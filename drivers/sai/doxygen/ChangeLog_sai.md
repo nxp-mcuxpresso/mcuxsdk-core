@@ -1,5 +1,10 @@
 # SAI
 
+## [2.4.10]
+
+- Improvements
+  - Allow enabling/disabling implicit channel configuration.
+
 ## [2.4.9]
 
 - Added Errata ERR051421 workaround.
