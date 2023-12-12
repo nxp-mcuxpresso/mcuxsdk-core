@@ -4,6 +4,7 @@
 
 - Improvements
   - Allow enabling/disabling implicit channel configuration.
+  - Allow NULL FIFO watermark.
 
 ## [2.4.9]
 
