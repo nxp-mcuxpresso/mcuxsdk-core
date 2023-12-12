@@ -5,6 +5,8 @@
 - Improvements
   - Allow enabling/disabling implicit channel configuration.
   - Allow NULL FIFO watermark.
+- Bug Fixes
+  - Fix compilation warnings when asserts are disabled
 
 ## [2.4.9]
 
