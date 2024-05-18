@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section flexio FLEXIO
-  The current FLEXIO driver version is 2.2.3.
+  The current FLEXIO driver version is 2.3.0.
+
+  - 2.3.0
+    - Improvements
+      - Supported platforms which don't have DOZE mode control.
+      - Added more pin control functions.
 
   - 2.2.3
     - Improvements
