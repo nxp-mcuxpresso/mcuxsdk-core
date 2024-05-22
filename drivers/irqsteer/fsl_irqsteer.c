@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2017, 2020, 2024 NXP
- * All rights reserved.
+ * Copyright 2016-2017, 2020, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -171,18 +170,17 @@ uint32_t IRQSTEER_GetMasterIrqCount(IRQSTEER_Type *base, irqsteer_int_master_t i
     return count;
 }
 
-static uint32_t IRQSTEER_GetRegIndex(irqsteer_int_master_t intMasterIndex, uint32_t slice)
+static uint32_t IRQSTEER_GetRegIndex(irqsteer_int_master_t intMasterIndex,
+				     uint32_t slice, uint32_t sliceNum)
 {
     uint32_t base = (uint32_t)FSL_FEATURE_IRQSTEER_CHn_MASK_COUNT - 1u - ((uint32_t)intMasterIndex * 2u);
 
     if (0u != ((uint32_t)FSL_FEATURE_IRQSTEER_CHn_MASK_COUNT % 2u))
     {
-        return base + slice;
+        base += sliceNum - 1;
     }
-    else
-    {
-        return base - slice;
-    }
+
+    return base - slice;
 }
 
 /*!
@@ -202,7 +200,7 @@ IRQn_Type IRQSTEER_GetMasterNextInterrupt(IRQSTEER_Type *base, irqsteer_int_mast
 
     bitOffset = __CLZ(__RBIT(base->CHn_STATUS[regIndex]));
     /* When no result found, continue the loop to parse the next CHn_STATUS register. */
-    if (IRQSTEER_INT_SRC_REG_WIDTH == bitOffset)
+    if ((IRQSTEER_INT_SRC_REG_WIDTH == bitOffset) && (regIndex > 0U))
     {
         regIndex--;
         bitOffset = __CLZ(__RBIT(base->CHn_STATUS[regIndex]));
@@ -231,7 +229,7 @@ IRQn_Type IRQSTEER_GetMasterNextInterrupt(IRQSTEER_Type *base, irqsteer_int_mast
         bitOffset = 0;
 
         /* compute the index of the register to be queried */
-        regIndex = IRQSTEER_GetRegIndex(intMasterIndex, i);
+        regIndex = IRQSTEER_GetRegIndex(intMasterIndex, i, sliceNum + 1);
 
         /* get register's value */
         chanStatus = base->CHn_STATUS[regIndex];
@@ -261,7 +259,7 @@ uint64_t IRQSTEER_GetMasterInterruptsStatus(IRQSTEER_Type *base, irqsteer_int_ma
     sliceNum = IRQSTEER_GetMasterIrqCount(base, intMasterIndex) / 32u - 1u;
 
     for (i = 0; i <= sliceNum; i++) {
-        regIndex = IRQSTEER_GetRegIndex(intMasterIndex, i);
+        regIndex = IRQSTEER_GetRegIndex(intMasterIndex, i, sliceNum + 1);
 
         chanStatus = base->CHn_STATUS[regIndex];
 

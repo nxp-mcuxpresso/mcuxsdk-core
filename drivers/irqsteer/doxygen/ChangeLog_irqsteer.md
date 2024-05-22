@@ -1,5 +1,11 @@
 # IRQSTEER
 
+## [2.1.4]
+
+- Bug Fixes
+  - Fixed the bug that IRQSTEER_GetMasterNextInterrupt may check wrong register
+    with platform which has odd number of CHn_MASK registers.
+
 ## [2.1.3]
 
 - Bug Fixes
