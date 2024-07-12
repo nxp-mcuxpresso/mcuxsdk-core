@@ -593,7 +593,9 @@ static void SWT_StoreTransConfig(swt_handle_t *handle, const swt_transfer_config
     handle->cfg.rxBuffAlloc       = config->rxBuffAlloc;
     handle->cfg.rxBuffFree        = config->rxBuffFree;
     handle->cfg.enUseMgmtRxBdRing = config->enUseMgmtRxBdRing;
+#if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
     handle->cfg.enUseMgmtTxBdRing = config->enUseMgmtTxBdRing;
+#endif
     handle->cfg.reclaimCallback   = config->reclaimCallback;
     handle->cfg.userData          = config->userData;
 }
@@ -685,6 +687,7 @@ status_t SWT_ManagementTxRxConfig(swt_handle_t *handle, ep_handle_t *epHandle, c
         /* Enable the Rx BD ring. */
         NETC_SIRxRingEnable(epHandle->hw.si, mgmtRxBdRingIdx, true);
     }
+//#if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
     if (txRxConfig->enUseMgmtTxBdRing)
     {
         /* Management Tx ring only can be SI 0 ring 0 */
@@ -696,11 +699,72 @@ status_t SWT_ManagementTxRxConfig(swt_handle_t *handle, ep_handle_t *epHandle, c
         handle->mgmtTxBdRing.dirtyBase = txRxConfig->mgmtTxBdrConfig.dirtyArray;
         handle->mgmtTxBdRing.len       = txRxConfig->mgmtTxBdrConfig.len;
     }
+//#endif
+
     return kStatus_Success;
 }
 
+#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
 status_t SWT_SendFrame(swt_handle_t *handle,
-                       swt_mgmt_tx_arg_t ringOrQueue,
+                       netc_frame_struct_t *frame,
+                       void *context,
+                       swt_tx_opt *opt)
+{
+    assert(opt != NULL);
+    //netc_tx_bdr_t *txBdRing = &handle->epHandle->txBdRing[opt->ring];
+    netc_tx_bdr_t *txBdRing = &handle->mgmtTxBdRing;
+    netc_tx_bd_t txDesc[2] = {0};
+
+    if (opt != NULL)
+    {
+        if ((opt->flags & (uint32_t)kSWT_TX_OPT_VLAN_INSERT) != 0U)
+        {
+            txDesc[0].standard.isExtended = 1U;
+            txDesc[1].ext.pcp             = opt->vlan.pcp;
+            txDesc[1].ext.dei             = opt->vlan.dei;
+            txDesc[1].ext.vid             = opt->vlan.vid;
+            txDesc[1].ext.tpid            = (uint16_t)opt->vlan.tpid;
+            txDesc[1].ext.eFlags          = (uint8_t)kNETC_TxExtVlanInsert;
+        }
+
+        if ((opt->flags & (uint32_t)kSWT_TX_OPT_OFFLOAD) != 0U)
+        {
+            txDesc[0].standard.flags = NETC_SI_TXDESCRIP_RD_FL(1) | NETC_SI_TXDESCRIP_RD_LSO(opt->offload.lso) | NETC_SI_TXDESCRIP_RD_L4CS(opt->offload.l4Checksum) |
+                                       NETC_SI_TXDESCRIP_RD_L4T(opt->offload.l4Type) | NETC_SI_TXDESCRIP_RD_L3T(opt->offload.l3Type) |
+                                       NETC_SI_TXDESCRIP_RD_L3HDRSIZE(opt->offload.l3HeaderSize) | NETC_SI_TXDESCRIP_RD_IPCS(opt->offload.ipv4Checksum) |
+                                       NETC_SI_TXDESCRIP_RD_L3START(opt->offload.l3Start);
+
+            txDesc[0].standard.isExtended = (opt->offload.lso) ? 1U : 0U;
+            txDesc[1].ext.lsoMaxSegSize   = opt->offload.lsoMaxSegSize;
+        }
+    }
+
+    return EP_SendFrameCommon(handle->epHandle, txBdRing, opt->ring, frame, context, &txDesc[0],
+                              handle->cfg.txCacheMaintain);
+}
+
+void SWT_ReclaimTxDescriptor(swt_handle_t *handle, uint8_t ring)
+{
+    netc_tx_frame_info_t *frameInfo;
+
+    do
+    {
+        frameInfo = EP_ReclaimTxDescCommon(handle->epHandle, &handle->epHandle->txBdRing[ring], ring,
+                                           (handle->epHandle->cfg.reclaimCallback != NULL));
+
+        if (frameInfo != NULL)
+        {
+            /* If reclaim callback is enabled, it must be called for each full frame. */
+            (void)handle->epHandle->cfg.reclaimCallback(handle->epHandle, ring, frameInfo,
+                                                        handle->epHandle->cfg.userData);
+            (void)memset(frameInfo, 0, sizeof(netc_tx_frame_info_t));
+        }
+    } while (frameInfo != NULL);
+}
+
+#else
+status_t SWT_SendFrame(swt_handle_t *handle,
+                       swt_mgmt_tx_arg_t txArg,
                        netc_hw_port_idx_t swtPort,
                        bool enMasquerade,
                        netc_frame_struct_t *frame,
@@ -716,14 +780,14 @@ status_t SWT_SendFrame(swt_handle_t *handle,
         {
             /* Switch management ENETC Tx BD hardware ring 0 can't be used to send port masqueradeque frame, so the
              * index need increase 1 */
-            hwRing = ringOrQueue.ring + 1U;
+            hwRing = txArg.ring + 1U;
         }
         else
         {
-            hwRing = ringOrQueue.ring;
+            hwRing = txArg.ring;
         }
         txDesc[0].standard.flags = NETC_SI_TXDESCRIP_RD_FLQ(2) | NETC_SI_TXDESCRIP_RD_PORT(swtPort);
-        txBdRing                 = &handle->epHandle->txBdRing[ringOrQueue.ring];
+        txBdRing                 = &handle->epHandle->txBdRing[txArg.ring];
     }
     else
     {
@@ -733,8 +797,8 @@ status_t SWT_SendFrame(swt_handle_t *handle,
             return kStatus_InvalidArgument;
         }
         txDesc[0].standard.flags = NETC_SI_TXDESCRIP_RD_FLQ(2) | NETC_SI_TXDESCRIP_RD_SMSO_MASK |
-                                   NETC_SI_TXDESCRIP_RD_PORT(swtPort) | NETC_SI_TXDESCRIP_RD_IPV(ringOrQueue.ipv) |
-                                   NETC_SI_TXDESCRIP_RD_DR(ringOrQueue.dr);
+                                   NETC_SI_TXDESCRIP_RD_PORT(swtPort) | NETC_SI_TXDESCRIP_RD_IPV(txArg.ipv) |
+                                   NETC_SI_TXDESCRIP_RD_DR(txArg.dr);
         hwRing   = 0U;
         txBdRing = &handle->mgmtTxBdRing;
     }
@@ -805,36 +869,6 @@ void SWT_ReclaimTxDescriptor(swt_handle_t *handle, bool enMasquerade, uint8_t ri
     } while (frameInfo != NULL);
 }
 
-status_t SWT_GetRxFrameSize(swt_handle_t *handle, uint32_t *length)
-{
-    assert((handle != NULL) && (length != NULL));
-    netc_rx_bdr_t *rxBdRing = NULL;
-    status_t result;
-
-    if (handle->cfg.enUseMgmtRxBdRing)
-    {
-        rxBdRing = &handle->mgmtRxBdRing;
-    }
-    else if (handle->epHandle->cfg.rxRingUse != 0U)
-    {
-        /* If no management Rx ring is specified, the host reason not zero frames will be received by Rx ring 0 */
-        rxBdRing = &handle->epHandle->rxBdRing[0];
-    }
-    else
-    {
-        /* If both the switch and its associated EP not config the Rx BD ring, no frame can be received */
-        return kStatus_InvalidArgument;
-    }
-
-    result = EP_GetRxFrameSizeCommon(handle->epHandle, rxBdRing, length);
-    if (kStatus_NETC_RxHRNotZeroFrame == result)
-    {
-        /* Only return success when currently frame is host reason not zero frame */
-        result = kStatus_Success;
-    }
-    return result;
-}
-
 status_t SWT_GetTimestampRefResp(swt_handle_t *handle, swt_tsr_resp_t *tsr)
 {
     status_t result         = kStatus_Fail;
@@ -890,6 +924,37 @@ status_t SWT_GetTimestampRefResp(swt_handle_t *handle, swt_tsr_resp_t *tsr)
         result = kStatus_Success;
     }
 
+    return result;
+}
+#endif
+
+status_t SWT_GetRxFrameSize(swt_handle_t *handle, uint32_t *length)
+{
+    assert((handle != NULL) && (length != NULL));
+    netc_rx_bdr_t *rxBdRing = NULL;
+    status_t result;
+
+    if (handle->cfg.enUseMgmtRxBdRing)
+    {
+        rxBdRing = &handle->mgmtRxBdRing;
+    }
+    else if (handle->epHandle->cfg.rxRingUse != 0U)
+    {
+        /* If no management Rx ring is specified, the host reason not zero frames will be received by Rx ring 0 */
+        rxBdRing = &handle->epHandle->rxBdRing[0];
+    }
+    else
+    {
+        /* If both the switch and its associated EP not config the Rx BD ring, no frame can be received */
+        return kStatus_InvalidArgument;
+    }
+
+    result = EP_GetRxFrameSizeCommon(handle->epHandle, rxBdRing, length);
+    if (kStatus_NETC_RxHRNotZeroFrame == result)
+    {
+        /* Only return success when currently frame is host reason not zero frame */
+        result = kStatus_Success;
+    }
     return result;
 }
 

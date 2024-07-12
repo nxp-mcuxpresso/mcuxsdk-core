@@ -179,9 +179,11 @@ typedef struct _netc_tx_frame_info_struct
 {
     bool isTsAvail;     /*!< Tx frame timestamp is available or not. */
     uint32_t timestamp; /*!< The timestamp of this Tx frame, valid when isTsAvail is true. */
+#if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
     bool isTxTsIdAvail; /*!< Switch port Tx frame timestamp Identifier is available or not. */
     uint16_t txtsid; /*!< The Transmit Timestamp Identifier, valid when isTsIdAvail is true, use for Switch management
                         ENETC direct frame which has specified a timestamp request. */
+#endif
     void *context;   /*!< Private context provided by the user. */
     netc_ep_tx_status_t status; /*!< Transmit status. */
 } netc_tx_frame_info_t;
@@ -336,6 +338,7 @@ typedef enum _netc_hw_mii_mode
     kNETC_GmiiMode  = 2U, /*!< GMII mode for data interface. */
     kNETC_RmiiMode  = 3U, /*!< RMII mode for data interface. */
     kNETC_RgmiiMode = 4U, /*!< RGMII mode for data interface. */
+    kNETC_SgmiiMode = 5U, /*!< SGMII mode for data interface. */
 } netc_hw_mii_mode_t;
 
 /*! @brief Defines the speed for the *MII data interface. */
@@ -3569,7 +3572,14 @@ typedef union _netc_tx_bd
         uint16_t vid : 12; /*!< VLAN ID. */
         uint16_t dei : 1;  /*!< VLAN DEI. */
         uint16_t pcp : 3;  /*!< VLAN PCP. */
+#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
+        uint32_t lsoMaxSegSize: 14;
+        uint32_t : 2;
+        uint32_t frameLenExt : 4;
+        uint32_t : 12;
+#else
         uint32_t : 32;
+#endif
         uint16_t : 16;
         uint8_t eFlags; /*!< Tx extension flags. */
         uint8_t : 7;
@@ -3578,10 +3588,19 @@ typedef union _netc_tx_bd
     struct
     {
         uint32_t timestamp;   /*!< Timestamp write back. */
+#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
+        uint32_t : 32;
+#else
         uint32_t txtsid : 16; /*!/ Transmit timestamp identifier, only active on Switch management ENETC. */
         uint32_t : 16;
+#endif
         uint32_t : 32;
+#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
+        uint32_t lsoErrCnt: 4;
+        uint32_t : 12;
+#else
         uint32_t : 16;
+#endif
         uint32_t status : 9; /*!< Status. */
         uint32_t : 1;
         uint32_t written : 1; /*!< Write-back flag. */
@@ -3633,6 +3652,7 @@ typedef union _netc_rx_bd
         uint32_t : 32;
         uint64_t : 64;
     } ext;
+#if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
     struct
     {
         uint32_t timestamp; /*!< Switch response timestamp. */
@@ -3642,11 +3662,12 @@ typedef union _netc_rx_bd
         uint32_t : 2;
         uint32_t hr : 4; /*!< Host Reason. */
         uint32_t : 10;
-        uint32_t error : 8;
+        uint32_t error : 8; /*!< Error status code. */
         uint32_t : 6;
         uint32_t isReady : 1; /*!< Received data ready flag. */
         uint32_t isFinal : 1; /*!< Final BD flag. */
     } resp;
+#endif
 } netc_rx_bd_t;
 
 /*! @brief Configuration for the SI Tx Buffer Descriptor Ring Configuration. */

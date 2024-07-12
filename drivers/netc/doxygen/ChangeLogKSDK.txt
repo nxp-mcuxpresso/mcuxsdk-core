@@ -27,6 +27,8 @@
     - New Features
       - Added interface to reset the mark frame red parameter.
       - Added support for FRER sequence generation reset.
+      - Added NETC Switch Tag support.
+      - Added the Tx offload feature support.
     - Improvements
       - Simplify NETC_TimerGetFreeRunningTime. Hardware synchronizes reads from high/low
         registers for the free running time. No need to do it in software.

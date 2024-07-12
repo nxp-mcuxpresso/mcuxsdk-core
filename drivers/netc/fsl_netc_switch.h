@@ -9,11 +9,17 @@
 
 #include "fsl_netc.h"
 #include "fsl_netc_endpoint.h"
+#include "fsl_netc_tag.h"
 #include "netc_hw/fsl_netc_hw.h"
 #include "netc_hw/fsl_netc_hw_enetc.h"
 #include "netc_hw/fsl_netc_hw_port.h"
 #include "netc_hw/fsl_netc_hw_si.h"
 
+#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
+#ifndef NETC_SWITCH_ID
+#define NETC_SWITCH_ID (1U)
+#endif
+#endif
 #if !(defined(__GNUC__) || defined(__ICCARM__))
 #pragma region api_swt
 #endif
@@ -189,7 +195,9 @@ typedef struct _swt_config_const
     bool rxCacheMaintain : 1;         /*!< Enable/Disable Rx buffer cache maintain in driver. */
     bool txCacheMaintain : 1;         /*!< Enable/Disable Tx buffer cache maintain in driver. */
     bool enUseMgmtRxBdRing : 1;       /*!< Enable/Disable use Switch management Rx BD ring. */
+#if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
     bool enUseMgmtTxBdRing : 1;       /*!< Enable/Disable use Switch management Tx BD ring. */
+#endif
     bool rxZeroCopy : 1;              /*!< Enable zero-copy receive mode. */
     swt_rx_alloc_cb_t rxBuffAlloc;    /*!< Callback function to alloc memory, must be provided for zero-copy Rx. */
     swt_rx_free_cb_t rxBuffFree;      /*!< Callback function to free memory, must be provided for zero-copy Rx. */
@@ -205,7 +213,9 @@ struct _swt_handle
     netc_cmd_bdr_t cmdBdRing[2]; /*!< Command BD ring handle for switch. */
     ep_handle_t *epHandle;       /*!< The EP handle to send/receive management frame. */
     netc_rx_bdr_t mgmtRxBdRing;  /*!< Management Receive BD ring for frames with Host Reason filed not zero. */
+//#if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
     netc_tx_bdr_t mgmtTxBdRing;  /*!< Management Transmit BD ring for Direct Switch Enqueue frames. */
+//#endif
 };
 
 /*! @} */ // end of netc_swt_init
@@ -231,16 +241,6 @@ struct _swt_handle
 /*! @addtogroup netc_swt_xfer
  * @{
  */
-/*! @brief Switch management Tx Option flags */
-typedef enum _swt_mgmt_tx_opt_flags
-{
-    kSWT_TX_OPT_REQ_TS =
-        0x1, /*!< Request frame transmission timestamp, only active when use Switch Port masquerading Tx option */
-    kSWT_TX_OPT_VLAN_INSERT = 0x2U, /*!< Enable VLAN insert, only active when use Switch Port masquerading Tx option */
-    kSWT_TX_OPT_DIRECT_ENQUEUE_REQ_TSR =
-        0x4U /*!< Timestamp Reference Request, only active when use Direct Switch Enqueue Tx option */
-} swt_mgmt_tx_opt_flags;
-
 /*! @brief Switch management Tx parameter */
 typedef union _swt_mgmt_tx_arg_t
 {
@@ -253,10 +253,38 @@ typedef union _swt_mgmt_tx_arg_t
     };
 } swt_mgmt_tx_arg_t;
 
+#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
+/*! @brief Switch management Tx Option flags */
+typedef enum _swt_mgmt_tx_opt_flags
+{
+    kSWT_TX_OPT_VLAN_INSERT = 0x1U, /*!< Enable VLAN insert, only active when use Switch Port masquerading Tx option. */
+    kSWT_TX_OPT_OFFLOAD = 0x2U /*!< Tx offload. */
+} swt_mgmt_tx_opt_flags;
+
+typedef struct _swt_tx_opt
+{
+    uint8_t ring; /*!< Tx ring index. */
+    uint32_t flags; /*!< A bitmask of @swt_mgmt_tx_opt_flags. */
+    netc_enetc_vlan_tag_t vlan; /*!< VLAN tag which will be inserted, used if enVlanInsert is set. */
+    netc_tx_offload_t offload; /*!< Offload parameters. */
+} swt_tx_opt;
+
+#else
+
+/*! @brief Switch management Tx Option flags */
+typedef enum _swt_mgmt_tx_opt_flags
+{
+    kSWT_TX_OPT_REQ_TS =
+        0x1, /*!< Request frame transmission timestamp, only active when use Switch Port masquerading Tx option */
+    kSWT_TX_OPT_VLAN_INSERT = 0x2U, /*!< Enable VLAN insert, only active when use Switch Port masquerading Tx option */
+    kSWT_TX_OPT_DIRECT_ENQUEUE_REQ_TSR =
+        0x4U /*!< Timestamp Reference Request, only active when use Direct Switch Enqueue Tx option */
+} swt_mgmt_tx_opt_flags;
+
 /*! @brief Switch management Tx Option */
 typedef struct _swt_tx_opt
 {
-    uint32_t flags;             /*!< A bitmask of swt_mgmt_tx_opt_flags */
+    uint32_t flags;             /*!< A bitmask of @swt_mgmt_tx_opt_flags */
     netc_enetc_vlan_tag_t vlan; /*!< VLAN tag which will be inserted, used if enVlanInsert is set */
 } swt_tx_opt;
 
@@ -266,6 +294,7 @@ typedef struct _swt_tsr_resp_t
     uint32_t timestamp; /*!< Switch response timestamp. */
     uint32_t txtsid;    /*!< Transmit timestamp identifier. */
 } swt_tsr_resp_t;
+#endif /* FSL_FEATURE_NETC_HAS_SWITCH_TAG */
 
 /*!
  * @brief Transfer configuration structure for Switch
@@ -283,10 +312,12 @@ struct _swt_transfer_config
     bool enUseMgmtRxBdRing; /*!< Enable/Disable use Switch management Rx BD ring, if disabled, the Switch/EP receive
                         APIs (SWT_GetRxFrameSize()/SWT_ReceiveFrameCopy()/SWT_GetTimestampRefResp()/SWT_ReceiveFrame())
                         will use EP Rx BD ring 0 to receive frames. */
+    netc_rx_bdr_config_t mgmtRxBdrConfig; /*!< Switch management Rx BD ring configuration. */
+//#if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
     bool enUseMgmtTxBdRing; /*!< Enable/Disable use Switch management Tx BD ring, if disabled, can't use Switch transfer
                                API (SWT_SendFrame()) to send frames. */
-    netc_rx_bdr_config_t mgmtRxBdrConfig; /*!< Switch management Rx BD ring configuration. */
     netc_tx_bdr_config_t mgmtTxBdrConfig; /*!< Switch management Rx BD ring configuration. */
+//#endif
     swt_reclaim_cb_t reclaimCallback;     /*!< Callback for reclaimed Tx Switch management frames. */
     void *userData;                       /*!< User data, return in callback. */
 };
@@ -1984,11 +2015,56 @@ status_t SWT_TxETMConfigCongestionGroup(swt_handle_t *handle, netc_tb_etmcg_conf
  */
 status_t SWT_ManagementTxRxConfig(swt_handle_t *handle, ep_handle_t *epHandle, const swt_transfer_config_t *txRxConfig);
 
+#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
+/*!
+ * @brief Transmits a frame on management port.
+ *
+ * @param handle The SWT handle
+ * @param frame The frame descriptor pointer
+ * @param context Private context provided back on reclaim
+ * @param opt Tx options.
+ * @retval status_t
+ */
+status_t SWT_SendFrame(swt_handle_t *handle,
+                       netc_frame_struct_t *frame,
+                       void *context,
+                       swt_tx_opt *opt);
+
+/*!
+ * @brief Wait until the EP Tx ring has completed the transfer.
+ *
+ * @note Only call after EP_SendFrame() to do a no-interrupt transfer
+ *
+ * @param handle
+ * @param ring Tx ring.
+ */
+static inline void SWT_WaitUnitilTxComplete(swt_handle_t *handle, bool enMasquerade, uint8_t ring)
+{
+    while (handle->epHandle->hw.si->BDR[ring].TBCIR != handle->epHandle->txBdRing[ring].producerIndex)
+    {
+    }
+}
+
+/*!
+ * @brief Reclaim tx descriptors.
+ * This function is used to update the tx descriptor status.
+ * For each reclaimed transmit frame the ep_reclaim_cb_t is called.
+ *
+ * This is called after being notified of a transmit completion from ISR.
+ * It runs until there are no more frames to be reclaimed in the BD ring.
+ *
+ * @param handle
+ * @param ring Tx ring.
+ */
+void SWT_ReclaimTxDescriptor(swt_handle_t *handle, uint8_t ring);
+
+#else
+
 /*!
  * @brief Transmits a management frame on a specific port.
  *
  * @param handle
- * @param ringOrQueue The ring index for Port masquerading or egress port priority/dr for direct enqueue
+ * @param txArg The ring index for Port masquerading or egress port priority/dr for direct enqueue
  * @param swtPort The ingress port for Port masquerading or egress for direct enqueue
  * @param enMasquerade Ture - Use Port masquerading Tx option, False - Use direct enqueue Tx Option
  * @param frame The frame descriptor pointer
@@ -1997,7 +2073,7 @@ status_t SWT_ManagementTxRxConfig(swt_handle_t *handle, ep_handle_t *epHandle, c
  * @retval status_t
  */
 status_t SWT_SendFrame(swt_handle_t *handle,
-                       swt_mgmt_tx_arg_t ringOrQueue,
+                       swt_mgmt_tx_arg_t txArg,
                        netc_hw_port_idx_t swtPort,
                        bool enMasquerade,
                        netc_frame_struct_t *frame,
@@ -2046,6 +2122,19 @@ static inline void SWT_WaitUnitilTxComplete(swt_handle_t *handle, bool enMasquer
 void SWT_ReclaimTxDescriptor(swt_handle_t *handle, bool enMasquerade, uint8_t ring);
 
 /*!
+ * @brief Receives Switch Transmit Timestamp Reference Response.
+ *
+ * @note MUST call SWT_GetRxFrameSize() beforehand to confirm get the kStatus_NETC_RxTsrResp status.
+ *
+ * @param handle
+ * @param tsr Timestamp Reference Response pointer
+ * @return kStatus_Success                Successfully receive Switch Transmit Timestamp Reference Response
+ * @return kStatus_InvalidArgument        No Rx BD ring is available
+ */
+status_t SWT_GetTimestampRefResp(swt_handle_t *handle, swt_tsr_resp_t *tsr);
+#endif
+
+/*!
  * @brief Receives management frames (host reason not zero) with zero copy
  *
  * @param handle
@@ -2075,18 +2164,6 @@ status_t SWT_ReceiveFrame(swt_handle_t *handle, netc_frame_struct_t *frame, netc
  * @return kStatus_InvalidArgument        No Rx BD ring is available
  */
 status_t SWT_ReceiveFrameCopy(swt_handle_t *handle, void *buffer, uint32_t length, netc_frame_attr_t *attr);
-
-/*!
- * @brief Receives Switch Transmit Timestamp Reference Response.
- *
- * @note MUST call SWT_GetRxFrameSize() beforehand to confirm get the kStatus_NETC_RxTsrResp status.
- *
- * @param handle
- * @param tsr Timestamp Reference Response pointer
- * @return kStatus_Success                Successfully receive Switch Transmit Timestamp Reference Response
- * @return kStatus_InvalidArgument        No Rx BD ring is available
- */
-status_t SWT_GetTimestampRefResp(swt_handle_t *handle, swt_tsr_resp_t *tsr);
 
 /*!
  * brief Gets the size of the pending frame in the specified receive ring buffer.

@@ -18,6 +18,15 @@
 /*! @brief The Switch function register base address offset.(SW0_PCI_HDR_TYPE0) */
 #define NETC_SOC_SWT_PCIE_FUNC_OFFSET       (5U)
 
+/*
+ *                port3  port2  port1  port0
+ * 0x08 = 0b 0000   1      0      0      0
+ * It means that input frame will forward to switch port3
+ */
+#ifndef NETC_SOC_INPUT_FRM_SWT_PORT_BITMAP
+#define NETC_SOC_INPUT_FRM_SWT_PORT_BITMAP (0x08)
+#endif
+
 /*! @brief Station interface index enumerator */
 typedef enum _netc_hw_si_idx
 {

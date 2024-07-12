@@ -187,12 +187,34 @@ typedef enum _ep_tx_opt_flags
 #endif
 } ep_tx_opt_flags;
 
+#if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
 typedef struct _ep_tx_opt
 {
     uint32_t flags;             /*!< A bitmask of ep_tx_opt_flags */
     uint32_t timestamp;         /*!< Departure timestamp, used if kEP_TX_OPT_START_TIME is set */
     netc_enetc_vlan_tag_t vlan; /*!< VLAN tag which will be inserted, used if kEP_TX_OPT_VLAN_INSERT is set */
 } ep_tx_opt;
+#else
+typedef struct _ep_tx_offload
+{
+    bool lso;               /*!< Large send offload. */
+    bool l4Checksum;        /*!< L4 checksum offload. */
+    bool ipv4Checksum;      /*!< IPv4 checksum offload. */
+    uint32_t lsoMaxSegSize : 14; /*!< Large send offload maximum segment size. */
+    uint32_t l4Type : 3;         /*!< L4 type. 1-UDP, 2-TCP. */
+    uint32_t l3Type : 1;         /*!< L3 type. 0-IPv4, 1-IPv6. */
+    uint32_t l3HeaderSize : 7;   /*!< L3 IP header size in units of 32-bit words. */
+    uint32_t l3Start : 7;        /*!< Offset of the IPv4/IPv6 header in units of bytes. */
+} netc_tx_offload_t;
+
+typedef struct _ep_tx_opt
+{
+    uint32_t flags;             /*!< A bitmask of ep_tx_opt_flags */
+    uint32_t timestamp;         /*!< Departure timestamp, used if kEP_TX_OPT_START_TIME is set */
+    netc_enetc_vlan_tag_t vlan; /*!< VLAN tag which will be inserted, used if kEP_TX_OPT_VLAN_INSERT is set */
+    netc_tx_offload_t offload;
+} ep_tx_opt;
+#endif
 
 /*! @} */ // end of netc_ep_xfer
 #if !(defined(__GNUC__) || defined(__ICCARM__))
