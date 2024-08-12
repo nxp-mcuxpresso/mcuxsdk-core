@@ -1,5 +1,10 @@
 # ADC12
 
+## [2.0.8]
+
+- Bug Fixes
+  - Fix build warning when `FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL` is defined as 1.
+
 ## [2.0.7]
 
 - Improvements

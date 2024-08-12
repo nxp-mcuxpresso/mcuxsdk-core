@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2019, 2021, 2024 NXP
+ * Copyright 2016-2019, 2021, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,12 +24,14 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*!
  * @brief Get instance number for ADC12 module.
  *
  * @param base ADC12 peripheral base address
  */
 static uint32_t ADC12_GetInstance(ADC_Type *base);
+#endif
 
 /*!
  * @brief Check calibration failed status.
@@ -60,9 +62,9 @@ static status_t ADC12_GetCalibrationStatus(ADC_Type *base);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*! @brief Pointers to ADC12 bases for each instance. */
 static ADC_Type *const s_adc12Bases[] = ADC_BASE_PTRS;
-#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*! @brief Pointers to ADC12 clocks for each instance. */
 static const clock_ip_name_t s_adc12Clocks[] = ADC12_CLOCKS;
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
@@ -70,6 +72,7 @@ static const clock_ip_name_t s_adc12Clocks[] = ADC12_CLOCKS;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 static uint32_t ADC12_GetInstance(ADC_Type *base)
 {
     uint32_t instance;
@@ -87,6 +90,7 @@ static uint32_t ADC12_GetInstance(ADC_Type *base)
 
     return instance;
 }
+#endif
 
 static status_t ADC12_GetCalibrationStatus(ADC_Type *base)
 {
