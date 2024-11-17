@@ -1,0 +1,11 @@
+/*!
+
+@defgroup flash_driver FTMRx Flash Driver
+@details The flash provides the FTMRx Flash driver of MCUXpresso SDK devices with the
+         FTMRx Flash module inside.
+         The flash driver provides general APIs to handle specific operations on the FTMRx
+         Flash module. The user can use those APIs directly in the application. In addition,
+         it provides internal functions called by the driver. Although these functions are
+         not meant to be called from the user's application directly, the APIs can still be used.
+
+*/

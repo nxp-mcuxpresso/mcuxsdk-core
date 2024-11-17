@@ -1,0 +1,51 @@
+/*!
+@defgroup pmc0 PMC0: Power Management Controller
+@details The MCUXpresso SDK provides a peripheral driver for the Power Management Controller (PMC) module of MCUXpresso SDK devices. The Power Management Controller (PMC) can be divided in two parts: PMC 0 and PMC 1. The PMC 0 controls the Core 0, its SoG and RAM, and the PMC 1 controls the Core 1, its SoG and RAM. This driver is for PMC 0 only.
+
+The PMC 0 has:
+- the high-power (HP) and low-power (LP) Core Regulator;
+- the high-power (HP) and low-power (LP) Array Regulator;
+- the high-power (HP) and low-power (LP) 1.2V Low Voltage Detector (LVD) monitor (in regulators input);
+- the high-power (HP) and low-power (LP) 1.2V High Voltage Detector (HVD) monitor (in regulators input);
+- the bandgap;
+- the forward bias (FBB) and the reverse back bias (RBB).
+In addition, the PMC has a 1.8 V POR (Power-On Reset) monitor to assure the voltage level in the Always-On power domain would be in the correct range to the correct functionality of the internal digital and analog blocks.
+Both PMCs receive requests from the MSMC to change the current power mode. Each PMC allows the customer to choose what features are enabled or disabled for each power mode using the PMC registers.
+
+# Typical use case {#PMC0TpyUC}
+
+## Turn on the PMC 1 using LDO Regulator{#PMC0TurnOnPMC1LdoRegulator}
+After a POR event, when the PMC 0 is during RUN mode and the PMC 1 is turned off.
+The procedure to turn on the PMC 1 using the internal LDO Regulator.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pmc0
+## Turn on the PMC 1 using the PMIC{#PMC0TurnOnPMC1PMIC}
+After a POR event, when the PMC 0 is during RUN mode and the PMC 1 is turned off.
+The procedure to turn on the PMC 1 using the external PMIC
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pmc0
+## Turn off the LDO Regulator{#PMC0TurnOffLdoRegulator}
+When the PMC 1 is during RUN mode, the LDO Regulator can be programmed to be
+turned off in the next transition from RUN to VLLS power mode. As in VLLS the
+regulator is disconnected from the load by the switches (switches are OFF), a external
+regulator can assume the power supply (PMIC).
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pmc0
+## Turn on the LDO Regulator{#PMC0TurnOnLdoRegulator}
+When the PMC 1 is during VLLS mode, the LDO Regulator can be turned on in a
+transition to RUN mode.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pmc0
+## Change the Core Regulator voltage level in PMC 0 RUN or HSRUN mode{#PMC0ChangeCoreRegulatorVoltLevel}
+To change the Core Regulator voltage level when the PMC 0 is in RUN mode:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pmc0
+To change the Core Regulator voltage level when the PMC 0 is in HSRUN mode:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pmc0
+## Change the SRAMs power mode during PMC 0 RUN mode{#PMC0ChangeSramPowerMode}
+To change the SRAMs power mode during the PMC 0 RUN mode.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pmc0
+*/
+

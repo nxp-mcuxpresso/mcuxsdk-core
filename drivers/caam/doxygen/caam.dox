@@ -1,0 +1,150 @@
+
+/*!
+@page drv_err Driver errors status
+ - #kStatus_CAAM_Again = 6300
+*/
+
+/*!
+@defgroup caam_driver CAAM: Cryptographic Acceleration and Assurance Module
+@details The MCUXpresso SDK provides the peripheral driver for the Cryptographic Acceleration and Assurance Module (CAAM) module.
+CAAM is a multi-functional accelerator that supports the cryptographic functions
+common in many security protocols. This includes AES128, AES256, DES, 3DES,
+SHA1, SHA224, SHA256, RSA-4096, and a random number generator with a true entropic seed. CAAM includes a DMA engine that is descriptor-based to reduce
+processor-accelerator interaction.
+
+The driver comprises two sets of API functions.
+
+In the first set, blocking APIs are provided for the selected subset of operations supported by CAAM hardware.
+The CAAM operations are complete, and results are made availabe for further usage, when a function returns.
+When called, these functions do not return until a CAAM operation is complete.
+These functions use main CPU for simple polling loops to determine operation complete or error status.
+
+The CAAM job descriptor is placed on the system stack during the blocking API calls.
+The driver uses global variable to manage the input and output job rings. 
+The driver uses critical section (implemented as global interrupt enable/disable) for a short time, whenever it needs to access these global variables.
+Therefore, the driver functions are designed to be re-entrant and as a consequence, one CPU thread can call one blocking API, such as AES Encrypt, while other CPU thread
+can call another blocking API, such as SHA-256 Update.
+The blocking functions provide typical interface to upper layer or application software.
+
+In the second set, non-blocking variants of the first set APIs are provided.
+Internally, the blocking APIs are implemented as a non-blocking operation start, followed by a blocking wait (CPU polling CAAM output job ring).
+for an operation completion. The non-blocking functions allow upper layer to inject an application specific operation after
+the CAAM job start and CAAM job complete events. The RTOS event wait and RTOS event set can be an example of such an operation.
+
+# CAAM Driver Initialization and Configuration {#CAAMInit}
+
+The CAAM Job Ring interface is a software job programming interface. CAAM implements 2 Job Ring interfaces.
+The CAAM driver uses caam_job_ring_interface_t data type as the Job Ring interface.
+Job Ring interface 0 is mandatory to be configured for the CAAM driver, Job Ring interface 1 is optional.
+
+Initialize CAAM after Power On Reset or reset cycle
+See the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/caam.
+
+The CAAM Driver is initialized by calling the CAAM_Init() function. 
+It enables the CAAM module clock, it configures the Job Ring interface(s) and instantiates the CAAM RNG module in normal (non-deterministic) mode.
+Then, it calls CAAM_RNG_GenerateSecureKey() to load the JDKEK, TDKEK, and TDSK registers
+and finally configures the CAAM SCFGR register.
+
+# Comments about API usage in RTOS {#CAAMRtos}
+
+CAAM operations provided by this driver are re-entrant by protecting global variables (Job Ring interface)
+in critical section (global interrupt enable/disable by EnableGlobalIRQ() and DisableGlobalIRQ() MCUXpresso SDK APIs).
+If required, different RTOS threads can call CAAM driver APIs simultaneously, given that EnableGlobalIRQ() and DisableGlobalIRQ()
+can a create critical section. 
+
+# Comments about API usage in interrupt handler {#CAAMisr}
+
+All APIs can be used from interrupt handler although execution time should be considered (interrupt latency of equal and lower priority interrupts increases).
+
+# Comments about DCACHE {#CAAMdcache}
+
+CAAM driver requires any cached memory to be used with CAAM module to be set in write-trough mode, so any data in CACHE are up to date with ones in memory.
+This guarantee that CAAM can fetch descriptor, execute desired operation and when computation is done, it is safe to perform invalidate even over unaligned data,
+since all data in physical memory are up to date with ones in CACHE (so no memory corruption occurs) and finally, CPU can retrieve correct output.
+
+# CAAM Driver Examples {#CAAMEx}
+
+## Simple examples {#CAAMSimpleEx}
+
+Encrypt plaintext by DES engine
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/caam
+Encrypt plaintext by AES engine
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/caam
+Compute keyed hash by AES engine (CMAC)
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/caam
+Compute hash by MDHA engine (SHA-256)
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/caam
+Compute modular integer exponentiation
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/caam
+Compute elliptic curve point addition
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/caam*/
+
+/*!
+@defgroup caam_driver_synchronous_blocking CAAM Blocking APIs
+@details This section describes the programming interface of the CAAM Synchronous Blocking functions
+@ingroup caam_driver
+*/
+/*!
+@defgroup caam_driver_rng CAAM RNG driver
+@details This section describes the programming interface of the CAAM RNG driver.
+@ingroup caam_driver_synchronous_blocking
+*/
+/*!
+@defgroup caam_driver_des CAAM DES driver
+@details This section describes the programming interface of the CAAM DES driver.
+@ingroup caam_driver_synchronous_blocking
+*/
+/*!
+@defgroup caam_driver_aes CAAM AES driver
+@details This section describes the programming interface of the CAAM AES driver.
+@ingroup caam_driver_synchronous_blocking
+*/
+/*!
+@defgroup caam_driver_hash CAAM HASH driver
+@details This section describes the programming interface of the CAAM HASH driver.
+@ingroup caam_driver_synchronous_blocking
+*/
+/*!
+@defgroup caam_driver_pkha CAAM PKHA driver
+@details This section describes the programming interface of the CAAM PKHA driver.
+@ingroup caam_driver_synchronous_blocking
+*/
+/*!
+@defgroup caam_nonblocking_driver CAAM Non-blocking APIs
+@details This section describes the programming interface of the CAAM Non Blocking functions
+@ingroup caam_driver
+*/
+/*!
+@defgroup caam_nonblocking_driver_des CAAM Non-blocking DES driver
+@details This section describes the programming interface of the CAAM Non-blocking DES driver.
+@ingroup caam_nonblocking_driver
+*/
+/*!
+@defgroup caam_nonblocking_driver_hash CAAM Non-blocking HASH driver
+@details This section describes the programming interface of the CAAM Non-blocking HASH driver.
+@ingroup caam_nonblocking_driver
+*/
+/*!
+@defgroup caam_nonblocking_driver_rng CAAM Non-blocking RNG driver
+@details This section describes the programming interface of the CAAM Non-blocking RNG driver.
+@ingroup caam_nonblocking_driver
+*/
+/*!
+@defgroup caam_nonblocking_driver_aes CAAM Non-blocking AES driver
+@details This section describes the programming interface of the CAAM Non-blocking AES driver.
+@ingroup caam_nonblocking_driver
+*/
+/*!
+@defgroup caam_driver_black CAAM Key Blankening driver
+@details This function constructs a job descriptor capable of performing a key blackening operation on a plaintext secure memory resident object.
+@ingroup caam_driver
+*/
+/*!
+@defgroup caam_driver_blob CAAM Blob driver
+@ingroup caam_driver
+*/
+/*!
+@defgroup caam_driver_crc CAAM CRC driver
+@details This functions is used to initialize the context for CAAM_CRC API.
+@ingroup caam_driver
+*/

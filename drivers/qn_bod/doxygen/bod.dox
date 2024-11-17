@@ -1,0 +1,10 @@
+/*!
+@defgroup qn_bod BOD: browned out detector 
+@details The MCUXpresso SDK provides a peripheral driver for browned out detector (BOD)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#QNBODTpyUC}
+Example use of BOD API.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/bod*/
+

@@ -1,0 +1,21 @@
+/*!
+@defgroup cmp CMP: Analog Comparator Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Analog Comparator (CMP) module of MCUXpresso SDK devices.
+
+
+The CMP driver is a basic comparator
+with advanced features. The APIs for the basic comparator enable the CMP to compare the
+two voltages of the two input channels and create the output of the comparator result. The APIs for advanced features
+can be used as the plug-in functions based on the basic comparator. They can process the comparator's output with
+hardware support.
+
+# Typical use case {#CMPTpyUC}
+
+## Polling Configuration {#CMPPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cmp
+## Interrupt Configuration {#CMPIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cmp
+*/
+

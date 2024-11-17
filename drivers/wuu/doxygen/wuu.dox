@@ -1,0 +1,24 @@
+/*!
+@defgroup wuu WUU: Wakeup Unit driver
+@details The MCUXpresso SDK provides a peripheral driver for the Wakeup Unit (WUU) module of
+MCUXpresso SDK devices. The WUU module allows the user to select external pin sources or internal
+modules as a wake-up source from low power modes.
+
+# External wakeup pins configuration {#WUUExWKPin}
+
+Configures the external wakeup pins' edge detection, wake up event and operate mode.
+Gets, clears, and checks the wakeup pins' flags. External wakeup pins are accessed by
+the 'pinIndex', which is started from 0. Please read the Reference Manual for the details.
+
+# Internal wakeup modules configuration {#WUUInWkMdl}
+
+Enables the internal wakeup modules, configures the wake up event. Internal wakeup modules are
+accessed by the 'moduleIndex', which is started from 0. Please read the Reference Manual for the details.
+
+# Digital pin filter for external wakeup pin configuration. {#WUUPinFlt}
+
+Configures the digital pin filters' edge detection, wakeup event wakeup pin and operate mode.
+Gets, clears, and checks the Pin filter flags. The pin digital filters are accessed by the
+'filterIndex', which is started from 1. Please read the Reference Manual for the details.
+
+*/

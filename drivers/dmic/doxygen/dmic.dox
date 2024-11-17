@@ -1,0 +1,78 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_DMIC_Busy = 5800
+ - #kStatus_DMIC_Idle = 5801
+ - #kStatus_DMIC_OverRunError = 5802
+ - #kStatus_DMIC_UnderRunError = 5803
+*/
+
+/*!
+@defgroup dmic DMIC: Digital Microphone
+@details The MCUXpresso SDK provides a peripheral driver for the Digital Microphone (DMIC) module.
+ @n
+The DMIC driver is created to help the user more easily operate the DMIC module. This driver can be used to
+performed basic and advanced DMIC operations. The driver can be used to transfer data from DMIC to memory using DMA 
+as well as in interrupt mode. The DMIC and DMA transfer in pingpong mode is preferred as DMIC is a streaming 
+device.   
+ @n
+ 
+# Function groups {#DMICFuncGrps}
+
+## Initialization and deinitialization {#DMICInitDeinit}
+This function group implements DMIC initialization and deinitialization API.
+DMIC_Init() function Enables the clock to the DMIC register interface.
+DMIC_Dinit() function Disables the clock to the DMIC register interface.
+
+## Configuration {#DMICConfiguration}
+This function group implements DMIC configration API.
+DMIC_ConfigIO()function configures the use of PDM (Pulse Density moulation) pins.
+DMIC_SetOperationMode()function configures the mode of operation either in DMA or in interrupt.
+DMIC_ConfigChannel() function configures the various property of a DMIC channel.
+DMIC_Use2fs()function configures the clock scaling used for PCM data output.
+DMIC_EnableChannnel() function enables a particualr DMIC channel.
+DMIC_FifoChannel() function configures FIFO settings for a DMIC channel. 
+
+## DMIC Data and status {#DMICDataStatus}
+This function group implements the API to get data and status of DMIC FIFO.
+DMIC_FifoGetStatus() function gives the status of a DMIC FIFO.
+DMIC_ClearStatus() function clears the status of a DMIC FIFO.
+DMIC_FifoGetData() function gets data from a DMIC FIFO.
+
+## DMIC Interrupt Functions {#DMICInterrupt}
+DMIC_EnablebleIntCallback() enables the interrupt for the selected DMIC peripheral.
+DMIC_DisableIntCallback() disables the interrupt for the selected DMIC peripheral.
+
+## DMIC HWVAD Functions {#HWVADFunction}
+This function group implements the API for HWVAD.
+DMIC_SetGainNoiseEstHwvad() Sets the gain value for the noise estimator.
+DMIC_SetGainSignalEstHwvad() Sets the gain value for the signal estimator.
+DMIC_SetFilterCtrlHwvad() Sets the HWVAD filter cutoff frequency parameter.
+DMIC_SetInputGainHwvad() Sets the input gain of HWVAD.
+DMIC_CtrlClrIntrHwvad() Clears HWVAD internal interrupt flag.
+DMIC_FilterResetHwvad() Resets HWVAD filters.
+DMIC_GetNoiseEnvlpEst() Gets the value from output of the filter z7.
+
+## DMIC HWVAD Interrupt Functions {#DMICHWVADInterrupt}
+DMIC_HwvadEnableIntCallback() enables the HWVAD interrupt for the selected DMIC peripheral.
+DMIC_HwvadDisableIntCallback() disables the HWVAD interrupt for the selected DMIC peripheral.
+
+# Typical use case {#DMICTpyUC}
+
+## DMIC DMA Configuration {#DMICDMAConfig}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dmic
+## DMIC use case {#DMADMICInterrupt}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dmic
+*/
+
+/*!
+@defgroup dmic_driver DMIC Driver
+@ingroup dmic
+*/
+
+/*!
+@if dox_section_dmic_dma_driver
+@defgroup dmic_dma_driver DMIC DMA Driver
+@ingroup dmic
+@endif
+*/
+

@@ -1,0 +1,11 @@
+/*!
+@defgroup flexram FLEXRAM: on-chip RAM manager
+@details The MCUXpresso SDK provides a driver for the FLEXRAM module of MCUXpresso SDK devices.
+
+The FLEXRAM module intergrates the ITCM, DTCM, and OCRAM controllers, and supports parameterized RAM array and RAM array portioning.
+
+This example code shows how to allocate RAM using the FLEXRAM driver.
+
+Refer to the driver examples codes located at <i>\<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/flexram.</i>
+
+*/

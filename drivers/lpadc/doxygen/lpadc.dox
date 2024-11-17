@@ -1,0 +1,15 @@
+/*!
+@defgroup lpadc LPADC: 12-bit SAR Analog-to-Digital Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 12-bit SAR Analog-to-Digital Converter (LPADC)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#LPADCTpyUC}
+
+## Polling Configuration {#LPADCPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpadc
+## Interrupt Configuration {#LPADCIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpadc
+*/
+

@@ -1,0 +1,454 @@
+/*!
+@defgroup mcg Multipurpose Clock Generator (MCG)
+@ingroup clock
+@details The MCUXpresso SDK provides a peripheral driver for the module of MCUXpresso SDK devices.
+
+# Function description {#MCGFunc}
+
+MCG driver provides these functions:
+ - Functions to get the MCG clock frequency.
+ - Functions to configure the MCG clock, such as PLLCLK and MCGIRCLK.
+ - Functions for the MCG clock lock lost monitor.
+ - Functions for the OSC configuration.
+ - Functions for the MCG auto-trim machine.
+ - Functions for the MCG mode.
+
+## MCG frequency functions {#MCGFreq}
+
+MCG module provides clocks, such as MCGOUTCLK, MCGIRCLK, MCGFFCLK, MCGFLLCLK, and
+MCGPLLCLK. The MCG driver provides functions to get the
+frequency of these clocks, such as CLOCK_GetOutClkFreq(),
+CLOCK_GetInternalRefClkFreq(), CLOCK_GetFixedFreqClkFreq(), CLOCK_GetFllFreq(),
+CLOCK_GetPll0Freq(), CLOCK_GetPll1Freq(), and CLOCK_GetExtPllFreq(). These functions
+get the clock frequency based on the current MCG registers.
+
+## MCG clock configuration {#MCGCLKCfg}
+
+The MCG driver provides functions to configure the internal reference clock (MCGIRCLK), the
+external reference clock, and MCGPLLCLK.\n
+
+The function CLOCK_SetInternalRefClkConfig() configures the MCGIRCLK, including the
+source and the driver. Do not change MCGIRCLK when the MCG mode is BLPI/FBI/PBI
+because the MCGIRCLK is used as a system clock in these modes and changing settings makes the
+system clock unstable.\n
+
+The function CLOCK_SetExternalRefClkConfig() configures the external reference clock
+source (MCG_C7[OSCSEL]). Do not call this function when the MCG mode is BLPE/FBE/PBE/FEE/PEE
+because the external reference clock is used as a clock source in these modes.
+Changing the  external reference clock source requires at least a 50 microseconds wait.
+The function CLOCK_SetExternalRefClkConfig() implements a for loop delay internally.
+The for loop delay assumes that the system clock is 96 MHz, which ensures at least 50
+micro seconds delay. However, when the system clock is slow, the delay time may significantly increase.
+ This for loop count can be optimized for better performance for specific cases.\n
+
+The MCGPLLCLK is disabled in FBE/FEE/FBI/FEI modes by default. Applications can
+enable the MCGPLLCLK in these modes using the functions CLOCK_EnablePll0() and
+CLOCK_EnablePll1(). To enable the MCGPLLCLK, the PLL reference clock divider(PRDIV)
+and the PLL VCO divider(VDIV) must be set to a proper value. The function
+CLOCK_CalcPllDiv() helps to get the PRDIV/VDIV.
+
+## MCG clock lock monitor functions {#MCGMonitor}
+
+The MCG module monitors the OSC and the PLL clock lock status. The MCG driver provides
+the functions to set the clock monitor mode, check the clock lost status, and clear
+the clock lost status.
+
+## OSC configuration {#MCGOsc}
+
+The MCG is needed together with the OSC module to enable the OSC clock. The function
+CLOCK_InitOsc0() CLOCK_InitOsc1 uses the MCG and OSC to initialize the OSC. The OSC
+should be configured based on the board design.
+
+## MCG auto-trim machine {#MCGAtm}
+
+The MCG provides an auto-trim machine to trim the MCG internal reference clock based
+on the external reference clock (BUS clock). During clock trimming, the MCG must not
+work in FEI/FBI/BLPI/PBI/PEI modes. The function CLOCK_TrimInternalRefClk() is
+used for the auto clock trimming.
+
+## MCG mode functions {#MCGMode}
+
+The function CLOCK_GetMcgMode returns the current MCG mode.
+The MCG can only switch between the neighbouring modes. If the target mode is
+not current mode's neighbouring mode, the application must choose the proper switch
+path. For example, to switch to PEE mode from FEI mode,
+use FEI -> FBE -> PBE -> PEE. \n
+
+For the MCG modes, the MCG driver provides three kinds of functions:\n
+
+The first type of functions involve functions CLOCK_SetXxxMode, such as CLOCK_SetFeiMode().
+These functions only set the MCG mode from neighbouring modes. If switching
+to the target mode directly from current mode is not possible, the functions return an error.
+
+The second type of functions are the functions CLOCK_BootToXxxMode,
+such as CLOCK_BootToFeiMode(). These functions set the MCG to specific modes from
+reset mode. Because the source mode and target mode are specific, these
+functions choose the best switch path. The functions are also useful to set up
+the system clock during boot up.
+
+The third type of functions is the CLOCK_SetMcgConfig(). This function chooses
+the right path to switch to the target mode. It is easy to use, but introduces a
+large code size.
+
+Whenever the FLL settings change, there should be a 1 millisecond delay to ensure that the FLL is
+stable. The function CLOCK_SetMcgConfig() implements a for loop delay internally to ensure that the
+FLL is stable. The for loop delay assumes that the system clock is 96 MHz, which ensures at least
+1 millisecond delay. However, when the system clock is slow, the delay time may increase
+significantly. The for loop count can be optimized for better performance according
+to a specific use case.\n
+
+# Typical use case {#MCGUSECse}
+
+The function CLOCK_SetMcgConfig
+is used to switch between any modes. However, this heavy-light function
+introduces a large code size. This section shows how to use the mode function to
+implement a quick and light-weight switch between typical specific modes. Note that
+the step to enable the external clock is not included in the following steps.
+Enable the corresponding clock before using it as a clock source.
+
+## Switch between BLPI and FEI {#MCGBLPIFEI}
+
+<div>
+    <table>
+        <tr>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Use case</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Steps</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Functions</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="3"> BLPI -> FEI </td>
+            <td align="center"> BLPI -> FBI </td>
+            <td align="left"> CLOCK_InternalModeToFbiModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> FEI </td>
+            <td align="left"> CLOCK_SetFeiMode(...)</td>
+        </tr>
+        <tr>
+            <td align="center"> Configure MCGIRCLK if need </td>
+            <td align="left"> CLOCK_SetInternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="3"> FEI -> BLPI </td>
+            <td align="center"> Configure MCGIRCLK if need </td>
+            <td align="left"> CLOCK_SetInternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FEI -> FBI </td>
+            <td align="left"> CLOCK_SetFbiMode(...) with fllStableDelay=NULL</td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> BLPI </td>
+            <td align="left"> CLOCK_SetLowPowerEnable(true) </td>
+        </tr>
+    </table>
+</div>
+
+## Switch between BLPI and FEE {#MCGBLPIFEE}
+
+<div>
+    <table>
+        <tr>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Use case</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Steps</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Functions</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="3"> BLPI -> FEE </td>
+            <td align="center"> BLPI -> FBI </td>
+            <td align="left"> CLOCK_InternalModeToFbiModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> Change external clock source if need </td>
+            <td align="left"> CLOCK_SetExternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> FEE </td>
+            <td align="left"> CLOCK_SetFeeMode(...)</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="3"> FEE -> BLPI </td>
+            <td align="center"> Configure MCGIRCLK if need </td>
+            <td align="left"> CLOCK_SetInternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FEE -> FBI </td>
+            <td align="left"> CLOCK_SetFbiMode(...) with fllStableDelay=NULL</td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> BLPI </td>
+            <td align="left"> CLOCK_SetLowPowerEnable(true) </td>
+        </tr>
+    </table>
+</div>
+
+## Switch between BLPI and PEE {#MCGBLPIPEE}
+
+<div>
+    <table>
+        <tr>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Use case</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Steps</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Functions</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="5"> BLPI -> PEE </td>
+            <td align="center"> BLPI -> FBI </td>
+            <td align="left"> CLOCK_InternalModeToFbiModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> Change external clock source if need </td>
+            <td align="left"> CLOCK_SetExternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> FBE </td>
+            <td align="left"> CLOCK_SetFbeMode(...) // fllStableDelay=NULL </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> PBE </td>
+            <td align="left"> CLOCK_SetPbeMode(...)</td>
+        </tr>
+        <tr>
+            <td align="center"> PBE -> PEE </td>
+            <td align="left"> CLOCK_SetPeeMode(...)</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="4"> PEE -> BLPI </td>
+            <td align="center"> PEE -> FBE </td>
+            <td align="left"> CLOCK_ExternalModeToFbeModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> Configure MCGIRCLK if need </td>
+            <td align="left"> CLOCK_SetInternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> FBI </td>
+            <td align="left"> CLOCK_SetFbiMode(...) with fllStableDelay=NULL </td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> BLPI </td>
+            <td align="left"> CLOCK_SetLowPowerEnable(true) </td>
+        </tr>
+    </table>
+</div>
+
+## Switch between BLPE and PEE {#MCGBLPEPEE}
+
+This table applies when using the same external clock source (MCG_C7[OSCSEL]) in BLPE mode and PEE mode.
+
+<div>
+    <table>
+        <tr>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Use case</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Steps</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Functions</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="2"> BLPE -> PEE </td>
+            <td align="center"> BLPE -> PBE </td>
+            <td align="left"> CLOCK_SetPbeMode(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> PBE -> PEE </td>
+            <td align="left"> CLOCK_SetPeeMode(...) </td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="2"> PEE -> BLPE </td>
+            <td align="center"> PEE -> FBE </td>
+            <td align="left"> CLOCK_ExternalModeToFbeModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> BLPE </td>
+            <td align="left"> CLOCK_SetLowPowerEnable(true) </td>
+        </tr>
+    </table>
+</div>
+
+If using different external clock sources (MCG_C7[OSCSEL]) in BLPE mode and PEE mode,
+call the CLOCK_SetExternalRefClkConfig() in FBI or FEI mode to change the external
+reference clock.
+
+<div>
+    <table>
+        <tr>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Use case</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Steps</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Functions</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="6"> BLPE -> PEE </td>
+            <td align="center"> BLPE -> FBE </td>
+            <td align="left"> CLOCK_ExternalModeToFbeModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> FBI </td>
+            <td align="left"> CLOCK_SetFbiMode(...) with fllStableDelay=NULL</td>
+        </tr>
+        <tr>
+            <td align="center"> Change source </td>
+            <td align="left"> CLOCK_SetExternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> FBE </td>
+            <td align="left"> CLOCK_SetFbeMode(...) with fllStableDelay=NULL</td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> PBE </td>
+            <td align="left"> CLOCK_SetPbeMode(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> PBE -> PEE </td>
+            <td align="left"> CLOCK_SetPeeMode(...) </td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="5"> PEE -> BLPE </td>
+            <td align="center"> PEE -> FBE </td>
+            <td align="left"> CLOCK_ExternalModeToFbeModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> FBI </td>
+            <td align="left"> CLOCK_SetFbiMode(...) with fllStableDelay=NULL </td>
+        </tr>
+        <tr>
+            <td align="center"> Change source </td>
+            <td align="left"> CLOCK_SetExternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> PBI -> FBE </td>
+            <td align="left"> CLOCK_SetFbeMode(...) with fllStableDelay=NULL </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> BLPE </td>
+            <td align="left"> CLOCK_SetLowPowerEnable(true) </td>
+        </tr>
+    </table>
+</div>
+
+## Switch between BLPE and FEE {#MCGBLPEFEE}
+
+This table applies when using the same external clock source (MCG_C7[OSCSEL]) in BLPE mode and FEE mode.
+
+<div>
+    <table>
+        <tr>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Use case</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Steps</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Functions</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="2"> BLPE -> FEE </td>
+            <td align="center"> BLPE -> FBE </td>
+            <td align="left"> CLOCK_ExternalModeToFbeModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> FEE </td>
+            <td align="left"> CLOCK_SetFeeMode(...) </td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="2"> FEE -> BLPE </td>
+            <td align="center"> PEE -> FBE </td>
+            <td align="left"> CLOCK_SetPbeMode(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> BLPE </td>
+            <td align="left"> CLOCK_SetLowPowerEnable(true) </td>
+        </tr>
+    </table>
+</div>
+
+If using different external clock sources (MCG_C7[OSCSEL]) in BLPE mode and FEE mode,
+call the CLOCK_SetExternalRefClkConfig() in FBI or FEI mode to change the external
+reference clock.
+
+<div>
+    <table>
+        <tr>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Use case</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Steps</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Functions</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="4"> BLPE -> FEE </td>
+            <td align="center"> BLPE -> FBE </td>
+            <td align="left"> CLOCK_ExternalModeToFbeModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> FBI </td>
+            <td align="left"> CLOCK_SetFbiMode(...) with fllStableDelay=NULL </td>
+        </tr>
+        <tr>
+            <td align="center"> Change source </td>
+            <td align="left"> CLOCK_SetExternalRefClkConfig(...)</td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> FEE </td>
+            <td align="left"> CLOCK_SetFeeMode(...)</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="4"> FEE -> BLPE </td>
+            <td align="center"> FEE -> FBI </td>
+            <td align="left"> CLOCK_SetFbiMode(...) with fllStableDelay=NULL </td>
+        </tr>
+        <tr>
+            <td align="center"> Change source </td>
+            <td align="left"> CLOCK_SetExternalRefClkConfig(...)</td>
+        </tr>
+        <tr>
+            <td align="center"> PBI -> FBE </td>
+            <td align="left"> CLOCK_SetFbeMode(...) with fllStableDelay=NULL</td>
+        </tr>
+        <tr>
+            <td align="center"> FBE -> BLPE </td>
+            <td align="left"> CLOCK_SetLowPowerEnable(true) </td>
+        </tr>
+    </table>
+</div>
+
+## Switch between BLPI and PEI {#MCGBLPIPEI}
+
+<div>
+    <table>
+        <tr>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Use case</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Steps</td>
+            <td colspan="1" align=center bgcolor="#2E9AFE">Functions</td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="3"> BLPI -> PEI </td>
+            <td align="center"> BLPI -> PBI </td>
+            <td align="left"> CLOCK_SetPbiMode(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> PBI -> PEI </td>
+            <td align="left"> CLOCK_SetPeiMode(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> Configure MCGIRCLK if need </td>
+            <td align="left"> CLOCK_SetInternalRefClkConfig(...) </td>
+        </tr>
+        <tr>
+            <td align="center" rowspan="3"> PEI -> BLPI </td>
+            <td align="center"> Configure MCGIRCLK if need </td>
+            <td align="left"> CLOCK_SetInternalRefClkConfig </td>
+        </tr>
+        <tr>
+            <td align="center"> PEI -> FBI </td>
+            <td align="left"> CLOCK_InternalModeToFbiModeQuick(...) </td>
+        </tr>
+        <tr>
+            <td align="center"> FBI -> BLPI </td>
+            <td align="left"> CLOCK_SetLowPowerEnable(true) </td>
+        </tr>
+    </table>
+</div>
+
+# Code Configuration Option {#MCGCodeOpt}
+
+## MCG_USER_CONFIG_FLL_STABLE_DELAY_EN {#MCGUsrPllDly}
+
+When switching to use FLL with function CLOCK_SetFeiMode() and CLOCK_SetFeeMode(), there is an internal function CLOCK_FllStableDelay(). It is used to delay a few ms so that to wait the FLL to be stable enough. By default, it is implemented in driver code like the following: 
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mcg
+Once user is willing to create their own delay funcion, just assert the macro MCG_USER_CONFIG_FLL_STABLE_DELAY_EN, and then define function CLOCK_FllStableDelay in the application code.
+
+*/

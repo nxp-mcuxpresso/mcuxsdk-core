@@ -1,0 +1,11 @@
+/*!
+@defgroup qn_qdec QDEC: Quadrature decoder
+@details The MCUXpresso SDK provides a peripheral driver for the Quadrature decoder
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#QNQDECTpyUC}
+
+## Basic Configuration {#QNQDECdefConfig}
+
+*/
+

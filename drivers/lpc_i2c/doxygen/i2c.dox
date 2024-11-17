@@ -1,0 +1,90 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_I2C_Busy = 6600
+ - #kStatus_I2C_Idle = 6601
+ - #kStatus_I2C_Nak = 6602
+ - #kStatus_I2C_InvalidParameter = 6603
+ - #kStatus_I2C_BitError = 6604
+ - #kStatus_I2C_ArbitrationLost = 6605
+ - #kStatus_I2C_NoTransferInProgress = 6606
+ - #kStatus_I2C_DmaRequestFail = 6607
+ - #kStatus_I2C_StartStopError = 6608
+ - #kStatus_I2C_UnexpectedState = 6609
+ - #kStatus_I2C_Addr_Nak = 6610
+ - #kStatus_I2C_Timeout = 6611
+*/
+
+/*!
+@defgroup i2c I2C: Inter-Integrated Circuit Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Inter-Integrated Circuit (I2C) module of MCUXpresso SDK devices.
+
+
+The I2C driver includes functional APIs and transactional APIs.
+
+Functional APIs are feature/property target low-level APIs.
+Functional APIs can be used for the I2C master/slave initialization/configuration/operation for
+optimization/customization purpose. Using the functional APIs requires the
+knowledge of the I2C master peripheral and how to organize functional APIs
+to meet the application requirements. The I2C functional operation groups provide the functional APIs set.
+
+Transactional APIs are transaction target high-level APIs.
+The transactional APIs can be used to enable the peripheral quickly and also in the
+application if the code size and performance of transactional APIs satisfy
+the requirements. If the code size and performance are critical requirements,
+see the transactional API implementation and write custom code using the functional APIs or accessing the hardware registers.
+
+Transactional APIs support asynchronous transfer. This means that the functions I2C_MasterTransferNonBlocking() set up the interrupt non-blocking transfer.
+When the transfer completes, the upper layer is notified through a callback function with the status.
+
+# Typical use case {#I2CTpyUC}
+
+## Master Operation in functional method{#I2CMasterOpsFunctional}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/i2cRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/i2c
+## Master Operation in DMA transactional method{#I2CMasterOpsTransDMA}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/i2c
+## Slave Operation in functional method{#I2CSlaveOpsFunctional}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/i2c
+## Slave Operation in interrupt transactional method{#I2CSlaveOpsTransIRQ}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/i2c
+*/
+
+/*!
+@defgroup i2c_driver I2C Driver
+@ingroup i2c
+@details
+*/
+
+/*!
+@defgroup i2c_master_driver I2C Master Driver
+@ingroup i2c
+@details
+*/
+
+/*!
+@defgroup i2c_slave_driver I2C Slave Driver
+@ingroup i2c
+@details
+*/
+
+/*!
+@if dox_section_i2c_dma_driver
+@defgroup i2c_dma_driver I2C DMA Driver
+@ingroup i2c
+@details
+@endif
+*/
+
+/*!
+@if dox_section_i2c_freertos_driver
+@defgroup i2c_freertos_driver I2C FreeRTOS Driver
+@ingroup i2c
+@details
+@endif
+*/
+
+
+

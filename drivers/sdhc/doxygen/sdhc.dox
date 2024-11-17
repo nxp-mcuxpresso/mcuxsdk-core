@@ -1,0 +1,20 @@
+/*
+@page drv_err Driver errors status
+ - #kStatus_SDHC_Busy = 1700
+ - #kStatus_SDHC_PrepareAdmaDescriptorFailed = 1701
+ - #kStatus_SDHC_SendCommandFailed = 1702
+ - #kStatus_SDHC_TransferDataFailed = 1703
+*/
+
+/*!
+@defgroup sdhc SDHC: Secure Digital Host Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Secure Digital Host Controller (SDHC)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#SDHCTypUC}
+
+## SDHC Operation {#SDHCOperation}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sdhc
+*/
+

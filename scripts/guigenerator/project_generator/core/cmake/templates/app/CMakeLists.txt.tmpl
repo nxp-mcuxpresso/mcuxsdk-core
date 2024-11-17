@@ -1,0 +1,210 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+INCLUDE(CMakeForceCompiler)
+
+SET(CMAKE_SYSTEM_NAME Generic)
+
+# this file was generated
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(#{@common[ 'project-name' ]})
+
+
+
+SET(CMAKE_EXECUTABLE_SUFFIX)
+# get rid of -rdynamic
+SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
+
+
+ENABLE_LANGUAGE(ASM)
+
+
+# -----------------------------------------------
+# common settings
+# -----------------------------------------------
+<?rb if (@common[ 'as-flags' ] and not @common[ 'as-flags' ].empty?) ?>
+
+# common asm flags
+<?rb    for flag in @common[ 'as-flags' ] ?>
+SET(CMAKE_ASM_FLAGS "<?rb _buf += '${CMAKE_ASM_FLAGS}' ?> #{ flag }")
+<?rb    end ?>
+<?rb end ?>
+<?rb if (@common[ 'as-defines' ] and not @common[ 'as-defines' ].empty?) ?>
+
+# common asm defines
+<?rb    for flag in @common[ 'as-defines' ] ?>
+SET(CMAKE_ASM_FLAGS "<?rb _buf += '${CMAKE_ASM_FLAGS}' ?> #{ flag }")
+<?rb    end ?>
+<?rb end ?>
+<?rb if (@common[ 'cc-flags' ] and not @common[ 'cc-flags' ].empty?) ?>
+
+# common c compiler flags
+<?rb    for flag in @common[ 'cc-flags' ] ?>
+SET(CMAKE_C_FLAGS "<?rb _buf += '${CMAKE_C_FLAGS}' ?> #{ flag }")
+<?rb    end ?>
+<?rb end ?>
+<?rb if (@common[ 'cc-defines' ] and not @common[ 'cc-defines' ].empty?) ?>
+
+# common c compiler defines
+<?rb    for flag in @common[ 'cc-defines' ] ?>
+SET(CMAKE_C_FLAGS "<?rb _buf += '${CMAKE_C_FLAGS}' ?> #{ flag }")
+<?rb    end ?>
+<?rb end ?>
+<?rb if (@common[ 'cx-flags' ] and not @common[ 'cx-flags' ].empty?) ?>
+
+# common c++ compiler flags
+<?rb    for flag in @common[ 'cx-flags' ] ?>
+SET(CMAKE_CXX_FLAGS "<?rb _buf += '${CMAKE_CXX_FLAGS}' ?> #{ flag }")
+<?rb    end ?>
+<?rb end ?>
+<?rb if (@common[ 'cx-defines' ] and not @common[ 'cx-defines' ].empty?) ?>
+
+# common c++ compiler defines
+<?rb    for flag in @common[ 'cx-defines' ] ?>
+SET(CMAKE_CXX_FLAGS "<?rb _buf += '${CMAKE_CXX_FLAGS}' ?> #{ flag }")
+<?rb    end ?>
+<?rb end ?>
+<?rb if (@common[ 'ld-flags' ] and not @common[ 'ld-flags' ].empty?) ?>
+
+# linker flags
+<?rb    for flag in @common[ 'ld-flags' ] ?>
+SET(CMAKE_EXE_LINKER_FLAGS "<?rb _buf += '${CMAKE_EXE_LINKER_FLAGS}' ?> #{ flag }")
+<?rb    end ?>
+<?rb end ?>
+
+
+<?rb    if @targets and not @targets.empty? ?>
+<?rb        for target_key, target_data in @targets ?>
+<?rb            if (
+                    (target_data[ 'as-flags' ] and not target_data[ 'as-flags' ].empty?) or 
+                    (target_data[ 'as-defines' ] and not target_data[ 'as-defines' ].empty?) or 
+                    (target_data[ 'cc-flags' ] and not target_data[ 'cc-flags' ].empty?) or 
+                    (target_data[ 'cc-defines' ] and not target_data[ 'cc-defines' ].empty?) or 
+                    (target_data[ 'cx-flags' ] and not target_data[ 'cx-flags' ].empty?) or 
+                    (target_data[ 'cx-defines' ] and not target_data[ 'cx-defines' ].empty?) or 
+                    (target_data[ 'project-includes' ] and not target_data[ 'project-includes' ].empty?) or 
+                    (target_data[ 'tool-includes' ] and not target_data[ 'tool-includes' ].empty?)
+                )
+?>
+IF(CMAKE_BUILD_TYPE MATCHES "#{target_key}")
+# -----------------------------------------------
+# special settings for '#{target_key}'
+# -----------------------------------------------
+<?rb                if (target_data[ 'as-flags' ] and not target_data[ 'as-flags' ].empty?) ?>
+
+#   asm flags
+<?rb                    for flag in target_data[ 'as-flags' ] ?>
+    SET(CMAKE_ASM_FLAGS "<?rb _buf += '${CMAKE_ASM_FLAGS}' ?> #{ flag }")
+<?rb                    end ?>
+<?rb                end ?>
+<?rb                if (target_data[ 'as-defines' ] and not target_data[ 'as-defines' ].empty?) ?>
+
+#   asm defines
+<?rb                    for flag in target_data[ 'as-defines' ] ?>
+    SET(CMAKE_ASM_FLAGS "<?rb _buf += '${CMAKE_ASM_FLAGS}' ?> #{ flag }")
+<?rb                    end ?>
+<?rb                end ?>
+<?rb                if (target_data[ 'cc-flags' ] and not target_data[ 'cc-flags' ].empty?) ?>
+
+#   c compiler flags
+<?rb                    for flag in target_data[ 'cc-flags' ] ?>
+    SET(CMAKE_C_FLAGS "<?rb _buf += '${CMAKE_C_FLAGS}' ?> #{ flag }")
+<?rb                    end ?>
+<?rb                end ?>
+<?rb                if (target_data[ 'cc-defines' ] and not target_data[ 'cc-defines' ].empty?) ?>
+
+#   c compiler defines
+<?rb                    for flag in target_data[ 'cc-defines' ] ?>
+    SET(CMAKE_C_FLAGS "<?rb _buf += '${CMAKE_C_FLAGS}' ?> #{ flag }")
+<?rb                    end ?>
+<?rb                end ?>
+<?rb                if (target_data[ 'cx-flags' ] and not target_data[ 'cx-flags' ].empty?) ?>
+
+#   c++ compiler flags
+<?rb                    for flag in target_data[ 'cx-flags' ] ?>
+    SET(CMAKE_CXX_FLAGS "<?rb _buf += '${CMAKE_CXX_FLAGS}' ?> #{ flag }")
+<?rb                    end ?>
+<?rb                end ?>
+<?rb                if (target_data[ 'cx-defines' ] and not target_data[ 'cx-defines' ].empty?) ?>
+
+#   c++ compiler defines
+<?rb                    for flag in target_data[ 'cx-defines' ] ?>
+    SET(CMAKE_CXX_FLAGS "<?rb _buf += '${CMAKE_CXX_FLAGS}' ?> #{ flag }")
+<?rb                    end ?>
+<?rb                end ?>
+<?rb                if (target_data[ 'ld-flags' ] and not target_data[ 'ld-flags' ].empty?) ?>
+
+# linker flags
+<?rb                    for flag in target_data[ 'ld-flags' ] ?>
+    SET(CMAKE_EXE_LINKER_FLAGS "<?rb _buf += '${CMAKE_EXE_LINKER_FLAGS}' ?> #{ flag }")
+<?rb                    end ?>
+<?rb                end ?>
+<?rb                if (target_data[ 'project-includes' ] and not target_data[ 'project-includes' ].empty?) ?>
+
+<?rb                    for include in target_data[ 'project-includes' ]?>
+    INCLUDE_DIRECTORIES("#{ include }")
+<?rb                    end ?>
+<?rb                end ?>
+<?rb                if (target_data[ 'tool-includes' ] and not target_data[ 'tool-includes' ].empty?) ?>
+<?rb                    for include in target_data[ 'tool-includes' ]?>
+    INCLUDE_DIRECTORIES("#{ include }")
+<?rb                    end ?>
+<?rb                end ?>
+
+    SET(CMAKE_EXE_LINKER_FLAGS "<?rb _buf += '${CMAKE_EXE_LINKER_FLAGS}' ?> -T#{ target_data[ 'linker-file'] }")
+
+<?rb                if (target_data[ 'includes' ] and not target_data[ 'includes' ].empty?) ?>
+
+<?rb                    for include in target_data[ 'includes' ]?>
+    include_directories("#{ include }")
+<?rb                    end ?>
+<?rb                end ?>
+
+    SET(EXECUTABLE_OUTPUT_PATH "#{target_data[ 'binary-dir' ]}")
+ENDIF()
+
+<?rb            end ?>
+<?rb        end ?>
+<?rb    end ?>
+
+
+ADD_EXECUTABLE(
+#{@common[ 'binary-filename' ]}
+<?rb for source in @common[ 'sources' ] ?>
+"#{source[ 'path' ]}"
+<?rb end ?>
+)
+
+
+<?rb    if @targets and not @targets.empty? ?>
+<?rb        for target_key, target_data in @targets ?>
+<?rb            if (
+                    (target_data[ 'libraries' ] and not target_data[ 'libraries' ].empty?)
+                )
+?>
+IF(CMAKE_BUILD_TYPE MATCHES "#{target_key}")
+<?rb                if (target_data[ 'libraries' ] and not target_data[ 'libraries' ].empty?) ?>
+    TARGET_LINK_LIBRARIES(#{@common[ 'binary-filename' ]}
+        -Wl,--start-group
+<?rb                    for library in target_data[ 'libraries' ] ?>
+<?rb                        filepath = File.basename(library, File.extname(library))
+                            dirpath  = File.dirname(library)
+                            if (filepath =~ /^lib/)
+                                filepath.gsub!(/^lib/, '')
+?>
+<?rb                            if (dirpath !~ /\$\{TOOLCHAIN_DIR\}/) ?>
+        -L"#{dirpath}"
+<?rb                            end ?>
+        -l#{filepath}
+<?rb                        end ?>
+<?rb                    end ?>
+        -Wl,--end-group
+    )
+<?rb                end ?>
+ENDIF()
+<?rb            end ?>
+<?rb        end ?>
+<?rb    end ?>
+
+

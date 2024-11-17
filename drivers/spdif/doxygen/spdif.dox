@@ -1,0 +1,67 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_SPDIF_RxDPLLLocked = 7500
+ - #kStatus_SPDIF_TxFIFOError = 7501
+ - #kStatus_SPDIF_TxFIFOResync = 7502
+ - #kStatus_SPDIF_RxCnew = 7503
+ - #kStatus_SPDIF_ValidatyNoGood = 7504
+ - #kStatus_SPDIF_RxIllegalSymbol = 7505
+ - #kStatus_SPDIF_RxParityBitError = 7506
+ - #kStatus_SPDIF_UChannelOverrun = 7507
+ - #kStatus_SPDIF_QChannelOverrun = 7508
+ - #kStatus_SPDIF_UQChannelSync = 7509
+ - #kStatus_SPDIF_UQChannelFrameError = 7510
+ - #kStatus_SPDIF_RxFIFOError = 7511
+ - #kStatus_SPDIF_RxFIFOResync = 7512
+ - #kStatus_SPDIF_LockLoss = 7513
+ - #kStatus_SPDIF_TxIdle = 7514
+ - #kStatus_SPDIF_RxIdle = 7515
+ - #kStatus_SPDIF_QueueFull = 7516
+*/
+
+/*!
+@defgroup spdif SPDIF: Sony/Philips Digital Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Sony/Philips Digital Interface (SPDIF)
+         module of MCUXpresso SDK devices.
+
+
+SPDIF driver includes functional APIs and transactional APIs.
+
+Functional APIs target low-level APIs.
+Functional APIs can be used for SPDIF initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the
+knowledge of the SPDIF peripheral and how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. SPDIF functional operation groups provide the
+functional API set.
+
+Transactional APIs target high-level APIs.
+Transactional APIs can be used to enable the peripheral and in the
+application if the code size and performance of transactional APIs satisfy the
+requirements. If the code size and performance are a critical requirement,
+see the transactional API implementation and write a custom code. All
+transactional APIs use the spdif_handle_t as the first parameter.
+Initialize the handle by calling the SPDIF_TransferTxCreateHandle() or SPDIF_TransferRxCreateHandle() API.
+
+Transactional APIs support asynchronous transfer. This means that the functions
+SPDIF_TransferSendNonBlocking() and SPDIF_TransferReceiveNonBlocking() set up the interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_SPDIF_TxIdle and kStatus_SPDIF_RxIdle status.
+
+# Typical use case {#SPDIFCase}
+
+## SPDIF Send/receive using an interrupt method {#SPDIFCaseInterrupt}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/spdif
+## SPDIF Send/receive using a DMA method {#SPDIFCaseDma}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/spdif
+
+*/
+
+/*!
+@if dox_section_spdif_edma
+@defgroup spdif_edma SPDIF eDMA Driver
+@ingroup spdif
+@endif
+*/

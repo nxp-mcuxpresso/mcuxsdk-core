@@ -1,0 +1,5 @@
+/*!
+@defgroup jn_cic_irb IRM: Infra-Red Modulator driver
+@details The MCUXpresso SDK provides a Infra-Red Modulator driver for MCUXpresso SDK devices.
+
+*/

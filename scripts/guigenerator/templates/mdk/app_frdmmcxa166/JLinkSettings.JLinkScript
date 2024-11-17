@@ -1,0 +1,201 @@
+/*
+ * Copyright 2024 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+void _Connect(void)
+{
+  int value;
+ 
+  JLINK_CORESIGHT_WriteDP(2, 0x00000000);
+  value = JLINK_CORESIGHT_ReadAP(0);
+
+  JLINK_SYS_Report1("*** CSW: ", value);
+
+  // Config Debug Mailbox when cannot connect
+  if((value & 0x40) == 0)
+  {
+    JLINK_SYS_Report("*** ConfigDebugMailbox start");
+
+    // Read AP ID register to identify DM AP at index 1
+    JLINK_CORESIGHT_WriteDP(2, 0x020000f0);
+    // The returned AP ID should be 0x002A0000
+    value = JLINK_CORESIGHT_ReadAP(3);
+    JLINK_SYS_Report1("AP ID:", value);
+
+    // Select DM AP index 1
+    JLINK_CORESIGHT_WriteDP(2, 0x01000000);
+    JLINK_CORESIGHT_ReadDP(0);
+
+    // Active DebugMailbox, Write DM RESYNC_REQ + CHIP_RESET_REQ
+    JLINK_CORESIGHT_WriteAP(0, 0x21);
+    // Poll CSW register (0) for zero return, indicating success
+    value = -1;
+    while (value != 0)
+    {
+      value = JLINK_CORESIGHT_ReadAP(0);
+    }
+    JLINK_SYS_Report1("RESYNC_REQ + CHIP_RESET_REQ:", value);
+
+    // Start DM-AP
+    JLINK_CORESIGHT_WriteAP(1, 0x01);
+    // Poll RETURN register (2) for zero return
+    value = -1;
+    while (value != 0)
+    {
+      value = JLINK_CORESIGHT_ReadAP(2) & 0xFFFF;
+    }
+    JLINK_SYS_Report1("Start DM-AP:", value);
+
+    // Enter Debug Session,  Write DM START_DBG_SESSION to REQUEST register (1)
+    JLINK_CORESIGHT_WriteAP(1, 0x07);
+    // Poll RETURN register (2) for zero return
+    value = -1;
+    while (value != 0)
+    {
+      value = JLINK_CORESIGHT_ReadAP(2) & 0xFFFF;
+    }
+    JLINK_SYS_Report1("DEBUG_SESSION_REQ:", value);
+
+    JLINK_SYS_Report("*** ConfigDebugMailbox end");
+  }
+}
+
+void AfterResetTarget(void)
+{
+  // Clear XPSR to avoid undefined instruction fault caused by IT/ICI
+  JLINK_MEM_WriteU32(0xE000EDF8, 0x01000000);
+  JLINK_MEM_WriteU32(0xE000EDF4, 0x00010010);
+  JLINK_SYS_Sleep(1);
+  // Clear MSPLIM to 0
+  JLINK_MEM_WriteU32(0xE000EDF8, 0x00000000);
+  JLINK_MEM_WriteU32(0xE000EDF4, 0x0001001C);
+  JLINK_SYS_Sleep(1);
+  // Disable MPU
+  JLINK_MEM_WriteU32(0xE000ED94, 0x00000000);
+
+  // Ungate clock for RAMA,RAMB,RAMC,ROMC
+  JLINK_MEM_WriteU32(0x40091064, 0x40E);
+
+  JLINK_SYS_Report("*** Update SRAM_XEN_DP");
+
+  // WriteEN index2
+  JLINK_MEM_WriteU32(0x40091D00, 0x00060000);
+  JLINK_MEM_WriteU32(0x40091D00, 0x00020002);
+  JLINK_MEM_WriteU32(0x40091D00, 0x00010002);
+  JLINK_MEM_WriteU32(0x40091D04, 0x00290000);
+  JLINK_MEM_WriteU32(0x40091D00, 0x00020002);
+  JLINK_MEM_WriteU32(0x40091D04, 0x00280000);
+  JLINK_MEM_WriteU32(0x40091D00, 0x00000002);
+  //SRAM_XEN=0x3F
+  JLINK_MEM_WriteU32(0x40091E58, 0x0000003F);
+  JLINK_MEM_WriteU32(0x40091E5C, 0x0000003F);
+
+  JLINK_SYS_Report("*** Update MEM0_BLK_CFG_Wx");
+  // WriteEN index15
+  JLINK_MEM_WriteU32(0x40091D00, 0x00060000);
+  JLINK_MEM_WriteU32(0x40091D00, 0x0002000F);
+  JLINK_MEM_WriteU32(0x40091D00, 0x0001000F);
+  JLINK_MEM_WriteU32(0x40091D04, 0x00290000);
+  JLINK_MEM_WriteU32(0x40091D00, 0x0002000F);
+  JLINK_MEM_WriteU32(0x40091D04, 0x00280000);
+  JLINK_MEM_WriteU32(0x40091D00, 0x0000000F);
+  //MBC0_MEMN_GLBAC0=0x00007777, RWX
+  JLINK_MEM_WriteU32(0x4008E020, 0x00007777);
+  //For Flash RWX
+  //MBC0_DOM0_MEM0_BLK_CFG_Wx=0x00000000
+  JLINK_MEM_WriteU32(0x4008E040, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E044, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E048, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E04C, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E050, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E054, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E058, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E05C, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E060, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E064, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E068, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E06C, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E070, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E074, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E078, 0x00000000);
+  JLINK_MEM_WriteU32(0x4008E07C, 0x00000000);
+}
+
+/*********************************************************************
+*
+*       ResetTarget
+*/
+void ResetTarget(void) {
+  int tmp;
+
+  JLINK_SYS_Report("*** JLINK ResetTarget");
+  // Halt the core
+  JLINK_MEM_WriteU32(0xE000EDF0, 0xA05F0003);
+
+  // Clear VECTOR CATCH and set TRCENA
+  tmp = JLINK_MEM_ReadU32(0xE000EDFC) & ~1;
+  JLINK_MEM_WriteU32(0xE000EDFC, tmp | (1<<24));
+
+  //// Breakoint at SYSCON_BASE + 0x23C
+  //JLINK_MEM_WriteU32(0xE0001020, 0x4009123C);
+  //JLINK_MEM_WriteU32(0xE0001028, 0x814);
+
+  // Set watch point
+  JLINK_MEM_WriteU32(0xE0001020, 0x00000000);
+  JLINK_MEM_WriteU32(0xE0001028, 0xF0000412);
+  JLINK_MEM_WriteU32(0xE0001030, 0x000FFFFF);
+  JLINK_MEM_WriteU32(0xE0001038, 0xF0000403);
+
+  // Reset using the SYSRESETREQ
+  JLINK_SYS_Report("Set CM33_SYSRESETREQ_EN");
+  JLINK_MEM_WriteU32(0xE000ED0C, 0x5FA0004);
+  JLINK_SYS_Sleep(100);
+
+  _Connect();
+
+  // Halt the core in case it didn't stop at a breakpiont
+  JLINK_MEM_WriteU32(0xE000EDF0, 0xA05F0003);
+
+  // Clear the Breakpoints
+  JLINK_MEM_WriteU32(0xE0001020, 0x0);
+  JLINK_MEM_WriteU32(0xE0001028, 0x0);
+  JLINK_MEM_WriteU32(0xE0001030, 0x0);
+  JLINK_MEM_WriteU32(0xE0001038, 0x0);
+}
+
+/*********************************************************************
+*
+*       InitTarget
+*/
+void InitTarget(void)
+{
+
+  JLINK_SYS_Report("******************************************************");
+  JLINK_SYS_Report("J-Link script: MCX Cortex-M33 core J-Link script");
+  JLINK_SYS_Report("******************************************************");
+  JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=0;DRPost=0;IRLenDevice=4");
+  CPU = CORTEX_M33;      // Pre-select that we have a Cortex-M33 connected
+  JTAG_AllowTAPReset = 0;   // J-Link is allowed to use a TAP reset for JTAG-chain auto-detection
+
+  JTAG_SetDeviceId(0, 0x6BA02477);  // 4-bits IRLen
+
+  if (JLINK_ActiveTIF == JLINK_TIF_JTAG) {
+    // JTAG Specific Part
+    // Init AP Transfer Mode, Transaction Counter, and Lane Mask (Normal Transfer Mode, Include all Byte Lanes)
+    // Additionally clear STICKYORUN, STICKYCMP, and STICKYERR bits by writing '1'
+    JLINK_CORESIGHT_WriteDP(1, 0x50000F32);
+  } else {
+    // SWD Specific Part
+    // Init AP Transfer Mode, Transaction Counter, and Lane Mask (Normal Transfer Mode, Include all Byte Lanes)
+    JLINK_CORESIGHT_WriteDP(1, 0x50000F00);
+    // Clear WDATAERR, STICKYORUN, STICKYCMP, and STICKYERR bits of CTRL/STAT Register by write to ABORT register
+    JLINK_CORESIGHT_WriteDP(0, 0x0000001E);
+  }
+
+  _Connect();
+
+  CORESIGHT_IndexAHBAPToUse = 0;
+}

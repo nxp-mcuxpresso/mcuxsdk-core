@@ -1,0 +1,110 @@
+/*!
+@defgroup cau3_driver CAU3
+@details The MCUXpresso SDK provides the Peripheral driver for the CAU3 module.
+
+
+# CAU3 Driver Initialization and Configuration {#CAU3Init}
+
+To initialize CAU3, call @ref CAU3_Init function. It enables the CAU3 clock and it loads the binary image of CAU3 firmware
+into CAU3 local memories (IMEM and DMEM).
+
+Since the CAU3 is a shared system module, its "ownership" must first be claimed by
+the host processor. This is accomplished via a hardware semaphore implemented in
+the HIRC submodule. The CAU3 driver provides CAU3_LockSemaphore for this purpose.
+Once ownership has been acquired, the host processor continues with requested operations.
+
+After the host processor is done with the operations and after receiving the appropriate notification, 
+the host processor releases the CAU3 semaphore, making the module available for other CPU
+or another bus master such as DMA. The CAU3 driver provides CAU3_ReleaseSemaphore function for this purpose.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cau3
+# Key Management
+
+The CAU3 maintains four symmetric key "contexts" in its local, private data memory. The
+data structure for the context is defined as:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cau3
+Up to 4 contexts can be addressed:
+
+CAU_SINGLE_KEY_CONTEXT_T cauKeyContext[4];
+
+The keySize definition is:
+
+if (keySize == 0) then {key is invalid}
+   else if (keySize == 8) then {key is 64-bit DES}
+        else if (keySize == 16) then {key is 128-bit AES}
+             else if (keySize == 24) then {key is 192-bit TDES}
+                  else if (keySize == 32) then {key is 256-bit AES}
+
+When the CAU3 CryptoCore performs an AES key expansion, the  output  schedule
+is  stored  in  the  local,  private  data memory and the appropriate pointer
+stored in the keySched context location. The key expansion/scheduling must be
+performed before any AES encryption or decryption operations are attempted.
+ 
+For  specific  situations,  for  example,  the Boot ROM, a key context can be
+loaded directly from the host processor. In the more  typical  situation,  an
+RFC3394-wrapped  key  blob is provided to a CAU3 function which automatically
+unwraps the blob and loads the specified key context.
+
+There is also a special  function  that  loads  the  special  "hardware  key"
+provided   as   an  input  to  the  CAU3  over  a  dedicated  interface  into
+cauKeyContext[0].
+
+# Comments about API usage in RTOS {#CAU3Rtos}
+
+None of the API functions is designed to be re-entrant. Concurrent CAU3 accesses from multiple threads or by multiple host
+processors are not allowed. 
+
+# Comments about API usage in interrupt handler {#CAU3isr}
+
+Assuming the host processor receiving interrupt has the ownership of the CAU3 module,
+it can request Encrypt/Decrypt/Hash/public_key operations in an interrupt routine.
+Still, it shall be assured by the user that CAU3 API functions are not called concurrently
+among multiple pre-empting interrupt handlers or between an interrupt handler and the main thread.
+Additionally, as the CAU3 accesses system memory for it's operation with data, such as message, plaintext, ciphertext or keys,
+all of those data shall remain valid until CAU3 operation completes.
+
+# CAU3 Driver Examples {#CAU3Ex}
+
+## Simple examples {#CAU3SimpleEx}
+
+Encrypt plaintext by AES engine
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cau3
+Compute keyed hash by AES engine (CMAC)
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cau3
+Compute hash (SHA-256)
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cau3*/
+
+/*!
+@defgroup cau3_driver_aes CAU3 AES driver
+@details This section describes the programming interface of the CAU3 AES driver.
+@ingroup cau3_driver
+*/
+/*!
+@defgroup cau3_driver_des CAU3 TDES driver
+@details This section describes the programming interface of the CAU3 TDES driver.
+@ingroup cau3_driver
+*/
+/*!
+@defgroup cau3_driver_chacha_poly CAU3 CHACHA20_POLY1305 driver
+@details This section describes the programming interface of the CAU3 CHACHA20_POLY1305 driver.
+@ingroup cau3_driver
+*/
+/*!
+@defgroup cau3_driver_hash CAU3 HASH driver
+@details This section describes the programming interface of the CAU3 HASH driver.
+@ingroup cau3_driver
+*/
+/*!
+@defgroup cau3_driver_pkha CAU3 PKHA driver
+@details This section describes the programming interface of the CAU3 PKHA driver.
+@ingroup cau3_driver
+*/
+/*!
+@defgroup cau3_driver_blob CAU3 Blob driver
+@details This section describes the programming interface of the CAU3 Blob driver.
+@ingroup cau3_driver
+*/
+
+
+

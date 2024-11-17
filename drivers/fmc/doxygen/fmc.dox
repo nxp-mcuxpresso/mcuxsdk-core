@@ -1,0 +1,17 @@
+/*!
+@defgroup fmc FMC: Hardware flash signature generator
+@details The MCUXpresso SDK provides a peripheral driver for the Flash Signature generator module of MCUXpresso SDK devices.
+
+The flash module contains a built-in signature generator. This generator can produce a 128-bit signature from a range of flash memory.
+A typical usage is to verify the flashed contents against a calculated signature (for example, during programming). The signature
+generator can also be accessed via an IAP function call or ISP command.
+
+
+# Generate flash signature {#GenerateFlashSig}
+<ol>
+<li>FMC_GenerateFlashSignature() function generates flash signature for a specified address range.</li>
+</ol>
+
+This example code shows how to generate 128-bit flash signature using the FMC driver.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fmc*/

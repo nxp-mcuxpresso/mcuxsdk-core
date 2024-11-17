@@ -1,0 +1,8 @@
+/*!
+@defgroup irqsteer IRQSTEER: Interrupt Request Steering Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Interrupt Request Steering (IRQSTEER)
+         module of MCUXpresso SDK devices.
+         The IrqSteer module redirects/steers the incoming interrupts to output interrupts of a
+         selected/designated channel as specified by a set of configuration registers.
+@platforms
+*/

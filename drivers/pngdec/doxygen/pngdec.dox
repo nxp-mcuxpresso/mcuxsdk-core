@@ -1,0 +1,14 @@
+/*!
+@defgroup pngdec PNGDEC: PNG decoder Driver
+@details The MCUXpresso SDK provides a peripheral driver for the PNG decoder (PNGDEC) module of MCUXpresso SDK devices.
+
+The PNGDEC driver is created to help the user operate the PNGDEC module. User can use the API to configure the
+driver to decode PNG file, get image information then drop decoded image data and ancillary data if configured.
+
+# Typical use case {#PNGDCTpyUC}
+
+## Normal Mode {#PNGDECDmaMode}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/platform/drivers/pngdec/example
+
+*/

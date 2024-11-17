@@ -1,0 +1,13 @@
+/*!
+@defgroup adc_etc ADC_ETC: ADC External Trigger Control
+@details The MCUXpresso SDK provides a peripheral driver for the ADC_ETC module of MCUXpresso SDK devices.
+
+# Typical use case {#ADC_ETCTpyUC}
+
+## Software trigger Configuration {#ADC_ETCSWTriggerConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/adc_etc
+## Hardware trigger Configuration {#ADC_ETCHWTriggerConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/adc_etc
+*/

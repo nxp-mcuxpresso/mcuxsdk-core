@@ -1,0 +1,10 @@
+/*!
+@defgroup xecc XECC: external error correction code controller
+@details The MCUXpresso SDK provides a driver for the XECC module of MCUXpresso SDK devices.
+
+The XECC module supports Single Error Correction and Double Error Detection(SEC-DED) ECC function to provide reliability for external memory ECC region access.
+
+
+This example code shows how to correct single error and detect multiple error using the XECC driver.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/xecc*/

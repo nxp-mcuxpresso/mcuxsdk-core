@@ -1,0 +1,25 @@
+/*!
+@defgroup llwu LLWU: Low-Leakage Wakeup Unit Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Low-Leakage Wakeup Unit (LLWU) module of
+MCUXpresso SDK devices. The LLWU module allows the user to select external pin sources and internal modules as a wake-up
+source from low-leakage power modes.
+
+
+# External wakeup pins configurations {#LLWUExWkPin}
+
+Configures the external wakeup pins' working modes, gets, and clears the wake pin flags. External
+wakeup pins are accessed by the `pinIndex`, which is started from 1. Numbers of the external pins depend on the SoC configuration.
+
+# Internal wakeup modules configurations {#LLWUInWkMdl}
+
+Enables/disables the internal wakeup modules and gets the module flags. Internal modules
+are accessed by `moduleIndex`, which is started from 1. Numbers of external pins depend the on SoC configuration.
+
+# Digital pin filter for external wakeup pin configurations {#LLWUPinFlt}
+
+Configures the digital pin filter of the external wakeup pins' working modes, gets, and clears the pin
+filter flags. Digital pin filters are accessed by the `filterIndex`, which is started from 1. Numbers of external pins
+depend on the SoC configuration.
+
+*/
+

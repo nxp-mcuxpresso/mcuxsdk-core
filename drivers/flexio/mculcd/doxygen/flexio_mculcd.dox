@@ -1,0 +1,300 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_FLEXIO_MCULCD_Idle = 2400
+ - #kStatus_FLEXIO_MCULCD_Busy = 2401
+ - #kStatus_FLEXIO_MCULCD_Error = 2302
+*/
+
+/*!
+@defgroup flexio_mculcd FlexIO MCU Interface LCD Driver
+@ingroup flexio
+@details The MCUXpresso SDK provides a peripheral driver for LCD (8080 or 6800 interface)
+function using Flexible I/O module of MCUXpresso SDK devices.
+
+The FlexIO LCD driver supports both 8-bit and 16-bit data bus, 8080 and 6800
+interface. User could change the macro FLEXIO_MCULCD_DATA_BUS_WIDTH to choose
+8-bit data bus or 16-bit data bus.
+
+The FlexIO LCD driver supports three kinds of data transfer:
+1. Send a data array. For example, send the LCD image data to the LCD controller.
+2. Send a value many times. For example, send 0 many times to clean the LCD screen.
+3. Read data into a data array. For example, read image from LCD controller.
+
+
+The FlexIO LCD driver includes functional APIs and transactional APIs.\n
+
+Functional APIs are feature/property target low level APIs.
+Functional APIs can be used for FlexIO LCD initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the
+knowledge of the FlexIO LCD peripheral and how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. FlexIO LCD functional operation groups provide the
+functional APIs set.\n
+
+Transactional APIs are transaction target high level APIs.
+The transactional APIs can be used to enable the peripheral and also in the
+application if the code size and performance of transactional APIs can satisfy
+requirements. If the code size and performance are critical requirements,
+see the transactional API implementation and write custom code.\n
+
+Transactional APIs support asynchronous transfer. This means that the function
+@ref FLEXIO_MCULCD_TransferNonBlocking sets up an interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_FLEXIO_MCULCD_Idle status.
+
+# Typical use case {#FlexIO_LCDCase}
+
+## FlexIO LCD send/receive using functional APIs {#FlexIO_LCDCaseFunctional}
+
+This example shows how to send command, or write and read data using the functional APIs. The
+data bus is 16-bit.
+
+@code
+uint16_t dataToSend[] = { ... };
+uint16_t dataToReceive[] = { ... };
+
+FLEXIO_MCULCD_Type flexioLcdDev;
+flexio_MCULCD_transfer_t xfer;
+flexio_MCULCD_config_t config;
+
+//////////////// Init the driver. //////////////////////
+FLEXIO_MCULCD_GetDefaultConfig(&config);
+FLEXIO_MCULCD_Init(&flexioLcdDev, &config, 120000000);
+
+////////////// Send command only. /////////////////////
+// Method 1:
+FLEXIO_MCULCD_StartTransfer(&flexioLcdDev);
+FLEXIO_MCULCD_WriteCommandBlocking(&flexioLcdDev, command1);
+FLEXIO_MCULCD_StopTransfer(&flexioLcdDev);
+
+// Method 2:
+xfer.command = command1;
+xfer.dataCount = 0; // Only send command, no data transfer.
+FLEXIO_MCULCD_TransferBlocking(&flexioLcdDev, &xfer);
+
+////////////// Send data array. /////////////////////
+// Method 1:
+FLEXIO_MCULCD_StartTransfer(&flexioLcdDev);
+FLEXIO_MCULCD_WriteCommandBlocking(&flexioLcdDev, command2);
+FLEXIO_MCULCD_WriteDataArrayBlocking(&flexioLcdDev, dataToSend, sizeof(dataToSend));
+FLEXIO_MCULCD_StopTransfer(&flexioLcdDev);
+
+// Method 2:
+xfer.command = command2;
+xfer.mode = kFLEXIO_MCULCD_WriteArray;
+xfer.dataAddrOrSameValue = (uint32_t)dataToSend;
+xfer.dataCount = sizeof(dataToSend);
+FLEXIO_MCULCD_TransferBlocking(&flexioLcdDev, &xfer);
+
+////////////// Send the same data many times. //////////////
+// Method 1:
+FLEXIO_MCULCD_StartTransfer(&flexioLcdDev);
+FLEXIO_MCULCD_WriteCommandBlocking(&flexioLcdDev, command2);
+FLEXIO_MCULCD_WriteSameValueBlocking(&flexioLcdDev, value, 1000); // Send value 1000 times
+FLEXIO_MCULCD_StopTransfer(&flexioLcdDev);
+
+// Method 2:
+xfer.command = command2;
+xfer.mode = kFLEXIO_MCULCD_WriteSameValue;
+xfer.dataAddrOrSameValue = value;
+xfer.dataCount = 1000;
+FLEXIO_MCULCD_TransferBlocking(&flexioLcdDev, &xfer);
+
+////////////// Read data array. /////////////////////
+// Method 1:
+FLEXIO_MCULCD_StartTransfer(&flexioLcdDev);
+FLEXIO_MCULCD_WriteCommandBlocking(&flexioLcdDev, command3);
+FLEXIO_MCULCD_ReadDataArrayBlocking(&flexioLcdDev, dataToReceive, sizeof(dataToReceive));
+FLEXIO_MCULCD_StopTransfer(&flexioLcdDev);
+
+// Method 2:
+xfer.command = command3;
+xfer.mode = kFLEXIO_MCULCD_ReadArray;
+xfer.dataAddrOrSameValue = (uint32_t)dataToReceive;
+xfer.dataCount = sizeof(dataToReceive);
+FLEXIO_MCULCD_TransferBlocking(&flexioLcdDev, &xfer);
+
+@endcode
+
+## FlexIO LCD send/receive using interrupt transactional APIs {#FlexIO_LCDCaseTransactional}
+
+@code
+
+flexio_MCULCD_handle_t handle;
+volatile bool completeFlag = false;
+
+void flexioLcdCallback(FLEXIO_MCULCD_Type *base, flexio_MCULCD_handle_t *handle, status_t status, void *userData)
+{
+    if (kStatus_FLEXIO_MCULCD_Idle == status)
+    {
+        completeFlag = true;
+    }
+}
+
+void main(void)
+{
+    // Init the FlexIO LCD driver.
+    FLEXIO_MCULCD_Init(...);
+
+    // Create the transactional handle.
+    FLEXIO_MCULCD_TransferCreateHandle(&flexioLcdDev, &handle, flexioLcdCallback, NULL);
+
+    ////////////// Send command only. /////////////////////
+    xfer.command = command1;
+    xfer.dataCount = 0; // Only send command, no data transfer.
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferNonBlocking(&flexioLcdDev, &xfer);
+
+    // When only send method, it is not necessary to wait for the callback,
+    // because the command is sent using a blocking method internally. The
+    // command has been sent out after the function FLEXIO_MCULCD_TransferNonBlocking
+    // returns.
+    while (!completeFlag)
+    {
+    }
+
+    ////////////// Send data array. /////////////////////
+    xfer.command = command2;
+    xfer.mode = kFLEXIO_MCULCD_WriteArray;
+    xfer.dataAddrOrSameValue = (uint32_t)dataToSend;
+    xfer.dataCount = sizeof(dataToSend);
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferNonBlocking(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+
+    ////////////// Send the same data many times. //////////////
+    xfer.command = command2;
+    xfer.mode = kFLEXIO_MCULCD_WriteSameValue;
+    xfer.dataAddrOrSameValue = value;
+    xfer.dataCount = 1000;
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferNonBlocking(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+
+    ////////////// Read data array. /////////////////////
+    xfer.command = command3;
+    xfer.mode = kFLEXIO_MCULCD_ReadArray;
+    xfer.dataAddrOrSameValue = (uint32_t)dataToReceive;
+    xfer.dataCount = sizeof(dataToReceive);
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferNonBlocking(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+}
+
+@endcode
+*/
+
+/*!
+@if dox_section_flexio_edma_mculcd
+@defgroup flexio_edma_mculcd FlexIO eDMA MCU Interface LCD Driver
+@ingroup flexio_mculcd
+
+SDK provide eDMA transactional APIs to transfer data using eDMA, the eDMA method
+is similar with interrupt transactional method.
+
+@note eDMA transactional functions use multiple beats method for better performance,
+in contrast, the blocking functions and interupt functions use single beat method.
+The function @ref FLEXIO_MCULCD_ReadData, @ref FLEXIO_MCULCD_WriteData,
+@ref FLEXIO_MCULCD_GetStatusFlags, and @ref FLEXIO_MCULCD_ClearStatusFlags are
+only used for single beat case, so don't use these functions to work together with
+eDMA functions.
+
+# FlexIO eDMA MCU Interface LCD Driver
+
+## FLEXIO LCD send/receive using a DMA method
+
+~~~~~{.c}
+flexio_MCULCD_edma_handle_t handle;
+volatile bool completeFlag = false;
+edma_handle_t rxEdmaHandle;
+edma_handle_t txEdmaHandle;
+
+void flexioLcdCallback(FLEXIO_MCULCD_Type *base, flexio_MCULCD_edma_handle_t *handle, status_t status, void *userData)
+{
+    if (kStatus_FLEXIO_MCULCD_Idle == status)
+    {
+        completeFlag = true;
+    }
+}
+
+void main(void)
+{
+    // Create the edma Handle.
+    EDMA_CreateHandle(&rxEdmaHandle, DMA0, channel);
+    EDMA_CreateHandle(&txEdmaHandle, DMA0, channel);
+
+    // Configure the DMAMUX.
+    // ...
+    // rxEdmaHandle should use the last FlexIO RX shifters as DMA requst source.
+    // txEdmaHandle should use the first FlexIO TX shifters as DMA requst source.
+
+    // Init the FlexIO LCD driver.
+    FLEXIO_MCULCD_Init(...);
+
+    // Create the transactional handle.
+    FLEXIO_MCULCD_TransferCreateHandleEDMA(&flexioLcdDev, &handle, flexioLcdCallback, NULL, &txEdmaHandle, &rxEdmaHandle);
+
+    ////////////// Send data array. /////////////////////
+    xfer.command = command2;
+    xfer.mode = kFLEXIO_MCULCD_WriteArray;
+    xfer.dataAddrOrSameValue = (uint32_t)dataToSend;
+    xfer.dataCount = sizeof(dataToSend);
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferEDMA(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+
+    ////////////// Send the same data many times. //////////////
+    xfer.command = command2;
+    xfer.mode = kFLEXIO_MCULCD_WriteSameValue;
+    xfer.dataAddrOrSameValue = value;
+    xfer.dataCount = 1000;
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferEDMA(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+
+    ////////////// Read data array. /////////////////////
+    xfer.command = command3;
+    xfer.mode = kFLEXIO_MCULCD_ReadArray;
+    xfer.dataAddrOrSameValue = (uint32_t)dataToReceive;
+    xfer.dataCount = sizeof(dataToReceive);
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferEDMA(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+}
+~~~~~
+@endif
+*/
+
+/*!
+@if dox_section_flexio_dma_mculcd
+@defgroup flexio_dma_mculcd FlexIO DMA MCU Interface LCD Driver
+@ingroup flexio_mculcd
+@endif
+
+*/
+
+/*!
+@if dox_section_flexio_smartdma_mculcd
+@defgroup flexio_smartdma_mculcd FlexIO SMARTDMA MCU Interface LCD Driver
+@ingroup flexio_mculcd
+@endif
+
+*/

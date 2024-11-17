@@ -1,0 +1,166 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_FLEXIO_I2S_Idle = 2300
+ - #kStatus_FLEXIO_I2S_TxBusy = 2301
+ - #kStatus_FLEXIO_I2S_RxBusy = 2302
+ - #kStatus_FLEXIO_I2S_Error = 2303
+ - #kStatus_FLEXIO_I2S_QueueFull = 2304
+*/
+
+/*!
+@defgroup flexio_i2s FlexIO I2S Driver
+@ingroup flexio
+@details The MCUXpresso SDK provides a peripheral driver for I2S function using Flexible I/O
+         module of MCUXpresso SDK devices.
+
+
+
+The FlexIO I2S driver includes functional APIs and transactional APIs.
+
+Functional APIs are feature/property target low level APIs.
+
+Functional APIs can be used for FlexIO I2S initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the
+knowledge of the FlexIO I2S peripheral and how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. FlexIO I2S functional operation groups provide the
+functional APIs set.
+
+
+Transactional APIs are transaction target high level APIs.
+The transactional APIs can be used to enable the peripheral and also in the
+application if the code size and performance of transactional APIs can satisfy
+requirements. If the code size and performance are critical requirements,
+see the transactional API implementation and write custom code. All
+transactional APIs use the sai_handle_t as the first parameter.
+Initialize the handle by calling the FlexIO_I2S_TransferTxCreateHandle() or FlexIO_I2S_TransferRxCreateHandle() API.
+
+Transactional APIs support asynchronous transfer. This means that the functions
+FLEXIO_I2S_TransferSendNonBlocking() and FLEXIO_I2S_TransferReceiveNonBlocking() set up an interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_FLEXIO_I2S_TxIdle and kStatus_FLEXIO_I2S_RxIdle status.
+
+# Typical use case {#FlexIO_I2SCase}
+
+## FlexIO I2S send/receive using an interrupt method {#FlexIO_I2SCaseInterrupt}
+
+~~~~~{.c}
+    sai_handle_t g_saiTxHandle;
+    sai_config_t user_config;
+    sai_transfer_t sendXfer;
+    volatile bool txFinished;
+    volatile bool rxFinished;
+    const uint8_t sendData[] = [......];
+
+    void FLEXIO_I2S_UserCallback(sai_handle_t *handle, status_t status, void *userData)
+    {
+        userData = userData;
+
+        if (kStatus_FLEXIO_I2S_TxIdle == status)
+        {
+            txFinished = true;
+        }
+    }
+
+    void main(void)
+    {
+        //...
+
+        FLEXIO_I2S_TxGetDefaultConfig(&user_config);
+
+        FLEXIO_I2S_TxInit(FLEXIO I2S0, &user_config);
+        FLEXIO_I2S_TransferTxCreateHandle(FLEXIO I2S0, &g_saiHandle, FLEXIO_I2S_UserCallback, NULL);
+
+        //Configures the SAI format.
+        FLEXIO_I2S_TransferTxSetTransferFormat(FLEXIO I2S0, &g_saiHandle, mclkSource, mclk);
+
+        // Prepares to send.
+        sendXfer.data = sendData
+        sendXfer.dataSize = sizeof(sendData)/sizeof(sendData[0]);
+        txFinished = false;
+
+        // Sends out.
+        FLEXIO_I2S_TransferSendNonBlocking(FLEXIO I2S0, &g_saiHandle, &sendXfer);
+
+        // Waiting to send is finished.
+        while (!txFinished)
+        {
+        }
+
+        // ...
+    }
+~~~~~
+
+## FLEXIO_I2S send/receive using a DMA method {#FLEXIO_I2SCaseDma}
+
+~~~~~{.c}
+    sai_handle_t g_saiHandle;
+    dma_handle_t g_saiTxDmaHandle;
+    dma_handle_t g_saiRxDmaHandle;
+    sai_config_t user_config;
+    sai_transfer_t sendXfer;
+    volatile bool txFinished;
+    uint8_t sendData[] = ...;
+
+    void FLEXIO_I2S_UserCallback(sai_handle_t *handle, status_t status, void *userData)
+    {
+        userData = userData;
+
+        if (kStatus_FLEXIO_I2S_TxIdle == status)
+        {
+            txFinished = true;
+        }
+    }
+
+    void main(void)
+    {
+        //...
+
+        FLEXIO_I2S_TxGetDefaultConfig(&user_config);
+        FLEXIO_I2S_TxInit(FLEXIO I2S0, &user_config);
+
+        // Sets up the DMA.
+        DMAMUX_Init(DMAMUX0);
+        DMAMUX_SetSource(DMAMUX0, FLEXIO_I2S_TX_DMA_CHANNEL, FLEXIO_I2S_TX_DMA_REQUEST);
+        DMAMUX_EnableChannel(DMAMUX0, FLEXIO_I2S_TX_DMA_CHANNEL);
+
+        DMA_Init(DMA0);
+
+        /* Creates the DMA handle. */
+        DMA_TransferTxCreateHandle(&g_saiTxDmaHandle, DMA0, FLEXIO_I2S_TX_DMA_CHANNEL);
+
+        FLEXIO_I2S_TransferTxCreateHandleDMA(FLEXIO I2S0, &g_saiTxDmaHandle, FLEXIO_I2S_UserCallback, NULL);
+
+        // Prepares to send.
+        sendXfer.data = sendData
+        sendXfer.dataSize = sizeof(sendData)/sizeof(sendData[0]);
+        txFinished = false;
+
+        // Sends out.
+        FLEXIO_I2S_TransferSendDMA(&g_saiHandle, &sendXfer);
+
+        // Waiting to send is finished.
+        while (!txFinished)
+        {
+        }
+
+        // ...
+    }
+~~~~~
+
+*/
+
+/*!
+@if dox_section_flexio_edma_i2s
+@defgroup flexio_edma_i2s FlexIO eDMA I2S Driver
+@ingroup flexio_i2s
+@endif
+*/
+
+/*!
+@if dox_section_flexio_dma_i2s
+@defgroup flexio_dma_i2s FlexIO DMA I2S Driver
+@ingroup flexio_i2s
+@endif
+*/
+

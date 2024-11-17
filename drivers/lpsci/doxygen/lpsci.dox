@@ -1,0 +1,95 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_LPSCI_TxBusy = 1200
+ - #kStatus_LPSCI_RxBusy = 1201
+ - #kStatus_LPSCI_TxIdle = 1202
+ - #kStatus_LPSCI_RxIdle = 1203
+ - #kStatus_LPSCI_FlagCannotClearManually = 1204
+ - #kStatus_LPSCI_BaudrateNotSupport = 1205
+ - #kStatus_LPSCI_Error = 1206
+ - #kStatus_LPSCI_RxRingBufferOverrun = 1207
+ - #kStatus_LPSCI_RxHardwareOverrun = 1208
+ - #kStatus_LPSCI_NoiseError = 1209
+ - #kStatus_LPSCI_FramingError = 1210
+ - #kStatus_LPSCI_ParityError = 1211
+ - #kStatus_LPSCI_IdleLineDetected = 1212 
+*/
+
+/*!
+@defgroup lpsci LPSCI: Universal Asynchronous Receiver/Transmitter
+*/
+
+/*!
+@defgroup lpsci_driver LPSCI Driver
+@ingroup lpsci
+@details The MCUXpresso SDK provides a peripheral driver for the Universal Asynchronous Receiver/Transmitter (LPSCI)
+         module of MCUXpresso SDK devices.
+
+The LPSCI driver can be split into 2 parts: functional APIs and transactional APIs.
+
+Functional APIs are feature/property target low level APIs. Functional APIs can be used for the LPSCI initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires knowledge of the LPSCI peripheral and how to organize
+functional APIs to meet the application requirements. All functional APIs use the peripheral base address as the first parameter. The LPSCI
+functional operation groups provide the functional APIs set.
+
+The transactional APIs are transaction target high level APIs. Transactional APIs can be used to enable the peripheral quickly and also
+in the user's application if the code size and performance of transactional APIs can satisfy the user's requirements. If there are special requirements
+for the code size and performance, see the transactional API implementation and write custom  code. All transactional APIs use
+the lpsci_handle_t as the second parameter. Initialize the handle by calling the LPSCI_TransferCreateHandle() API.
+
+Transactional APIs support queue feature for both transmit/receive. Whenever the user calls the LPSCI_TransferSendNonBlocking() or LPSCI_TransferReceiveNonBlocking(),  the transfer
+structure is queued into the internally maintained software queue. The driver  automatically continues the transmit/receive if the queue is not empty.
+When a transfer is finished, the callback is called to inform the user about the completion.
+
+The LPSCI transactional APIs support the background receive. Provide the ringbuffer address and size while calling the LPSCI_TransferCreateHandle() API.
+The driver automatically starts receiving the data from the receive buffer into the ringbuffer. When the user makes subsequent calls to the LPSCI_ReceiveDataIRQ(),
+the driver provides the received data in the ringbuffer for user buffer directly and queues the left buffer into the receive queue.
+
+# Function groups {#LPSCIFuncGrps}
+
+## LPSCI functional Operation {#LPSCIFunctional}
+
+This function group implements the LPSCI functional API. Functional APIs are feature-oriented.
+
+## LPSCI transactional Operation {#LPSCItransactional}
+
+This function group implements the LPSCI transactional API.
+
+## LPSCI DMA transactional Operation {#LPSCItransactional}
+
+This function group implements the LPSCI DMA transactional API.
+
+# Typical use case {#LPSCITypUC}
+
+## LPSCI Operation {#LPSCIOperation}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpsci
+## LPSCI Send/Receive using an interrupt method {#LPSCIModeInt}
+
+## LPSCI Receive using the ringbuffer feature {#LPSCIUseRingBuf}
+
+## LPSCI Send/Receive using the DMA method {#LPSCIModeDMA}
+
+*/
+
+/*!
+@if dox_section_lpsci_dma_driver
+@defgroup lpsci_dma_driver LPSCI DMA Driver
+@ingroup lpsci
+@endif
+*/
+
+
+/*!
+@if dox_section_lpsci_freertos_driver
+@defgroup lpsci_freertos_driver LPSCI FreeRTOS Driver
+@ingroup lpsci
+@endif
+*/
+
+/*!
+@if dox_section_lpsci_cmsis_driver
+@defgroup lpsci_cmsis_driver LPSCI CMSIS Driver
+@ingroup lpsci
+@endif
+*/

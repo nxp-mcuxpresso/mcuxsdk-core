@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sessionSetup><partner><name>Partner0</name><workspace>$WS_PATH$</workspace><project>$PROJ_PATH$</project><config>Debug</config><numberOfCores>1</numberOfCores></partner><partner><name>Partner1</name><workspace>$PROJ_DIR$/../../cm0plus/iar/dev_safety_iec60730b.eww</workspace><project>dev_safety_iec60730b</project><config>debug</config><numberOfCores>1</numberOfCores><attachToRunningTarget>true</attachToRunningTarget></partner></sessionSetup>

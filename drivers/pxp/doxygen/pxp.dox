@@ -1,0 +1,32 @@
+/*!
+@defgroup pxp_driver PXP: Pixel Pipeline
+@details The MCUXpresso SDK provides a driver for the Pixel Pipeline (PXP)
+
+The PXP is used to process graphics buffers or composite video and graphics data
+before sending to an LCD display or TV encoder. The PXP driver only provides
+functional APIs. It does not maintain software level state, so that the APIs
+could be involved directly to any upper layer graphics framework easily.\n
+
+To use the PXP driver, call @ref PXP_Init first to enable and initialize the
+peripheral. Generally, call the PXP driver APIs the configure input buffer,
+output buffer, and other setting such as flip, rotate, then call @ref PXP_Start,
+thus the PXP starts the processing. When finished, the flag @ref kPXP_CompleteFlag
+asserts. PXP also supports operation queuing, it means that a new operation could
+be submited to PXP while the current PXP operation is running. When current operation
+finished, the new operation configurations are loaded to PXP register and new
+processing starts.
+
+# Typical use case {#PXPCase}
+
+## PXP normal operation {#PXPNorm}
+
+This example shows how to perform vertical flip to process surface and save to output buffer.
+The input and output buffer pixel format are RGB888.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pxp
+## PXP operation queue {#PXPQueue}
+
+This example shows how to perform vertical flip to process surface using operation
+queue. The input and output buffer pixel format are RGB888.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pxp*/

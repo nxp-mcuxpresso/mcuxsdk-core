@@ -1,0 +1,37 @@
+/*!
+
+@defgroup flexbus FlexBus: External Bus Interface Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Crossbar External Bus Interface (FlexBus) block of MCUXpresso SDK devices.
+
+
+A multifunction external bus interface is provided
+on the device with a basic functionality to interface to slave-only devices. It can be
+directly connected to the following asynchronous or synchronous devices with little or no
+additional circuitry.
+<UL>
+    <LI>External ROMs
+    <LI>Flash memories
+    <LI>Programmable logic devices
+    <LI>Other simple target (slave) devices
+	</UL>
+For asynchronous devices, a simple chip-select based interface can be used.
+The FlexBus interface has up to six general purpose chip-selects, FB_CS[5:0]. The 
+number of chip selects available depends on the device and its pin configuration.
+
+# FlexBus functional operation {#FlexbusFunctionalOperation}
+
+To configure the FlexBus driver, use on of the two ways to configure the flexbus_config_t structure.
+     1. Using the FLEXBUS_GetDefaultConfig() function.
+     2. Set parameters in the flexbus_config_t structure.
+
+To initialize and configure the FlexBus driver, call the FLEXBUS_Init() function and pass a pointer to
+ the flexbus_config_t structure.
+
+To de-initialize the FlexBus driver, call the FLEXBUS_Deinit() function.
+
+# Typical use case and example {#FlexbusExample}
+
+This example shows how to write/read to external memory (MRAM) by using the FlexBus module.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/flexbus
+*/

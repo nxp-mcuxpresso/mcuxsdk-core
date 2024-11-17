@@ -1,0 +1,51 @@
+/*!
+@defgroup dcdc DCDC: DCDC Converter
+@details The MCUXpresso SDK provides a peripheral driver for the DCDC Converter (DCDC) module of MCUXpresso SDK devices.
+@{
+
+The DCDC converter module is a switching mode DC-DC converter supporting Buck, Boost, and Bypass mode. It can produce multiple switching outputs for SoC peripherals and external devices with high conversion efficiency. The converter can be operated in continuous or pulsed mode.
+
+As a module to provide the power for hardware system, the DCDC would start working when the system is powered up before the software takes over the SoC. Some important configurations, like selecting BUCK/BOOST/BYPASS mode, is done in the board settings. Before the software can access the DCDC's registers, DCDC are already working normally with the default settings.
+
+However, if the application needs to improve the DCDC's performance or change the default settings, DCDC driver would help. The DCDC's register can not be accessed by software before its initialization (open the clock gate). Then user can configure the hardware according to the application guide from RM.
+
+# Function groups {#DCDCFunGrps}
+
+## Initialization and deinitialization {#DCDCInit}
+
+This function group is to enable/disable the operations to DCDC module through the driver. 
+
+## Status {#DCDCStatus}
+
+Provides functions to get and clear the DCDC status.
+
+## Interrupts {#DCDCInterrupts}
+
+Provides functions to enable/disable DCDC interrupts.
+
+## Misc control {#DCDCMiscCtrl}
+
+Provides functions to set the DCDC's miscellaneous control.
+
+# Application guideline {#DCDCAppGuide}
+
+## Continuous mode {#DCDCModeContinous}
+
+As guideline from RM, to have better efficiency and ripple. The following call is recommended:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dcdc
+In boost mode, POSLIMIT_BOOST_IN is set to small value by default. To limit startup voltage, set it to 0x12 after startup, to provide high current to output, especially when battery voltage is low. The following call could be used.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dcdc
+## Target voltage adjustment {#DCDCTargVolAdj}
+
+To adjust target voltage of VDD1P8 and VDD1P5. The following code could be used:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dcdc
+## Pulsed mode {#DCDCModePulse}
+
+Before entering pulsed mode, the target voltage should be locked. Also, there are some recommended setting.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dcdc
+*/
+/*! @} */

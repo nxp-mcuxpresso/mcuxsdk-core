@@ -1,0 +1,39 @@
+/*!
+@defgroup xbar XBAR: Inter-Peripheral Crossbar Switch
+@details The MCUXpresso SDK provides a peripheral driver for the Inter-Peripheral Crossbar Switch (XBAR)
+block of MCUXpresso SDK devices.
+@{
+
+The XBAR peripheral driver configures the XBAR (Inter-Peripheral Crossbar Switch) and handles initialization and
+configuration of the XBAR module.
+
+XBAR driver has two parts:
+
+- Signal connection - This part interconnects input and output signals.
+- Active edge feature - Some of the outputs provides active edge detection. If an active edge occurs,
+ an interrupt or a DMA request can be called. APIs handle user callbacks for the interrupts.
+ The driver also includes API for clearing and reading status bit.
+
+# Function groups {#XbarFunctionalGroups}
+
+## XBAR Initialization {#XBARInit}
+
+To initialize the XBAR driver, a state structure has to be passed into the initialization function.
+This block of memory keeps pointers to user's callback functions and parameters to these
+functions. The XBAR module is initialized by calling the XBAR_Init() function.
+
+## Call diagram {#XBARCallDiagram}
+
+1. Call the "XBAR_Init()" function to initialize the XBAR module.
+2. Optionally, call the "XBAR_SetSignalsConnection()" function to Set connection between the selected XBAR_IN[*] input and the XBAR_OUT[*] output signal. It connects the XBAR input to the selected XBAR output.
+A configuration structure of the "xbar_input_signal_t" type and "xbar_output_signal_t" type is required.
+3. Call the "XBAR_SetOutputSignalConfig" function to set the active edge features, such interrupts or DMA requests.
+A configuration structure of the "xbar_control_config_t" type is required to point to structure that keeps configuration of control register.
+4. Finally, the XBAR works properly.
+
+
+# Typical use case {#XbarExample}
+
+
+*/
+/*! @} */

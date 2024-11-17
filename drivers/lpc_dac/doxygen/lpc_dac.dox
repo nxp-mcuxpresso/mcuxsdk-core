@@ -1,0 +1,15 @@
+/*!
+@defgroup lpc_dac DAC: 10-bit Digital To Analog Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 10-bit digital to analog converter (DAC)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#LPCDACTpyUC}
+
+## Polling Configuration {#LPCDACPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac
+## Interrupt Configuration {#DACIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac
+*/
+

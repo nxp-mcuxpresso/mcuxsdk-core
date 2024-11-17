@@ -1,0 +1,7 @@
+/*!
+@defgroup jn_rng RNG: Random Number generator
+@details The MCUXpresso SDK provides a peripheral driver for the Random Number generator
+         module of MCUXpresso SDK devices.
+
+*/
+

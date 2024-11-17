@@ -1,0 +1,37 @@
+/*!
+@defgroup cache_armv7_m7 CACHE: ARMV7-M7 CACHE Memory Controller
+@details The MCUXpresso SDK provides a peripheral driver for the CACHE Controller of 
+         MCUXpresso SDK devices.
+
+The CACHE driver is created to help the user more easily operate the cache memory. The APIs for basic operations are including the following three levels:
+
+1L. The L1 cache driver API. This level provides the level 1 caches controller drivers. The L1 caches are mainly integrated in the Core memory system, Cortex-M7 L1 caches, etc. 
+For our Cortex-M4 series platforms, the L1 cache is the local memory controller (LMEM) which is not integrated in the Cortex-M4 processer memory system.
+
+2L. The L2 cache driver API. This level provides the level 2 cache controller drivers. The L2 cache
+could be integrated in the CORE memory system or an external L2 cache memory, PL310, etc.
+
+3L. The combined cache driver API.
+This level provides many APIs for combined L1 and L2 cache maintain operations. This is
+provided for MCUXpresso SDK drivers (DMA, ENET, USDHC, etc) which should do the cache maintenance in their 
+transactional APIs.
+
+# Function groups {#CACHEFuncGrps}
+
+## L1 CACHE Operation {#L1CACHEMaintainOperation}
+The L1 CACHE has both code cache and data cache. This function group provides independent two groups API for both code cache and data cache.
+There are Enable/Disable APIs for code cache and data cache control and cache maintenance operations as Invalidate/Clean/CleanInvalidate by all and by address range.
+
+## L2 CACHE Operation {#L2CACHEMaintainOperation}
+The L2 CACHE does not divide the cache to data and code. Instead, this function group provides
+one group cache maintenance operations as Enable/Disable/Invalidate/Clean/CleanInvalidate
+by all and by address range. Except the maintenance operation APIs, the L2 CACHE has it's 
+initialization/configure API. The user can use the default configure parameter by calling 
+L2CACHE_GetDefaultConfig() or changing the parameters as they wish. Then, call L2CACHE_Init
+to do the L2 CACHE initialization. After initialization, the L2 cache can then be enabled.
+
+Note: For the core external l2 Cache, the SoC usually has the control bit to select the SRAM 
+to use as L2 Cache or normal SRAM. Make sure this selection is right when you use the 
+L2 CACHE feature.
+
+*/

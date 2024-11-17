@@ -1,0 +1,19 @@
+/*!
+@defgroup lpc_iocon IOCON: I/O pin configuration
+@details The MCUXpresso SDK provides Peripheral driver for the I/O pin configuration (IOCON) module of
+         MCUXpresso SDK devices.
+
+# Function groups {#IOCONFuncGrps}
+
+## Pin mux set {#IOCONPinMuxSet}
+The function IOCONPinMuxSet() set pinmux for single pin according to selected configuration.
+
+
+## Pin mux set {#IOCON_SetPinMuxing}
+The function IOCON_SetPinMuxing() set pinmux for group of pins according to selected configuration.
+
+
+# Typical use case {#IOCONTpyUC}
+Example use of IOCON API to selection of GPIO mode.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iocon*/
+

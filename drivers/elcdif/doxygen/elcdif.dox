@@ -1,0 +1,23 @@
+/*!
+@defgroup elcdif eLCDIF: Enhanced LCD Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Enhanced LCD Interface(eLCDIF)
+
+The Enhanced LCD Interface supports MPU mode, VSYNC mode, RGB mode (or DOTCLK mode),
+and DVI mode. The current eLCDIF driver only supports RGB mode.\n
+
+# Typical use case{#LCDIFTypicalUseCase}
+
+## Frame buffer update {#LCDIFFb}
+
+The function @ref ELCDIF_SetNextBufferAddr sets the next frame to show to eLCDIF,
+the eLCDIF loads the new frame and sets the interrupt @ref kELCDIF_CurFrameDone.
+If no new frame is set, the old one is displayed.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/elcdif
+## Alpha surface {#LCDIFAs}
+
+The alpha surface can be enabled to add an extra overlay on the normal display
+buffer. In this example, the alpha surface is enabled, and the alpha value is
+updated after every frame loaded to eLCDIF.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/elcdif*/

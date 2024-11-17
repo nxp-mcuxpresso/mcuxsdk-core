@@ -1,0 +1,114 @@
+/*!
+@defgroup dpu Display Processing Unit (DPU)
+@details The SDK provides a peripheral driver for the DPU.
+
+The DPU module consists of many processing units, such as FetchDecode, LayerBlend,
+and so on. The SDK DPU driver provides separate functions for these processing
+units.
+
+For a processing unit, there are three kinds of functions:
+
+1. The initialize functions. These functions are named as DPU_InitXxx. For example,
+@ref DPU_InitStore. These functions should only be used before display started to
+initialize the processing units.
+
+2. The configure functions. These functions are named as DPU_XxxSetYyyConfig. For example, @ref DPU_SetStoreDstBufferConfig. 
+These functions can be used before the
+display starts to setup configuration. Additionally, they can be used after the display
+starts to make some runtime changes.
+
+3. The function to get default configuration.
+
+In the DPU driver, the pipeline is also treated as a processing unit. For example,
+the unit kDPU_PipelineExtDst0 means the pipeline with unit ExtDst0 as its endpoint.
+Accordingly, there are functions to initialize the pipeline and configure the
+pipeline.
+
+# Program model {#DPUProg}
+
+The DPU module provides the shadow registers. The software can write to shadow
+registers instead of to the active configuration. When a new configuration is
+completed, the software can trigger the shadowed configuration to be the active
+configuration.\n
+
+The DPU driver uses this feature. The shadow load function is enabled during
+the unit initialization. After all configurations in a pipeline are finished,
+the function @ref DPU_TriggerPipelineShadowLoad can be called to activate
+the shadowed configurations. After this, the upper layer should monitor the interrupt
+status to make sure the shadow load is finished before a new configuration.\n
+
+The program workflow is like this:
+
+@image html dpu_display_workflow.png
+@image latex dpu_display_workflow.png "DPU display workflow"
+
+For the blit engine, the driver supports two kinds of methods.
+
+Method 1: Configure and start operation when a previous process finishes. The software
+workflow is:
+   1. Configure the blit engine units.
+   2. Trigger the blit engine pipeline shadow load using @ref DPU_TriggerPipelineShadowLoad.
+   3. Start the process using @ref DPU_StartStore.
+   4. Monitor the DPU store frame complete interrupt.
+   5. Repeat from step 1 for a new process.
+
+The workflow flow is:
+
+@image html blit1.png
+@image latex blit1.png "DPU blit engine workflow 1"
+
+Method 2: Set the new configuration when the previous process is still on-going. In this
+case, the software cannot use the store frame complete interrupt to make sure all
+processes are finished because the software cannot distinguish which frame completion
+asserts this interrupts. The function @ref DPU_TriggerPipelineCompleteInterrupt
+should be used in this case. The workflow is:
+   1. Configure the blit engine units.
+   2. Trigger the blit engine pipeline shadow load using @ref DPU_TriggerPipelineShadowLoad.
+   3. Start process using @ref DPU_StartStore.
+   4. Monitor the DPU pipeline shadow load interrupt.
+   5. If there is new process, then repeat from step 1.
+   6. If there is not a new process or the software wants to make sure all processes are finished,
+      call @ref DPU_TriggerPipelineCompleteInterrupt and monitor the pipeline sequence
+      complete interrupt.
+
+The workflow flow is:
+
+@image html blit2.png
+@image latex blit2.png "DPU blit engine workflow 2"
+
+# Path configuration {#DPUPath}
+
+The DPU consists of many processing units. The pipeline path should configured
+carefully for special use cases.\n
+
+The blit engine diagram is:
+
+@image html dpu_blit_engine_diagram.png
+@image latex dpu_blit_engine_diagram.png "Blit Engine Block Diagram"
+
+The display controller block diagram is:
+
+@image html dpu_display_diagram.png
+@image latex dpu_display_diagram.png "Display Controller Block Diagram"
+
+Processing units have their primary input (named src or prim) connected to the top side
+and their secondary input port (named sec), if present, connected to the left or right
+side in the diagram. The ROP#9 unit has its secondary input right and tertiary
+(named tert) left side connected.
+
+@note An active unit must at least have its primary port connected, while secondary
+and tertiary ports are optional
+
+@par
+
+@note When both horizontal and vertical scaling is active, then the sequence
+of both units in the Pixelbus configuration should be\n
+     -> HScaler -> VScaler ->    when down-scaling horizontally\n
+     -> VScaler -> HScaler ->    when up-scaling horizontally
+
+The default path configuration after reset is:
+
+@image html reset_path.png
+@image latex dpu_display_diagram.png "Default Path Configuration"
+
+*/

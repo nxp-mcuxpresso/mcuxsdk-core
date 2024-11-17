@@ -1,0 +1,13 @@
+/*!
+@defgroup bbnsm Battery-Backed Non-Secure Module
+@ingroup bbnsm
+@details The MCUXpresso SDK provides a peripheral driver for the Battery-Backed Non-Secure Module (BBNSM) module.@n
+ @n
+ BBNSM (Battery-Backed Non-Secure Module) serves as non-volatile logic and storage for Sentinel. BBNSM implements the
+ following features:
+ - Non-volatile storage and logic
+ - General-purpose register
+ - Real-time counter (RTC)
+ - On/Off Control
+ @n
+*/

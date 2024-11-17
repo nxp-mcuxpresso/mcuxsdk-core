@@ -1,0 +1,11 @@
+/*!
+@defgroup gdet Glitch Detect
+@ingroup gdet
+@details The MCUXpresso SDK provides a peripheral driver for the Glitch Detect (GDET) module.@n
+ @n
+GDET is an on-chip sensor that enables protection of the chip from glitch attacks. The Boot ROM configures and enables the
+GDET during device initialization.
+Glitch detection is based on the expected core voltage (CORE_VDD), so the GDET module must be reconfigured if the core
+voltage is changed
+ @n
+*/

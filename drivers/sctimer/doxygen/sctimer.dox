@@ -1,0 +1,77 @@
+/*!
+@defgroup sctimer SCTimer: SCTimer/PWM (SCT)
+@details The MCUXpresso SDK provides a driver for the SCTimer Module (SCT) of MCUXpresso SDK devices.
+
+# Function groups {#SCTimerFunc}
+The SCTimer driver supports the generation of PWM signals. The driver also supports
+enabling events in various states of the SCTimer and the actions that will be triggered when an event
+occurs.
+
+## Initialization and deinitialization {#SCTimerInit}
+The function SCTIMER_Init() initializes the SCTimer with specified configurations. The function
+SCTIMER_GetDefaultConfig() gets the default configurations.
+
+The function SCTIMER_Deinit() halts the SCTimer counter and turns off the module clock.
+
+## PWM Operations {#SCTimerPwmOperation}
+The function SCTIMER_SetupPwm() sets up SCTimer channels for PWM output. The function
+can set up the PWM signal properties duty cycle and level-mode (active low or high) to use.
+However, the same PWM period and PWM mode (edge or center-aligned) is applied to all channels
+requesting the PWM output. The signal duty cycle is provided as a percentage of the PWM period.
+Its value should be between 1 and 100.
+
+The function SCTIMER_UpdatePwmDutycycle() updates the PWM signal duty cycle
+of a particular SCTimer channel.
+
+## Status {#SCTimerStatus}
+Provides functions to get and clear the SCTimer status.
+
+## Interrupt {#SCTimerInterrupt}
+Provides functions to enable/disable SCTimer interrupts and get current enabled interrupts.
+
+# SCTimer State machine and operations {#SCTimerStateMachine}
+The SCTimer has 10 states and each state can have a set of events enabled that can trigger a user
+specified action when the event occurs.
+
+## SCTimer event operations {#SCTimerEventOperation}
+The user can create an event and enable it in the current state using the functions SCTIMER_CreateAndScheduleEvent()
+and SCTIMER_ScheduleEvent(). SCTIMER_CreateAndScheduleEvent() creates a new event based on the users
+preference and enables it in the current state. SCTIMER_ScheduleEvent() enables an event created earlier in the
+current state.
+
+## SCTimer state operations {#SCTimerStateOperation}
+The user can get the current state number by calling SCTIMER_GetCurrentState(), they can use this state number to
+set state transitions when a particular event is triggered.
+
+Once the user has created and enabled events for the current state they can go to the next state by calling the function
+SCTIMER_IncreaseState(). The user can then start creating events to be enabled in this new state.
+
+## SCTimer action operations {#SCTimerActionOperation}
+There are a set of functions that decide what action should be taken when an event is triggered.
+SCTIMER_SetupCaptureAction() sets up which counter to capture and which capture register to read  on event trigger.
+SCTIMER_SetupNextStateAction() sets up which state the SCTimer state machine should transition to on event trigger.
+SCTIMER_SetupOutputSetAction() sets up which pin to set on event trigger.
+SCTIMER_SetupOutputClearAction() sets up which pin to clear on event trigger.
+SCTIMER_SetupOutputToggleAction() sets up which pin to toggle on event trigger.
+SCTIMER_SetupCounterLimitAction() sets up which counter will be limited on event trigger.
+SCTIMER_SetupCounterStopAction() sets up which counter will be stopped on event trigger.
+SCTIMER_SetupCounterStartAction() sets up which counter will be started on event trigger.
+SCTIMER_SetupCounterHaltAction() sets up which counter will be halted on event trigger.
+SCTIMER_SetupDmaTriggerAction() sets up which DMA request will be activated on event trigger.
+
+# 16-bit counter mode {#SCTimer16bit}
+The SCTimer is configurable to run as two 16-bit counters via the enableCounterUnify flag that is available in the configuration
+structure passed in to the SCTIMER_Init() function.
+
+When operating in 16-bit mode, it is important the user specify the appropriate counter to use when working with the functions:
+SCTIMER_StartTimer(), SCTIMER_StopTimer(), SCTIMER_CreateAndScheduleEvent(), SCTIMER_SetupCaptureAction(),
+SCTIMER_SetupCounterLimitAction(), SCTIMER_SetupCounterStopAction(), SCTIMER_SetupCounterStartAction(), and 
+SCTIMER_SetupCounterHaltAction().
+
+
+# Typical use case {#SCTimerCase}
+
+## PWM output {#SCTimerPWMOutput}
+Output a PWM signal on 2 SCTimer channels with different duty cycles.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sctimer
+*/

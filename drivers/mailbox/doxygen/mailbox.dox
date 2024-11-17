@@ -1,0 +1,21 @@
+/*!
+@defgroup mailbox Mailbox
+@details The MCUXpresso SDK provides a peripheral driver for the Mailbox module of MCUXpresso SDK devices.
+
+The mailbox driver API provide:
+    - init/deinit: MAILBOX_Init()/MAILBOX_Deinit()
+    - read/write from/to mailbox register: MAILBOX_SetValue()/MAILBOX_GetValue()
+    - set/clear mailbox register bits: MAILBOX_SetValueBits()/MAILBOX_ClearValueBits()
+    - get/set mutex: MAILBOX_GetMutex()/MAILBOX_SetMutex()
+
+# Typical use case {#MAILBOXTpyUC}
+## Example of code on primary core, which cause interrupt on secondary core by writing to mailbox register.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mailbox
+## Example of code on secondary core to handle interrupt from primary core.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mailbox
+## Example of code to get/set mutex.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mailbox*/
+

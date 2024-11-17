@@ -1,0 +1,22 @@
+/*!
+@defgroup pint_driver PINT: Pin Interrupt and Pattern Match Driver
+
+@details The MCUXpresso SDK provides a driver for the Pin Interrupt and Pattern match (PINT).@n
+ @n
+It can configure one or more pins to generate a pin interrupt when the pin or pattern match conditions are met.
+The pins do not have to be configured as gpio pins however they must be connected to PINT via INPUTMUX. Only the pin interrupt or pattern match function can be active for interrupt generation. If the pin interrupt function is enabled then the pattern match function can be used for wakeup via RXEV.
+ @n
+
+
+ # Pin Interrupt and Pattern match Driver operation {#PINTInit}
+
+PINT_PinInterruptConfig() function configures the pins for pin interrupt.
+
+PINT_PatternMatchConfig() function configures the pins for pattern match.
+
+## Pin Interrupt use case {#PINTPinInterruptTpyUC}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pint
+## Pattern match use case {#PINTPatternMatchUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pint*/
+

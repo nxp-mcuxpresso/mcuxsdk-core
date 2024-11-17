@@ -1,0 +1,29 @@
+/*!
+@defgroup aes AES: AES encryption decryption driver
+@details The MCUXpresso SDK provides a peripheral driver for the AES module in MCUXpresso SDK devices.
+
+The driver provides blocking synchronous APIs.
+The AES operations are complete (and results are made availabe for further usage) when a function returns.
+When called, these functions do not return until an AES operation is complete.
+These functions use main CPU for simple polling loops to determine operation complete or error status, as well as plaintext or ciphertext data movements.
+The driver functions are not re-entrant.
+These functions provide typical interface to upper layer or application software.
+
+# AES Driver Initialization and Configuration {#AESInit}
+
+Clock to the AES module has to be enabled before using the driver API.
+The function AES_SetKey() has to be used to store encryption key into device registers prior to using other API.
+
+# Comments about API usage in RTOS {#AESRtos}
+
+AES operations provided by this driver are not re-entrant. Because of this, the application software should ensure
+the AES module operation is not requested from different tasks or interrupt service routines while an operation is in progress.
+
+# AES Driver Examples {#AESEx}
+
+Encrypt plaintext and decrypt it back by AES engine
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/aes
+Encrypts AES using CTR block mode.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/aes
+Generation of GCM tag only
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/aes*/

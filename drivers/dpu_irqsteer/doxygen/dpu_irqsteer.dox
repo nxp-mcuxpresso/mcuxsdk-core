@@ -1,0 +1,6 @@
+/*!
+@defgroup dpu_irqsteer DPU IRQSTEER: Interrupt Request Steering Driver
+@details The MCUXpresso SDK provides a peripheral driver for the DPU Interrupt Request Steering (IRQSTEER)
+         module of MCUXpresso SDK devices.
+         The DPU IRQSTEER combines and routes the interrupts in DPU to other subsustems.
+*/

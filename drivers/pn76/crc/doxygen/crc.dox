@@ -1,0 +1,9 @@
+/*!
+@defgroup crc CRC: Cyclic Redundancy Check Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Cyclic Redundancy Check (CRC) module of MCUXpresso SDK devices.@n
+ @n
+The cyclic redundancy check (CRC) module generates 16/32-bit CRC code for error detection.
+The CRC module also provides a programmable polynomial, seed, and other parameters required to implement a 16-bit or 32-bit CRC standard.
+ @n
+
+*/

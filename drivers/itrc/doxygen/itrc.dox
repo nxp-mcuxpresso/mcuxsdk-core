@@ -1,0 +1,12 @@
+/*!
+@defgroup itrc Intrusion and Tamper Response Controller
+@ingroup itrc
+@details The MCUXpresso SDK provides a peripheral driver for the Intrusion and Tamper Response Controller (ITRC) module.@n
+ @n
+Intrusion and Tamper Response Controller (ITRC) provides mechanism to configure the response action for an intrusion event
+detected by an on chip security sensors. Intrusion Response is the action a device performs in order to prevent misuse of the
+device or disclosure of critical assets (cryptographic keys, personal data) that are generated or stored within the device. The
+response mechanism is typically triggered by either a signal from an on-chip sensor designed to detect that the device is in a
+threat condition or by an explicit command provided by the software.
+ @n
+*/

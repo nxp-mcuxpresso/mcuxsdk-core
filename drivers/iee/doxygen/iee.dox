@@ -1,0 +1,16 @@
+/*!
+@defgroup iee IEE: Inline Encryption Engine
+@details The MCUXpresso SDK provides a peripheral driver for the Inline Encryption Engine (IEE) module.@n
+ @n
+The IEE module provides a means to perform inline encryption and decryption of
+information transferred over external memory interfaces. On this device, the IEE
+performs encryption and decryption of information transferred over the MMDC,
+SDRAMC, or FlexSPI1 to external DRAM device. It also performs decryption of
+information from external serial flash device accessed through FlexSPI1.
+ @n
+
+# IEE Driver Initialization and Configuration {#IEEInit}
+
+# IEE Driver Examples {#IEEEx}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iee

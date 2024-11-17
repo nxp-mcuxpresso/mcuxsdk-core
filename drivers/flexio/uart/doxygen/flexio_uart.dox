@@ -1,0 +1,383 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_FLEXIO_UART_TxBusy = 700
+ - #kStatus_FLEXIO_UART_RxBusy = 701
+ - #kStatus_FLEXIO_UART_TxIdle = 702
+ - #kStatus_FLEXIO_UART_RxIdle = 703
+ - #kStatus_FLEXIO_UART_ERROR = 704
+ - #kStatus_FLEXIO_UART_RxRingBufferOverrun = 705
+ - #kStatus_FLEXIO_UART_RxHardwareOverrun = 706
+*/
+
+/*!
+@defgroup flexio_uart FlexIO UART Driver
+@ingroup flexio
+@details The MCUXpresso SDK provides a peripheral driver for the Universal Asynchronous Receiver/Transmitter (UART) function using the Flexible I/O.
+
+
+
+FlexIO UART driver includes functional APIs and transactional APIs.
+Functional APIs target low-level APIs.
+Functional APIs can be used for the FlexIO UART initialization/configuration/operation for optimization/customization purpose.
+Using the functional APIs requires the knowledge of the FlexIO UART peripheral and how to organize functional APIs to meet the application requirements.
+All functional API use the FLEXIO_UART_Type * as the first parameter. FlexIO UART functional operation groups provide the functional APIs set.
+
+Transactional APIs target high-level APIs.
+Transactional APIs can be used to enable the peripheral and also in the application if the code size and performance of transactional APIs satisfy requirements.
+If the code size and performance are critical requirements, see the transactional API implementation and write custom code. All
+transactional APIs use the flexio_uart_handle_t as the second parameter. Initialize the handle by calling the FLEXIO_UART_TransferCreateHandle() API.
+
+Transactional APIs support asynchronous transfer. This means that the functions FLEXIO_UART_SendNonBlocking() and FLEXIO_UART_ReceiveNonBlocking() set up an interrupt
+for data transfer.
+When the transfer is complete, the upper layer is notified through a callback function with the kStatus_FLEXIO_UART_TxIdle and kStatus_FLEXIO_UART_RxIdle status.
+
+Transactional receive APIs support the ring buffer.
+Prepare the memory for the ring buffer and pass in the start address and size through calling the FLEXIO_UART_InstallRingBuffer().
+When the ring buffer is enabled, the received data is saved to the ring buffer in the background.
+The function FLEXIO_UART_ReceiveNonBlocking() first gets data the from the ring buffer.
+If ring buffer does not have enough data, the function returns the data to the ring buffer and saves the received data to user memory.
+When all data is received, the upper layer is informed through a callback with the statuskStatus_FLEXIO_UART_RxIdle status.
+
+If the receive ring buffer is full, the upper layer is informed through a callback with status kStatus_FLEXIO_UART_RxRingBufferOverrun.
+In the callback function, the upper layer reads data from the ring buffer. If not, the oldest data is overwritten by the new data.
+
+The ring buffer size is specified when calling the FLEXIO_UART_InstallRingBuffer.
+Note that one byte is reserved for the ring buffer maintenance. Create
+a handle as follows.
+
+~~~~~{.c}
+    FLEXIO_UART_InstallRingBuffer(&uartDev, &handle, &ringBuffer, 32);
+~~~~~
+
+In this example, the buffer size is 32. However, only 31 bytes are used for saving data.
+
+# Typical use case {#FLEXIO_UARTCase}
+
+## FlexIO UART send/receive using a polling method {#FLEXIO_UARTCasePolling}
+
+~~~~~{.c}
+    uint8_t ch;
+    FLEXIO_UART_Type uartDev;
+    status_t result = kStatus_Success;
+    flexio_uart_user_config user_config;
+    FLEXIO_UART_GetDefaultConfig(&user_config);
+    user_config.baudRate_Bps = 115200U;
+    user_config.enableUart = true;
+
+    uartDev.flexioBase = BOARD_FLEXIO_BASE;
+    uartDev.TxPinIndex = FLEXIO_UART_TX_PIN;
+    uartDev.RxPinIndex = FLEXIO_UART_RX_PIN;
+    uartDev.shifterIndex[0] = 0U;
+    uartDev.shifterIndex[1] = 1U;
+    uartDev.timerIndex[0] = 0U;
+    uartDev.timerIndex[1] = 1U;
+
+    result = FLEXIO_UART_Init(&uartDev, &user_config, 48000000U);
+    //Check if configuration is correct.
+    if(result != kStatus_Success)
+    {
+        return;
+    }
+    FLEXIO_UART_WriteBlocking(&uartDev, txbuff, sizeof(txbuff));
+
+    while(1)
+    {
+        FLEXIO_UART_ReadBlocking(&uartDev, &ch, 1);
+        FLEXIO_UART_WriteBlocking(&uartDev, &ch, 1);
+    }
+~~~~~
+
+## FlexIO UART send/receive using an interrupt method {#FLEXIO_UARTCaseInterrupt}
+
+~~~~~{.c}
+    FLEXIO_UART_Type uartDev;
+    flexio_uart_handle_t g_uartHandle;
+    flexio_uart_config_t user_config;
+    flexio_uart_transfer_t sendXfer;
+    flexio_uart_transfer_t receiveXfer;
+    volatile bool txFinished;
+    volatile bool rxFinished;
+    uint8_t sendData[] = ['H', 'e', 'l', 'l', 'o'];
+    uint8_t receiveData[32];
+
+    void FLEXIO_UART_UserCallback(FLEXIO_UART_Type *base, flexio_uart_handle_t *handle, status_t status, void *userData)
+    {
+        userData = userData;
+
+        if (kStatus_FLEXIO_UART_TxIdle == status)
+        {
+            txFinished = true;
+        }
+
+        if (kStatus_FLEXIO_UART_RxIdle == status)
+        {
+            rxFinished = true;
+        }
+    }
+
+    void main(void)
+    {
+        //...
+
+        FLEXIO_UART_GetDefaultConfig(&user_config);
+        user_config.baudRate_Bps = 115200U;
+        user_config.enableUart = true;
+
+        uartDev.flexioBase = BOARD_FLEXIO_BASE;
+        uartDev.TxPinIndex = FLEXIO_UART_TX_PIN;
+        uartDev.RxPinIndex = FLEXIO_UART_RX_PIN;
+        uartDev.shifterIndex[0] = 0U;
+        uartDev.shifterIndex[1] = 1U;
+        uartDev.timerIndex[0] = 0U;
+        uartDev.timerIndex[1] = 1U;
+
+        result = FLEXIO_UART_Init(&uartDev, &user_config, 120000000U);
+        //Check if configuration is correct.
+        if(result != kStatus_Success)
+        {
+            return;
+        }
+
+        FLEXIO_UART_TransferCreateHandle(&uartDev, &g_uartHandle, FLEXIO_UART_UserCallback, NULL);
+
+        // Prepares to send.
+        sendXfer.data = sendData;
+        sendXfer.dataSize = sizeof(sendData)/sizeof(sendData[0]);
+        txFinished = false;
+
+        // Sends out.
+        FLEXIO_UART_SendNonBlocking(&uartDev, &g_uartHandle, &sendXfer);
+
+        // Send finished.
+        while (!txFinished)
+        {
+        }
+
+        // Prepares to receive.
+        receiveXfer.data = receiveData;
+        receiveXfer.dataSize = sizeof(receiveData)/sizeof(receiveData[0]);
+        rxFinished = false;
+
+        // Receives.
+        FLEXIO_UART_ReceiveNonBlocking(&uartDev, &g_uartHandle, &receiveXfer, NULL);
+
+        // Receive finished.
+        while (!rxFinished)
+        {
+        }
+
+        // ...
+    }
+~~~~~
+
+## FlexIO UART receive using the ringbuffer feature {#FLEXIO_UARTCaseRing}
+
+~~~~~{.c}
+    #define RING_BUFFER_SIZE 64
+    #define RX_DATA_SIZE     32
+
+    FLEXIO_UART_Type uartDev;
+    flexio_uart_handle_t g_uartHandle;
+    flexio_uart_config_t user_config;
+    flexio_uart_transfer_t sendXfer;
+    flexio_uart_transfer_t receiveXfer;
+    volatile bool txFinished;
+    volatile bool rxFinished;
+    uint8_t receiveData[RX_DATA_SIZE];
+    uint8_t ringBuffer[RING_BUFFER_SIZE];
+
+    void FLEXIO_UART_UserCallback(FLEXIO_UART_Type *base, flexio_uart_handle_t *handle, status_t status, void *userData)
+    {
+        userData = userData;
+
+        if (kStatus_FLEXIO_UART_RxIdle == status)
+        {
+            rxFinished = true;
+        }
+    }
+
+    void main(void)
+    {
+        size_t bytesRead;
+        //...
+
+        FLEXIO_UART_GetDefaultConfig(&user_config);
+        user_config.baudRate_Bps = 115200U;
+        user_config.enableUart = true;
+
+        uartDev.flexioBase = BOARD_FLEXIO_BASE;
+        uartDev.TxPinIndex = FLEXIO_UART_TX_PIN;
+        uartDev.RxPinIndex = FLEXIO_UART_RX_PIN;
+        uartDev.shifterIndex[0] = 0U;
+        uartDev.shifterIndex[1] = 1U;
+        uartDev.timerIndex[0] = 0U;
+        uartDev.timerIndex[1] = 1U;
+
+        result = FLEXIO_UART_Init(&uartDev, &user_config, 48000000U);
+        //Check if configuration is correct.
+        if(result != kStatus_Success)
+        {
+            return;
+        }
+
+        FLEXIO_UART_TransferCreateHandle(&uartDev, &g_uartHandle, FLEXIO_UART_UserCallback, NULL);
+        FLEXIO_UART_InstallRingBuffer(&uartDev, &g_uartHandle, ringBuffer, RING_BUFFER_SIZE);
+
+        // Receive is working in the background to the ring buffer.
+
+        // Prepares to receive.
+        receiveXfer.data = receiveData;
+        receiveXfer.dataSize = RX_DATA_SIZE;
+        rxFinished = false;
+
+        // Receives.
+        FLEXIO_UART_ReceiveNonBlocking(&uartDev, &g_uartHandle, &receiveXfer, &bytesRead);
+
+        if (bytesRead = RX_DATA_SIZE) /* Have read enough data. */
+        {
+            ;
+        }
+        else
+        {
+            if (bytesRead) /* Received some data, process first. */
+            {
+                ;
+            }
+
+            // Receive finished.
+            while (!rxFinished)
+            {
+            }
+        }
+
+        // ...
+    }
+~~~~~
+
+## FlexIO UART send/receive using a DMA method {#FLEXIO_UARTCaseDma}
+
+~~~~~{.c}
+    FLEXIO_UART_Type uartDev;
+    flexio_uart_handle_t g_uartHandle;
+    dma_handle_t g_uartTxDmaHandle;
+    dma_handle_t g_uartRxDmaHandle;
+    flexio_uart_config_t user_config;
+    flexio_uart_transfer_t sendXfer;
+    flexio_uart_transfer_t receiveXfer;
+    volatile bool txFinished;
+    volatile bool rxFinished;
+    uint8_t sendData[] = ['H', 'e', 'l', 'l', 'o'];
+    uint8_t receiveData[32];
+
+    void FLEXIO_UART_UserCallback(FLEXIO_UART_Type *base, flexio_uart_handle_t *handle, status_t status, void *userData)
+    {
+        userData = userData;
+
+        if (kStatus_FLEXIO_UART_TxIdle == status)
+        {
+            txFinished = true;
+        }
+
+        if (kStatus_FLEXIO_UART_RxIdle == status)
+        {
+            rxFinished = true;
+        }
+    }
+
+    void main(void)
+    {
+        //...
+
+        FLEXIO_UART_GetDefaultConfig(&user_config);
+        user_config.baudRate_Bps = 115200U;
+        user_config.enableUart = true;
+
+        uartDev.flexioBase = BOARD_FLEXIO_BASE;
+        uartDev.TxPinIndex = FLEXIO_UART_TX_PIN;
+        uartDev.RxPinIndex = FLEXIO_UART_RX_PIN;
+        uartDev.shifterIndex[0] = 0U;
+        uartDev.shifterIndex[1] = 1U;
+        uartDev.timerIndex[0] = 0U;
+        uartDev.timerIndex[1] = 1U;
+        result = FLEXIO_UART_Init(&uartDev, &user_config, 48000000U);
+        //Check if configuration is correct.
+        if(result != kStatus_Success)
+        {
+            return;
+        }
+
+        /* Init DMAMUX. */
+        DMAMUX_Init(EXAMPLE_FLEXIO_UART_DMAMUX_BASEADDR)
+
+        /* Init the DMA/EDMA module */
+#if defined(FSL_FEATURE_SOC_DMA_COUNT) && FSL_FEATURE_SOC_DMA_COUNT > 0U
+        DMA_Init(EXAMPLE_FLEXIO_UART_DMA_BASEADDR);
+        DMA_CreateHandle(&g_uartTxDmaHandle, EXAMPLE_FLEXIO_UART_DMA_BASEADDR, FLEXIO_UART_TX_DMA_CHANNEL);
+        DMA_CreateHandle(&g_uartRxDmaHandle, EXAMPLE_FLEXIO_UART_DMA_BASEADDR, FLEXIO_UART_RX_DMA_CHANNEL);
+#endif /* FSL_FEATURE_SOC_DMA_COUNT */
+
+#if defined(FSL_FEATURE_SOC_EDMA_COUNT) && FSL_FEATURE_SOC_EDMA_COUNT > 0U
+        edma_config_t edmaConfig;
+
+        EDMA_GetDefaultConfig(&edmaConfig);
+        EDMA_Init(EXAMPLE_FLEXIO_UART_DMA_BASEADDR, &edmaConfig);
+        EDMA_CreateHandle(&g_uartTxDmaHandle, EXAMPLE_FLEXIO_UART_DMA_BASEADDR, FLEXIO_UART_TX_DMA_CHANNEL);
+        EDMA_CreateHandle(&g_uartRxDmaHandle, EXAMPLE_FLEXIO_UART_DMA_BASEADDR, FLEXIO_UART_RX_DMA_CHANNEL);
+#endif /* FSL_FEATURE_SOC_EDMA_COUNT */
+
+        dma_request_source_tx = (dma_request_source_t)(FLEXIO_DMA_REQUEST_BASE + uartDev.shifterIndex[0]);
+        dma_request_source_rx = (dma_request_source_t)(FLEXIO_DMA_REQUEST_BASE + uartDev.shifterIndex[1]);
+
+        /* Requests  DMA channels for transmit and receive. */
+        DMAMUX_SetSource(EXAMPLE_FLEXIO_UART_DMAMUX_BASEADDR, FLEXIO_UART_TX_DMA_CHANNEL, (dma_request_source_t)dma_request_source_tx);
+        DMAMUX_SetSource(EXAMPLE_FLEXIO_UART_DMAMUX_BASEADDR, FLEXIO_UART_RX_DMA_CHANNEL, (dma_request_source_t)dma_request_source_rx);
+        DMAMUX_EnableChannel(EXAMPLE_FLEXIO_UART_DMAMUX_BASEADDR, FLEXIO_UART_TX_DMA_CHANNEL);
+        DMAMUX_EnableChannel(EXAMPLE_FLEXIO_UART_DMAMUX_BASEADDR, FLEXIO_UART_RX_DMA_CHANNEL);
+
+        FLEXIO_UART_TransferCreateHandleDMA(&uartDev, &g_uartHandle, FLEXIO_UART_UserCallback, NULL, &g_uartTxDmaHandle, &g_uartRxDmaHandle);
+
+        // Prepares to send.
+        sendXfer.data = sendData
+        sendXfer.dataSize = sizeof(sendData)/sizeof(sendData[0]);
+        txFinished = false;
+
+        // Sends out.
+        FLEXIO_UART_SendDMA(&uartDev, &g_uartHandle, &sendXfer);
+
+        // Send finished.
+        while (!txFinished)
+        {
+        }
+
+        // Prepares to receive.
+        receiveXfer.data = receiveData;
+        receiveXfer.dataSize = sizeof(receiveData)/sizeof(receiveData[0]);
+        rxFinished = false;
+
+        // Receives.
+        FLEXIO_UART_ReceiveDMA(&uartDev, &g_uartHandle, &receiveXfer, NULL);
+
+        // Receive finished.
+        while (!rxFinished)
+        {
+        }
+
+        // ...
+    }
+~~~~~
+
+*/
+
+/*!
+@if dox_section_flexio_edma_uart
+@defgroup flexio_edma_uart FlexIO eDMA UART Driver
+@ingroup flexio_uart
+@endif
+*/
+
+/*!
+@if dox_section_flexio_dma_uart
+@defgroup flexio_dma_uart FlexIO DMA UART Driver
+@ingroup flexio_uart
+@endif
+*/

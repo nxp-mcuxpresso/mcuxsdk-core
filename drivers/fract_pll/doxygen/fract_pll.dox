@@ -1,0 +1,10 @@
+/**
+ *@defgroup fract_pll FRACT_PLL: FRACT PLL Driver
+ *@details ip: d_ip_pll_fracn_gp_syn - soc: imx91, imx95
+ */
+
+/**
+ *@defgroup fract_pll_driver FRACT_PLL Driver
+ *@ingroup fract_pll
+ *@details The MCUXpresso SDK provides a peripheral driver for the fractional pll module of MCUXpresso SDK devices.
+ */

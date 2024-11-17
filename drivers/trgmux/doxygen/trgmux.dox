@@ -1,0 +1,12 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_TRGMUX_Locked = 4200
+*/
+
+/*!
+@defgroup trgmux TRGMUX: Trigger Mux Driver
+@details The MCUXpresso SDK provides driver for the Trigger Mux (TRGMUX) module of MCUXpresso SDK devices.
+
+# Typical use case {#TRGMUXTypUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/trgmux
+*/

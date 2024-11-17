@@ -1,0 +1,6 @@
+/*!
+@defgroup mscm MSCM: Miscellaneous System Control
+@details The Miscellaneous System Control Module (MSCM) contains CPU configuration registers and on-chip memory controller
+	 registers.
+*/
+

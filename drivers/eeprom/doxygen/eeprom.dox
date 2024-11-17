@@ -1,0 +1,6 @@
+/*!
+@defgroup eeprom EEPROM: EEPROM memory driver
+@details The MCUXpresso SDK provides a peripheral driver for the eeprom module of MCUXpresso SDK devices.
+
+# Typical use case {#eepromTypUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/eeprom*/

@@ -1,0 +1,39 @@
+/*!
+@defgroup xrdc2 XRDC2: Extended Resource Domain Controller 2
+@details The MCUXpresso SDK provides a driver for the Extended Resource Domain
+Controller 2 (XRDC2) block of MCUXpresso SDK devices.
+
+# XRDC2 functions {#XRDC2Func}
+
+XRDC2 module includes such submodules:
+
+ - XRDC2_MGR
+   The Manager submodule coordinates all programming model reads and writes.
+
+ - XRDC2_MDAC
+   The Master Domain Assignment Controller handles resource assignments
+   and generation of the domain identifiers (domain ID).
+
+ - XRDC2_MSC
+   The Memory Slot Controller implements the access controls for slave
+   memory slots based on the pre-programmed region descriptor registers.
+
+ - XRDC2_MRC
+   The Memory Region Controller implements the access controls for slave
+   memories based on the pre-programmed region descriptor registers.
+
+ - XRDC2_PAC
+   The Peripheral Access Controller implements the access controls for
+   slave peripherals based on the preprogrammed domain access control registers.
+
+Accordingly, the XRDC2 driver functions could be grouped as follows:
+ - XRDC2_MGR functions.
+ - XRDC2_MDAC functions.
+ - XRDC2_MSC functions.
+ - XRDC2_MRC functions.
+ - XRDC2_PAC functions.
+
+# Typical use case {#XRDC2TypUC}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/xrdc2
+*/

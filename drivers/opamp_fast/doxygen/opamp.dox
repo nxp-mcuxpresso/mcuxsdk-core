@@ -1,0 +1,17 @@
+/*!
+@defgroup opamp OPAMP: Operational Amplifier
+@details  The MCUXpresso SDK provides a peripheral driver for the OPAMP module of MCUXpresso SDK devices.
+
+OPAMP driver is created to help user to operate the OPAMP module. Based on features of the OPAMP module,
+this driver is divided into the following function groups:
+
+# Initialization and De-Initialization.
+    Functions in this group are used to initialize and de-initialize the OPAMP module.
+
+# Configuration.
+    Functions in this group are used to configure the OPAMP module.
+    The OPAMP_GetDefaultConfig() function is used to get default configuration of OPAMP.
+    The OPAMP_SetCompensationCapcitor() function is used to set OPAMP compensation capcitor.
+    The OPAMP_SetBiasCurrent() function is used to set the OPAMP bias current.
+    The OPAMP_Enable() function is used to enable or disable the OPAMP.
+*/

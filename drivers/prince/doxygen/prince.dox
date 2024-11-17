@@ -1,0 +1,10 @@
+/*!
+@defgroup prince PRINCE: PRINCE bus crypto engine
+@details The MCUXpresso SDK provides a peripheral driver for the PRINCE bus crypto engine module of MCUXpresso SDK devices.
+
+..
+
+
+This example code shows how to use the PRINCE driver.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/prince*/

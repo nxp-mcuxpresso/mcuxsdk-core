@@ -1,0 +1,29 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_MCAN_TxBusy = 6800
+ - #kStatus_MCAN_TxIdle = 6801
+ - #kStatus_MCAN_RxBusy = 6802
+ - #kStatus_MCAN_RxIdle = 6803
+ - #kStatus_MCAN_RxFifo0New = 6804
+ - #kStatus_MCAN_RxFifo0Idle = 6805
+ - #kStatus_MCAN_RxFifo0Watermark = 6806
+ - #kStatus_MCAN_RxFifo0Full = 6807
+ - #kStatus_MCAN_RxFifo0Lost = 6808
+ - #kStatus_MCAN_RxFifo1New = 6809
+ - #kStatus_MCAN_RxFifo1Idle = 6810
+ - #kStatus_MCAN_RxFifo1Watermark = 6811
+ - #kStatus_MCAN_RxFifo1Full = 6812
+ - #kStatus_MCAN_RxFifo1Lost = 6813
+ - #kStatus_MCAN_RxFifo0Busy = 6814
+ - #kStatus_MCAN_RxFifo1Busy = 6815
+ - #kStatus_MCAN_ErrorStatus = 6816
+ - #kStatus_MCAN_UnHandled = 6817
+*/
+
+/*!
+@defgroup mcan MCAN: Controller Area Network Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Controller Area Network (MCAN)
+         module of MCUXpresso SDK devices.
+*/
+
+

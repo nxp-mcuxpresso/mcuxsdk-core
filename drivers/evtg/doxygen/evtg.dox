@@ -1,0 +1,16 @@
+/*!
+@defgroup evtg EVTG: Event Generator Driver
+
+*/
+
+/*!
+@defgroup evtg_driver EVTG Driver
+@ingroup evtg
+@details The MCUXpresso SDK provides a peripheral driver for the Event Generator (EVTG)module of MCUXpresso SDK devices.
+
+# Typical use case{#EVTGTypicalUseCase}
+
+## EVTG Operation{#EDMAOper}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/evtg
+*/

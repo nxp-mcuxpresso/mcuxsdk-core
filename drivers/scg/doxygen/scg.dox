@@ -1,0 +1,155 @@
+/*!
+@defgroup scg System Clock Generator (SCG)
+@ingroup clock
+@details The MCUXpresso SDK provides a peripheral driver for the System Clock Generator (SCG) module of MCUXpresso SDK devices.
+
+# Function description {#SCGFunc}
+
+The SCG module contains the system PLL (SPLL), a slow internal reference clock (SIRC),
+a fast internal reference clock (FIRC), a low power FLL, and the system oscillator clock (SOSC). They
+can be configured separately as the source of MCU system clocks. Accordingly,
+the SCG driver provides these functions:
+
+- MCU system clock configuration.
+- SCG SOSC configuration.
+- SCG SIRC configuration.
+- SCG FIRC configuration.
+- SCG SPLL configuration.
+- SCG LPFLL configuration.
+
+## MCU System Clock {#SCGSYSClk}
+
+MCU system clock configurations include the clock source selection and the clock
+dividers. The configurations for VLPR, RUN, and HSRUN modes are set separately
+using the CLOCK_SetVlprModeSysClkConfig(), CLOCK_SetRunModeSysClkConfig(), and the
+CLOCK_SetHsrunModeSysClkConfig() functions to configure the MCU system clock.\n
+
+The current MCU system clock configuration can be obtained with the function CLOCK_GetCurSysClkConfig().
+The current MCU system clock frequency can be obtained with the CLOCK_GetSysClkFreq() function.
+
+## SCG System OSC Clock {#SCGSOSC}
+
+The functions CLOCK_InitSysOsc()/CLOCK_DeinitSysOsc() are used for the SOSC clock
+initialization. The function CLOCK_InitSysOsc disables the SOSC internally and
+re-configures it. As a result, ensure that the SOSC is not used while calling these functions.\n
+
+The SOSC clock can be used directly as the MCU system clock source. The SOSCDIV1_CLK,
+SOSCDIV2_CLK, and SOSCDIV3_CLK can be used as the peripheral clock source. The
+clocks frequencies can be obtained by functions CLOCK_GetSysOscFreq() and
+CLOCK_GetSysOscAsyncFreq().\n
+
+To configure the SOSC monitor mode, use the function CLOCK_SetSysOscMonitorMode().
+The clock error status can be received and cleared with the CLOCK_IsSysOscErr() and
+CLOCK_ClearSysOscErr() functions.\n
+
+## SCG Slow IRC Clock {#SCGSIRC}
+
+The functions CLOCK_InitSirc()/CLOCK_DeinitSirc() are used for the SIRC clock
+initialization. The function CLOCK_InitSirc disables the SIRC internally and
+re-configures it. Ensure that the SIRC is not used while calling these functions.\n
+
+The SIRC clock can be used directly as the MCU system clock source. The SIRCDIV1_CLK,
+SIRCDIV2_CLK, and SIRCDIV3_CLK can be used as the peripheral clock source. The
+clocks frequencies can be received with functions CLOCK_GetSircFreq() and
+CLOCK_GetSircAsyncFreq().\n
+
+## SCG Fast IRC Clock {#SCGFIRC}
+
+The functions CLOCK_InitFirc()/CLOCK_DeinitFirc() are used for the FIRC clock
+initialization. The function CLOCK_InitFirc disables the FIRC internally and
+re-configures it. Ensure that the FIRC is not used while calling these functions.\n
+
+The FIRC clock can be used directly as the MCU system clock source. The FIRCDIV1_CLK,
+FIRCDIV2_CLK, and FIRCDIV3_CLK can be used as the peripheral clock source. The
+clocks frequencies could be obtained by functions CLOCK_GetFircFreq() and
+CLOCK_GetFircAsyncFreq().\n
+
+The FIRC can be trimmed by the external clock. See the Section "Typical use case"
+to enable the FIRC trim.
+
+## SCG Low Power FLL Clock {#SCGLPFLL}
+
+The functions CLOCK_InitLpFll()/CLOCK_DeinitLpFll() are used for the LPFLL clock
+initialization. The function CLOCK_InitLpFll disables the LPFLL internally and
+re-configures it. Ensure that the LPFLL is not used while calling these functions.\n
+
+The LPFLL clock can be used directly as the MCU system clock source. The LPFLLDIV1_CLK,
+LPFLLDIV2_CLK, and LPFLLDIV3_CLK can be used as the peripheral clock source. The
+clocks frequencies could be obtained by functions CLOCK_GetLpFllFreq() and
+CLOCK_GetLpFllAsyncFreq().\n
+
+The LPFLL can be trimmed by the external clock, specific the trimConfig in
+scg_lpfll_config_t to enable the clock trim.
+
+## SCG System PLL Clock {#SCGSPLL}
+
+The functions CLOCK_InitSysPll()/CLOCK_DeinitSysPll() are used for the SPLL clock
+initialization. The function CLOCK_InitSysPll disables the SPLL internally and
+re-configures it. Ensure that the SPLL is not used while calling these functions.\n
+
+To generate the desired SPLL frequency, PREDIV and MULT value must be set properly
+while initializing the SPLL. The function CLOCK_GetSysPllMultDiv()  calculates
+the PREDIV and MULT. Passing in the reference clock frequency and the desired output
+frequency, the function returns the PREDIV and MULT which generate the frequency
+closest to the desired frequency.
+
+Because the SPLL is based on the FIRC or SOSC, the FIRC or SOSC must be enabled first before
+the SPLL initialization. Also, when re-configuring the FIRC or SOSC, be careful with the
+SPLL.\n
+
+The SPLL clock can be used directly as the MCU system clock source. The SPLLDIV1_CLK,
+SPLLDIV2_CLK, and SPLLDIV3_CLK can be used as the peripheral clock source. The
+clocks frequencies can be obtained with functions CLOCK_GetSysPllFreq() and
+CLOCK_GetSysPllAsyncFreq().\n
+
+To configure the SPLL monitor mode, use the function CLOCK_SetSysPllMonitorMode().
+The clock error status can be received and cleared by the CLOCK_IsSysPllErr() and
+CLOCK_ClearSysPllErr().\n
+
+## SCG clock valid check {#SCGCLKVld}
+
+The functions such as the CLOCK_IsFircValid() are used to check whether a specific
+clock is valid or not. See "Typical use case" for details.\n
+
+The clocks are valid after the initialization functions such as the CLOCK_InitFirc(). As a result, it is not
+ necessary to call the CLOCK_IsFircValid() after the CLOCK_InitFirc().
+
+# Typical use case {#SCGUSECse}
+
+## FIRC clock trim {#SCGFIRCTrim}
+
+During the FIRC initialization, applications can choose whether to enable trim or not.
+
+1. Trim is not enabled.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/scg
+2. Trim is enabled.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/scg
+## SPLL initialization {#SCGSPLLInit}
+
+The following code shows how to set up the SCG SPLL. The SPLL uses the SOSC as a reference
+clock.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/scg
+## System clock configuration {#SCGSYSCLKCfg}
+
+While changing the system clock configuration, the actual system clock does not
+change until the target clock source is valid. Ensure that the
+clock source is valid before using it. The functions such as CLOCK_IsSircValid()
+are used for this purpose.\n
+
+The SCG has a dedicated system clock configuration registers for VLPR, RUN, and HSRUN modes.
+During the power mode change, the system clock configuration may change too. In this
+case, check whether the clock source is valid during the power mode change.\n
+
+In the following example, the SIRC is used as the system clock source in VLPR mode, the FIRC is
+used as a system clock source in RUN mode, and the SPLL is used as a system clock source in
+HSRUN mode.\n
+
+The example work flow:
+
+1. SIRC, FIRC, and SPLL are all enabled in RUN mode.
+2. MCU enters VLPR mode. In VLPR mode, FIRC, and SPLL are disabled automatically.
+3. MCU enters RUN mode. Wait for the FIRC to become valid.
+4. MCU enters HSRUN mode. In step 3, the SPLL is already enabled, but may not be valid.
+   Wait for it to become valid when entering HSRUN mode.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/scg
+*/

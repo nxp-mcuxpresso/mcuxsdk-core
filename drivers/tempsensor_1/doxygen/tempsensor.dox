@@ -1,0 +1,33 @@
+/*!
+@defgroup tempsensor TEMPSENSOR: Temperature Sensor Module
+@details The MCUXpresso SDK provides a peripheral driver for the Temperature Sensor Module (TEMPSENSOR)
+         module of MCUXpresso SDK devices.
+
+Based on features of the Temperature Sensor module, the tempsensor driver provides these functions group:
+
+# Tempsensor Initialization, de-initialization, and configuration.
+Functions in this group are used to initialize, de-initialize, and configure the tempsensor module.\n
+
+# Tempsensor threshold configuration.
+Functions in this group are used to configure the tempsensor threshold.\n
+
+# Temperature acquisition, the unit is Celsius.
+Functions in this group are used to obtain the temperature, the return value unit is Celsius.\n
+
+# Tempsensor enable and disable, temperature measurement start and stop.
+Functions in this group are used to enable/disable the tempsensor and start/stop the measurement.\n
+
+# Tempsensor interrupts and status.
+Functions in this group control the tempsensor interrupts, including interrupts enable and disable, 
+interrupts flag clean, and status obtain.\n
+
+# Tempsensor misc.
+Functions TMPSNS_NonSecure_SetFilterLength() and TMPSNS_Secure_SetFilterLength() are used to set the
+filter length of the threshold flag.\n
+
+Functions TMPSNS_NonSecure_ClearFilterCount() and TMPSNS_Secure_ClearFilterCount() are used to clear the
+internal filter counter.\n
+
+Function TMPSNS_Secure_SetTrimVal() is used to set the trim value of the tempsensor.\n
+
+*/

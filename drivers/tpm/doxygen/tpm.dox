@@ -1,0 +1,78 @@
+/*!
+@defgroup tpm TPM: Timer PWM Module
+@details The MCUXpresso SDK provides a driver for the Timer PWM Module (TPM)
+         of MCUXpresso SDK devices.
+
+The TPM driver supports the generation of PWM signals, input capture, and output compare modes.
+On some SoCs, the driver supports the generation of combined PWM signals, dual-edge capture, and quadrature
+decoder modes. The driver also supports configuring each of the TPM fault inputs. The fault input is available only
+on some SoCs.
+
+# Introduction of TPM {#TPMIntroduction}
+
+## Initialization and deinitialization {#TPMInit}
+
+The function TPM_Init() initializes the TPM with a specified configurations. The function TPM_GetDefaultConfig()
+gets the default configurations. On some SoCs, the initialization function issues a software reset to reset the
+TPM internal logic. The initialization function configures the TPM's behavior when it receives a trigger input and its operation
+in doze and debug modes.
+
+The function TPM_Deinit() disables the TPM counter and turns off the module clock.
+
+## PWM Operations {#TPMPwmOperation}
+
+The function TPM_SetupPwm() sets up TPM channels for the PWM output. The function can set up the PWM signal
+properties for multiple channels. Each channel has its own tpm_chnl_pwm_signal_param_t structure that is used
+to specify the output signals duty cycle and level-mode. However, the same PWM period and PWM mode is applied
+to all channels requesting a PWM output.
+The signal duty cycle is provided as a percentage of the PWM period. Its value should be between 0 and 100
+where 0=inactive signal (0% duty cycle) and 100=always active signal (100% duty cycle).
+When generating a combined PWM signal, the channel number passed refers to a channel pair number,
+for example 0 refers to channel 0 and 1, 1 refers to channels 2 and 3.
+
+The function TPM_UpdatePwmDutycycle() updates the PWM signal duty cycle
+of a particular TPM channel.
+
+The function TPM_UpdateChnlEdgeLevelSelect() updates the level select bits of a
+particular TPM channel. This can be used to disable the PWM output when making changes
+to the PWM signal.
+
+## Input capture operations {#TPMInpOperation}
+The function TPM_SetupInputCapture() sets up a TPM channel for input capture.
+The user can specify the capture edge.
+
+The function TPM_SetupDualEdgeCapture() can be used to measure the pulse width of
+a signal. This is available only for certain SoCs. A channel pair is used during
+the capture with the input signal coming through a channel that can be configured. The user
+can specify the capture edge for each channel and any filter value to be used when
+processing the input signal.
+
+## Output compare operations {#TPMCompOperation}
+The function TPM_SetupOutputCompare() sets up a TPM channel for output comparison.
+The user can specify the channel output on a successful comparison and a comparison
+value.
+
+## Quad decode  {#TPMQuadOperation}
+The function TPM_SetupQuadDecode() sets up TPM channels 0 and 1 for quad decode, which
+is available only for certain SoCs. The user can specify the quad decode mode, polarity,
+and filter properties for each input signal.
+
+## Fault operation  {#TPMFaultOperation}
+The function TPM_SetupFault() sets up the properties for each fault, which is available only for certain SoCs.
+The user can specify the fault polarity and whether to use a filter on a fault input. The overall fault filter value and
+fault control mode are set up during initialization.
+
+## Status {#TPMStatus}
+Provides functions to get and clear the TPM status.
+
+## Interrupt {#TPMInterrupt}
+Provides functions to enable/disable TPM interrupts and get current enabled interrupts.
+
+
+# Typical use case {#TPMCase}
+
+## PWM output {#TPMPWMOutput}
+Output the PWM signal on 2 TPM channels with different duty cycles. Periodically update the
+PWM signal duty cycle.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/tpm
+*/

@@ -1,0 +1,37 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_SEMC_InvalidDeviceType = 10000
+ - #kStatus_SEMC_IpCommandExecutionError = 10001 
+ - #kStatus_SEMC_AxiCommandExecutionError = 10002
+ - #kStatus_SEMC_InvalidMemorySize = 10003
+ - #kStatus_SEMC_InvalidIpcmdDataSize = 10004
+ - #kStatus_SEMC_InvalidAddressPortWidth = 10005
+ - #kStatus_SEMC_InvalidDataPortWidth = 10006
+ - #kStatus_SEMC_InvalidSwPinmuxSelection = 10007
+ - #kStatus_SEMC_InvalidBurstLength = 10008
+ - #kStatus_SEMC_InvalidColumnAddressBitWidth = 10009
+ - #kStatus_SEMC_InvalidBaseAddress = 10010
+ - #kStatus_SEMC_InvalidTimerSetting = 10011
+*/
+
+/*!
+@defgroup semc SEMC: Smart External DRAM Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Smart External DRAM Controller
+ block of MCUXpresso SDK devices.
+
+# SEMC: Smart External DRAM Controller Driver {#SEMCDriver}
+
+## SEMC Initialization Operation {#SEMCInitDeinit}
+The SEMC Initialize is to initialize for common configure: gate the SEMC clock, configure IOMUX, and queue weight setting.
+The SEMC Deinitialize is to ungate the clock and disable SEMC module.
+
+## SEMC Interrupt Operation {#SEMCInteOps}
+The interrupt and disable operation for SEMC.
+
+## SEMC Memory access Operation {#SEMCMemoryAccess}
+This group is mainly provide NAND/NOR memory access API which is through IP bus/ IP command access. Since the AXI access is directly read/write is so easy, so the AXI read/write part is not provided in SEMC.
+
+# Typical use case {#SEMCTpyUC}
+
+
+*/

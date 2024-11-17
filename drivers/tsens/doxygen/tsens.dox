@@ -1,0 +1,37 @@
+/*!
+@defgroup tsens TSENS: Temperature Sensor Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Temperature Sensor (TSENS)
+         module of MCUXpresso SDK devices.
+
+# Function groups {#TSENSFunc}
+The TSENS driver supports initialization/configuration/operation for optimization/customization purpose.
+
+## Initialization and deinitialization {#TSENSInit}
+The function TSENS_Init() initializes the TSENS with specified configurations. The function
+TSENS_GetDefaultConfig() gets the default configurations.
+
+The function TSENS_Deinit() disables all interrupts and the module clock.
+
+## Get temperature {#TSENSGet}
+The function TSENS_StartMeasurement starts a TSENS conversion.
+
+The function TSENS_GetTemperature() gets the temperature value in last measurement.
+
+## Calibration configuration {#TSENSCali}
+The function TSENS_GetDefaultCalibrationConfig() gets the default calibration parameters.
+
+The function TSENS_SetCalibrationConfig() configures calibration parameters.
+
+## Status {#TSENSStatus}
+Provides functions to get the TSENS status.
+
+## Interrupt {#TSENSInterrupt}
+Provides functions to enable/disable TSENS interrupts and set interrupt conditions.
+
+# Typical use case {#TSENSTpyUC}
+
+## TSENS basic Configuration {#TSENSConfig}
+Example to get temperature through the usage of conversion ready interrupt.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/tsens
+*/
+

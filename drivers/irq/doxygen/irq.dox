@@ -1,0 +1,19 @@
+/*!
+@defgroup irq_module IRQ: external interrupt (IRQ) module
+@ingroup irq
+@details The MCUXpresso SDK provides a peripheral driver for the external interrupt (IRQ) module of MCUXpresso SDK devices.
+
+# IRQ Operations {#IRQOperations}
+
+## IRQ Initialization Operation {#IRQInitOperation}
+The IRQ Initialize is to initialize for common configure: gate the IRQ clock, configure enabled IRQ pins for pullup, edge select and detect mode,
+then enable the IRQ module. The IRQ Deinitialize is used to ungate the clock.
+
+## IRQ Basic Operation {#IRQBasicOperation}
+The IRQ provides the function to enable/disable interrupts.
+IRQ still provides functions to get and clear IRQF flags.
+
+# Typical use case {#IRQTpyUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/irq
+
+*/

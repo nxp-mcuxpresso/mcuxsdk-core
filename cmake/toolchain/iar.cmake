@@ -1,0 +1,39 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+set(TOOLCHAIN_ROOT $ENV{IAR_DIR})
+string(REGEX REPLACE "\\\\" "/" TOOLCHAIN_ROOT "${TOOLCHAIN_ROOT}")
+
+if(NOT TOOLCHAIN_ROOT)
+    message(FATAL_ERROR "***Please set IAR_DIR in environment variables***")
+endif()
+
+SET(TARGET_TRIPLET "arm/bin")
+
+set(AS "iasmarm")
+set(CC "iccarm")
+set(CXX "iccarm")
+set(LD "ilinkarm")
+set(AR "iarchive")
+set(CPP "iccarm")
+set(OC "ielftool")
+set(OD "objdump")
+
+set(AS ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${AS}${TOOLCHAIN_EXT})
+set(CC ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${CC}${TOOLCHAIN_EXT})
+set(CXX ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${CXX}${TOOLCHAIN_EXT})
+set(LD ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${LD}${TOOLCHAIN_EXT})
+set(AR ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${AR}${TOOLCHAIN_EXT})
+set(CPP ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${CPP}${TOOLCHAIN_EXT})
+set(OC ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${OC}${TOOLCHAIN_EXT})
+set(OD ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${OD}${TOOLCHAIN_EXT})
+
+set(CMAKE_ASM_COMPILER "${AS}")
+set(CMAKE_C_COMPILER "${CC}")
+set(CMAKE_CXX_COMPILER "${CXX}")
+set(CMAKE_OBJCOPY "${OC}")
+set(CMAKE_OBJDUMP "${OD}")
+set(OBJDUMP_OUT_CMD "")
+set(OBJDUMP_BIN_CMD "--bin")

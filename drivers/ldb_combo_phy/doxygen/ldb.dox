@@ -1,0 +1,9 @@
+/*!
+@defgroup ldb LDB: LVDS Display Bridge
+@details The MCUXpresso SDK provides a peripheral driver for the LVDS Display Bridge (LDB)
+         module of MCUXpresso SDK devices.
+
+SDK provides the APIs to initialize the LDB and configure the LDB channel. Refer
+the example for details.
+
+*/

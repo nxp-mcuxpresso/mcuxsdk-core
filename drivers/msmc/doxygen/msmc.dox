@@ -1,0 +1,54 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_SMC_StopAbort = 3900
+*/
+
+/*!
+@defgroup msmc MSMC: Multicore System Mode Controller
+@details The MCUXpresso SDK provides a peripheral driver for the Multicore System Mode Controller (MSMC) module of MCUXpresso SDK devices.
+
+# Typical use case {#MSMCTpyUC}
+
+## Set Core 0 from RUN to VLPR mode{#MSMCSetCore0RunToVlpr}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/msmc
+## Set Core 0 from VLPR/HSRUN to RUN mode{#MSMCSetCore0VlprOrHsrunToRun}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/msmc
+# Typical use case {#MSMCTpyUC}
+
+## Set Core 0 from RUN to HSRUN mode{#MSMCSetCore0RunToHsrun}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/msmc
+## Enter wait or stop modes {#MSMCWaitStop}
+
+SMC driver provides APIs to set MCU to different wait modes and stop modes. At
+the same time, there are pre-function and post-function for the modes setting.
+The pre-function and post-function are used for:
+
+1. Disable/enable the interrupt through PRIMASK. In practise, there is such scenario:
+the application sets the wakeup interrupt and calls SMC function @ref SMC_SetPowerModeStop
+to set MCU to STOP mode, but the wakeup interrupt happens so quickly that the ISR
+completed before the function @ref SMC_SetPowerModeStop, as a result, the MCU 
+enters STOP mode and never be wakeup by the interrupt. In this case, application
+could first disable interrupt through PRIMASK, then set the wakeup interrupt and
+enter STOP mode. After wakeup, the first thing is enable the interrupt through PRIMASK.
+The MCU could still be wakeup when disable interrupt through PRIMASK. The pre- and post-
+functions handle the PRIMASK inside.
+
+@code
+
+SMC_PreEnterStopModes();
+
+/* Enable the wakeup interrupt here. */
+
+SMC_SetPowerModeStop(SMC0, kSMC_PartialStop);
+
+SMC_PostExitStopModes();
+
+@endcode
+
+For other use cases, please refer to the comments of the MSMC driver header file.
+Some example codes are also provided.
+
+*/

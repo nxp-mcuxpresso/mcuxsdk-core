@@ -1,0 +1,14 @@
+/*!
+@defgroup  adc_12b1msps_sar ADC: 12-bit Analog to Digital Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 12-bit Analog to Digital Converter (ADC) 
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#ADCTpyUC}
+
+## Interrupt Configuration {#ADCIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_adc
+## Polling Configuration {#ADCPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_adc
+*/

@@ -1,0 +1,53 @@
+/*!
+@defgroup pwt_driver PWT: Pulse Width Timer
+@details The MCUXpresso SDK provides a driver for the Pulse Width Timer (PWT)
+         of MCUXpresso SDK devices.
+
+# Function groups {#PWTFunc}
+The PWT driver supports capture or measure the pulse width mapping on its input channels. 
+The counter of PWT has two selectable clock sources, Timer clock and alternative clock.
+PWT module supports programmable positive or negative pulse edges, and programmable interrupt 
+generation upon pulse width values or counter overflow.
+
+
+## Initialization and deinitialization {#PWTInitPWTDeinit}
+The function PWT_Init() initializes the PWT with specified configurations. The function
+PWT_GetDefaultConfig() gets the default configurations. The initialization function 
+configures the PWT for the requested register update mode for register with buffers.
+
+The function PWT_Deinit() disables the PWT counter and turns off the module clock.
+## Reset {#PWT_Reset}
+The function PWT_Reset() is built into PWT as a mechanism used to reset/restart the pulse width timer.
+## Status {#PWTStatus}
+Provides functions to get and clear the PWT status.
+## Interrupt {#PWTInterrupt}
+Provides functions to enable/disable PWT interrupts and get current enabled interrupts.
+## Start & Stop timer {#PWTStart}
+The function PWT_StartTimer() starts the PWT time counter.
+
+The function PWT_StopTimer() stops the PWT time counter.
+## GetInterrupt {#PWTGetInterrupt}
+Provides functions to generate Overflow/Pulse Width Data Ready Interrupt.
+## Get Timer value {#PWTGetTimervalue}
+The function PWT_GetCurrentTimerCount() is set to read the current counter value.
+
+The function PWT_ReadPositivePulseWidth() is set to read the positive pulse width.
+
+The function PWT_ReadNegativePulseWidth() is set to read the negative pulse width.
+## PWT Operations {#PWTOperation}
+## Input capture operations
+The input capture operations sets up an channel for input capture.
+
+The function EdgeCapture can be used to measure the pulse width of a signal. 
+A channel is used during capture with the input signal coming through a channel n. 
+The capture edge for each channel, and any filter value to be used when processing the
+input signal.
+
+
+# Typical use case {#PWTCase}
+
+## PWT measure {#PWT}
+This is an example code to measure the pulse width:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pwt
+*/

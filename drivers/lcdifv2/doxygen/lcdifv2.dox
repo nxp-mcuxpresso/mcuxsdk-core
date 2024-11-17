@@ -1,0 +1,20 @@
+/*!
+@defgroup lcdifv2 LCDIFv2: LCD Interface v2
+@details The MCUXpresso SDK provides a peripheral driver for the LCD Interface v2(LCDIFv2)
+
+The LCDIFv2 supports RGB mode (dot clock mode), it supports up to maximum 8 layers
+of alpha blending.
+
+# Shadow load {#LCDIFV2ShadowLoad}
+
+Shadow registers are used for LCDIFv2 layer configuration, when layer configurations
+are set, they are written to the shadow registers and do not take effect, after the function
+LCDIFV2_TriggerLayerShadowLoad is called, the new configuration are loaded to the
+active control registers at next vertical blank period. This mechanism ensures that
+all configurations are loaded at the same time.
+
+# Typical use case {#ISITpyUC}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lcdifv2*/
+
+*/

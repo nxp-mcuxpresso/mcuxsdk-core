@@ -1,0 +1,21 @@
+/*!
+@defgroup tempsensor TEMPSENSOR: Temperature Sensor Module
+@details The MCUXpresso SDK provides a peripheral driver for the Temperature Sensor Module (TEMPSENSOR)
+         module of MCUXpresso SDK devices.
+
+# TEMPSENSOR Operations {#TEMPMONOperation}
+  The function TEMPMON_Init() will initialize the TEMPSENSOR peripheral operation.
+
+  The function TEMPMON_Deinit() will deinitialize the TEMPSENSOR peripheral operation.
+
+  The function TEMPMON_GetDefaultConfig() will get default configuration.
+  
+  The function TEMPMON_StartMeasure() will start the temperature measurement process.
+  
+  The function TEMPMON_StopMeasure() will stop the temperature measurement process.
+  
+  The function TEMPMON_GetCurrentTemp() will get the current temperature.
+  
+  The function TEMPMON_SetTempAlarm() will set the temperature count that will generate an alarm interrupt.
+
+*/

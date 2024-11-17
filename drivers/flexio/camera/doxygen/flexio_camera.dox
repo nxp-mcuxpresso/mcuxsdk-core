@@ -1,0 +1,94 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_FLEXIO_CAMERA_RxBusy = 5500
+ - #kStatus_FLEXIO_CAMERA_RxIdle = 5501
+*/
+
+/*!
+@defgroup flexio_camera FlexIO Camera Driver
+@ingroup flexio
+@details The MCUXpresso SDK provides a driver for the camera function using Flexible I/O.
+
+
+
+FlexIO Camera driver includes functional APIs and eDMA transactional APIs.
+Functional APIs target low level APIs. Users can use functional APIs for FlexIO Camera initialization/configuration/operation purpose.
+Using the functional API requires knowledge of the FlexIO Camera peripheral and how to organize functional APIs to meet the requirements of the
+application. All functional API use the FLEXIO_CAMERA_Type * as the first parameter. FlexIO Camera functional operation groups provide the functional APIs set.
+
+eDMA transactional APIs target high-level APIs. Users can use the transactional API to enable the peripheral quickly and can also use in the application
+if the code size and performance of transactional APIs satisfy requirements. If the code size and performance are critical requirements, see the
+transactional API implementation and write custom code. All transactional APIs use the flexio_camera_edma_handle_t as the second parameter. Users need to
+initialize the handle by calling the FLEXIO_CAMERA_TransferCreateHandleEDMA() API.
+
+eDMA transactional APIs support asynchronous receive. This means that the functions FLEXIO_CAMERA_TransferReceiveEDMA() set up an interrupt for data
+receive. When the receive is complete, the upper layer is notified through a callback function with the status kStatus_FLEXIO_CAMERA_RxIdle.
+
+# Typical use case {#FLEXIO_CAMERACase}
+
+## FlexIO Camera Receive using eDMA method {#CAMERACasePolling}
+
+~~~~~{.c}
+
+    volatile uint32_t isEDMAGetOnePictureFinish = false;
+    edma_handle_t g_edmaHandle;
+    flexio_camera_edma_handle_t g_cameraEdmaHandle;
+    edma_config_t edmaConfig;
+    FLEXIO_CAMERA_Type g_FlexioCameraDevice = {.flexioBase = FLEXIO0,
+                                           .datPinStartIdx = 24U, /* fxio_pin 24 -31 are used. */
+                                           .pclkPinIdx = 1U,      /* fxio_pin 1 is used as pclk pin. */
+                                           .hrefPinIdx = 18U,     /* flexio_pin 18 is used as href pin. */
+                                           .shifterStartIdx = 0U, /* Shifter 0 = 7 are used. */
+                                           .shifterCount = 8U,
+                                           .timerIdx = 0U};
+    flexio_camera_config_t cameraConfig;
+
+    /* Configure DMAMUX */
+    DMAMUX_Init(DMAMUX0);
+    /* Configure DMA */
+    EDMA_GetDefaultConfig(&edmaConfig);
+    EDMA_Init(DMA0, &edmaConfig);
+
+    DMAMUX_SetSource(DMAMUX0, DMA_CHN_FLEXIO_TO_FRAMEBUFF, (g_FlexioCameraDevice.shifterStartIdx + 1U));
+    DMAMUX_EnableChannel(DMAMUX0, DMA_CHN_FLEXIO_TO_FRAMEBUFF);
+    EDMA_CreateHandle(&g_edmaHandle, DMA0, DMA_CHN_FLEXIO_TO_FRAMEBUFF);
+
+    FLEXIO_CAMERA_GetDefaultConfig(&cameraConfig);
+    FLEXIO_CAMERA_Init(&g_FlexioCameraDevice, &cameraConfig);
+    /* Clear all the flag. */
+    FLEXIO_CAMERA_ClearStatusFlags(&g_FlexioCameraDevice,
+                                   kFLEXIO_CAMERA_RxDataRegFullFlag | kFLEXIO_CAMERA_RxErrorFlag);
+    FLEXIO_ClearTimerStatusFlags(FLEXIO0, 0xFF);
+    FLEXIO_CAMERA_TransferCreateHandleEDMA(&g_FlexioCameraDevice, &g_cameraEdmaHandle, FLEXIO_CAMERA_UserCallback, NULL,
+                                   &g_edmaHandle);
+    cameraTransfer.dataAddress = (uint32_t)u16CameraFrameBuffer;
+    cameraTransfer.dataNum = sizeof(u16CameraFrameBuffer);
+    FLEXIO_CAMERA_TransferReceiveEDMA(&g_FlexioCameraDevice, &g_cameraEdmaHandle, &cameraTransfer);
+    while (!(isEDMAGetOnePictureFinish))
+    {
+        ;
+    }
+
+    /* A callback function is also needed */
+    void FLEXIO_CAMERA_UserCallback(FLEXIO_CAMERA_Type *base,
+                                flexio_camera_edma_handle_t *handle,
+                                status_t status,
+                                void *userData)
+    {
+        userData = userData;
+        /* eDMA Transfer finished */
+        if (kStatus_FLEXIO_CAMERA_RxIdle == status)
+        {
+            isEDMAGetOnePictureFinish = true;
+        }
+    }
+~~~~~
+*/
+
+/*!
+@if dox_section_flexio_edma_camera
+@defgroup flexio_edma_camera FlexIO eDMA Camera Driver
+@ingroup flexio_camera
+@endif
+*/
+

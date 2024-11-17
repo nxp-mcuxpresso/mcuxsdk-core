@@ -1,0 +1,13 @@
+/*!
+@defgroup qn_acmp ACMP: Analog Comparator Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Comparator (ACMP) module of MCUXpresso SDK devices.
+
+ACMP driver is created to help the user to better operate the ACMP module. This driver can be considered as a basic
+comparator with advanced features. The APIs for basic comparator can make the CMP work as a general comparator, which
+compares the two input channel's voltage and immediately creates the output of the comparator result. The APIs for
+advanced feature can be used as the plug-in function based on the basic comparator. They can provide more ways to
+process the comparator's output.
+
+# Typical use case {#QNACMPTpyUC}
+Example use of ACMP API.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/acmp*/

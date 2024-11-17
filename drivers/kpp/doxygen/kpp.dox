@@ -1,0 +1,20 @@
+/*!
+@defgroup kpp KPP: KeyPad Port Driver
+@details The MCUXpresso SDK provides a peripheral driver for the KeyPad Port 
+block of MCUXpresso SDK devices.
+
+# KPP: KeyPad Port Driver
+
+## KPP Initialization Operation
+The KPP Initialize is to initialize for common configure: gate the KPP clock, configure columns, and rows features.
+The KPP Deinitialize is to ungate the clock.
+
+## KPP Basic Operation
+The KPP provide the function to enable/disable interrupts.
+The KPP provide key press scanning function KPP_keyPressScanning. This API should be called by the
+Interrupt handler in application. KPP still provides functions to get and clear status flags.
+
+# Typical use case {#KPPTpyUC}
+
+
+*/

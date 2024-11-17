@@ -1,0 +1,15 @@
+/*!
+@defgroup cache_lpcac CACHE: LPCAC CACHE Memory Controller
+@details The SDK provides a peripheral driver for the CACHE Controller of 
+         MCUXpresso SDK devices.
+
+The CACHE driver is created to the help the user more easily operate the cache memory.
+
+The APIs for basic operations are included the following three groups:
+1L. The L1-specific cache driver API. This group provides the IP-specific cache controller drivers. The L1 caches in this arch is the AHB Low Power Cache Controller (LPCAC). The driver API name in this level is L1 cache controller specific.
+
+# Function groups {#CACHEFuncGrps}
+
+## L1 CACHE Operation {#L1CACHEMaintainOperation}
+This function group provides Enable/Disable cache and configure allocation/parity attribute APIs.
+*/

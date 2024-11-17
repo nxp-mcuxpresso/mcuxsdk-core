@@ -1,0 +1,33 @@
+/*!
+@defgroup qdc QDC: Quadrature Encoder/Decoder
+@details The MCUXpresso SDK provides a peripheral driver for the Quadrature Encoder/Decoder (QDC)
+         module of MCUXpresso SDK devices.
+
+This section describes the programming interface of the QDC Peripheral driver.
+The QDC driver configures the QDC module and provides a functional interface for the user to build the QDC application.
+
+# Function groups {#QDCFunGrps}
+
+## Initialization and De-initialization {#QDCInit}
+
+This function group initializes default configuration structure for the QDC counter and initializes QDC counter with the normal configuration and de-initialize QDC module. Some APIs are also created to control the features.
+
+## Status {#QDCSta}
+
+This function group get/clear the QDC status.
+
+## Interrupts {#QDCInt}
+
+This function group enable/disable the QDC interrupts.
+
+## Value Operation {#QDCValOps}
+
+This function group get the counter/hold value of positions.
+
+# Typical use case {#QDCTpyUC}
+
+## Polling Configuration {#QDCPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/qdc
+*/
+

@@ -1,0 +1,36 @@
+/*
+@page drv_err Driver errors status
+ - #kStatus_USDHC_BusyTransferring = 6500
+ - #kStatus_USDHC_PrepareAdmaDescriptorFailed = 6501
+ - #kStatus_USDHC_SendCommandFailed = 6502
+ - #kStatus_USDHC_TransferDataFailed = 6503
+ - #kStatus_USDHC_DMADataAddrNotAlign = 6504
+ - #kStatus_USDHC_ReTuningRequest = 6505
+ - #kStatus_USDHC_TuningError = 6506
+*/
+
+/*!
+@defgroup usdhc USDHC: Ultra Secured Digital Host Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Ultra Secured Digital Host Controller (USDHC) module of MCUXpresso SDK/i.MX devices.
+
+# Typical use case {#USDHCTypUC}
+
+## USDHC Operation {#USDHCOperation}
+
+Refer to the driver examples codes located at <i>\<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/usdhc.</i>
+
+# Cache maintain capability
+The uSDHC host controller is intergrated with ADMA to have better transfer performance, so to maintain data integrity during DMA operations on the platform that has cache, USDHC driver provide a cache maintain functionality by define:
+         FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL = 1
+It is suggest that the address of buffer used for read/write is align with cache line size.
+
+# Scatter gather transfer capability
+The USDHC driver implement scatter gather transfer functionality, so application can submit uncontinuous data buffer in one transfer request by the scatter gather api, to have this feature, USDHC driver has below api
+    USDHC_TransferScatterGatherADMANonBlocking
+This function suppport scatter gather transfer and cover the functionality of USDHC_TransferNonBlocking also, but if application would like to use the function, please enable function macro firstly, since the scatter gather functionality is disabled by default.
+    \#define FSL_USDHC_ENABLE_SCATTER_GATHER_TRANSFER 1
+
+Please note that once the macro is defined, the USDHC_TransferNonBlocking will be removed automatically.
+
+*/
+

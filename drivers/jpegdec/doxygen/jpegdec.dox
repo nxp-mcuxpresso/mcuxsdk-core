@@ -1,0 +1,40 @@
+/*!
+@defgroup jpegdec JPEGDEC: JPEG decoder Driver
+@details The MCUXpresso SDK provides a peripheral driver for the JPEG decoder (JPEGDEC) module of MCUXpresso SDK devices.
+
+The JPEGDEC driver is created to help the user operate the JPEGDEC module. User can use the API to configure the
+driver to decode JPEG file, get image information then drop decoded image data. The JPEGDEC has 4 slots, each slot
+has one bit stream. There are 3 working modes with different configurations:
+
+# Typical use case {#JPEGDCTpyUC}
+
+## Single Bit Stream and Single Frame mode
+
+If none of the slot's next descriptor is enabled, then the decoding will pause
+after this JPEG stream is decoded. User can call this API again to update the
+configuration then call JPEGDEC_StartDecode to start another decoding process.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/platform/drivers/jpegdec/example
+
+## Single Bit Stream Repeat mode
+
+If only one of the slot and its next descriptor is enabled, after the decoder
+completes the current frame decoding, it fetches the next descriptor then updates
+the decoder configuration according to the descriptor. In this mode, only one
+slot is in use so the bit stream remains the same.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/platform/drivers/jpegdec/example
+
+## Context Switch mode
+
+If more than one slot and its next descriptor is enabled, after the decoder
+completes the current frame decoding, it fetches the next descriptor for this
+slot, and the bit stream buffer for the next enabled slot and switches to the
+next slot. When switching, the current slot's bit stream buffer pointer is
+saved and will be restored when this bit stream is switched back. In this mode,
+each bit stream is assigned with one bit stream ID and up to four bit streams
+(4 slots) are supported.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/platform/drivers/jpegdec/example
+
+*/

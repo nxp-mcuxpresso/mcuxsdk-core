@@ -1,0 +1,9 @@
+/*!
+@defgroup qn_rng RNG: Random Number generator
+@details The MCUXpresso SDK provides a peripheral driver for the Random Number generator
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#QNRNGTpyUC}
+Example use of RNG API.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rng*/
+

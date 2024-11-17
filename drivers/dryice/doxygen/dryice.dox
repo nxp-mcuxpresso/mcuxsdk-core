@@ -1,0 +1,25 @@
+/*!
+@defgroup dryice DryIce: DryIce Driver
+@details The MCUXpresso SDK provides a peripheral driver for the MCU DryIce module of MCUXpresso SDK devices.
+
+# DRYICE Driver Initialization and Configuration {#DRYICEInit}
+
+DRYICE_Init() function enables the clock gate for the DryIce module in the SIM module. 
+For module configuration, the following configuration functions are available:
+
+* DRYICE_SetConfig()
+
+* DRYICE_ActiveTamperSetConfig()
+
+* DRYICE_PinSetConfig()
+
+After the VBAT POR, a software reset, a write to the tamper seconds register, or whenever an enabled tamper flag is set, the DryIce Tamper Flag is set.
+To clear the DryIce Tamper Flag, the Tamper Acknowledge Flag has to be set also, which can be accomplished by issuing a chip reset.
+Note that the DryIce includes 32-bytes of secure key storage that is held in reset whenever the DryIce
+tamper flag is set. As a result, always clear the DryIce tamper flag before writing any secure key register.
+
+# DRYICE Driver Examples {#DRYICEEx}
+
+Initialization and configuration
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryice

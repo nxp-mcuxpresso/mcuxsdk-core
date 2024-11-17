@@ -1,0 +1,6 @@
+/*!
+@defgroup rtwdog RTWDOG: 32-bit Watchdog Timer
+@details The MCUXpresso SDK provides a peripheral driver for the RTWDOG module of MCUXpresso SDK devices.
+
+# Typical use case {#RTWDOGTypUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rtwdog*/

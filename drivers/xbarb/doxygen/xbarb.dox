@@ -1,0 +1,35 @@
+/*!
+@defgroup xbarb XBARB: Inter-Peripheral Crossbar Switch
+@details The MCUXpresso SDK provides a peripheral driver for the Inter-Peripheral Crossbar Switch (XBARB)
+block of MCUXpresso SDK devices.
+@{
+
+The XBARB peripheral driver configures the XBARB (Inter-Peripheral Crossbar Switch) and handles initialization and
+configuration of the XBARB module.
+
+XBARB driver has two parts:
+
+- Signal connection interconnects input and output signals.
+
+# Function groups {#XbarbFunctionalGroups}
+
+## XBARB Initialization {#XBARBInit}
+
+To initialize the XBARB driver, a state structure has to be passed into the initialization function.
+This block of memory keeps pointers to user's callback functions and parameters to these
+functions. The XBARB module is initialized by calling the XBARB_Init() function.
+
+## Call diagram {#XBARBCallDiagram}
+
+1. Call the "XBARB_Init()" function to initialize the XBARB module.
+2. Optionally, call the "XBARB_SetSignalsConnection()" function to Set connection between the selected XBARB_IN[*] 
+input and the XBARB_OUT[*] output signal. It connects the XBARB input to the selected XBARB output.
+A configuration structure of the "xbarb_input_signal_t" type and "xbarb_output_signal_t" type is required.
+3. Finally, the XBARB works properly.
+
+
+# Typical use case {#XbarbExample}
+
+
+*/
+/*! @} */

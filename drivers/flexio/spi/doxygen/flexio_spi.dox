@@ -1,0 +1,202 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_FLEXIO_SPI_Busy = 501
+ - #kStatus_FLEXIO_SPI_Idle = 502
+ - #kStatus_FLEXIO_SPI_Error = 503
+*/
+
+/*!
+@defgroup flexio_spi FlexIO SPI Driver
+@ingroup flexio
+@details The MCUXpresso SDK provides a peripheral driver for an SPI function using the Flexible I/O
+         module of MCUXpresso SDK devices.
+
+
+FlexIO SPI driver includes functional APIs and transactional APIs.
+
+Functional APIs target low-level APIs.
+Functional APIs can be used for FlexIO SPI initialization/configuration/operation for optimization/customization purpose.
+Using the functional API requires the knowledge of the FlexIO SPI peripheral and how to organize functional APIs to
+meet the application requirements.
+All functional API use the FLEXIO_SPI_Type *base as the first parameter.
+FlexIO SPI functional operation groups provide the functional API set.
+
+Transactional APIs target high-level APIs.
+Transactional APIs can be used to enable the peripheral and also in the application if the code size and performance of transactional APIs can satisfy requirements.
+If the code size and performance are critical requirements, see the transactional API implementation and write custom code. All
+transactional APIs use the flexio_spi_master_handle_t/flexio_spi_slave_handle_t as the second parameter.
+Initialize the handle by calling the FLEXIO_SPI_MasterTransferCreateHandle() or FLEXIO_SPI_SlaveTransferCreateHandle() API.
+
+Transactional APIs support asynchronous transfer. This means that the functions FLEXIO_SPI_MasterTransferNonBlocking()/FLEXIO_SPI_SlaveTransferNonBlocking() set up an
+interrupt for data transfer. When the transfer is complete, the upper layer is notified through a callback
+function with the kStatus_FLEXIO_SPI_Idle status.
+
+Note that the FlexIO SPI slave driver only supports discontinuous PCS access, which is a limitation. The FlexIO SPI slave driver can support continuous PCS, but the slave
+cannot adapt discontinuous and continuous PCS automatically. Users can change the timer disable mode in FLEXIO_SPI_SlaveInit manually, from kFLEXIO_TimerDisableOnTimerCompare
+to kFLEXIO_TimerDisableNever to enable a discontinuous PCS access. Only CPHA = 0 is supported.
+
+
+# Typical use case {#FlexIO_SPICase}
+
+## FlexIO SPI send/receive using an interrupt method {#FlexIO_SPICaseInterrupt}
+
+~~~~~{.c}
+    flexio_spi_master_handle_t g_spiHandle;
+    FLEXIO_SPI_Type spiDev;
+    volatile bool txFinished;
+    static uint8_t srcBuff[BUFFER_SIZE];
+    static uint8_t destBuff[BUFFER_SIZE];
+
+    void FLEXIO_SPI_MasterUserCallback(FLEXIO_SPI_Type *base, flexio_spi_master_handle_t *handle, status_t status, void *userData)
+    {
+        userData = userData;
+
+        if (kStatus_FLEXIO_SPI_Idle == status)
+        {
+            txFinished = true;
+        }
+    }
+
+    void main(void)
+    {
+        //...
+        flexio_spi_transfer_t xfer = {0};
+        flexio_spi_master_config_t userConfig;
+
+        FLEXIO_SPI_MasterGetDefaultConfig(&userConfig);
+        userConfig.baudRate_Bps = 500000U;
+
+        spiDev.flexioBase = BOARD_FLEXIO_BASE;
+        spiDev.SDOPinIndex = FLEXIO_SPI_MOSI_PIN;
+        spiDev.SDIPinIndex = FLEXIO_SPI_MISO_PIN;
+        spiDev.SCKPinIndex = FLEXIO_SPI_SCK_PIN;
+        spiDev.CSnPinIndex = FLEXIO_SPI_CSn_PIN;
+        spiDev.shifterIndex[0] = 0U;
+        spiDev.shifterIndex[1] = 1U;
+        spiDev.timerIndex[0] = 0U;
+        spiDev.timerIndex[1] = 1U;
+
+        FLEXIO_SPI_MasterInit(&spiDev, &userConfig, FLEXIO_CLOCK_FREQUENCY);
+
+        xfer.txData = srcBuff;
+        xfer.rxData = destBuff;
+        xfer.dataSize = BUFFER_SIZE;
+        xfer.flags = kFLEXIO_SPI_8bitMsb;
+        FLEXIO_SPI_MasterTransferCreateHandle(&spiDev, &g_spiHandle, FLEXIO_SPI_MasterUserCallback, NULL);
+        FLEXIO_SPI_MasterTransferNonBlocking(&spiDev, &g_spiHandle, &xfer);
+
+        // Send finished.
+        while (!txFinished)
+        {
+        }
+
+            // ...
+    }
+~~~~~
+
+## FlexIO_SPI Send/Receive in DMA way {#FlexIO_SPICaseDma}
+
+~~~~~{.c}
+    dma_handle_t g_spiTxDmaHandle;
+    dma_handle_t g_spiRxDmaHandle;
+    flexio_spi_master_handle_t g_spiHandle;
+    FLEXIO_SPI_Type spiDev;
+    volatile bool txFinished;
+    static uint8_t srcBuff[BUFFER_SIZE];
+    static uint8_t destBuff[BUFFER_SIZE];
+    void FLEXIO_SPI_MasterUserCallback(FLEXIO_SPI_Type *base, flexio_spi_master_dma_handle_t *handle, status_t status, void *userData)
+    {
+        userData = userData;
+
+        if (kStatus_FLEXIO_SPI_Idle == status)
+        {
+            txFinished = true;
+        }
+    }
+
+    void main(void)
+    {
+        flexio_spi_transfer_t xfer = {0};
+        flexio_spi_master_config_t userConfig;
+
+        FLEXIO_SPI_MasterGetDefaultConfig(&userConfig);
+        userConfig.baudRate_Bps = 500000U;
+
+        spiDev.flexioBase = BOARD_FLEXIO_BASE;
+        spiDev.SDOPinIndex = FLEXIO_SPI_MOSI_PIN;
+        spiDev.SDIPinIndex = FLEXIO_SPI_MISO_PIN;
+        spiDev.SCKPinIndex = FLEXIO_SPI_SCK_PIN;
+        spiDev.CSnPinIndex = FLEXIO_SPI_CSn_PIN;
+        spiDev.shifterIndex[0] = 0U;
+        spiDev.shifterIndex[1] = 1U;
+        spiDev.timerIndex[0] = 0U;
+        spiDev.timerIndex[1] = 1U;
+
+        /* Init DMAMUX. */
+        DMAMUX_Init(EXAMPLE_FLEXIO_SPI_DMAMUX_BASEADDR)
+
+        /* Init the DMA/EDMA module */
+#if defined(FSL_FEATURE_SOC_DMA_COUNT) && FSL_FEATURE_SOC_DMA_COUNT > 0U
+        DMA_Init(EXAMPLE_FLEXIO_SPI_DMA_BASEADDR);
+        DMA_CreateHandle(&txHandle, EXAMPLE_FLEXIO_SPI_DMA_BASEADDR, FLEXIO_SPI_TX_DMA_CHANNEL);
+        DMA_CreateHandle(&rxHandle, EXAMPLE_FLEXIO_SPI_DMA_BASEADDR, FLEXIO_SPI_RX_DMA_CHANNEL);
+#endif /* FSL_FEATURE_SOC_DMA_COUNT */
+
+#if defined(FSL_FEATURE_SOC_EDMA_COUNT) && FSL_FEATURE_SOC_EDMA_COUNT > 0U
+        edma_config_t edmaConfig;
+
+        EDMA_GetDefaultConfig(&edmaConfig);
+        EDMA_Init(EXAMPLE_FLEXIO_SPI_DMA_BASEADDR, &edmaConfig);
+        EDMA_CreateHandle(&txHandle, EXAMPLE_FLEXIO_SPI_DMA_BASEADDR, FLEXIO_SPI_TX_DMA_CHANNEL);
+        EDMA_CreateHandle(&rxHandle, EXAMPLE_FLEXIO_SPI_DMA_BASEADDR, FLEXIO_SPI_RX_DMA_CHANNEL);
+#endif /* FSL_FEATURE_SOC_EDMA_COUNT */
+
+        dma_request_source_tx = (dma_request_source_t)(FLEXIO_DMA_REQUEST_BASE + spiDev.shifterIndex[0]);
+        dma_request_source_rx = (dma_request_source_t)(FLEXIO_DMA_REQUEST_BASE + spiDev.shifterIndex[1]);
+
+        /* Requests  DMA channels for transmit and receive. */
+        DMAMUX_SetSource(EXAMPLE_FLEXIO_SPI_DMAMUX_BASEADDR, FLEXIO_SPI_TX_DMA_CHANNEL, (dma_request_source_t)dma_request_source_tx);
+        DMAMUX_SetSource(EXAMPLE_FLEXIO_SPI_DMAMUX_BASEADDR, FLEXIO_SPI_RX_DMA_CHANNEL, (dma_request_source_t)dma_request_source_rx);
+        DMAMUX_EnableChannel(EXAMPLE_FLEXIO_SPI_DMAMUX_BASEADDR, FLEXIO_SPI_TX_DMA_CHANNEL);
+        DMAMUX_EnableChannel(EXAMPLE_FLEXIO_SPI_DMAMUX_BASEADDR, FLEXIO_SPI_RX_DMA_CHANNEL);
+
+        FLEXIO_SPI_MasterInit(&spiDev, &userConfig, FLEXIO_CLOCK_FREQUENCY);
+
+        /* Initializes the buffer. */
+        for (i = 0; i < BUFFER_SIZE; i++)
+        {
+            srcBuff[i] = i;
+        }
+
+        /* Sends to the slave. */
+        xfer.txData = srcBuff;
+        xfer.rxData = destBuff;
+        xfer.dataSize = BUFFER_SIZE;
+        xfer.flags = kFLEXIO_SPI_8bitMsb;
+        FLEXIO_SPI_MasterTransferCreateHandleDMA(&spiDev, &g_spiHandle, FLEXIO_SPI_MasterUserCallback, NULL, &g_spiTxDmaHandle, &g_spiRxDmaHandle);
+        FLEXIO_SPI_MasterTransferDMA(&spiDev, &g_spiHandle, &xfer);
+
+        // Send finished.
+        while (!txFinished)
+        {
+        }
+
+        // ...
+    }
+~~~~~
+
+*/
+
+/*!
+@if dox_section_flexio_edma_spi
+@defgroup flexio_edma_spi FlexIO eDMA SPI Driver
+@ingroup flexio_spi
+@endif
+*/
+
+/*!
+@if dox_section_flexio_dma_spi
+@defgroup flexio_dma_spi FlexIO DMA SPI Driver
+@ingroup flexio_spi
+@endif
+*/

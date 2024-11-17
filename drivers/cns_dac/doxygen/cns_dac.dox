@@ -1,0 +1,28 @@
+/*!
+@defgroup dac DAC: Digital Analog Converter
+@details The MCUXpresso SDK provides a driver for the Digital Analog Converter (DAC) module of MCUXpreeso SDK devices.
+
+Based on the features of the DAC module, the DAC driver is divided into serval function groups.
+## Module Initialization Interfaces
+The functions in this group can be used to initialize or de-initialize the DAC module. To initialize the DAC module,
+the function DAC_GetDefaultConfig() can be invoked to get the module's default configuration.
+
+## Channels Control Interfaces
+This function group contains channel control APIs. To configure the channels' all options directly at one time, the
+function DAC_SetChannelConfig() is provided, this function takes the pointer to structure that in the type of
+@ref dac_channel_config_t as the parameter. All channel-related options are covered in this structure type.
+To set some specific options of channels, some low-level APIs also provided in this function group. All APIs in this
+function group take channelMask as the parameter, it means the mask of channel ID. If both channel A and channel B
+are aimed to set the same options, then users just need to invoke related APIs once with the channelMask set as the OR'ed
+value of channel A and channel B.
+
+## Triangle Waveform Configuration Interface
+There is only one API in this function group, it is DAC_SetTriangleConfig() function. This function is used to configure
+the triangle waveform when channel A's wave type is selected as the triangle type.
+
+## Interrupts Control Interfaces.
+The APIs in this function group can be used to enable/disable interrupts.
+
+## Status Flags Control Interfaces
+The APIs in this function group can be used to get/clear status flags.
+*/

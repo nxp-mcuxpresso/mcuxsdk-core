@@ -1,0 +1,4 @@
+/*!
+@defgroup syspm SYSPM: System Performance Monitor
+@details  The System Performance Monitor (SYSPM) is a memory mapped peripheral that enables the user to monitor system and/or CPU events. The SYSPM consists of sixteen 256 Byte sub-slots (SS). The first subslot is the configuration slot. The registers in the configuration SS0 describe the number of monitors, types of monitors and number of counters per monitor. Subsequent subslots are occupied by an optional Programmable System Activity Monitor (PSAM), and Performance Monitors (PERFMON) registers.
+*/

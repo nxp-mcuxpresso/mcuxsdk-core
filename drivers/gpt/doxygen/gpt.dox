@@ -1,0 +1,21 @@
+/*!
+@defgroup gpt GPT: General Purpose Timer
+@details The MCUXpresso SDK provides a driver for the General Purpose Timer (GPT)
+         of MCUXpresso SDK devices.
+
+# Function groups {#GPTFunc}
+The gpt driver supports the generation of PWM signals, input capture, and
+setting up the timer match conditions.
+
+## Initialization and deinitialization {#GPTInit}
+The function GPT_Init() initializes the gpt with specified configurations. The function
+GPT_GetDefaultConfig() gets the default configurations. The initialization function
+configures the restart/free-run mode and input selection when running.
+
+The function GPT_Deinit() stops the timer and turns off the module clock.
+
+# Typical use case {#GptCase}
+
+## GPT interrupt example {#GPTInterruptExample}
+Set up a channel to trigger a periodic interrupt after every 1 second.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/gpt*/

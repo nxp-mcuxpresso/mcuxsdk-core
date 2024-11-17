@@ -1,0 +1,33 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_SEMA42_Busy = 1600
+ - #kStatus_SEMA42_Reseting = 1601
+*/
+
+/*!
+@defgroup sema42 SEMA42: Hardware Semaphores Driver
+@details The MCUXpresso SDK provides a driver for the SEMA42 module of MCUXpresso SDK devices.
+
+The SEMA42 driver is used for multicore platforms. Before using the SEMA42, call the
+SEMA42_Init() function to initialize the module. Note that this function only enables the clock
+but does not reset the gates because the module might be used by other processors
+at the same time. To reset the gates, call either the SEMA42_ResetGate() or
+SEMA42_ResetAllGates() functions. The function SEMA42_Deinit() deinitializes the SEMA42.\n
+
+The SEMA42 provides two functions to lock the SEMA42 gate. The function SEMA42_TryLock()
+tries to lock the gate. If the gate has been locked by another processor, this
+function returns an error immediately. The function SEMA42_Lock() is a blocking method, which
+waits until the gate is free and locks it.\n
+
+The SEMA42_Unlock() unlocks the SEMA42 gate. The gate can only be unlocked by the
+processor which locked it. If the gate is not locked by the current processor, this
+function takes no effect. The function SEMA42_GetGateStatus() returns a status whether the gate
+is unlocked and which processor locks the gate.\n
+
+The SEMA42 gate can be reset to unlock forcefully. The function SEMA42_ResetGate()
+resets a specific gate. The function SEMA42_ResetAllGates() resets all gates.
+
+# Typical use case {#SEMA42TypUC}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sema42
+*/

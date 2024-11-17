@@ -1,0 +1,38 @@
+/*!
+@defgroup jn_iocon IOCON: I/O pin configuration
+@details The MCUXpresso SDK provides a peripheral driver for the I/O pin configuration (IOCON) module of
+         MCUXpresso SDK devices.
+
+# Function groups {#IOCONFuncGrps}
+
+## Pin mux set {#IOCONPinMuxSet}
+The function IOCONPinMuxSet() sets a pinmux for a single pin according to the selected configuration.
+
+
+## Pin mux set {#IOCON_SetPinMuxing}
+The function IOCON_SetPinMuxing() sets a pinmux for group of pins according to the selected configuration.
+
+
+# Typical use case {#IOCONTpyUC}
+Example use of IOCON API to selection of GPIO mode.
+~~~~~{.c}
+int main(void)
+{
+    /* enable clock for IOCON */
+    CLOCK_EnableClock(kCLOCK_Iocon);
+
+    /* Set pin mux for single pin */
+    IOCON_PinMuxSet(IOCON, 0, 29, IOCON_FUNC0 | IOCON_GPIO_MODE | IOCON_DIGITAL_EN | IOCON_INPFILT_OFF);
+
+    /* Set pin mux for group of pins */
+    const iocon_group_t gpio_pins[] = {
+    {0, 24, (IOCON_FUNC0 | IOCON_GPIO_MODE | IOCON_DIGITAL_EN | IOCON_INPFILT_OFF)},
+    {0, 31, (IOCON_FUNC0 | IOCON_GPIO_MODE | IOCON_DIGITAL_EN | IOCON_INPFILT_OFF)},
+    };
+
+    Chip_IOCON_SetPinMuxing(IOCON, gpio_pins, sizeof(gpio_pins)/sizeof(gpio_pins[0]));
+
+}
+~~~~~
+*/
+

@@ -1,0 +1,32 @@
+/*!
+@defgroup pdb PDB: Programmable Delay Block
+@details The MCUXpresso SDK provides a peripheral driver for the Programmable Delay Block (PDB)
+         module of MCUXpresso SDK devices.
+
+
+The PDB driver includes a basic PDB counter, trigger generators for ADC, DAC, and pulse-out.
+
+The basic PDB counter can be used as a general programmable timer with an interrupt.
+The counter increases automatically with the divided clock signal after it is triggered to start by an external trigger input or the software trigger.
+There are "milestones" for the output trigger event. When the counter is equal to any of these "milestones",
+the corresponding trigger is generated and sent out to other modules. These "milestones" are for the following events.
+ - Counter delay interrupt, which is the interrupt for the PDB module
+ - ADC pre-trigger to trigger the ADC conversion
+ - DAC interval trigger to trigger the DAC buffer and move the buffer read pointer
+ - Pulse-out triggers to generate a single of rising and falling edges, which can be assembled to a window.
+
+The "milestone" values have a flexible load mode.
+To call the APIs to set these value is equivalent to writing data to their buffer.
+The loading event occurs as the load mode describes.
+This design ensures that all "milestones" can be updated at the same time.
+
+# Typical use case {#PDBTypUC}
+
+## Working as basic PDB counter with a PDB interrupt. {#PDBInt}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdb
+## Working with an additional trigger. The ADC trigger is used as an example. {#PDBTrig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdb
+*/
+

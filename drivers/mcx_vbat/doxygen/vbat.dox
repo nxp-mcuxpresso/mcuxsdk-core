@@ -1,0 +1,59 @@
+/*!
+@defgroup mcx_vbat MCX_VBAT: Smart Power Switch
+@details The MCUXpresso SDK provides a peripheral driver for the Smart Power Switch (VBAT) block of MCUXpresso SDK devices.
+The VBAT includes the following features:
+    - Oscillator for 32.768 kHz crystal (OSC32K);
+        + The OSC32K is disabled by default on VBAT PORT.
+        + When enabled, it takes the oscillator start-up time before the OSC_RDY flag is set and the
+          clock is output to other modules.
+    - Internal 16 kHz free running oscillator (FRO16k);
+        + The FRO16K is enabled by default on VBAT POR.
+        + It can be disabled by software.
+    - Backup retention SRAM regulator(SRAM LDO).
+        + The SRAM LDO is a retention regulator used to retain VBAT retention SRAM in low power modes, including when
+          VBAT is the only available supply.
+        + Before entering a low power mode where the retention SRAM is powered by VBAT supply, software must enable the
+          bandgap and LDO.
+        + The refresh mode must also be enabled for lowest power consumption. 
+
+Based on VBAT's features the VBAT driver are divided into 6 function groups.
+
+# FRO16K Control Interfaces
+Functions in this group can be used to configure internal 16kHz free running oscillator.
+
+To enable and lock the FRO16K:
+    1. Invoke VBAT_EnableFRO16k(VBAT0, true) to enable FRO16K;
+    2. Invoke VBAT_LockFRO16kSettings(VBAT0) to lock FRO16K settings;
+    3. Invoke VBAT_UngateFRO16k(VBAT0, kVBAT_EnableClockToVddBat | kVBAT_EnableClockToVddSys) to ungate clock to VDD_BAT power domain and VDD_SYS power domain.
+
+# OSC32K Control Interfaces
+Functions in this group can be used to configure internal 32k crystal oscillator.
+
+To configure and lock OSC32kHz for lowest power operation(Switched mode):
+    1. Invoke VBAT_SetCrystalOsc32kModeAndLoadCapacitance(VBAT0, kVBAT_Osc32kEnabledToLowPowerSwitchedMode, kVBAT_Osc32kCrystalLoadCap0pF, kVBAT_Osc32kCrystalLoadCap0pF) to set OSC32k as low power switched mode.
+    2. Invoke VBAT_EnableCrystalOsc32k(VBAT0, true) to enable OSC32kHz.
+    3. Invoke VBAT_LookOsc32kSettings(VBAT0) to lock OSC32k settings.
+    4. Invoke VBAT_UngateOsc32k(VBAT0, kVBAT_EnableClockToVddBat | kVBAT_EnableClockToVddSys) to ungate clock to VDD_BAT power domain and VDD_SYS power domain.
+
+# RAM_LDO Control Interfaces
+Functions in this group can be used to control internal bandgap and RAM_LDO.
+
+To enable and lock the LDO and bandgap:
+    1. Check if FRO16k is enabled by invoking VBAT_CheckFRO16kEnabled(VBAT0).
+    2. Invoke VBAT_EnableBandgap(VBAT0, true) to enable bandgap.
+    3. Invoke VBAT_EnableBandgapRefreshMode(VBAT0, true) to enable bandgap low power refresh mode.
+    4. Invoke VBAT_EnableBackupSRAMRegulator(VBAT0, true) to enable backup SRAM regulator.
+    5. Invoke VBAT_LockRamLdoSettings(VBAT0) to lock LDO settings.
+
+# Bandgap Timer Control Interfaces
+Functions in this group can be used to control internal software bandgap timers. Please note that bandgap timers are
+available when the bandgap is enabled and are clocked by the FRO16k.
+
+# Status, Interrupt, Wakeup Control Interfaces
+VBAT_GetStatusFlags() and VBAT_ClearStatusFlags() function in this group can be used to get and clear status flags.
+VBAT_EnableInterrupts() and VBAT_DisableInterrupts() function in this group can be used to enable/disable interrupt.
+VBAT_EnableWakeup() and VBAT_DisableWakeup() function in this group can be used to enable/disable wakeup features.
+
+# Switch Control Interfaces
+Functions in this group can be used to switch power supply of VBAT modules.
+*/

@@ -1,0 +1,58 @@
+/*!
+@defgroup syscon SYSCON: System Configuration
+@details The MCUXpresso SDK provides a peripheral clock and power driver for the SYSCON module of MCUXpresso SDK devices. For furter details, see the corresponding chapter.
+*/
+
+/*!
+@defgroup clock Clock Driver
+@details The MCUXpresso SDK provides a peripheral clock driver for the SYSCON module of MCUXpresso SDK devices.
+
+# Function description {#SYSCONFunc}
+
+Clock driver provides these functions:
+ - Functions to initialize the Core clock to given frequency
+ - Functions to configure the clock selection muxes.
+ - Functions to setup peripheral clock dividers
+ - Functions to set the flash wait states for the input freuqency
+ - Functions to get the frequency of the selected clock
+ - Functions to set PLL frequency  
+
+## SYSCON Clock frequency functions {#SYSCONClockFreq}
+
+SYSCON clock module provides clocks, such as MCLKCLK, ADCCLK, DMICCLK, MCGFLLCLK, FXCOMCLK, WDTOSC, RTCOSC, USBCLK,
+and SYSPLL. The functions CLOCK_EnableClock() and CLOCK_DisableClock() enables and disables the various 
+clocks. CLOCK_SetupFROClocking() initializes the FRO to 12 MHz, 48 MHz, or 96 MHz frequency.
+CLOCK_SetupPLLData(), CLOCK_SetupSystemPLLPrec(), and CLOCK_SetPLLFreq() functions are used to setup the PLL.  
+The SYSCON clock driver provides functions to get the frequency of these clocks, such as CLOCK_GetFreq(),
+CLOCK_GetFro12MFreq(), CLOCK_GetExtClkFreq(), CLOCK_GetWdtOscFreq(),
+CLOCK_GetFroHfFreq(), CLOCK_GetPllOutFreq(), CLOCK_GetOsc32KFreq(), CLOCK_GetCoreSysClkFreq(), 
+CLOCK_GetI2SMClkFreq(), CLOCK_GetFlexCommClkFreq, and CLOCK_GetAsyncApbClkFreq. 
+
+## SYSCON clock Selection Muxes {#SYSCONClockSel}
+
+The SYSCON clock driver provides the function to configure the clock selected. The function 
+CLOCK_AttachClk() is implemented for this. The function selects the clock source for a particular
+peripheral like MAINCLK, DMIC, FLEXCOMM, USB, ADC, and PLL.
+
+## SYSCON clock dividers {#SYSCONClockSetClkDiv}
+
+The SYSCON clock module provides the function to setup the peripheral clock dividers. The function 
+CLOCK_SetClkDiv() configures the CLKDIV registers for various periperals like USB, DMIC, I2S, SYSTICK, AHB, ADC, and also
+CLKOUT and TRACE functions. 
+
+## SYSCON flash wait states {#SYSCONFlashwait}
+
+The SYSCON clock driver provides the  function CLOCK_SetFLASHAccessCyclesForFreq() that configures 
+FLASHCFG register with a selected FLASHTIM value. 
+
+# Typical use case {#SYSCONClockUsecs}
+
+	POWER_DisablePD(kPDRUNCFG_PD_FRO_EN); /*!< Ensure FRO is on so that we can switch to its 12MHz mode temporarily*/
+    CLOCK_AttachClk(
+        kFRO12M_to_MAIN_CLK);          /*!< Switch to 12MHz first to ensure we can change voltage without accidentally
+                                       being below the voltage for current speed */
+    POWER_SetVoltageForFreq(48000000); /*!< Set voltage for core */
+    CLOCK_SetFLASHAccessCyclesForFreq(48000000); /*!< Set FLASH waitstates for core */
+    CLOCK_SetupFROClocking(48000000);            /*!< Setup CPU to run off FRO 48MHz output*/
+    CLOCK_AttachClk(kFRO_HF_to_MAIN_CLK);        /*!< Switch main clock to 48MHz */
+*/

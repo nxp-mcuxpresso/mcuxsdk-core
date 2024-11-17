@@ -1,0 +1,33 @@
+/*!
+@defgroup enc ENC: Quadrature Encoder/Decoder
+@details The MCUXpresso SDK provides a peripheral driver for the Quadrature Encoder/Decoder (ENC)
+         module of MCUXpresso SDK devices.
+
+This section describes the programming interface of the ENC Peripheral driver.
+The ENC driver configures the ENC module and provides a functional interface for the user to build the ENC application.
+
+# Function groups {#ENCFunGrps}
+
+## Initialization and De-initialization {#ENCInit}
+
+This function group initializes default configuration structure for the ENC counter and initializes ENC counter with the normal configuration and de-initialize ENC module. Some APIs are also created to control the features.
+
+## Status {#ENCSta}
+
+This function group get/clear the ENC status.
+
+## Interrupts {#ENCInt}
+
+This function group enable/disable the ENC interrupts.
+
+## Value Operation {#ENCValOps}
+
+This function group get the counter/hold value of positions.
+
+# Typical use case {#ENCTpyUC}
+
+## Polling Configuration {#ENCPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/enc
+*/
+

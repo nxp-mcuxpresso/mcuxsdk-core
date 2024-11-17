@@ -1,0 +1,14 @@
+/*!
+@defgroup wdog8 WDOG8: 8-bit Watchdog Timer
+@details The MCUXpresso SDK provides a peripheral driver for the WDOG8 module of MCUXpresso SDK devices.
+
+# Typical use case {#WDOG8TypUC}
+~~~~~{.c}
+    wdog8_config_t config;
+    WDOG8_GetDefaultConfig(&config);
+    config.timeoutValue = 0xffffU;
+    config.enableWindowMode = true;
+    config.windowValue = 0x1ffU;
+    WDOG8_Init(wdog_base,&config);
+~~~~~
+*/

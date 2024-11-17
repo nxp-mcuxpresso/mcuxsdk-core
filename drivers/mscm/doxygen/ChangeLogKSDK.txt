@@ -1,0 +1,8 @@
+/*!
+@page driver_log Driver Change Log
+
+@section mscm MSCM
+  - 2.0.0
+    - Initial version.
+
+*/

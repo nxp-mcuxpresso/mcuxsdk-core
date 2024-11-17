@@ -1,0 +1,8 @@
+/*!
+@defgroup rcm RCM: Reset Control Module Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Reset Control Module (RCM) module of MCUXpresso SDK devices.
+
+
+
+*/
+

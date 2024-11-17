@@ -1,0 +1,13 @@
+/*!
+@defgroup src SRC: System Reset Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the System Reset Controller (SRC)
+         module.
+
+The System Reset Controller (SRC) controls the reset and boot operation of the SoC. It is
+responsible for the generation of all reset signals and boot decoding. The reset controller
+determines the source and the type of reset, such as POR, WARM, COLD, and performs
+the necessary reset qualification and stretching sequences. Based on the type of reset, the
+reset logic generates the reset sequence for the entire IC.
+
+*/
+

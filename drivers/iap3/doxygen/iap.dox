@@ -1,0 +1,29 @@
+/*!
+@defgroup IAP_driver IAP: In Application Programming Driver
+@details The MCUXpresso SDK provides a driver for the In Application Programming (IAP).
+ @n
+It provides a set of functions to call the on-chip in application programming interface.
+User code executing from on-chip RAM can call these function to read information like part id, read and write flash, read and write ffr.
+ @n
+
+## IAP Basic Operations
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iap
+*/
+
+/*!
+@defgroup iap_boot_driver IAP Boot Driver
+@ingroup IAP_driver
+@details
+*/
+
+/*!
+@defgroup iap_flexspi_driver IAP FlexSPI Driver
+@ingroup IAP_driver
+@details
+*/
+
+/*!
+@defgroup iap_otp_driver IAP OTP Driver
+@ingroup IAP_driver
+@details
+*/

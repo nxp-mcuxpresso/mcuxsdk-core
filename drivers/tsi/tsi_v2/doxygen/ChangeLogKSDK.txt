@@ -1,0 +1,22 @@
+/*!
+@page driver_log Driver Change Log
+
+@if dox_section_tsi_v2_driver
+
+@section tsi_v2 TSI_V2
+  The current TSI_V2 driver version is 2.1.2.
+
+  - 2.1.2
+    - Bug Fixes
+      - Fixed w1c issues in status handling API.
+
+  - 2.1.1
+    - New Features
+      - Changed void TSI_DeInit(TSI_Type *base) to void TSI_Deinit(TSI_Type *base).
+
+  - 2.0.1
+    - Other Changes
+      - Changed default configuration structure member order.
+
+@endif
+*/

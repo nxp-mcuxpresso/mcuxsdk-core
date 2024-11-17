@@ -1,0 +1,34 @@
+/*!
+@defgroup sdadc SDADC: SDADC Module
+@details The MCUXpresso SDK provides a peripheral driver for the SDADC module of MCUXpresso SDK devices. 
+
+Based on features of the SDADC module, this driver is divided into the following function groups:
+
+# SDADC initialization and de-initialization.
+    Functions in this group are used to initialize and de-initialize the SDADC module.
+
+# SDADC channel modulator, reference, and LDO configuration.
+    Functions in this group are used to:
+    1. Do initialize power up
+    2. Enable and disable channel modulator, reference and LDO power.
+    3. Configure reference mode and LDO drive capability.
+
+# SDADC channel mode, DAC compensation, modulator DC Loop, decimator DC Filter configuration.
+    Functions in this group are used to:
+    1. Configure channel mode.
+    2. Enable and disable DAC compensation, modulator DC Loop, decimator DC Filter, and decimator output invert.
+    3. Configure decimator volume, decimator sample rate, and dither amplitude.
+
+# SDADC modulator, decimator, and modulator DC Loop reset and release reset.
+    Functions in this group are used to control reset or release reset for the SDADC modulator, decimator, and modulator DC Loop.
+
+# SDADC FIFO related operations.
+    Functions in this group are used to:
+    1. Enable and disable global or specific FIFO interrupt and watermark.
+    2. Clean and check the global or specific FIFO interrupt and watermark status flag.
+    3. Configure FIFO watermark.
+    4. Control FIFO's write and read reset.
+    5. Get FIFO available entries.
+    6. Get FIFO raw data.
+    7. Copy FIFO data to a buffer.
+*/

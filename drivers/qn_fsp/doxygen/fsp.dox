@@ -1,0 +1,9 @@
+/*!
+@defgroup qn_fsp FSP: Fusion Signal Processing
+@details The MCUXpresso SDK provides a peripheral driver for the Fusion Signal Processing (FSP)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#QNFSPTpyUC}
+Example use of FSP API.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsp
+*/

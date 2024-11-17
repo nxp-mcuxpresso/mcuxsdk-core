@@ -1,0 +1,5 @@
+/*!
+@defgroup elemu ELEMU: Edgelock Messaging unit driver
+@details The firmware lib provides Edgelock driver.
+*/
+

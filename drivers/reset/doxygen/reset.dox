@@ -1,0 +1,7 @@
+/*!
+@defgroup reset Reset driver
+@ingroup syscon
+@details The MCUXpresso SDK provides a reset driver for the MCUXpresso SDK devices.
+
+
+*/

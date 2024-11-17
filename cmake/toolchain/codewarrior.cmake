@@ -1,0 +1,37 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+set(CMAKE_EXECUTABLE_SUFFIX ".elf")
+
+set(TOOLCHAIN_ROOT $ENV{CW_DIR})
+string(REGEX REPLACE "\\\\" "/" TOOLCHAIN_ROOT "${TOOLCHAIN_ROOT}")
+
+if(NOT TOOLCHAIN_ROOT)
+    message(FATAL_ERROR "***Please set CW_DIR in environment variables***")
+endif()
+
+SET(TARGET_TRIPLET "MCU/DSP56800x_EABI_Tools/bin")
+
+set(AS "mwasm56800e")
+set(CC "mwcc56800e")
+set(CXX "mwcc56800e")
+set(LD "mwld56800e")
+
+set(AS ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${AS}${TOOLCHAIN_EXT})
+set(CC ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${CC}${TOOLCHAIN_EXT})
+set(CXX ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${CXX}${TOOLCHAIN_EXT})
+set(LD ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${LD}${TOOLCHAIN_EXT})
+set(MCUToolsBaseDir ${TOOLCHAIN_ROOT}/MCU)
+
+
+set(CMAKE_ASM_COMPILER "${AS}")
+set(CMAKE_C_COMPILER "${CC}")
+set(CMAKE_CXX_COMPILER "${CXX}")
+set(CMAKE_OBJCOPY "${LD}")
+set(OBJDUMP_OUT_CMD "")
+set(OBJDUMP_BIN_CMD "-bin")
+
+# force cmake use mwld56800e to link image
+set(CMAKE_LINKER ${LD})
+set(CMAKE_C_LINK_EXECUTABLE "<CMAKE_LINKER> <OBJECTS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")

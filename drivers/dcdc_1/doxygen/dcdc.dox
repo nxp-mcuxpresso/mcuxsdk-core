@@ -1,0 +1,36 @@
+/*!
+@defgroup dcdc DCDC: DCDC Converter
+@details The MCUXpresso SDK provides a peripheral driver for the DCDC Converter (DCDC) module of MCUXpresso SDK devices.
+@{
+
+The DCDC converter module is a synchronous buck mode DCDC converter. It can produce single outputs for SoC peripherals and external devices with high conversion efficiency. The converter can be operated in continuous or pulsed mode.
+
+As a module to provide the power for hardware system, the DCDC starts working when the system is powered up before the software takes over the SoC. Some important configuration is done by the board settings. Before the software can access the DCDC's registers, the DCDC is already working normally with the default settings.
+
+However, if the application needs to improve the DCDC's performance or change the default settings, the DCDC driver would help. The DCDC's register cannot be accessed by software before its initialization (open the clock gate). The user can configure the hardware according to the application guide from reference manual.
+
+# Function groups {#DCDCFunGrps}
+
+## Initialization and deinitialization {#DCDCInit}
+
+This function group is to enable/disable the operations to DCDC module through the driver.
+
+## Status {#DCDCStatus}
+
+Provides functions to get the DCDC status.
+
+## Misc control {#DCDCMiscCtrl}
+
+Provides functions to set the DCDC's miscellaneous control.
+
+## Set point mode control
+
+Provides functions to initialize/de-initialize DCDC module in set point mode.
+
+# Application guideline {#DCDCAppGuide}
+
+## Continous conduction mode {#DCDCModeContinous}
+
+## Discontinous conduction mode {#DCDCModeDiscontinous}
+
+/*! @} */

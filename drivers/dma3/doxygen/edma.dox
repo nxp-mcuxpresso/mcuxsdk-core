@@ -1,0 +1,17 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_EDMA_QueueFull = 5100
+ - #kStatus_EDMA_Busy = 5101
+*/
+
+/*!
+@defgroup dma3 EDMA: Enhanced Direct Memory Access (eDMA) Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the enhanced Direct Memory Access (eDMA)
+         of MCUXpresso SDK devices.
+
+# Typical use case{#EDMATypicalUseCase}
+
+## EDMA Operation{#EDMAOper}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/edma*/
+

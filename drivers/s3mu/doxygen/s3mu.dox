@@ -1,0 +1,5 @@
+/*!
+@defgroup s3mu S3MU: Sentinel
+@details The firmware lib provides Sentinel driver.
+*/
+

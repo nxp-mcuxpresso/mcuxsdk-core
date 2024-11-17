@@ -1,0 +1,63 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_SMC_StopAbort = 3900
+*/
+
+/*!
+@defgroup smc SMC: System Mode Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the System Mode Controller (SMC) module of
+MCUXpresso SDK devices. The SMC module sequences the system in and out of all
+low-power stop and run modes.
+
+API functions are provided to configure the system for working in a dedicated power mode. For
+different power modes, SMC_SetPowerModexxx() function accepts different parameters. System power mode
+state transitions are not available between power modes. For details about available transitions,
+see the power mode transitions section in the SoC reference manual.
+
+# Typical use case {#SMCTypUc}
+
+## Enter wait or stop modes {#SMCWaitStop}
+
+SMC driver provides APIs to set MCU to different wait modes and stop modes.
+Pre and post functions are used for setting the modes.
+The pre functions and post functions are used as follows.
+
+Disable/enable the interrupt through PRIMASK. This is an example use case.
+The application sets the wakeup interrupt and calls SMC function @ref SMC_SetPowerModeStop
+to set the MCU to STOP mode, but the wakeup interrupt happens so quickly that the ISR
+completes before the function @ref SMC_SetPowerModeStop. As a result, the MCU 
+enters the STOP mode and never is woken up by the interrupt. In this use case, the application 
+first disables the interrupt through PRIMASK, sets the wakeup interrupt, and
+enters the STOP mode. After wakeup, enable the interrupt through PRIMASK.
+The MCU can still be woken up by disabling the interrupt through PRIMASK. The pre and post
+functions handle the PRIMASK.
+
+@code
+
+SMC_PreEnterStopModes();
+
+/* Enable the wakeup interrupt here. */
+
+SMC_SetPowerModeStop(SMC, kSMC_PartialStop);
+
+SMC_PostExitStopModes();
+
+@endcode
+
+For legacy Kinetis, when entering stop modes, the flash speculation might be
+interrupted. As a result, the prefetched code or data might be broken. To make
+sure the flash is idle when entring the stop modes, smc driver allocates a RAM
+region, the code to enter stop modes are excuted in RAM, thus the flash is idle
+and no prefetch is performed while entring stop modes. Application should make
+sure that, the rw data of fsl_smc.c is located in memory region which is not
+powered off in stop modes, especially LLS2 modes.
+
+For STOP, VLPS, and LLS3, the whole RAM are powered up, so after woken up, the
+RAM function could continue excuting. For VLLS mode, the system resets after
+woken up, the RAM content might be re-initialized. For LLS2 mode, only part of
+RAM are powered on, so application must make sure that, the rw data of fsl_smc.c
+is located in memory region which is not powered off, otherwise after woken up,
+the MCU could not get right code to excute.
+
+*/
+

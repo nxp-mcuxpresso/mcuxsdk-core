@@ -1,0 +1,5 @@
+/*!
+@defgroup lcdif_driver LCDIF: LCD interface
+@details The MCUXpresso SDK provides a peripheral driver for the LCD interface (LCDIF) module of MCUXpresso SDK devices.
+
+*/

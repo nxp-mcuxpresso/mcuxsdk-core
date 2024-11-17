@@ -1,0 +1,34 @@
+/*!
+@defgroup ostimer OSTIMER: OS Event Timer Driver
+@details The MCUXpresso SDK provides a peripheral driver for the OSTIMER module of MCUXpresso SDK devices.
+OSTIMER driver is created to help user to operate the OSTIMER module. The OSTIMER timer can be used as a low power timer. 
+The APIs can be used to enable the OSTIMER module, initialize it and set the match time, get the current timer count.
+And the raw value in OS timer register is gray-code type, so both decimal and gray-code format API were added for users. 
+OSTIMER can be used as a wake up source from low power mode.
+
+
+# Function groups {#OSTIMERFunc}
+The OSTIMER driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#OSTIMERInit}
+The OSTIMER_Init() function will initialize the OSTIMER and enable the clock for OSTIMER.
+The OSTIMER_Deinit() function will shut down the bus clock of OSTIMER.
+
+## OSTIMER status {#OSTIMERsTATUS}
+The function OSTIMER_GetStatusFlags() will get the current status flag of OSTIMER.
+The function OSTIMER_ClearStatusFlag() will help clear the status flags.
+
+## OSTIMER set match value {#OSTIMERMatchValue}
+For OSTIMER, allow users set the match in two ways, set match value with raw data(gray code) 
+and st the match value with common data(decimal format).
+OSTIMER_SetMatchRawValue() is used with gray code and OSTIMER_SetMatchValue() is used together with 
+decimal data.
+
+## OSTIMER get timer count {#OSTIMERTimerCount}
+The OSTIMER driver allow users to get the timer count in two ways, getting the gray code value by using
+OSTIMER_GetCaptureRawValue() and getting the decimal data by using OSTIMER_GetCurrentTimerValue().
+
+# Typical use case {#OSTIMERUseCase}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ostimer/
+
+*/

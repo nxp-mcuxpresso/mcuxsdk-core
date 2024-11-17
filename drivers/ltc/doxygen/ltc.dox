@@ -1,0 +1,121 @@
+/*!
+@defgroup ltc LTC: LP Trusted Cryptography
+@details The MCUXpresso SDK provides a peripheral driver for the LP Trusted Cryptography (LTC) module of MCUXpresso SDK devices.
+LP Trusted Cryptography is a set of cryptograhpic hardware accelerator engines that share common registers. LTC architecture can support AES, DES, 3DES, MDHA (SHA), RSA, and ECC.
+ The actual list of implemented cryptograhpic hardware accelerator engines depends on the specific microcontroller.
+
+The driver comprises two sets of API functions.
+
+In the first set, blocking synchronous APIs are provided, for all operations supported by LTC hardware.
+The LTC operations are complete (and results are made availabe for further usage) when a function returns.
+When called, these functions do not return until an LTC operation is complete.
+These functions use main CPU for simple polling loops to determine operation complete or error status and also for plaintext or ciphertext data movements.
+The driver functions are not re-entrant.
+These functions provide typical interface to upper layer or application software.
+
+In the second set, DMA support for symmetric LTC processing is provided, for AES and DES engines.
+APIs in the second set use DMA for data movement to and from the LTC input and output FIFOs.
+By using these functions, main CPU is not used for plaintext or ciphertext data movements (DMA is used instead).
+Thus, CPU processing power can be used for other application tasks, at cost of decreased maximum data throughput (because of DMA module and transactions management overhead).
+These functions provide less typical interface, for applications that must offload main CPU while ciphertext or plaintext is being processed, at cost of longer
+cryptograhpic processing time.
+
+# LTC Driver Initialization and Configuration {#LTCInit}
+
+LTC Driver is initialized by calling the LTC_Init() function, it enables the LTC module clock in the SIM module.
+If AES or DES engine is used and the LTC module implementation features the LTC DPA Mask Seed register, seed
+the DPA mask generator by using the seed from a random number generator. The LTC_SetDpaMaskSeed() function is provided to set the DPA mask seed.
+
+# Comments about API usage in RTOS {#LTCRtos}
+
+LTC operations provided by this driver are not re-entrant. Thus, application software shall ensure
+the LTC module operation is not requested from different tasks or interrupt service routines while an operation is in progress.
+
+# Comments about API usage in interrupt handler {#LTCisr}
+
+All APIs can be used from interrupt handler although execution time shall be considered (interrupt latency of equal and lower priority interrupts increases).
+
+# LTC Driver Examples {#LTCEx}
+
+## Simple examples {#LTCSimpleEx}
+
+Initialize LTC after Power On Reset or reset cycle
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ltcEncrypt plaintext by DES engine
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ltc
+Encrypt plaintext by AES engine
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ltc
+Compute keyed hash by AES engine (CMAC)
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ltc
+Compute hash by MDHA engine (SHA-256)
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ltc
+Compute modular integer exponentiation
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ltc
+Compute elliptic curve point multiplication
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ltc*/
+
+/*!
+@defgroup ltc_driver_synchronous_blocking LTC Blocking APIs
+@details This section describes the programming interface of the LTC Synchronous Blocking functions
+@ingroup ltc
+*/
+/*!
+@defgroup ltc_driver_des LTC DES driver
+@details This section describes the programming interface of the LTC DES driver.
+@ingroup ltc_driver_synchronous_blocking
+*/
+/*!
+@defgroup ltc_driver_aes LTC AES driver
+@details This section describes the programming interface of the LTC AES driver.
+@ingroup ltc_driver_synchronous_blocking
+*/
+/*!
+@defgroup ltc_driver_hash LTC HASH driver
+@details This section describes the programming interface of the LTC HASH driver.
+@ingroup ltc_driver_synchronous_blocking
+*/
+/*!
+@defgroup ltc_driver_pkha LTC PKHA driver
+@details This section describes the programming interface of the LTC PKHA driver.
+@ingroup ltc_driver_synchronous_blocking
+*/
+/*!
+@if dox_section_ltc_edma_driver
+@defgroup ltc_edma_driver LTC Non-blocking eDMA APIs
+@details This section describes the programming interface of the LTC eDMA Non Blocking functions
+@ingroup ltc
+@endif
+*/
+/*!
+@if dox_section_ltc_edma_driver
+@defgroup ltc_edma_driver_des LTC eDMA DES driver
+@details This section describes the programming interface of the LTC eDMA DES driver.
+@ingroup ltc_edma_driver
+@endif
+*/
+/*!
+@if dox_section_ltc_edma_driver
+@defgroup ltc_edma_driver_aes LTC eDMA AES driver
+@details This section describes the programming interface of the LTC eDMA AES driver.
+@ingroup ltc_edma_driver
+@endif
+*/
+/*!
+\internal @defgroup ltc_driver_dpa LTC DPA driver
+@details This section describes the programming interface of the LTC DPA driver.
+@ingroup ltc
+*/
+/*!
+\internal @defgroup ltc_driver_aes_with_dpa LTC DPA AES driver
+@details This section describes the programming interface of the LTC DPA AES driver.
+@ingroup ltc_driver_dpa
+*/
+/*!
+\internal @defgroup ltc_driver_des_with_dpa LTC DPA DES driver
+@details This section describes the programming interface of the LTC DPA DES driver.
+@ingroup ltc_driver_dpa
+*/
+/*!
+\internal @defgroup ltc_driver_cmac_with_dpa LTC DPA AES CMAC driver
+@details This section describes the programming interface of the LTC DPA AES CMAC driver.
+@ingroup ltc_driver_dpa
+*/

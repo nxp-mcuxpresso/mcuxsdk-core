@@ -1,0 +1,15 @@
+/*!
+@defgroup ieer IEER: Inline Encryption Engine Router
+@details The MCUXpresso SDK provides a peripheral driver for the Inline Encryption Engine Router (IEER) module.@n
+ @n
+The purpose of the IEE Router (IEER) Shim is 1) to decide whether a bus master
+transaction need to be routed to IEER for encryption/decryption or pass it to the
+destination slave. 2) to pass on the crypto context, for example, key selection information to the
+IEE.
+ @n
+
+# IEER Driver Initialization and Configuration {#IEERInit}
+
+# IEER Driver Examples {#IEEREx}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ieer

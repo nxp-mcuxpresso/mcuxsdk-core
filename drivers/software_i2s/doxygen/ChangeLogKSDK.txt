@@ -1,0 +1,9 @@
+/*!
+@page driver_log Driver Change Log
+
+@section software_i2s I2S
+  The current I2S driver version is 2.0.0.
+    
+  - 2.0.0
+    - Initial version.
+*/

@@ -1,0 +1,31 @@
+/*!
+@defgroup rtd_cmc RTD_CMC: Real Time Domain Core Mode Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Real Time Domain Core Mode Controller (RTD_CMC) module
+of MCUXpresso SDK devices. The RTD_CMC module sequences the CPU and associated logic through the different
+operating modes.
+The APIs are divided into following function groups:
+
+# Clock Mode Configurations
+    The function RTDCMC_SetClockMode() in this group can be used to configure the amount of clock gating when the core
+asserts sleeping due to WFI, WFE or sleepNEXT.
+# Gets/Clears the Clock Mode, the wake up source, the Reset source
+    Functions sided in this function group can be used to get/clear clock mode, wake-up source and reset source.
+
+# Power Mode Configuration
+    The function RTDCMC_SetPowerModeProtection() used to set power mode protection, and function RTDCMC_EnterLowPowerMode()
+used to enter into specific power mode, please note that only the power mode allowed by RTDCMC_SetPowerModeProtection()
+can be successful.
+# System Reset Interrupts
+    Functions in this group are for system reset interrupt control.
+# Power Switch Domain Interrupt
+    Functions in this group are for power switch domain interrupt control.
+# Real Time Domain Power Switch Domain Status API
+    The function RTDCMC_CheckRealTimeDomainPowerSwitchDomainStatus() can be used to check power switch domain status.
+# Boot Configuration
+    Functions in this group are for Boot configurations.
+# Non Maskable Pin interrupt
+    The function RTDCMC_EnableNonMaskablePinInterrupt() can be used to enable/disable Non-maskable pin interrupt.
+# Debug Configuration
+    The function RTDCMC_EnableDebugOperation() can be used to enable/disable debug.
+*/
+

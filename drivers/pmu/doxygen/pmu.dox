@@ -1,0 +1,15 @@
+/*!
+@defgroup pmu PMU: Power Management Unit
+@details The MCUXpresso SDK provides a peripheral driver for the Power Management Unit (PMU) module of
+MCUXpresso SDK devices. The power management unit (PMU) is designed to simplify the external power
+interface. The power system can be split into the input power sources and their characteristics,
+the integrated power transforming and controlling elements, and the final load interconnection
+and requirements. By using the internal LDO regulators, the number of external supplies is greatly
+reduced. 
+
+The PMU driver provides the APIs to adjust the work condition of each regulator, and can gate the
+power of some modules.
+
+
+*/
+

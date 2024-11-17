@@ -1,0 +1,21 @@
+/*!
+@defgroup sysctl SYSCTL: I2S bridging and signal sharing Configuration
+@details The MCUXpresso SDK provides a peripheral driver for the SYSCTL module of MCUXpresso SDK devices. For furter details, see the corresponding chapter.
+*/
+
+# Typical use case {#SYSCTLUC}
+##Signal sharing
+Below example shows FC6/FC7 share WS/SCK signal which comes from FC7.
+@code
+	SYSCTL_Init(SYSCTL);
+    /* select signal source for share set */
+    SYSCTL_SetShareSignalSrc(SYSCTL, kSYSCTL_ShareSet0, kSYSCTL_SharedCtrlSignalSCK, kSYSCTL_Flexcomm7);
+    SYSCTL_SetShareSignalSrc(SYSCTL, kSYSCTL_ShareSet0, kSYSCTL_SharedCtrlSignalWS, kSYSCTL_Flexcomm7);
+    /* select share set for special flexcomm signal */
+    SYSCTL_SetShareSet(SYSCTL, kSYSCTL_Flexcomm7, kSYSCTL_FlexcommSignalSCK, kSYSCTL_ShareSet0);
+    SYSCTL_SetShareSet(SYSCTL, kSYSCTL_Flexcomm7, kSYSCTL_FlexcommSignalWS, kSYSCTL_ShareSet0);
+    SYSCTL_SetShareSet(SYSCTL, kSYSCTL_Flexcomm6, kSYSCTL_FlexcommSignalSCK, kSYSCTL_ShareSet0);
+    SYSCTL_SetShareSet(SYSCTL, kSYSCTL_Flexcomm6, kSYSCTL_FlexcommSignalWS, kSYSCTL_ShareSet0);
+@endcode
+
+*/

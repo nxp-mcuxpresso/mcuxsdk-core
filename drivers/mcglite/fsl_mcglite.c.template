@@ -1,0 +1,345 @@
+/*
+ * Copyright (c) 2015, Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * o Redistributions of source code must retain the above copyright notice, this list
+ *   of conditions and the following disclaimer.
+ *
+ * o Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or
+ *   other materials provided with the distribution.
+ *
+ * o Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from this
+ *   software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "fsl_mcglite.h"
+#include "assert.h"
+
+/* ## Start:DefineFront */
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.clock"
+#endif
+
+#if (defined(OSC) && !(defined(OSC0)))
+#define OSC0 OSC
+#endif
+
+#define MCG_HIRC_FREQ (48000000U)
+#define MCG_LIRC_FREQ1 (2000000U)
+#define MCG_LIRC_FREQ2 (8000000U)
+
+#define MCG_S_CLKST_VAL ((MCG->S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT)
+#define MCG_SC_FCRDIV_VAL ((MCG->SC & MCG_SC_FCRDIV_MASK) >> MCG_SC_FCRDIV_SHIFT)
+#define MCG_MC_LIRC_DIV2_VAL ((MCG->MC & MCG_MC_LIRC_DIV2_MASK) >> MCG_MC_LIRC_DIV2_SHIFT)
+#define MCG_C2_IRCS_VAL ((MCG->C2 & MCG_C2_IRCS_MASK) >> MCG_C2_IRCS_SHIFT)
+/* ## End:DefineFront */
+
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+/* ## Start:Variable */
+/* External XTAL0 (OSC0) clock frequency. */
+volatile uint32_t g_xtal0Freq;
+/* External XTAL32K clock frequency. */
+volatile uint32_t g_xtal32Freq;
+/* ## End:Variable */
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+/* ## Start:Prototypes */
+/*!
+ * @brief Get the current MCG_Lite LIRC_CLK frequency in Hz.
+ *
+ * This function will return the LIRC_CLK value in frequency(Hz) based
+ * on current MCG_Lite configurations and settings. It is an internal function.
+ *
+ * @return MCG_Lite LIRC_CLK frequency.
+ */
+static uint32_t CLOCK_GetLircClkFreq(void);
+
+#if (defined(FSL_FEATURE_MCGLITE_HAS_RANGE0) && FSL_FEATURE_MCGLITE_HAS_RANGE0)
+/*!
+ * @brief Get RANGE value based on OSC frequency.
+ *
+ * To setup external crystal oscillator, must set the register bits RANGE base
+ * on the crystal frequency. This function returns the RANGE base on the input
+ * frequency. This is an internal function.
+ *
+ * @return RANGE value.
+ */
+static uint8_t CLOCK_GetOscRangeFromFreq(uint32_t freq);
+#endif /* (defined(FSL_FEATURE_MCGLITE_HAS_RANGE0) && FSL_FEATURE_MCGLITE_HAS_RANGE0) */
+/* ## End:Prototypes */
+
+/*******************************************************************************
+* Code
+******************************************************************************/
+
+/* ## Start:FuncStatic */
+static uint32_t CLOCK_GetLircClkFreq(void)
+{
+    static const uint32_t lircFreqs[] = {MCG_LIRC_FREQ1, MCG_LIRC_FREQ2};
+    uint32_t freq;
+
+    /* Check whether the LIRC is enabled. */
+    if (((MCG->C1 & MCG_C1_IRCLKEN_MASK) != 0U) || ((uint8_t)kMCGLITE_ClkSrcLirc == MCG_S_CLKST_VAL))
+    {
+        freq = lircFreqs[MCG_C2_IRCS_VAL];
+    }
+    else
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+#if (defined(FSL_FEATURE_MCGLITE_HAS_RANGE0) && FSL_FEATURE_MCGLITE_HAS_RANGE0)
+static uint8_t CLOCK_GetOscRangeFromFreq(uint32_t freq)
+{
+    uint8_t range;
+
+    if (freq <= 39063U)
+    {
+        range = 0U;
+    }
+    else if (freq <= 8000000U)
+    {
+        range = 1U;
+    }
+    else
+    {
+        range = 2U;
+    }
+
+    return range;
+}
+#endif /* (defined(FSL_FEATURE_MCGLITE_HAS_RANGE0) && FSL_FEATURE_MCGLITE_HAS_RANGE0) */
+/* ## End:FuncStatic */
+
+/* ## Start:FuncFreq */
+/*!
+ * brief Gets the MCG internal reference clock (MCGIRCLK) frequency.
+ *
+ * This function gets the MCG_Lite internal reference clock frequency in Hz based
+ * on the current MCG register value.
+ *
+ * return The frequency of MCGIRCLK.
+ */
+uint32_t CLOCK_GetInternalRefClkFreq(void)
+{
+    uint8_t divider1 = MCG_SC_FCRDIV_VAL;
+    uint8_t divider2 = MCG_MC_LIRC_DIV2_VAL;
+    /* LIRC internal reference clock is selected*/
+    return CLOCK_GetLircClkFreq() >> (divider1 + divider2);
+}
+
+/*
+* brief Gets the current MCGPCLK frequency.
+*
+* This function gets the MCGPCLK frequency in Hz based on the current MCG_Lite
+* register settings.
+*
+* return The frequency of MCGPCLK.
+*/
+uint32_t CLOCK_GetPeriphClkFreq(void)
+{
+    uint32_t freq;
+
+    /* Check whether the HIRC is enabled. */
+    if (((MCG->MC & MCG_MC_HIRCEN_MASK) != 0U) || ((uint8_t)kMCGLITE_ClkSrcHirc == MCG_S_CLKST_VAL))
+    {
+        freq = MCG_HIRC_FREQ;
+    }
+    else
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Gets the MCG_Lite output clock (MCGOUTCLK) frequency.
+ *
+ * This function gets the MCG_Lite output clock frequency in Hz based on the current
+ * MCG_Lite register value.
+ *
+ * return The frequency of MCGOUTCLK.
+ */
+uint32_t CLOCK_GetOutClkFreq(void)
+{
+    uint32_t freq;
+
+    switch (MCG_S_CLKST_VAL)
+    {
+        case (uint8_t)kMCGLITE_ClkSrcHirc:
+            freq = MCG_HIRC_FREQ;
+            break;
+        case (uint8_t)kMCGLITE_ClkSrcLirc:
+            freq = CLOCK_GetLircClkFreq() >> MCG_SC_FCRDIV_VAL;
+            break;
+        case (uint8_t)kMCGLITE_ClkSrcExt:
+            /* Please call CLOCK_SetXtal0Freq base on board setting before using OSC0 clock. */
+            assert(g_xtal0Freq);
+            freq = g_xtal0Freq;
+            break;
+        default:
+            freq = 0U;
+            break;
+    }
+
+    return freq;
+}
+/* ## End:FuncFreq */
+
+/* ## Start:FuncMisc */
+/*!
+ * brief Gets the current MCG_Lite mode.
+ *
+ * This function checks the MCG_Lite registers and determines the current MCG_Lite mode.
+ *
+ * return The current MCG_Lite mode or error code.
+ */
+mcglite_mode_t CLOCK_GetMode(void)
+{
+    mcglite_mode_t mode;
+
+    switch (MCG_S_CLKST_VAL)
+    {
+        case (uint8_t)kMCGLITE_ClkSrcHirc: /* HIRC */
+            mode = kMCGLITE_ModeHirc48M;
+            break;
+        case (uint8_t)kMCGLITE_ClkSrcLirc: /* LIRC */
+            if ((uint8_t)kMCGLITE_Lirc2M == MCG_C2_IRCS_VAL)
+            {
+                mode = kMCGLITE_ModeLirc2M;
+            }
+            else
+            {
+                mode = kMCGLITE_ModeLirc8M;
+            }
+            break;
+        case (uint8_t)kMCGLITE_ClkSrcExt: /* EXT  */
+            mode = kMCGLITE_ModeExt;
+            break;
+        default:
+            mode = kMCGLITE_ModeError;
+            break;
+    }
+
+    return mode;
+}
+
+/*!
+ * brief Sets the MCG_Lite configuration.
+ *
+ * This function configures the MCG_Lite, includes the output clock source, MCGIRCLK
+ * settings, HIRC settings, and so on. See ref mcglite_config_t for details.
+ *
+ * param  targetConfig Pointer to the target MCG_Lite mode configuration structure.
+ * return Error code.
+ */
+status_t CLOCK_SetMcgliteConfig(mcglite_config_t const *targetConfig)
+{
+    assert(targetConfig);
+
+    /*
+     * If switch between LIRC8M and LIRC2M, need to switch to HIRC mode first,
+     * because could not switch directly.
+     */
+    if (((uint8_t)kMCGLITE_ClkSrcLirc == MCG_S_CLKST_VAL) && (kMCGLITE_ClkSrcLirc == targetConfig->outSrc) &&
+        (MCG_C2_IRCS_VAL != (uint8_t)(targetConfig->ircs)))
+    {
+        MCG->C1 = (uint8_t)((MCG->C1 & ~MCG_C1_CLKS_MASK) | MCG_C1_CLKS(kMCGLITE_ClkSrcHirc));
+        while ((uint8_t)kMCGLITE_ClkSrcHirc != MCG_S_CLKST_VAL)
+        {
+        }
+    }
+
+    /* Set configuration now. */
+    MCG->SC = MCG_SC_FCRDIV(targetConfig->fcrdiv);
+    MCG->MC = MCG_MC_HIRCEN(targetConfig->hircEnableInNotHircMode) | MCG_MC_LIRC_DIV2(targetConfig->lircDiv2);
+    MCG->C2 = (uint8_t)((MCG->C2 & ~MCG_C2_IRCS_MASK) | MCG_C2_IRCS(targetConfig->ircs));
+    MCG->C1 = MCG_C1_CLKS(targetConfig->outSrc) | targetConfig->irclkEnableMode;
+
+    /*
+     * If external oscillator used and MCG_Lite is set to EXT mode, need to
+     * wait for the OSC stable.
+     */
+    if (((MCG->C2 & MCG_C2_EREFS0_MASK) != 0U) && (kMCGLITE_ClkSrcExt == targetConfig->outSrc))
+    {
+        while (0U == (MCG->S & MCG_S_OSCINIT0_MASK))
+        {
+        }
+    }
+
+    /* Wait for clock source change completed. */
+    while ((uint8_t)targetConfig->outSrc != MCG_S_CLKST_VAL)
+    {
+    }
+
+    return kStatus_Success;
+}
+
+/*!
+ * brief Initializes the OSC0.
+ *
+ * This function initializes the OSC0 according to the board configuration.
+ *
+ * param  config Pointer to the OSC0 configuration structure.
+ */
+void CLOCK_InitOsc0(osc_config_t const *config)
+{
+#if (defined(FSL_FEATURE_MCGLITE_HAS_RANGE0) && FSL_FEATURE_MCGLITE_HAS_RANGE0)
+    uint8_t range = CLOCK_GetOscRangeFromFreq(config->freq);
+#endif
+
+    OSC_SetCapLoad(OSC0, config->capLoad);
+    OSC_SetExtRefClkConfig(OSC0, &config->oscerConfig);
+
+#if (defined(FSL_FEATURE_MCGLITE_HAS_RANGE0) && FSL_FEATURE_MCGLITE_HAS_RANGE0)
+    MCG->C2 = ((MCG->C2 & MCG_C2_IRCS_MASK) | MCG_C2_RANGE0(range) | (uint8_t)config->workMode);
+#else
+    MCG->C2 = ((MCG->C2 & MCG_C2_IRCS_MASK) | (uint8_t)config->workMode);
+#endif
+
+    if ((kOSC_ModeExt != config->workMode) && ((OSC0->CR & OSC_CR_ERCLKEN_MASK) != 0U))
+    {
+        /* Wait for stable. */
+        while (0U == (MCG->S & MCG_S_OSCINIT0_MASK))
+        {
+        }
+    }
+}
+
+/*!
+ * brief Deinitializes the OSC0.
+ *
+ * This function deinitializes the OSC0.
+ */
+void CLOCK_DeinitOsc0(void)
+{
+    OSC0->CR = 0U;
+    MCG->C2 &= MCG_C2_IRCS_MASK;
+}
+/* ## End:FuncMisc */

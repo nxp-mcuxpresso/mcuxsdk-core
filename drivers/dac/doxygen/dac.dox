@@ -1,0 +1,30 @@
+/*!
+@defgroup dac DAC: Digital-to-Analog Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Digital-to-Analog Converter (DAC)
+         module of MCUXpresso SDK devices.
+
+The DAC driver includes a basic DAC module (converter) and a DAC buffer.
+
+The basic DAC module supports operations unique to the DAC converter in each DAC instance. The APIs in this section
+are used in the initialization phase, which enables the DAC module in the application. The APIs
+enable/disable the clock, enable/disable the module, and configure the converter. Call the initial APIs to
+prepare the DAC module for the application.
+
+The DAC buffer operates the DAC hardware buffer. The DAC module supports a hardware buffer to
+keep a group of DAC values to be converted. This feature supports updating the DAC output value automatically by
+triggering the buffer read pointer to move in the buffer. Use the APIs to configure the hardware buffer's
+trigger mode, watermark, work mode, and use size. Additionally, the APIs operate the DMA, interrupts, flags,
+the pointer (the index of the buffer), item values, and so on.
+
+Note that the most functional features are designed for the DAC hardware buffer.
+
+# Typical use case {#DACTypUC}
+
+## Working as a basic DAC without the hardware buffer feature {#DACWithoutHBuf}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac
+## Working with the hardware buffer {#DACWithHBuf}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac
+*/
+

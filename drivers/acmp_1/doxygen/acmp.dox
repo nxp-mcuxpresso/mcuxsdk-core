@@ -1,0 +1,13 @@
+/*!
+@defgroup acmp ACMP: Analog Comparator Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Comparator (ACMP) module of MCUXpresso SDK devices.
+
+# Typical use case {#ACMPTpyUC}
+
+## Normal Configuration {#ACMPNormalConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/acmp
+## Interrupt Configuration {#ACMPIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/acmp
+*/

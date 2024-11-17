@@ -1,0 +1,12 @@
+/*!
+@defgroup ssarc SSARC: State Save and Restore Controller
+@details The MCUXpresso SDK provides a peripheral driver for the State Save and 
+         Restore Controller(SSARC) module of MCUXpresso SDK devices.
+
+The SSARC driver supports the setting of descriptors and groups. For the setting of descriptors, the
+function SSARC_SetDescriptorConfig() can be used to config the type of descriptors' operation.
+For the setting of groups, the function SSARC_GroupInit() can be used to config the groups and enable the groups. The function
+SSARC_GroupDeinit() can be used to disable the groups.
+
+
+ */

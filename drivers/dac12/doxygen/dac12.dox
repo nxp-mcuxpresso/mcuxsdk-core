@@ -1,0 +1,29 @@
+/*!
+@defgroup dac12 DAC12: 12-bit Digital-to-Analog Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 12-bit Digital-to-Analog Converter (DAC12)
+         module of MCUXpresso SDK devices.
+
+This DAC is the 12-bit resolution digital-to-analog converters with programmable reference generator
+output. Its output data items are loaded into a FIFO, so that various FIFO mode can be used to
+output the value for user-defined sequence.
+
+The DAC driver provides a user-friendly interface to operate the DAC peripheral. The user can 
+initialize/deinitialize the DAC driver, set data into FIFO, or enable the interrupt DMA for special
+events so that the hardware can process the DAC output data automatically. Also, the configuration
+for software and hardware trigger are also included in the driver.
+
+# Typical use case {#DAC12TypUC}
+
+## A simple use case to output the user-defined DAC12 value. {#DAC12SimpleBasic}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac12
+## Working with the trigger {#DAC12WithTrg}
+
+Once more than one data is filled into the FIFO, the output pointer moves into configured mode
+when a trigger comes. This trigger can be from software or hardware, and moves one item for each
+trigger. Also, the interrupt/DMA event can be activated when the output pointer hits to the
+configured position.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac12
+*/
+

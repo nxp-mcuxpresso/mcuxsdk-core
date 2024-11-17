@@ -1,0 +1,32 @@
+/*!
+@defgroup vref VREF: Voltage Reference Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Crossbar Voltage Reference (VREF) block of MCUXpresso SDK devices.
+
+
+The VREF can be used in applications to provide a reference voltage to external devices, or used internally in the
+device as a reference to analog peripherals (such as the ADC, DAC, or CMP). The Voltage Reference (VREF) can supply an
+accurate voltage output that can be trimmed in 0.5*(1/Kf)(Kf means the feedback factor of buf21) mV steps. The voltage
+reference has 3 operating modes that provide different levels of supply rejection and power consumption.
+
+## Initialization and deinitialization {#VrefInit}
+
+To configure the VREF driver, configure vref_config_t structure in one of two ways.
+    1. Use the VREF_GetDefaultConfig() function.
+    2. Set the parameter in the vref_config_t structure.
+
+To initialize the VREF driver, call the VREF_Init() function and pass a pointer to
+ the vref_config_t structure.
+
+To de-initialize the VREF driver, call the VREF_Deinit() function.
+
+## Trim functions (#VrefTrim)
+
+The function VREF_SetTrimVal() can trim the bandgap or output voltage and the function VREF_GetTrimVal() can read
+the trim value.
+
+# Typical use case and example {#VrefExample}
+
+This example shows how to generate a reference voltage by using the VREF module.
+
+Refer to the driver examples codes located at <SDK_ROOT>/boards/<BOARD>/driver_examples/vref_1
+*/

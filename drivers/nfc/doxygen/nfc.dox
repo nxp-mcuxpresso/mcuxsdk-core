@@ -1,0 +1,24 @@
+/*!
+@defgroup nfc_driver NFC: RFID/NFC communication unit
+@details The MCUXpresso SDK provides a driver for the RFID/NFC communication unit
+
+The NFC HW block is based on a MIFARE Ultralight EV1 block which is responsible
+for the wireless NFC communication with an external reader.
+
+The IC has a shared memory region which is overlayed on the EEPROM area of the
+MIFARE Ultralight EV1 block. The NFC shared memory can be accessed by the ARM core
+over the APB bus and also by an external contact-less reader. The access by the
+ARM core will henceforth be referred to as "APB side access" and the access by
+an external reader as "RF side access". The exchange of data over the RF from
+an external reader and the MIFARE Ultralight EV1 block is in units of pages which
+is of 4 bytes in size. The memory organization of the MIFARE Ultralight EV1 block
+is also in the same manner. The first 4 pages is an EEPROM block and that can only
+be accessed from the RF side and not from the APB side. The next 128 pages is the
+shared memory and that can be accessed from both the RF side as well as the APB side.
+
+The NFC driver only provides simple and basic functions to operate NFC registers,
+upper layer should handle the complex cases. For example, the shared memory could
+be accessed by both RF side and APB side, upper layer should make sure the content
+consistency.
+
+*/

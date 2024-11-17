@@ -1,0 +1,104 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_PDM_Busy = 7200
+ - #kStatus_PDM_CLK_LOW = 7201
+ - #kStatus_PDM_FIFO_ERROR = 7202
+ - #kStatus_PDM_QueueFull = 7203
+ - #kStatus_PDM_Idle = 7204
+*/
+
+/*!
+@defgroup pdm PDM: Microphone Interface
+*/
+
+/*!
+@defgroup pdm_driver PDM Driver
+@ingroup pdm
+@details The MCUXpresso SDK provides a peripheral driver for the Microphone Interface (PDM)
+         module of MCUXpresso SDK devices.
+
+
+PDM driver includes functional APIs and transactional APIs.
+
+Functional APIs target low-level APIs.
+Functional APIs can be used for PDM initialization, configuration, and operation for
+the optimization and customization purpose. Using the functional API requires the
+knowledge of the PDM peripheral and how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. PDM functional operation groups provide the
+functional API set.
+
+Transactional APIs target high-level APIs.
+Transactional APIs can be used to enable the peripheral and in the
+application if the code size and performance of transactional APIs satisfy the
+requirements. If the code size and performance are a critical requirement,
+see the transactional API implementation and write a custom code.
+Initialize the handle by calling the PDM_TransferCreateHandle() API.
+
+Transactional APIs support asynchronous transfer. This means that the functions
+PDM_TransferReceiveNonBlocking() set up the interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with kStatus_PDM_Idle status.
+
+# Typical use case {#PDMCase}
+
+## PDM receive using an interrupt method {#PDMCaseInterrupt}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdm_interrupt
+## PDM receive using a SDMA method {#PDMCaseSDma}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdm/pdm_sdma_transfer
+
+## PDM receive using a EDMA method {#PDMCaseEDma}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdm/pdm_edma_transfer
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdm/pdm_sai_edma
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdm/pdm_sai_multi_channel_edma
+
+## PDM receive using a transactional method {#PDMCaseTransactional}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdm/pdm_interrupt_transfer
+
+*/
+
+/*!
+@defgroup pdm_driver PDM Driver
+@ingroup pdm
+*/
+
+/*!
+@if dox_section_pdm_edma
+@defgroup pdm_edma PDM EDMA Driver
+@endif
+*/
+
+/*!
+@if dox_section_pdm_sdma
+@defgroup pdm_sdma PDM SDMA Driver
+
+# Typical use case {#PDMCase}
+
+The SDMA multi fifo script support transfer data between multi peripheral fifos and memory, a typical user case is that receiving multi PDM channel data and put it into memory as
+------------------------------------------------------------------------------
+| channel 0  | channel 1  | channel 2  | channel 3  | channel 4  | .........  |
+-------------------------------------------------------------------------------
+Multi fifo script is target to implement above feature, it can supports
+1.configurable fifo watermark range from 1~(2^12-1), it is a value of fifo_watermark * channel_numbers
+2.configurable fifo numbers, support up to 15 continuous fifos
+3.configurable fifo address offset, support address offset up to 64
+@code
+/* load sdma script */
+SDMA_LoadScript()
+/* pdm multi channel configurations */
+PDM_SetChannelConfigSDMA()
+PDM_SetChannelConfigSDMA()
+PDM_SetChannelConfigSDMA()
+PDM_SetChannelConfigSDMA()
+....
+
+PDM_TransferReceiveSDMA
+@endcode
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pdm/pdm_sai_sdma
+@endif
+*/
+

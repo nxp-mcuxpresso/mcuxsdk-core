@@ -1,0 +1,18 @@
+/*!
+@defgroup  adc_5hc_12b1msps_sar ADC_5HC: 12-bit Analog to Digital Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 12-bit Analog to Digital Converter (ADC_5HC) 
+         module of MCUXpresso SDK devices. 
+		 
+		 
+There are some differences between ADC and ADC_5HC. First, the number of ADC_HCn registers is different. 
+Second, ADC_5HC could work with the TSC module to control touch screen, but ADC cannot. If the user tries to use TSC, ADC_5HC should be configured to work with TSC.
+
+# Typical use case {#ADCTpyUC}
+
+## Polling Configuration {#ADCIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_adc_5hc
+## Polling Configuration {#ADCPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_adc_5hc
+*/

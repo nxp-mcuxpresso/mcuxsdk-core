@@ -1,0 +1,26 @@
+/*!
+@defgroup sdramc SDRAMC: Synchronous DRAM Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Synchronous DRAM Controller
+ block of MCUXpresso SDK devices.
+
+# SDRAMC: Synchronous DRAM Controller Driver {#SDRAMC}
+
+## SDRAM Controller Basic Operation {#SDRAMCBasicOps}
+The SDRAM controller commands include the initialization MRS command, precharge command, enter/exit self-refresh command, and enable/disable auto-refresh command.
+Use the SDRAMC_SendCommand() to send these commands
+to SDRAM to initialize it.
+The SDRAMC_EnableWriteProtect() is provided to enable/disable the write protection.
+The SDRAMC_EnableOperateValid() is provided to enable/disable the operation valid.
+
+# Typical use case {#SDRAMCTpyUC}
+This example shows how to use the SDRAM Controller driver to
+initialize the external 16 bit port-size 8-column SDRAM chip.
+Initialize the SDRAM controller and run the initialization sequence. The external SDRAM is initialized and the SDRAM read
+and write is available.
+
+First, initialize the SDRAM Controller.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sdramc
+Then, run the initialization sequence.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sdramc
+*/

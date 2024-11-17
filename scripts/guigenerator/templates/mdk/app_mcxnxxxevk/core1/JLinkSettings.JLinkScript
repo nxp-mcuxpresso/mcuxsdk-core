@@ -1,0 +1,133 @@
+/*
+ * Copyright 2023 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+void _Connect(void)
+{
+  int value;
+ 
+  JLINK_CORESIGHT_WriteDP(2, 0x00000000);
+  value = JLINK_CORESIGHT_ReadAP(0);
+
+  JLINK_SYS_Report1("*** CSW: ", value);
+
+  // Config Debug Mailbox when cannot connect
+  if((value & 0x40) == 0)
+  {
+    JLINK_SYS_Report("*** ConfigDebugMailbox start");
+
+    // Read AP ID register to identify DM AP at index 1
+    JLINK_CORESIGHT_WriteDP(2, 0x020000f0);
+    // The returned AP ID should be 0x002A0000
+    value = JLINK_CORESIGHT_ReadAP(3);
+    JLINK_SYS_Report1("AP ID:", value);
+
+    // Select DM AP index 2
+    JLINK_CORESIGHT_WriteDP(2, 0x02000000);
+    JLINK_CORESIGHT_ReadDP(0);
+
+    // Active DebugMailbox, Write DM RESYNC_REQ + CHIP_RESET_REQ
+    JLINK_CORESIGHT_WriteAP(0, 0x21);
+    // Poll CSW register (0) for zero return, indicating success
+    value = -1;
+    while (value != 0)
+    {
+      value = JLINK_CORESIGHT_ReadAP(0);
+    }
+    JLINK_SYS_Report1("RESYNC_REQ + CHIP_RESET_REQ:", value);
+
+    // Start DM-AP
+    JLINK_CORESIGHT_WriteAP(1, 0x01);
+    // Poll RETURN register (2) for zero return
+    value = -1;
+    while (value != 0)
+    {
+      value = JLINK_CORESIGHT_ReadAP(2) & 0xFFFF;
+    }
+    JLINK_SYS_Report1("Start DM-AP:", value);
+
+    // Enter Debug Session,  Write DM START_DBG_SESSION to REQUEST register (1)
+    JLINK_CORESIGHT_WriteAP(1, 0x07);
+    // Poll RETURN register (2) for zero return
+    value = -1;
+    while (value != 0)
+    {
+      value = JLINK_CORESIGHT_ReadAP(2) & 0xFFFF;
+    }
+    JLINK_SYS_Report1("DEBUG_SESSION_REQ:", value);
+
+    JLINK_SYS_Report("*** ConfigDebugMailbox end");
+  }
+}
+
+void AfterResetTarget(void)
+{
+  // Clear XPSR to avoid undefined instruction fault caused by IT/ICI
+  JLINK_MEM_WriteU32(0xE000EDF8, 0x01000000);
+  JLINK_MEM_WriteU32(0xE000EDF4, 0x00010010);
+  JLINK_SYS_Sleep(1);
+  // Clear MSPLIM to 0
+  JLINK_MEM_WriteU32(0xE000EDF8, 0x00000000);
+  JLINK_MEM_WriteU32(0xE000EDF4, 0x0001001C);
+  JLINK_SYS_Sleep(1);
+  // Disable MPU
+  JLINK_MEM_WriteU32(0xE000ED94, 0x00000000);
+}
+
+/*********************************************************************
+*
+*       ResetTarget
+*/
+void ResetTarget(void) {
+  int tmp;
+
+  JLINK_SYS_Report("*** JLINK ResetTarget");
+  // Halt the core
+  JLINK_MEM_WriteU32(0xE000EDF0, 0xA05F0003);
+
+  // Clear VECTOR CATCH and set TRCENA
+  tmp = JLINK_MEM_ReadU32(0xE000EDFC) & ~1;
+  JLINK_MEM_WriteU32(0xE000EDFC, tmp | (1<<24));
+
+  // Breakoint at SYSCON_BASE + 0x40
+  JLINK_MEM_WriteU32(0xE0001020, 0x50000040);
+  JLINK_MEM_WriteU32(0xE0001028, 0x814);
+
+  // Reset using the SYSRESETREQ
+  JLINK_SYS_Report("Set CM33_SYSRESETREQ_EN");
+  JLINK_MEM_WriteU32(0xE000ED0C, 0x5FA0004);
+  JLINK_SYS_Sleep(50);
+
+  _Connect();
+
+  // Halt the core in case it didn't stop at a breakpiont
+  JLINK_MEM_WriteU32(0xE000EDF0, 0xA05F0003);
+
+  // Clear the Breakpoints
+  JLINK_MEM_WriteU32(0xE0001020, 0x0);
+  JLINK_MEM_WriteU32(0xE0001028, 0x0);
+}
+
+/*********************************************************************
+*
+*       InitTarget
+*/
+void InitTarget(void)
+{
+
+  JLINK_SYS_Report("******************************************************");
+  JLINK_SYS_Report("J-Link script: MCX Cortex-M33 core J-Link script");
+  JLINK_SYS_Report("******************************************************");
+  JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=0;DRPost=0;IRLenDevice=4");
+  CPU = CORTEX_M33;      // Pre-select that we have a Cortex-M33 connected
+  JTAG_AllowTAPReset = 0;   // J-Link is allowed to use a TAP reset for JTAG-chain auto-detection
+
+  JTAG_SetDeviceId(0, 0x6BA02477);  // 4-bits IRLen
+
+  _Connect();
+
+  CORESIGHT_IndexAHBAPToUse = 1;
+}

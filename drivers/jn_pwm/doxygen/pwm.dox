@@ -1,0 +1,93 @@
+/*!
+@defgroup pwm_driver PWM: Pulse Width Modulator
+@details The SDK provides a driver for the Pulse Width Modulator (PWM)
+         of JN518x devices.
+
+## Initialization and deinitialization {#PWMInit}
+  The function PWM_Init() initializes the PWM module with specified configurations,
+the function PWM_GetDefaultConfig() could help to get the default configurations. The initialization function
+configures the module to use the specified clock for PWM operation.
+
+## PWM Operations {#PWMPwmOperation}
+  The function PWM_SetupPwm() sets up the PWM channel for PWM output. The function
+can set up PWM signal property the channel. The PWM has 10 channels: 0 to 9.
+Each channel has its own period, compare match value, and polarity specified. The settings are
+applied to the specified channel requesting PWM output. The period and
+compare match are 16-bit values. At the compare match value, within the
+period, the PWM output toggles. The period value is loaded to downcounter, which decrements to 0.
+Once it reaches 0, it reloads the count and starts the signal out again, until the PWM channel is stopped.
+The function also sets up the channel output level after the channel is disabled.
+The 11th channel (ChannelAll) is a special channel which outputs the same output signals on other 
+10 channels (0 to 9) when it is set up and enabled. 
+
+## Read Period and Compare Match value operations {#PWMReadOperation}
+  The function PWM_ReadPeriodValue() reads the current period (downcounter value) for the PWM channel.
+The function PWM_ReadCompareValue() reads the compare match value for the PWM channel.
+
+## PWM Start and Stop operations  {#PWMStartStopOperation}
+  The function PWM_StartTimer() can be used to start the PWM channel. The function PWM_StopTimer() can be used 
+to stop the PWM channel.
+
+## Status {#PWMStatus}
+  Provide functions to get and clear the PWM status.
+
+## Interrupt {#PWMInterrupt}
+  Provide functions to enable/disable PWM interrupts and get current enabled interrupts.
+
+# Typical use case {#PWMCase}
+
+## PWM output {#PWMPWMOutput}
+  Configures PWM channel to output PWM signal.
+~~~~~{.c}
+
+int main(void)
+{
+    /* Structure of initialize PWM */
+    pwm_config_t pwmConfig;
+    pwm_setup_t pwmChan0;
+    uint32_t pwmClockFrq;
+    uint32_t pwmChan0Clk;
+
+    /* Board pin, clock, debug console initialization */
+    BOARD_InitHardware();
+
+    PRINTF("PWM driver example\n");
+
+    pwmClockFrq = CLOCK_GetFreq(kCLOCK_Pwm);
+    
+    PWM_GetDefaultConfig(&pwmConfig);
+
+    /* Use 32MHz clock */
+    pwmConfig.clk_sel = kPWM_Osc32Mclk;
+
+    /* Initialize PWM */
+    if (PWM_Init(BOARD_PWM_BASEADDR, &pwmConfig) != kStatus_Success)
+    {
+        PRINTF("PWM initialization failed\n");
+        return 1;
+    }
+
+    /* Set up PWM channel 0 to generate PWM pulse of 100 us with 50% duty cycle */
+    pwmChan0.pol_ctrl = kPWM_SetHighOnMatchLowOnPeriod;        
+    pwmChan0.dis_out_level = kPWM_SetLow;
+    pwmChan0.prescaler_val = 0;
+    pwmChan0Clk = pwmClockFrq / (1 + pwmChan0.prescaler_val);
+    pwmChan0.period_val = USEC_TO_COUNT(100, pwmChan0Clk);
+    pwmChan0.comp_val = pwmChan0.period_val / 2;
+    if(PWM_SetupPwm (BOARD_PWM_BASEADDR, kPWM_Pwm0, &pwmChan0) !=  kStatus_Success)
+    {
+        PRINTF("PWM chan0 setup failed\n");
+        return 1;
+    }
+    
+    /* Start the PWM generation channel 0 */
+    PWM_StartTimer(BOARD_PWM_BASEADDR, kPWM_Pwm0);
+
+    while (1U)
+    {
+        ;
+    }
+}
+~~~~~
+
+*/

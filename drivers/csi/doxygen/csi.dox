@@ -1,0 +1,76 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_CSI_NoEmptyBuffer = 2900
+ - #kStatus_CSI_NoFullBuffer = 2901
+ - #kStatus_CSI_QueueFull = 2902
+*/
+
+/*!
+@defgroup csi_driver CSI: CMOS Sensor Interface
+@details The MCUXpresso SDK provides a driver for the CMOS Sensor Interface (CSI)
+
+The CSI enables the chip to connect directly to external CMOS image sensors. The
+CSI driver provides functional APIs and transactional APIs for the CSI module.
+The functional APIs implement the basic functions, so the user can construct them
+for a special use case. The transactional APIs provide a queue mechanism in order for the user to submit an empty frame buffer and get a fully-filled frame buffer
+easily.
+
+# Frame Buffer Queue {#CSIFBQ}
+
+The CSI transactional functions maintain a frame buffer queue. The queue size
+is defined by the macro CSI_DRIVER_QUEUE_SIZE. The queue size is 4 by default, but the 
+user can override it by redefining the macro value in the project setting.\n
+
+To use transactional APIs, first call @ref CSI_TransferCreateHandle to create
+a handle to save the CSI driver state. This function initializes the frame buffer
+queue to empty status.\n
+
+After the handle is created, the function @ref CSI_TransferSubmitEmptyBuffer
+can be used to submit the empty frame buffer to the queue. If the queue does
+not have room to save the new empty frame buffers, this function returns with an error.
+It is not necessary to check the queue rooms before submitting an empty frame buffer.
+After this step, the application can call @ref CSI_TransferStart to start the
+transfer. There must be at least two empty buffers in the queue, otherwise this
+function returns an error. The incoming frames are saved to the empty buffers
+one by one, and a callback is provided when every frame completed. To get the
+fully-filled frame buffer, call the function @ref CSI_TransferGetFullBuffer.
+This function returns an error if the frame buffer queue does not have full buffers.
+Therefore, it is not necessary to check the full buffer number in the queue
+before this function.\n
+
+To stop the transfer, call the function @ref CSI_TransferStop at anytime. If the
+queue has some full frame buffers, the application can still read them out after
+this stop function.\n
+
+Once the transfer is started by calling @ref CSI_TransferStart, the CSI device
+starts to receive frames and save into buffer. The CSI devices does not stop
+until @ref CSI_TransferStop is called. If application does not submit empty buffer
+to CSI driver, the CSI driver always writes to the last submited empty buffer,
+this buffer will never be sent into full buffer queue until new empty buffer submited.
+In other words, one frame buffer is reserved by CSI driver, if application submits
+N empty buffers, it could get (N-1) full buffers.
+
+# Fragment Mode {#CSIFRAG}
+
+The frame buffer queue mechanism needs large memory, it is not suitable for some
+special case, for example, no SDRAM used. Fragment mode is designed for this
+purpose, it needs two types of buffers:
+
+1. DMA buffer. It could be as small as (camera frame width x 2 x 2) bytes, CSI DMA
+writes the input data to this buffer.
+
+2. Frame buffer. The input data is copied to this buffer at last. What is more,
+user could define a window (in other words, region of interest), only image in
+this window will be copied to the frame buffer. If input data is YUV422 format,
+user can only save Y component optionally.
+
+Limitations:
+1. Fragment mode could not be used together with frame buffer queue mode.
+2. In fragment mode, user should pay attention to the system payload. When the
+payload is high, the image capture might be broken.
+
+# Typical use case {#CSICase}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/csi
+
+*/

@@ -1,0 +1,53 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_QSPI_Idle = 4500
+ - #kStatus_QSPI_Busy = 4501
+ - #kStatus_QSPI_Error = 4502
+*/
+
+/*!
+@defgroup qspi QSPI: Quad Serial Peripheral Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Quad Serial Peripheral Interface (QSPI)
+         module of MCUXpresso SDK devices.
+
+
+QSPI driver includes functional APIs and EDMA transactional APIs.
+
+Functional APIs are feature/property target low level APIs.
+Functional APIs can be used for QSPI initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the
+knowledge of the QSPI peripheral and how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. QSPI functional operation groups provide the
+functional API set.
+
+Transactional APIs are transaction target high level APIs.
+Transactional APIs can be used to enable the peripheral and in the
+application if the code size and performance of transactional APIs satisfy the
+requirements. If the code size and performance are a critical requirement,
+see the transactional API implementation and write a custom code. All
+transactional APIs use the qspi_handle_t as the first parameter.
+Initialize the handle by calling the QSPI_TransferTxCreateHandleEDMA() or QSPI_TransferRxCreateHandleEDMA() API.
+
+
+*/
+
+/*!
+@defgroup qspi_driver Quad Serial Peripheral Interface Driver
+@ingroup qspi
+*/
+
+/*!
+@if dox_section_qspi_edma_driver
+@defgroup qspi_edma_driver Quad Serial Peripheral Interface EDMA Driver
+@ingroup qspi
+@endif
+*/
+
+/*!
+@if dox_section_qspi_dma_driver
+@defgroup qspi_dma_driver Quad Serial Peripheral Interface DMA Driver
+@ingroup qspi
+@endif
+*/
+

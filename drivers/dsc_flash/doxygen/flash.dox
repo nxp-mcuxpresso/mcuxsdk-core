@@ -1,0 +1,39 @@
+/*!
+@defgroup flash_driver C90TFS Flash Driver
+@details The flash provides the C90TFS Flash driver of Kinetis devices with the
+         C90TFS Flash module inside.
+         The flash driver provides general APIs to handle  specific operations on C90TFS/FTFx
+         Flash module. The user can use those APIs directly in the application. In addition,
+         it provides internal functions  called by the driver. Although these functions are
+         not meant to be called from the user's application directly, the APIs can still be used.
+*/
+
+/*!
+@defgroup ftfx_flash_driver Ftftx FLASH Driver
+@ingroup flash_driver
+@details
+*/
+
+/*!
+@defgroup ftfx_feature ftfx feature
+@ingroup flash_driver
+@details
+*/
+
+/*!
+@defgroup ftfx_adapter ftfx adapter
+@ingroup ftfx_feature
+@details
+*/
+
+/*!
+@defgroup ftfx_controller ftfx controller
+@ingroup flash_driver
+@details
+*/
+
+/*!
+@defgroup ftfx_utilities ftfx utilities
+@ingroup ftfx_controller
+@details
+*/

@@ -1,0 +1,62 @@
+/*!
+@defgroup asrc ASRC: Asynchronous sample rate converter
+@details The MCUXpresso SDK provides a peripheral driver for the Asynchronous sample rate converter
+         module of MCUXpresso SDK devices.
+
+The ASRC supports up to three sampling rate pairs, the ASRC supports concurrent sample rate conversion of up  to 10 channels.
+The incoming audio data to this chip may be received from various sources at different
+sampling rates. The outgoing audio data of this chip may have different sampling rates
+and it can also be associated with output clocks that are asynchronous to the input clocks.
+When the input sampling clock is not physically available, the rate conversion can
+still work by setting ideal-ratio values into ASRC interface registers.
+When both the input sampling clock and the output sampling clock are physically
+available, the rate conversion can work by configuring the physical clocks.
+
+The Asynchronous sample rate converter support convert between sample rate:
+    kASRC_SampleRate_8000HZ  = 8000U,        /*!< asrc sample rate 8KHZ */
+    kASRC_SampleRate_11025HZ = 11025U,       /*!< asrc sample rate 11.025KHZ */
+    kASRC_SampleRate_12000HZ = 12000U,       /*!< asrc sample rate 12KHZ */
+    kASRC_SampleRate_16000HZ = 16000U,       /*!< asrc sample rate 16KHZ */
+    kASRC_SampleRate_22050HZ = 22050U,       /*!< asrc sample rate 22.05KHZ */
+    kASRC_SampleRate_24000HZ = 24000U,       /*!< asrc sample rate 24KHZ */
+    kASRC_SampleRate_32000HZ = 32000U,       /*!< asrc sample rate 32KHZ */
+    kASRC_SampleRate_44100HZ = 44100U,       /*!< asrc sample rate 44.1KHZ */
+    kASRC_SampleRate_48000HZ = 48000U,       /*!< asrc sample rate 48KHZ */
+    kASRC_SampleRate_64000HZ = 64000U,       /*!< asrc sample rate 64KHZ */
+    kASRC_SampleRate_88200HZ = 88200U,       /*!< asrc sample rate 88.2KHZ */
+    kASRC_SampleRate_96000HZ = 96000U,       /*!< asrc sample rate 96KHZ */
+    kASRC_SampleRate_128000HZ = 128000U,     /*!< asrc sample rate 128KHZ */
+    kASRC_SampleRate_176400HZ = 176400U,     /*!< asrc sample rate 176.4KHZ */
+    kASRC_SampleRate_192000HZ = 192000U,     /*!< asrc sample rate 192KHZ */
+Limited support for the case when output sampling rates is between 8kHz and 30kHz. The limitation is the supported ratio (Fsin/Fsout) range as between 1/24 to 8.
+
+# Typical use case {#ASRCCase}
+
+## ASRC convert audio sample rate from memory to memory using an interrupt method {#ASRCCaseInterrupt}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/asrc
+## ASRC convert audio sample rate from memory to memory using a pooling method {#ASRCCasePolling}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/asrc
+
+## ASRC convert audio sample rate from memory to memory using a EDMA method {#ASRCCaseEDMA}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/asrc
+
+## ASRC convert audio sample rate from memory to peripheral using a EDMA method {#ASRCCaseEDMA}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/asrc
+
+*/
+
+/*!
+@defgroup asrc_driver ASRC Driver
+@ingroup asrc
+*/
+
+/*!
+@if dox_section_asrc_edma_driver
+@defgroup asrc_edma_driver ASRC EDMA Driver
+@ingroup asrc
+@endif
+*/

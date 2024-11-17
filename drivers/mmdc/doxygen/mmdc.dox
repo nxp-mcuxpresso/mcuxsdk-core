@@ -1,0 +1,26 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_MMDC_ErrorDGCalibration = 7101
+ - #kStatus_MMDC_ErrorReadCalibration = 7102
+ - #kStatus_MMDC_ErrorWriteCalibration = 7103
+ - #kStatus_MMDC_ErrorWriteLevelingCalibration = 7104
+ - #kStatus_MMDC_WaitFlagTimeout = 7105
+*/
+
+/*!
+@defgroup mmdc MMDC: Multi Mode DDR Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Multi Mode DDR Controller
+ block of MCUXpresso SDK devices.
+
+The MMDC is configurable high performance and optimized DDR controller that support LPDDR2 x16 memory type.
+The MMDC driver provide function API to config the MMDC core and PHY register.
+
+# Typical use case {#MMDCTpyUC}
+This example shows how to use the MMDC driver to
+initialize the external 16 bit DDR device.
+Initialize the MMDC controller and run the initialization sequence. The external DDR device is initialized and the DDR read and write is available.
+
+Initialize the LPDDR2 Controller and external device.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mmdc
+
+*/

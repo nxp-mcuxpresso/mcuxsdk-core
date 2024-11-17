@@ -1,0 +1,18 @@
+/*!
+@defgroup mmu MMU: Memory Map Unit
+@details The MCUXpresso SDK provides a peripheral driver for the MMU module of MCUXpresso SDK devices.
+
+Based on unit size, the user-defined valid address range is divided into serval units. There is an 8K depth LUT SRAM
+which is used to remapping tables. For example, if the 1st item of LUT SRAM is set to 5, it means the 1st unit from the
+base address is mapped to the 5th unit from the base address. In this way, any access to the 1st unit of address is mapped
+to the 5th unit of address.
+
+Please note that some devices may support 4-page mode, in this mode the 8K depth LUT SRAM is divided into 4 pages.
+Different pages can contain different maps. For example, on page 1 the 1st unit can map to 2nd unit, but on page 2
+the 1st unit can map to the 5th unit. Users can invoke #MMU_SelectPage to specify which mapping is used in different time
+point.
+
+Functions in "MMU Functional Interfaces" group are used to map/un-map/move virtual address to 
+physical address. If those functions can not cover some specifc use cases, please use low-level
+functions.
+*/

@@ -1,0 +1,10 @@
+/*!
+@page driver_log Driver Change Log
+
+@section flexspi_flr FLEXSPI_FLR
+  The current FLEXSPI Follower driver version is 1.0.0.
+
+  - 1.0.0
+    - Initial version.
+
+*/

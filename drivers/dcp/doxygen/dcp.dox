@@ -1,0 +1,92 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_DCP_Again = 6700
+*/
+
+/*!
+@defgroup dcp_driver DCP: Data Co-Processor
+@details The MCUXpresso SDK provides a peripheral driver for the Data Co-Processor (DCP) module.
+For security purposes, the Data Co-Processor (DCP) provides hardware acceleration for
+the cryptographic algorithms. The features of DCP are: Encryption Algorithms: AES-128 (ECB and CBC modes), Hashing Algorithms: SHA-1 and SHA-256, modified CRC-32,
+Key selection from the SNVS, DCP internal key storage, or general memory, Internal Memory for storing up to four AES-128 keys-when a key is written to a
+key slot it can be read only by the DCP AES-128 engine, IP slave interface, and DMA.
+
+The driver comprises two sets of API functions.
+
+In the first set, blocking APIs are provided, for selected subset of operations supported by DCP hardware.
+The DCP operations are complete (and results are made available for further usage) when a function returns.
+When called, these functions do not return until a DCP operation is complete.
+These functions use main CPU for simple polling loops to determine operation complete or error status.
+
+The DCP work packets (descriptors) are placed on the system stack during the blocking API calls.
+The driver uses critical section (implemented as global interrupt enable/disable) for a short time whenever it needs to pass DCP work packets to DCP channel for processing.
+Therefore, the driver functions are designed to be re-entrant and as a consequence, one CPU thread can call one blocking API, such as AES Encrypt, while other CPU thread
+can call another blocking API, such as SHA-256 Update.
+The blocking functions provide typical interface to upper layer or application software.
+
+In the second set, non-blocking variants of the first set APIs are provided.
+Internally, the blocking APIs are implemented as a non-blocking operation start, followed by a blocking wait (CPU polling DCP work packet's status word)
+for an operation completion. The non-blocking functions allow upper layer to inject an application specific operation after
+the DCP operation start and DCP channel complete events. RTOS event wait and RTOS event set can be an example of such an operation.
+
+# DCP Driver Initialization and Configuration {#DCPInit}
+
+Initialize DCP after Power On Reset or reset cycle
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dcp
+
+The DCP Driver is initialized by calling the DCP_Init() function. It enables the DCP module clock and configures DCP for operation.
+
+# Key Management
+
+The DCP implements four different key storage mechanisms: OTP-key, OTP-Unique key, Payload key, and SRAM-based keys that can be used by the software to securely 
+store keys on a semi-permanent basis (kDCP_KeySlot0 ~ kDCP_KeySlot3). Once the function DCP_AES_SetKey() is called, it sets the AES key for encryption/decryption 
+with the dcp_handle_t structure. In case the SRAM-based key is selected, the function copies and holds the key in memory. In case the OTP key is used, please make
+sure to set DCP related IOMUXC_GPRs before DCP initialization, since the software reset of DCP must be issued to take these setting in effect.
+Refer to the DCP_OTPKeySelect() function in BEE driver example.
+
+# Comments about API usage in RTOS {#DCPRtos}
+
+DCP transactional (encryption or hash) APIs can be called from multiple threads. 
+
+# Comments about API usage in interrupt handler {#DCPisr}
+
+Assuming the host processor receiving interrupt has the ownership of the DCP module,
+it can request Encrypt/Decrypt/Hash/public_key operations in an interrupt routine.
+Additionally, as the DCP accesses system memory for it's operation with data (such as message, plaintext, ciphertext, or keys)
+all data should remain valid until the DCP operation completes.
+
+# Comments about DCACHE {#DCPDcache}
+
+Input and output buffers passed to DCP API should be in non-cached memory or handled properly (DCACHE Clean and Invalidate) while using DCACHE.
+
+# DCP Driver Examples {#DCPEx}
+
+## Simple examples {#DCPSimpleEx}
+
+Encrypt plaintext by AES engine
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/DCP
+
+Compute hash (CRC-32)
+The CRC-32 algorithm implements a 32-bit CRC algorithm similar to the one used by Ethernet and many other protocols.
+The CRC differs from the Unix cksum() function in these four ways: The CRC initial value is 0xFFFFFFFF instead of 0x00000000,
+final XOR value is 0x00000000 instead of 0xFFFFFFFF, the logic pads the zeros to a 32-bit boundary for the trailing bytes, and it does not post-pend the file length.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/DCP
+
+Compute hash (SHA-256)
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/DCP*/
+
+/*!
+@defgroup dcp_driver_aes DCP AES blocking driver
+@details This section describes the programming interface of the DCP AES blocking driver.
+@ingroup dcp_driver
+*/
+/*!
+@defgroup dcp_nonblocking_driver_aes DCP AES non-blocking driver
+@details This section describes the programming interface of the DCP AES non-blocking driver.
+@ingroup dcp_driver
+*/
+/*!
+@defgroup dcp_driver_hash DCP HASH driver
+@details This section describes the programming interface of the DCP HASH driver.
+@ingroup dcp_driver
+*/

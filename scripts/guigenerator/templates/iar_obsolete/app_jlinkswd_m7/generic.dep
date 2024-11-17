@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>1657143740</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs/>
+    <forcedrebuild>
+      <name>[REBUILD_ALL]</name>
+    </forcedrebuild>
+  </configuration>
+  <configuration>
+    <name>Int Flash DDRData Debug</name>
+    <outputs/>
+  </configuration>
+  <configuration>
+    <name>Int Flash DDRData Release</name>
+    <outputs/>
+  </configuration>
+  <configuration>
+    <name>Int Flash SramData Debug</name>
+    <outputs/>
+  </configuration>
+  <configuration>
+    <name>Int Flash SramData Release</name>
+    <outputs/>
+  </configuration>
+  <configuration>
+    <name>Int Ram Debug</name>
+    <outputs/>
+  </configuration>
+  <configuration>
+    <name>Release</name>
+    <outputs/>
+  </configuration>
+</project>
+
+

@@ -1,0 +1,28 @@
+/*!
+@page driver_log Driver Change Log
+
+@section spim SPIM
+  The current spim driver version is 2.1.1.
+
+  - 2.1.1
+    - Improvements
+      - Changed SPI_DUMMYDATA to 0x00.
+
+  - 2.1.0
+    - Improvements
+      - Supported more interrupts for function SPI_EnableInterrupts and SPI_DisableInterrupts.
+
+  - 2.0.0
+    - Initial version.
+
+@section spim_gpdma SPIM_GPDMA
+  The current spim_gpdma driver version is 2.0.1.
+
+  - 2.0.1
+    - Bug Fixes
+      - Fixed MISRA C-2012 violations.
+
+  - 2.0.0
+    - Initial version.
+
+*/

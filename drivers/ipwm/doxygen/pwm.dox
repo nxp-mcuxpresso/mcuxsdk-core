@@ -1,0 +1,19 @@
+/*!
+@defgroup pwm_driver PWM: Pulse Width Modulation Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Pulse Width Modulation (PWM) module of MCUXpresso SDK devices.
+
+# PWM Driver {#PWMDriver}
+
+## Initialization and deinitialization {#PWMInit}
+The function PWM_Init() initializes the PWM with a specified configurations. The function PWM_GetDefaultConfig()
+gets the default configurations.The initialization function configures the PWM for the requested register update
+mode for registers with buffers.
+
+The function PWM_Deinit() disables the PWM counter and turns off the module clock.
+
+# Typical use case {#PWMCase}
+## PWM output {#PWMPWMOutput}
+  Output PWM signal on PWM3 module with different dutycycles. Periodically update the
+PWM signal duty cycle. 
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pwm
+*/

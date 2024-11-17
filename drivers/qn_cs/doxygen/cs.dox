@@ -1,0 +1,11 @@
+/*!
+@defgroup qn_cs CS: Capacitive sense 
+@details The MCUXpresso SDK provides a peripheral driver for Capacitive sense (CS)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#QNCSTpyUC}
+
+## Basic Configuration {#QNCSdefConfig}
+
+*/
+

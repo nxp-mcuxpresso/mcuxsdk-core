@@ -1,0 +1,11 @@
+/*!
+@defgroup gpio_driver GPIO: General-Purpose Input/Output Driver
+@details The MCUXpresso SDK provides a peripheral driver for the General-Purpose Input/Output (GPIO)
+module of MCUXpresso SDK devices.
+
+# Typical use case {#GPIOTpyUC}
+
+## Input Operation {#GPIOInOps}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/gpio
+*/

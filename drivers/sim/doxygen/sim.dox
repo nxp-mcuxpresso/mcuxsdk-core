@@ -1,0 +1,6 @@
+/*!
+@defgroup sim SIM: System Integration Module Driver
+@details The MCUXpresso SDK provides a peripheral driver for the System Integration Module (SIM) of MCUXpresso SDK devices.
+
+*/
+

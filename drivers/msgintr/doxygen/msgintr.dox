@@ -1,0 +1,16 @@
+/*!
+@defgroup msgintr MSGINTR: Message Unit
+@details The MCUXpresso SDK provides a peripheral driver for the message unit
+         module of MCUXpresso SDK devices.
+
+The MSGINTR supports to let other modules to trigger interrupt through writing data into MSGINT register address.
+The MSGINTR maps different message interrupts to specified bit, one MSGINTR supports 3*32 bit map.
+
+# Typical use case {#MSGINTRCase}
+
+*/
+
+/*!
+@defgroup msgintr_driver MSGINTR Driver
+@ingroup msgintr
+*/

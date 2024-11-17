@@ -1,0 +1,10 @@
+/*!
+@defgroup snvs_lp Secure Non-Volatile Storage Low-Power
+@ingroup snvs
+@details The MCUXpresso SDK provides a peripheral driver for the Secure Non-Volatile Storage Low-Power (SNVS-LP) module.@n
+ @n
+The SNVS_LP is a data storage subsystem. Its purpose is to store and protect system
+data, regardless of the main system power state. The SNVS _LP is in the always-powered-up domain, which is a separate power domain
+with its own power supply.
+ @n
+*/

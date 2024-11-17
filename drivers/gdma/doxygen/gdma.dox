@@ -1,0 +1,20 @@
+/*!
+@defgroup gdma GDMA: General DMA(GDMA) Driver
+@details The MCUXpresso SDK provides a driver for the GDMA.
+
+GDMA driver provides two types of APIs:
+
+The first type is functional APIs, or the basic channel operation APIs. Such as
+@ref GDMA_SetChannelSourceAddress, @ref GDMA_StartChannel. Generally, functional
+APIs use the GDMA_Type \*base as parameter. They are simple basic function blocks
+and does not handle the interrupts. Application should implement the ISR if
+only functional APIs used.
+
+The second type is transactional APIs. Such as @ref GDMA_SubmitTransfer. Generally
+these APIs uses the parameter @ref gdma_handle_t. Transactional APIs handles the
+interrupts, user could get the interrupt status by registering callback.
+
+The functional APIs and transactional APIs are very similar to each other, please
+refer the driver examples.
+
+*/

@@ -1,0 +1,64 @@
+/*!
+@defgroup asrc ASRC: Asynchronous sample rate converter
+@details The MCUXpresso SDK provides a peripheral driver for the Asynchronous sample rate converter
+         module of MCUXpresso SDK devices.
+
+The Asynchronous sample rate converter support convert between sample rate:
+    kASRC_SampleRate_8000   = 8000,   /*!< 8K sample rate */
+    kASRC_SampleRate_11025  = 11025,  /*!< 11025 sample rate */
+    kASRC_SampleRate_12000  = 12000,  /*!< 12K sample rate */
+    kASRC_SampleRate_16000  = 16000,  /*!< 16K sample rate */
+    kASRC_SampleRate_22050  = 22050,  /*!< 22.05K sample rate */
+    kASRC_SampleRate_24000  = 24000,  /*!< 24K sample rate */
+    kASRC_SampleRate_32000  = 32000,  /*!< 32K sample rate */
+    kASRC_SampleRate_44100  = 44100,  /*!< 44.1K sample rate */
+    kASRC_SampleRate_48000  = 48000,  /*!< 48K sample rate */
+    kASRC_SampleRate_64000  = 64000,  /*!< 64K sample rate */
+    kASRC_SampleRate_88200  = 88200,  /*!< 88.2K sample rate */
+    kASRC_SampleRate_96000  = 96000,  /*!< 96K sample rate */
+    kASRC_SampleRate_128000 = 128000, /*!< 128K sample rate */
+    kASRC_SampleRate_176400 = 176400, /*!< 176K sample rate */
+    kASRC_SampleRate_192000 = 192000, /*!< 256K sample rate */
+    kASRC_SampleRate_256000 = 256000, /*!< 256K sample rate */
+    kASRC_SampleRate_352800 = 352800, /*!< 352.8K sample rate */
+    kASRC_SampleRate_384000 = 384000, /*!< 384K sample rate */
+    kASRC_SampleRate_768000 = 768000, /*!< 768K sample rate */
+either up conversion or down conversion is supported.
+
+The ASRC can process 4 groups of audio channels with an independent time-base simultaneously. A group of channels with
+the same time-base (or resampling ratio) is referred to as a context. Each context has an independent input/output sample
+memory, resampling ratio, prefilter coefficient FIFO, number of channels, and assigned datapath resources. A context can
+be configured to start and stop at any time without affecting the processing of other contexts in flight. The maximum number
+of channels which can run on the ASRC is 32. These 32 channels can either be associated with a single context or spread
+across multiple contexts. The ASRC datapath is comprised of 4 independent context processing pipes capable of running
+the prefilter and resampling algorithms.
+ASRC driver provides default firmware table for the prefilter and resampling configuration to support different sample rate convert path.
+Note: ASRC polling function support 24bit raw audio data convert, the sdma driver doesn't support 24bit raw data, it is means that application should convert 24bit to 32bit firstly.
+
+# Typical use case {#ASRCCase}
+
+## ASRC convert audio sample rate using an polling method {#ASRCCasePolling}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/asrc
+## ASRC convert audio sample rate from memory to memory using a SDMA method {#ASRCCaseSDMAM2M}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/asrc/asrc_m2m_sdma
+
+## ASRC convert audio sample rate from memory to peripheral using a SDMA method {#ASRCCaseSDMAP2P}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/asrc/asrc_p2p_sdma
+
+*/
+
+/*!
+@defgroup asrc_driver ASRC Driver
+@ingroup asrc
+*/
+
+
+/*!
+@if dox_section_asrc_sdma
+@defgroup asrc_sdma ASRC SDMA Driver
+@ingroup asrc
+@endif
+*/

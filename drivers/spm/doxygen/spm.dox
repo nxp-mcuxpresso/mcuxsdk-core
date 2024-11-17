@@ -1,0 +1,19 @@
+/*!
+@defgroup spm SPM: System Power Manager
+@details The firmware lib provides a Peripheral driver for the System Power Manager (SPM) module of
+Kinetis devices. The SPM module contains internal voltage regulator, power on reset, low-voltage detect
+system, and high-voltage detect system.
+
+# Typical use case {#SPMTpyUC}
+
+## LDO->DCDC
+
+It is recommended to switch to DCDC first before enabling the peripheral's power attached to it. Otherwise, it might
+cause Vdd_core undershooting during the switch if Vout_aux domain loading is added. Switching to DCDC with less loading
+on Vdd_core domain is always preferred.
+
+For Example 1: Vout_aux = 1.8V, Vdd_core_1.2V
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/demo_apps/dcdc_framework
+*/
+

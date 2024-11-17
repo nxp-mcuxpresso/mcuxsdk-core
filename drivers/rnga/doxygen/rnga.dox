@@ -1,0 +1,61 @@
+/*!
+
+@defgroup rnga RNGA: Random Number Generator Accelerator Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Random Number Generator Accelerator (RNGA) block of MCUXpresso SDK devices.
+
+
+# RNGA Initialization {#RNGAInit}
+
+<ol>
+<li>To initialize the RNGA module, call the RNGA_Init() function.
+This function automatically enables the RNGA module and its clock. \n</li>
+<li>After calling the RNGA_Init() function, the RNGA is enabled and the counter starts working. </li>
+<li>To disable the RNGA module, call the RNGA_Deinit() function. </li>
+</ol>
+
+# Get random data from RNGA {#RdRNGA}
+<ol>
+<li>RNGA_GetRandomData() function gets random data from the RNGA module.</li>
+</ol>
+
+# RNGA Set/Get Working Mode {#RNGAWm}
+
+The RNGA works either in sleep mode or normal mode
+<ol>
+<li>RNGA_SetMode() function sets the RNGA mode.</li>
+<li>RNGA_GetMode() function gets the RNGA working mode.</li>
+</ol>
+
+# Seed RNGA {#SdRNGA}
+<ol>
+<li>RNGA_Seed() function inputs an entropy value that the RNGA can use to seed the pseudo random algorithm.</li>
+</ol>
+
+This example code shows how to initialize and get random data from the RNGA driver:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rnga
+@note It is important to note that there is no known cryptographic proof showing this is a secure
+method for generating random data. In fact, there may be an attack against this random
+number generator if its output is used directly in a cryptographic application. The attack
+is based on the linearity of the internal shift registers. Therefore, it is highly
+recommended that the random data produced by this module be used as an entropy
+source to provide an input seed to a NIST-approved pseudo-random-number generator
+based on DES or SHA-1 and defined in NIST FIPS PUB 186-2 Appendix 3 and NIST
+FIPS PUB SP 800-90.
+The requirement is needed to maximize the entropy of this input seed. To do this, when
+data is extracted from RNGA as quickly as the hardware allows, there are one to
+two bits of added entropy per 32-bit word. Any single bit of that word contains that
+entropy. Therefore, when used as an entropy source, a random number should be
+generated for each bit of entropy required and the least significant bit (any bit would be
+equivalent) of each word retained. The remainder of each random number should then be
+discarded. Used this way, even with full knowledge of the internal state of RNGA and all
+prior random numbers, an attacker is not able to predict the values of the extracted bits.
+Other sources of entropy can be used along with RNGA to generate the seed to the
+pseudorandom algorithm. The more random sources combined to create the seed, the
+better. The following is a list of sources that can be easily combined with the output of
+this module.
+- Current time using highest precision possible
+- Real-time system inputs that can be characterized as "random"
+- Other entropy supplied directly by the user
+
+*/

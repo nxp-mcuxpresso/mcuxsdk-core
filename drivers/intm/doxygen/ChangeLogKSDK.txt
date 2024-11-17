@@ -1,0 +1,14 @@
+/*!
+@page driver_log Driver Change Log
+
+@section intm INTM
+  The current INTM driver version is 2.0.1.
+
+  - 2.0.1
+    - Bug Fixes
+      - Fixed violations of the MISRA C-2012 rules 10.3, 10.4.
+
+  - 2.0.0
+    - Initial version.
+
+*/

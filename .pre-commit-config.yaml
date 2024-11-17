@@ -1,0 +1,30 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+repos:
+- repo: https://github.com/adrienverge/yamllint
+  rev: v1.35.1
+  hooks:
+  - id: yamllint
+    args:
+    - -c
+    - yamllint_config.yml
+- repo: https://github.com/cheshirekow/cmake-format-precommit
+  rev: v0.6.13
+  hooks:
+  - id: cmake-format
+    args:
+    - --in-place
+    - -c
+    - cmake_format_config.yml
+    - --
+    additional_dependencies:
+    - pyyaml
+  - id: cmake-lint
+    args:
+    - -c
+    - cmake_format_config.yml
+    - --
+    additional_dependencies:
+    - pyyaml

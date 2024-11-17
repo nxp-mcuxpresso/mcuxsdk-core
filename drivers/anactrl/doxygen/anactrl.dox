@@ -1,0 +1,28 @@
+/*!
+@defgroup anactrl ANACTRL: Analog Control Driver
+
+# ANACTRL function groups {#ANACTRLFuncGrp}
+
+# Function groups {#ANACTRLFunc}
+The ANACTRL driver supports initialization/configuration/operation for optimization/customization purpose.
+
+## Initialization and deinitialization {#ANACTRLInit}
+This function group is to enable/disable the clock for the ANACTRL module.
+
+## Set oscillators {#ANACTRLSet}
+The function ANACTRL_SetFro192M sets the on-chip high-speed Free Running Oscillator. The function
+ANACTRL_GetDefaultFro192MConfig() gets the default configuration.
+
+The function ANACTRL_SetXo32M sets the 32 MHz Crystal oscillator. The function
+ANACTRL_GetDefaultXo32MConfig() gets the default configuration.
+
+## Measure Frequency {#ANACTRLMeasure}
+This function measures the target frequency according to the reference frequency.
+
+## Interrupt {#ANACTRLInterrupt}
+Provides functions to enable/disable/clear ANACTRL interrupts.
+
+## Status {#ANACTRLStatus}
+Provides functions to get the ANACTRL status.
+
+*/

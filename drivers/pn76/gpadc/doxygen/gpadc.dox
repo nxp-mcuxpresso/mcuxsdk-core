@@ -1,0 +1,5 @@
+/*!
+@defgroup gpadc GPADC: General Purpose ADC Driver
+@details The MCUXpresso SDK provides a driver for the GPADC.
+
+*/

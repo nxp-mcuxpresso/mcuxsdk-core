@@ -1,0 +1,36 @@
+/*!
+@defgroup adc12 ADC12: Analog-to-Digital Converter
+@details The MCUXpresso SDK provides a peripheral driver for the Analog-to-Digital Converter (ADC12) module of 
+         MCUXpresso SDK devices.
+
+The ADC12 driver is created to help the user better operate the ADC12 module. This driver can be considered
+ a basic analog-to-digital converter with advanced features. The APIs for basic operations can make
+the ADC12 work as a general converter, which can convert the analog input to be a digital value. The
+APIs for advanced operations can be used as the plug-in function based on the basic operations. They 
+can provide more ways to process the converter's conversion results, such DMA trigger, hardware compare,
+hardware average, and so on.
+
+Note that channel 26 of ADC12 is connected to a internal temperature sensor of the module. If 
+you want to get the best conversion result of the temperature value, set the field 
+"sampleClockCount" in the structure "adc12_config_t" to be maximum value when you call the API 
+"ADC12_Init()". This field indicates the sample time of the analog input signal. A longer sample time 
+makes the conversion result of the analog input signal more stable and accurate.
+
+# Function groups {#ADC12FuncGrps}
+
+## Initialization and deinitialization {#ADC12InitDeinit}
+This function group implement ADC12 initialization and deinitialization API.
+## Basic Operations {#ADC12BasicOperation}
+This function group implement basic ADC12 operation API.
+## Advanced Operations {#ADC12AdvancedOperation}
+This function group implement advanced ADC12 operation API.
+
+# Typical use case {#ADC12TpyUC}
+
+## Normal Configuration {#ADC12NormalConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/adc12
+## Interrupt Configuration {#ADC12IntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/adc12
+*/

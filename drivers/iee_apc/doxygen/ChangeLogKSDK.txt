@@ -1,0 +1,13 @@
+/*!
+@page driver_log Driver Change Log
+
+@section apc_iee IEE_APC
+  The current IEE_APC driver version is 2.0.1.
+
+  - 2.0.1
+    - Fixed MISRA issues.
+
+  - 2.0.0
+    - Initial version.
+
+*/

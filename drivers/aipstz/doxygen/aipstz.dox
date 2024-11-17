@@ -1,0 +1,6 @@
+/*!
+@defgroup aipstz AIPSTZ: AHB to IP Bridge
+@details The MCUXpresso SDK provides a driver for the AHB-to-IP Bridge (AIPSTZ)
+         of MCUXpresso SDK devices.
+
+*/
