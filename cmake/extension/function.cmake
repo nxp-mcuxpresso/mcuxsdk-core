@@ -1135,11 +1135,11 @@ function(mcux_load_project_ide_data)
     foreach(f
             ${SdkRootDirPath}/devices/IDE.yml
             ${SdkRootDirPath}/devices/${soc_portfolio}/IDE.yml
-            ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/IDE.yml
-            ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/IDE.yml
+            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/IDE.yml
+            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/IDE.yml
             ${SdkRootDirPath}/examples/IDE.yml
             ${SdkRootDirPath}/examples/_boards/IDE.yml
-            ${SdkRootDirPath}/examples/_boards/${board}/IDE.yml)
+            ${SdkRootDirPath}/${board_root}/${board}/IDE.yml)
       if(EXISTS ${f})
         list(APPEND IDE_yml_list ${f})
       endif()
@@ -1148,13 +1148,13 @@ function(mcux_load_project_ide_data)
     foreach(f
             ${SdkRootDirPath}/devices/IDE.yml
             ${SdkRootDirPath}/devices/${soc_portfolio}/IDE.yml
-            ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/IDE.yml
-            ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/IDE.yml
-            ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/${core_id}/IDE.yml
+            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/IDE.yml
+            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/IDE.yml
+            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/${core_id}/IDE.yml
             ${SdkRootDirPath}/examples/IDE.yml
             ${SdkRootDirPath}/examples/_boards/IDE.yml
-            ${SdkRootDirPath}/examples/_boards/${board}/IDE.yml
-            ${SdkRootDirPath}/examples/_boards/${board}/${core_id}/IDE.yml)
+            ${SdkRootDirPath}/${board_root}/${board}/IDE.yml
+            ${SdkRootDirPath}/${board_root}/${board}/${core_id}/IDE.yml)
       if(EXISTS ${f})
         list(APPEND IDE_yml_list ${f})
       endif()

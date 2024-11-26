@@ -34,7 +34,7 @@ function(runners_yaml_append_config)
 
   runners_yaml_append("\n# Common runner configuration values.")
   runners_yaml_append("config:")
-  runners_yaml_append("  board_dir: ${SdkRootDirPath}/examples/_boards/${board}")
+  runners_yaml_append("  board_dir: ${SdkRootDirPath}/${board_root}/${board}")
   # get_runners_prop(elf_file elf "${KERNEL_ELF_NAME}")
   runners_yaml_append("  # Build outputs:")
   # runners_yaml_append("  elf_file: ${elf}")

@@ -1,1 +1,1 @@
-rsource "${soc_portfolio}/${soc_series}/${device}/Kconfig"
+rsource "../${device_root}/${soc_portfolio}/${soc_series}/${device}/Kconfig"

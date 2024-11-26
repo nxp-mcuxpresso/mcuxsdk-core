@@ -22,6 +22,6 @@ if (CONFIG_MCUX_PRJSEG_module.board.suite)
     mcux_add_codewarrior_linker_script(
             TARGETS flash_ldm_hpm_debug flash_ldm_hpm_debug
             BASE_PATH ${SdkRootDirPath}
-            LINKER devices/${soc_portfolio}/${soc_series}/${device}/codewarrior/${device}_Internal_PFlash_LDM.cmd
+            LINKER ${device_root}/${soc_portfolio}/${soc_series}/${device}/codewarrior/${device}_Internal_PFlash_LDM.cmd
     )
 endif()

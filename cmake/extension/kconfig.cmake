@@ -159,8 +159,10 @@ set(COMMON_KCONFIG_ENV_SETTINGS
     CONFIG_=${KCONFIG_NAMESPACE}_
     KCONFIG_CONFIG=${DOTCONFIG}
     board=${board}
+    board_root=${board_root}
     shield=${shield}
     device=${device}
+    device_root=${device_root}
     soc_series=${soc_series}
     SdkRootDirPath=${SdkRootDirPath}
     KCONFIG_BINARY_DIR=${KCONFIG_BINARY_DIR}
@@ -231,11 +233,11 @@ elseif (NOT NO_DEFAULT_CONFIG)
       f
       ${SdkRootDirPath}/devices/prj.conf
       ${SdkRootDirPath}/devices/${soc_portfolio}/prj.conf
-      ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/prj.conf
-      ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/prj.conf
+      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/prj.conf
+      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/prj.conf
       ${SdkRootDirPath}/examples/prj.conf
       ${SdkRootDirPath}/examples/_boards/prj.conf
-      ${SdkRootDirPath}/examples/_boards/${board}/prj.conf)
+      ${SdkRootDirPath}/${board_root}/${board}/prj.conf)
       if(EXISTS ${f})
         list(APPEND merge_config_files ${f})
       endif()
@@ -245,13 +247,13 @@ elseif (NOT NO_DEFAULT_CONFIG)
       f
       ${SdkRootDirPath}/devices/prj.conf
       ${SdkRootDirPath}/devices/${soc_portfolio}/prj.conf
-      ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/prj.conf
-      ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/prj.conf
-      ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/${core_id}/prj.conf
+      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/prj.conf
+      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/prj.conf
+      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/${core_id}/prj.conf
       ${SdkRootDirPath}/examples/prj.conf
       ${SdkRootDirPath}/examples/_boards/prj.conf
-      ${SdkRootDirPath}/examples/_boards/${board}/prj.conf
-      ${SdkRootDirPath}/examples/_boards/${board}/${core_id}/prj.conf)
+      ${SdkRootDirPath}/${board_root}/${board}/prj.conf
+      ${SdkRootDirPath}/${board_root}/${board}/${core_id}/prj.conf)
       if(EXISTS ${f})
         list(APPEND merge_config_files ${f})
       endif()

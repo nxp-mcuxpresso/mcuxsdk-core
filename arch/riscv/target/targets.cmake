@@ -19,6 +19,6 @@ if (CONFIG_MCUX_PRJSEG_module.board.suite)
     mcux_add_riscvllvm_linker_script(
         TARGETS debug release
         BASE_PATH ${SdkRootDirPath}
-        LINKER devices/${soc_portfolio}/${soc_series}/${device}/llvm/${device}xxxx_ezhv_ram.ld
+        LINKER ${device_root}/${soc_portfolio}/${soc_series}/${device}/llvm/${device}xxxx_ezhv_ram.ld
     )
 endif()

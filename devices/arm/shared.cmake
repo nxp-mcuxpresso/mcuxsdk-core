@@ -5,10 +5,10 @@ include(${SdkRootDirPath}/arch/arm/cortexm/cpu_define.cmake)
 
 if(CONFIG_MCUX_COMPONENT_device.RTE)
 
-    mcux_add_source(BASE_PATH ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/template SOURCES RTE_Device.h CONFIG
+    mcux_add_source(BASE_PATH ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/template SOURCES RTE_Device.h CONFIG
                     true)
 
-    mcux_add_include(BASE_PATH ${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/template TARGET_FILES RTE_Device.h
+    mcux_add_include(BASE_PATH ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/template TARGET_FILES RTE_Device.h
                      INCLUDES .)
 
 endif()
