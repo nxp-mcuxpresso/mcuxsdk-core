@@ -23,8 +23,8 @@ def main():
     board_name = sys.argv[1]
     toolchain_name = sys.argv[2]
     target_name = sys.argv[3]
-    search_directory=f'examples/{board_name}'
-    dst_directory='examples/src'
+    search_directory=f'examples/_boards/{board_name}'
+    dst_directory='examples'
 
     print("search_directory = " + search_directory)
     found_files = find_files(search_directory, file_to_find)
