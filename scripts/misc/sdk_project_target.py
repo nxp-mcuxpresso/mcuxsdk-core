@@ -300,7 +300,7 @@ class MCUXAppTargets(object):
         category = app_dir.replace('\\', '/').split('/')[1]
         example_data = mcux_read_yaml(app_example_file)
         if validate:
-            self._validate_example_data(app_dir, example_data)
+            self._validate_example_data(app_example_file, example_data)
 
         if not example_data:
             mcux_error(f"Invalid example file {app_example_file}")
@@ -353,7 +353,7 @@ class MCUXAppTargets(object):
                         break
         return apps
 
-    def _validate_example_data(self, app_dir, example_data):
+    def _validate_example_data(self, example_yml, example_data):
         example_schema = mcux_read_json((Path(sdk_root_dir) / SCHEMA_DIR / EXAMPLE_YML_SCHEMA).as_posix())
         definition_schema = mcux_read_json((Path(sdk_root_dir) / SCHEMA_DIR / DEFINITION_YAL_SCHEMA).as_posix())
         schema_store = {
@@ -364,7 +364,7 @@ class MCUXAppTargets(object):
         try:
             js.Draft7Validator(example_schema, resolver=resolver).validate(example_data)
         except js.ValidationError as e:
-            mcux_error(app_dir + ':' + e.message)
+            mcux_error(example_yml + ': ' + e.message)
 
 class MCUXRepoProjects(object):
 
@@ -442,3 +442,7 @@ class MCUXRepoProjects(object):
     def pretty_print_apps(self, apps):
         for idx, app in enumerate(apps):
             mcux_info(f"[{idx+1:4}][{app.build_cmd}]")
+
+    def silent_print_apps(self, apps):
+        for app in apps:
+            print(app.build_cmd)

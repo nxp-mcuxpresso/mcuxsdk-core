@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section flexspi FLEXSPI
-  The current FLEXSPI driver version is 2.6.1.
+  The current FLEXSPI driver version is 2.6.2.
+
+  - 2.6.2
+    - Bug Fixes
+      - Wait Bus IDLE before operation of FLEXSPI_SoftwareReset(), FLEXSPI_TransferBlocking() and
+        FLEXSPI_TransferNonBlocking().
 
   - 2.6.1
     - Bug Fixes

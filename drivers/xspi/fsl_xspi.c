@@ -1366,7 +1366,7 @@ status_t XSPI_StartIpAccess(
     mdadEnabled = (bool)((base->MGC & XSPI_MGC_GVLDMDAD_MASK) != 0UL);
     mdadValid   = (((*(uint32_t *)tgMdadRegAddr) & XSPI_TG0MDAD_VLD_MASK) != 0UL);
     /* Check the selected target group queue is empty. */
-    while (((*(uint32_t *)tgSfarsRegAddr) & XSPI_TGSFARS_VLD_MASK) != 0UL)
+    while (((*(volatile uint32_t *)tgSfarsRegAddr) & XSPI_TGSFARS_VLD_MASK) != 0UL)
     {
     }
 
@@ -1377,7 +1377,7 @@ status_t XSPI_StartIpAccess(
     {
         do
         {
-            tmp32 = (*(uint32_t *)tgSfarsRegAddr & (XSPI_TGSFARS_VLD_MASK | XSPI_TGSFARS_ERR_MASK));
+            tmp32 = (*(volatile uint32_t *)tgSfarsRegAddr & (XSPI_TGSFARS_VLD_MASK | XSPI_TGSFARS_ERR_MASK));
             if (tmp32 == XSPI_TGSFARS_ERR_MASK)
             {
                 /* The manager ID or write attributes to set SFAR register is not valid. */
@@ -1393,7 +1393,7 @@ status_t XSPI_StartIpAccess(
     {
         do
         {
-            tmp32 = (*(uint32_t *)tgIpcrsRegAddr & (XSPI_TGIPCRS_ERR_MASK | XSPI_TGIPCRS_VLD_MASK));
+            tmp32 = (*(volatile uint32_t *)tgIpcrsRegAddr & (XSPI_TGIPCRS_ERR_MASK | XSPI_TGIPCRS_VLD_MASK));
             if ((tmp32 & XSPI_TGIPCRS_ERR_MASK) != 0UL)
             {
                 return kStatus_XSPI_IpAccessIPCRInvalid;
@@ -1440,7 +1440,7 @@ status_t XSPI_StartIpAccessNonBlocking(XSPI_Type *base, uint32_t addr, uint8_t s
     mdadValid   = (((*(uint32_t *)tgMdadRegAddr) & XSPI_TG0MDAD_VLD_MASK) != 0UL);
 
     /* Check the selected target group queue is empty. */
-    while (((*(uint32_t *)tgSfarsRegAddr) & XSPI_TGSFARS_VLD_MASK) != 0UL)
+    while (((*(volatile uint32_t *)tgSfarsRegAddr) & XSPI_TGSFARS_VLD_MASK) != 0UL)
     {
     }
 

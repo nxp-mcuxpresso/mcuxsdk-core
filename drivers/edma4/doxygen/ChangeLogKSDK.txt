@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section eDMA EDMA
-  The current eDMA driver version is 2.10.1.
+  The current eDMA driver version is 2.10.2.
+
+  - 2.10.2
+    - Bug Fixes
+      - Fixed violations of the MISRA C-2012 rules 10.3.
 
   - 2.10.1
     - Bug Fixes

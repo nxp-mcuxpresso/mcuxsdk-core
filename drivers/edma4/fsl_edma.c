@@ -261,7 +261,7 @@ void EDMA_InitChannel(EDMA_Type *base, uint32_t channel, edma_channel_config_t *
     if (0U != (uint32_t)channelConfig->channelRequestSource)
     {
         /* dma request source */
-        EDMA_SetChannelMux(base, channel, (int32_t)channelConfig->channelRequestSource);
+        EDMA_SetChannelMux(base, channel, (uint32_t)channelConfig->channelRequestSource);
     }
 #endif
 

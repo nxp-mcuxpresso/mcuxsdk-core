@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if(CONFIG_MCUX_COMPONENT_driver.pn76_pnev7642fama_hostif)
+    mcux_component_version(2.1.2)
 
     mcux_add_source(SOURCES fsl_hostif.h fsl_hostif.c)
 

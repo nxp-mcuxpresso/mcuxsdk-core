@@ -61,8 +61,20 @@ middleware/usb/
 middleware/wifi_nxp/
 middleware/wireless/
 middleware/issdk
+middleware/nxp_iot_agent/
+middleware/se_hostlib/
+middleware/eiq/
+middleware/maestro/
+middleware/openvg/
+middleware/vglite/
+middleware/vit/
+middleware/voice_seeker/
+middleware/voice_spot/
+
 migrate/
 rtos/
+
+tool_data/
 
 *.pyc
 build

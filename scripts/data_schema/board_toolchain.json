@@ -1,0 +1,15 @@
+{
+    "$id": "board_toolchain.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MCUXpresso SDK board supported toolchains and targets data schema",
+    "description": "MCUXpresso SDK board supported toolchains and targets data schema",
+    "version": "1.0.0",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "board.toolchains": {
+            "$ref": "./definitions_schema.json#/definitions/boardSupportToolchainType"
+        }
+    },
+    "required": [ "board.toolchains" ]
+}

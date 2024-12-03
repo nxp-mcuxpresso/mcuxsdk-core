@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section flexio FLEXIO
-  The current FLEXIO driver version is 2.2.2.
+  The current FLEXIO driver version is 2.2.3.
+
+  - 2.2.3
+    - Improvements
+      - Adapter the FLEXIO driver to platforms which don't have system level
+        interrupt controller, such as NVIC.
 
   - 2.2.2
     - Improvements

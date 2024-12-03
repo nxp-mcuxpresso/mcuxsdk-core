@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
+ * Copyright 2016-2020, 2024 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -442,7 +442,9 @@ static void FLEXIO_CommonIRQHandler(void)
 void FLEXIO_SetPinConfig(FLEXIO_Type *base, uint32_t pin, flexio_gpio_config_t *config)
 {
     assert(NULL != config);
+#if defined(FLEXIO_IRQS)
     IRQn_Type flexio_irqs[] = FLEXIO_IRQS;
+#endif
 
     if (config->pinDirection == kFLEXIO_DigitalInput)
     {
@@ -450,17 +452,19 @@ void FLEXIO_SetPinConfig(FLEXIO_Type *base, uint32_t pin, flexio_gpio_config_t *
         if (0U != (config->inputConfig & (uint8_t)kFLEXIO_InputInterruptEnable))
         {
             base->PINIEN = 1UL << pin;
+#if defined(FLEXIO_IRQS)
             /* Clear pending NVIC IRQ before enable NVIC IRQ. */
             NVIC_ClearPendingIRQ(flexio_irqs[FLEXIO_GetInstance(base)]);
             /* Enable interrupt in NVIC. */
             (void)EnableIRQ(flexio_irqs[FLEXIO_GetInstance(base)]);
+#endif
         }
-        
+
         if (0U != (config->inputConfig & (uint8_t)kFLEXIO_FlagRisingEdgeEnable))
         {
             base->PINREN = 1UL << pin;
         }
-        
+
         if (0U != (config->inputConfig & (uint8_t)kFLEXIO_FlagFallingEdgeEnable))
         {
             base->PINFEN = 1UL << pin;

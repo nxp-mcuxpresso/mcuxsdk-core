@@ -7,6 +7,7 @@ import re
 import os
 import sys
 import logging
+from west.configuration import config
 
 script_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)))
 sdk_root_dir = os.path.abspath(os.path.join(script_dir, '..'))
@@ -21,11 +22,11 @@ Example:
     west list_project -p examples/src/driver_examples/lpuart/interrupt -o test.yml
 
 Data Source
-        # examples/evkbmimxrt1170, board default targets
+        # examples/_boards/evkbmimxrt1170, board default targets
         board.toolchains:
         - +armgcc@debug
 
-        # examples/src/driver_examples/lpuart/interrupt
+        # examples/driver_examples/lpuart/interrupt
         lpuart_interrupt:
           ....
           boards:
@@ -50,6 +51,12 @@ Output Format
 
 '''.format(sdk_project_target.MCUXAppTargets.config_filter.__doc__)
 
+def config_get(option, fallback):
+    return config.get('list_project', option, fallback=fallback)
+
+def config_getboolean(option, fallback):
+    return config.getboolean('list_project', option, fallback=fallback)
+
 class ListProject(WestCommand):
     def __init__(self):
         super().__init__(
@@ -72,7 +79,7 @@ class ListProject(WestCommand):
                                                     help='Toolchains to build, the default value is armgcc, e.g, -t armgcc iar')
         parser.add_argument('-c', '--config',       nargs='+', action="extend", default=[],
                                                     help='Targets to build, the default value is release. e.g, -c release debug')
-        parser.add_argument('-l', '--list_format',  action='store', choices=['none', 'cmd'], default='cmd',
+        parser.add_argument('-l', '--list_format',  action='store', choices=['none', 'cmd', 'silent_cmd'], default=None,
                                                     help='List format for matched projects.')
         parser.add_argument('-o', '--output_file',  action='store', default=None, help='Output file name. Must ends with .yml or .json')
         parser.add_argument(      '--cmake_invoke', action='store_true', default=False, help='If invoked by cmake, the target field will be ignored so that all available targets will be printed out.')
@@ -86,6 +93,8 @@ class ListProject(WestCommand):
         mcux_log_init(logging.DEBUG if args.verbose else logging.INFO)
         # Search for the testcase
         op = sdk_project_target.MCUXRepoProjects()
+        output_format = args.list_format or config_get('list_format', 'cmd')
+        is_validate_example_yml = args.validate or config_getboolean('validate', False)
         match_cases = []
         for app_path in args.app_path:
             match_cases.extend(
@@ -96,7 +105,7 @@ class ListProject(WestCommand):
                     toolchains_filter=args.toolchain,
                     targets_filter=args.config if not args.cmake_invoke else [],
                     is_pick_one_target_for_app=args.pick_one_target,
-                    validate=args.validate,
+                    validate=is_validate_example_yml
                 )
             )
         # Export data when necessary
@@ -104,9 +113,11 @@ class ListProject(WestCommand):
             op.dump_to_file(args.output_file, match_cases)
 
         # List the output
-        if args.list_format == 'cmd':
+        if output_format == 'silent_cmd':
+            op.silent_print_apps(match_cases)
+        elif output_format == 'cmd':
             op.pretty_print_apps(match_cases)
-        elif args.list_format == 'none':
+        elif output_format == 'none':
             pass
 
         # Return the matched cases

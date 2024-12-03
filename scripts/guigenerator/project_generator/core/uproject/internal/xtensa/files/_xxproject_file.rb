@@ -156,6 +156,12 @@ module Internal
               content_node.content = nil
               content_node = @operations.create_option_node("//xxProperties/propertyGroup[\@name=\"build.property\"]" + "/buildTarget[\@defaultTarget=\"#{target.capitalize }\"]")
             end
+
+            def set_export_include_path(value, *_args, **_kargs)
+              content_node = @operations.create_option_node("//xxProperties/propertyGroup[\@name=\"build.auto.includes\"]")
+              content_node.content = nil
+              content_node['mode'] = value
+            end
           end
         end
       end

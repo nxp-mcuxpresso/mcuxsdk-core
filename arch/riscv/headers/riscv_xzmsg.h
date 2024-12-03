@@ -1,6 +1,5 @@
 /*
  * Copyright 2023-2024 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -84,7 +83,7 @@ typedef enum _xzmsg_rcv_type
  * API
  ******************************************************************************/
 
-#ifdef __cpluplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 

@@ -444,7 +444,6 @@ status_t DCP_AES_EncryptEcbNonBlocking(DCP_Type *base,
     }
     else if (handle->keySlot == kDCP_OtpUniqueKey)
     {
-        dcpPacket->control0 |= ((uint32_t)1u << 10);  /* OTP_KEY */
         dcpPacket->control1 = ((uint32_t)0xFEu << 8); /* KEY_SELECT = UNIQUE_KEY */
     }
     else if (handle->keySlot == kDCP_PayloadKey)
@@ -541,7 +540,6 @@ status_t DCP_AES_DecryptEcbNonBlocking(DCP_Type *base,
     }
     else if (handle->keySlot == kDCP_OtpUniqueKey)
     {
-        dcpPacket->control0 |= ((uint32_t)1u << 10);  /* OTP_KEY */
         dcpPacket->control1 = ((uint32_t)0xFEu << 8); /* KEY_SELECT = UNIQUE_KEY */
     }
     else if (handle->keySlot == kDCP_PayloadKey)
@@ -649,7 +647,6 @@ status_t DCP_AES_EncryptCbcNonBlocking(DCP_Type *base,
     else if (handle->keySlot == kDCP_OtpUniqueKey)
     {
         dcpPacket->payloadPointer = (uint32_t)iv;
-        dcpPacket->control0 |= ((uint32_t)1u << 10);   /* OTP_KEY */
         dcpPacket->control1 |= ((uint32_t)0xFEu << 8); /* KEY_SELECT = UNIQUE_KEY */
     }
     else if (handle->keySlot == kDCP_PayloadKey)
@@ -759,7 +756,6 @@ status_t DCP_AES_DecryptCbcNonBlocking(DCP_Type *base,
     else if (handle->keySlot == kDCP_OtpUniqueKey)
     {
         dcpPacket->payloadPointer = (uint32_t)iv;
-        dcpPacket->control0 |= ((uint32_t)1u << 10);   /* OTP_KEY */
         dcpPacket->control1 |= ((uint32_t)0xFEu << 8); /* UNIQUE_KEY */
     }
     else if (handle->keySlot == kDCP_PayloadKey)

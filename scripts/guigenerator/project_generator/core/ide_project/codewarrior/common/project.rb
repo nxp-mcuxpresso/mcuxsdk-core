@@ -48,6 +48,7 @@ module CodeWarrior
     end
 
     def add_addl_lib(target, path, rootdir: nil)
+      path.gsub!("\\\"", "")
       if path.match(/^\$\{\S+\}\S+/)
         path = '"' + path + '"'
         super(target, path)
@@ -58,6 +59,7 @@ module CodeWarrior
     end
 
     def add_sys_search_path(target, path, rootdir: nil)
+      path.gsub!("\\\"", "")
       if path.match(/^\$\{\S+\}\S+/)
         path = '"' + path + '"'
         super(target, path)
@@ -68,6 +70,7 @@ module CodeWarrior
     end
 
     def add_sys_path_recursively(target, path, rootdir: nil)
+      path.gsub!("\\\"", "")
       if path.match(/^\$\{\S+\}\S+/)
         path = '"' + path + '"'
         super(target, path)

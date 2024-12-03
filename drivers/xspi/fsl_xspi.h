@@ -816,6 +816,12 @@ typedef struct _xspi_ahbBuffer_config
     uint8_t masterId; /*!< Specify the ID of the AHB master to be associated with buffer. */
     union
     {
+        /* Errata ERR052527: Limitation in High-priority scheme of XSPI buffer0 & buffer1.
+           Description: Buffer 0 can not suspend buffer 1 as expected when buffer 0 enable high priority and buffer 1
+           disable high priority. Similary buffer 1 can not suspend buffer0 as expected when buffer 1 enable high
+           priority and buffer 1 disable high priority.
+           Workaround: High priority enable settings for both buffer0 and buffer1 should be always set same.
+         */
         bool enablePriority;  /*!< High Priority Enable, it can be written '1' only when OTFAD is disabled,
                                 the AHB prefetch feature must be enabled if priority mechanism is enabled.
                                  */

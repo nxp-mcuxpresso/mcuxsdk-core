@@ -19,8 +19,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.5.0. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 6, 0))
+/*! @brief SPC driver version 2.7.0. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
 /*! @} */
 
 #define SPC_EVD_CFG_REG_EVDISO_SHIFT   0UL
@@ -701,6 +701,17 @@ static inline void SPC_EnableSRAMLdo(SPC_Type *base, bool enable)
 static inline void SPC_RetainSRAMArray(SPC_Type *base, uint8_t mask)
 {
     base->SRAMRETLDO_CNTRL |= SPC_SRAMRETLDO_CNTRL_SRAM_RET_EN(mask);
+}
+
+/*!
+ * @brief Unretain SRAM array
+ *
+ * @param base SPC peripheral base address.
+ * @param mask The OR'ed value of SRAM Array.
+ */
+static inline void SPC_UnRetainSRAMArray(SPC_Type *base, uint8_t mask)
+{
+    base->SRAMRETLDO_CNTRL &= ~SPC_SRAMRETLDO_CNTRL_SRAM_RET_EN(mask);
 }
 
 /*! @} */

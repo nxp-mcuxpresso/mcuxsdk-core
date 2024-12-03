@@ -1,0 +1,39 @@
+{
+    "$id": "marketing_data_kit.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MCUXpresso SDK marketing kit data schema",
+    "description": "MCUXpresso SDK marketing kit data schema",
+    "version": "1.0.0",
+    "allOf": [ { "$ref": "./definitions_schema.json#/definitions/commonMarketingDataType" } ],
+    "properties": {
+        "full_name": {
+            "type": "string",
+            "description": "The kit full name"
+        },
+        "board": {
+            "type": "string",
+            "description": "The kit board" 
+        },
+        "accessories": {
+            "type": "array",
+            "description": "The kit accessories",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The accessory id"
+                    },
+                    "full_anme": {
+                        "type": "string",
+                        "description": "The accessory full_anme"
+                    },
+                    "href": {
+                        "type": "string",
+                        "description": "The accessory href"
+                    }
+                }
+            }
+        }
+    }
+}

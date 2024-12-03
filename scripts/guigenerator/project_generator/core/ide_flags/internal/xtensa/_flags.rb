@@ -364,7 +364,7 @@ module Internal
 
       def cpp_compiler_language_dialect(line)
         Core.assert(line.is_a?(String), 'not a string')
-        pattern = /\s(-std=c\+\+11|-std=c\+\+14)\s/
+        pattern = /\s(-std=c\+\+11|-std=c\+\+14|-std=c\+\+17)\s/
         result  = line.match(pattern)
         if result
           @file.languageTab.languageDialectCpp(result[1])
@@ -377,7 +377,7 @@ module Internal
 
       def cpp_compiler_standard_library(line)
         Core.assert(line.is_a?(String), 'not a string')
-        pattern = /\s(--stdlib=libc\+\+)\s/
+        pattern = /\s(-stdlib=libc\+\+)\s/
         result  = line.match(pattern)
         if result
           @file.languageTab.standardCppLibrary(result[1])

@@ -9,6 +9,7 @@
 #include "fsl_netc_timer.h"
 #endif
 #if defined(FSL_FEATURE_NETC_HAS_ERRATA_051587) && FSL_FEATURE_NETC_HAS_ERRATA_051587
+#include "fsl_netc_timer.h"
 #include <math.h>
 #endif
 

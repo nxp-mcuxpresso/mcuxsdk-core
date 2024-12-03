@@ -37,6 +37,7 @@ module CodeWarrior
       def analyze_ldflags(target, line)
         line = linker_large_data_mem_model(target, line)
         line = linker_hawk_elf(target, line)
+        line = linker_addl_lib(target, line)
         line = linker_addl_linker(target, line)
       end
 

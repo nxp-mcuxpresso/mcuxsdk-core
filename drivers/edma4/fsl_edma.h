@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief eDMA driver version */
-#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 1)) /*!< Version 2.10.1. */
+#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 2)) /*!< Version 2.10.2. */
 /*! @} */
 
 /*! @brief eDMA driver name */
@@ -284,7 +284,7 @@ typedef struct _edma_channel_config
     uint8_t channelDataSignExtensionBitPosition; /*!< channel data sign extension bit psition configuration */
 
 #if (defined FSL_FEATURE_EDMA_HAS_CHANNEL_MUX && FSL_FEATURE_EDMA_HAS_CHANNEL_MUX) || (defined FSL_FEATURE_EDMA_HAS_MP_CHANNEL_MUX && FSL_FEATURE_EDMA_HAS_MP_CHANNEL_MUX)
-    int channelRequestSource; /*!< hardware service request source for the channel */
+    uint32_t channelRequestSource; /*!< hardware service request source for the channel */
 #endif
 
     bool enableMasterIDReplication;                  /*!< enable master ID replication */
@@ -702,7 +702,7 @@ static inline void EDMA_SetChannelAccessType(EDMA_Type *base,
  *                             may use other enum type to express dma request source and User can fined it in
  *                             SOC header or fsl_edma_soc.h.
  */
-static inline void EDMA_SetChannelMux(EDMA_Type *base, uint32_t channel, int32_t channelRequestSource)
+static inline void EDMA_SetChannelMux(EDMA_Type *base, uint32_t channel, uint32_t channelRequestSource)
 {
     assert(channel < (uint32_t)FSL_FEATURE_EDMA_INSTANCE_CHANNELn(base));
 

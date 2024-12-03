@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexCAN driver version. */
-#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 11, 8))
+#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 13, 0))
 /*! @} */
 
 #if !(defined(FLEXCAN_WAIT_TIMEOUT) && FLEXCAN_WAIT_TIMEOUT)
@@ -302,6 +302,15 @@ typedef enum _flexcan_wake_up_source
     kFLEXCAN_WakeupSrcUnfiltered = 0x0U, /*!< FlexCAN uses unfiltered Rx input to detect edge. */
     kFLEXCAN_WakeupSrcFiltered   = 0x1U, /*!< FlexCAN uses filtered Rx input to detect edge. */
 } flexcan_wake_up_source_t;
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
+/*! @brief FlexCAN payload endianness. */
+typedef enum _flexcan_endianness
+{
+    kFLEXCAN_bigEndian    = 0x0U, /*!< Transmit frame with MSB first, receive frame with big-endian format. */
+    kFLEXCAN_littleEndian = 0x1U, /*!< Transmit frame with LSB first, receive frame with little-endian format. */
+} flexcan_endianness_t;
 #endif
 
 /*! @brief FlexCAN Rx Fifo Filter type. */
@@ -797,6 +806,14 @@ typedef struct _flexcan_config
                                              then the secondary sample point position is determined by the sum of the
                                              transceiver delay measurement plus the enhanced TDC offset. */
 #endif
+    bool enableRemoteRequestFrameStored;  /*!< true: Store Remote Request Frame in the same fashion of data frame.
+                                               false: Generate an automatic Remote Response Frame. */
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
+    flexcan_endianness_t payloadEndianness; /*!< Selects the byte order for the payload of transmit and
+                                                 receive frames, see @ref flexcan_endianness_t. */
+#endif
+
     flexcan_timing_config_t timingConfig; /* Protocol timing . */
 } flexcan_config_t;
 
@@ -1217,8 +1234,12 @@ void FLEXCAN_Deinit(CAN_Type *base);
  *   flexcanConfig->disableSelfReception                 = false;
  *   flexcanConfig->enableListenOnlyMode                 = false;
  *   flexcanConfig->enableDoze                           = false;
+ *   flexcanConfig->enablePretendedeNetworking           = false;
  *   flexcanConfig->enableMemoryErrorControl             = true;
  *   flexcanConfig->enableNonCorrectableErrorEnterFreeze = true;
+ *   flexcanConfig->enableTransceiverDelayMeasure        = true;
+ *   flexcanConfig->enableRemoteRequestFrameStored       = true;
+ *   flexcanConfig->payloadEndianness                    = kFLEXCAN_bigEndian;
  *   flexcanConfig.timingConfig                          = timingConfig;
  *
  * @param pConfig Pointer to the FlexCAN configuration structure.
@@ -1342,6 +1363,26 @@ void FLEXCAN_SetRxIndividualMask(CAN_Type *base, uint8_t maskIdx, uint32_t mask)
  */
 void FLEXCAN_SetTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable);
 
+/*!
+ * @brief Configures a FlexCAN Receive Message Buffer.
+ *
+ * This function cleans a FlexCAN build-in Message Buffer and configures it
+ * as a Receive Message Buffer.
+ * User should invoke this API when CTRL2[RRS]=1.
+ * When CTRL2[RRS]=1, frame's ID is compared to the IDs of the receive mailboxes with the CODE field
+ * configured as kFLEXCAN_RxMbEmpty, kFLEXCAN_RxMbFull or kFLEXCAN_RxMbOverrun. Message buffer will 
+ * store the remote frame in the same fashion of a data frame. No automatic remote response frame will
+ * be generated. User need to setup another message buffer to respond remote request.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param mbIdx The Message Buffer index.
+ * @param pRxMbConfig Pointer to the FlexCAN Message Buffer configuration structure.
+ * @param enable Enable/disable Rx Message Buffer.
+ *               - true: Enable Rx Message Buffer.
+ *               - false: Disable Rx Message Buffer.
+ */
+void FLEXCAN_SetRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_config_t *pRxMbConfig, bool enable);
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * @brief Configures a FlexCAN transmit message buffer.
@@ -1356,24 +1397,7 @@ void FLEXCAN_SetTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable);
  *               - false: Disable Tx Message Buffer.
  */
 void FLEXCAN_SetFDTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable);
-#endif
 
-/*!
- * @brief Configures a FlexCAN Receive Message Buffer.
- *
- * This function cleans a FlexCAN build-in Message Buffer and configures it
- * as a Receive Message Buffer.
- *
- * @param base FlexCAN peripheral base address.
- * @param mbIdx The Message Buffer index.
- * @param pRxMbConfig Pointer to the FlexCAN Message Buffer configuration structure.
- * @param enable Enable/disable Rx Message Buffer.
- *               - true: Enable Rx Message Buffer.
- *               - false: Disable Rx Message Buffer.
- */
-void FLEXCAN_SetRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_config_t *pRxMbConfig, bool enable);
-
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * @brief Configures a FlexCAN Receive Message Buffer.
  *
@@ -1389,6 +1413,21 @@ void FLEXCAN_SetRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_co
  */
 void FLEXCAN_SetFDRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_config_t *pRxMbConfig, bool enable);
 #endif
+
+/*!
+ * @brief Configures a FlexCAN Remote Response Message Buffer.
+ *
+ * User should invoke this API when CTRL2[RRS]=0.
+ * When CTRL2[RRS]=0, frame's ID is compared to the IDs of the receive mailboxes with the CODE field
+ * configured as kFLEXCAN_RxMbRanswer. If there is a matching ID, then this mailbox content will be 
+ * transmitted as response. The received remote request frame is not stored in receive buffer. It is
+ * only used to trigger a transmission of a frame in response.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param mbIdx The Message Buffer index.
+ * @param pFrame Pointer to CAN message frame structure for response.
+ */
+void FLEXCAN_SetRemoteResponseMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_frame_t *pFrame);
 
 /*!
  * @brief Configures the FlexCAN Legacy Rx FIFO.

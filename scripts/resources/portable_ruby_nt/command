@@ -1,0 +1,15 @@
+7zr a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on ruby.7z bin lib
+
+       -t7z   7z archive
+
+       -m0=lzma lzma method
+
+       -mx=9  level of compression = 9 (Ultra)
+
+       -mfb=64
+              number of fast bytes for LZMA = 64
+
+       -md=32m
+              dictionary size = 32 megabytes
+
+       -ms=on solid archive = on

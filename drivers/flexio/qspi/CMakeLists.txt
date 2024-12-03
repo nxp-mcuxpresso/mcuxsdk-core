@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if (CONFIG_MCUX_COMPONENT_driver.flexio_qspi_smartdma)
+    mcux_component_version(2.0.0)
 
     mcux_add_source(
         SOURCES
@@ -17,6 +18,7 @@ if (CONFIG_MCUX_COMPONENT_driver.flexio_qspi_smartdma)
 endif()
 
 if (CONFIG_MCUX_COMPONENT_driver.flexio_qspi_edma)
+    mcux_component_version(2.0.0)
 
     mcux_add_source(
         SOURCES
@@ -31,6 +33,7 @@ if (CONFIG_MCUX_COMPONENT_driver.flexio_qspi_edma)
 endif()
 
 if (CONFIG_MCUX_COMPONENT_driver.flexio_qspi)
+    mcux_component_version(2.0.0)
 
     mcux_add_source(
         SOURCES

@@ -2,8 +2,12 @@
 @page driver_log Driver Change Log
 
 @section tempmon TEMPMON
-  The current TEMPMON driver version is 2.1.1.
+  The current TEMPMON driver version is 2.2.0.
 
+  - 2.2.0
+    - Bug Fixes
+      - Fixed the issue of inconsistency between data width and RM.
+  
   - 2.1.1
     - Bug Fixes
       - Fixed the violations of MISRA C-2012 rules:

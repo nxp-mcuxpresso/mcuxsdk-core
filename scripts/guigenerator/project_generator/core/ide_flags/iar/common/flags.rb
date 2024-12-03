@@ -78,6 +78,8 @@ module Iar
         line = compiler_interworking(target, line)
         line = compiler_cpu_mode(target, line)
         line = compiler_optimization(target, line)
+        line = compiler_strategy(target, line)
+        line = compiler_optimization_strategy(target, line)
         line = compiler_cse(target, line)
         line = compiler_unroll(target, line)
         line = compiler_inline(target, line)
