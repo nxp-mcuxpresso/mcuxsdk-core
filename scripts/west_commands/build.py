@@ -167,7 +167,7 @@ class Build(Forceable):
         group.add_argument('--shield', action='store', help='')
         group.add_argument('--hint', action='store_true', default=False, help='Execute external assistant command like'
                                                                               'west list_project')
-
+        group.add_argument('-nsc','--no_sanity_check', dest='no_sanity_check', action='store_true', default=False, help='Skip sanity check')
         group = parser.add_mutually_exclusive_group()
         group.add_argument('--sysbuild', action='store_true',
                            help='''create multi domain build system''')
@@ -482,6 +482,8 @@ class Build(Forceable):
     def _sanity_check(self):
         # Sanity check the build configuration.
         # Side effect: may update cmake_cache attribute.
+        if self.args.no_sanity_check:
+            return
         log.dbg('sanity checking the build', level=log.VERBOSE_EXTREME)
         self._sanity_check_source_dir()
 
