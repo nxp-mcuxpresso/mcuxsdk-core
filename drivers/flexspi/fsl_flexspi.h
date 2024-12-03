@@ -25,7 +25,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FLEXSPI driver version. */
-#define FSL_FLEXSPI_DRIVER_VERSION (MAKE_VERSION(2, 6, 1))
+#define FSL_FLEXSPI_DRIVER_VERSION (MAKE_VERSION(2, 6, 2))
 /*! @} */
 
 #define FSL_FEATURE_FLEXSPI_AHB_BUFFER_COUNT FSL_FEATURE_FLEXSPI_AHB_BUFFER_COUNTn(0)
@@ -428,13 +428,7 @@ void FLEXSPI_SetFlashConfig(FLEXSPI_Type *base, flexspi_device_config_t *config,
  *
  * @param base FLEXSPI peripheral base address.
  */
-static inline void FLEXSPI_SoftwareReset(FLEXSPI_Type *base)
-{
-    base->MCR0 |= FLEXSPI_MCR0_SWRESET_MASK;
-    while (0U != (base->MCR0 & FLEXSPI_MCR0_SWRESET_MASK))
-    {
-    }
-}
+void FLEXSPI_SoftwareReset(FLEXSPI_Type *base);
 
 /*!
  * @brief Enables or disables the FLEXSPI module.

@@ -131,7 +131,7 @@ module SDKGenerator
                   src_path = File.join(@generator_options[:input_dir], file['source'])
                   relative_path = Pathname.new(src_path).relative_path_from(Pathname.new(@generator_options[:output_dir])).to_s
                   if relative_path.start_with?('..')
-                    FileUtils.cp_f(src_path, File.join(@generator_options[:output_dir],toolchain, file['repo_path'], File.basename(file['source'])))
+                    FileUtils.cp_f(src_path, File.join(@generator_options[:output_dir],toolchain, file['package_path'] || file['repo_path'], File.basename(file['source'])))
                   else
                     # if the file is in build dir, copy it to build dir/toolchain folder
                     FileUtils.cp_f(src_path, File.join(@generator_options[:output_dir],toolchain, relative_path))
@@ -148,7 +148,7 @@ module SDKGenerator
                   Dir.glob("#{File.join(@generator_options[:input_dir], item['path'])}/*.{h,hpp}").each do |file|
                     relative_path = Pathname.new(file).relative_path_from(Pathname.new(@generator_options[:output_dir])).to_s
                     if relative_path.start_with?('..')
-                      FileUtils.cp_f(file, File.join(@generator_options[:output_dir],toolchain, item['path'], File.basename(file)))
+                      FileUtils.cp_f(file, File.join(@generator_options[:output_dir],toolchain, item['package_path'] || item['path'], File.basename(file)))
                     else
                       # if the file is in build dir, copy it to build dir/toolchain folder
                       FileUtils.cp_f(file, File.join(@generator_options[:output_dir],toolchain, relative_path))
@@ -302,7 +302,7 @@ module SDKGenerator
         # Add sources
         project_data[tool_key]['source']&.each do |source|
           # filter file at first
-          # next unless filter_source(source, project_info, tool_key, project_data)
+          next unless filter_source(source, project_info, tool_key, project_data)
           # Clear the source path
           source['source'].tr!('\\', '/')
           if ([:release_action_process, :file_copy] - @generator_options[:generators].keys).empty?
@@ -474,6 +474,9 @@ module SDKGenerator
       def add_libraries(project_instance, target, source, tool_key, project_info)
         if tool_key == 'xcc'
           project_instance.add_link_library(target.downcase, source['source']) if project_instance.methods.include?(:add_link_library)
+        elsif tool_key == 'codewarrior'
+          # for code warrior, extra libraries are added into addl-libraries to differ with system libraries which are added in ld-flags
+          project_instance.add_addl_lib(target.downcase, source['source'], rootdir: 'default_path') if project_instance.methods.include?(:add_addl_lib)
         elsif tool_key == 'armgcc'
           project_instance.add_link_library(target.downcase, source['source'], linked_project_path: linked_project_path(project_info, tool_key)) if project_instance.methods.include?(:add_link_library)
         else
@@ -970,7 +973,7 @@ module SDKGenerator
             end
           end
         else
-          binary_name = File.join(project_info[:outdir], identifier, "#{project_info[:pname]}.out")
+          binary_name = File.join(project_info[:outdir], identifier, "#{project_info[:pname]}#{project_info[:type] == 'application' ? '.out' : '.a'}")
           project_instance.binary_file(identifier, binary_name, rootdir: 'outroot')
         end
 
@@ -1055,6 +1058,10 @@ module SDKGenerator
         # Set CreateMinsize, Xtensa specified
         if content.key?('createMinsize')
           project_instance.set_create_minsize_object(identifier, content['createMinsize']) if project_instance.methods.include?(:set_create_minsize_object)
+        end
+        # Set export include path, Xtensa specified
+        if content.key?('export_include_path')
+          project_instance.set_export_include_path(identifier, content['export_include_path']) if project_instance.methods.include?(:set_export_include_path)
         end
 
         if content.key?('link-generated-lib')

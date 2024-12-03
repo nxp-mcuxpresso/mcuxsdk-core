@@ -107,8 +107,10 @@ macro(project project_name)
       add_executable(app)
     elseif (${__PROJECT_TYPE} STREQUAL "LIBRARY")
       add_library(app)
+    elseif (${__PROJECT_TYPE} STREQUAL "LIBRARY_OBJECT")
+      add_library(app OBJECT)
     else()
-      log_fatal("Unsupported project type: ${__PROJECT_TYPE}, it should be EXECUTABLE or LIBRARY")
+      log_fatal("Unsupported project type: ${__PROJECT_TYPE}, EXECUTABLE, LIBRARY or LIBRARY_OBJECT")
     endif ()
 
     target_link_libraries(app PRIVATE McuxSDK)
@@ -121,7 +123,7 @@ macro(project project_name)
       COMMAND ${CMAKE_COMMAND} -E touch ${dummy_file}
       WORKING_DIRECTORY ${APPLICATION_BINARY_DIR}
     )
-    target_sources(app PRIVATE ${dummy_file})
+    target_sources(app PRIVATE ${APPLICATION_BINARY_DIR}/${dummy_file})
     
     if (__CUSTOM_LINKER)
       remove_defined_linker()
@@ -178,8 +180,10 @@ macro(project project_name)
       add_executable(${MCUX_SDK_PROJECT_NAME})
     elseif (${__PROJECT_TYPE} STREQUAL "LIBRARY")
       add_library(${MCUX_SDK_PROJECT_NAME})
+    elseif (${__PROJECT_TYPE} STREQUAL "LIBRARY_OBJECT")
+      add_library(${MCUX_SDK_PROJECT_NAME} OBJECT)
     else()
-      log_fatal("Unsupported project type: ${__PROJECT_TYPE}, it should be EXECUTABLE or LIBRARY")
+      log_fatal("Unsupported project type: ${__PROJECT_TYPE}, it should be EXECUTABLE, LIBRARY or LIBRARY_OBJECT")
     endif ()
 
     # get full_project_board_port_path
@@ -197,7 +201,12 @@ macro(project project_name)
     # Get custom prj.conf
     if (DEFINED __CUSTOM_PRJ_CONF_PATH)
       foreach(path ${__CUSTOM_PRJ_CONF_PATH})
-        cmake_path(APPEND full_prj_conf_path ${SdkRootDirPath} ${path} "prj.conf")
+        if(IS_ABSOLUTE ${path})
+          cmake_path(APPEND full_prj_conf_path ${path} "prj.conf")
+        else ()
+          cmake_path(APPEND full_prj_conf_path ${SdkRootDirPath} ${path} "prj.conf")
+        endif ()
+
         if (EXISTS ${full_prj_conf_path})
           list(APPEND CUSTOM_PRJ_CONF_PATHS ${full_prj_conf_path})
         else ()
@@ -233,7 +242,16 @@ macro(project project_name)
 endmacro()
 
 # Post process before the final configure done
-cmake_language(DEFER DIRECTORY ${CMAKE_SOURCE_DIR} CALL hook_end_configure())
+# SDK_EXTERNAL_PROJECT_DIR should be defined in a parent CMakeLists.txt
+# which adds the SDK project using add_subdirectory command. This variable
+# should point to the actual path to the SDK project. This way, when the
+# hook_end_configure call is deferred to post processing phase, the SDK
+# variables are still in scope.
+if (SDK_EXTERNAL_PROJECT_DIR)
+  cmake_language(DEFER DIRECTORY ${SDK_EXTERNAL_PROJECT_DIR} CALL hook_end_configure())
+else()
+  cmake_language(DEFER DIRECTORY ${CMAKE_SOURCE_DIR} CALL hook_end_configure())
+endif()
 
 function(hook_end_configure)
   dump_gui_project_data()

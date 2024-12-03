@@ -1718,11 +1718,14 @@ class Kconfig(object):
 
         no_prefix = False
         type_unsigned = False
+        macro_value_in_quotes = False
         for node in sym.nodes:
             if node.help and _NO_PREFIX in node.help.lower():
                 no_prefix = True
             if node.help and _TYPE_UNSIGNED in node.help.lower():
                 type_unsigned = True
+            if node.help and _MACRO_VALUE_IN_QUOTES in node.help.lower():
+                macro_value_in_quotes = True
 
         if no_prefix:
             updated_config_prefix = ""
@@ -1744,8 +1747,12 @@ class Kconfig(object):
             list.append(_macro + '\n')
 
         elif sym.orig_type is STRING:
-            list.append('#define {}{} {}\n'
-                             .format(updated_config_prefix, sym.name, c_define_escape(val)))
+            if macro_value_in_quotes:
+                value = '#define {}{} "{}"\n'.format(updated_config_prefix, sym.name, escape(val))
+            else:
+                value = '#define {}{} {}\n'.format(updated_config_prefix, sym.name, c_define_escape(val))
+
+            list.append(value)
 
         else:  # sym.orig_type in _INT_HEX:
             if sym.orig_type is HEX and \
@@ -7289,6 +7296,9 @@ _NO_PREFIX = "no prefix"
 
 # Type unsigned
 _TYPE_UNSIGNED = "type unsigned"
+
+# Put macro values in quotes
+_MACRO_VALUE_IN_QUOTES = "macro value is in quotes"
 
 # Helper functions for getting compiled regular expressions, with the needed
 # matching function returned directly as a small optimization.

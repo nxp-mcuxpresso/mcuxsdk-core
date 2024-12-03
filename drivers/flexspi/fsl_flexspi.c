@@ -616,6 +616,26 @@ void FLEXSPI_SetFlashConfig(FLEXSPI_Type *base, flexspi_device_config_t *config,
     }
 }
 
+/*!
+ * brief Software reset for the FLEXSPI logic.
+ *
+ * This function sets the software reset flags for both AHB and buffer domain and
+ * resets both AHB buffer and also IP FIFOs.
+ *
+ * param base FLEXSPI peripheral base address.
+ */
+void FLEXSPI_SoftwareReset(FLEXSPI_Type *base)
+{
+    /* Wait for bus to be idle before changing flash configuration. */
+    while (!FLEXSPI_GetBusIdleStatus(base))
+    {
+    }
+    base->MCR0 |= FLEXSPI_MCR0_SWRESET_MASK;
+    while (0U != (base->MCR0 & FLEXSPI_MCR0_SWRESET_MASK))
+    {
+    }
+}
+
 /*! brief Updates the LUT table.
  *
  * param base FLEXSPI peripheral base address.
@@ -884,6 +904,11 @@ status_t FLEXSPI_TransferBlocking(FLEXSPI_Type *base, flexspi_transfer_t *xfer)
     uint32_t configValue = 0;
     status_t result      = kStatus_Success;
 
+    /* Wait for bus to be idle before changing flash configuration. */
+    while (!FLEXSPI_GetBusIdleStatus(base))
+    {
+    }
+
     /* Clear sequence pointer before sending data to external devices. */
     base->FLSHCR2[xfer->port] |= FLEXSPI_FLSHCR2_CLRINSTRPTR_MASK;
 
@@ -927,6 +952,11 @@ status_t FLEXSPI_TransferBlocking(FLEXSPI_Type *base, flexspi_transfer_t *xfer)
 
     /* Wait until the IP command execution finishes */
     while (0UL == (base->INTR & FLEXSPI_INTR_IPCMDDONE_MASK))
+    {
+    }
+
+    /* Wait for bus to be idle before changing flash configuration. */
+    while (!FLEXSPI_GetBusIdleStatus(base))
     {
     }
 
@@ -996,6 +1026,7 @@ status_t FLEXSPI_TransferNonBlocking(FLEXSPI_Type *base, flexspi_handle_t *handl
     assert(NULL != handle);
     assert(NULL != xfer);
 
+
     /* Check if the I2C bus is idle - if not return busy status. */
     if (handle->state != (uint32_t)kFLEXSPI_Idle)
     {
@@ -1003,6 +1034,11 @@ status_t FLEXSPI_TransferNonBlocking(FLEXSPI_Type *base, flexspi_handle_t *handl
     }
     else
     {
+        /* Wait for bus to be idle before changing flash configuration. */
+        while (!FLEXSPI_GetBusIdleStatus(base))
+        {
+        }
+
         handle->data              = (uint8_t *)xfer->data;
         handle->dataSize          = xfer->dataSize;
         handle->transferTotalSize = xfer->dataSize;

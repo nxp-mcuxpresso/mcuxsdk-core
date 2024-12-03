@@ -36,3 +36,13 @@ west-commands:
       - name: mcuxsdk-export
         class: McuxSdkExport
         help: export MCUX SDK installation as a CMake config package
+  - file: scripts/west_commands/update_tool_data_repo.py
+    commands:
+      - name: update_tool_data_repo
+        class: UpdateToolDataRepo
+        help: update tool data repository
+  - file: scripts/west_commands/env_setup.py
+    commands:
+      - name: install_ruby
+        help: Install portable ruby for Windows
+        class: InstallRuby

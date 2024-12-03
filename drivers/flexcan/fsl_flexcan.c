@@ -747,7 +747,7 @@ static void FLEXCAN_Reset(CAN_Type *base)
     {
     }
 
-/* Reset MCR register. */
+    /* Reset MCR register. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_GLITCH_FILTER) && FSL_FEATURE_FLEXCAN_HAS_GLITCH_FILTER)
     base->MCR |= CAN_MCR_WRNEN_MASK | CAN_MCR_WAKSRC_MASK |
                  CAN_MCR_MAXMB((uint32_t)FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) - 1U);
@@ -848,7 +848,7 @@ status_t FLEXCAN_SetFDBitRate(CAN_Type *base, uint32_t sourceClock_Hz, uint32_t 
 
     return result;
 }
-#endif
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
 /*!
  * brief Initializes a FlexCAN instance.
@@ -884,6 +884,7 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
 
     uint32_t mcrTemp;
     uint32_t ctrl1Temp;
+    uint32_t ctrl2Temp;
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     uint32_t instance;
 #endif
@@ -981,6 +982,9 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
     /* Save current CTRL1 value and enable to enter Freeze mode(enabled by default). */
     ctrl1Temp = base->CTRL1;
 
+    /* Save current CTRL2 value and enable to enter Freeze mode(enabled by default). */
+    ctrl2Temp = base->CTRL2;
+
     /* Save current MCR value and enable to enter Freeze mode(enabled by default). */
     mcrTemp = base->MCR;
 
@@ -992,6 +996,16 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
 
     /* Enable Listen Only Mode? */
     ctrl1Temp = (pConfig->enableListenOnlyMode) ? ctrl1Temp | CAN_CTRL1_LOM_MASK : ctrl1Temp & ~CAN_CTRL1_LOM_MASK;
+
+    /* Remote Response Frame is generated or Remote Request Frame is stored. */
+    ctrl2Temp = (pConfig->enableRemoteRequestFrameStored) ? ctrl2Temp | CAN_CTRL2_RRS_MASK :
+                                                            ctrl2Temp & ~CAN_CTRL2_RRS_MASK;
+
+    /* Selects the byte order for the payload of transmit and receive frames. */
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
+    ctrl2Temp = (pConfig->payloadEndianness) ? ctrl2Temp | CAN_CTRL2_PES_MASK :
+                                               ctrl2Temp & ~CAN_CTRL2_PES_MASK;
+#endif
 
 #if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SUPV_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SUPV_SUPPORT)
     /* Enable Supervisor Mode? */
@@ -1031,6 +1045,9 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
 
     /* Write back CTRL1 Configuration to register. */
     base->CTRL1 = ctrl1Temp;
+
+    /* Write back CTRL2 Configuration to register. */
+    base->CTRL2 = ctrl2Temp;
 
     /* Write back MCR Configuration to register. */
     base->MCR = mcrTemp;
@@ -1202,7 +1219,7 @@ void FLEXCAN_FDInit(
     /* Exit Freeze Mode. */
     FLEXCAN_ExitFreezeMode(base);
 }
-#endif
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
 /*!
  * brief De-initializes a FlexCAN instance.
@@ -1253,6 +1270,8 @@ void FLEXCAN_Deinit(CAN_Type *base)
  *   flexcanConfig->enableMemoryErrorControl             = true;
  *   flexcanConfig->enableNonCorrectableErrorEnterFreeze = true;
  *   flexcanConfig->enableTransceiverDelayMeasure        = true;
+ *   flexcanConfig->enableRemoteRequestFrameStored       = true;
+ *   flexcanConfig->payloadEndianness                    = kFLEXCAN_bigEndian;
  *   flexcanConfig.timingConfig                          = timingConfig;
  *
  * param pConfig Pointer to the FlexCAN configuration structure.
@@ -1298,6 +1317,12 @@ void FLEXCAN_GetDefaultConfig(flexcan_config_t *pConfig)
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_BIT_TIMING_REG) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_BIT_TIMING_REG)
     pConfig->enableTransceiverDelayMeasure = true;
+#endif
+
+    pConfig->enableRemoteRequestFrameStored = true;
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
+    pConfig->payloadEndianness = kFLEXCAN_bigEndian;
 #endif
 
     /* Default protocol timing configuration, nominal bit time quantum is 10 (80% SP), data bit time quantum is 5
@@ -1549,7 +1574,7 @@ void FLEXCAN_SetFDTimingConfig(CAN_Type *base, const flexcan_timing_config_t *pC
     /* Exit Freeze Mode. */
     FLEXCAN_ExitFreezeMode(base);
 }
-#endif
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
 /*!
  * brief Sets the FlexCAN receive message buffer global mask.
@@ -1620,42 +1645,6 @@ void FLEXCAN_SetRxIndividualMask(CAN_Type *base, uint8_t maskIdx, uint32_t mask)
 
     /* Exit Freeze Mode. */
     FLEXCAN_ExitFreezeMode(base);
-}
-
-/*!
- * brief Configures a FlexCAN transmit message buffer.
- *
- * This function aborts the previous transmission, cleans the Message Buffer, and
- * configures it as a Transmit Message Buffer.
- *
- * param base FlexCAN peripheral base address.
- * param mbIdx The Message Buffer index.
- * param enable Enable/disable Tx Message Buffer.
- *               - true: Enable Tx Message Buffer.
- *               - false: Disable Tx Message Buffer.
- */
-void FLEXCAN_SetTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable)
-{
-    /* Assertion. */
-    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
-#if !defined(NDEBUG)
-    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
-#endif
-
-    /* Inactivate Message Buffer. */
-    if (enable)
-    {
-        base->MB[mbIdx].CS = CAN_CS_CODE(kFLEXCAN_TxMbInactive);
-    }
-    else
-    {
-        base->MB[mbIdx].CS = 0;
-    }
-
-    /* Clean Message Buffer content. */
-    base->MB[mbIdx].ID    = 0x0;
-    base->MB[mbIdx].WORD0 = 0x0;
-    base->MB[mbIdx].WORD1 = 0x0;
 }
 
 /*!
@@ -2220,7 +2209,105 @@ bool FLEXCAN_FDCalculateImprovedTimingValues(CAN_Type *base,
     }
     return fgRet;
 }
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
+/*!
+ * brief Configures a FlexCAN transmit message buffer.
+ *
+ * This function aborts the previous transmission, cleans the Message Buffer, and
+ * configures it as a Transmit Message Buffer.
+ *
+ * param base FlexCAN peripheral base address.
+ * param mbIdx The Message Buffer index.
+ * param enable Enable/disable Tx Message Buffer.
+ *               - true: Enable Tx Message Buffer.
+ *               - false: Disable Tx Message Buffer.
+ */
+void FLEXCAN_SetTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable)
+{
+    /* Assertion. */
+    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
+#if !defined(NDEBUG)
+    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
+#endif
+
+    /* Inactivate Message Buffer. */
+    if (enable)
+    {
+        base->MB[mbIdx].CS = CAN_CS_CODE(kFLEXCAN_TxMbInactive);
+    }
+    else
+    {
+        base->MB[mbIdx].CS = 0;
+    }
+
+    /* Clean Message Buffer content. */
+    base->MB[mbIdx].ID    = 0x0;
+    base->MB[mbIdx].WORD0 = 0x0;
+    base->MB[mbIdx].WORD1 = 0x0;
+}
+
+/*!
+ * brief Configures a FlexCAN Receive Message Buffer.
+ *
+ * This function cleans a FlexCAN build-in Message Buffer and configures it
+ * as a Receive Message Buffer.
+ * User should invoke this API when CTRL2[RRS]=1.
+ * When CTRL2[RRS]=1, frame's ID is compared to the IDs of the receive mailboxes with the CODE field
+ * configured as kFLEXCAN_RxMbEmpty, kFLEXCAN_RxMbFull or kFLEXCAN_RxMbOverrun. Message buffer will 
+ * store the remote frame in the same fashion of a data frame. No automatic remote response frame will
+ * be generated. User need to setup another message buffer to respond remote request.
+ *
+ * param base FlexCAN peripheral base address.
+ * param mbIdx The Message Buffer index.
+ * param pRxMbConfig Pointer to the FlexCAN Message Buffer configuration structure.
+ * param enable Enable/disable Rx Message Buffer.
+ *               - true: Enable Rx Message Buffer.
+ *               - false: Disable Rx Message Buffer.
+ */
+void FLEXCAN_SetRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_config_t *pRxMbConfig, bool enable)
+{
+    /* Assertion. */
+    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
+    assert(((NULL != pRxMbConfig) || (false == enable)));
+#if !defined(NDEBUG)
+    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
+#endif
+
+    uint32_t cs_temp = 0;
+
+    /* Inactivate Message Buffer. */
+    base->MB[mbIdx].CS = 0;
+
+    /* Clean Message Buffer content. */
+    base->MB[mbIdx].ID    = 0x0;
+    base->MB[mbIdx].WORD0 = 0x0;
+    base->MB[mbIdx].WORD1 = 0x0;
+
+    if (enable)
+    {
+        /* Setup Message Buffer ID. */
+        base->MB[mbIdx].ID = pRxMbConfig->id;
+
+        /* Setup Message Buffer format. */
+        if (kFLEXCAN_FrameFormatExtend == pRxMbConfig->format)
+        {
+            cs_temp |= CAN_CS_IDE_MASK;
+        }
+
+        /* Setup Message Buffer type. */
+        if (kFLEXCAN_FrameTypeRemote == pRxMbConfig->type)
+        {
+            cs_temp |= CAN_CS_RTR_MASK;
+        }
+
+        /* Activate Rx Message Buffer. */
+        cs_temp |= CAN_CS_CODE(kFLEXCAN_RxMbEmpty);
+        base->MB[mbIdx].CS = cs_temp;
+    }
+}
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * brief Configures a FlexCAN transmit message buffer.
  *
@@ -2283,64 +2370,7 @@ void FLEXCAN_SetFDTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable)
     mbAddr[availoffset] = CAN_CS_CODE(kFLEXCAN_TxMbInactive);
 #endif
 }
-#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
-/*!
- * brief Configures a FlexCAN Receive Message Buffer.
- *
- * This function cleans a FlexCAN build-in Message Buffer and configures it
- * as a Receive Message Buffer.
- *
- * param base FlexCAN peripheral base address.
- * param mbIdx The Message Buffer index.
- * param pRxMbConfig Pointer to the FlexCAN Message Buffer configuration structure.
- * param enable Enable/disable Rx Message Buffer.
- *               - true: Enable Rx Message Buffer.
- *               - false: Disable Rx Message Buffer.
- */
-void FLEXCAN_SetRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_config_t *pRxMbConfig, bool enable)
-{
-    /* Assertion. */
-    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
-    assert(((NULL != pRxMbConfig) || (false == enable)));
-#if !defined(NDEBUG)
-    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
-#endif
-
-    uint32_t cs_temp = 0;
-
-    /* Inactivate Message Buffer. */
-    base->MB[mbIdx].CS = 0;
-
-    /* Clean Message Buffer content. */
-    base->MB[mbIdx].ID    = 0x0;
-    base->MB[mbIdx].WORD0 = 0x0;
-    base->MB[mbIdx].WORD1 = 0x0;
-
-    if (enable)
-    {
-        /* Setup Message Buffer ID. */
-        base->MB[mbIdx].ID = pRxMbConfig->id;
-
-        /* Setup Message Buffer format. */
-        if (kFLEXCAN_FrameFormatExtend == pRxMbConfig->format)
-        {
-            cs_temp |= CAN_CS_IDE_MASK;
-        }
-
-        /* Setup Message Buffer type. */
-        if (kFLEXCAN_FrameTypeRemote == pRxMbConfig->type)
-        {
-            cs_temp |= CAN_CS_RTR_MASK;
-        }
-
-        /* Activate Rx Message Buffer. */
-        cs_temp |= CAN_CS_CODE(kFLEXCAN_RxMbEmpty);
-        base->MB[mbIdx].CS = cs_temp;
-    }
-}
-
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * brief Configures a FlexCAN Receive Message Buffer.
  *
@@ -2405,7 +2435,60 @@ void FLEXCAN_SetFDRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_
         mbAddr[offset] = cs_temp;
     }
 }
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
+
+/*!
+ * brief Configures a FlexCAN Remote Response Message Buffer.
+ *
+ * User should invoke this API when CTRL2[RRS]=0.
+ * When CTRL2[RRS]=0, frame's ID is compared to the IDs of the receive mailboxes with the CODE field
+ * configured as kFLEXCAN_RxMbRanswer. If there is a matching ID, then this mailbox content will be 
+ * transmitted as response. The received remote request frame is not stored in receive buffer. It is
+ * only used to trigger a transmission of a frame in response.
+ *
+ * param base FlexCAN peripheral base address.
+ * param mbIdx The Message Buffer index.
+ * param pFrame Pointer to CAN message frame structure for response.
+ */
+void FLEXCAN_SetRemoteResponseMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_frame_t *pFrame)
+{
+    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
+    assert(NULL != pFrame);
+    assert(pFrame->length <= 8U);
+#if !defined(NDEBUG)
+    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
 #endif
+
+    uint32_t cs_temp;
+    cs_temp = 0;
+
+    /* Inactivate Remote Response Message Buffer. */
+    base->MB[mbIdx].CS = (base->MB[mbIdx].CS & ~CAN_CS_CODE_MASK) | CAN_CS_CODE(kFLEXCAN_TxMbInactive);
+
+    /* Fill Message ID field. */
+    base->MB[mbIdx].ID = pFrame->id;
+
+    /* Fill Message Format field. */
+    if ((uint32_t)kFLEXCAN_FrameFormatExtend == pFrame->format)
+    {
+        cs_temp |= CAN_CS_SRR_MASK | CAN_CS_IDE_MASK;
+    }
+
+    /* If matching mailbox has RTR bit set, then FlexCAN will transmit a remote frame as response. */
+    if ((uint32_t)kFLEXCAN_FrameTypeRemote == pFrame->type)
+    {
+        cs_temp |= CAN_CS_RTR_MASK;
+    }
+
+    cs_temp |= CAN_CS_CODE(kFLEXCAN_RxMbRanswer) | CAN_CS_DLC(pFrame->length);
+
+    /* Load Message Payload. */
+    base->MB[mbIdx].WORD0 = pFrame->dataWord0;
+    base->MB[mbIdx].WORD1 = pFrame->dataWord1;
+
+    /* Activate Tx Message Buffer. */
+    base->MB[mbIdx].CS = cs_temp;
+}
 
 /*!
  * brief Configures the FlexCAN Legacy Rx FIFO.
@@ -2852,6 +2935,86 @@ status_t FLEXCAN_WriteTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_frame_t 
     return status;
 }
 
+/*!
+ * brief Reads a FlexCAN Message from Receive Message Buffer.
+ *
+ * This function reads a CAN message from a specified Receive Message Buffer.
+ * The function fills a receive CAN message frame structure with
+ * just received data and activates the Message Buffer again.
+ * The function returns immediately.
+ *
+ * param base FlexCAN peripheral base address.
+ * param mbIdx The FlexCAN Message Buffer index.
+ * param pRxFrame Pointer to CAN message frame structure for reception.
+ * retval kStatus_Success            - Rx Message Buffer is full and has been read successfully.
+ * retval kStatus_FLEXCAN_RxOverflow - Rx Message Buffer is already overflowed and has been read successfully.
+ * retval kStatus_Fail               - Rx Message Buffer is empty.
+ */
+status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFrame)
+{
+    /* Assertion. */
+    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
+    assert(NULL != pRxFrame);
+#if !defined(NDEBUG)
+    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
+#endif
+
+    uint32_t cs_temp;
+    uint32_t rx_code;
+    status_t status;
+
+    /* Read CS field of Rx Message Buffer to lock Message Buffer. */
+    cs_temp = base->MB[mbIdx].CS;
+    /* Get Rx Message Buffer Code field. */
+    rx_code = (cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT;
+
+    /* Check to see if Rx Message Buffer is full. */
+    if (((uint32_t)kFLEXCAN_RxMbFull == rx_code) || ((uint32_t)kFLEXCAN_RxMbOverrun == rx_code))
+    {
+        /* Store Message ID. */
+        pRxFrame->id = base->MB[mbIdx].ID & (CAN_ID_EXT_MASK | CAN_ID_STD_MASK);
+
+        /* Get the message ID and format. */
+        pRxFrame->format = (cs_temp & CAN_CS_IDE_MASK) != 0U ? (uint8_t)kFLEXCAN_FrameFormatExtend :
+                                                               (uint8_t)kFLEXCAN_FrameFormatStandard;
+
+        /* Get the message type. */
+        pRxFrame->type =
+            (cs_temp & CAN_CS_RTR_MASK) != 0U ? (uint8_t)kFLEXCAN_FrameTypeRemote : (uint8_t)kFLEXCAN_FrameTypeData;
+
+        /* Get the message length. */
+        pRxFrame->length = (uint8_t)((cs_temp & CAN_CS_DLC_MASK) >> CAN_CS_DLC_SHIFT);
+
+        /* Get the time stamp. */
+        pRxFrame->timestamp = (uint16_t)((cs_temp & CAN_CS_TIME_STAMP_MASK) >> CAN_CS_TIME_STAMP_SHIFT);
+
+        /* Store Message Payload. */
+        pRxFrame->dataWord0 = base->MB[mbIdx].WORD0;
+        pRxFrame->dataWord1 = base->MB[mbIdx].WORD1;
+
+        /* Read free-running timer to unlock Rx Message Buffer. */
+        (void)base->TIMER;
+
+        if ((uint32_t)kFLEXCAN_RxMbFull == rx_code)
+        {
+            status = kStatus_Success;
+        }
+        else
+        {
+            status = kStatus_FLEXCAN_RxOverflow;
+        }
+    }
+    else
+    {
+        /* Read free-running timer to unlock Rx Message Buffer. */
+        (void)base->TIMER;
+
+        status = kStatus_Fail;
+    }
+
+    return status;
+}
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * brief Writes a FlexCAN FD Message to the Transmit Message Buffer.
@@ -2944,89 +3107,7 @@ status_t FLEXCAN_WriteFDTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_fd_fra
 
     return status;
 }
-#endif
 
-/*!
- * brief Reads a FlexCAN Message from Receive Message Buffer.
- *
- * This function reads a CAN message from a specified Receive Message Buffer.
- * The function fills a receive CAN message frame structure with
- * just received data and activates the Message Buffer again.
- * The function returns immediately.
- *
- * param base FlexCAN peripheral base address.
- * param mbIdx The FlexCAN Message Buffer index.
- * param pRxFrame Pointer to CAN message frame structure for reception.
- * retval kStatus_Success            - Rx Message Buffer is full and has been read successfully.
- * retval kStatus_FLEXCAN_RxOverflow - Rx Message Buffer is already overflowed and has been read successfully.
- * retval kStatus_Fail               - Rx Message Buffer is empty.
- */
-status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFrame)
-{
-    /* Assertion. */
-    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
-    assert(NULL != pRxFrame);
-#if !defined(NDEBUG)
-    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
-#endif
-
-    uint32_t cs_temp;
-    uint32_t rx_code;
-    status_t status;
-
-    /* Read CS field of Rx Message Buffer to lock Message Buffer. */
-    cs_temp = base->MB[mbIdx].CS;
-    /* Get Rx Message Buffer Code field. */
-    rx_code = (cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT;
-
-    /* Check to see if Rx Message Buffer is full. */
-    if (((uint32_t)kFLEXCAN_RxMbFull == rx_code) || ((uint32_t)kFLEXCAN_RxMbOverrun == rx_code))
-    {
-        /* Store Message ID. */
-        pRxFrame->id = base->MB[mbIdx].ID & (CAN_ID_EXT_MASK | CAN_ID_STD_MASK);
-
-        /* Get the message ID and format. */
-        pRxFrame->format = (cs_temp & CAN_CS_IDE_MASK) != 0U ? (uint8_t)kFLEXCAN_FrameFormatExtend :
-                                                               (uint8_t)kFLEXCAN_FrameFormatStandard;
-
-        /* Get the message type. */
-        pRxFrame->type =
-            (cs_temp & CAN_CS_RTR_MASK) != 0U ? (uint8_t)kFLEXCAN_FrameTypeRemote : (uint8_t)kFLEXCAN_FrameTypeData;
-
-        /* Get the message length. */
-        pRxFrame->length = (uint8_t)((cs_temp & CAN_CS_DLC_MASK) >> CAN_CS_DLC_SHIFT);
-
-        /* Get the time stamp. */
-        pRxFrame->timestamp = (uint16_t)((cs_temp & CAN_CS_TIME_STAMP_MASK) >> CAN_CS_TIME_STAMP_SHIFT);
-
-        /* Store Message Payload. */
-        pRxFrame->dataWord0 = base->MB[mbIdx].WORD0;
-        pRxFrame->dataWord1 = base->MB[mbIdx].WORD1;
-
-        /* Read free-running timer to unlock Rx Message Buffer. */
-        (void)base->TIMER;
-
-        if ((uint32_t)kFLEXCAN_RxMbFull == rx_code)
-        {
-            status = kStatus_Success;
-        }
-        else
-        {
-            status = kStatus_FLEXCAN_RxOverflow;
-        }
-    }
-    else
-    {
-        /* Read free-running timer to unlock Rx Message Buffer. */
-        (void)base->TIMER;
-
-        status = kStatus_Fail;
-    }
-
-    return status;
-}
-
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * brief Reads a FlexCAN FD Message from Receive Message Buffer.
  *
@@ -3130,7 +3211,7 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
 
     return status;
 }
-#endif
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
 /*!
  * brief Reads a FlexCAN Message from Legacy Rx FIFO.
@@ -3287,7 +3368,7 @@ status_t FLEXCAN_TransferSendBlocking(CAN_Type *base, uint8_t mbIdx, flexcan_fra
         FLEXCAN_ClearMbStatusFlags(base, (uint32_t)1U << mbIdx);
 #endif
 
-        /*After TX MB tranfered success, update the Timestamp from MB[mbIdx].CS register*/
+        /* After TX MB tranfered success, update the Timestamp from MB[mbIdx].CS register. */
         pTxFrame->timestamp = (uint16_t)((base->MB[mbIdx].CS & CAN_CS_TIME_STAMP_MASK) >> CAN_CS_TIME_STAMP_SHIFT);
 
         status = kStatus_Success;
@@ -3452,7 +3533,7 @@ status_t FLEXCAN_TransferFDReceiveBlocking(CAN_Type *base, uint8_t mbIdx, flexca
     /* Read Received CAN Message. */
     return FLEXCAN_ReadFDRxMb(base, mbIdx, pRxFrame);
 }
-#endif
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
 /*!
  * brief Performs a polling receive transaction from Legacy Rx FIFO on the CAN bus.
@@ -3870,7 +3951,7 @@ status_t FLEXCAN_TransferFDReceiveNonBlocking(CAN_Type *base, flexcan_handle_t *
 
     return status;
 }
-#endif
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
 /*!
  * brief Receives a message from Legacy Rx FIFO using IRQ.
@@ -4146,7 +4227,7 @@ void FLEXCAN_TransferFDAbortReceive(CAN_Type *base, flexcan_handle_t *handle, ui
     handle->mbFDFrameBuf[mbIdx] = NULL;
     handle->mbState[mbIdx]      = (uint8_t)kFLEXCAN_StateIdle;
 }
-#endif
+#endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
 
 /*!
  * brief Aborts the interrupt driven message receive process.
@@ -4505,7 +4586,7 @@ static status_t FLEXCAN_SubHandlerForMB(CAN_Type *base, flexcan_handle_t *handle
             }
             break;
 
-        /* Sove Rx Remote Frame.  User need to Read the frame in Mail box in time by Read from MB API. */
+        /* Solve Rx Remote Frame. User need to Read the frame in Mail box in time by Read from MB API. */
         case (uint8_t)kFLEXCAN_StateRxRemote:
             status = kStatus_FLEXCAN_RxRemote;
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)

@@ -103,6 +103,13 @@
                 "category": {
                     "type": "string",
                     "description": "The category for this solution/project."
+                },
+                "example_readme": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "The path of readme file"
+                    }
                 }
             },
             "required": [
@@ -137,6 +144,54 @@
         },
         "shieldsType": {
             "type": "object"
+        },
+        "commonMarketingDataType": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The marketing board name"
+                },
+                "display_name": {
+                    "type": "string",
+                    "description": "The board display name"
+                },
+                "overview": {
+                    "type": "string",
+                    "description": "The board overview" 
+                },
+                "href": {
+                    "type": "string",
+                    "description": "The board href"
+                },
+                "image": {
+                    "type": "string",
+                    "description": "The board image"
+                },
+                "full_name": {},
+                "parts": {},
+                "kits": {},
+                "vendor": {},
+                "NPI": {},
+                "board": {},
+                "accessories": {}
+            },
+            "required": [
+                "name",
+                "display_name",
+                "overview",
+                "href"
+            ]
+        },
+        "boardSupportToolchainType": {
+            "type": "array",
+            "minItems": 0,
+            "uniqueItems": true,
+            "additionalItems": false,
+            "items": {
+                "$ref": "#/definitions/toolchainTargetSupportType"
+            }
         }
     }
 }

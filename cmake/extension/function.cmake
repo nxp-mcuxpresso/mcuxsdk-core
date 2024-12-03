@@ -2196,8 +2196,7 @@ endfunction()
 # Add/remove linker symbol function
 ##############################
 function(mcux_add_linker_symbol)
-  set(single_value SYMBOLS)
-  set(multi_value TARGETS)
+  set(multi_value TARGETS SYMBOLS)
   cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}"
           ${ARGN})
   set(match_target false)

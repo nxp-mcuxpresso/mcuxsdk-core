@@ -274,6 +274,11 @@ module Xtensa
         path = path_mod(path, rootdir)
         @xxproject_file.buildTab.builderTab.internalTab.add_preclean_steps(File.join('${xt_project_loc}', path))
       end
+
+      def set_export_include_path(target, value)
+        value = 'off' if value == false
+        @xxproject_file.buildTab.builderTab.internalTab.set_export_include_path(value)
+      end
     end
   end
 end

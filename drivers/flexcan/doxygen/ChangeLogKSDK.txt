@@ -2,7 +2,16 @@
 @page driver_log Driver Change Log
 
 @section flexcan FLEXCAN
-  The current FLEXCAN driver version is 2.11.8.
+  The current FLEXCAN driver version is 2.13.0.
+
+  - 2.13.0
+    - Improvements
+      - Support payload endianness selection feature.
+
+  - 2.12.0
+    - Improvements
+      - Support automatic Remote Response feature.
+      - Add API FLEXCAN_SetRemoteResponseMbConfig() to configure automatic Remote Response mailbox.
 
   - 2.11.8
     - Improvements

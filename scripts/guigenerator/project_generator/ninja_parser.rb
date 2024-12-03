@@ -46,7 +46,7 @@ class NinjaParser
   def prepare_data(name, toolchain, config, outdir)
     data = {
       @name => {
-        'section-type' => 'application',
+        'section-type' => ENV['project_type']  == 'LIBRARY' ? 'library' : 'application',
         'required' => true,
         'belong_to' => "set.board.#{ENV['board']}",
         'contents' => {
@@ -184,18 +184,36 @@ class NinjaParser
         if result
           all_flags = preprocess_flags_with_prefix(result[1].split(/\s+/))
           all_flags.each do |flag|
-            pattern = /-D([A-Za-z0-9_\(\)]+)=?(.*)?/
-            _flag = flag.match(pattern)
-            if _flag
+            case flag
+            when /-D([A-Za-z0-9_\(\)]+)=?(.*)?/
+              _flag = flag.match(/-D([A-Za-z0-9_\(\)]+)=?(.*)?/)
               if _flag[2]
-                # flags like -DSSCP_CONFIG_FILE=\"fsl_sscp_config_elemu.h\", should be parsed as yml format:
-                # SSCP_CONFIG_FILE: '"fsl_sscp_config_elemu.h"'
-                if _flag[2].match(/^\\\".*\\\"$/)
-                    @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-define"][_flag[1]] = _flag[2].gsub("\\", '')
+                if _flag[2].strip.match(/\S+,\S+/) && @toolchain == 'mdk'
+                    # mdk GUI define does not support A=B,C add it in misc flags
+                    @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-flags"] << flag
                     next
+                elsif _flag[2].match(/^\\\".*\\\"$/)
+                  # flags like -DSSCP_CONFIG_FILE=\"fsl_sscp_config_elemu.h\", should be parsed as yml format:
+                  # SSCP_CONFIG_FILE: '"fsl_sscp_config_elemu.h"'
+                  @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-define"][_flag[1]] = _flag[2].gsub("\\", '')
+                  next
                 end
               end
               @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-define"][_flag[1]] = _flag[2].empty? ? nil : _flag[2]
+            when /-I-\s(-i|-ir)\s+\"([\S|\s]+)\"/
+              _flag = flag.match(/-I-\s(-i|-ir)\s+\"([\S|\s]+)\"/)
+              if _flag[2].include?("MCU/DSP56800x_EABI_Tools")
+                res = "\\\"${MCUToolsBaseDir}/#{_flag[2].split('/MCU/')[1]}\\\""
+              else
+                res = "\\\"#{_flag[1]}\\\""
+              end
+              if _flag[1] == '-i'
+                @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-search-path"] = [] unless @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-search-path"]
+                @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-search-path"] << {'path' => res}
+              elsif _flag[1] == '-ir'
+                @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-path-recursively"] = [] unless @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-path-recursively"]
+                @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-path-recursively"] << {'path' => res}
+              end
             else
               @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-flags"] << flag
             end
@@ -388,6 +406,8 @@ class NinjaParser
       pattern = /--scatter\s(\S+)\s/
     when 'armgcc'
       pattern = /-T\s(\S+)\s/
+    when 'codewarrior'
+      pattern = /(\S+Internal_PFlash_(SDM|LDM|HPM|LPM|SPM).cmd)/
     else
       pattern = nil
     end
@@ -416,8 +436,9 @@ class NinjaParser
   def preprocess_flags_with_prefix(all_flags)
     keep_prefix = ["--preinclude", "-include", "--config_def",  "-P", "--diag_suppress"]
     result = []
-    pre_flag = ''
+
     all_flags.each_with_index do |flag, index|
+        next if flag.nil? || flag.strip.empty?
         if keep_prefix.include?(flag.strip)
           # update relative path for preinclude file
           preinclude_file = all_flags[index+1]
@@ -427,6 +448,8 @@ class NinjaParser
               all_flags[index+1] = File.join('$PROJ_DIR$', path)
             elsif @toolchain == 'xtensa'
               all_flags[index+1] = File.join('${xt_project_loc}', path)
+            elsif @toolchain == 'codewarrior'
+              all_flags[index+1] = File.join('${ProjDirPath}', path)
             else
               all_flags[index+1] = path
             end
@@ -436,6 +459,7 @@ class NinjaParser
           else
             result.push "#{flag} #{all_flags[index+1]}"
           end
+          all_flags[index+1] = nil
         elsif flag.strip.start_with?("--image_input=")
           pattern = /--image_input=(\S+),(\S+),(\S+),(\d+)/
           res = flag.strip.match(pattern)
@@ -443,10 +467,25 @@ class NinjaParser
             path = File.join('$PROJ_DIR$', translate_project_relative_path(res[1]))
             result.push flag.gsub(res[1], path)
           end
-        else
-            result.push flag unless keep_prefix.include?(pre_flag)
+        elsif @toolchain == 'codewarrior'
+          if flag.strip == '-I-'
+            # for codewarrior, "-I -i path" and "-I -ir path" should be seen as a whole
+            result.push "#{flag} #{all_flags[index+1]}  #{all_flags[index+2]} #{all_flags[index+3]}"
+            for i in 1..3
+              all_flags[index+i] = nil
+            end
+          else
+            pattern = /-l\"(\S+)MCU\/(DSP56800x_EABI_Tools\/lib\S+)\"/
+            res = flag.strip.match(pattern)
+            if res && res[2]
+              result.push "-l\\\"${MCUToolsBaseDir}/#{res[2]}\\\""
+            else
+              result.push flag
+            end
+          end
+        elsif flag
+          result.push flag
         end
-        pre_flag = flag.strip
     end
     result
   end
@@ -605,6 +644,8 @@ class NinjaParser
     ENV.each do |key, value|
       @variables[key] = value
     end
+    # codewarrior cp-define use CONFIG_MCUX_HW_DEVICE_ID
+    @variables['CONFIG_MCUX_HW_DEVICE_ID'] =  @variables['device_id']
 
     file_list = ENV['IDE_YML_LIST']&.split(' ')
     ide_data = {}
@@ -616,9 +657,9 @@ class NinjaParser
         },
         'cmake_toolchain' => {
           'files' => [
-            {'source' => "cmake/toolchain/#{@toolchain}.cmake", 'type' => 'script'},
-            {'source' => "cmake/toolchain/toolchain.cmake", 'type' => 'script'},
-            {'source' => "cmake/toolchain/mcux_config.cmake", 'type' => 'script'}
+            {'source' => "scripts/guigenerator/templates/cmake/toolchain/#{@toolchain}.cmake", 'type' => 'script', 'package_path' => 'cmake/toolchain', "exclude" => true},
+            {'source' => "scripts/guigenerator/templates/cmake/toolchain/toolchain.cmake", 'type' => 'script', 'package_path' => 'cmake/toolchain', "exclude" => true},
+            {'source' => "scripts/guigenerator/templates/cmake/toolchain/mcux_config.cmake", 'type' => 'script', 'package_path' => 'cmake/toolchain', "exclude" => true}
           ]
         }
       }))

@@ -9,7 +9,7 @@ require_relative './ninja_parser'
 require_relative 'core/_fileutils'
 
 PACKAGE_YML_PATH = 'yml_data/shared/misc/package.yml'
-SCRIPT_SUPPORTED_TOOLCHAIN = %w[iar mdk armgcc xtensa]
+SCRIPT_SUPPORTED_TOOLCHAIN = %w[iar mdk armgcc xtensa codewarrior]
 CMAKE_LOG_LEVEL_MAP = { 'TRACE' => Logger::DEBUG,
                         'DEBUG' => Logger::DEBUG,
                         'VERBOSE' => Logger::INFO,

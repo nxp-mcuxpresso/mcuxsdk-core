@@ -1,6 +1,5 @@
 /*
- * Copyright  2018-2021 NXP
- * All rights reserved.
+ * Copyright  2018-2021, 2024 NXP
  *
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -24,16 +23,16 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief TEMPMON driver version. */
-#define FSL_TEMPMON_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
+#define FSL_TEMPMON_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*! @} */
 
 /*! @brief TEMPMON temperature structure. */
 typedef struct _tempmon_config
 {
     uint16_t frequency;    /*!< The temperature measure frequency.*/
-    int8_t highAlarmTemp;  /*!< The high alarm temperature.*/
-    int8_t panicAlarmTemp; /*!< The panic alarm temperature.*/
-    int8_t lowAlarmTemp;   /*!< The low alarm temperature.*/
+    int16_t highAlarmTemp;  /*!< The high alarm temperature.*/
+    int16_t panicAlarmTemp; /*!< The panic alarm temperature.*/
+    int16_t lowAlarmTemp;   /*!< The low alarm temperature.*/
 } tempmon_config_t;
 
 /*! @brief TEMPMON alarm mode. */
@@ -116,7 +115,7 @@ float TEMPMON_GetCurrentTemperature(TEMPMON_Type *base);
  * @param tempVal The alarm temperature with degrees Celsius
  * @param alarmMode The alarm mode.
  */
-void TEMPMON_SetTempAlarm(TEMPMON_Type *base, int8_t tempVal, tempmon_alarm_mode alarmMode);
+void TEMPMON_SetTempAlarm(TEMPMON_Type *base, int16_t tempVal, tempmon_alarm_mode alarmMode);
 
 #if defined(__cplusplus)
 }

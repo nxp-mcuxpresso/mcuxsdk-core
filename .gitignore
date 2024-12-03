@@ -61,6 +61,8 @@ middleware/usb/
 middleware/wifi_nxp/
 middleware/wireless/
 middleware/issdk
+middleware/nxp_iot_agent/
+middleware/se_hostlib/
 migrate/
 rtos/
 

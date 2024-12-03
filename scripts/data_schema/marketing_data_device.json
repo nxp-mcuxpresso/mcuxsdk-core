@@ -1,0 +1,23 @@
+{
+    "$id": "marketing_data_device.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MCUXpresso SDK marketing device data schema",
+    "description": "MCUXpresso SDK marketing device data schema",
+    "version": "1.0.0",
+    "allOf": [ { "$ref": "./definitions_schema.json#/definitions/commonMarketingDataType" } ],
+    "properties": {
+        "vendor": {
+            "type": "string",
+            "description": "The device vendor"
+        },
+        "NPI": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The NPI name"
+                }
+            }
+        }
+    }
+}

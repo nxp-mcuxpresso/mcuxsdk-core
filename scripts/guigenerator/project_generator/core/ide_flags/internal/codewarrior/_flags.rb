@@ -206,6 +206,22 @@ module Internal
         return line
       end
 
+      def linker_addl_lib(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /-l(\S+)/
+        result = line.match(pattern)
+        while result
+          lib = result[1].gsub!("\\\"", "")
+          if lib.match(/^\$\{\S+\}\S+/)
+            lib = '"' + lib + '"'
+          end
+          @file.dscLinkerTab.inputTab.add_addl_lib(target, lib)
+          line.sub!(result[0], '')
+          result = line.match(pattern)
+        end
+        return line
+      end
+
       def linker_addl_linker(target, line)
         Core.assert(line.is_a?(String), 'not a string')
         @file.dscLinkerTab.generalTab.add_other_flags(target, line.strip) unless line.strip.empty?

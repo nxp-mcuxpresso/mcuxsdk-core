@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 include_guard(GLOBAL)
-set(GUI_PROJECT_SUPPORTED_TOOLCHAIN "iar" "mdk" "xtensa")
+set(GUI_PROJECT_SUPPORTED_TOOLCHAIN "iar" "mdk" "xtensa" "codewarrior")
 set(STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN "armgcc" "iar" "mdk" "xtensa")
 
 mcux_get_property(IDE_YML_LIST INTERFACE_IDE_YML_LIST)
@@ -36,12 +36,20 @@ set(COMMON_ENV_SETTINGS
     # project_root_path=${project_board_port_path}
     CONFIG_MCUX_TOOLCHAIN_IAR_CPU_IDENTIFIER=${CONFIG_MCUX_TOOLCHAIN_IAR_CPU_IDENTIFIER}
     CONFIG_MCUX_TOOLCHAIN_MDK_CPU_IDENTIFIER=${CONFIG_MCUX_TOOLCHAIN_MDK_CPU_IDENTIFIER}
+    CONFIG_MCUX_TOOLCHAIN_CODEWARRIOR_CPU_IDENTIFIER=${CONFIG_MCUX_TOOLCHAIN_CODEWARRIOR_CPU_IDENTIFIER}
     is_multicore_device=${CONFIG_MCUX_HW_SOC_MULTICORE_DEVICE}
     board_mounted_device_part=${CONFIG_MCUX_HW_DEVICE_PART}
     toolchain=${CONFIG_TOOLCHAIN}
     build_config=${CMAKE_BUILD_TYPE}
     IDE_YML_LIST=${IDE_YML_LIST}
-    log_level=${CMAKE_LOG_LEVEL})
+    log_level=${CMAKE_LOG_LEVEL}
+    project_type=${__PROJECT_TYPE})
+
+if(NOT DEFINED SB_CONF_FILE)
+    # VARIABLE_FROM_CMAKE does not work for sysbuild
+    mcux_get_property(_VARIABLE_FROM_CMAKE VARIABLE_FROM_CMAKE)
+    list(APPEND COMMON_ENV_SETTINGS ${_VARIABLE_FROM_CMAKE})
+endif ()
 
 set(PROJECT_GENERATOR
     ${SdkRootDirPath}/scripts/guigenerator/project_generator/project_generator.rb

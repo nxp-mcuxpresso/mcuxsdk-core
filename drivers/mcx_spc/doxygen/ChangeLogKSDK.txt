@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section mcx_spc MCX_SPC
-  The current MCX_SPC driver version is 2.6.0.
+  The current MCX_SPC driver version is 2.7.0.
+
+  - 2.7.0
+    - New Features
+      - Added new function to unretain RAM array.
 
   - 2.6.0
     - Bug Fixes
