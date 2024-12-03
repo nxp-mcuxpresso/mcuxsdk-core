@@ -241,17 +241,7 @@ macro(project project_name)
   include(${SdkRootDirPath}/cmake/extension/guigenerator.cmake)
 endmacro()
 
-# Post process before the final configure done
-# SDK_EXTERNAL_PROJECT_DIR should be defined in a parent CMakeLists.txt
-# which adds the SDK project using add_subdirectory command. This variable
-# should point to the actual path to the SDK project. This way, when the
-# hook_end_configure call is deferred to post processing phase, the SDK
-# variables are still in scope.
-if (SDK_EXTERNAL_PROJECT_DIR)
-  cmake_language(DEFER DIRECTORY ${SDK_EXTERNAL_PROJECT_DIR} CALL hook_end_configure())
-else()
-  cmake_language(DEFER DIRECTORY ${CMAKE_SOURCE_DIR} CALL hook_end_configure())
-endif()
+cmake_language(DEFER DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} CALL hook_end_configure())
 
 function(hook_end_configure)
   dump_gui_project_data()
