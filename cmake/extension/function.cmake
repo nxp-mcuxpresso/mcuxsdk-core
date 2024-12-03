@@ -1414,6 +1414,8 @@ function(_mcux_remove_linker_script)
     set(ld_cmd "-T ${linker_path}")
   elseif(${CONFIG_TOOLCHAIN} STREQUAL "mdk")
     set(ld_cmd "--scatter ${linker_path}")
+  elseif(${CONFIG_TOOLCHAIN} STREQUAL "codewarrior")
+    set(ld_cmd "${linker_path}")
   endif()
 
   mcux_set_property(INTERFACE_LD_TO_BE_REMOVED_FLAGS ${ld_cmd} APPEND)
@@ -1481,6 +1483,18 @@ function(mcux_remove_mcux_linker_script)
   if(${CONFIG_TOOLCHAIN} STREQUAL "mcux")
     _mcux_remove_linker_script(TARGETS ${__TARGETS} BASE_PATH ${__BASE_PATH}
                                LINKER ${__LINKER})
+  endif()
+endfunction()
+
+function(mcux_remove_codewarrior_linker_script)
+  set(single_value LINKER BASE_PATH)
+  set(multi_value TARGETS)
+  cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}"
+          ${ARGN})
+
+  if(${CONFIG_TOOLCHAIN} STREQUAL "codewarrior")
+    _mcux_remove_linker_script(TARGETS ${__TARGETS} BASE_PATH ${__BASE_PATH}
+            LINKER ${__LINKER})
   endif()
 endfunction()
 
