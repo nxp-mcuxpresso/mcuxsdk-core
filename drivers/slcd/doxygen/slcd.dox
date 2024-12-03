@@ -1,0 +1,35 @@
+/*!
+@defgroup slcd SLCD: Segment LCD Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Segment LCD (SLCD)
+module of MCUXpresso SDK devices. The SLCD module is a CMOS charge pump voltage inverter
+that is designed for low voltage and low-power operation.
+SLCD is designed to generate the appropriate waveforms to drive multiplexed numeric, alphanumeric, or custom segment LCD panels.
+SLCD also has several timing and control settings that can be software-configured
+depending on the application's requirements. Timing and control consists of registers and
+control logic for the following:
+
+1. LCD frame frequency
+2. Duty cycle selection
+3. Front plane/back plane selection and enabling
+4. Blink modes and frequency
+5. Operation in low-power modes
+
+# Plane Setting and Display Control {#SLCDPlaneSetDC}
+
+After the SLCD general initialization, the SLCD_SetBackPlanePhase(),
+SLCD_SetFrontPlaneSegments(), and SLCD_SetFrontPlaneOnePhase()
+are used to set the special back/front Plane
+to make SLCD display correctly. Then, the independent display control APIs,
+SLCD_StartDisplay() and SLCD_StopDisplay(), start and stop the SLCD display.
+
+The SLCD_StartBlinkMode() and SLCD_StopBlinkMode() are provided for
+the runtime special blink mode control.
+To get the SLCD fault detection result,  call the SLCD_GetFaultDetectCounter().
+
+
+# Typical use case {#SLCDTpyUC}
+
+## SLCD Initialization operation {#SLCDInitOpera}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/slcd
+*/

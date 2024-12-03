@@ -1,0 +1,47 @@
+/*!
+@defgroup lpit LPIT: Low-Power Interrupt Timer
+@details The MCUXpresso SDK provides a driver for the Low-Power Interrupt Timer (LPIT)
+         of MCUXpresso SDK devices.
+
+# Function groups {#LPITFunc}
+The LPIT driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#LPITInit}
+The function LPIT_Init() initializes the LPIT with specified configurations. The function
+LPIT_GetDefaultConfig() gets the default configurations. The initialization function
+configures the LPIT operation in doze mode and debug mode.
+
+The function LPIT_SetupChannel() configures the operation of each LPIT channel.
+
+The function LPIT_Deinit() disables the LPIT module and disables the module clock.
+
+## Timer period Operations {#LPITTimerPeriodOperation}
+The function LPITR_SetTimerPeriod()  sets the timer period in units of count. Timers begin
+counting down from the value set by this function until it reaches 0.
+
+The function LPIT_GetCurrentTimerCount() reads the current timer counting value.
+This function returns the real-time timer counting value, in a range from 0 to a timer period.
+
+The timer period operation functions takes the count value in ticks. User can call the utility macros
+provided in fsl_common.h to convert to microseconds or milliseconds
+
+## Start and Stop timer operations {#LPITStartStopOperation}
+The function LPIT_StartTimer() starts the timer counting. After calling this function, the timer loads
+the period value set earlier via the LPIT_SetPeriod() function and starts counting down to 0. When
+the timer reaches 0, it generates a trigger pulse and sets the timeout interrupt flag.
+
+The function LPIT_StopTimer() stops the timer counting.
+
+## Status {#LPITStatus}
+Provides functions to get and clear the LPIT status.
+
+## Interrupt {#LPITInterrupt}
+Provides functions to enable/disable LPIT interrupts and get current enabled interrupts.
+
+
+# Typical use case {#LPITUseCase}
+
+## LPIT tick example {#LPITTick}
+Updates the LPIT period and toggles an LED periodically.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpit
+*/

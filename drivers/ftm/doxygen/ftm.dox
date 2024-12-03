@@ -1,0 +1,87 @@
+/*!
+@defgroup ftm FTM: FlexTimer Driver
+@details The MCUXpresso SDK provides a driver for the FlexTimer Module (FTM)
+         of MCUXpresso SDK devices.
+
+# Function groups {#FTMFunc}
+The FTM driver supports the generation of PWM signals, input capture, dual edge
+capture, output compare, and quadrature decoder modes. The driver also supports
+configuring each of the FTM fault inputs.
+
+## Initialization and deinitialization {#FTMInit}
+The function FTM_Init() initializes the FTM with specified configurations. The function
+FTM_GetDefaultConfig() gets the default configurations. The initialization function
+configures the FTM for the requested register update mode for registers with buffers.
+It also sets up the FTM's fault operation mode and FTM behavior in the BDM mode.
+
+The function FTM_Deinit() disables the FTM counter and turns off the module clock.
+
+## PWM Operations {#FTMPwmOperation}
+The function FTM_SetupPwm()  sets up FTM channels for the PWM output. The function
+sets up the PWM signal properties for multiple channels. Each channel has its
+own duty cycle and level-mode specified. However, the same PWM period and
+PWM mode is applied to all channels requesting the PWM output. The signal duty cycle is
+provided as a percentage of the PWM period. Its value should be between 0 and 100
+0=inactive signal (0% duty cycle) and 100=always active signal (100% duty cycle).
+
+The function FTM_UpdatePwmDutycycle() updates the PWM signal duty cycle
+of a particular FTM channel.
+
+The function FTM_UpdateChnlEdgeLevelSelect() updates the level select bits of a
+particular FTM channel. This can be used to disable the PWM output when making changes
+to the PWM signal.
+
+## Input capture operations {#FTMInpOperation}
+The function FTM_SetupInputCapture() sets up an FTM channel for the input capture.
+The user can specify the capture edge and a filter value to be used when processing
+the input signal.
+
+The function FTM_SetupDualEdgeCapture() can be used to measure the pulse width of
+a signal. A channel pair is used during capture with the input signal coming
+through a channel n. The user can specify whether to use one-shot or continuous capture,
+the capture edge for each channel, and any filter value to be used when processing the
+input signal.
+
+## Output compare operations {#FTMCompOperation}
+The function FTM_SetupOutputCompare() sets up an FTM channel for the output comparison.
+The user can specify the channel output on a successful comparison and a comparison
+value.
+
+## Quad decode  {#FTMQuadOperation}
+The function FTM_SetupQuadDecode() sets up FTM channels 0 and 1 for quad decoding.
+The user can specify the quad decoding mode, polarity, and filter properties for each input
+signal.
+
+## Fault operation  {#FTMFaultOperation}
+The function FTM_SetupFault() sets up the properties for each fault. The user can specify
+the fault polarity and whether to use a filter on a fault input. The overall fault filter value and
+fault control mode are set up during initialization.
+
+
+# Register Update  {#FTMRegUp}
+Some of the FTM registers have buffers. The driver supports various methods to
+update these registers with the content of the register buffer. The registers can be
+updated using the PWM synchronized loading or an intermediate point loading.
+The update mechanism for register with buffers can be specified through the
+following fields available in the configuration structure.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ftmMultiple PWM synchronization update modes can be used by providing an OR'ed list of options
+available in the enumeration ::ftm_pwm_sync_method_t to the pwmSyncMode field.
+
+When using an intermediate reload points, the PWM synchnronization is not required. Multiple
+reload points can be used by providing an OR'ed list of options available in the
+enumeration ::ftm_reload_point_t to the reloadPoints field.
+
+The driver initialization function sets up the appropriate bits in the FTM module based on
+the register update options selected.
+
+If software PWM synchronization is used, the below function can be used to initiate
+a software trigger.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ftm
+
+# Typical use case {#FTMCase}
+
+## PWM output {#FTMPWMOutput}
+Output a PWM signal on two FTM channels with different duty cycles. Periodically update the
+PWM signal duty cycle.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ftm
+*/

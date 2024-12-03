@@ -1,0 +1,5 @@
+/*!
+@defgroup clock Clock Driver
+@details The MCUXpresso SDK provides APIs for MCUXpresso SDK devices' clock operation.
+
+*/

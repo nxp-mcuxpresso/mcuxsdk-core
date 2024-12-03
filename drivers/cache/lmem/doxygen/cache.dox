@@ -1,0 +1,19 @@
+/*!
+@defgroup cache_lmem CACHE: LMEM CACHE Memory Controller
+@details The MCUXpresso SDK provides a peripheral driver for the CACHE Controller of
+         MCUXpresso SDK devices.
+
+The CACHE driver is created to help the user more easily operate the cache memory. The APIs for basic operations are including the following three levels:
+1L. The L1 cache driver API. This level provides the level 1 caches controller drivers. The L1 caches in this arch is the previous the local memory controller (LMEM).
+
+2L. The unified cache driver API.
+This level provides many APIs for unified cache driver APIs for combined L1 and L2 cache maintain operations. This is provided for SDK drivers (DMA, ENET, USDHC, etc) which should do the cache maintenance in their transactional APIs. Because in this arch, there is no L2 cache
+so the unified cache driver API directly calls only L1 driver APIs.
+
+# Function groups {#CACHEFuncGrps}
+
+## L1 CACHE Operation {#L1CACHEMaintainOperation}
+The L1 CACHE has both code cache and data cache. This function group provides two independent API groups for both code cache and data cache.
+There are Enable/Disable APIs for code cache and data cache control and cache maintenance operations as Invalidate/Clean/CleanInvalidate by all and by address range.
+
+*/

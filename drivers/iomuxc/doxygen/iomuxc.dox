@@ -1,0 +1,9 @@
+/*!
+@defgroup iomuxc_driver IOMUXC: Input/Output Multiplexing Controller
+@details The MCUXpresso SDK provides a peripheral driver for the Input/Output Multiplexing Controller.@n
+ @n
+The IOMUXC, working in conjunction with the IOMUX, enables the chip to share one
+pad for multiple signals from different peripheral interfaces.
+ @n
+*/
+

@@ -1,0 +1,10 @@
+/*!
+@defgroup qn_dac DAC: Digital-to-Analog Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Digital-to-Analog Converter (DAC)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#QNDACTpyUC}
+Example use of DAC API.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac
+*/
+

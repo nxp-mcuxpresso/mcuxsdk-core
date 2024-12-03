@@ -1,0 +1,11 @@
+/*!
+@defgroup gpc GPC: General Power Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the General Power Controller (GPC)
+         module of MCUXpresso SDK devices.
+
+API functions are provided to configure the system about working in dedicated power mode. There are
+mainly about enabling the power for memory, enabling the wakeup sources for STOP modes, and
+power up/down operations for various peripherals.  
+
+*/
+

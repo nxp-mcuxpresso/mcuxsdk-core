@@ -1,0 +1,47 @@
+/*!
+@defgroup pit PIT: Periodic Interrupt Timer
+@details The MCUXpresso SDK provides a driver for the Periodic Interrupt Timer (PIT)
+         of MCUXpresso SDK devices.
+
+# Function groups {#PITFunc}
+The PIT driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#PITInit}
+The function PIT_Init() initializes the PIT with specified configurations. The function
+PIT_GetDefaultConfig() gets the default configurations. The initialization function
+configures the PIT operation in debug mode.
+
+The function PIT_SetTimerChainMode() configures the chain mode operation of each PIT channel.
+
+The function PIT_Deinit() disables the PIT timers and disables the module clock.
+
+## Timer period Operations {#PITTimerPeriodOperation}
+The function PITR_SetTimerPeriod()  sets the timer period in units of count. Timers begin
+counting down from the value set by this function until it reaches 0.
+
+The function PIT_GetCurrentTimerCount() reads the current timer counting value.
+This function returns the real-time timer counting value, in a range from 0 to a timer period.
+
+The timer period operation functions takes the count value in ticks. Users can call the utility macros
+provided in fsl_common.h to convert to microseconds or milliseconds.
+
+## Start and Stop timer operations {#PITStartStopOperation}
+The function PIT_StartTimer() starts the timer counting. After calling this function, the timer loads
+the period value set earlier via the PIT_SetPeriod() function and starts counting down to 0. When
+the timer reaches 0, it generates a trigger pulse and sets the timeout interrupt flag.
+
+The function PIT_StopTimer() stops the timer counting.
+
+## Status {#PITStatus}
+Provides functions to get and clear the PIT status.
+
+## Interrupt {#PITInterrupt}
+Provides functions to enable/disable PIT interrupts and get current enabled interrupts.
+
+
+# Typical use case {#PITUseCase}
+
+## PIT tick example {#PITTick}
+Updates the PIT period and toggles an LED periodically.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pit
+*/

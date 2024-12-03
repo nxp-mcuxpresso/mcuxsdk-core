@@ -1,0 +1,38 @@
+---
+west-commands:
+  - file: scripts/west_commands/build.py
+    commands:
+      - name: build
+        class: Build
+        help: compile a mcux application
+  - file: scripts/west_commands/flash.py
+    commands:
+      - name: flash
+        class: Flash
+        help: flash and run a binary on a board
+  - file: scripts/west_commands/debug.py
+    commands:
+      - name: debug
+        class: Debug
+        help: flash and interactively debug a Zephyr application
+      - name: debugserver
+        class: DebugServer
+        help: connect to board and launch a debug server
+      - name: attach
+        class: Attach
+        help: interactively debug a board
+  - file: scripts/west_commands/format.py
+    commands:
+      - name: format
+        class: Format
+        help: format source code
+  - file: scripts/west_commands/list_project.py
+    commands:
+      - name: list_project
+        class: ListProject
+        help: ListProject
+  - file: scripts/west_commands/export.py
+    commands:
+      - name: mcuxsdk-export
+        class: McuxSdkExport
+        help: export MCUX SDK installation as a CMake config package

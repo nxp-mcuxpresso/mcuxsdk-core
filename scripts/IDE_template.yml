@@ -1,0 +1,12 @@
+ps.misc.project_template:
+  section-type: project_segment
+  belong_to: set.board.${board}
+  required: true
+  contents:
+    configuration:
+      tools:
+        iar:
+          project-templates:
+          - scripts/templates/iar/app_cmsisdap/generic.ewd
+          - scripts/templates/iar/app_cmsisdap/generic.ewp
+          - scripts/templates/iar/general.eww

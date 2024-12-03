@@ -1,0 +1,15 @@
+/*!
+@page driver_log Driver Change Log
+
+@section cop COP
+  The current COP driver version is 2.0.1.
+
+  - 2.0.1
+    - Bug Fixes
+      - Fixed MISRA-2012 issues.
+        - Rule 10.1 and rule 17.7.
+
+  - 2.0.0
+    - Initial version.
+
+*/

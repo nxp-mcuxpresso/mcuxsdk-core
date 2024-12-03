@@ -1,0 +1,40 @@
+/*!
+@defgroup dac32 DAC32: Digital-to-Analog Converter
+@details The MCUXpresso SDK provides a peripheral driver for the Digital-to-Analog Converter (DAC32)
+         module of MCUXpresso SDK devices.
+
+The DAC32 driver includes a basic DAC32 module (converter) and DAC32 buffer.
+
+The basic DAC32 module supports operations unique to the DAC converter in each DAC32 instance. The APIs in this part
+are used in the initialization phase, which is necessary for enabling the DAC32 module in the application. The APIs
+enable/disable the clock, enable/disable the module, and configure the converter. Call the initial APIs to
+prepare the DAC32 module for the application.
+
+The DAC32 buffer operates the DAC32 hardware buffer. The DAC32 module supports a hardware buffer to
+keep a group of DAC values to be converted. This feature supports updating the DAC output value automatically by
+triggering the buffer read pointer to move in the buffer. Use the APIs to configure the hardware buffer's
+trigger mode, watermark, work mode, and use size. Additionally, the APIs operate the DMA, interrupts, flags,
+the pointer (index of buffer), item values, and so on.
+
+The DAC32 buffer plays a major part when using the DAC module, as the most functional features are designed for the DAC32
+hardware buffer. 
+
+# Function groups {#DAC32FuncGrps}
+
+## Initialization and deinitialization {#DAC32Init}
+
+This function group implements APIs for the basic DAC module (converter).
+
+## Buffer {#DAC32Buf}
+
+This function group implements APIs for the DAC buffer.
+
+# Typical use case {#DAC32TypUC}
+
+## Working as a basic DAC without the hardware buffer feature. {#DAC32WithoutHBuf}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac32
+## Working with the hardware buffer. {#DAC32WithHBuf}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac32
+*/

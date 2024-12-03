@@ -1,0 +1,13 @@
+/*!
+@page driver_log Driver Change Log
+@section intc INTC
+ The current INTC driver version is 2.0.1
+
+ - 2.0.1
+   - Improvements
+     - Added doxygen comments.
+
+ - 2.0.0
+   - Initial version.
+
+*/

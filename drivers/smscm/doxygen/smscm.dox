@@ -1,0 +1,26 @@
+/*!
+@defgroup smscm SMSCM: Secure Miscellaneous System Control Module
+@details The MCUXpresso SDK provides a peripheral driver for the Secure Miscellaneous System Control (SMSMC) module of MCUXpresso SDK devices.
+
+# Function groups {#SMSCMFuncGrps}
+
+## Enable debug {#SMSCM_EnableDebug}
+The function SMSCM_EnableDebug() enable the debug feature.
+
+## Disable debug {#SMSCM_DisableDebug}
+The function SMSCM_DisableDebug() disable the debug feature.
+
+
+## Lock the debug {#SMSCM_DebugLock}
+The function SMSCM_DebugLock() lock the debug register and it can not be modified until reset.
+
+
+The value in security counter register can be setted and changed by APIs provided.
+Several APIs are provided to control the On-Chip Memory Registers (OCMRn), users can lock the OCMRn,
+enable and set flash cache mode, select ECC control functions, and some of other APIs are
+provided to get the ECC fault address and OCMR attribute.
+
+
+# Typical use case {#SMSCMTpyUC}
+Example use of SMSCM security counter.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/smscm*/

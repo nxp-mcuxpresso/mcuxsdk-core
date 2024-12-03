@@ -1,0 +1,101 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+# board
+rsource "examples/Kconfig"
+
+# device
+rsource "devices/Kconfig"
+
+# Driver config
+menu "Driver Configuration"
+    rsource "drivers/Kconfig"
+    osource "rtos/freertos/freertos-drivers/Kconfig"
+endmenu
+
+# Component config
+rsource "components/Kconfig"
+
+# middleware config
+menu "Middleware"
+    osource "middleware/wifi_nxp/Kconfig"
+    osource "middleware/mbedtls/Kconfig"
+    osource "middleware/usb/Kconfig"
+    osource "middleware/fatfs/Kconfig"
+    osource "middleware/littlefs/Kconfig"
+    osource "middleware/multicore/Kconfig"
+    osource "middleware/vglite/vglite_sdk/Kconfig"
+    menu "audio_voice"
+        osource "middleware/audio_voice/maestro/Kconfig"
+        osource "middleware/audio_voice/components/Kconfig"
+    endmenu
+    osource "middleware/wireless/framework/Kconfig"
+    osource "middleware/wireless/framework_private/Kconfig"
+    osource "middleware/wireless/XCVR/Kconfig"
+    osource "middleware/wireless/genfsk/Kconfig"
+    osource "middleware/lwip/Kconfig"
+    osource "middleware/soem/Kconfig"
+    osource "middleware/wireless/bluetooth/Kconfig"
+	osource "middleware/wireless/bluetooth_private/Kconfig"
+    osource "middleware/wireless/ble_controller/Kconfig"
+    osource "middleware/wireless/wpa_supplicant-rtos/Kconfig"
+    osource "middleware/wireless/ieee-802.15.4/Kconfig"
+    osource "middleware/wireless/zigbee/Kconfig"
+    osource "middleware/mbedtls3x/Kconfig"
+    osource "middleware/tfm/Kconfig"
+    osource "middleware/mmcau/Kconfig"
+    osource "middleware/sdmmc/Kconfig"
+    osource "middleware/edgefast_bluetooth/Kconfig"
+    osource "middleware/wireless/ethermind/Kconfig"
+    osource "middleware/freemaster/Kconfig"
+    osource "middleware/llhttp/Kconfig"
+    osource "middleware/tinycbor/Kconfig"
+    osource "middleware/pkcs11/Kconfig"
+    osource "middleware/secure-subsystem/Kconfig"
+    osource "middleware/rtcesl/Kconfig"
+    osource "middleware/motor_control/Kconfig"
+    osource "middleware/cjson/Kconfig"
+    osource "middleware/libjpeg/Kconfig"
+    osource "middleware/pngdec/Kconfig"
+    osource "middleware/openh264/Kconfig"
+    osource "middleware/lin_stack/Kconfig"
+    osource "examples/lvgl_examples/lvgl_sdk/Kconfig"
+    osource "middleware/cadence/Kconfig"
+    osource "middleware/mcuboot_opensource/Kconfig"
+    osource "middleware/touch/Kconfig"
+    osource "middleware/metering/Kconfig"
+    osource "middleware/aws_iot/device-defender/Kconfig"
+    osource "middleware/aws_iot/device-shadow/Kconfig"
+    osource "middleware/aws_iot/jobs/Kconfig"
+    osource "middleware/aws_iot/ota/Kconfig"
+    osource "middleware/nxp_iot_agent/Kconfig"
+    osource "middleware/eiq/Kconfig"
+    osource "middleware/openvg/Kconfig"
+    osource "middleware/se_hostlib/Kconfig"
+    osource "middleware/issdk/Kconfig"
+    osource "middleware/emwin/Kconfig"
+    osource "middleware/dhara/Kconfig"
+endmenu
+
+# RTOS config
+menu "RTOS"
+menu "FreeRTOS"
+    osource "rtos/freertos/freertos-kernel/Kconfig"
+    osource "rtos/freertos/backoffalgorithm/Kconfig"
+    osource "rtos/freertos/corehttp/Kconfig"
+    osource "rtos/freertos/corejson/Kconfig"
+    osource "rtos/freertos/coremqtt/Kconfig"
+    osource "rtos/freertos/coremqtt-agent/Kconfig"
+    osource "rtos/freertos/corepkcs11/Kconfig"
+    osource "rtos/freertos/freertos-plus-tcp/Kconfig"
+endmenu
+endmenu
+
+menu "External Modules"
+
+    osource "$(KCONFIG_BINARY_DIR)/Kconfig.modules"
+
+endmenu
+
+

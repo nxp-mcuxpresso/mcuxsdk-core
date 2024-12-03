@@ -1,0 +1,27 @@
+int ResetTarget(void)
+{
+    unsigned int ImageEntry;
+
+    // Halt the core
+    JLINK_TARGET_Halt();
+
+    // Set watch point at the Reset_Handler
+    ImageEntry = JLINK_MEM_ReadU32(0x00218004) - 1;
+    JLINK_MEM_WriteU32(0xE0001020, ImageEntry);
+    JLINK_MEM_WriteU32(0xE0001028, 0x00000812);
+
+    // Execute SYSRESETREQ via AIRCR
+    JLINK_MEM_WriteU32(0xE000ED0C, 0x05FA0004);
+
+    // Wait for reset
+    JLINK_SYS_Sleep(200);
+
+    // Halt the core in case it didn't stop at watchpoint
+    JLINK_TARGET_Halt();
+
+    // Clear watch point
+    JLINK_MEM_WriteU32(0xE0001020, 0x0);
+    JLINK_MEM_WriteU32(0xE0001028, 0x0);
+
+    return 0;
+}

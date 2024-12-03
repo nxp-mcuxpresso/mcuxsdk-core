@@ -1,0 +1,9 @@
+/*!
+@defgroup hostif HOSTIF: Host Interface Unit Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Host Interface Unit (HOSTIF) module of MCUXpresso SDK devices.@n
+ @n
+The Host Interface Unit (HOSTIF) module allows communication between the application host (SPI/I2C) and system RAM 
+via the BMA (Buffer Management and Arbitration) module.
+The HostIF is protocol agnostic and stores the received frames in a series of buffers.
+ @n
+*/

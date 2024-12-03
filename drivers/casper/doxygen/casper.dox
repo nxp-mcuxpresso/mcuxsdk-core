@@ -1,0 +1,43 @@
+/*!
+@defgroup casper CASPER: The Cryptographic Accelerator and Signal Processing Engine with RAM sharing
+@details The MCUXpresso SDK provides a peripheral driver for the Cryptographic Accelerator and Signal Processing Engine with RAM sharing (CASPER) module of MCUXpresso SDK devices. The CASPER peripheral provides acceleration of asymmetric cryptographic algorithms as well as optionally of certain signal processing algorithms. The cryptographic acceleration is normally used in conjunction with pure-hardware blocks for hashing and symmetric cryptography, thereby providing performance and energy efficiency for a range of cryptographic uses.
+
+Blocking synchronous APIs are provided for selected cryptographic algorithms using CASPER hardware. The driver interface intends to be easily integrated with generic software crypto libraries such as mbedTLS or wolfSSL.
+The CASPER operations are complete (and results are made availabe for further usage) when a function returns.
+When called, these functions do not return until an CASPER operation is complete.
+These functions use main CPU for simple polling loops to determine operation complete or error status and also for plaintext or ciphertext data movements.
+The driver functions are not re-entrant.
+These functions provide typical interface to upper layer or application software.
+
+# CASPER Driver Initialization and deinitialization {#CASPERInit}
+
+CASPER Driver is initialized by calling the CASPER_Init() function, it resets the CASPER module and enables it's clock.
+CASPER Driver is deinitialized by calling the CASPER_Deinit() function, it disables CASPER module clock.
+
+# Comments about API usage in RTOS {#CASPERRtos}
+
+CASPER operations provided by this driver are not re-entrant. Thus, application software shall ensure
+the CASPER module operation is not requested from different tasks or interrupt service routines while an operation is in progress.
+
+# Comments about API usage in interrupt handler {#CASPERIsr}
+
+All APIs shall not be used from interrupt handler as global variables are used.
+
+# CASPER Driver Examples {#CASPEREx}
+
+## Simple examples {#CASPERSimpleEx}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/casper/
+*/
+
+/*!
+@defgroup casper_driver casper_driver
+@ingroup casper
+@details
+*/
+
+/*!
+@defgroup casper_driver_pkha casper_driver_pkha
+@ingroup casper
+@details
+*/

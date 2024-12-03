@@ -1,0 +1,57 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_ESAI_TxBusy = 6900
+ - #kStatus_ESAI_RxBusy = 6901
+ - #kStatus_ESAI_TxError = 6902
+ - #kStatus_ESAI_RxError = 6903
+ - #kStatus_ESAI_QueueFull = 6904
+ - #kStatus_ESAI_TxIdle = 6905
+ - #kStatus_ESAI_RxIdle = 6906
+*/
+
+/*!
+@defgroup esai ESAI: Enhanced Serial Audio Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Enhanced Serial Audio Interface (ESAI)
+         module of MCUXpresso SDK devices.
+
+
+ESAI driver includes functional APIs and transactional APIs.
+
+Functional APIs are feature/property target low-level APIs.
+Functional APIs can be used for ESAI initialization/configuration/operation for the 
+optimization/customization purpose. Using the functional API requires the
+knowledge of the ESAI peripheral and how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. ESAI functional operation groups provide the
+functional API set.
+
+Transactional APIs are transaction target high-level APIs.
+Transactional APIs can be used to enable the peripheral and in the
+application if the code size and performance of transactional APIs satisfy the
+requirements. If the code size and performance are a critical requirement,
+see the transactional API implementation and write a custom code. All
+transactional APIs use the esai_handle_t as the first parameter.
+Initialize the handle by calling the ESAI_TransferTxCreateHandle() or ESAI_TransferRxCreateHandle() API.
+
+Transactional APIs support asynchronous transfer. This means that the functions
+ESAI_TransferSendNonBlocking() and ESAI_TransferReceiveNonBlocking() set up the interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_ESAI_TxIdle and kStatus_ESAI_RxIdle status.
+
+# Typical use case {#ESAICase}
+
+## ESAI Send/Receive using an interrupt method {#ESAICaseInterrupt}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/esai
+## ESAI Send/receive using a DMA method {#ESAICaseDma}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/esai
+
+*/
+
+/*!
+@if dox_section_esai_edma
+@defgroup esai_edma ESAI eDMA Driver
+@ingroup esai
+@endif
+*/

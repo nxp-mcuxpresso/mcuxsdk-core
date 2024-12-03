@@ -1,0 +1,9 @@
+/*!
+@defgroup otfad OTFAD: On The Fly AES-128 Decryption Driver
+@details The MCUXpresso SDK provides a peripheral driver for On The Fly AES-128 Decryption (OTFAD)
+module of MCUXpresso SDK devices.
+
+This example code shows how to decrypt ciphertext in external memory using the OTFAD driver.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/otfad
+*/

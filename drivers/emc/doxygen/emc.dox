@@ -1,0 +1,38 @@
+/*!
+@defgroup emc EMC: External Memory Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the External Memory Controller
+ block of MCUXpresso SDK devices.
+
+The EMC driver is provides support for synchronous static memory devices such as RAM, ROM, and flash, in addition to dynamic memories such as single data rate SDRAM with an SDRAM clock of up to 100 MHz. From software control, three main function blocks are related:
+1. Basic controller
+    a. Timing control with programmable delay elements.
+    b. Module enable.
+2. Dynamic memory controller
+3. Static memory controller
+
+When using EMC, first call the EMC_Init() function to do module basic initialize. Note that
+this function enables the module clock, configures the module system level clock/delay, and
+enables the module. It is the initialization of the basic controller.
+To initialize the external dynamic memory. The EMC_DynamicMemInit() function should be called before you can access any dynamic memory. The EMC_DynamicMemInit() function is
+provided to initialize the Static memory controller and it should be called when you want
+to access any exterenal static memory. The function EMC_Deinit() deinitializes the EMC module. \n
+
+EMC Provides many basic operation APIs for application to do flexible control.
+The function EMC_Enable() is provided to enable/disable the EMC module.
+The function EMC_EnableDynamicMemControl() is provided to enable/disble the EMC dynamic memory controller.
+The function EMC_SendDynamicMemCommand() is provided to send the NOP/PRECHARGE/MODE/SELF-REFRESH commands. Call EMC_EnterLowPowerMode() to enter or exit the low-power mode. 
+There is a calibration function EMC_DelayCalibrate() which does calibaration of the EMC programmable delays by providing a real-time representation of the values of those deays.\n
+
+# Typical use case {#EMCTpyUC}
+This example shows how to use the EMC to initialize the external 64M 16-bit bus width SDRAM chip (4 banks and 9 columns).
+The SDRAM is on the CS0.
+
+First, initialize the EMC Controller.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/emc
+For the APP_DelayCal():
+    The system configure provided the command and feedback clock delay calibration for EMC
+    EMCDYCTRL and EMCCAL. Application may require the change for these two system configure register. please use the recommded work flow to choose the best delay.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/emc
+
+*/

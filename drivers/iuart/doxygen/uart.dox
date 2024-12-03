@@ -1,0 +1,108 @@
+/*!
+@page drv_err Driver errors status
+
+ - #kStatus_UART_TxBusy = 2800
+ - #kStatus_UART_RxBusy = 2801
+ - #kStatus_UART_TxIdle = 2802
+ - #kStatus_UART_RxIdle = 2803
+ - #kStatus_UART_TxWatermarkTooLarge = 2804
+ - #kStatus_UART_RxWatermarkTooLarge = 2805
+ - #kStatus_UART_FlagCannotClearManually = 2806
+ - #kStatus_UART_Error = 2807
+ - #kStatus_UART_RxRingBufferOverrun = 2808
+ - #kStatus_UART_RxHardwareOverrun = 2809
+ - #kStatus_UART_NoiseError = 2810
+ - #kStatus_UART_FramingError = 2811
+ - #kStatus_UART_ParityError = 2812
+ - #kStatus_UART_BaudrateNotSupport = 2813
+ - #kStatus_UART_BreakDetect = 2814
+*/
+
+/*!
+@defgroup uart UART: Universal Asynchronous Receiver/Transmitter Driver
+*/
+
+/*!
+@defgroup uart_driver UART Driver
+@ingroup uart
+@details The MCUXpresso SDK provides a peripheral driver for the Universal Asynchronous Receiver/Transmitter (UART)
+         module of MCUXpresso SDK devices.
+
+
+The UART driver includes functional APIs and transactional APIs.
+
+Functional APIs are used for UART initialization/configuration/operation for the purpose of 
+optimization/customization. Using the functional API requires the
+knowledge of the UART peripheral and how to organize functional APIs to
+meet the application requirements. All functional APIs use the peripheral base
+address as the first parameter. UART functional operation groups provide the
+functional API set.
+
+Transactional APIs can be used to enable the peripheral quickly and in the
+application if the code size and performance of transactional APIs can satisfy the
+requirements. If the code size and performance are critical requirements,
+see the transactional API implementation and write custom code. All
+transactional APIs use the uart_handle_t as the second parameter.
+Initialize the handle by calling the UART_TransferCreateHandle() API.
+
+Transactional APIs support asynchronous transfer, which means that the functions
+UART_TransferSendNonBlocking() and UART_TransferReceiveNonBlocking() set up an interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_UART_TxIdle and kStatus_UART_RxIdle.
+
+Transactional receive APIs support the ring buffer. Prepare the
+memory for the ring buffer and pass in the start address and size while calling the
+UART_TransferCreateHandle(). If passing  NULL, the ring buffer feature is disabled.
+When the ring buffer is enabled, the received data is saved to the ring buffer in the background.
+The UART_TransferReceiveNonBlocking() function first gets data from the ring buffer. If
+the ring buffer does not have enough data, the function first returns the data in the
+ring buffer and then saves the received data to user memory. When all data is received,
+the upper layer is informed through a callback with the kStatus_UART_RxIdle.
+
+If the receive ring buffer is full, the upper layer is informed through a callback with the
+kStatus_UART_RxRingBufferOverrun. In the callback function, the upper layer reads
+data out from the ring buffer. If not, existing data is overwritten by the new data.
+
+The ring buffer size is specified when creating the handle. Note that
+one byte is reserved for the ring buffer maintenance. When
+creating handle using the following code.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/uart
+In this example, the buffer size is 32, but only 31 bytes are used for
+saving data.
+
+# Typical use case {#UARTCase}
+
+## UART Send/receive using a polling method {#UARTCasePolling}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/uart
+## UART Send/receive using an interrupt method {#UARTCaseInterrupt}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/uart
+## UART Receive using the ringbuffer feature {#UARTCaseRing}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/uart
+## UART automatic baud rate detect feature {#UARTCaseAutoBaudRate}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/uart*/
+
+/*!
+@defgroup uart_freertos_driver UART FreeRTOS Driver
+@ingroup uart
+@details
+*/
+
+/*!
+@if dox_section_uart_sdma
+@defgroup uart_sdma UART SDMA Driver
+@ingroup uart
+@details
+@endif
+*/
+
+/*!
+@if dox_section_uart_cmsis_driver
+@defgroup uart_cmsis_driver UART CMSIS Driver
+@ingroup uart
+@endif
+*/

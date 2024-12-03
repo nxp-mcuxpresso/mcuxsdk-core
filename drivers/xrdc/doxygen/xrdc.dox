@@ -1,0 +1,60 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_XRDC_NoError = 1500
+*/
+
+/*!
+@defgroup xrdc XRDC: Extended Resource Domain Controller
+@details The MCUXpresso SDK provides a driver for the Extended Resource Domain
+Controller (XRDC) block of MCUXpresso SDK devices.
+@{
+
+# XRDC functions {#XRDCFunc}
+
+The XRDC module includes four submodules, as follows:
+
+ - XRDC_MGR
+   The Manager submodule coordinates all programming model reads and writes.
+
+ - XRDC_MDAC
+   The Master Domain Assignment Controller handles resource assignments
+   and generation of the domain identifiers (domain ID).
+
+ - XRDC_MRC
+   The Memory Region Controller implements the access controls for slave
+   memories based on the pre-programmed region descriptor registers.
+
+ - XRDC_PAC
+   The Peripheral Access Controller implements the access controls for
+   slave peripherals based on the preprogrammed domain access control registers.
+
+Accordingly, the XRDC driver functions could be grouped as follows:
+ - XRDC_MGR functions.
+ - XRDC_MDAC functions.
+ - XRDC_MRC functions.
+ - XRDC_PAC functions.
+
+# Typical use case {#XRDCTypUC}
+
+## Set up configurations during system initialization {#XRDCConfig}
+
+The domain assignment and access policy can be configured during the system initialization.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/xrdc
+## XRDC error handle {#XRDCErrHandle}
+
+When an access violation occurs, the hard fault is triggered. The function
+XRDC_GetAndClearFirstDomainError() is used to get the error information. Although there
+might be more than one error, this function only gets the first error.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/xrdc
+## Access involve SEMA42 {#XRDCInvolSEMA42}
+
+See the SoC reference manual to check which SEMA42 instance is used. For example, for
+KL28, the memory region defined by the MRC0 uses the SEMA42-0, while the memory region defined by
+MRC1 uses the SEMA42-1. The peripherals controlled by the PAC0 and PAC2 use the SEMA42-0, while the
+peripherals controlled by PAC1 use the SEMA42-1.\n
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/xrdc
+*/
+/*! @} */

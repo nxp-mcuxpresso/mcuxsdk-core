@@ -1,0 +1,12 @@
+#
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+
+menu "cadence"
+    orsource "codecs/Kconfig"
+    orsource "multicore-xaf/Kconfig"
+    orsource "naturedsp/Kconfig"
+    orsource "nnlib/Kconfig"
+endmenu

@@ -1,0 +1,6 @@
+/*!
+@defgroup sysctr_driver SYSCTR: System Counter Driver
+@details The MCUXpresso SDK provides a driver for the SYSCTR module of MCUXpresso SDK devices.
+
+*/
+

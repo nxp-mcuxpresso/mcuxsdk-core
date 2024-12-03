@@ -1,0 +1,5 @@
+/*!
+@defgroup dcic DCIC: Display Content Integrity Checker
+@details The MCUXpresso SDK provides a peripheral driver for the DCIC module of MCUXpresso SDK devices.
+
+*/

@@ -1,0 +1,5 @@
+/*!
+@defgroup csi2rx MIPI CSI2 RX: MIPI CSI2 RX Driver
+@details The MCUXpresso SDK provides a peripheral driver for the MIPI DWC CSI-2 RX.
+
+*/

@@ -1,0 +1,17 @@
+/*!
+@defgroup swm SWM: Switch Matrix Module
+@details The MCUXpresso SDK provides a peripheral driver for the Switch Matrix Module (SWM)
+         module of MCUXpresso SDK devices.
+
+# SWM: Switch Matrix Module {#SWM}
+
+## SWM Operations {#SWMOperation}
+  The function SWM_SetMovablePinSelect() will selects a movable pin designated by its GPIO port and
+bit numbers to a function.
+
+  The function SWM_SetFixedMovablePinSelect() will selects a fixed movable pin designated by its GPIO port and
+bit numbers to a function.
+
+  The function SWM_SetFixedPinSelect() will enables a fixed-pin function in PINENABLE0 or PINENABLE1.
+
+*/

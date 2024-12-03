@@ -1,0 +1,6 @@
+/*!
+@defgroup ewm EWM: External Watchdog Monitor Driver
+@details The MCUXpresso SDK provides a peripheral driver for the External Watchdog (EWM) Driver module of MCUXpresso SDK devices.
+
+# Typical use case {#EWMTypUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ewm*/

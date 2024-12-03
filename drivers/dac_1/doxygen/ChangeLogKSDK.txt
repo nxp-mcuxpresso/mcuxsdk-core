@@ -1,0 +1,34 @@
+/*!
+@page driver_log Driver Change Log
+
+@section dac DAC
+  The current DAC driver version is 2.1.2.
+
+  - 2.1.2
+    - Improvements
+      - Release peripheral from reset if necessary in init function.
+
+  - 2.1.1
+    - Bug Fixes
+      - Fixed violations of the MISRA C-2012 rules.
+
+  - 2.1.0
+    - New Features
+      - Added support for period trigger mode.
+      - Added support for sync trigger between dac instances.
+      - Added support for configuring DAC sync cycles.
+      - Added support for internal reference current selection.
+      - Enabled buffer mode manually for K4 series board.
+
+  - 2.0.2
+    - Bug Fixes
+      - Fixed MISRA C-2012 rule 10.3 and rule 17.7.
+
+  - 2.0.1
+    - New Features
+      - Added a control macro to enable/disable the CLOCK code in current driver.
+
+  - 2.0.0
+    - Initial version.
+
+*/

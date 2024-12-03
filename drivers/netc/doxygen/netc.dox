@@ -1,0 +1,120 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_NETC_RxFrameEmpty = 16600
+ - #kStatus_NETC_RxTsrResp = 16601
+ - #kStatus_NETC_RxFrameError = 16602
+ - #kStatus_NETC_TxFrameOverLen = 16603
+ - #kStatus_NETC_LackOfResource = 16604
+ - #kStatus_NETC_Unsupported = 16605
+ - #kStatus_NETC_RxHRZeroFrame = 16606
+ - #kStatus_NETC_RxHRNotZeroFrame = 16607
+ - #kStatus_NETC_NotFound = 16608
+*/
+
+/*!
+ * @defgroup netc NETC driver
+ * @details The MCUXpresso SDK provides a driver for the NETC module.
+ * The NETC driver is designed in 2 layers:
+ * - API layer
+ * - Hardware layer
+ */
+
+/*!
+ * @defgroup netc_api API layer
+ * @details The API layer is available for user access and is supposed to be the only interfaces for the user.
+ * A module in the API layer is not necessary a direct mapping of a hardware peripheral but provides a higher functional
+ * model for the user.
+ *
+ * For example, the Endpoint API module models the endpoint usage which covers the configuration of ENETC peripheral,
+ * port peripheral, Station interface peripheral, etc... It abstracts the hardware details to provide a simpler model to
+ * interact on the network.
+ *
+ * The modules APIs require a handle (xxx_handle_t pointer) which is used to get the appropriate context.
+ *
+ * NETC is divided into 4 main groups:
+ *  - Endpoint: NETC works as endpoint
+ *  - Switch: NETC works as switch
+ *  - Timer: Timer functionalities
+ *  - MDIO: MDIO functionalities
+ *
+ * @ingroup netc
+ */
+
+#pragma region netc_hw
+//////////////////////////////////////
+// Group for the NETC Hardware
+//////////////////////////////////////
+/*!
+ * @defgroup netc_hw Hardware layer
+ * @details The hardware layer is mainly designed for code reuse. For example, in the API layer, Switch and Endpoint
+ * module which share common code such as port and station interface (SI). In general, the hardware layer maps closely
+ * to the hardware modules.
+ * User should not invoke the hardware layer directly.
+ * @ingroup netc
+ */
+
+/*!
+ * @defgroup netc_hw_si Hardware Station Interface(SI)
+ * @details Group for Station Interface(SI) API and data structure.
+ * data structures are prefixed with netc_si.
+ * APIs are prefixed with NETC_SI.
+ * @ingroup netc_hw
+ */
+
+/*!
+ * @defgroup netc_hw_enetc Hardware ENETC
+ * @details Group for ENETC API and data structure.
+ * data structure with netc_enetc as part in the naming.
+ * API starts with NETC_Enetc.
+ * @ingroup netc_hw
+ */
+
+/*!
+ * @defgroup netc_hw_port Hardware Port
+ * @details Group for PORT features API and data structure.
+ * data structures are prefixed with netc_port.
+ * APIs are prefixed with NETC_Port.
+ * @ingroup netc_hw
+ */
+
+/*!
+ * @defgroup netc_hw_port_tx Hardware Port Tx
+ * @details Group for the Port Tx functionalities
+ * @ingroup netc_hw_port
+ */
+
+/*!
+ * @defgroup netc_hw_port_rx Hardware Port Rx
+ * @details Group for the Port Rx functionalities
+ * @ingroup netc_hw_port
+ */
+
+/*!
+ * @defgroup netc_hw_port_mac Hardware Port MAC
+ * @details Group for the Port Mac functionalities
+ * @ingroup netc_hw
+ */
+
+/*!
+ * @defgroup netc_hw_switch Hardware Switch
+ * @details Group for switch specific hardware API and data structure.
+ *
+ * @ingroup netc_hw
+ */
+
+/*!
+ * @defgroup netc_hw_common Hardware Common Functions
+ * @details Group for API/Data structure of common usage.
+ *
+ * @ingroup netc_hw
+ */
+
+/*!
+ * @defgroup netc_hw_table Hardware Table Access Functions
+ * @details Group for API/Data structure of Tables.
+ * It supports NTMP 1.0 and NTMP 2.0 but it is transparent to the invoker.
+ *
+ * @ingroup netc_hw
+ */
+
+ #pragma endregion netc_hw

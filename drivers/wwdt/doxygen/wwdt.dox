@@ -1,0 +1,25 @@
+/*!
+@defgroup wwdt WWDT: Windowed Watchdog Timer Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Watchdog module (WDOG) of MCUXpresso SDK devices.
+
+# Function groups {#WWDTFunc}
+
+## Initialization and deinitialization {#WWDTInit}
+The function WWDT_Init() initializes the watchdog timer with specified configurations. The configurations
+include timeout value and whether to enable watchdog after init. The function WWDT_GetDefaultConfig()
+gets the default configurations.
+
+The function WWDT_Deinit() disables the watchdog and the module clock.
+
+## Status {#WWDTStatus}
+Provides functions to get and clear the WWDT status.
+
+## Interrupt {#WWDTInterrupt}
+Provides functions to enable/disable WWDT interrupts and get current enabled interrupts.
+
+## Watch dog Refresh {#WWDTRefresh}
+The function WWDT_Refresh() feeds the WWDT.
+
+
+# Typical use case {#WWDTTypUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/wwdt*/

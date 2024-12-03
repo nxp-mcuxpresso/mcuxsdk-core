@@ -1,0 +1,84 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_ENET_InitMemoryFail = 4000
+ - #kStatus_ENET_RxFrameError = 4001
+ - #kStatus_ENET_RxFrameFail = 4002
+ - #kStatus_ENET_RxFrameEmpty = 4003
+ - #kStatus_ENET_RxFrameDrop = 4004
+ - #kStatus_ENET_TxFrameOverLen = 4005
+ - #kStatus_ENET_TxFrameBusy = 4006
+ - #kStatus_ENET_TxFrameFail = 4007
+*/
+
+/*!
+@defgroup enet ENET: Ethernet MAC Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 10/100 Mbps Ethernet MAC (ENET)
+         module of MCUXpresso SDK devices.
+
+# ENET: Ethernet MAC Driver {EthernetMACDriver}
+
+# Operations of Ethernet MAC Driver {#EthernetMACDriverOps}
+
+## MII interface Operation {#ENETMIIInterOps}
+
+The MII interface is the interface connected with MAC and PHY.
+the Serial management interface - MII management interface should be set before any access
+to the external PHY chip register. Call ENET_SetSMI() to initialize the MII management interface.
+Use ENET_StartSMIRead(), ENET_StartSMIWrite(), and ENET_ReadSMIData() to read/write to PHY registers.
+This function group sets up the MII and serial management SMI interface, gets data from the SMI interface,
+and starts the SMI read and write command.
+Use ENET_SetMII() to configure the MII before successfully getting data from the external PHY.
+
+## MAC address filter {#ENETAddrFilter}
+
+This group sets/gets the ENET mac address and the multicast group address filter.
+ENET_AddMulticastGroup() should be called to add the ENET MAC to the multicast group.
+The IEEE 1588 feature requires receiving the PTP message.
+
+## Other Baisc control Operations {#ENETOthBasicCtlOps}
+This group has the receive active API ENET_ActiveRead() for single and multiple rings. 
+The ENET_AVBConfigure() is provided to configure the AVB features to support the AVB frames transmission. 
+Note that due to the AVB frames transmission scheme being a credit-based TX scheme, it is only supported with the Enhanced buffer descriptors. Because of this, 
+the AVB configuration should only be done with the Enhanced buffer descriptor. When the AVB feature is required, make sure the
+the "ENET_ENHANCEDBUFFERDESCRIPTOR_MODE" is defined before using this feature.  
+
+## Transactional Operation {#ENETTransOps}
+For ENET receive, the ENET_GetRxFrameSize() function needs to be called to get the received data size. Then,
+call the ENET_ReadFrame() function to get the received data. If the received error occurs, call the ENET_GetRxErrBeforeReadFrame() function
+after ENET_GetRxFrameSize() and before ENET_ReadFrame() functions to get the detailed error information.
+
+For ENET transmit, call the ENET_SendFrame() function to send the data out. The transmit data error information
+is only accessible for the IEEE 1588 enhanced buffer descriptor mode. When the ENET_ENHANCEDBUFFERDESCRIPTOR_MODE is defined,
+the ENET_GetTxErrAfterSendFrame() can be used to get the detail transmit error information.
+The transmit error information can only be updated by uDMA after the data is transmitted. The ENET_GetTxErrAfterSendFrame() function
+is recommended to be called on the transmit interrupt handler.
+
+If send/read frame with zero-copy mechanism is needed, there're special APIs like ENET_GetRxFrame() and ENET_StartTxFrame().
+The send frame zero-copy APIs can't be used mixed with ENET_SendFrame() for the same ENET peripheral, same as read frame zero-copy APIs.
+
+## PTP IEEE 1588 Feature Operation {#ENETPTP1588FeatureOps}
+
+This function group configures the PTP IEEE 1588 feature, starts/stops/gets/sets/adjusts the PTP IEEE 1588 timer,
+gets the receive/transmit frame timestamp, and PTP IEEE 1588 timer channel feature setting.
+
+The ENET_Ptp1588Configure() function needs to be called when the ENET_ENHANCEDBUFFERDESCRIPTOR_MODE is defined and the IEEE 1588 feature
+is required.
+
+# Typical use case {#ENETTpyUC}
+
+## ENET Initialization, receive, and transmit operations {#ENETInitRxTxOps}
+
+For the ENET_ENHANCEDBUFFERDESCRIPTOR_MODE undefined use case, use the legacy type buffer descriptor transmit/receive the frame as follows.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/enet
+For the ENET_ENHANCEDBUFFERDESCRIPTOR_MODE defined use case, add the PTP IEEE 1588 configuration
+to enable the PTP IEEE 1588 feature. The initialization occurs as follows.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/enet
+
+*/
+
+/*!
+@if dox_section_enet_cmsis_driver
+@defgroup enet_cmsis_driver ENET CMSIS Driver
+@ingroup enet
+@endif
+*/

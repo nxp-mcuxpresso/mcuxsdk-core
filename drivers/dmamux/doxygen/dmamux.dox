@@ -1,0 +1,12 @@
+/*!
+@defgroup dmamux DMAMUX: Direct Memory Access Multiplexer Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Direct Memory Access Multiplexer  (DMAMUX)
+         of MCUXpresso SDK devices.
+
+# Typical use case{#DMAMUXTypicalUseCase}
+
+## DMAMUX Operation{#DMAMUXOper}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dmamux
+*/
+

@@ -1,0 +1,35 @@
+/*!
+@defgroup freqme FREQME: Frequency Measurement
+@details  The MCUXpresso SDK provides a driver for the Frequency Measurement (FREQME).
+
+# Function groups
+The freqme module can be used to measure the frequency of the selected target clock or the pulse width of the selected
+reference clock. Based on features of freqme moudle, the driver can be divided into 5 function groups.
+
+## Basic Control APIs
+Functions in this groups are for module basic control. The function FREQME_StartMeasurementCycle() starts the
+measurement cycle and function FREQME_TerminateMeasurementCycle() terminates the measurement cycle. The funciton
+FREQME_Init() initializes the module, before invoking that function some steps also need to do:
+- Reset the Frquency Measurement function peripheral reset.
+- Select reference and target clocks using input mux block, please note to feed selected clocks source to FREQME module.
+- If designed to measure external input clocks, please remember to set pin mux.
+
+## Frequency Measurement Mode Control APIs
+The funciton FREQME_CalculateTargetClkFreq() calculates the frequency of selected target clock. The formula is
+Ftarget = (RESULT - 2) * Freference / 2 ^ REF_SCALE. And the result value in unit of Hz.
+To measure the frequency with a high degree of accuracy, the frequency of target clock is better less than reference
+clock.
+
+## Pulse Width Measurement Mode Control APIs
+Functions in this groups are useful when the operate mode is set as pulse width measure mode. To measure the pulse period
+with a high degree of accuracy, the frequency of reference clock is better less than target clock.
+
+## Status Control APIs
+Functions in this group can be used to get/clear interrupt status flags.
+
+## Interrupt Control APIs
+Functions in this function group can be used to enable/disable interrupts. The module supports 3 types of interrupts:
+Underflow interrupt(Interrupt is active when the result is less than minumum value), Overflow interrupt(Interrupt is
+active when the result is greater than maximum value), Result ready interrupt(Interrupt is active when a Measurement
+completes and the result is ready).
+*/

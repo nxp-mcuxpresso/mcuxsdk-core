@@ -1,0 +1,382 @@
+/*
+ * The Clear BSD License
+ * Copyright (c) 2015, Freescale Semiconductor, Inc.
+ * Copyright  2016 - 2017 ,  NXP
+ * All rights reserved.
+ *
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted (subject to the limitations in the disclaimer below) provided
+ * that the following conditions are met:
+ *
+ * o Redistributions of source code must retain the above copyright notice, this list
+ *   of conditions and the following disclaimer.
+ *
+ * o Redistributions in binary form must reproduce the above copyright notice, this
+ *   list of conditions and the following disclaimer in the documentation and/or
+ *   other materials provided with the distribution.
+ *
+ * o Neither the name of copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from this
+ *   software without specific prior written permission.
+ *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef _FSL_MCGLITE_H_
+#define _FSL_MCGLITE_H_
+
+#include "fsl_osc.h"
+#include "fsl_common.h"
+
+/*! @addtogroup mcglite*/
+/*! @{*/
+
+/*******************************************************************************
+* Definitions
+******************************************************************************/
+
+/* ## Start:DefineFront */
+/*! @brief External XTAL0 (OSC0) clock frequency.
+ *
+ * The XTAL0/EXTAL0 (OSC0) clock frequency in Hz. When the clock is set up, use the
+ * function CLOCK_SetXtal0Freq to set the value in the clock driver. For example,
+ * if XTAL0 is 8 MHz:
+ * @code
+ * CLOCK_InitOsc0(...);
+ * CLOCK_SetXtal0Freq(80000000);
+ * @endcode
+ *
+ * This is important for the multicore platforms where one core needs to set up the
+ * OSC0 using the CLOCK_InitOsc0. All other cores need to call the CLOCK_SetXtal0Freq
+ * to get a valid clock frequency.
+ */
+extern volatile uint32_t g_xtal0Freq;
+
+/*! @brief The external XTAL32/EXTAL32/RTC_CLKIN clock frequency.
+ *
+ * The XTAL32/EXTAL32/RTC_CLKIN clock frequency in Hz. When the clock is set up, use the
+ * function CLOCK_SetXtal32Freq to set the value in the clock driver.
+ *
+ * This is important for the multicore platforms where one core needs to set up
+ * the clock. All other cores need to call the CLOCK_SetXtal32Freq
+ * to get a valid clock frequency.
+ */
+extern volatile uint32_t g_xtal32Freq;
+/* ## End:DefineFront */
+
+/* ## Start:DefineBack */
+/*! @brief Oscillator capacitor load setting.*/
+enum _osc_cap_load
+{
+    kOSC_Cap2P = OSC_CR_SC2P_MASK,  /*!< 2  pF capacitor load */
+    kOSC_Cap4P = OSC_CR_SC4P_MASK,  /*!< 4  pF capacitor load */
+    kOSC_Cap8P = OSC_CR_SC8P_MASK,  /*!< 8  pF capacitor load */
+    kOSC_Cap16P = OSC_CR_SC16P_MASK /*!< 16 pF capacitor load */
+};
+
+/*! @brief OSCERCLK enable mode. */
+enum _oscer_enable_mode
+{
+    kOSC_ErClkEnable = OSC_CR_ERCLKEN_MASK,       /*!< Enable.              */
+    kOSC_ErClkEnableInStop = OSC_CR_EREFSTEN_MASK /*!< Enable in stop mode. */
+};
+
+/*! @brief The OSC configuration for OSCERCLK. */
+typedef struct _oscer_config
+{
+    uint8_t enableMode; /*!< OSCERCLK enable mode. OR'ed value of \ref _oscer_enable_mode. */
+
+#if (defined(FSL_FEATURE_OSC_HAS_EXT_REF_CLOCK_DIVIDER) && FSL_FEATURE_OSC_HAS_EXT_REF_CLOCK_DIVIDER)
+    uint8_t erclkDiv; /*!< Divider for OSCERCLK.*/
+#endif
+} oscer_config_t;
+
+/*! @brief The OSC work mode. */
+typedef enum _osc_mode
+{
+    kOSC_ModeExt = 0U,                         /*!< Use external clock.   */
+    kOSC_ModeOscLowPower = MCG_C2_EREFS0_MASK, /*!< Oscillator low power. */
+#if ((defined(FSL_FEATURE_MCGLITE_HAS_HGO0) && FSL_FEATURE_MCGLITE_HAS_HGO0) && \
+     (defined(FSL_FEATURE_MCGLITE_HAS_RANGE0) && FSL_FEATURE_MCGLITE_HAS_RANGE0))
+    kOSC_ModeOscHighGain = MCG_C2_EREFS0_MASK | MCG_C2_HGO0_MASK, /*!< Oscillator high gain. */
+#endif
+} osc_mode_t;
+
+/*!
+ * @brief OSC Initialization Configuration Structure
+ *
+ * Defines the configuration data structure to initialize the OSC.
+ * When porting to a new board, set the following members
+ * according to the board settings:
+ * 1. freq: The external frequency.
+ * 2. workMode: The OSC module mode.
+ */
+typedef struct _osc_config
+{
+    uint32_t freq;              /*!< External clock frequency.    */
+    uint8_t capLoad;            /*!< Capacitor load setting.      */
+    osc_mode_t workMode;        /*!< OSC work mode setting.       */
+    oscer_config_t oscerConfig; /*!< Configuration for OSCERCLK.  */
+} osc_config_t;
+
+/*! @brief MCG_Lite clock source selection. */
+typedef enum _mcglite_clkout_src
+{
+    kMCGLITE_ClkSrcHirc, /*!< MCGOUTCLK source is HIRC */
+    kMCGLITE_ClkSrcLirc, /*!< MCGOUTCLK source is LIRC */
+    kMCGLITE_ClkSrcExt,  /*!< MCGOUTCLK source is external clock source */
+    kMCGLITE_ClkSrcReserved
+} mcglite_clkout_src_t;
+
+/*! @brief MCG_Lite LIRC select. */
+typedef enum _mcglite_lirc_mode
+{
+    kMCGLITE_Lirc2M, /*!< Slow internal reference(LIRC) 2 MHz clock selected */
+    kMCGLITE_Lirc8M, /*!< Slow internal reference(LIRC) 8 MHz clock selected */
+} mcglite_lirc_mode_t;
+
+/*! @brief MCG_Lite divider factor selection for clock source*/
+typedef enum _mcglite_lirc_div
+{
+    kMCGLITE_LircDivBy1 = 0U, /*!< Divider is 1    */
+    kMCGLITE_LircDivBy2,      /*!< Divider is 2    */
+    kMCGLITE_LircDivBy4,      /*!< Divider is 4    */
+    kMCGLITE_LircDivBy8,      /*!< Divider is 8    */
+    kMCGLITE_LircDivBy16,     /*!< Divider is 16   */
+    kMCGLITE_LircDivBy32,     /*!< Divider is 32   */
+    kMCGLITE_LircDivBy64,     /*!< Divider is 64   */
+    kMCGLITE_LircDivBy128     /*!< Divider is 128  */
+} mcglite_lirc_div_t;
+
+/*! @brief MCG_Lite clock mode definitions */
+typedef enum _mcglite_mode
+{
+    kMCGLITE_ModeHirc48M, /*!< Clock mode is HIRC 48 M  */
+    kMCGLITE_ModeLirc8M,  /*!< Clock mode is LIRC 8 M   */
+    kMCGLITE_ModeLirc2M,  /*!< Clock mode is LIRC 2 M   */
+    kMCGLITE_ModeExt,     /*!< Clock mode is EXT       */
+    kMCGLITE_ModeError    /*!< Unknown mode            */
+} mcglite_mode_t;
+
+/*! @brief MCG internal reference clock (MCGIRCLK) enable mode definition. */
+enum _mcglite_irclk_enable_mode
+{
+    kMCGLITE_IrclkEnable = MCG_C1_IRCLKEN_MASK,       /*!< MCGIRCLK enable.              */
+    kMCGLITE_IrclkEnableInStop = MCG_C1_IREFSTEN_MASK /*!< MCGIRCLK enable in stop mode. */
+};
+
+/*! @brief MCG_Lite configure structure for mode change. */
+typedef struct _mcglite_config
+{
+    mcglite_clkout_src_t outSrc;  /*!< MCGOUT clock select.                */
+    uint8_t irclkEnableMode;      /*!< MCGIRCLK enable mode, OR'ed value of _mcglite_irclk_enable_mode. */
+    mcglite_lirc_mode_t ircs;     /*!< MCG_C2[IRCS].                       */
+    mcglite_lirc_div_t fcrdiv;    /*!< MCG_SC[FCRDIV].                     */
+    mcglite_lirc_div_t lircDiv2;  /*!< MCG_MC[LIRC_DIV2].                  */
+    bool hircEnableInNotHircMode; /*!< HIRC enable when not in HIRC mode.  */
+} mcglite_config_t;
+/* ## End:DefineBack */
+
+/*******************************************************************************
+* API
+******************************************************************************/
+#if defined(__cplusplus)
+extern "C" {
+#endif /* __cplusplus*/
+
+/* ## Start:FuncFreq */
+/*!
+ * @name MCG_Lite clock frequency
+ * @{
+ */
+
+/*!
+ * @brief Gets the MCG_Lite output clock (MCGOUTCLK) frequency.
+ *
+ * This function gets the MCG_Lite output clock frequency in Hz based on the current
+ * MCG_Lite register value.
+ *
+ * @return The frequency of MCGOUTCLK.
+ */
+uint32_t CLOCK_GetOutClkFreq(void);
+
+/*!
+ * @brief Gets the MCG internal reference clock (MCGIRCLK) frequency.
+ *
+ * This function gets the MCG_Lite internal reference clock frequency in Hz based
+ * on the current MCG register value.
+ *
+ * @return The frequency of MCGIRCLK.
+ */
+uint32_t CLOCK_GetInternalRefClkFreq(void);
+
+/*!
+* @brief Gets the current MCGPCLK frequency.
+*
+* This function gets the MCGPCLK frequency in Hz based on the current MCG_Lite
+* register settings.
+*
+* @return The frequency of MCGPCLK.
+*/
+uint32_t CLOCK_GetPeriphClkFreq(void);
+
+/*! @}*/
+/* ## End:FuncFreq */
+
+/* ## Start:FuncMisc */
+/*!
+ * @name MCG_Lite mode.
+ * @{
+ */
+
+/*!
+ * @brief Gets the current MCG_Lite mode.
+ *
+ * This function checks the MCG_Lite registers and determines the current MCG_Lite mode.
+ *
+ * @return The current MCG_Lite mode or error code.
+ */
+mcglite_mode_t CLOCK_GetMode(void);
+
+/*!
+ * @brief Sets the MCG_Lite configuration.
+ *
+ * This function configures the MCG_Lite, includes the output clock source, MCGIRCLK
+ * settings, HIRC settings, and so on. See @ref mcglite_config_t for details.
+ *
+ * @param  targetConfig Pointer to the target MCG_Lite mode configuration structure.
+ * @return Error code.
+ */
+status_t CLOCK_SetMcgliteConfig(mcglite_config_t const *targetConfig);
+
+/*! @}*/
+
+/*!
+ * @name OSC configuration
+ * @{
+ */
+
+/*!
+ * @brief Configures the OSC external reference clock (OSCERCLK).
+ *
+ * This function configures the OSC external reference clock (OSCERCLK).
+ * This is an example to enable the OSCERCLK in normal mode and stop mode, and set
+ * the output divider to 1.
+ *
+   @code
+   oscer_config_t config =
+   {
+       .enableMode = kOSC_ErClkEnable | kOSC_ErClkEnableInStop,
+       .erclkDiv   = 1U,
+   };
+
+   OSC_SetExtRefClkConfig(OSC, &config);
+   @endcode
+ *
+ * @param base   OSC peripheral address.
+ * @param config Pointer to the configuration structure.
+ */
+static inline void OSC_SetExtRefClkConfig(OSC_Type *base, oscer_config_t const *config)
+{
+    uint8_t reg = base->CR;
+
+    reg &= (uint8_t)(~(OSC_CR_ERCLKEN_MASK | OSC_CR_EREFSTEN_MASK));
+    reg |= config->enableMode;
+
+    base->CR = reg;
+
+#if (defined(FSL_FEATURE_OSC_HAS_EXT_REF_CLOCK_DIVIDER) && FSL_FEATURE_OSC_HAS_EXT_REF_CLOCK_DIVIDER)
+    base->DIV = OSC_DIV_ERPS(config->erclkDiv);
+#endif
+}
+
+/*!
+ * @brief Sets the capacitor load configuration for the oscillator.
+ *
+ * This function sets the specified capacitor configuration for the oscillator.
+ * This should be done in the early system level initialization function call
+ * based on the system configuration.
+ *
+ * @param base   OSC peripheral address.
+ * @param capLoad OR'ed value for the capacitor load option.See \ref _osc_cap_load.
+ *
+ * Example:
+   @code
+   OSC_SetCapLoad(OSC, kOSC_Cap2P | kOSC_Cap8P);
+   @endcode
+ */
+
+static inline void OSC_SetCapLoad(OSC_Type *base, uint8_t capLoad)
+{
+    uint8_t reg = base->CR;
+
+    reg &= (uint8_t)(~(OSC_CR_SC2P_MASK | OSC_CR_SC4P_MASK | OSC_CR_SC8P_MASK | OSC_CR_SC16P_MASK));
+    reg |= capLoad;
+
+    base->CR = reg;
+}
+
+/*!
+ * @brief Initializes the OSC0.
+ *
+ * This function initializes the OSC0 according to the board configuration.
+ *
+ * @param  config Pointer to the OSC0 configuration structure.
+ */
+void CLOCK_InitOsc0(osc_config_t const *config);
+
+/*!
+ * @brief Deinitializes the OSC0.
+ *
+ * This function deinitializes the OSC0.
+ */
+void CLOCK_DeinitOsc0(void);
+
+/*! @}*/
+
+/*!
+ * @name External clock frequency
+ * @{
+ */
+
+/*!
+ * @brief Sets the XTAL0 frequency based on board settings.
+ *
+ * @param freq The XTAL0/EXTAL0 input clock frequency in Hz.
+ */
+static inline void CLOCK_SetXtal0Freq(uint32_t freq)
+{
+    g_xtal0Freq = freq;
+}
+
+/*!
+ * @brief Sets the XTAL32/RTC_CLKIN frequency based on board settings.
+ *
+ * @param freq The XTAL32/EXTAL32/RTC_CLKIN input clock frequency in Hz.
+ */
+static inline void CLOCK_SetXtal32Freq(uint32_t freq)
+{
+    g_xtal32Freq = freq;
+}
+/* @} */
+
+/* ## End:FuncMisc */
+
+#if defined(__cplusplus)
+}
+#endif /* __cplusplus*/
+
+/*! @}*/
+
+#endif /* _FSL_MCGLITE_H_*/

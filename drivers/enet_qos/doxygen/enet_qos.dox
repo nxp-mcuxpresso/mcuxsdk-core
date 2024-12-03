@@ -1,0 +1,63 @@
+/*!
+@defgroup enet_qos EQOS-TSN: Ethernet QoS with TSN Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 10/100/1000 Mbps Ethernet QoS with TSN module of MCUXpresso SDK devices.
+
+# EQOS-TSN: Ethernet QoS with TSN Driver {#EthernetQosDriver}
+
+# Operations of Ethernet QoS with TSN Driver {EthernetQosDriverOps}
+
+## Initialize and De-initialize interface Operation {#ENETQosInitDeinitInterOps}
+
+Use the ENET_QOS_GetDefaultConfig() to get the default basic configuration,
+Use the default configuration unchanged or changed as the input to the 
+ENET_QOS_Init() to do basic configuration for EQOS module.
+Call ENET_QOS_DescriptorInit() to initialization the descriptors and 
+Call ENET_QOS_StartRxTx() to start the EQOS engine after all initialization.
+ENET_QOS_Deinit() is used to to EQOS De-initialization.
+
+## Other basic operation {#ENETQosOthBasicOps}
+
+This group provides the EQOS mac address set/get operation with ENET_QOS_SetMacAddr() and ENET_QOS_GetMacAddr(). The ENET_QOS_EnterPowerDown() and ENET_QOS_ExitPowerDown()
+can be used to do power management.
+
+## Interrupt operation {#ENETQosIntOps}
+
+This group provide the DMA interrupt get and clear APIs. This can be used
+by application to create new IRQ handler.
+
+## Functional Operation {#ENETQosFuncOps}
+
+This group functions are low level TX/RX descriptor operations.
+It is convenient to use these TX/RX APIs to do application specific RX/TX. 
+For TX: Use ENET_QOS_IsTxDescriptorDmaOwn(), ENET_QOS_SetupTxDescriptor() to build your packet for transfer
+and ENET_QOS_UpdateTxDescriptorTail to update the TX tail pointer.
+For RX: Use ENET_QOS_GetRxDescriptor() to get the received data/length and use
+the ENET_QOS_UpdateRxDescriptor() to update the buffers/status.
+
+## Transactional Operation {#ENETQosTransOps}
+
+When use the Transactional APIs, please make sure to call the ENET_QOS_CreateHandler
+to create the handler which are used to maintain all data related to TX/RX
+process.
+
+For EQOS receive, the ENET_QOS_GetRxFrameSize() function must be called to get the received data size. Then,
+call the ENET_QOS_ReadFrame() function to get the received data. 
+
+For EQOS transmit, call the ENET_QOS_SendFrame() function to send the data out. 
+To save memory and avoid the memory copy in the TX process. The ENET_QOS_SendFrame()
+here is a zero-copy API, so make sure the input data buffers are not re-queued or
+freed before the data are really sent out. To make sure the data buffers reclaim 
+is rightly done. the transmit interrupt must be used. so For transactional
+APIs here we enabled the tx interrupt in ENET_QOS_CreateHandler(). That means the
+tx interrupt is automatically enabled in transactional APIs. 
+is recommended to be called on the transmit interrupt handler.ENET_QOS_ReclaimTxDescriptor() is a transactional API to get the information
+from the finished transmit data buffers and reclaim the tx index. it is called
+by the transmit interrupt IRQ handler. 
+
+
+For use the transactional APIs, receive polling
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/enet_qos
+For the functional API, rx polling
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/enet_qos
+
+*/

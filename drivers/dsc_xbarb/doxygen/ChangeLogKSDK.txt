@@ -1,0 +1,9 @@
+/*!
+@page driver_log Driver Change Log
+@section xbarb XBARB
+ The current XBARB driver version is 2.0.0.
+
+ - 2.0.0
+   - Initial version.
+
+*/

@@ -1,0 +1,38 @@
+/*!
+@defgroup lcdic_driver LCDIC: LCD Interface Controller
+@details
+
+LCDIC is a MCU interface controller, the main features:
+  - Support QVGA (320*240) or below
+  - Support RGB565 or below
+  - Support Tearing Effect Signal to eliminate tearing effect
+  - Support DMA transmission
+  - LCD refreshing rate 50/60Hz
+  - Frame updating rate 15 fps or below
+  - Support Intel 8080 interface with 8-bit data bus
+  - Support 3/4-wire SPI interface with 8-bit data bus
+
+LCDIC module is initialized and configued by the function LCDIC_Init. After calling
+this function, the LCDIC is ready to work.
+
+LCDIC can send reset sequence to the reset pin to reset the LCD panel, call
+LCDIC_SendResetSequence to send the reset sequence. To monitor the reset done event,
+application could poll the status or register callback by LCDIC_SetResetSequenceDoneCallback.
+
+For data send and receive, LCDIC driver provides two types of function, the first
+type is blocking functions, the function returns only when the transfer finished
+or error happens. Another type is non-blocking functions, the transfer start functions
+return before transfer done, application should get the transfer done event by
+register callback function.
+
+*/
+
+/*!
+@defgroup lcdic LCDIC Driver
+@ingroup lcdic_driver
+*/
+
+/*!
+@defgroup lcdic_dma LCDIC DMA Driver
+@ingroup lcdic_driver
+*/

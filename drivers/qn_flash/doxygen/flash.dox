@@ -1,0 +1,9 @@
+/*!
+@defgroup qn_flash FLASH: flash driver
+@details The MCUXpresso SDK provides a peripheral driver for the Flash driver
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#QNFLASHTpyUC}
+Example use of FLASH API.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/flash*/
+

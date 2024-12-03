@@ -1,0 +1,43 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_MSCAN_TxBusy = 6800
+ - #kStatus_MSCAN_TxIdle = 6801
+ - #kStatus_MSCAN_TxSwitchToRx = 6802
+ - #kStatus_MSCAN_RxBusy = 6803
+ - #kStatus_MSCAN_RxIdle = 6804
+ - #kStatus_MSCAN_RxOverflow = 6805
+ - #kStatus_MSCAN_RxFifoBusy = 6806
+ - #kStatus_MSCAN_RxFifoIdle = 6807
+ - #kStatus_MSCAN_RxFifoOverflow = 6808
+ - #kStatus_MSCAN_RxFifoWarning = 6809
+ - #kStatus_MSCAN_ErrorStatus = 6810
+ - #kStatus_MSCAN_UnHandled = 6811
+*/
+
+/*!
+@defgroup mscan MSCAN: Scalable Controller Area Network
+@details The MCUXpresso SDK provides a peripheral driver for the Scalable Controller Area Network (MSCAN)
+         module of MCUXpresso SDK devices.
+*/
+
+/*!
+@defgroup mscan_driver MSCAN Driver
+@ingroup mscan
+@details This section describes the programming interface of the MSCAN driver.
+The MSCAN driver configures MSCAN module and provides functional and transactional
+interfaces to build the MSCAN application.
+
+# Typical use case {#MSCANTpyUC}
+
+## Message Buffer Send Operation {#MSCANMbSendOps}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dsc_mscan
+## Message Buffer Receive Operation {#MSCANMbReceiveOps}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dsc_mscan
+## Receive FIFO Operation {#MSCANFifoReceiveOps}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dsc_mscan
+
+## Calculate {#MSCANCalculate}
+Provides static functions to calculate improved timing configuration.
+*/

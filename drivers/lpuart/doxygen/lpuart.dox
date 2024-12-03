@@ -1,0 +1,63 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_LPUART_TxBusy = 1300
+ - #kStatus_LPUART_RxBusy = 1301
+ - #kStatus_LPUART_TxIdle = 1302
+ - #kStatus_LPUART_RxIdle = 1303
+ - #kStatus_LPUART_TxWatermarkTooLarge = 1304
+ - #kStatus_LPUART_RxWatermarkTooLarge = 1305
+ - #kStatus_LPUART_FlagCannotClearManually = 1306
+ - #kStatus_LPUART_Error = 1307
+ - #kStatus_LPUART_RxRingBufferOverrun = 1308
+ - #kStatus_LPUART_RxHardwareOverrun = 1309
+ - #kStatus_LPUART_NoiseError = 1310
+ - #kStatus_LPUART_FramingError = 1311
+ - #kStatus_LPUART_ParityError = 1312
+ - #kStatus_LPUART_BaudrateNotSupport = 1313
+ - #kStatus_LPUART_IdleLineDetected = 1314
+*/
+
+/*!
+@defgroup lpuart LPUART:  Low Power Universal Asynchronous Receiver/Transmitter Driver
+*/
+
+/*!
+@defgroup lpuart_driver LPUART Driver
+@ingroup lpuart
+@details The MCUXpresso SDK provides a peripheral driver for the Low Power UART (LPUART)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#LPUARTTypUC}
+
+## LPUART Operation {#LPUARTOperation}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpuart
+*/
+
+/*!
+@if dox_section_lpuart_dma_driver
+@defgroup lpuart_dma_driver LPUART DMA Driver
+@ingroup lpuart
+@endif
+*/
+
+/*!
+@if dox_section_lpuart_edma_driver
+@defgroup lpuart_edma_driver LPUART eDMA Driver
+@ingroup lpuart
+@endif
+*/
+
+/*!
+@if dox_section_lpuart_freertos_driver
+@defgroup lpuart_freertos_driver LPUART FreeRTOS Driver
+@ingroup lpuart
+@endif
+*/
+
+/*!
+@if dox_section_lpuart_cmsis_driver
+@defgroup lpuart_cmsis_driver LPUART CMSIS Driver
+@ingroup lpuart
+@endif
+*/

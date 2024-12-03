@@ -1,0 +1,19 @@
+/*!
+@defgroup mx25 MX25: MX25 external flash interface driver
+*/
+
+/*!
+@defgroup mx25_driver MX25 Driver
+@ingroup mx25
+@details
+
+MX25 driver includes functional APIs.
+
+Functional APIs are feature/property target low level APIs.
+Functional APIs can be used for MX25 initialization/configuration/operation. 
+Using the functional API requires the knowledge of the MX25 peripheral and how
+to organize functional APIs to meet the application requirements. All functional 
+APIs use the peripheral base address as the first parameter. MX25 functional 
+operation groups provide the functional API set.
+
+*/

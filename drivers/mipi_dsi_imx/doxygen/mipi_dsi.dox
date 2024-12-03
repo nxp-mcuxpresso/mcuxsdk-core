@@ -1,0 +1,6 @@
+/*!
+@defgroup mipi_dsi_host MIPI_DSI: MIPI DSI Host Controller
+@details The MCUXpresso SDK provides a peripheral driver for the MIPI DSI
+
+Which platforms include the ip MIPI DSI host controller: iMX93, iMX95.
+*/

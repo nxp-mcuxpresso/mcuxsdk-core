@@ -1,0 +1,33 @@
+/*!
+@defgroup mcglite Multipurpose Clock Generator Lite (MCGLITE)
+@ingroup clock
+@details The MCUXpresso SDK provides a peripheral driver for the MCG_Lite module of MCUXpresso SDK devices.
+# Function description {#MCGLITEFunc}
+
+The MCG_Lite driver provides three kinds of APIs:
+
+1. APIs to get the MCG_Lite frequency.
+2. APIs for MCG_Lite mode.
+3. APIs for OSC setup.
+
+## MCG_Lite clock frequency {#MCGLITEFreq}
+
+The CLOCK_GetOutClkFreq(), CLOCK_GetInternalRefClkFreq()
+and CLOCK_GetPeriphClkFreq() functions are used to get the frequency of MCGOUTCLK,
+MCGIRCLK, and MCGPCLK based on the current hardware setting.
+
+## MCG_Lite mode {#MCGLITEMode}
+
+The function CLOCK_GetMode() gets the current MCG_Lite mode.\n
+
+The function CLOCK_SetMcgliteConfig() sets the MCG_Lite to a desired configuration.
+The MCG_Lite cannot switch between the LIRC2M and LIRC8M. Instead, the
+function switches to the HIRC mode first and then switches to the target mode.
+
+## OSC configuration {#MCGLITEOsc}
+
+To enable the OSC clock, the MCG_Lite is needed together with the OSC module. The function
+CLOCK_InitOsc0() uses the MCG_Lite and the OSC to initialize the OSC. The OSC should be
+configured based on the board design.
+
+*/

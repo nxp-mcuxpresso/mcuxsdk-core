@@ -1,0 +1,24 @@
+/*!
+@defgroup sha SHA: SHA encryption decryption driver
+@details The MCUXpresso SDK provides a peripheral driver for the SHA module in MCUXpresso SDK devices.
+
+The driver provides blocking synchronous APIs.
+The SHA operations are complete (and results are made availabe for further usage) when a function returns.
+When called, these functions do not return until an SHA operation is complete.
+These functions use main CPU for simple polling loops to determine operation complete or error status and data movements.
+The driver functions are not re-entrant.
+These functions provide typical interface to upper layer or application software.
+
+# SHA Driver Initialization and Configuration {#SHAInit}
+
+Clock to the SHA module has to be enabled before using the driver API.
+
+# Comments about API usage in RTOS {#SHARtos}
+
+SHA operations provided by this driver are not re-entrant. Therefore, the application software should ensure
+the SHA module operation is not requested from different tasks or interrupt service routines while an operation is in progress.
+
+# SHA Driver Example {#SHAEx}
+
+Typical use case
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sha*/

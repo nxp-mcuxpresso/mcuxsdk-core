@@ -1,0 +1,62 @@
+/*!
+@defgroup rtc RTC: Real Time Clock
+@details The MCUXpresso SDK provides a driver for the Real Time Clock (RTC)
+         of MCUXpresso SDK devices.
+
+# Function groups {#RTCFunc}
+The RTC driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#RTCInit}
+The function RTC_Init() initializes the RTC with specified configurations. The function
+RTC_GetDefaultConfig() gets the default configurations.
+
+The function RTC_Deinit() disables the RTC timer and disables the module clock.
+
+## Set & Get Datetime {#RTCDatetime}
+The function RTC_SetDatetime() sets the timer period in seconds. Users pass in the
+details in date & time format by using the below data structure.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rtc
+The function RTC_GetDatetime() reads the current timer value in seconds, converts it to
+date & time format and stores it into a datetime structure passed in by the user.
+
+## Set & Get Alarm {#RTCAlarm}
+The function RTC_SetAlarm()  sets the alarm time period in seconds. Users pass in the
+details in date & time format by using the datetime data structure.
+
+The function RTC_GetAlarm() reads the alarm time in seconds, converts it to
+date & time format and stores it into a datetime structure passed in by the user.
+
+## Start & Stop timer {#RTCStart}
+The function RTC_StartTimer() starts the RTC time counter.
+
+The function RTC_StopTimer() stops the RTC time counter.
+
+## Status {#RTCStatus}
+Provides functions to get and clear the RTC status.
+
+## Interrupt {#RTCInterrupt}
+Provides functions to enable/disable RTC interrupts and get current enabled interrupts.
+
+## RTC Oscillator {#RTCOscillator}
+Some SoC's allow control of the RTC oscillator through the RTC module.
+
+The function RTC_SetOscCapLoad() allows the user to modify the capacitor load configuration
+of the RTC oscillator.
+
+## Monotonic Counter {#RTCMonotonic}
+Some SoC's have a 64-bit Monotonic counter available in the RTC module.
+
+The function  RTC_SetMonotonicCounter() writes a 64-bit to the counter.
+
+The function RTC_GetMonotonicCounter() reads the monotonic counter and returns the
+64-bit counter value to the user.
+
+The function RTC_IncrementMonotonicCounter() increments the Monotonic Counter by one.
+
+# Typical use case {#RTCUseCase}
+
+## RTC tick example {#RTCTick}
+Example to set the RTC current time and trigger an alarm.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rtc
+*/

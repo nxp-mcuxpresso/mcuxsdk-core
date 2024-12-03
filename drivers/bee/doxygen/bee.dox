@@ -1,0 +1,54 @@
+/*!
+@defgroup bee BEE: Bus Encryption Engine
+@details The MCUXpresso SDK provides a peripheral driver for the Bus Encryption Engine (BEE) module.
+
+The BEE module is implemented as an on-the-fly decryption engine. The main features of the
+BEE module are:
+
+  - Standard AXI interconnection
+  - On-the-fly AES-128 decryption, supporting ECB and CTR mode
+  - Aliased memory space support. Address remapping for up to two individual regions
+  - Independent AES Key management for those two individual regions
+  - Bus access pattern optimization with the aid of local store and forward buffer
+  - Non-secured access filtering based on security label of the access
+  - Illegal access check and filtering.
+
+The known hardware limitations of the BEE module are as follows:
+  - Only supports 128 bits data width AXI interconnection
+  - Only supports 16-byte burst access size. For a single transaction, the minimum supported access size is limited to 4 bytes.
+  - Granularity of the address bias is 128 KB per step
+
+# BEE Driver Initialization and Configuration {#BEEInit}
+The function BEE_Init() initializes the BEE to default values. 
+The function BEE_GetDefaultConfig() loads default values to the BEE configuration structure.
+The default values are described below.
+
+See the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/bee.
+The function BEE_Deinit() performs a hardware reset of BEE module and disables clocks. Configuration and keys from software for both
+regions are cleared.
+
+# Enable & Disable BEE {#BEEEnable}
+The function BEE_Enable() enables decryption using BEE.
+The function BEE_Disable() disables decryption using BEE.
+
+# Set BEE region config and key {#BEESet}
+The function BEE_SetConfig() sets BEE settings according to given configuration structure.
+The structure is described below.
+
+See the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/bee.
+The function BEE_SetRegionKey() loads given AES key to BEE register for the given region.
+The key must be 32-bit aligned and stored in little-endian format.
+Note that eFuse BEE_KEYx_SEL must be set accordingly to be able to load and use the key loaded in BEE registers.
+Otherwise, the key cannot be loaded and BEE uses the key from OTPMK or SW_GP2.
+
+The function BEE_SetRegionNonce() loads given AES nonce (used only for AES CTR mode) to BEE register for the given region.
+The nonce must be 32-bit aligned and stored in little-endian format.
+
+# Status {#BEEStatus}
+Provides functions to get and clear the BEE status.
+
+The function BEE_GetStatusFlags() returns status of BEE peripheral.
+The function BEE_ClearStatusFlags() clears the BEE status flags.
+
+## BEE example {#BEEEx}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/bee*/

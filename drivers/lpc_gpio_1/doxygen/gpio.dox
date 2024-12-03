@@ -1,0 +1,32 @@
+/*!
+@defgroup lpc_gpio_1 GPIO: General Purpose I/O
+
+@details The MCUXpresso SDK provides a peripheral driver for the General Purpose I/O (GPIO) module of
+         MCUXpresso SDK devices.
+
+# Function groups {#GPIOFuncGrps}
+
+## Initialization and deinitialization {#GPIOInit}
+The function GPIO_PinInit()  initializes the GPIO with specified configuration.
+The function GPIO_PortInit() reserved for other cpu(LPC8N04 only have one port,so default port 0).
+
+## Pin manipulation {#GPIOPinManipulation}
+The function GPIO_PinWrite() set output state of selected GPIO pin.
+The function GPIO_PinRead() read input value of selected GPIO pin.
+
+## Port manipulation {#GPIOPortManipulation}
+The function GPIO_PortSet()    sets the output level of selected GPIO pins to the logic 1.
+The function GPIO_PortClear()  sets the output level of selected GPIO pins to the logic 0.
+The function GPIO_PortToggle() reverse the output level of selected GPIO pins.
+The function GPIO_PortRead()   read input value of whole GPIO port.
+
+## Port Interrupts manipulation{#GPIOPortInterrupts}
+The function GPIO_PortEnableInterrupts()      Enables interrupts for selected pins on a port
+The function GPIO_PortDisableInterrupts()     Disables interrupts for selected pins on a port
+The function GPIO_PortGetInterruptsFlags()    Read raw interrupt pending status for pin interrupts for a port
+The function GPIO_PortReadMaskedInterrupts()  Read masked interrupt pending status for pin interrupts for a port
+The function GPIO_PortClearInterruptFlags()   Clears pending interrupts for selected pins for a port
+
+# Typical use case {#GPIOTpyUC}
+Example use of GPIO API.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/gpio*/

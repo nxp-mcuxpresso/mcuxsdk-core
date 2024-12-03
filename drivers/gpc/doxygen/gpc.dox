@@ -1,0 +1,28 @@
+/*!
+@defgroup gpc GPC: General Power Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the General Power Controller (GPC)
+         module of MCUXpresso SDK devices.
+
+API functions are provided to configure the system about working in dedicated power mode. There are
+mainly about enabling the power for memory, enabling the wakeup sources for Partial Sleep mode, and
+power up/down operations.  
+
+# Typical use case {#GPCTpyUC}
+
+1. Enable the wakeup source for Partial Sleep (PSLEEP) mode. In PSLEEP mode, HP domain is powered
+down, while LP domain remains powered on. Therefore, peripherals in LP domain can wakeup the system from
+PSLEEP mode via interrupts. In PSLEEP mode, system clocks are stopped and peripheral clocks of LP
+domain can be optionally on. LP domain peripherals can generate interrupt either asynchronously or
+need its peripheral clock on, depending on what kind of wakeup event is expected. Using the API of
+"GPC_EnablePartialSleepWakeupSource()" can enable the corresponding module as a wakeup source of
+PSLEEP mode. When the MCU exits from the PSLEEP mode, the API of "GPC_GetPartialSleepWakeupFlag()"
+can be used to check if the expected event occurs. However, to clear the wakeup flags, the user has to
+clear the interrupt status of the corresponding wakeup module.
+
+2. Power up/down sequence. After the power up/down request, the power of HP domain would not be
+ready immediately, it would wait for a few delay so that the voltage is stable. Then switch the
+power of HP domain by hardware. To set the delay time, the driver privodes the API of
+"GPC_ConfigPowerUpSequence()" and "GPC_ConfigPowerDownSequence()".
+
+*/
+

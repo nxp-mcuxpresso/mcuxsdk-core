@@ -1,0 +1,6 @@
+/*!
+@defgroup jn_cmp CMP: JN518X cmp driver
+@details The MCUXpresso SDK provides a peripheral driver for the cmp driver module of MCUXpresso SDK devices.
+
+*/
+

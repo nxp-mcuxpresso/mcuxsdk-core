@@ -1,0 +1,6 @@
+/*!
+@defgroup qtmr QTMR: Quad Timer Driver
+@details The MCUXpresso SDK provides a driver for the QTMR module of MCUXpresso SDK devices.
+
+*/
+

@@ -1,0 +1,31 @@
+/*!
+@defgroup waketimer WAKETIMER: WAKETIMER Driver
+@details The MCUXpresso SDK provides a peripheral driver for the WAKETIMER module of MCUXpresso SDK devices.
+WAKETIMER driver is created to help user to operate the WAKETIMER module. The WAKETIMER timer can be used as a low power timer. 
+The APIs can be used to enable the WAKETIMER module, initialize it, start the countdown timer, get the current timer count.
+WAKETIMER can be used as a wake up source from low power mode.
+
+
+# Function groups {#WAKETIMERFunc}
+The WAKETIMER driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#WAKETIMERInit}
+The WAKETIMER_GetDefaultConfig() will generate the default config.
+The WAKETIMER_Init() function will initialize the WAKETIMER.
+The WAKETIMER_Deinit() function will deinitialize WAKETIMER.
+
+## WAKETIMER interrupt {#WAKETIMERInterrupt}
+The function WAKETIMER_EnableInterrupts() enable timeout interrupt.
+The function WAKETIMER_DisableInterrupts() disable timeout interrupt.
+The function WAKETIMER_ClearInterruptFlags() clear the timeout interrupt flag.
+The function WAKETIMER_SetCallback() set the timeout user callback function.
+
+## WAKETIMER set match value {#WAKETIMERStartStop}
+The function WAKETIMER_HaltTimer() halt the counter and stop the timer.
+The function WAKETIMER_StartTimer() stop the timer with a given countdown value.
+The function WAKETIMER_GetCurrentTimerValue() return current counter value.
+
+# Typical use case {#WAKETIMERUseCase}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/waketimer/
+
+*/

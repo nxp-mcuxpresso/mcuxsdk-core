@@ -1,0 +1,35 @@
+/*
+@defgroup tsi_v6_driver TSI: Touch Sensing Input
+@details The MCUXpresso SDK provides a driver for the Touch Sensing Input (TSI)
+         module of MCUXpresso SDK devices.
+
+# Function groups {#TSIv6FuncGrps}
+
+## TSI initialization & configuration {#TSIInitConfig}
+This function group initializes the default configuration of the peripheral.
+
+## TSI functional Operation {#TSIFunctional}
+
+This function group implements the TSI functional APIs, 
+including interrupts enable/disable, trigger method selection, and retrieve conversion counter value.
+
+# Typical use case {#TSIv6TypUC}
+
+## TSI Operation {#TSIOperation}
+
+~~~~~{.c}
+    TSI_GetSelfCapModeDefaultConfig(&user_config);
+    TSI_InitSelfCapMode(TSI0, user_config);
+    TSI_SetMeasuredChannelNumber(TSI0, channelMask);
+    TSI_EnableInterrupts(TSI0, kTSI_GlobalInterruptEnable | kTSI_EndOfScanInterruptEnable);
+
+    TSI_EnableSoftwareTriggerScan(TSI0);
+    TSI_EnableModule(TSI0);
+    while(1) 
+    {
+       TSI_StartSoftwareTrigger(TSI0);
+       TSI_GetCounter(TSI0);
+    }
+~~~~~
+
+*/

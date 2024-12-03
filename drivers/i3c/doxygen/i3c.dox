@@ -1,0 +1,63 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_I3C_Busy = 7900
+ - #kStatus_I3C_Idle = 7901
+ - #kStatus_I3C_Nak  = 7902
+ - #kStatus_I3C_WriteAbort = 7903
+ - #kStatus_I3C_Term           = 7904
+ - #kStatus_I3C_HdrParityError = 7905
+ - #kStatus_I3C_CrcError       = 7906
+ - #kStatus_I3C_ReadFifoError  = 7907
+ - #kStatus_I3C_WriteFifoError = 7908
+ - #kStatus_I3C_MsgError =7909
+ - #kStatus_I3C_InvalidReq = 7910
+ - #kStatus_I3C_Timeout    = 7911
+ - #kStatus_I3C_SlaveCountExceed =7912
+ - #kStatus_I3C_IBIWon = 7913
+ - #kStatus_I3C_OverrunError  = 7914
+ - #kStatus_I3C_UnderrunError = 7915
+ - #kStatus_I3C_UnderrunNak =7916
+ - #kStatus_I3C_InvalidStart   = 7917
+ - #kStatus_I3C_SdrParityError = 7918
+ - #kStatus_I3C_S0S1Error      = 7919
+*/
+
+/*!
+ * @defgroup i3c I3C: I3C Driver
+ */
+
+/*!
+ * @defgroup i3c_master_driver I3C Master Driver
+ * @ingroup i3c
+ */
+
+/*!
+ * @defgroup i3c_slave_driver I3C Slave Driver
+ * @ingroup i3c
+ */
+
+/*!
+ * @if dox_section_i3c_master_dma_driver
+ * @defgroup i3c_master_dma_driver I3C Master DMA Driver
+ * @ingroup i3c
+ * @endif
+ */
+
+/*!
+ * @if dox_section_i3c_slave_dma_driver
+ * @defgroup i3c_slave_dma_driver I3C Slave DMA Driver
+ * @ingroup i3c
+ * @endif 
+ */
+
+ /*!
+ * @if dox_section_i3c_freertos_driver 
+ * @defgroup i3c_freertos_driver I3C FreeRTOS Driver
+ * @ingroup i3c
+ * @endif 
+ */
+ 
+/*!
+ * @defgroup i3c_common_driver I3C Common Driver
+ * @ingroup i3c
+ */

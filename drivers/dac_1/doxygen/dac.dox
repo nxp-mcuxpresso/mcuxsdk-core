@@ -1,0 +1,29 @@
+/*!
+@defgroup dac DAC: Digital-to-Analog Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Digital-to-Analog Converter (DAC)
+         module of MCUXpresso SDK devices.
+
+This DAC is the 12-bit resolution digital-to-analog converters with a programmable reference generator
+output. Its output data items are loaded into a FIFO, so that various FIFO modes can be used to
+output the value for user-defined sequence.
+
+The DAC driver provides a user-friendly interface to operate the DAC peripheral. The user can 
+initialize/deinitialize the DAC driver, set data into FIFO, or enable the interrupt DMA for special
+events so that the hardware can process the DAC output data automatically. Also, the configuration
+for the software and hardware trigger are also included in the driver.
+
+# Typical use case {#DACTypUC}
+
+## A simple use case to output the user-defined DAC value. {#DACSimpleBasic}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac
+## Working with the trigger {#DACWithTrg}
+
+Once more than one data is filled into the FIFO, the output pointer would move in configured mode
+when a trigger come. This trigger can be from software or hardware, and move one item for each
+trigger. Also, the interrupt/DMA event could be activated when the output pointer hits to the
+configured position.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dac
+*/
+

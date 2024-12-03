@@ -1,0 +1,14 @@
+/*!
+@defgroup  tsc TSC: Touch Screen Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Touch Screen Controller(TSC) 
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#TSCTpyUC}
+
+## 4-wire Polling Configuration {#TSCPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_tsc
+## 4-wire Interrupt Configuration {#TSCIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_tsc
+*/

@@ -1,0 +1,21 @@
+/*!
+@defgroup acomp ACOMP: Analog Comparator
+@details The MCUXpresso SDK provides a driver for the Analog Converter (ACOMP) module of MCUXpreeso SDK devices.
+
+The ACOMP driver can be divided into 4 function groups.
+## ACOMP Control Interfaces 
+The functions in this group can be used to control the ACOMP module. User can invoke ACOMP_GetDefaultConfig() function
+to configure the default setting, then invoking ACOMP_Init() to initialize the module. All ACOMP feature(except software
+reset comparators and clock divider) can be enabled by invoking ACOMP_Init() function.
+
+## ACOMP Result Interface
+There is only one function in this function groups, it is ACOMP_GetResult(). User can get the result of comparator by
+invoking this function.
+
+## ACOMP Interrupt Control Interfaces
+The functions in this group can be used to enable/disable interrupts.
+
+## ACOMP Status Flag Interfaces
+The ACOMP_GetStatusFlags() function in this group can return all status flags. The ACOMP_ClearStatusFlags() can be used
+to clear status flags, but please note that no all status flags can be cleared by software.
+*/

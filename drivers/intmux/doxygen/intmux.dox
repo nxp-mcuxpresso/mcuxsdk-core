@@ -1,0 +1,11 @@
+/*!
+@defgroup intmux INTMUX: Interrupt Multiplexer Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Interrupt Multiplexer (INTMUX)
+         module of MCUXpresso SDK devices.
+
+
+# Typical use case{#INTMUXTypicalUseCase}
+
+## Channel Configure{#ChannelConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/intmux*/

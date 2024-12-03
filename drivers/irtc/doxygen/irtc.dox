@@ -1,0 +1,8 @@
+/*!
+@defgroup irtc IRTC: IRTC Driver
+@details The MCUXpresso SDK provides a driver for the IRTC module of MCUXpresso SDK devices.
+@{
+
+*/
+/*! @} */
+

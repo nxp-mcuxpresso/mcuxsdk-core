@@ -1,0 +1,55 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_SPIFI_Busy = 5900
+ - #kStatus_SPIFI_Idle = 5901
+ - #kStatus_SPIFI_Error = 5902
+*/
+
+/*!
+@defgroup spifi SPIFI: SPIFI flash interface driver
+*/
+
+/*!
+@defgroup spifi_driver SPIFI Driver
+@ingroup spifi
+@details
+
+SPIFI driver includes functional APIs.
+
+Functional APIs are feature/property target low level APIs.
+Functional APIs can be used for SPIFI initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the
+knowledge of the SPIFI peripheral and how to organize functional APIs to
+meet the application requirements. All functional APIs use the peripheral base
+address as the first parameter. SPIFI functional operation groups provide the
+functional API set.
+
+# Typical use case {#SPIFICase}
+
+## SPIFI transfer using a polling method {#SPIFICasePolling}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/spifi
+*/
+
+/*!
+@if dox_section_spifi_dma_driver
+@defgroup spifi_dma_driver SPIFI DMA Driver
+@ingroup spifi
+@details This section describes the programming interface of the SPIFI DMA driver.
+SPIFI DMA driver includes transactional APIs.
+
+Transactional APIs are transaction target high level APIs.
+Transactional APIs can be used to enable the peripheral and in the
+application if the code size and performance of transactional APIs satisfy the
+requirements. If the code size and performance are a critical requirement,
+see the transactional API implementation and write a custom code. All
+transactional APIs use the spifi_handle_t as the first parameter.
+Initialize the handle by calling the SPIFI_TransferCreateHandleDMA() API. 
+
+# Typical use case {#SPIFICase}
+
+## SPIFI Send/receive using a DMA method {#SPIFICaseDma}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/spifi
+@endif
+*/

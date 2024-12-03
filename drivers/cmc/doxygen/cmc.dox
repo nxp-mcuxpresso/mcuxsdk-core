@@ -1,0 +1,12 @@
+/*!
+@defgroup cmc CMC: Core Mode Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Core Mode Controller (CMC) module of
+MCUXpresso SDK devices. The CMC module sequences the CPU and associated logic through the different
+operating modes.
+
+API function are provided to config the system for working in a dedicated power mode. For entering
+different power modes of different power domains, CMC_EnterLowPowerMode() function accepts different
+parameters. For entering the same power modes of different power domains, invoke CMC_GlobalEnterLowPowerMode()
+function.
+
+*/

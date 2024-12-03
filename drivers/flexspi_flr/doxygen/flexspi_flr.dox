@@ -1,0 +1,23 @@
+/*!
+@defgroup flexspi_flr FLEXSPI_FLR: Flexible Serial Peripheral Interface Follower Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Flexible Serial Peripheral
+         Follower Interface (FLEXSPI_FLR) module of MCUXpresso SDK/i.MX devices.
+
+
+FLEXSPI_FLR driver includes functional APIs and interrupt non-blocking transactional APIs.
+
+Functional APIs are feature/property target low level APIs.
+Functional APIs can be used for FLEXSPI_FLR initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the knowledge
+of the FLEXSPI_FLR peripheral and how to organize functional APIs to meet the application
+requirements. All functional APIs use the peripheral base address as the first parameter.
+FLEXSPI_FLR functional operation groups provide the functional API set.
+
+Transactional APIs are transaction target high level APIs.
+Transactional APIs can be used to enable the interrupt. If the code size
+and performance are a critical requirement, see the transactional API
+implementation and write a custom code. All transactional APIs use the
+flexspi_slv_handle_t as the second parameter.
+Initialize the handle for interrupt non-blocking transfer by calling the FLEXSPI_SLV_InterruptCreateHandle API.
+
+*/

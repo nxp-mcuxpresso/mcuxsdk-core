@@ -1,0 +1,22 @@
+/*!
+@defgroup lin LIN: Local Interconnect Network Driver
+*/
+
+/*!
+@defgroup lin_driver LIN Driver
+@ingroup lin
+@details The MCUXpresso SDK provides a peripheral driver for the Local Interconnect Network (LIN)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#LINTypUC}
+
+## LIN Operation {#LINOperation}
+
+For an example of Local Interconnect Network, see the driver example lin_master or lin_slave.
+
+*/
+
+/*!
+@defgroup lin_lpuart_driver LIN LPUART Driver
+@ingroup lin
+*/

@@ -1,0 +1,22 @@
+/*!
+@defgroup fmeas FMEAS: Frequency Measure Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Frequency Measure function of MCUXpresso SDK devices' SYSCON module.
+ @n
+It measures frequency of any on-chip or off-chip clock signal.
+The more precise and higher accuracy clock is selected as a reference clock.
+The resulting frequency is internally computed from the ratio of value of selected target and reference clock counters.
+ @n
+
+
+# Frequency Measure Driver operation {#FMEASInit}
+
+INPUTMUX_AttachSignal() function has to be used to select reference and target clock signal sources.
+
+FMEAS_StartMeasure() function starts the measurement cycle.
+
+FMEAS_IsMeasureComplete() can be polled to check if the measurement cycle has finished.
+
+FMEAS_GetFrequency() returns the frequency of the target clock. Frequency of the reference clock has to be provided as a parameter.
+
+# Typical use case {#FMEASTypUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fmeas*/

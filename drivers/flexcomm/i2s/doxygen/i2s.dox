@@ -1,0 +1,1423 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_I2S_BufferComplete = 2700
+ - #kStatus_I2S_Done = 2701
+ - #kStatus_I2S_Busy = 2702
+*/
+
+/*!
+@defgroup i2s I2S: I2S Driver
+@details The MCUXpresso SDK provides the peripheral driver for the I2S function of FLEXCOMM module of MCUXpresso SDK devices.@n
+ @n
+The I2S module is used to transmit or receive digital audio data. Only transmit or receive is enabled at one time in one module.
+ @n
+Driver currently supports one (primary) channel pair per one I2S enabled FLEXCOMM module only.
+ @n
+
+
+ # I2S Driver Initialization and Configuration {#I2SInit}
+
+I2S_TxInit() and I2S_RxInit() functions ungate the clock for the FLEXCOMM module, assign I2S function to FLEXCOMM module and configure audio data format and other I2S operational settings.
+I2S_TxInit() is used when I2S should transmit data, I2S_RxInit() when it should receive data.
+
+I2S_TxGetDefaultConfig() and I2S_RxGetDefaultConfig() functions can be used to set the module configuration structure with default values for transmit and receive function, respectively.
+
+I2S_Deinit() function resets the FLEXCOMM module.
+
+I2S_TxTransferCreateHandle() function creates transactional handle for transmit in interrupt mode.
+
+I2S_RxTransferCreateHandle() function creates transactional handle for receive in interrupt mode.
+
+I2S_TxTransferCreateHandleDMA() function creates transactional handle for transmit in DMA mode.
+
+I2S_RxTransferCreateHandleDMA() function creates transactional handle for receive in DMA mode.
+
+
+# I2S Transmit Data {#I2STransfer}
+
+I2S_TxTransferNonBlocking() function is used to add data buffer to transmit in interrupt mode. It also begins transmission if not transmitting yet.
+
+I2S_RxTransferNonBlocking() function is used to add data buffer to receive data into in interrupt mode. It also begins reception if not receiving yet.
+
+I2S_TxTransferSendDMA() function is used to add data buffer to transmit in DMA mode. It also begins transmission if not transmitting yet.
+
+I2S_RxTransferReceiveDMA() function is used to add data buffer to receive data into in DMA mode. It also begins reception if not receiving yet.
+
+The transfer of data will be stopped automatically when all data buffers queued using the above functions will be processed and no new data buffer is enqueued meanwhile.
+If the above functions are not called frequently enough, I2S stop followed by restart may keep occurring resulting in drops audio stream.
+
+
+# I2S Interrupt related functions {#I2SInterrupt}
+
+I2S_EnableInterrupts() function is used to enable interrupts in FIFO interrupt register. Regular use cases do not require this function to be called from application code.
+
+I2S_DisableInterrupts() function is used to disable interrupts in FIFO interrupt register. Regular use cases do not require this function to be called from application code.
+
+I2S_GetEnabledInterrupts() function returns interrupts enabled in FIFO interrupt register. Regular use cases do not require this function to be called from application code.
+
+I2S_TxHandleIRQ() and I2S_RxHandleIRQ() functions are called from ISR which is invoked when actual FIFO level decreases to configured watermark value.
+
+I2S_DMACallback() function is called from ISR which is invoked when DMA transfer (actual descriptor) finishes.
+
+
+# I2S Other functions {#I2SOther}
+
+I2S_Enable() function enables I2S function in FLEXCOMM module. Regular use cases do not require this function to be called from application code.
+
+I2S_Disable() function disables I2S function in FLEXCOMM module. Regular use cases do not require this function to be called from application code.
+
+I2S_TransferGetErrorCount() function returns the number of FIFO underruns or overruns in interrupt mode.
+
+I2S_TransferGetCount() function returns the number of bytes transferred in interrupt mode.
+
+I2S_TxTransferAbort() function aborts trasmit operation in interrupt mode.
+
+I2S_RxTransferAbort() function aborts receive operation in interrupt mode.
+
+I2S_TransferAbortDMA() function aborts transmit or receive operation in DMA mode.
+
+# I2S Functional limitations
+
+I2S can not to accurately determine when the data is sent to the end. Since program commands cannot quickly disable I2S, there will always be more clock exposure.
+If someone want to get accurate data, can use I2S_TransferAbortDMA() api in TxCallback() to terminate sending data prematurely and ensure the accuracy of the data with delay function.
+
+# I2S Data formats {#I2SFormat}
+
+## DMA mode {#I2SFormatDMA}
+
+Length of buffer for transmit or receive has to be multiply of 4 bytes. Buffer address has to be aligned to 4-bytes.
+Data are put into or taken from FIFO unaltered in DMA mode so buffer has to be prepared according to following information.
+If oneChannel is enabled, then the buffer should contain valid data only, that is to say, audio data should be put continuously in the buffer
+Take 8 bit data as example:
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 4 and 16, every word in buffer should contain data for left and right channels.
+
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R15</td>
+        <td>@c R14</td>
+        <td>@c R13</td>
+        <td>@c R12</td>
+        <td>@c R11</td>
+        <td>@c R10</td>
+        <td>@c R09</td>
+        <td>@c R08</td>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+Rnn - right channel bit nn @n
+Lnn - left channel bit nn @n
+
+Note that for example if i2s_config_t.dataLength = 7, bits on positions R07-R15 and L07-L15 are ignored (buffer "wastes space"). @n
+
+
+If i2s_config_t.dataLength (channel bit width) is between 17 and 24 and i2s_config_t.pack48 = false:
+
+Even words (counting from zero):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>@c L23</td>
+        <td>@c L22</td>
+        <td>@c L21</td>
+        <td>@c L20</td>
+        <td>@c L19</td>
+        <td>@c L18</td>
+        <td>@c L17</td>
+        <td>@c L16</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+Odd words (counting from zero):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>@c R23</td>
+        <td>@c R22</td>
+        <td>@c R21</td>
+        <td>@c R20</td>
+        <td>@c R19</td>
+        <td>@c R18</td>
+        <td>@c R17</td>
+        <td>@c R16</td>
+        <td>@c R15</td>
+        <td>@c R14</td>
+        <td>@c R13</td>
+        <td>@c R12</td>
+        <td>@c R11</td>
+        <td>@c R10</td>
+        <td>@c R09</td>
+        <td>@c R08</td>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 17 and 24 and i2s_config_t.pack48 = true:
+
+Even words (counting from zero):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+        <td>@c L23</td>
+        <td>@c L22</td>
+        <td>@c L21</td>
+        <td>@c L20</td>
+        <td>@c L19</td>
+        <td>@c L18</td>
+        <td>@c L17</td>
+        <td>@c L16</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+Odd words (counting from zero):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>@c R23</td>
+        <td>@c R22</td>
+        <td>@c R21</td>
+        <td>@c R20</td>
+        <td>@c R19</td>
+        <td>@c R18</td>
+        <td>@c R17</td>
+        <td>@c R16</td>
+        <td>@c R15</td>
+        <td>@c R14</td>
+        <td>@c R13</td>
+        <td>@c R12</td>
+        <td>@c R11</td>
+        <td>@c R10</td>
+        <td>@c R09</td>
+        <td>@c R08</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 25 and 32:
+
+Even words (counting from zero):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c L31</td>
+        <td>@c L30</td>
+        <td>@c L29</td>
+        <td>@c L28</td>
+        <td>@c L27</td>
+        <td>@c L26</td>
+        <td>@c L25</td>
+        <td>@c L24</td>
+        <td>@c L23</td>
+        <td>@c L22</td>
+        <td>@c L21</td>
+        <td>@c L20</td>
+        <td>@c L19</td>
+        <td>@c L18</td>
+        <td>@c L17</td>
+        <td>@c L16</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+Odd words (counting from zero):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R31</td>
+        <td>@c R30</td>
+        <td>@c R29</td>
+        <td>@c R28</td>
+        <td>@c R27</td>
+        <td>@c R26</td>
+        <td>@c R25</td>
+        <td>@c R24</td>
+        <td>@c R23</td>
+        <td>@c R22</td>
+        <td>@c R21</td>
+        <td>@c R20</td>
+        <td>@c R19</td>
+        <td>@c R18</td>
+        <td>@c R17</td>
+        <td>@c R16</td>
+        <td>@c R15</td>
+        <td>@c R14</td>
+        <td>@c R13</td>
+        <td>@c R12</td>
+        <td>@c R11</td>
+        <td>@c R10</td>
+        <td>@c R09</td>
+        <td>@c R08</td>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+    </tr>
+</table>
+
+## Interrupt mode {#I2SFormatInterrupt}
+
+If i2s_config_t.dataLength (channel bit width) is 4:
+
+Buffer does not need to be aligned (buffer is read / written by single bytes, each byte contain left and right channel):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 5 and 8:
+
+Length of buffer for transmit or receive has to be multiply of 2 bytes. Buffer address has to be aligned to 2-bytes.
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 9 and 16:
+
+Length of buffer for transmit or receive has to be multiply of 4 bytes. Buffer address has to be aligned to 4-bytes.
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R15</td>
+        <td>@c R14</td>
+        <td>@c R13</td>
+        <td>@c R12</td>
+        <td>@c R11</td>
+        <td>@c R10</td>
+        <td>@c R09</td>
+        <td>@c R08</td>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 17 and 24 and i2s_config_t.pack48 = false(mono channel audio data is supported):
+
+Length of buffer for transmit or receive has to be multiply of 6 bytes.
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R23</td>
+        <td>@c R22</td>
+        <td>@c R21</td>
+        <td>@c R20</td>
+        <td>@c R19</td>
+        <td>@c R18</td>
+        <td>@c R17</td>
+        <td>@c R16</td>
+        <td>@c R15</td>
+        <td>@c R14</td>
+        <td>@c R13</td>
+        <td>@c R12</td>
+        <td>@c R11</td>
+        <td>@c R10</td>
+        <td>@c R09</td>
+        <td>@c R08</td>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+        <td>@c L23</td>
+        <td>@c L22</td>
+        <td>@c L21</td>
+        <td>@c L20</td>
+        <td>@c L19</td>
+        <td>@c L18</td>
+        <td>@c L17</td>
+        <td>@c L16</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 17 and 24 and i2s_config_t.pack48 = true:
+
+Length of buffer for transmit or receive has to be multiply of 6 bytes. Buffer address has to be aligned to 4-bytes.
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R23</td>
+        <td>@c R22</td>
+        <td>@c R21</td>
+        <td>@c R20</td>
+        <td>@c R19</td>
+        <td>@c R18</td>
+        <td>@c R17</td>
+        <td>@c R16</td>
+        <td>@c R15</td>
+        <td>@c R14</td>
+        <td>@c R13</td>
+        <td>@c R12</td>
+        <td>@c R11</td>
+        <td>@c R10</td>
+        <td>@c R09</td>
+        <td>@c R08</td>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+        <td>@c L23</td>
+        <td>@c L22</td>
+        <td>@c L21</td>
+        <td>@c L20</td>
+        <td>@c L19</td>
+        <td>@c L18</td>
+        <td>@c L17</td>
+        <td>@c L16</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 25 and 32 and i2s_config_t.oneChannel = false:
+
+Buffer for transmit or receive has to be multiply of 8 bytes. Buffer address has to be aligned to 4-bytes.
+
+Even words (counting from zero):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c L31</td>
+        <td>@c L30</td>
+        <td>@c L29</td>
+        <td>@c L28</td>
+        <td>@c L27</td>
+        <td>@c L26</td>
+        <td>@c L25</td>
+        <td>@c L24</td>
+        <td>@c L23</td>
+        <td>@c L22</td>
+        <td>@c L21</td>
+        <td>@c L20</td>
+        <td>@c L19</td>
+        <td>@c L18</td>
+        <td>@c L17</td>
+        <td>@c L16</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+Odd words (counting from zero):
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c R31</td>
+        <td>@c R30</td>
+        <td>@c R29</td>
+        <td>@c R28</td>
+        <td>@c R27</td>
+        <td>@c R26</td>
+        <td>@c R25</td>
+        <td>@c R24</td>
+        <td>@c R23</td>
+        <td>@c R22</td>
+        <td>@c R21</td>
+        <td>@c R20</td>
+        <td>@c R19</td>
+        <td>@c R18</td>
+        <td>@c R17</td>
+        <td>@c R16</td>
+        <td>@c R15</td>
+        <td>@c R14</td>
+        <td>@c R13</td>
+        <td>@c R12</td>
+        <td>@c R11</td>
+        <td>@c R10</td>
+        <td>@c R09</td>
+        <td>@c R08</td>
+        <td>@c R07</td>
+        <td>@c R06</td>
+        <td>@c R05</td>
+        <td>@c R04</td>
+        <td>@c R03</td>
+        <td>@c R02</td>
+        <td>@c R01</td>
+        <td>@c R00</td>
+    </tr>
+</table>
+
+If i2s_config_t.dataLength (channel bit width) is between 25 and 32 and i2s_config_t.oneChannel = true:
+
+Buffer for transmit or receive has to be multiply of 4 bytes. Buffer address has to be aligned to 4-bytes.
+
+<table>
+    <tr>
+        <th>@c MSB</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th>@c LSB</th>
+    </tr>
+    <tr>
+        <td>@c L31</td>
+        <td>@c L30</td>
+        <td>@c L29</td>
+        <td>@c L28</td>
+        <td>@c L27</td>
+        <td>@c L26</td>
+        <td>@c L25</td>
+        <td>@c L24</td>
+        <td>@c L23</td>
+        <td>@c L22</td>
+        <td>@c L21</td>
+        <td>@c L20</td>
+        <td>@c L19</td>
+        <td>@c L18</td>
+        <td>@c L17</td>
+        <td>@c L16</td>
+        <td>@c L15</td>
+        <td>@c L14</td>
+        <td>@c L13</td>
+        <td>@c L12</td>
+        <td>@c L11</td>
+        <td>@c L10</td>
+        <td>@c L09</td>
+        <td>@c L08</td>
+        <td>@c L07</td>
+        <td>@c L06</td>
+        <td>@c L05</td>
+        <td>@c L04</td>
+        <td>@c L03</td>
+        <td>@c L02</td>
+        <td>@c L01</td>
+        <td>@c L00</td>
+    </tr>
+</table>
+
+
+# I2S Driver Examples {#I2SEx}
+
+## Interrupt mode examples {#I2SInterruptEx}
+
+Transmit example
+@code{.c}
+void StartTransfer(void)
+{
+    i2s_config_t config;
+    i2s_transfer_t transfer;
+    i2s_handle_t handle;
+
+    I2S_TxGetDefaultConfig(&config);
+    config.masterSlave = kI2S_MasterSlaveNormalMaster;
+    config.divider = 32; /* clock frequency/audio sample frequency/channels/channel bit depth */
+    I2S_TxInit(I2S0, &config);
+
+    I2S_TxTransferCreateHandle(I2S0, &handle, TxCallback, NULL);
+
+    transfer.data = buffer;
+    transfer.dataSize = sizeof(buffer);
+    I2S_TxTransferNonBlocking(I2S0, &handle, transfer);
+
+    /* Enqueue next buffer right away so there is no drop in audio data stream when the first buffer finishes */
+    I2S_TxTransferNonBlocking(I2S0, &handle, someTransfer);
+}
+
+void TxCallback(I2S_Type *base, i2s_handle_t *handle, status_t completionStatus, void *userData)
+{
+    i2s_tranfer_t transfer;
+
+    if (completionStatus == kStatus_I2S_BufferComplete)
+    {
+        /* Enqueue next buffer */
+        transfer.data = buffer;
+        transfer.dataSize = sizeof(buffer);
+        I2S_TxTransferNonBlocking(base, handle, transfer);
+    }
+}
+@endcode
+
+Receive example
+@code{.c}
+void StartTransfer(void)
+{
+    i2s_config_t config;
+    i2s_transfer_t transfer;
+    i2s_handle_t handle;
+
+    I2S_RxGetDefaultConfig(&config);
+    config.masterSlave = kI2S_MasterSlaveNormalMaster;
+    config.divider = 32; /* clock frequency/audio sample frequency/channels/channel bit depth */
+    I2S_RxInit(I2S0, &config);
+
+    I2S_RxTransferCreateHandle(I2S0, &handle, RxCallback, NULL);
+
+    transfer.data = buffer;
+    transfer.dataSize = sizeof(buffer);
+    I2S_RxTransferNonBlocking(I2S0, &handle, transfer);
+
+    /* Enqueue next buffer right away so there is no drop in audio data stream when the first buffer finishes */
+    I2S_RxTransferNonBlocking(I2S0, &handle, someTransfer);
+}
+
+void RxCallback(I2S_Type *base, i2s_handle_t *handle, status_t completionStatus, void *userData)
+{
+    i2s_tranfer_t transfer;
+
+    if (completionStatus == kStatus_I2S_BufferComplete)
+    {
+        /* Enqueue next buffer */
+        transfer.data = buffer;
+        transfer.dataSize = sizeof(buffer);
+        I2S_RxTransferNonBlocking(base, handle, transfer);
+    }
+}
+@endcode
+
+
+## DMA mode examples {#I2SDMAEx}
+
+Transmit example
+@code{.c}
+void StartTransfer(void)
+{
+    i2s_config_t config;
+    i2s_transfer_t transfer;
+    i2s_dma_handle_t handle;
+
+    I2S_TxGetDefaultConfig(&config);
+    config.masterSlave = kI2S_MasterSlaveNormalMaster;
+    config.divider = 32; /* clock frequency/audio sample frequency/channels/channel bit depth */
+    I2S_TxInit(I2S0, &config);
+
+    I2S_TxTransferCreateHandleDMA(I2S0, &handle, TxCallback, NULL);
+
+    transfer.data = buffer;
+    transfer.dataSize = sizeof(buffer);
+    I2S_TxTransferNonBlockingDMA(I2S0, &handle, transfer);
+
+    /* Enqueue next buffer right away so there is no drop in audio data stream when the first buffer finishes */
+    I2S_TxTransferNonBlockingDMA(I2S0, &handle, someTransfer);
+}
+
+void TxCallback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
+{
+    i2s_tranfer_t transfer;
+
+    if (completionStatus == kStatus_I2S_BufferComplete)
+    {
+        /* Enqueue next buffer */
+        transfer.data = buffer;
+        transfer.dataSize = sizeof(buffer);
+        I2S_TxTransferNonBlockingDMA(base, handle, transfer);
+    }
+}
+@endcode
+
+Receive example
+@code{.c}
+void StartTransfer(void)
+{
+    i2s_config_t config;
+    i2s_transfer_t transfer;
+    i2s_dma_handle_t handle;
+
+    I2S_RxGetDefaultConfig(&config);
+    config.masterSlave = kI2S_MasterSlaveNormalMaster;
+    config.divider = 32; /* clock frequency/audio sample frequency/channels/channel bit depth */
+    I2S_RxInit(I2S0, &config);
+
+    I2S_RxTransferCreateHandleDMA(I2S0, &handle, RxCallback, NULL);
+
+    transfer.data = buffer;
+    transfer.dataSize = sizeof(buffer);
+    I2S_RxTransferNonBlockingDMA(I2S0, &handle, transfer);
+
+    /* Enqueue next buffer right away so there is no drop in audio data stream when the first buffer finishes */
+    I2S_RxTransferNonBlockingDMA(I2S0, &handle, someTransfer);
+}
+
+void RxCallback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
+{
+    i2s_tranfer_t transfer;
+
+    if (completionStatus == kStatus_I2S_BufferComplete)
+    {
+        /* Enqueue next buffer */
+        transfer.data = buffer;
+        transfer.dataSize = sizeof(buffer);
+        I2S_RxTransferNonBlockingDMA(base, handle, transfer);
+    }
+}
+@endcode
+*/
+
+/*!
+@defgroup i2s_driver I2S Driver
+@ingroup i2s
+@details
+*/
+
+/*!
+@if dox_section_i2s_dma_driver
+@defgroup i2s_dma_driver I2S DMA Driver
+@ingroup i2s
+@details
+@endif
+*/

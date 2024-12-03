@@ -1,0 +1,53 @@
+/*!
+@defgroup mrt MRT: Multi-Rate Timer
+@details The MCUXpresso SDK provides a driver for the Multi-Rate Timer (MRT) of MCUXpresso SDK devices.
+
+# Function groups {#MRTFunc}
+The MRT driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#MRTInit}
+The function MRT_Init() initializes the MRT with specified configurations. The function
+MRT_GetDefaultConfig() gets the default configurations. The initialization function
+configures the MRT operating mode.
+
+The function MRT_Deinit() stops the MRT timers and disables the module clock.
+
+## Timer period Operations {#MRTTimerPeriodOperation}
+The function MRT_UpdateTimerPeriod() is used to update the timer period in units of count.
+The new value is immediately loaded or will be loaded at the end of the current time
+interval.
+
+The function MRT_GetCurrentTimerCount() reads the current timer counting value.
+This function returns the real-time timer counting value, in a range from 0 to a timer period.
+
+The timer period operation functions takes the count value in ticks. The user can call the utility macros
+provided in fsl_common.h to convert to microseconds or milliseconds
+
+## Start and Stop timer operations {#MRTStartStopOperation}
+The function MRT_StartTimer() starts the timer counting. After calling this function, the timer loads
+the period value, counts down to 0 and depending on the timer mode it either loads the respective
+start value again or stop. When the timer reaches 0, it generates a trigger pulse and sets the timeout
+interrupt flag.
+
+The function MRT_StopTimer() stops the timer counting.
+
+## Get and release channel {#MRTChannel}
+These functions can be used to reserve and release a channel.
+The function MRT_GetIdleChannel() finds the available channel. This function returns the lowest
+available channel number. The function MRT_ReleaseChannel() release the channel when the timer
+is using the multi-task mode. In multi-task mode, the INUSE flags allow more control over when MRT
+channels are released for further use.
+
+## Status {#MRTStatus}
+Provides functions to get and clear the PIT status.
+
+## Interrupt {#MRTInterrupt}
+Provides functions to enable/disable PIT interrupts and get current enabled interrupts.
+
+
+# Typical use case {#MRTUseCase}
+
+## MRT tick example {#MRTTick}
+Updates the MRT period and toggles an LED periodically.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mrt
+*/

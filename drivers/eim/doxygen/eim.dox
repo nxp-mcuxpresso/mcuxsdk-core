@@ -1,0 +1,10 @@
+/*!
+@defgroup eim EIM: error injection module
+@details The MCUXpresso SDK provides a driver for the EIM module of MCUXpresso SDK devices.
+
+The Error Injection Module (EIM) is mainly used for diagnostic purposes and enables you to induce artificial errors on error-checking mechanisms of a system.
+It provides a method for diagnostic coverage of internal memories (for example, system RAM, cache RAMs, and peripheral memories).
+
+This example code shows how to show error injection using the EIM driver.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/eim*/

@@ -1,0 +1,9 @@
+/*!
+@defgroup dpr DPR: Display Prefetch Resolve
+@details The MCUXpresso SDK provides a peripheral driver for the DPR
+         module of MCUXpresso SDK devices.
+
+The DPR works with Prefetch Resolve Gasket (PRG) to prefetch the frame buffer
+data for display controller.
+
+*/

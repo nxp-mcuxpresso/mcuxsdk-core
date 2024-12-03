@@ -1,0 +1,24 @@
+/*!
+@defgroup snvs SNVS: Secure Non-Volatile Storage
+@details The MCUXpresso SDK  provides a peripheral driver for the Secure Non-Volatile Storage (SNVS) module.@n
+ @n
+The SNVS module is designed to safely hold security-related data such as cryptographic
+key, time counter, monotonic counter, and general purpose security information. The
+SNVS includes a low power section, namely SNVS_LP, that is battery backed by the
+SVNS (or VBAT) power domain. This enables it to keep this data valid and continue to
+increment the time counter when the power goes down in the rest of the SoC. The
+always-powered-up part of the module is isolated from the rest of the logic to ensure that
+it does not get corrupted when the SoC is powered down. The SNVS is designed to
+comply with Digital Rights Management (DRM) and other security application rules and
+requirements. This trusted hardware provides features that allow the system software
+designer to ensure that the data kept by the device is certifiable. Specially, it incorporates
+a security monitor that checks for various security conditions. If a security violation is
+indicated then it invalidates access to its sensitive data, and the secret data, for instance,
+Zeroizable Secret Key, is zeroized. the SNVS can be also configured to bypass its
+security features and protection mechanism. In this case it can be used by systems that do
+not require security.
+ @n
+
+*/
+
+

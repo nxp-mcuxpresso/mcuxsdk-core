@@ -1,0 +1,9 @@
+[PE_STARTUP]
+SHOWDIALOG=_ "0"
+interface_selection=_ "1"
+[PE_STORED_DEVICES]
+device0=_ "device_name"
+[PE_PEDEBUG]
+CURRENTDEVICE=_ "device_name"
+[PE_DEVICE]
+CHIPMODE=_ "device_name"

@@ -1,0 +1,5 @@
+/*!
+@defgroup sema4 SEMA4: Hardware Semaphores Driver
+@details The MCUXpresso SDK provides a driver for the SEMA4 module of MCUXpresso SDK devices.
+
+*/

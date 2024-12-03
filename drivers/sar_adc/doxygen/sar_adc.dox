@@ -1,0 +1,28 @@
+/*!
+@defgroup sar_adc SAR_ADC: SAR_ADC Module
+@details The MCUXpresso SDK provides a peripheral driver for the SAR_ADC module of MCUXpresso SDK devices. 
+
+Based on features of the SAR_ADC module, this driver is divided into the following function groups:
+
+# ADC Initialization, De-Initialization, and Configuration.
+    Functions in this group are used to initialize, de-initialize, and configure the SAR_ADC module.
+
+# ADC main status.
+    Functions in this group are used to get the SAR_ADC status.
+
+# ADC chain and channel configuration.
+    Functions in this group are used to configure the SAR_ADC conversion chains and conversion channels.
+
+# DMA transfer and pre-sample configuration.
+    Functions in this group are used to configure the SAR_ADC DMA transfer and pre-sample features.
+
+# Analog watchdog.
+    Functions in this group are used to configure the SAR_ADC analog watchdog features.
+
+# Calibration and self-test
+    Functions in this group are used to configure the SAR_ADC calibration and self-test features.
+
+# ADC conversion result.
+    Functions in this group are used to get the SAR_ADC non-self-test channel and self-test channel
+    conversion result. 
+*/

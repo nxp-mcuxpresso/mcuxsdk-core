@@ -1,0 +1,72 @@
+/*!
+@page drv_err Driver errors status
+
+ - #kStatus_ECSPI_Busy = 6400
+ - #kStatus_ECSPI_Idle = 6401
+ - #kStatus_ECSPI_Error = 6402
+ - #kStatus_ECSPI_HardwareOverFlow = 6403
+*/
+
+/*!
+@defgroup ecspi ECSPI: Enhanced Configurable Serial Peripheral Interface Driver
+*/
+
+/*!
+@defgroup ecspi_driver ECSPI Driver
+@ingroup ecspi
+@details
+
+ECSPI driver includes functional APIs and transactional APIs.
+
+Functional APIs are feature/property target low level APIs.
+Functional APIs can be used for ECSPI initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the
+knowledge of the SPI peripheral and how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. ECSPI functional operation groups provide the
+functional API set.
+
+Transactional APIs are transaction target high level APIs.
+Transactional APIs can be used to enable the peripheral and in the
+application if the code size and performance of transactional APIs satisfy the
+requirements. If the code size and performance are a critical requirement,
+see the transactional API implementation and write a custom code. All
+transactional APIs use the spi_handle_t as the first parameter.
+Initialize the handle by calling the SPI_MasterTransferCreateHandle() or SPI_SlaveTransferCreateHandle() API.
+
+Transactional APIs support asynchronous transfer. This means that the functions
+SPI_MasterTransferNonBlocking() and SPI_SlaveTransferNonBlocking() set up the interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_SPI_Idle status.
+
+# Typical use case {#ECSPICase}
+
+## SPI master transfer using polling method {#ECSPICasePolling}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ecspi
+##SPI master transfer using an interrupt method {#ECSPICaseInterrupt}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ecspi
+*/
+
+/*!
+@if dox_section_ecspi_freertos_driver
+@defgroup ecspi_freertos_driver ECSPI FreeRTOS Driver
+@ingroup ecspi
+@endif
+*/
+
+/*!
+@if dox_section_ecspi_sdma
+@defgroup ecspi_sdma ECSPI SDMA Driver
+@ingroup ecspi
+@details
+@endif
+*/
+
+/*!
+@if dox_section_ecspi_cmsis_driver
+@defgroup ecspi_cmsis_driver ECSPI CMSIS Driver
+@ingroup ecspi
+@endif
+*/

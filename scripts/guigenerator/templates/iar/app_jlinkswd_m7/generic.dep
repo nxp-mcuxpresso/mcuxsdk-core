@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <fileVersion>5</fileVersion>
+    <fileChecksum>2507586936</fileChecksum>
+    <configuration>
+        <name>Debug</name>
+        <outputs />
+    </configuration>
+    <configuration>
+        <name>Int Flash DDRData Debug</name>
+        <outputs />
+    </configuration>
+    <configuration>
+        <name>Int Flash DDRData Release</name>
+        <outputs />
+    </configuration>
+    <configuration>
+        <name>Int Flash SramData Debug</name>
+        <outputs />
+    </configuration>
+    <configuration>
+        <name>Int Flash SramData Release</name>
+        <outputs />
+    </configuration>
+    <configuration>
+        <name>Int Ram Debug</name>
+        <outputs />
+    </configuration>
+    <configuration>
+        <name>Release</name>
+        <outputs />
+    </configuration>
+</project>

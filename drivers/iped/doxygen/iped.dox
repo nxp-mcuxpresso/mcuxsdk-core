@@ -1,0 +1,5 @@
+/*!
+@defgroup iped Inline Prince Encryption Decryption
+@ingroup iped
+@details The MCUXpresso SDK provides a peripheral driver for the Inline Prince Encryption Decryption (IPED) module.@n
+*/

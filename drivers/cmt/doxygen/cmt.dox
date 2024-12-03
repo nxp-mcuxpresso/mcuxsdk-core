@@ -1,0 +1,38 @@
+/*!
+@defgroup cmt CMT: Carrier Modulator Transmitter Driver
+@details The carrier modulator transmitter (CMT) module provides the means to generate
+the protocol timing and carrier signals for a side variety of encoding schemes. The CMT
+incorporates hardware to off-load the critical and/or lengthy timing requirements associated
+with signal generation from the CPU. The MCUXpresso SDK provides a driver for the CMT module of the MCUXpresso SDK devices.
+
+# Clock formulas {#CMTClkf}
+The CMT module has internal clock dividers. It was originally designed to be based on an 8 MHz
+bus clock that can be divided by 1, 2, 4, or 8 according to the specification. To be compatible
+with a higher bus frequency, the primary prescaler (PPS) was developed to receive a higher frequency
+and generate a clock enable signal called an intermediate frequency (IF). The IF must be approximately
+equal to 8 MHz and works as a clock enable to the secondary prescaler. For the PPS, the prescaler
+is selected according to the bus clock to generate an intermediate clock approximate to 8 MHz
+and is selected as (bus_clock_hz/8000000). The secondary prescaler is the "cmtDivider". The clocks
+for the CMT module are listed below.
+
+1. CMT clock frequency = bus_clock_Hz / (bus_clock_Hz / 8000000) / cmtDivider   \n
+2. CMT carrier and generator frequency = CMT clock frequency / (highCount1 + lowCount1)  \n
+   (In FSK mode, the second frequency = CMT clock frequency / (highCount2 + lowCount2))   \n
+3. CMT infrared output signal frequency    \n
+   a. In Time and Baseband mode            \n
+   CMT IRO signal mark time = (markCount + 1) / (CMT clock frequency / 8)    \n
+   CMT IRO signal space time = spaceCount / (CMT clock frequency / 8)        \n
+   b. In FSK mode                                                            \n
+   CMT IRO signal mark time = (markCount + 1) / CMT carrier and generator frequency \n
+   CMT IRO signal space time = spaceCount / CMT carrier and generator frequency     \n
+
+# Typical use case {#CMTTpyUC}
+
+This is an example code to initialize data.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cmt
+This is an example IRQ handler to change the mark and space count to complete data modulation.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cmt
+*/
+

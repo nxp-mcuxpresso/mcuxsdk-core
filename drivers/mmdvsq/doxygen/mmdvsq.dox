@@ -1,0 +1,32 @@
+/*!
+@defgroup mmdvsq MMDVSQ: Memory-Mapped Divide and Square Root
+@details The MCUXpresso SDK provides driver for the Memory-Mapped Divide and Square Root (MMDVSQ)
+         module of MCUXpresso SDK devices.
+@{
+
+ARM processor cores in the Cortex-M family implementing the ARMv6-M instruction set architecture do
+not include hardware support for integer division operations. However, in certain deeply-embedded
+application spaces, hardware support for this class of arithmetic operations along with an unsigned
+square root function is important to maximize the system performance and minimize the device power
+dissipation. Accordingly, the MMDVSQ module is included to serve as a memory-mapped
+co-processor located in a special address space within the system memory map accessible only to
+the processor core.
+The MMDVSQ module supports execution of the integer division operations defined in the ARMv7-M
+instruction set architecture plus an unsigned integer square root operation. The supported integer
+division operations include 32/32 signed (SDIV) and unsigned (UDIV) calculations.
+
+# Function groups {#MmdvsqFunctionalGroups}
+
+## MMDVSQ functional Operation {#MmdvsqFunctionalOperation}
+
+This group implements the MMDVSQ functional API.
+
+## MMDVSQ status Operation {#MmdvsqStatusOperation}
+
+This group implements the MMDVSQ status API.
+
+# Typical use case and example {#MmdvsqExample}
+Example:
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mmdvsq
+*/
+/*! @} */

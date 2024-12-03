@@ -1,0 +1,115 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_SMARTCARD_Success = 4300
+ - #kStatus_SMARTCARD_TxBusy = 4301
+ - #kStatus_SMARTCARD_RxBusy = 4302
+ - #kStatus_SMARTCARD_NoTransferInProgress = 4303
+ - #kStatus_SMARTCARD_Timeout = 4304
+ - #kStatus_SMARTCARD_Initialized = 4305
+ - #kStatus_SMARTCARD_PhyInitialized = 4306
+ - #kStatus_SMARTCARD_CardNotActivated = 4307
+ - #kStatus_SMARTCARD_InvalidInput = 4308
+ - #kStatus_SMARTCARD_OtherError = 4309
+*/
+
+/*!
+@defgroup smartcard Smart Card
+@details The MCUXpresso SDK provides a peripheral drivers for the UART-ISO7816 and EMVSIM/USIM modules of MCUXpresso SDK devices.@n
+ @n
+Smart Card driver provides the necessary functions to access and control integrated circuit cards.
+The driver controls communication modules (UART/EMVSIM/USIM) and handles special ICC sequences, such as the activation/deactivation
+(using EMVSIM/USIM IP or external interface chip). The Smart Card driver consists of two IPs (SmartCard_Uart and SmartCard_EmvSim drivers)
+and three PHY drivers (smartcard_phy_emvsim, smartcard_phy_tda8035, and smartcard_phy_gpio drivers). These drivers can be combined, which
+ means that the Smart Card driver wraps one IP (transmission) and one PHY (interface) driver.
+
+The driver provides asynchronous functions to communicate with the Integrated Circuit Card (ICC).
+The driver contains RTOS adaptation layers which use semaphores as synchronization
+objects of synchronous transfers. The RTOS driver support also provides protection for multithreading.
+
+# SmartCard Driver Initialization {#SmartCardInit}
+
+The Smart Card Driver is initialized by calling the SMARTCARD_Init() and SMARTCARD_PHY_Init() functions.
+The Smart Card Driver initialization configuration structure requires these settings:
+<ul>
+<li>Smart Card voltage class</li>
+<li>Smart Card Interface options such as the RST, IRQ, CLK pins, and so on.</li>
+</ul>
+The driver also supports user callbacks for assertion/de-assertion Smart Card events and transfer finish event. This feature is useful to detect the card presence
+or for handling transfer events, for example, in RTOS.
+The user should initialize the Smart Card driver, which consist of IP and PHY drivers.
+
+# SmartCard Call diagram {#SmarCardCallDiagram}
+Because the call diagram is complex, the detailed use of the Smart Card driver is not described in this section.
+For details about using the Smart Card driver, see the Smart Card driver example which describes a simple use case.
+
+# PHY driver
+
+The Smart Card interface driver is initialized by calling the function SMARTCARD_PHY_Init().
+During the initialization phase, Smart Card clock is configured and all hardware pins for IC handling are configured.
+*/
+
+/*!
+@defgroup smartcard_phy_tda8035_driver Smart Card PHY TDA8035 Driver
+@ingroup smartcard
+@details The Smart Card interface TDA8035 driver handles the external interface chip TDA8035 which supports all necessary functions to control the ICC.
+These functions involve PHY pin initialization, ICC voltage selection and activation,
+ICC clock generation, ICC card detection, and activation/deactivation sequences.
+*/
+
+/*!
+@defgroup smartcard_phy_emvsim_driver Smart Card PHY EMVSIM Driver
+@ingroup smartcard
+@details The Smart Card interface EMVSIM driver handles the EMVSIM peripheral, which covers all necessary functions to control the ICC. These functions are
+ICC clock setup, ICC voltage turning on/off, ICC card detection, activation/deactivation, and ICC reset sequences. The EMVSIM peripheral covers all features of
+interface ICC chips.
+*/
+
+/*!
+@defgroup smartcard_phy_gpio_driver Smart Card PHY GPIO Driver
+@ingroup smartcard
+@details The Smart Card interface GPIO driver handles the GPIO and FTM/TPM peripheral for clock generation, which covers all necessary functions to control
+the ICC. These functions are
+ICC clock setup, ICC voltage turning on/off, activation/deactivation, and ICC reset sequences. This driver doesn't support the ICC pin short circuit protection and
+an emergency deactivation.
+*/
+
+/*!
+@defgroup smartcard_phy_usim_driver Smart Card PHY USIM W
+@ingroup smartcard
+@details The Smart Card interface USIM driver handles the USIM peripheral, which covers all necessary functions to control the ICC. These functions are
+ICC clock setup, ICC voltage turning on/off, ICC card detection, activation/deactivation, and ICC reset sequences. The USIM peripheral covers all features of
+interface ICC chips.
+*/
+
+/*!
+@defgroup smartcard_uart_driver Smart Card UART Driver
+@ingroup smartcard
+@details The Smart Card UART driver uses a standard UART peripheral which supports the ISO-7816 standard. The driver supports transmission functionality
+in the CPU mode. The driver also supports non-blocking (asynchronous) type of data transfers. The blocking (synchronous) transfer is supported only by the RTOS adaptation layer.
+*/
+
+/*!
+@defgroup smartcard_emvsim_driver Smart Card EMVSIM Driver
+@ingroup smartcard
+@details The SmartCard EMVSIM driver covers the transmission functionality in the CPU mode. The driver supports non-blocking (asynchronous) type of data transfers.
+The blocking (synchronous) transfer is supported only by the RTOS adaptation layer.
+*/
+
+/*!
+@defgroup smartcard_usim_driver Smart Card USIM Driver
+@ingroup smartcard
+@details The SmartCard USIM driver covers the transmission functionality in the CPU mode. The driver supports non-blocking (asynchronous) type of data transfers.
+The blocking (synchronous) transfer is supported only by the RTOS adaptation layer.
+*/
+
+/*!
+@if dox_section_smartcard_freertos_driver
+@defgroup smartcard_freertos_driver Smart Card FreeRTOS Driver
+@ingroup smartcard
+@endif
+*/
+
+/*!
+@defgroup smartcard_phy_driver Smart Card PHY Driver
+@ingroup smartcard
+*/

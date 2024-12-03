@@ -1,0 +1,11 @@
+{
+    "$id": "example_decription_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "MCUXpresso SDK example description data schema",
+    "description": "MCUXpresso SDK example description data schema.",
+    "patternProperties": {
+        "^.*$": {
+          "$ref": "./definitions_schema.json#/definitions/exampleDescriptionType"
+        }
+    }
+}

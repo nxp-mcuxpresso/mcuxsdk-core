@@ -1,0 +1,28 @@
+/*!
+@defgroup cache_lplmem CACHE: LPLMEM CACHE Memory Controller
+@details The SDK provides a peripheral driver for the CACHE Controller of 
+         MCUXpresso SDK devices.
+
+CACHE driver is created to help user to operate the cache memory more easy.
+The LPLMEM contains code bus cache and system bus cache if the system bus cache
+is supported (the system bus cache is soc specific). The code bus cache is ranged from
+0x00000000 ~ 0x1FFFFFFF and the system bus is ranged from 0x20000000 ~ 0xFFFFFFFF.
+
+The APIs for basic operations are including the following three groups:
+1L. The L1 specific cache driver API. This group provides the IP specific cache controller drivers. The L1 caches in this arch is the AHB Low-Power Local Memory Controller (LPLMEM). The driver API name in this level is L1 cache controller specific.
+
+2L. The unified L1 cache driver API.
+For ease of use, we try to unify the L1 cache driver API as much as possible in this group. APIs of this type directly call the L1 specific cache driver API and are unified to the same name. Due to the cache controller specification, it is impossible to provide all L1 cache unified APIs for LPLMEM.
+
+3L. The unified cache driver API.
+This group is provided for unified cache driver APIs for combining L1 and L2 cache maintain operations. This is provided for SDK drivers (DMA, ENET, USDHC, etc) which should do the cache maintenance in their transactional APIs. This is because in this arch, there is no L2 cache
+so the unified cache driver API directly call only L1 cache driver APIs.
+
+# Function groups {#CACHEFuncGrps}
+
+## L1 CACHE Operation {#L1CACHEMaintainOperation}
+This function group provides Enable/Disable APIs.
+This function group only provides the cache invalidate operation beacuse the LPLMEM is write through mode. By default, the cache mode is write through with allocation.
+The above cache maintains are provided for code bus cache and might provide for system bus cache if
+it is supported in the future.
+*/

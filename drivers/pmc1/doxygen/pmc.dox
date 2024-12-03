@@ -1,0 +1,8 @@
+/*!
+@defgroup pmc PMC: Power Management Controller
+@details The MCUXpresso SDK provides a peripheral driver for the Power Management Controller (PMC) module of
+MCUXpresso SDK devices. The PMC module contains low-voltage detect system.
+
+
+*/
+

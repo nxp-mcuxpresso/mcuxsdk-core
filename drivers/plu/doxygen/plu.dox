@@ -1,0 +1,38 @@
+/*!
+@defgroup plu PLU: Programmable Logic Unit
+@details The MCUXpresso SDK provides a peripheral driver for the Programmable Logic Unit
+         module of MCUXpresso SDK devices.
+
+# Function groups {#PLUFunc}
+The PLU driver supports the creation of small combinatorial and/or sequential logic networks including simple state
+machines.
+
+## Initialization and de-initialization {#PLUInit}
+The function PLU_Init() enables the PLU clock and reset the module.
+
+The function PIT_Deinit() gates the PLU clock.
+
+## Set input/output source and Truth Table {#PLUSetInputOutputSourceTruthTable}
+The function PLU_SetLutInputSource() sets the input source for the LUT element.
+
+The function PLU_SetOutputSource() sets output source of the PLU module.
+
+The function PLU_SetLutTruthTable() sets the truth table for the LUT element.
+
+## Read current Output State {#PLUReadCurrentOutputState}
+The function PLU_ReadOutputState() reads the current state of the 8 designated PLU Outputs.
+
+## Wake-up/Interrupt Control {#PLUWakeupInterruptControl}
+The function PLU_EnableWakeIntRequest() enables the wake-up/interrupt request on a PLU output pin with a optional
+configuration to eliminate the glitches. The function PLU_GetDefaultWakeIntConfig() gets the default configuration
+which can be used in a case with a given PLU_CLKIN.
+
+The function PLU_LatchInterrupt() latches the interrupt and it can be cleared by function PLU_ClearLatchedInterrupt().
+
+# Typical use case {#PLUTpyUC}
+
+## PLU combination example {#PLUCombination}
+Create a simple combinatorial logic network to control the LED.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/plu/combination
+
+*/

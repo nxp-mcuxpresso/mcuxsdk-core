@@ -1,0 +1,9 @@
+/*!
+@page driver_log Driver Change Log
+
+@section epit EPIT
+  The current EPIT driver version is 2.0.0.
+
+  - 2.0.0
+    - Initial version.
+*/

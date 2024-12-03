@@ -1,0 +1,19 @@
+/*!
+@defgroup kbi KBI: Keyboard interrupt Driver
+@details The MCUXpresso SDK provides a peripheral driver for the keyboard interrupt 
+block of MCUXpresso SDK devices.
+
+# KBI Operations {#KBIOperations}
+
+## KBI Initialization Operation {#KBIInitOperation}
+The KBI Initialize is to initialize for common configure: gate the KBI clock, configure enabled KBI pins, and enable the interrupt.
+The KBI Deinitialize is to disable the interrupt/pins and ungate the clock.
+
+## KBI Basic Operation {#KBIBasicOperation}
+The KBI provide the function to enable/disable interrupts.
+KBI still provide functions to get and clear status flags.
+
+# Typical use case {#KBITpyUC}
+
+
+*/

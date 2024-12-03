@@ -1,0 +1,39 @@
+/*!
+@defgroup mmau MMAU: Memory Mapped Arithmetic Unit
+@details The MCUXpresso SDK provides a peripheral driver for the Memory Mapped Arithmetic Unit (MMAU)
+         block of MCUXpresso SDK devices.
+
+@{
+
+
+The Memory Mapped Arithmetic Unit (MMAU) provides acceleration to a set of math
+operations, including signed/unsigned multiplication and accumulation, division
+and root-square, and so on.
+
+# Function groups {#MmauFunctionalGroups}
+
+## MMAU Initialization {#MmauInitial}
+To initialize the MMAU driver, call the MMAU_EnableDMA(MMAU, true) and MMAU_EnableSupervisorOnly(MMAU, false) functions.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mmau
+## MMAU Interrupts {#MmauInt}
+MMAU supports three interrupts: Accumulation Overflow (Q), Divide/Multiply Overflow (V) and
+Divide-by-Zero (DZ). These interrupts were definition at mmau_flag_t structure.
+The MMAU driver supports enable/disable the interrupts, get/clear the interrupt flags.
+
+For example:
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mmau
+## MMAU Instruction flags {#MmauInstructFlags}
+The MMAU driver provides four instruction flags: Accumulation Overflow (Q), Divide or Multiply
+Overflow (V), Divide-by-Zero (DZ) and Signed calculation result is negative (N). These flags were
+updated after each calculation. MMAU driver contains get and set functions to access instruction
+flags.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mmau
+## MMAU Operators {#MmauOps}
+The MMAU driver supports multiply, divide and square root functions. Each kind of function
+supports Unsigned Integer, Signed Integer (except square root) and Fractional Number as operator.
+
+# Typical use case and example {#MmauExample}
+This example demonstrates the SIN calculation.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mmau
+*/
+/*! @} */

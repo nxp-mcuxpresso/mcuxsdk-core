@@ -1,0 +1,27 @@
+/*!
+@defgroup opamp OPAMP: Operational Amplifier
+@details  The MCUXpresso SDK provides a peripheral driver for the OPAMP module of MCUXpresso SDK devices.
+OPAMP driver is created to help user to operate the OPAMP module. The APIs can use enable OPAMP module 
+initialize it and de-initialize OPAMP module.
+
+# Function groups {#OPAMPFunc}
+The OPAMP driver supports operating the module as a operational amplifier.
+
+## Initialization and deinitialization {#OPAMPInit}
+The OPAMP_Init() function will initialize the OPAMP and enable the clock for OPAMP.
+The OPAMP_Deinit() function will disable OPAMP module and shut down the bus clock of OPAMP.
+
+## OPAMP positive and negative port gain configuration {#OPAMPGainConfig}
+The OPAMP_DoPosGainConfig() function is used to set positive port gain.
+The OPAMP_DoNegGainConfig() function is used to set negative port gain.
+
+## OPAMP reference buffer {#OPAMPBuffer}
+The OPAMP_EnableRefBuffer() is enable bias voltage input buffer.
+
+## OPAMP trigger mode {#OPAMPTriggerMode}
+The OPAMP_EnableTriggerMode() is enable OPAMP trigger mode.
+
+# Typical use case {#OPAMPUseCase}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/OPAMP/
+
+ */

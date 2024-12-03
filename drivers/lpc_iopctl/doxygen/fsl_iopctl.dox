@@ -1,0 +1,9 @@
+/*!
+@defgroup iopctl_driver IOPCTL: Input/Output Pad Controller
+@details The MCUXpresso SDK provides a peripheral driver for the Input/Output Pad Controller.@n
+ @n
+The IOPCTL, working in conjunction with the PIMCTL, enables the chip to share one
+pad for multiple signals from different peripheral interfaces.
+ @n
+*/
+

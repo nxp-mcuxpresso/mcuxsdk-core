@@ -1,0 +1,4 @@
+/*!
+@defgroup pn_wrapper PN Wrapper: Wrapper for PN platforms
+@details This is a wrapper to make PN platforms secure library API work in MCUXpresso SDK.
+*/

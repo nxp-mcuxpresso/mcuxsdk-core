@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <PE_STARTUP>
+        <SHOWDIALOG>_ "0"</SHOWDIALOG>
+    </PE_STARTUP>
+    <PE_STORED_DEVICES>
+        <device0>_ "device_name"</device0>
+    </PE_STORED_DEVICES>
+    <PE_PEDEBUG>
+        <CURRENTDEVICE>_ "device_name"</CURRENTDEVICE>
+    </PE_PEDEBUG>
+    <PE_DEVICE>
+        <CHIPMODE>_ "device_name"</CHIPMODE>
+    </PE_DEVICE>
+</settings>

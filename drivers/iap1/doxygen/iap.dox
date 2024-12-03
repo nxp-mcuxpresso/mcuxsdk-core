@@ -1,0 +1,113 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_FLASH_Success = 0
+ - #kStatus_FLASH_InvalidArgument = 4
+ - #kStatus_FLASH_AlignmentError = 101
+ - #kStatus_FLASH_AddressError = 102
+ - #kStatus_FLASH_AccessError = 103
+ - #kStatus_FLASH_ProtectionViolation = 104
+ - #kStatus_FLASH_CommandFailure = 105
+ - #kStatus_FLASH_UnknownProperty = 106
+ - #kStatus_FLASH_EraseKeyError = 107
+ - #kStatus_FLASH_RegionExecuteOnly = 108
+ - #kStatus_FLASH_ExecuteInRamFunctionNotReady = 109
+ - #kStatus_FLASH_CommandNotSupported = 111
+ - #kStatus_FLASH_HashCheckError = 124
+ - #kStatus_FLASH_BlankIfrPageData = 121
+ - #kStatus_FLASH_EncryptedRegionsEraseNotDoneAtOnce = 122
+ - #kStatus_FLASH_ProgramVerificationNotAllowed = 123
+ - #kStatus_FLASH_HashCheckError = 124
+
+*/
+
+/*!
+@defgroup flash_driver IAP: In Application Programming Driver
+@details The MCUXpresso SDK provides a driver for the In Application Programming (IAP).
+ @n
+It provides a set of functions to call the on-chip in application programming interface.
+User code executing from on-chip RAM can call these function to read information like part id, read and write flash, read and write ffr.
+ @n
+
+
+# In Application Programming operation {#IAPInit}
+
+FLASH_Init() Initializes the global flash properties structure members
+
+FLASH_Erase() Erases the flash sectors encompassed by parameters passed into function
+
+FLASH_Program() Programs flash with data at locations passed in through parameters
+
+FLASH_VerifyErase() Verifies an erasure of the desired flash area hase been erased
+
+FLASH_VerifyProgram() Verifies programming of the desired flash area hase been programed
+
+FLASH_GetProperty() Returns the desired flash property.
+
+FFR_Init() Generic APIs for FFR
+
+FFR_Deinit() Generic APIs for FFR
+
+FFR_CustomerPagesInit() APIs to access CFPA pages 
+
+FFR_InfieldPageWrite() APIs to access CFPA pages
+
+FFR_GetCustomerInfieldData() APIs to access CMPA pages 
+
+FFR_GetCustomerData() Read data stored in 'Customer Factory CFG Page'
+
+FFR_KeystoreWrite() Read data stored in 'Customer Factory CFG Page'
+
+FFR_KeystoreGetAC() Read data stored in 'Customer Factory CFG Page'
+
+FFR_KeystoreGetKC() Read data stored in 'Customer Factory CFG Page'
+
+FFR_GetUUID() Read data stored in 'NXP Manufacuring Programmed CFG Page'
+
+FFR_GetManufactureData() Read data stored in 'NXP Manufacuring Programmed CFG Page'
+
+kb_init() Initialize ROM API for a given operation
+
+kb_deinit() Cleans up the ROM API context
+
+kb_execute() Perform the operation configured during init
+
+skboot_authenticate() Authenticate entry function with ARENA allocator init
+
+HASH_IRQHandler() Interface for image authentication API
+
+kb_init() Initialize ROM API for a given operation
+
+kb_deinit() Cleans up the ROM API context
+
+kb_execute() Perform the operation configured during init
+
+skboot_authenticate() Authenticate entry function with ARENA allocator init
+
+HASH_IRQHandler() Interface for image authentication API
+
+# Typical use case {#IAPTypUC}
+
+## IAP Basic Operations {#IAPBasicOps}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iap1*/
+## IAP Flash Operations {#IAPFlashOps}
+
+*/
+
+/*!
+@defgroup flash_ifr_driver IAP_FFR Driver
+@ingroup flash_driver
+@details
+*/
+
+/*!
+@defgroup kb_driver IAP_KBP Driver
+@ingroup flash_driver
+@details
+*/
+
+/*!
+@defgroup skboot_authenticate skboot_authenticate
+@ingroup flash_driver
+@details
+*/

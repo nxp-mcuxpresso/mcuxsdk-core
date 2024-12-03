@@ -1,0 +1,24 @@
+/*!
+@defgroup cache_armv7_a CACHE: ARMV7_A CACHE Memory Controller
+@details The MCUXpresso SDK provides a peripheral driver for the CACHE Controller.
+
+The CACHE driver is created to help the user more easily operate the cache memory. The APIs for basic operations are including the following two levels:
+1L. The L1 cache driver API. 
+The L1 cache driver API here is defined as the core-integrated cache's controller driver
+for all core-A intergreated caches:
+a. L1 maintain only if L2 is not supported
+b. L1 and L2 cache maintain together. 
+
+2L. The combined cache driver API.
+This level provides unified APIs for combined cache maintain operations. This is
+provided for MCUXpresso SDK drivers (DMA, ENET, USDHC, etc) which should do the cache maintenance in their 
+transactional APIs. In this architecture, there is only core intergrated cache, so the unified
+APIs here is directly call the L1 cache driver API. 
+
+# Function groups {#CACHEFuncGrps}
+
+## L1 CACHE Operation {#L1CACHE MaintainOperation}
+The L1 CACHE has both code cache and data cache. This function group provides independent two groups API for both code cache and data cache.
+There are Enable/Disable APIs for code cache and data cache control and cache maintenance operations as Invalidate/Clean/CleanInvalidate by all and by address range.
+
+*/

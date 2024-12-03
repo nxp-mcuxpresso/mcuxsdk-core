@@ -1,0 +1,6 @@
+/*!
+@defgroup pwmll_driver PWMLL: Pulse Width Modulator Low Level
+@details The MCUXpresso SDK provides a peripheral low level(register based) driver for the Pulse Width Modulator (PWM) of MCUXpresso SDK devices.
+
+*/
+

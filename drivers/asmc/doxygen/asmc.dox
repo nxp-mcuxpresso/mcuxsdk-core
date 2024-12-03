@@ -1,0 +1,42 @@
+/*!
+@defgroup asmc ASMC: Auxiliary System Mode Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Auxiliary System Mode Controller (ASMC) module of
+MCUXpresso SDK devices. The ASMC module is responsible for sequencing Core 1 into and out of all
+low-power Stop and Run modes. The ASMC (Auxiliary System Mode Control) provides status and control 
+registers for Core 1.
+
+API functions are provided for configuring the system working in a dedicated power mode. For
+different power modes, the function `ASMC_SetPowerModexxx` accepts different parameters. System power mode
+state transitions are not available for between power modes. For details about available transitions,
+see the Power mode transitions section in the SoC reference manual.
+
+# Typical use case {#ASMCTypUc}
+
+## Enter wait or stop modes {#ASMCWaitStop}
+
+The ASMC driver provides APIs to set the MCU to different wait modes and stop modes. At
+the same time, there are pre function and post function for the modes setting.
+The pre function and post function are used to:
+
+1. Disable/Enable the interrupt through PRIMASK. In practise, there is such a scenario:
+the application sets the wakeup interrupt and calls SMC function @ref ASMC_SetPowerModeStop
+to set MCU to STOP mode, but the wakeup interrupt happens so quickly that the ISR
+completes before the function @ref ASMC_SetPowerModeStop. As a result, the MCU 
+enters STOP mode and is never waken up by the interrupt. In this case, the application
+could first disable the interrupt through PRIMASK, then set the wakeup interrupt and
+enter STOP mode. After wakeup, the first thing you need to do is enable the interrupt through PRIMASK.
+The MCU can still wakeup when you disable interrupt through PRIMASK. The pre and post
+functions handle the PRIMASK inside.
+
+@code
+
+ASMC_PreEnterStopModes();
+
+/* Enable the wakeup interrupt here. */
+
+ASMC_SetPowerModeStop(ASMC, kASMC_PartialStop);
+
+ASMC_PostExitStopModes();
+
+@endcode
+*/

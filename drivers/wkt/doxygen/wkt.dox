@@ -1,0 +1,35 @@
+/*!
+@defgroup wkt WKT: Self-wake-up Timer
+@details The MCUXpresso SDK provides a driver for the Self-wake-up Timer (WKT) of MCUXpresso SDK devices.
+
+# Function groups {#WKTFunc}
+The WKT driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#WKTInit}
+The function WKT_Init() initializes the WKT with specified configurations. The function
+WKT_GetDefaultConfig() gets the default configurations. The initialization function
+configures the WKT operating mode.
+
+The function WKT_Deinit() stops the WKT timers and disables the module clock.
+
+## Read actual WKT counter value {#WKTGetCount}
+The function WKT_GetCounterValue() reads the current timer counting value.
+This function returns the real-time timer counting value, in a range from 0 to a timer period.
+
+## Start and Stop timer operations {#WKTStartStopOperation}
+The function WKT_StartTimer() starts the timer counting. After calling this function, the timer loads
+the period value, counts down to 0. When the timer reaches 0, it stops and generates a trigger pulse and sets
+the timeout interrupt flag.
+
+The function WKT_StopTimer() stops the timer counting.
+
+## Status {#WKTStatus}
+Provides functions to get and clear the WKT status flags.
+
+
+# Typical use case {#WKTUseCase}
+
+## WKT tick example {#WKTTick}
+Updates the WKT period and toggles an LED periodically.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/wkt
+*/

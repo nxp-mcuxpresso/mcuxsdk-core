@@ -1,0 +1,47 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_FLEXCAN_TxBusy = 5300
+ - #kStatus_FLEXCAN_TxIdle = 5301
+ - #kStatus_FLEXCAN_TxSwitchToRx = 5302
+ - #kStatus_FLEXCAN_RxBusy = 5303
+ - #kStatus_FLEXCAN_RxIdle = 5304
+ - #kStatus_FLEXCAN_RxOverflow = 5305
+ - #kStatus_FLEXCAN_RxFifoBusy = 5306
+ - #kStatus_FLEXCAN_RxFifoIdle = 5307
+ - #kStatus_FLEXCAN_RxFifoOverflow = 5308
+ - #kStatus_FLEXCAN_RxFifoWarning = 5309
+ - #kStatus_FLEXCAN_ErrorStatus = 5310
+ - #kStatus_FLEXCAN_UnHandled = 5311
+*/
+
+/*!
+@defgroup flexcan FlexCAN: Flex Controller Area Network Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Flex Controller Area Network (FlexCAN)
+         module of MCUXpresso SDK devices.
+*/
+
+/*!
+@defgroup flexcan_driver FlexCAN Driver
+@ingroup flexcan
+@details This section describes the programming interface of the FlexCAN driver.
+The FlexCAN driver configures FlexCAN module and provides functional and transactional
+interfaces to build the FlexCAN application.
+
+# Typical use case {#FlexCANTpyUC}
+
+## Message Buffer Send Operation {#FlexCANMbSendOps}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/flexcan
+## Message Buffer Receive Operation {#FlexCANMbReceiveOps}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/flexcan
+## Receive FIFO Operation {#FlexCANFifoReceiveOps}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/flexcan
+*/
+
+/*!
+@if dox_section_flexcan_edma_driver
+@defgroup flexcan_edma_driver FlexCAN eDMA Driver
+@ingroup flexcan
+@endif
+*/

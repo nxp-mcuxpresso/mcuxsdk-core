@@ -1,0 +1,14 @@
+/*!
+@page driver_log Driver Change Log
+
+@section tmu TMU
+  The current TMU driver version is 2.1.0.
+
+  - 2.1.0
+    - New feature.
+      - Supported rising & falling temp rate critical threshold.
+      - Supported polling function to avoid the temp sudden jump issue.
+  - 2.0.0
+    - Initial version.
+      - This module was first developed on i.MX 93.
+*/

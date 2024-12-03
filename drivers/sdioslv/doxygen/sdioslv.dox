@@ -1,0 +1,13 @@
+/*!
+@defgroup sdioslv SDIOSLV: sdio slave controller interface
+@details The MCUXpresso SDK provides a peripheral driver for thesdio slave controller interface(SDIOSLV)
+
+The sdio slave controller interface supports SDIO V2.0 and V3.0 specification.
+
+# Typical use case{#SDIOSLVTypicalUseCase}
+
+## SDIO V2.0 slave
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sdioslv/sdioslv_2.0
+
+## SDIO V3.0 slave
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sdioslv/sdioslv_3.0

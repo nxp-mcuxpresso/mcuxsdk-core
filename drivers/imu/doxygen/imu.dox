@@ -1,0 +1,6 @@
+/*!
+@defgroup imu IMU: Inter CPU Messaging Unit
+@details The MCUXpresso SDK provides a driver for the IMU module of MCUXpresso SDK devices.
+
+*/
+

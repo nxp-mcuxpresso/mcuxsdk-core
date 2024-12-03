@@ -1,0 +1,48 @@
+/*!
+@defgroup rtc RTC: Real Time Clock
+@details The MCUXpresso SDK provides a driver for the Real Time Clock (RTC).
+
+# Function groups {#RTCFunc}
+The RTC driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#RTCInit}
+The function RTC_Init() initializes the RTC with specified configurations. The function
+RTC_GetDefaultConfig() gets the default configurations.
+
+The function RTC_Deinit() disables the RTC timer and disables the module clock.
+
+## Set & Get Datetime {#RTCDatetime}
+The function RTC_SetDatetime() sets the timer period in seconds. User passes in the
+details in date & time format by using the below data structure.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rtc
+The function RTC_GetDatetime() reads the current timer value in seconds, converts it to
+date & time format and stores it into a datetime structure passed in by the user.
+
+## Set & Get Alarm {#RTCAlarm}
+The function RTC_SetAlarm()  sets the alarm time period in seconds. User passes in the
+details in date & time format by using the datetime data structure.
+
+The function RTC_GetAlarm() reads the alarm time in seconds, converts it to
+date & time format and stores it into a datetime structure passed in by the user.
+
+## Start & Stop timer {#RTCStart}
+The function RTC_StartTimer() starts the RTC time counter.
+
+The function RTC_StopTimer() stops the RTC time counter.
+
+## Status {#RTCStatus}
+Provides functions to get and clear the RTC status.
+
+## Interrupt {#RTCInterrupt}
+Provides functions to enable/disable RTC interrupts and get current enabled interrupts.
+
+## High resolution timer {#RTCHighResolution}
+Provides functions to enable high resolution timer and set and get the wake time.
+
+# Typical use case {#RTCUseCase}
+
+## RTC tick example {#RTCTick}
+Example to set the RTC current time and trigger an alarm.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rtc
+*/

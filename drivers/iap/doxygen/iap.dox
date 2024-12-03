@@ -1,0 +1,79 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_IAP_Success = 0
+ - #kStatus_IAP_InvalidCommand = 10201
+ - #kStatus_IAP_SrcAddrError = 10202
+ - #kStatus_IAP_DstAddrError = 10203
+ - #kStatus_IAP_SrcAddrNotMapped = 10204
+ - #kStatus_IAP_DstAddrNotMapped = 10205
+ - #kStatus_IAP_CountError = 10206
+ - #kStatus_IAP_InvalidSector = 10207
+ - #kStatus_IAP_SectorNotblank = 10208
+ - #kStatus_IAP_NotPrepared = 10209
+ - #kStatus_IAP_CompareError = 10210
+ - #kStatus_IAP_Busy = 10211
+ - #kStatus_IAP_ParamError = 10212
+ - #kStatus_IAP_AddrError = 10213
+ - #kStatus_IAP_AddrNotMapped = 10214
+ - #kStatus_IAP_NoPower = 10214
+ - #kStatus_IAP_NoClock = 10227
+ - #kStatus_IAP_ReinvokeISPConfig = 1021C
+*/
+
+/*!
+@defgroup IAP_driver IAP: In Application Programming Driver
+@details The MCUXpresso SDK provides a driver for the In Application Programming (IAP) module of MCUXpresso SDK devices.
+
+
+# Function groups {#IAPFunc}
+The driver provides a set of functions to call the on-chip in application programming interface. User code executing
+from on-chip RAM can call these functions to read information like part id; read and write flash, EEPROM and FAIM.
+
+## Basic operations {#IAPBasicOperation}
+The function IAP_ReadPartID() reads the part id of the board.
+
+The function IAP_ReadBootCodeVersion() reads the boot code Version.
+
+The function IAP_ReadUniqueID() reads the unique id of the boards.
+
+The function IAP_ReinvokeISP() reinvokes the ISP mode.
+
+The function IAP_ReadFactorySettings() reads the factory settings.
+
+## Flash operations {#IAPFlashOperation}
+The function IAP_PrepareSectorForWrite() prepares a sector for write or erase operation. Then, the function
+IAP_CopyRamToFlash() programs the flash memory.
+
+The function IAP_EraseSector() erases a flash sector while the function IAP_ErasePage() erases a flash page.
+
+The function IAP_BlankCheckSector() is used to blank check a sector or multiple sectors of on-chip flash memory.
+
+The function IAP_Compare() is used to compare the memory contents at two locations. The user can compare several bytes
+(must be a multiple of 4) content in two different flash locations.
+
+The function IAP_ReadFlashSignature() can get the 32-bits signature of the entire flash and the function
+IAP_ExtendedFlashSignatureRead() can calculate the signature of one or more flash pages.
+
+## EEPROM operations {#IAPEepromOperation}
+The function IAP_ReadEEPROMPage() reads the 128 bytes content of an EEPROM page and IAP_WriteEEPROMPage() writes 128
+bytes content in an EEPROM page
+
+## FAIM operations {#IAPFaimOperation}
+The function IAP_ReadEEPROMPage() reads the 32 bits content of an FAIM page and IAP_WriteEEPROMPage() writes 32 bits
+content in an FAIM page
+
+# Typical use case {#IAPTypUC}
+
+## IAP Basic Operations {#IAPBasicOps}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iap/iap_basic/
+
+## IAP Flash Operations {#IAPFlashOps}
+Refer to the driver example codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iap/iap_flash/
+
+## IAP EEPROM Operations {#IAPEEPROMOps}
+Refer to the driver example codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iap/iap_eeprom/
+
+## IAP FAIM Operations {#IAPFAIMOps}
+Refer to the driver example codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iap/iap_faim/
+
+*/

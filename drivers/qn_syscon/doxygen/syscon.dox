@@ -1,0 +1,57 @@
+/*!
+@defgroup qn_syscon SYSCON: System Configuration
+@details The MCUXpresso SDK provides a peripheral driver for the System Configuration
+         module of MCUXpresso SDK devices.
+
+@defgroup clock Clock driver
+@ingroup qn_syscon
+@details The MCUXpresso SDK provides a peripheral clock driver for the SYSCON module of MCUXpresso SDK devices.
+
+# Function description {#SYSCONFunc}
+
+Clock driver provides these functions:
+ - Functions to initialize the Core clock to given frequency.
+ - Functions to configure the clock selection muxes.
+ - Functions to setup peripheral clock dividers.
+ - Functions to get the frequency of the selected clock.
+ - Functions to set PLL frequency.
+
+## SYSCON Clock frequency functions {#SYSCONClockFreq}
+
+SYSCON clock module provides clocks, such as MCLKCLK, ADCCLK, DMICCLK, MCGFLLCLK, FXCOMCLK, WDTOSC, RTCOSC, and USBCLK. 
+The functions CLOCK_EnableClock() and CLOCK_DisableClock() enables and disables the various 
+clocks. The SYSCON clock driver provides functions to get the frequency of these clocks, such as CLOCK_GetFreq().
+
+## SYSCON clock Selection Muxes {#SYSCONClockSel}
+
+The SYSCON clock driver provides the function to configure the clock selected. The function 
+CLOCK_AttachClk() is implemented for this. The function selects the clock source for a particular
+peripheral like MAINCLK, DMIC, FLEXCOMM, USB, ADC, and PLL.
+
+## SYSCON clock dividers {#SYSCONClockSetClkDiv}
+
+The SYSCON clock module provides the function to setup the peripheral clock dividers. The function 
+CLOCK_SetClkDiv() configures the CLKDIV registers for various periperals like USB, DMIC, SYSTICK, AHB, and 
+CLKOUT functions. 
+
+# Typical use case {#SYSCONClockUsecs}
+
+    /* when CLK_XTAL_SEL is set to 1(means 32M xtal is used), XTAL_DIV is valid */
+    CLOCK_SetClkDiv(kCLOCK_DivXtalClk, 1U);
+
+    /* Configure AHB clock, AHBCLK = SYSCLK/(div+1) */
+    CLOCK_SetClkDiv(kCLOCK_DivAhbClk, 0U);
+
+    /* Configure APB clock, APBCLK = AHBCLK/(div+1)*/
+    CLOCK_SetClkDiv(kCLOCK_DivApbClk, 0U);
+
+    /* Select XTAL clock frequency: 32M */
+    CLOCK_AttachClk(k32M_to_XTAL_CLK);
+
+    /* SYSCLK comes from XTAL */
+    CLOCK_AttachClk(kXTAL_to_SYS_CLK);
+
+    /* Select 32k clock source: 32768Hz XTAL */
+    CLOCK_AttachClk(kXTAL32K_to_32K_CLK);
+
+*/

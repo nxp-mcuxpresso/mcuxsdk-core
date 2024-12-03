@@ -1,0 +1,60 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_DSPI_Error = 601
+*/
+
+/*!
+@defgroup dspi DSPI: Serial Peripheral Interface Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Serial Peripheral Interface (SPI) module of MCUXpresso SDK devices.
+*/
+
+/*!
+@defgroup dspi_driver DSPI Driver
+@ingroup dspi
+@details This section describes the programming interface of the DSPI peripheral driver.
+The DSPI driver configures the DSPI module and provides functional and transactional
+interfaces to build the DSPI application.
+
+# Typical use case {#DSPITpyUC}
+
+## Master Operation {#DSPIMasterOps}
+
+Refer to the driver examples codes located at <i>\<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dspi.</i>
+## Slave Operation {#DSPISlaveOps}
+
+Refer to the driver examples codes located at <i>\<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dspi.</i>
+*/
+
+/*!
+@if dox_section_dspi_dma_driver
+@defgroup dspi_dma_driver DSPI DMA Driver
+@ingroup dspi
+@details This section describes the programming interface of the DSPI peripheral driver.
+The DSPI driver configures DSPI module and provides functional and transactional
+interfaces to build the DSPI application.
+@endif
+*/
+
+/*!
+@if dox_section_dspi_edma_driver
+@defgroup dspi_edma_driver DSPI eDMA Driver
+@ingroup dspi
+@details This section describes the programming interface of the DSPI peripheral driver.
+The DSPI driver configures DSPI module and provides functional and transactional
+interfaces to build the DSPI application.
+@endif
+*/
+
+/*!
+@if dox_section_dspi_freertos_driver
+@defgroup dspi_freertos_driver DSPI FreeRTOS Driver
+@ingroup dspi
+@endif
+*/
+
+/*!
+@if dox_section_dspi_cmsis_driver
+@defgroup dspi_cmsis_driver DSPI CMSIS Driver
+@ingroup dspi
+@endif
+*/

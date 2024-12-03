@@ -1,0 +1,37 @@
+/*!
+@defgroup adc ADC: Analog Digital Converter
+@details The MCUXpresso SDK provides a driver for the Analog Digital converter (ADC) module of MCUXpresso SDK devices.
+
+# Function Groups
+The ADC driver can be divided into 7 function groups.
+
+## ADC Basic Control Interfaces
+The functions in this group can be used to configure the whole ADC module. To initialize the ADC module, the ADC_Init()
+is provided. Before invoking ADC_Init() function, user can use ADC_GetDefaultConfig() function to get default configurations.
+
+## ADC Calibration Control Interfaces
+The ADC module supports both automatic calibration and user defined calibration. To do auto calibration, the function
+ADC_DoAutoCalibration() is provided, to do user defined calibration, the function ADC_DoUserCalibration() is provided.
+
+## ADC Temperature Sensor Control Interfaces
+The functions in this group can be used to control temperature sensor, including enableing temperature sensor and setting
+temperature sensor mode.
+
+## ADC Audio Control Interfaces
+This function group contains 3 functions to control audio. ADC_EnableAudio() can be used to enable/disable audio PGA and
+decimation rate select. ADC_SetAudioPGAVoltageGain() can be used to set audio PGA voltage gain.
+ADC_ConfigAudioVoiceLevel() can be used to configure audio voice level.
+
+## ADC Conversion Related Interfaces
+Conversion related function are placed in this function group. If the trigger mode is set as software trigger, invoking
+ADC_DoSoftwareTrigger() to trigger the scan. ADC_SetScanChannel() function can be used to set each channel's mux source.
+After conversion completed, ADC_GetConversionResult() can be used to get 32-bit width packed ADC conversion result.
+
+## ADC Interrupt Control Interfaces
+The functions in this group can be used to enable/disable interrupts.
+
+## ADC Status Control Interfaces
+The ACOMP_GetStatusFlags() function in this group can return all status flags. The ACOMP_ClearStatusFlags() can be used
+to clear status flags, but please note that no all status flags can be cleared by software.
+
+*/

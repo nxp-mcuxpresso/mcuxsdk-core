@@ -1,0 +1,43 @@
+/*!
+
+@defgroup aoi AOI: Crossbar AND/OR/INVERT Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Crossbar AND/OR/INVERT (AOI) block of MCUXpresso SDK devices.
+@{
+
+
+The AOI module supports a configurable number of event outputs, where each event
+output represents a user-programmed combinational boolean function based on four event
+inputs. The key features of this module include:
+  - Four dedicated inputs for each event output
+  - User-programmable combinational boolean function evaluation for each event output
+  - Memory-mapped device connected to a slave peripheral (IPS) bus
+  - Configurable number of event outputs
+
+# Function groups {#AOIFuncGroups}
+## AOI Initialization {#AOIInit}
+To initialize the AOI driver, call the AOI_Init() function and pass a baseaddr pointer.
+
+See the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/aoi.
+
+## AOI Get Set Operation {#AOIOperation}
+The AOI module provides a universal boolean function generator using a four-term sum of products expression with each product term containing
+true or complement values of the four selected event inputs (A, B, C, D). The AOI is a highly programmable module for creating combinational
+boolean outputs for use as hardware triggers. Each selected input term in each product term can be configured to produce a logical 0 or 1 or
+pass the true or complement of the selected event input. To configure the selected AOI module event, call the API of the AOI_SetEventLogicConfig() function.
+To get the current event state configure, call the API of AOI_GetEventLogicConfig() function. The AOI module does not support any special modes of operation.
+See the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/aoi.
+
+# Typical use case {#AOIUsercase}
+The AOI module is designed to be integrated in conjuction with one or more inter-peripheral
+crossbar switch (XBAR) modules. A crossbar switch is typically used to select the 4*n
+AOI inputs from among available peripheral outputs and GPIO signals. The n EVENTn
+outputs from the AOI module are typically used as additional inputs to a second crossbar
+switch, adding to it the ability to connect to its outputs an arbitrary 4-input boolean
+function of its other inputs.
+
+This is an example to initialize and configure the AOI driver for a possible use case. Because the AOI module function is directly connected with an XBAR (Inter-peripheral crossbar) module,
+other peripheral drivers (PIT, CMP, and XBAR) are used to show full functionality of AOI module.
+
+For example:
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/aoi*/
+/*! @} */

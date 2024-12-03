@@ -1,0 +1,11 @@
+/*!
+@defgroup mau MAU: Math Accelerator Unit Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Math Accelerator Unit of MCUXpresso SDK devices.
+
+# Typical use case {#MAUTpyUC}
+
+## Interrupt Configuration {#Calculation}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_mau
+*/
+

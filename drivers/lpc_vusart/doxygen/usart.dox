@@ -1,0 +1,105 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_USART_TxBusy = 5700
+ - #kStatus_USART_RxBusy = 5701
+ - #kStatus_USART_TxIdle = 5702
+ - #kStatus_USART_RxIdle = 5703
+ - #kStatus_USART_TxError = 5707
+ - #kStatus_USART_RxError = 5709
+ - #kStatus_USART_RxRingBufferOverrun = 5708
+ - #kStatus_USART_NoiseError = 5710
+ - #kStatus_USART_FramingError = 5711
+ - #kStatus_USART_ParityError = 5712
+ - #kStatus_USART_HardwareOverrun = 5713
+ - #kStatus_USART_FifoBusError = 5714
+ - #kStatus_USART_BaudrateNotSupport = 5715
+*/
+
+/*!
+@defgroup usart USART: Universal Asynchronous Receiver/Transmitter Driver
+@details The MCUXpresso SDK provides a peripheral UART driver for the Universal Synchronous Receiver/Transmitter (USART)
+         module of MCUXpresso SDK devices. Driver does not support synchronous mode.
+
+The USART driver includes two parts: functional APIs and transactional APIs.
+
+Functional APIs are used for USART initialization/configuration/operation for the purpose of 
+optimization/customization. Using the functional API requires the
+knowledge of the USART peripheral and know how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. USART functional operation groups provide the
+functional APIs set.
+
+Transactional APIs can be used to enable the peripheral quickly and in the
+application if the code size and performance of transactional APIs can satisfy the
+requirements. If the code size and performance are critical requirements,
+see the transactional API implementation and write custom code. All
+transactional APIs use the usart_handle_t as the second parameter.
+Initialize the handle by calling the USART_TransferCreateHandle() API.
+
+Transactional APIs support asynchronous transfer, which means that the functions
+USART_TransferSendNonBlocking() and USART_TransferReceiveNonBlocking() set up an interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_USART_TxIdle and kStatus_USART_RxIdle.
+
+Transactional receive APIs support the ring buffer. Prepare the
+memory for the ring buffer and pass in the start address and size while calling the
+USART_TransferCreateHandle(). If passing  NULL, the ring buffer feature is disabled.
+When the ring buffer is enabled, the received data is saved to the ring buffer in the background.
+The USART_TransferReceiveNonBlocking() function first gets data from the ring buffer. If
+the ring buffer does not have enough data, the function first returns the data in the
+ring buffer and then saves the received data to user memory. When all data is received,
+the upper layer is informed through a callback with the kStatus_USART_RxIdle.
+
+If the receive ring buffer is full, the upper layer is informed through a callback with the
+kStatus_USART_RxRingBufferOverrun. In the callback function, the upper layer reads
+data out from the ring buffer. If not, the oldest data is overwritten by the new data.
+
+The ring buffer size is specified when creating the handle. Note that
+one byte is reserved for the ring buffer maintenance. When
+creating handle using the following code:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/usart
+In this example, the buffer size is 32, but only 31 bytes are used for
+saving data.
+
+# Typical use case {#USARTCase}
+
+## USART Send/receive using a polling method {#USARTCasePolling}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/usart
+## USART Send/receive using an interrupt method {#USARTCaseInterrupt}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/usart
+## USART Receive using the ringbuffer feature {#USARTCaseRing}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/usart
+## USART Send/Receive using the DMA method {#USARTCaseDma}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/usart
+*/
+
+/*!
+@defgroup usart_driver USART Driver
+@ingroup usart
+*/
+
+/*!
+@if dox_section_usart_dma_driver
+@defgroup usart_dma_driver USART DMA Driver
+@ingroup usart
+@endif
+*/
+
+/*!
+@if dox_section_usart_freertos_driver
+@defgroup usart_freertos_driver USART FreeRTOS Driver
+@ingroup usart
+@endif
+*/
+
+/*!
+@if dox_section_usart_cmsis_driver
+@defgroup usart_cmsis_driver USART CMSIS Driver
+@ingroup usart
+@endif
+*/

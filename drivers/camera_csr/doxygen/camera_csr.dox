@@ -1,0 +1,8 @@
+/*!
+@defgroup camera_csr CAMERA MIX CSR: Camera Domain Block Control
+@details The MCUXpresso SDK provides a peripheral driver for the BLK_CTRL_CAMERA.
+
+For i.MX95 SOC, it define a camera_csr modules about configuration and registers for the whole camera domain, incluing the CSI2-host interface, ISP, ISI, M0+ and LPCAC.
+The inital version only add Pixel Formatting module funtionality.
+*/
+

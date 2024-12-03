@@ -1,0 +1,11 @@
+/*!
+@defgroup rdc RDC: Resource Domain Controller
+@details The MCUXpresso SDK provides a driver for the RDC module of MCUXpresso SDK devices.
+
+The Resource Domain Controller (RDC) provides robust support for the isolation of
+destination memory mapped locations such as peripherals and memory to a single core, a
+bus master, or set of cores and bus masters.\n
+
+The RDC driver should be used together with the RDC_SEMA42 driver.
+
+*/

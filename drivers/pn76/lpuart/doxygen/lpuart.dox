@@ -1,0 +1,20 @@
+Overview
+========
+@defgroup lpuart LPUART:  Low Power Universal Asynchronous Receiver/Transmitter Driver
+@ingroup lpuart
+@details The MCUXpresso SDK provides a peripheral driver for the Low Power UART (LPUART)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#LPUARTTypUC}
+
+## LPUART Operation {#LPUARTOperation}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpuart
+*/
+
+/*!
+@if dox_section_lpuart_gpdma_driver
+@defgroup lpuart_gpdma_driver LPUART GPDMA Driver
+@ingroup lpuart
+@endif
+*/

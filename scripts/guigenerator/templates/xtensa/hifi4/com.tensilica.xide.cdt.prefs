@@ -1,0 +1,8 @@
+eclipse.preferences.version=1
+xtensabuilder/com.tensilica.xide.cdt.prefs.builder.default.compiler=xt-clang
+xtensabuilder/com.tensilica.xide.cdt.prefs.builder.default.mode=Internal
+xtensabuilder/com.tensilica.xide.cdt.prefs.builder.parallel.build=true
+xtensabuilder/com.tensilica.xide.cdt.prefs.builder.parallel.jobs.optimal=true
+xtensabuilder/com.tensilica.xide.cdt.prefs.builder.parallel.jobs.specified=1
+xtensabuilder/com.tensilica.xide.cdt.prefs.builder.rommable.output.bfd=binary
+xtensabuilder/projectScope=true

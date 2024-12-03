@@ -1,0 +1,6 @@
+/*!
+@defgroup tstmr_driver TSTMR: Timestamp Timer Driver
+@details The MCUXpresso SDK provides a driver for the TSTMR module of MCUXpresso SDK devices.
+
+*/
+

@@ -1,0 +1,30 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_OTP_WrEnableInvalid = 6100
+ - #kStatus_OTP_SomeBitsAlreadyProgrammed = 6101
+ - #kStatus_OTP_AllDataOrMaskZero = 6102
+ - #kStatus_OTP_WriteAccessLocked = 6103
+ - #kStatus_OTP_ReadDataMismatch = 6104
+ - #kStatus_OTP_UsbIdEnabled = 6105
+ - #kStatus_OTP_EthMacEnabled = 6106
+ - #kStatus_OTP_AesKeysEnabled = 6107
+ - #kStatus_OTP_IllegalBank = 6108
+ - #kStatus_OTP_ShufflerConfigNotValid = 6109 
+ - #kStatus_OTP_ShufflerNotEnabled = 6110
+ - #kStatus_OTP_ShufflerCanOnlyProgSingleKey = 6111 
+ - #kStatus_OTP_IllegalProgramData = 6112
+ - #kStatus_OTP_ReadAccessLocked = 6113
+*/
+
+/*!
+@defgroup otp OTP: One-Time Programmable memory and API
+@details The MCUXpresso SDK provides a peripheral driver for the OTP module of MCUXpresso SDK devices.
+
+The main clock has to be set to a frequency stated in user manual prior to using OTP driver.
+OTP memory is manipulated by calling provided API stored in ROM. MCUXpresso SDK driver encapsulates this.
+
+# OTP example {#OTPExample}
+
+This example shows how to write to OTP.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/otp*/

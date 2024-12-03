@@ -1,0 +1,142 @@
+{
+    "$id": "definitions_schema.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "description": "The MCUXpresso SDK data schema property definitions",
+    "version": "1.0.0",
+    "definitions": {
+        "exampleDescriptionType": {
+            "type": "object",
+            "description": "The example data type.",
+            "additionalProperties": false,
+            "properties": {
+                "use_sysbuild": {
+                    "type": "boolean",
+                    "description": "Using sysbuild, for multi projects solution.",
+                    "default": true
+                },
+                "skip_build": {
+                    "type": "boolean",
+                    "description": "Skip project build. Used when project is already build by other project with sysbuild.",
+                    "default": true
+                },
+                "section-type": {
+                    "description": "Identify project type, it could be application or library.",
+                    "enum": [
+                        "application",
+                        "library"
+                    ]
+                },
+                "belong_to": {
+                    "type": "string",
+                    "description": "[MCUXpresso SDK ecosystem data] The project belong to which board or device.",
+                    "examples": [
+                        {
+                            "belong_to": "set.board.${board}"
+                        },
+                        {
+                            "belong_to": "set.device.${device}"
+                        }
+                    ]
+                },  
+                "contents": {
+                    "type": "object",
+                    "description": "The project configuration.",
+                    "additionalProperties": false,
+                    "properties": {
+                        "document": {
+                            "$ref": "#/definitions/configurationDocumentType"
+                        },
+                        "project-root-path": {
+                            "type": "string",
+                            "description": "[MCUXpresso SDK ecosystem data] The project root directory in SDK package.",
+                            "examples": [
+                                {
+                                    "project-root-path": "boards/${board}/demo_apps/hello_world/${multicore_foldername}"
+                                }
+                            ]
+                        },
+                        "meta_path": {
+                            "type": "string",
+                            "description": "[MCUXpresso SDK ecosystem data] The project root directory in SDK meta repo.",
+                            "examples": [
+                                {
+                                    "meta_path": "examples/src/demo_apps/hello_world"
+                                }
+                            ]
+                        }
+                    },
+                    "required": [
+                        "document",
+                        "project-root-path"
+                    ]
+                },
+                "boards": {
+                    "$ref": "#/definitions/BoardToolchainTargetSupportType"
+                },
+                "shields": {
+                    "$ref": "#/definitions/shieldsType"
+                }
+            },
+            "required": [
+                "contents",
+                "boards"
+            ]
+        },
+        "configurationDocumentType": {
+            "type": "object",
+            "$comment": "configuration document object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The solution/project name."
+                },
+                "version": {
+                    "$ref": "#/definitions/versionType",
+                    "description": "The project version.",
+                    "$comment": "Currently version is optional for project"
+                },
+                "brief": {
+                    "type": "string",
+                    "description": "Detailed introduction about the solution/project."
+                },
+                "category": {
+                    "type": "string",
+                    "description": "The category for this solution/project."
+                }
+            },
+            "required": [
+                "name",
+                "category",
+                "brief"
+            ]
+        },
+        "BoardToolchainTargetSupportType": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "\\w+((@\\w+)?)$": {
+                    "type": "array",
+                    "minItems": 0,
+                    "uniqueItems": true,
+                    "additionalItems": false,
+                    "items": { 
+                        "$ref": "#/definitions/toolchainTargetSupportType"
+                    }                   
+                }
+            }
+        },
+        "toolchainTargetSupportType": {
+            "type": "string",
+            "pattern": "^(\\+|\\-)(iar|mdk|armgcc|xcc|xtensa|codewarrior|riscvllvm)@\\w*(debug|release)$"
+        },
+        "versionType": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]+|(\\.[0-9]+(\\.[0-9]+|\\.[0-9]+_rev[0-9]+))|\\.[0-9]+_rev[0-9]+)$",
+            "description": "Component version number. Note that if version number has only a decimal like 1.2, please add quotation marks for version in case it is identifed as number type. "
+        },
+        "shieldsType": {
+            "type": "object"
+        }
+    }
+}

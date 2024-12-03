@@ -1,0 +1,35 @@
+/*!
+@defgroup sysmpu SYSMPU: System Memory Protection Unit
+@details The SYSMPU driver provides hardware access control for all memory references generated in the device.
+Use the SYSMPU driver to program the region descriptors that define memory spaces
+and their access rights. After initialization, the SYSMPU concurrently monitors the system bus
+transactions and evaluates their appropriateness.
+
+# Initialization and Deinitialization{#SYSMPUInit}
+
+To initialize the SYSMPU module, call the SYSMPU_Init() function and provide the user configuration data structure.
+This function sets the configuration of the SYSMPU module automatically and enables the SYSMPU module. \n
+Note that the configuration start address, end address, the region valid value, and the debugger's access permission for the SYSMPU region 0 cannot be changed.
+
+This is an example code to configure the SYSMPU driver.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sysmpu
+# Basic Control Operations {#SYSMPUBasicOp}
+
+SYSMPU can be enabled/disabled for the entire memory protection region by calling the
+SYSMPU_Enable() function. To save the power for any unused special regions when the entire
+memory protection region is disabled, call the SYSMPU_RegionEnable().
+
+After SYSMPU initialization, the SYSMPU_SetRegionLowMasterAccessRights() and
+SYSMPU_SetRegionHighMasterAccessRights() can be used to change the access rights
+for special master ports and for special region numbers.
+The SYSMPU_SetRegionConfig can be used to set the whole region with the start/end
+address with access rights.
+
+The SYSMPU_GetHardwareInfo() API is provided to get the hardware information for the device.
+The SYSMPU_GetSlavePortErrorStatus() API is provided to get the error status of a special
+slave port. When an error happens in this port, the SYSMPU_GetDetailErrorAccessInfo() API
+is provided to get the detailed error information.
+
+*/
+

@@ -1,0 +1,15 @@
+/*!
+@defgroup lpc_acomp LPC_ACOMP: Analog comparator Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Analog comparator (LPC_ACOMP)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#LPCACOMPTpyUC}
+
+## Polling Configuration {#LPCACOMPBasicConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/acomp/acomp_basic
+## Interrupt Configuration {#LPCACOMPIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/acomp/acomp_interrupt
+*/
+

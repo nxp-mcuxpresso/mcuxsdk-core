@@ -1,0 +1,153 @@
+/*!
+@defgroup lpc_lcdc LCDC: LCD Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the LCD controller (LCD)
+         of MCUXpresso SDK devices.
+
+The LCD driver supports TFT and STN panel. It also supports hardware cursor, which
+makes software easy.
+
+# Typical use case {#LPCLCDTpyUC}
+
+## Update framebuffer dynamically {#LPCLCDFb}
+
+The function @ref LCDC_SetPanelAddr is used to set the new framebuffer address.
+After this function, the new framebuffer address is not loaded to current register
+until the vertical synchroization. When the address is loaded, the interrupt
+@ref kLCDC_BaseAddrUpdateInterrupt occurs then upper layer could set the new
+framebuffer. In this example, there are two buffers. When the active buffer is
+displayed, upper layer could modify the inactive buffer.
+
+@code
+
+#if (defined(__CC_ARM) || defined(__GNUC__))
+__attribute__((aligned(8)))
+#elif defined(__ICCARM__)
+#pragma data_alignment = 8
+#else
+#error Toolchain not support.
+#endif
+static uint16_t s_frameBufs[2][IMG_HEIGHT][IMG_WIDTH];
+
+/* The index of the inactive buffer. */
+static volatile uint8_t s_inactiveBufsIdx;
+
+/* The new frame address already loaded to the LCD controller. */
+static volatile bool s_frameAddrUpdated = false;
+
+void LCD_IRQHandler(void)
+{
+    uint32_t intStatus = LCDC_GetEnabledInterruptsPendingStatus(LCD);
+
+    LCDC_ClearInterruptsStatus(LCD, intStatus);
+
+    if (intStatus & kLCDC_BaseAddrUpdateInterrupt)
+    {
+        s_frameAddrUpdated = true;
+    }
+}
+
+/* This function fills the framebuffer. */
+static void APP_FillBuffer(void *buffer);
+
+int main(void)
+{
+    lcdc_config_t lcdConfig;
+
+    /* Setup the LCD input clock here. */
+    BOARD_InitHardware();
+
+    s_frameAddrUpdated = false;
+
+    /* s_frameBufs[0] is displayed first. */
+    s_inactiveBufsIdx = 1;
+
+    /* Fill the s_frameBufs[0]. */
+    APP_FillBuffer((void *)(s_frameBufs[0]));
+
+    LCDC_GetDefaultConfig(&lcdConfig);
+
+    lcdConfig.panelClock_Hz = LCD_PANEL_CLK;
+    lcdConfig.ppl = LCD_PPL;
+    lcdConfig.hsw = LCD_HSW;
+    lcdConfig.hfp = LCD_HFP;
+    lcdConfig.hbp = LCD_HBP;
+    lcdConfig.lpp = LCD_LPP;
+    lcdConfig.vsw = LCD_VSW;
+    lcdConfig.vfp = LCD_VFP;
+    lcdConfig.vbp = LCD_VBP;
+    lcdConfig.polarityFlags = LCD_POL_FLAGS;
+    lcdConfig.upperPanelAddr = (uint32_t)s_frameBufs[0];
+    lcdConfig.bpp = kLCDC_16BPP565;
+    lcdConfig.display = kLCDC_DisplayTFT;
+    lcdConfig.swapRedBlue = false;
+
+    LCDC_Init(LCD, &lcdConfig, LCD_INPUT_CLK_FREQ);
+
+    LCDC_EnableInterrupts(LCD, kLCDC_BaseAddrUpdateInterrupt);
+    NVIC_EnableIRQ(LCD_IRQn);
+
+    LCDC_Start(LCD);
+    LCDC_PowerUp(LCD);
+
+    while (1)
+    {
+        /*
+         * Fill the inactive buffer.
+         */
+        APP_FillBuffer((void *)s_frameBufs[s_inactiveBufsIdx]);
+
+        while (!s_frameAddrUpdated)
+        {
+        }
+        /*
+         * The buffer address has been loaded to the LCD controller, now
+         * set the inactive buffer to active buffer.
+         */
+        LCDC_SetPanelAddr(LCD, kLCDC_UpperPanel, (uint32_t)(s_frameBufs[s_inactiveBufsIdx]));
+
+        s_frameAddrUpdated = false;
+        s_inactiveBufsIdx ^= 1U;
+    }
+}
+@endcode
+
+## Hardware cursor {#LPCLCDCursor}
+
+This example shows how to show a 32x32 pixel cursor and change its position.
+
+@code
+lcdc_cursor_config_t cursorConfig;
+
+int32_t cursorPosX = 0;
+int32_t cursorPosY = 0;
+
+/* Init the LCD here. */
+// ....
+
+/* Setup the Cursor. */
+LCDC_CursorGetDefaultConfig(&cursorConfig);
+
+cursorConfig.size = kLCDC_CursorSize32;
+cursorConfig.syncMode = kLCDC_CursorSync;
+cursorConfig.image[0] = (uint32_t *)cursor32Img0;
+
+LCDC_SetCursorConfig(LCD, &cursorConfig);
+
+LCDC_ChooseCursor(LCD, 0);
+
+LCDC_SetCursorPosition(LCD, 0, 0);
+
+LCDC_EnableCursor(LCD, true);
+
+while (1)
+{
+    // Do something else here
+
+    // Update cursorPosX and cursorPosY
+
+    LCDC_SetCursorPosition(LCD, cursorPosX, cursorPosY);
+}
+
+@endcode
+
+*/

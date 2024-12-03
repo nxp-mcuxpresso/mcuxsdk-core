@@ -1,0 +1,66 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_LPSPI_Busy = 400
+ - #kStatus_LPSPI_Error = 401
+ - #kStatus_LPSPI_Idle = 402
+ - #kStatus_LPSPI_OutOfRange = 403
+*/
+
+/*!
+@defgroup lpspi LPSPI: Low Power Serial Peripheral Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Low Power Serial Peripheral Interface (LPSPI) module of MCUXpresso SDK devices.
+@{
+*/
+
+/*!
+@defgroup lpspi_driver LPSPI Peripheral driver
+@ingroup lpspi
+@details This section describes the programming interface of the LPSPI Peripheral driver.
+The LPSPI driver configures LPSPI module, provides the functional and transactional
+interfaces to build the LPSPI application.
+
+# Function groups{#LPSPIFunGrps}
+
+## LPSPI Initialization and De-initialization {#LPSPIInitReset}
+
+This function group initializes the default configuration structure for master and slave, initializes the LPSPI
+master with a master configuration, initializes the LPSPI slave with a slave configuration, and de-initializes the LPSPI module.
+
+## LPSPI Basic Operation {#LPSPIBasicOps}
+
+This function group enables/disables the LPSPI module both interrupt and DMA, gets the data register address for the DMA
+transfer, sets master and slave, starts and stops the transfer, and so on.
+
+## LPSPI Transfer Operation {#LPSPITransOps}
+
+This function group controls the transfer, master send/receive data, and slave send/receive data.
+
+## LPSPI Status Operation {#LPSPIStatusOps}
+
+This function group gets/clears the LPSPI status.
+
+## LPSPI Block Transfer Operation {#LPSPIBlockTrans}
+
+This function group transfers a block of data, gets the transfer status, and aborts the transfer.
+
+# Typical use case {#LPSPITpyUC}
+
+## Master Operation {#LPSPIMasterOps}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpspi
+## Slave Operation {#LPSPISlaveOps}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpspi
+
+*/
+
+/*!
+@if dox_section_lpspi_edma_driver
+@defgroup lpspi_edma_driver LPSPI eDMA Driver
+@ingroup lpspi
+@endif
+*/
+
+/*!
+ * @}
+ */

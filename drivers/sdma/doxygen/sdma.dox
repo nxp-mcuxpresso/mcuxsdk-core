@@ -1,0 +1,17 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_SDMA_ERROR = 7300
+ - #kStatus_SDMA_Busy = 7301
+*/
+
+/*!
+@defgroup sdma SDMA: Smart Direct Memory Access (SDMA) Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Smart Direct Memory Access (SDMA)
+         of devices.
+
+# Typical use case{#SDMATypicalUseCase}
+
+## SDMA Operation{#SDMAOper}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sdma*/
+

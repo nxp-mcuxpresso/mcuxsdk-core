@@ -1,0 +1,33 @@
+/*!
+@defgroup cadc CADC: 12-bit Cyclic Analog-to-Digital Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 12-bit Cyclic Analog-to-Digital Converter (CADC)
+         module of MCUXpresso SDK devices.
+
+The analog-to-digital (ADC) converter function consists of two separate analog-to-digital converters, each with eight analog inputs and its own sample and hold circuit. A common digital control module configures and controls the functioning of the converters.
+
+To match the hardware feature, the CADC driver is designed with three parts: APIs for configuring common digital control module, APIs for configuring each converter and APIs for operating sample slots.
+
+The common digital control configuration is set when initializing the CADC module in application, as it should be done firstly before any other operation, and decide how the two converters work together. The converter configure APIs would set each converter's attributes and operate them. Finally, the sample slot API would configure the sample slot with input channel and gather them to be a conversion sequence. Once the trigger (software trigger or external hardware trigger) starts,
+ the sequence is started and the conversion are executed.
+
+# Function groups {#CADCFunGrps}
+
+## Initialization and deinitialization{#CADCInit}
+
+This function group initializes/de-initializes the CADC. The initialization should be done first, before any operation to the CADC module in application. It enables the clock and sets the configuration for the common digital control. 
+An API to fill the configuration with an available default setting is also provided.
+
+## Each converter {#CADCConv}
+
+This function group configures each of the two converters in the CADC module.
+
+## Each sample {#CADCSample}
+
+This function group is for the operations to sample slot.
+
+# Typical use case {#CADCTpyUC}
+
+## Triggered parallel {#CADCTrgPal}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cadc
+*/

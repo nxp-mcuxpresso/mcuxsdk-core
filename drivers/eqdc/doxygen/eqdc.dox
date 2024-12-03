@@ -1,0 +1,32 @@
+/*!
+@defgroup eqdc EQDC: Enhanced Quadrature Encoder/Decoder
+@details The MCUXpresso SDK provides a peripheral driver for the Enhanced Quadrature Encoder/Decoder ()
+         module of MCUXpresso SDK devices.
+
+This section describes the programming interface of the EQDC Peripheral driver.
+The EQDC driver configures the EQDC module and provides a functional interface for the user to build the EQDC application.
+
+# Function groups {#EQDCFunGrps}
+
+## Initialization and De-initialization {#EQDCInit}
+
+This function group initializes default configuration structure for the EQDC counter and initializes EQDC counter with the normal configuration and de-initialize EQDC module. Some APIs are also created to control the features.
+
+## Status {#EQDCSta}
+
+This function group get/clear the EQDC status.
+
+## Interrupts {#EQDCInt}
+
+This function group enable/disable the EQDC interrupts.
+
+## Value Operation {#EQDCValOps}
+
+This function group get the counter/hold value of positions.
+
+# Typical use case {#EQDCTpyUC}
+
+## Polling Configuration {#EQDCPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/eqdc
+*/

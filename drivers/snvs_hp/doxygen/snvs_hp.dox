@@ -1,0 +1,14 @@
+/*!
+@defgroup snvs SNVS: Secure Non-Volatile Storage
+@defgroup snvs_hp Secure Non-Volatile Storage High-Power
+@ingroup snvs
+@details The MCUXpresso SDK  provides a Peripheral driver for the Secure Non-Volatile Storage High-Power(SNVS-HP) module.@n
+ @n
+The SNVS_HP is in the chip's power-supply domain and thus receives the power along
+with the rest of the chip. The SNVS_HP provides an interface between the SNVS_LP and
+the rest of the system; there is no way to access the SNVS_LP registers except through
+the SNVS_HP. For access to the SNVS_LP registers, the SNVS_HP must be powered up.
+It uses a register access permission policy to determine whether the access to the
+particular registers is permitted.
+ @n
+*/

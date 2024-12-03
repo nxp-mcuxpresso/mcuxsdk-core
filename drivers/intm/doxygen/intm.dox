@@ -1,0 +1,9 @@
+/*!
+@defgroup intm INTM: Interrupt Monitor Driver
+@ingroup intm
+@details The MCUXpresso SDK provides a peripheral driver for the Interrupt Monitor (INTM) module of MCUXpresso SDK devices.@n
+ @n
+Interrupt Monitor (INTM) module provides a mechanism to monitor the latency of the responses on interrupt requests to ensure that the
+processing of these critical interrupts executes within the expected time frame, increasing the reliability of the device.
+ @n
+*/

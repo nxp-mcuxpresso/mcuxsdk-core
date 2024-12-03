@@ -1,0 +1,44 @@
+/*!
+@defgroup dac14 DAC14: 14-bit Digital-to-Analog Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 14-bit Digital-to-Analog Converter (DAC14)
+         module of MCUXpresso SDK devices.
+
+This DAC is the 14-bit resolution digital-to-analog converters with a programmable reference generator
+output. Its output data items are loaded into a FIFO, so that various FIFO modes can be used to
+output the value for user-defined sequence.
+
+The DAC driver provides a user-friendly interface to operate the DAC peripheral. The user can 
+initialize/deinitialize the DAC driver, set data into FIFO, or enable the interrupt DMA for special
+events so that the hardware can process the DAC output data automatically. Also, the configuration
+for the software and hardware trigger are also included in the driver.
+
+# Function groups{#DAC14Func}
+
+## Initialization and deinitialization {#DAC14Init}
+This function group implements APIs for the basic DAC module (converter).
+
+## DAC control {#DAC14Control}
+The DAC14_Enable() to control dac system.
+
+## Swing back mode {#DAC14SwingbackMode}
+The DAC14_EnableSwingBackMode() to control swing back mode.
+
+## FIFO mode {#DAC14FIFOMode}
+The DAC14_EnableFIFOMode() to control FIFO mode.
+
+## Interrupts {#DAC14Interrupts}
+Provides functions to enable/disable DAC14 interrupts.
+
+## DMA control {#DAC14DmaControl}
+The DAC14_EnableDMA() to control DAC14 dma function.
+
+## Status {#DAC14Status}
+Provides functions to get/clear the DAC14 status.
+
+## Functional feature {#DAC14FunFeature}
+The DAC14_SetData() is Set data into the entry of FIFO buffer.
+The DAC14_GetFIFOWritePointer() is get the value of the FIFO write pointer.
+The DAC14_GetFIFOReadPointer() is get the value of the FIFO read pointer.
+The DAC14_DoSoftwareTrigger() is used to control the DAC for software trigger
+
+*/

@@ -1,0 +1,68 @@
+/*!
+@defgroup pwm_driver PWM: Pulse Width Modulator
+@details The MCUXpresso SDK provides a driver for the Pulse Width Modulator (PWM)
+         of MCUXpresso SDK devices.
+
+# PWM: Pulse Width Modulator {#PWM}
+
+## Initialization and deinitialization {#PWMInit}
+  The function PWM_Init() initializes the PWM sub module with specified configurations,
+the function PWM_GetDefaultConfig() could help to get the default configurations. The initialization function
+configures the sub module for the requested register update mode for registers with buffers.
+It also sets up the sub module operation in debug and wait modes.
+
+## PWM Operations {#PWMPwmOperation}
+  The function PWM_SetupPwm() sets up PWM channels for PWM output, the function
+can set up PWM signal properties for multiple channels. The PWM has 2 channels: A and B.
+Each channel has its own duty cycle and level-mode specified, however the same PWM
+period and PWM mode is applied to all channels requesting PWM output. The signal
+duty cycle is provided as a percentage of the PWM period, its value should be between 0
+and 100; 0=inactive signal(0% duty cycle) and 100=always active signal (100% duty cycle).
+The function also sets up the channel dead time value which is used when the user selects
+complementary mode of operation.
+
+  The function PWM_UpdatePwmDutycycle() updates the PWM signal duty cycle
+of a particular PWM channel.
+
+## Input capture operations {#PWMInpOperation}
+  The function PWM_SetupInputCapture() sets up a PWM channel for input capture.
+The user can specify the capture edge and the mode; one-shot capture or free-running
+capture.
+
+## Fault operation  {#PWMFaultOperation}
+  The function PWM_SetupFault() sets up the properties for each fault.
+
+## PWM Start and Stop operations  {#PWMStartStopOperation}
+  The function PWM_StartTimer() can be used to start one or multiple sub modules. The
+function PWM_StopTimer() can be used to stop one or multiple sub modules.
+
+## Status {#PWMStatus}
+  Provide functions to get and clear the PWM status.
+
+## Interrupt {#PWMInterrupt}
+  Provide functions to enable/disable PWM interrupts and get current enabled interrupts.
+
+
+# Register Update  {#PWMRegUp}
+  Some of the PWM registers have buffers, the driver support various methods to
+update these registers with the content of the register buffer.
+The update mechanism for register with buffers can be specified through the
+following fields available in the configuration structure.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pwmThe user can select one of the reload options provided in enumeration ::pwm_register_reload_t.
+When using immediate reload, the reloadFrequency field is not used.
+
+The driver initialization function sets up the appropriate bits in the PWM module based on
+the register update options selected.
+
+The below function should be used to initiate a register reload. The example shows register reload
+initiated on PWM sub modules 0, 1, and 2.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pwm
+
+# Typical use case {#PWMCase}
+
+## PWM output {#PWMPWMOutput}
+  Output PWM signal on 3 PWM sub module with different dutycycles. Periodically update the
+PWM signal duty cycle. Each sub module runs in Complementary output mode with PWM A used to
+generate the complementary PWM pair.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pwm
+*/

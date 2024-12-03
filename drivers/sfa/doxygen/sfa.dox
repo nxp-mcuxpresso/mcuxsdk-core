@@ -1,0 +1,50 @@
+/*!
+@defgroup sfa SFA: Signal Frequency Analyser
+@details The MCUXpresso SDK provides a driver for the Signal Frequency Analyser (SFA)
+         of MCUXpresso SDK devices.
+
+# Function groups {#SFAFunc}
+The SFA driver supports operating the module to measure clock frequency, clock period
+and time between triggers.
+
+## Initialization and Deinitialization {#SFAInit}
+The function SFA_Init() enables the SFA clock.
+The function SFA_Deinit() clears each conters and status flags, disables SFA, gates the SFA clock.
+The function SFA_GetDefaultConfig() gets the default configurations.
+The function SFA_EnableCUTPin() controls the connection of the CUT to an external pin.
+
+## Status {#SFAStatus}
+Provides functions to get and clear the SFA status.
+
+## Interrupt {#SFAInterrupts}
+Provides functions to enable/disable SFA interrupts.
+
+## SFA measurement Operations {#SFAMeasurementOperation}
+The function SFA_InstallCallback() installs the callback function to be called when measure finish.
+The function SFA_SetMeasureConfig() sets the measurement options.
+The function SFA_MeasureBlocking() starts measure sequence in blocking mode.
+The funciton SFA_MeasureNonBlocking() starts measure sequence in nonblocking mode.
+The function SFA_AbortMeasureSequence() aborts measure sequence.
+The funciton SFA_CalculateFrequencyOrPeriod() calculates the frequency or period based on the reference clock frequency.
+
+## Control CUT counter {#SFACUTCounterOperation}
+The function SFA_GetCUTCounter() gets current counts of the CUT counter.
+The function SFA_SetCUTTargetCount() sets the target counts for the CUT.
+The function SFA_GetCUTTargetCount() gets the target counts of the CUT.
+The function SFA_SetCUTLowLimitClockCount() sets CUT low limit clock count.
+The function SFA_GetCUTLowLimitClockCount() Gets CUT low limit clock count.
+The function SFA_SetCUTHighLimitClockCount() sets CUT high limit clock count.
+The function SFA_GetCUTHighLimitClockCount() Gets CUT high limit clock count.
+
+## Control REF counter {#SFAREFCounterOperation}
+The function SFA_GetREFCouner() get current counts of the REF counter.
+The function SFA_SetREFTargetCount() sets the target counts for the CUT.
+The function SFA_GetREFTargetCount() gets the target counts of the CUT.
+The function SFA_GetREFStartCount() gets the saved REF count when measurement starts.
+The function SFA_GetREFEndCount() gets the saved REF count when measurement ends.
+The function SFA_SetREFLowLimitClockCount() sets REF low limit clock count.
+The function SFA_GetREFLowLimitClockCount() Gets REF low limit clock count.
+The function SFA_SetREFHighLimitClockCount() sets REF high limit clock count.
+The function SFA_GetREFHighLimitClockCount() Gets REF high limit clock count.
+
+*/

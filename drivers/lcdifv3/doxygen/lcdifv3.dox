@@ -1,0 +1,11 @@
+/*!
+@defgroup lcdifv3 LCDIFv3: LCD Interface v3
+@details The MCUXpresso SDK provides a peripheral driver for the LCD Interface v3(LCDIFv3)
+
+The LCDIFv3 supports RGB mode (dot clock mode)
+
+Which platforms include the ip LCDIFv3: iMX93, iMX8M Plus
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/platform/drivers/lcdifv3/driver_examples/*/
+
+*/

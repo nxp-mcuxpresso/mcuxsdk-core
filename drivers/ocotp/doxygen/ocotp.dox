@@ -1,0 +1,42 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_OCOTP_AccessError = 14600
+ - #kStatus_OCOTP_CrcFail = 14601
+*/
+
+/*!
+@defgroup ocotp OCOTP: On Chip One-Time Programmable controller.
+@details The MCUXpresso SDK provides a peripheral driver for the OCOTP module of MCUXpresso SDK devices.
+
+This section contains information describing the requirements for the on-chip eFuse OTP
+controller along with details about the block functionality and implementation.
+
+# OCOTP function group {#OCOTPFunc}
+The OCOTP driver support operaing API to allow read and write the fuse map.
+
+## Initialization and de-initialization {#OCOTPInit}
+The funciton OCOTP_Init() is to initialize the OCOTP with peripheral base address and source clock
+frequency.
+
+The function OCOTP_Deinit() is to de-initialize the OCOTP controller with peripheral base address.
+
+## Read and Write operation {#OCOTPReadWrite}
+
+The function OCOTP_ReloadShadowRegister() is to reload the value from the fuse map. this API should be
+called firstly before reading the register.
+
+The OCOTP_ReadFuseShadowRegister() is to read the value from a given address, if operation is success, a 
+known value will be return, othwise, a value of 0xBADABADA will be returned.
+
+The function OCOTP_WriteFuseShadowRegister() will write a specific value to a known address. please check
+the return status o make sure whether the access to register is success.
+
+# OCOTP example {#OCOTPExample}
+
+This example shows how to get the controller version using API.
+Due to the eFuse is One-Time programmable, example will only print the information of OCOTP controller version.
+If more operations are needed, please using the API to implement the write and read operation.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ocotp
+
+*/

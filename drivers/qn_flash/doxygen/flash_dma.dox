@@ -1,0 +1,73 @@
+/*!
+@defgroup qn_flash_dma FLASH_DMA: flash_dma driver
+@details The MCUXpresso SDK provides a peripheral driver for the flash_dma driver
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#QNFLASH_DMATpyUC}
+Example use of FLASH_DMA API.
+~~~~~{.c}
+int main(void)
+{
+    flash_config_t config;
+
+    status_t result = 0;
+    uint32_t i = 0;
+
+    /* Board pin, clock, debug console init */
+    BOARD_InitHardware();
+    /* Configure Flash  */
+    FLASH_GetDefaultConfig(&config);
+
+    /*Flash module init*/
+    FLASH_Init(DEMO_FLASH_BASE, &config);
+    PRINTF("FLASH_Init\r\n");
+    /* Configure DMA. */
+    DMA_Init(DMA0);
+    DMA_EnableChannel(DMA0, FLASH_WRITE_DMA_CHANNEL);
+    DMA_EnableChannel(DMA0, FLASH_READ_DMA_CHANNEL);
+
+    DMA_CreateHandle(&g_flashWriteDMAHandle, DMA0, FLASH_WRITE_DMA_CHANNEL);
+    DMA_CreateHandle(&g_flashreadDMAHandle, DMA0, FLASH_READ_DMA_CHANNEL);
+
+    FLASH_CreateHandleDMA(DEMO_FLASH_BASE, &g_flashDmaHandle, FLASH_UserCallback, NULL, &g_flashWriteDMAHandle,
+                          &g_flashreadDMAHandle);
+
+    /* erase test page*/
+    result = FLASH_PageErase(DEMO_FLASH_BASE, &config, FLASH_ADDR_TO_PAGE(TEST_START_ADDR));
+    if (result)
+    {
+        PRINTF("FLASH_PageErase error  result = %d \r\n", result);
+        while (1)
+            ;
+    }
+
+    /*set test data */
+    for (i = 0; i < TEST_MEM_SIZE; i++)
+    {
+        data_buf[i] = (uint8_t)i;
+    }
+    PRINTF("FLASH_StartWriteDMA addr = 0x%x size = %d \r\n", TEST_START_ADDR, TEST_MEM_SIZE);
+    FLASH_StartWriteDMA(DEMO_FLASH_BASE, &g_flashDmaHandle, &config, TEST_START_ADDR, (uint32_t *)data_buf,
+                        TEST_MEM_SIZE / 4);
+
+    while (g_Transfer_Done != true)
+    {
+    }
+    g_Transfer_Done = false;
+
+    /*show result*/
+    if (pass)
+    {
+        PRINTF("Passed!\r\n");
+    }
+    else
+    {
+        PRINTF("Failed!\r\n");
+    }
+
+    while (1)
+        ;
+}
+~~~~~
+*/
+

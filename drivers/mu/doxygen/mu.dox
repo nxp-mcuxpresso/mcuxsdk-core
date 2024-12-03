@@ -1,0 +1,88 @@
+/*!
+@defgroup mu MU: Messaging Unit
+@details The MCUXpresso SDK provides a driver for the MU module of MCUXpresso SDK devices.
+
+# Function description {#MUFunc}
+
+The MU driver provides these functions:
+ - Functions to initialize the MU module.
+ - Functions to send and receive messages.
+ - Functions for MU flags for both MU sides.
+ - Functions for status flags and interrupts.
+ - Other miscellaneous functions.
+
+## MU initialization {#MUInit}
+
+The function MU_Init() initializes the MU module and enables the MU
+clock. It should be called before any other MU functions.\n
+
+The function MU_Deinit() deinitializes the MU module and disables the MU
+clock. No MU functions can be called after this function.\n
+
+## MU message {#MUMsg}
+
+The MU message must be sent when the transmit register is empty. The MU driver provides
+blocking API and non-blocking API to send message.\n
+
+The MU_SendMsgNonBlocking() function writes a message to the MU transmit register without checking
+the transmit register status. The upper layer should check that the transmit register is empty before
+calling this function. This function can be used in the ISR for better performance.\n
+
+The MU_SendMsg() function is a blocking function. It waits until the transmit register is empty and
+sends the message.\n
+
+Correspondingly, there are blocking and non-blocking APIs for receiving a message.
+The MU_ReadMsgNonBlocking() function is a non-blocking API. The MU_ReadMsg() function is the blocking API.
+
+## MU flags {#MUFlags}
+
+The MU driver provides 3-bit general purpose flags. When the flags are set on one side, they
+are reflected on the other side.\n
+
+The MU flags must be set when the previous flags have been updated to the other
+side. The MU driver provides a non-blocking function and a blocking function. The blocking
+function MU_SetFlags() waits until previous flags have been updated to the other
+side and then sets flags. The non-blocking function sets the flags directly. Ensure
+that the kMU_FlagsUpdatingFlag is not pending before calling this function.\n
+
+The function MU_GetFlags() gets the MU flags on the current side.
+
+## Status and interrupt {#MUStat}
+
+The function MU_GetStatusFlags() returns all MU status flags. Use the _mu_status_flags
+to check for specific flags, for example, to check RX0 and RX1 register full, use the following code:
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mu
+The receive full flags are cleared automatically after messages are read out. The
+transmit empty flags are cleared automatically after new messages are written to the transmit
+register. The general purpose interrupt flags must be cleared manually using the
+function MU_ClearStatusFlags().\n
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mu
+To enable or disable a specific interrupt, use MU_EnableInterrupts() and
+MU_DisableInterrupts() functions. The interrupts to enable or disable should be passed in
+as a bit mask of the _mu_interrupt_enable.\n
+
+The MU_TriggerInterrupts() function triggers general purpose interrupts and NMI to the other
+core. The interrupts to trigger are passed in as a bit mask of the _mu_interrupt_trigger.
+If previously triggered interrupts have not been processed by the other side, this
+function returns an error.
+
+## MU misc functions {#MUMisc}
+
+The MU_BootCoreB() and MU_HoldCoreBReset() functions should only be used from A side. They
+are used to boot the core B or to hold core B in reset.\n
+
+The MU_ResetBothSides() function resets MU at both A and B sides. However, only the A side can call
+this function.\n
+
+If a core enters stop mode, the platform clock of this core is disabled by
+default. The function MU_SetClockOnOtherCoreEnable() forces the other core's
+platform clock to remain enabled even after that core has entered a stop mode.
+In this case, the other core's platform clock keeps running until the current core
+enters stop mode too.\n
+
+Function MU_GetOtherCorePowerMode() gets the power mode of the other core.
+
+*/
+

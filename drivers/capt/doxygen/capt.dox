@@ -1,0 +1,18 @@
+/*!
+@defgroup capt CAPT: Capacitive Touch
+@details The MCUXpresso SDK provides a peripheral driver for the Capacitive Touch (CAPT) module
+         of MCUXpresso SDK devices.
+
+The Capacitive Touch module measures the change in capacitance of an electrode plate
+when an earth-ground connected object (for example, the finger or stylus) is brought
+within close proximity. Simply stated, the module delivers a small charge to an X capacitor
+(a mutual capacitance touch sensor), then transfers that charge to a larger Y capacitor
+(the measurement capacitor), and counts the number of iterations necessary for the
+voltage across the Y capacitor to cross a predetermined threshold.
+
+# Typical use case {#CAPTTpyUC}
+
+## Normal Configuration {#CAPTNormalConfig}
+
+See the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/capt/capt_basic.
+*/

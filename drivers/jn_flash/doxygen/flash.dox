@@ -1,0 +1,6 @@
+/*!
+@defgroup jn_flash FLASH: JN518X flash driver
+@details The MCUXpresso SDK provides a peripheral driver for the flash driver module of MCUXpresso SDK devices.
+
+*/
+

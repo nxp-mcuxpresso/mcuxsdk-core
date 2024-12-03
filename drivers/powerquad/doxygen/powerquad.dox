@@ -1,0 +1,92 @@
+/*!
+@defgroup powerquad POWERQUAD: PowerQuad hardware accelerator
+@details The MCUXpresso SDK provides driver for the PowerQuad
+         module of MCUXpresso SDK devices.
+@{
+
+The PowerQuad hardware accelerator for (fixed/floating point/matrix operation) DSP functions is 
+that idea is to replace some of the CMSIS DSP functionality with the hardware features provided by this IP.
+
+PowerQuad driver provides the following CMSIS DSP compatible functions:
+
+- Matrix functions
+@code
+arm_mat_add_q15
+arm_mat_add_q31
+arm_mat_add_f32
+arm_mat_sub_q15
+arm_mat_sub_q31
+arm_mat_sub_f32
+arm_mat_mult_q15
+arm_mat_mult_q31
+arm_mat_mult_f32
+arm_mat_inverse_f32
+arm_mat_trans_q15
+arm_mat_trans_q31
+arm_mat_trans_f32
+arm_mat_scale_q15
+arm_mat_scale_q31
+arm_mat_scale_f32
+@endcode
+
+- Math functions
+@code
+arm_sqrt_q15
+arm_sqrt_q31
+arm_sin_q15
+arm_sin_q31
+arm_sin_f32
+arm_cos_q15
+arm_cos_q31
+arm_cos_f32
+@endcode
+
+- Filter functions
+@code
+arm_fir_q15
+arm_fir_q31
+arm_fir_f32
+arm_conv_q15
+arm_conv_q31
+arm_conv_f32
+arm_correlate_q15
+arm_correlate_q31
+arm_correlate_f32
+@endcode
+
+- Transform functions
+@code
+arm_rfft_q15
+arm_rfft_q31
+arm_cfft_q15
+arm_cfft_q31
+arm_ifft_q15
+arm_ifft_q31
+arm_dct4_q15
+arm_dct4_q31
+@endcode
+
+@note CMSIS DSP compatible functions limitations
+1. PowerQuad FFT engine only looks at the bottom 27 bits of the input word, down scale
+the input data to avoid saturation.
+2. When use arm_fir_q15/arm_fir_q31/arm_fir_f32 for incremental, the new data should
+follow the old data. For example the array for input data is inputData[], and the array
+for output data is outputData[]. The first 32 input data is saved in inputData[0:31],
+after callling `arm_fir_xxx(&fir, inputData, outputData, 32)`, the output data is saved
+in outputData[0:31]. The new input data must be saved from inputData[32], then call
+`arm_fir_xxx(&fir, &inputData[32], &outputData[32], 32)` for incremental calculation.
+
+The PowerQuad consists of several internal computation engines: Transform engine, Transcendental 
+function engine, Trigonometry function engine, Dual biquad IIR filter engine, Matrix accelerator engine,
+FIR filter engine, CORDIC engine.
+
+For low level APIs, all function APIs, except using coprocessor instruction and arctan/arctanh API, need to calling wait done API to wait for calculation complete.
+
+# Function groups {#PowerquadFunctionalGroups}
+
+## POWERQUAD functional Operation {#PowerquadFunctionalOperation}
+
+This group implements the POWERQUAD functional API.
+
+*/
+/*! @} */

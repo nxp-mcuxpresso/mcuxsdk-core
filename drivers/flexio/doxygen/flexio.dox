@@ -1,0 +1,12 @@
+/*!
+@defgroup flexio FlexIO: FlexIO Driver
+@details The MCUXpresso SDK provides a generic driver and multiple protocol-specific FlexIO drivers for the FlexIO module of MCUXpresso SDK devices.
+
+*/
+
+/*!
+@defgroup flexio_driver FlexIO Driver
+@ingroup flexio
+
+*/
+

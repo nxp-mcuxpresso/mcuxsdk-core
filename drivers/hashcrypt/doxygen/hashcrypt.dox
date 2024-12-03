@@ -1,0 +1,52 @@
+/*!
+@defgroup hashcrypt Hashcrypt: The Cryptographic Accelerator
+@details The MCUXpresso SDK provides a peripheral driver for the Hashcrypt peripheral. The Hashcrypt peripheral provides one or more engines to perform specific symmetric crypto algorithms, including hashing and en/decryption. The cryptographic acceleration is normally used in conjunction with pure-hardware blocks for hashing and symmetric cryptography, thereby providing performance and energy efficiency for a range of cryptographic uses.
+
+Blocking synchronous APIs are provided for selected cryptographic algorithms using Hashcrypt hardware. The driver interface intends to be easily integrated with generic software crypto libraries such as mbedTLS.
+The Hashcrypt operations are complete (and results are made availabe for further usage) when a function returns.
+When called, these functions do not return until an Hashcrypt operation is complete.
+These functions use main CPU for simple polling loops to determine operation complete or error status and also for plaintext or ciphertext data movements.
+These functions provide typical interface to upper layer or application software.
+There is one non-blocking function provided for the purpose of background hashing. HASHCRYPT_SHA_UpdateNonBlocking() starts hashing of an input message while the CPU can continue executing.
+
+# Hashcrypt Driver Initialization and deinitialization {#HASHCRYPTInit}
+
+Hashcrypt Driver is initialized by calling the HASHCRYPT_Init() function, it enables clock and disables reset for Hashcrypt peripheral.
+Hashcrypt Driver is deinitialized by calling the HASHCRYPT_Deinit() function, it sisables clock and enables reset.
+
+# Comments about API usage in RTOS {#HASHCRYPTRtos}
+
+Hashcrypt operations provided by this driver are not re-entrant. Thus, application software shall ensure
+the Hashcrypt module operation is not requested from different tasks or interrupt service routines while an operation is in progress.
+
+# Comments about API usage in interrupt handler {#HASHCRYPTIsr}
+
+APIs can be used from interrupt handler although execution time shall be considered (interrupt latency increases considerably).
+
+# Hashcrypt Driver Examples {#HASHCRYPTx}
+
+## Simple examples {#HASHCRYPTSimpleEx}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/hashcrypt/
+*/
+
+
+/*!
+@defgroup hashcrypt_driver_aes Hashcrypt AES
+@ingroup hashcrypt
+*/
+
+/*!
+@defgroup hashcrypt_driver_hash Hashcrypt HASH
+@ingroup hashcrypt
+*/
+
+/*!
+@defgroup hashcrypt_background_driver_hash Hashcrypt Background HASH
+@ingroup hashcrypt
+*/
+
+/*!
+@defgroup hashcrypt_driver Hashcrypt common functions
+@ingroup hashcrypt
+*/

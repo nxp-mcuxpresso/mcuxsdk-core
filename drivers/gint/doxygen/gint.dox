@@ -1,0 +1,18 @@
+/*!
+@defgroup gint_driver GINT: Group GPIO Input Interrupt Driver
+
+@details The MCUXpresso SDK provides a driver for the Group GPIO Input Interrupt (GINT).
+ @n
+It can configure one or more pins to generate a group interrupt when the pin conditions are met.
+The pins do not have to be configured as GPIO pins.
+ @n
+
+
+# Group GPIO Input Interrupt Driver operation {#GINTInit}
+
+GINT_SetCtrl() and GINT_ConfigPins() functions configure the pins.
+
+GINT_EnableCallback() function enables the callback functionality. Callback function is called when the pin conditions are met.
+
+# Typical use case {#GINTTypUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/gint*/

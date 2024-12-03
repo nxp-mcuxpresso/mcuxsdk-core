@@ -1,0 +1,11 @@
+/*!
+@defgroup erm ERM: error recording module
+@details The MCUXpresso SDK provides a driver for the ERM module of MCUXpresso SDK devices.
+
+The Error Reporting Module (ERM) provides information and optional interrupt notification on memory error events associated with ECC and parity. 
+The ERM collects error events on memory accesses for memory arrays, such as flash memory, system RAM, or peripheral RAMs. 
+ERM supports various channels for memory sources where each ERM channel is associated with a different memory module.
+
+This example code shows how to show error events using the ERM driver.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/erm*/

@@ -1,0 +1,19 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+extends: default
+
+rules:
+  # 120 chars should be enough, but don't fail if a line is longer
+  line-length:
+    max: 120
+    level: warning
+  trailing-spaces:
+    level: warning
+  new-line-at-end-of-file:
+    level: warning
+  new-lines:
+    level: warning
+  # don't bother me with this rule
+  indentation: disable

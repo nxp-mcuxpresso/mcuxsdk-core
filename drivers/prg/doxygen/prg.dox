@@ -1,0 +1,9 @@
+/*!
+@defgroup prg PRG: Prefetch Resolve Gasket
+@details The MCUXpresso SDK provides a peripheral driver for the PRG
+         module of MCUXpresso SDK devices.
+
+The PRG works with Display Prefetch Resolve (DPR) to prefetch the frame buffer
+data for display controller.
+
+*/

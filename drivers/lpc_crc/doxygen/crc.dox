@@ -1,0 +1,61 @@
+/*!
+@defgroup crc CRC: Cyclic Redundancy Check Driver
+@details MCUXpresso SDK provides a peripheral driver for the Cyclic Redundancy Check (CRC) module of MCUXpresso SDK devices.@n
+ @n
+The cyclic redundancy check (CRC) module generates 16/32-bit CRC code for error detection.
+The CRC module provides three variants of polynomials, a programmable seed, and other parameters required to implement a 16-bit or 32-bit CRC standard.
+ @n
+
+
+# CRC Driver Initialization and Configuration {#CRCInit}
+
+CRC_Init() function enables the clock for the CRC module in the LPC SYSCON block and fully (re-)configures the CRC module according to configuration structure.
+It also starts checksum computation by writing the seed.
+
+The seed member of the configuration structure is the initial checksum for which new data can be added to.
+When starting new checksum computation, the seed should be set to the initial checksum per the CRC protocol specification.
+For continued checksum operation, the seed should be set to the intermediate checksum value as obtained from previous calls to CRC_GetConfig() function.
+After CRC_Init(), one or multiple CRC_WriteData() calls follow to update checksum with data, then CRC_Get16bitResult() or CRC_Get32bitResult() follows to read the result.
+CRC_Init() can be called as many times as required, which allows for runtime changes of the CRC protocol.
+
+CRC_GetDefaultConfig() function can be used to set the module configuration structure with parameters for CRC-16/CCITT-FALSE protocol.
+
+CRC_Deinit() function disables clock to the CRC module.
+
+CRC_Reset() performs hardware reset of the CRC module.
+
+# CRC Write Data {#CRCWrite}
+
+The CRC_WriteData() function is used to add data to actual CRC. Internally it tries to use 32-bit reads and writes for all aligned data in the user buffer
+and it uses 8-bit reads and writes for all unaligned data in the user buffer. This function can update CRC with user supplied data chunks of arbitrary size,
+so one can update CRC byte by byte or with all bytes at once. Prior call of CRC configuration function CRC_Init() fully specifies the CRC module
+configuration for CRC_WriteData() call.
+
+CRC_WriteSeed() Write seed (initial checksum) to CRC module.
+
+# CRC Get Checksum {#CRCGet}
+
+The CRC_Get16bitResult() or CRC_Get32bitResult() function is used to read the CRC module checksum register.
+The bit reverse and 1's complement operations are already applied to the result if previously configured.
+Use CRC_GetConfig() function to get the actual checksum without bit reverse and 1's complement applied so it can be used as seed when resuming calculation later.
+
+* CRC_Init() / CRC_WriteData() / CRC_Get16bitResult() to get final checksum.
+
+* CRC_Init() / CRC_WriteData() / ... / CRC_WriteData() / CRC_Get16bitResult() to get final checksum.
+
+* CRC_Init() / CRC_WriteData() / CRC_GetConfig() to get intermediate checksum to be used as seed value in future.
+
+* CRC_Init() / CRC_WriteData() / ... / CRC_WriteData() / CRC_GetConfig() to get intermediate checksum.
+
+# Comments about API usage in RTOS {#CRCRtos}
+
+If multiple RTOS tasks share the CRC module to compute checksums with different data and/or protocols, the following needs to be implemented by the user:
+
+
+The triplets
+
+* CRC_Init() / CRC_WriteData() / CRC_Get16bitResult() or CRC_Get32bitResult() or CRC_GetConfig()
+
+Should be protected by RTOS mutex to protect CRC module against concurrent accesses from different tasks. For example:
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/crcRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/crcRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/crcRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/crcRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/crcRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/crc
+*/

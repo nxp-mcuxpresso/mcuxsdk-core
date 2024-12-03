@@ -1,0 +1,4 @@
+/*!
+@defgroup smartdma SMARTDMA: SMART DMA Driver
+@details The MCUXpresso SDK provides a peripheral driver for the SMART DMA module of MCUXpresso SDK devices.
+*/

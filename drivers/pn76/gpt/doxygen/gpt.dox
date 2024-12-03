@@ -1,0 +1,6 @@
+/*!
+@defgroup gpt GPT: General purpose timer
+@details The MCUXpresso SDK provides a peripheral driver for the General purpose timer(GPT) module of
+MCUXpresso SDK devices. The GPT module contains 4 timers, timer0/1/2/3, each timer support free running mode and one-shot mode.
+
+*/

@@ -1,0 +1,21 @@
+/*!
+@defgroup vbat VBAT: Smart Power Switch
+@details The MCUXpresso SDK provides a peripheral driver for the Smart Power Switch (VBAT) block of MCUXpresso SDK devices.
+
+Based on VBAT's features the VBAT driver are divided into 4 function groups.
+
+# FRO16K Control Interfaces
+Functions in this group can be used to configure internal 16kHz free running oscillator.
+
+# RAM_LDO Control Interfaces
+Functions in this group can be used to control internal bandgap and RAM_LDO.
+
+# Bandgap Timer Control Interfaces
+Functions in this group can be used to control internal software bandgap timers. Please note that bandgap timers are
+available when the bandgap is enabled and are clocked by the FRO16k.
+
+# Status, Interrupt, Wakeup Control Interfaces
+VBAT_GetStatusFlags() and VBAT_ClearStatusFlags() function in this group can be used to get and clear status flags.
+VBAT_EnableInterrupts() and VBAT_DisableInterrupts() function in this group can be used to enable/disable interrupt.
+VBAT_EnableWakeup() and VBAT_DisableWakeup() function in this group can be used to enable/disable wakeup features.
+*/

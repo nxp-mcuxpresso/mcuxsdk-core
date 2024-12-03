@@ -1,0 +1,29 @@
+/*!
+@defgroup lpcmp LPCMP: Low Power Analog Comparator Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Low Power Analog Comparator (LPCMP) module of Kinetis devices.
+
+
+The LPCMP driver is a basic comparator
+with advanced features. The APIs for the basic comparator enable the LPCMP to compare the
+two voltages of the two input channels and create the output of the comparator result. The APIs for advanced features
+can be used as the plug-in functions based on the basic comparator. They can process the comparator's output with
+hardware support.
+
+# Typical use case {#LPCMPTpyUC}
+
+## Polling Configuration {#LPCMPPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpcmp
+## Interrupt Configuration {#LPCMPIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpcmp
+
+# Initialization and configuration
+    Functions in this group are used to initialize and configure LPCMP module, LPCMP internal DAC, channel and filter block, etc.
+
+# Window mode
+    Functions in this group are used to enable/disable window and configure window control, etc.
+
+# RoundRobin mode
+    Functions in this group are used to configure roundrobin mode, set internal timer rate and preset value, etc.
+*/

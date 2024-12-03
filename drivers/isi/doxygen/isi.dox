@@ -1,0 +1,163 @@
+/*!
+@defgroup isi ISI: Image Sensing Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Image Sensing Interface(ISI)
+         of I.MX devices.
+
+The ISI module supports:
+ - Scaling
+ - Color Space Conversion
+ - Alpha insertion
+ - Image flipping
+ - Image cropping
+
+The ISI driver provides separate functions for these features so these features
+can be enabled according to the use case.
+
+To use an ISI channel, the function @ref ISI_Init should be called first to enable the
+clock and set ISI to a defined status. After initialization, use the @ref ISI_SetConfig
+to set the basic configuration. The ISI can work with the basic configurations,
+to enable the additional features and call the feature configuration functions such
+as @ref ISI_SetCropConfig to set the configuration for specific feature. When the 
+configuration is finished, call @ref ISI_Start to start the ISI to work.
+
+# Typical use case {#ISITpyUC}
+
+## Output buffer {#ISIOutputBuf}
+
+Every ISI channel has two output buffers, every buffer has three panels,
+used by Y, U, and V accordingly. When a frame transfer is finished, the next frame
+is saved to the other buffer automatically.\n
+
+In this example, the output format is RGBA8888, so only the outputBufferAddrY is
+used. To show that how to update the output buffer address, this example uses 5
+memory blocks as the output buffer. The output frame is saved to these 5
+memory blocks one by one. This means the first frame is saved to outputBufs[0] by
+ISI output buffer 0, the second frame is saved to outputBufs[1] by the ISI output buffer
+1, the third frame is saved to outputBufs[2] by the ISI output buffer 0, the forth
+frame is saved to outputBufs[3] by the ISI output buffer 1, and so on.
+
+@code
+
+#define ISI_BASE    ISI0
+#define MEM_BLK_CNT 5
+#define IMG_HEIGHT  320
+#define IMG_WIDTH   480
+
+/* Memory blocks used as output buffer. */
+uint32_t outputBufs[MEM_BLK_CNT][IMG_HEIGHT][IMG_WIDTH];
+/* Index of outputBufs to save ISI output frame next. This value could be 0 to (MEM_BLK_CNT - 1). */
+uint8_t outputBufIdx;
+/* ISI output buffer that currently used. */
+uint8_t isiBufIdx;
+
+void ISI_Configure(ISI_Type * base)
+{
+    isi_config_t isiConfig;
+
+    ISI_GetDefaultConfig(&isiConfig);
+    isiConfig->inputHeight = IMG_HEIGHT;
+    isiConfig->inputWidth = IMG_WIDTH;
+    isiConfig->outputFormat = kISI_OutputRGBA8888;
+
+    ISI_SetConfig(base, &isiConfig);
+
+    /* Because color space conversion is enabled by default, so disable it. */
+    ISI_EnableColorSpaceConversion(base, false);
+
+    /* Set the address for output buffer. */
+    ISI_SetOutputBufferAddr(base, 0U, (uint32_t)(outputBufs[0]), 0U, 0U);
+    ISI_SetOutputBufferAddr(base, 1U, (uint32_t)(outputBufs[1]), 0U, 0U);
+
+    /* outputBufs[2] will be used to save output frame next. */
+    outputBufIdx = 2U;
+
+    /* At the begining, ISI uses the output buffer 0. */
+    isiBufIdx = 0U;
+}
+
+void ISI_IRQHandler(void)
+{
+    if (kISI_FrameReceivedInterrupt & ISI_GetInterruptStatus(ISI_BASE))
+    {
+        ISI_ClearInterruptStatus(ISI_BASE, kISI_FrameReceivedInterrupt);
+
+        /* Frame output completed, set the output buffer address. */
+        ISI_SetOutputBufferAddr(base, isiBufIdx, (uint32_t)(outputBufs[outputBufIdx]), 0U, 0U);
+
+        /* There are 2 ISI output buffers, so the output buffer index is 0 -> 1 -> 0 -> 1 -> ... */
+        isiBufIdx ^= 1;
+
+        /* Update the buffer memory block index. */
+        outputBufIdx++;
+        if (outputBufIdx >= MEM_BLK_CNT)
+        {
+            outputBufIdx = 0U;
+        }
+    }
+}
+
+void main(void)
+{
+    ISI_Init(ISI_BASE);
+
+    ISI_Configure(ISI_BASE);
+
+    /* Enable the ISI interrupt in SOC level, NVIC and IRQSTEER. */
+    /* Enable the frame complete interrupt. */
+    ISI_EnableInterrupts(ISI_BASE, kISI_FrameReceivedInterrupt);
+
+    /* Start working. */
+    ISI_Start(ISI_BASE);
+
+    while (1)
+    {
+    }
+}
+
+@endcode
+
+## Output panic and overflow {#ISIPanicCtrl}
+
+ISI employs two 256-bytes ping pong buffers between ISI and output memory. There
+are three level overflow interrupt for the ping pong buffer:
+
+1. Ping pong buffer nearly full. The nearly full threshold is set by @ref isi_threshold_t.
+The alert interrupt such as @ref kISI_OverflowAlertYInterrupt occurs if the threshold
+is reached. When this kind of interrupt occurs, the application should request higher
+AXI write channel priority to make sure the ping pong buffer is read out in time.
+
+2. Ping buffer overflow less than 256 Bytes. In this case, the overflow interrupt
+such as @ref kISI_OverflowYInterrupt occurs. The number of overflow bytes could
+be gotten by @ref ISI_GetOverflowBytes. ISI can insert a blank pixel for each
+lost pixel.
+
+3. Ping buffer overflow more than 256 Bytes. This is monitored by excess overflow interrupt
+such as @ref kISI_ExcessOverflowYInterrupt. In this case, application should reset
+the ISI.
+
+@code
+
+void ISI_IRQHandler(void)
+{
+    uint32_t interrupts = ISI_GetInterruptStatus(ISI_BASE);
+    ISI_ClearInterruptStatus(ISI_BASE, interrupts);
+
+    if (kISI_ExcessOverflowYInterrupt & interrupts)
+    {
+        // Reset the ISI;
+    }
+
+    if (kISI_OverflowYInterrupt & interrupts)
+    {
+        uint8_t overflowBytes = ISI_GetOverflowBytes(ISI_BASE);
+    }
+
+    if (kISI_OverflowAlertYInterrupt & interrupts)
+    {
+        // Request higher AXI write channel priority;
+    }
+}
+
+@endcode
+
+*/

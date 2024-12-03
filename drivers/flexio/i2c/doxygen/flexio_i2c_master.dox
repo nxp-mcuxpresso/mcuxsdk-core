@@ -1,0 +1,86 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_FLEXIO_I2C_Busy = 800
+ - #kStatus_FLEXIO_I2C_Idle = 801
+ - #kStatus_FLEXIO_I2C_Nak = 802
+*/
+
+/*!
+@defgroup flexio_i2c_master FlexIO I2C Master Driver
+@ingroup flexio
+@details The MCUXpresso SDK provides a peripheral driver for I2C master function using Flexible I/O
+         module of MCUXpresso SDK devices.
+
+
+The FlexIO I2C master driver includes functional APIs and transactional APIs.
+
+Functional APIs target low level APIs.
+Functional APIs can be used for the FlexIO I2C master initialization/configuration/operation for the
+optimization/customization purpose. Using the functional APIs requires the
+knowledge of the FlexIO I2C master peripheral and how to organize functional APIs
+to meet the application requirements. The FlexIO I2C master functional operation groups provide the functional APIs set.
+
+Transactional APIs target high-level APIs.
+The transactional APIs can be used to enable the peripheral quickly and also in the
+application if the code size and performance of transactional APIs satisfy
+the requirements. If the code size and performance are critical requirements,
+see the transactional API implementation and write custom code using the functional APIs or accessing the hardware registers.
+
+Transactional APIs support an asynchronous transfer. This means that the functions
+FLEXIO_I2C_MasterTransferNonBlocking() set up the interrupt non-blocking transfer.
+When the transfer completes, the upper layer is notified through a callback function with the kStatus_Success status.
+
+# Typical use case {#FlexIO_I2CMasterCase}
+
+## FlexIO I2C master transfer using an interrupt method {#FlexIO_I2CMasterCaseInterrupt}
+
+~~~~~{.c}
+    flexio_i2c_master_handle_t g_m_handle;
+    flexio_i2c_master_config_t masterConfig;
+    flexio_i2c_master_transfer_t masterXfer;
+    volatile bool completionFlag = false;
+    const uint8_t sendData[] = [......];
+    FLEXIO_I2C_Type i2cDev;
+
+    void FLEXIO_I2C_MasterCallback(FLEXIO_I2C_Type *base, status_t status, void *userData)
+    {
+        userData = userData;
+
+        if (kStatus_Success == status)
+        {
+            completionFlag = true;
+        }
+    }
+
+    void main(void)
+    {
+        //...
+
+        FLEXIO_I2C_MasterGetDefaultConfig(&masterConfig);
+
+        FLEXIO_I2C_MasterInit(&i2cDev, &user_config);
+        FLEXIO_I2C_MasterTransferCreateHandle(&i2cDev, &g_m_handle, FLEXIO_I2C_MasterCallback, NULL);
+
+        // Prepares to send.
+        masterXfer.slaveAddress = g_accel_address[0];
+        masterXfer.direction = kI2C_Read;
+        masterXfer.subaddress = &who_am_i_reg;
+        masterXfer.subaddressSize = 1;
+        masterXfer.data = &who_am_i_value;
+        masterXfer.dataSize = 1;
+        masterXfer.flags = kI2C_TransferDefaultFlag;
+
+        // Sends out.
+        FLEXIO_I2C_MasterTransferNonBlocking(&i2cDev, &g_m_handle, &masterXfer);
+
+        // Wait for sending is complete.
+        while (!completionFlag)
+        {
+        }
+
+        // ...
+    }
+~~~~~
+
+*/
+

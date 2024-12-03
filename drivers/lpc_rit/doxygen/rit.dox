@@ -1,0 +1,48 @@
+/*!
+@defgroup rit RIT: Repetitive Interrupt Timer
+@details The MCUXpresso SDK provides a driver for the Repetitive Interrupt Timer (RIT)
+         of MCUXpresso SDK devices.
+
+# Function groups {#RITFunc}
+The RIT driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#RITInit}
+The function RIT_Init() initializes the RIT with specified configurations. The function
+RIT_GetDefaultConfig() gets the default configurations. The initialization function
+configures the RIT operation normally in debug mode.
+
+The function RIT_Deinit() disables the RIT timers and disables the module clock.
+
+## Timer read and write Operations {#RITTimerPeriodOperation}
+The function RIT_SetTimerCompare() sets the timer period in units of count. The timers count
+from 0 to the count value set here.
+The function RIT_SetMaskBit() sets some bit which is ignored in comparison
+between the compare and counter register.
+
+The function RIT_GetCurrentTimerCount() reads the current timer counting value.
+This function returns the real-time timer counting value, in a range from 0 to a timer period.
+
+The timer period operation functions takes the count value in ticks. User can call the utility macros
+provided in fsl_common.h to convert to microseconds or milliseconds
+
+## Start and Stop timer operations {#RITStartStopOperation}
+The function RIT_StartTimer() starts the timer counting. After calling this function, the timer
+counts up to the counter value set earlier by using the RIT_SetTimerCompare() function. Each time
+the timer reaches the count value, it generates a trigger pulse and sets the interrupt flag and 
+set the counter to zero/continue counting when RIT_SetCountAutoClear() set the Timer clear enable/disable.
+
+The function RIT_StopTimer() stops the timer counting./* resets the timer's counter register. */
+
+## clear the count operations {#RITClearOperation}
+The function RIT_SetCountAutoClear() set the cuonter register to continue counting or clear the counter to zero
+when the counter value equals the masked compare value specified by the contents of COMPVAL/COMPVAL_H and
+MASK/MASK_H registers.
+
+## Status {#RITStatus}
+Provides functions to get and clear the RIT status.
+
+# Typical use case {#RITUseCase}
+
+## RIT tick example {#RITTick}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rit
+*/

@@ -1,0 +1,10 @@
+/*!
+@defgroup rtc RTC: Real Time Clock
+@details The MCUXpresso SDK provides a peripheral driver for the Real Time Clock
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#RTCTpyUC}
+Example use of RTC API.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/rtc/
+
+*/

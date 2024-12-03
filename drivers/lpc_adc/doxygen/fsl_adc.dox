@@ -1,0 +1,15 @@
+/*!
+@defgroup lpc_adc ADC: 12-bit SAR Analog-to-Digital Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 12-bit Successive Approximation (SAR)
+         Analog-to-Digital Converter (ADC) module of MCUXpresso SDK devices.
+
+# Typical use case {#LPCADCTpyUC}
+
+## Polling Configuration {#LPCADCPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_adc
+## Interrupt Configuration {#ADC16IntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/fsl_adc
+*/
+

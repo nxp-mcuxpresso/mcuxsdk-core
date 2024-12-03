@@ -1,0 +1,31 @@
+/*!
+@defgroup puf_driver PUF: Physical Unclonable Function 
+@details The MCUXpresso SDK provides a peripheral driver for the Physical Unclonable Function (PUF) module of MCUXpresso SDK devices. The PUF controller provides a secure key storage without injecting or provisioning device unique PUF root key. 
+
+Blocking synchronous APIs are provided for generating the activation code, intrinsic key generation, storing and reconstructing keys using PUF hardware.
+The PUF operations are complete (and results are made availabe for further usage) when a function returns.
+When called, these functions do not return until an PUF operation is complete.
+These functions use main CPU for simple polling loops to determine operation complete or error status.
+The driver functions are not re-entrant.
+These functions provide typical interface to upper layer or application software.
+
+# PUF Driver Initialization and deinitialization {#PUFInit}
+
+PUF Driver is initialized by calling the PUF_Init() function, it resets the PUF module, enables it's clock and enables power to PUF SRAM.
+PUF Driver is deinitialized by calling the PUF_Deinit() function, it disables PUF module clock, asserts peripheral reset and disables power to PUF SRAM.
+
+# Comments about API usage in RTOS {#PUFRtos}
+
+PUF operations provided by this driver are not re-entrant. Thus, application software shall ensure
+the PUF module operation is not requested from different tasks or interrupt service routines while an operation is in progress.
+
+# Comments about API usage in interrupt handler {#PUFIsr}
+
+All APIs can be used from interrupt handler although execution time shall be considered (interrupt latency of equal and lower priority interrupts increases).
+
+# PUF Driver Examples {#PUFEx}
+
+## Simple examples {#PUFSimpleEx}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/puf
+*/

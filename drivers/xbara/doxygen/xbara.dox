@@ -1,0 +1,40 @@
+/*!
+@defgroup xbara XBARA: Inter-Peripheral Crossbar Switch
+@details The MCUXpresso SDK provides a peripheral driver for the Inter-Peripheral Crossbar Switch (XBARA)
+block of MCUXpresso SDK devices.
+@{
+
+The XBARA peripheral driver configures the XBARA (Inter-Peripheral Crossbar Switch) and handles initialization and
+configuration of the XBARA module.
+
+XBARA driver has two parts:
+
+- Signal connection interconnects input and output signals.
+- Active edge feature - Some of the outputs provide an active edge detection. If an active edge occurs,
+ an interrupt or a DMA request can be called. APIs handle user callbacks for the interrupts.
+ The driver also includes API for clearing and reading status bits.
+
+# Function  {#XbaraFunctionalGroups}
+
+## XBARA Initialization {#XBARAInit}
+
+To initialize the XBARA driver, a state structure has to be passed into the initialization function.
+This block of memory keeps pointers to user's callback functions and parameters to these
+functions. The XBARA module is initialized by calling the XBARA_Init() function.
+
+## Call diagram {#XBARACallDiagram}
+
+1. Call the "XBARA_Init()" function to initialize the XBARA module.
+2. Optionally, call the "XBARA_SetSignalsConnection()" function to Set connection between the selected XBARA_IN[*] input and the XBARA_OUT[*] output signal. 
+It connects the XBARA input to the selected XBARA output.
+A configuration structure of the "xbara_input_signal_t" type and "xbara_output_signal_t" type is required.
+3. Call the "XBARA_SetOutputSignalConfig" function to set the active edge features, such interrupts or DMA requests.
+A configuration structure of the "xbara_control_config_t" type is required to point to structure that keeps configuration of control register.
+4. Finally, the XBARA works properly.
+
+
+# Typical use case {#XbaraExample}
+
+
+*/
+/*! @} */

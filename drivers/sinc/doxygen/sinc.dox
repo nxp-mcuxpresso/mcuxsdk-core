@@ -1,0 +1,33 @@
+/*!
+@defgroup sinc SINC: SINC Filter
+@details The MCUXpresso SDK provides a peripheral driver for the SINC Filter module of MCUXpresso SDK devices. The SINC module is a digital filter that converts an external ADC sigma-delta modulator bitstream
+to a data stream. One SINC module contains 4 channel4 with dedicated modulator clocks, bitstreams, and triggers.
+Based on features of SINC module, this driver are divided into following function groups:
+
+# SINC Generic Functional Control APIs
+    Functions in this group are used to initialize or de-initialize SINC module, users can use SINC module by only invoking SINC_Init() with correct configuration.
+
+# SINC Generic Low Level Control APIs
+    Functions in this group are used to enable/disable SINC master or reset SINC module.
+
+# Clock Control APIs
+    Functions in this group are used to control SINC internal clocks.
+
+# Channel Functional Control APIs
+    Functions in this group can be used to set specific channel in the high level method. For example, if only want to set all options(input, protection, FIFO and so on) of channel0, invoking SINC_SetChannelConfig() with the second parameter as #kSINC_Channel0.
+
+# Channel Result/FIFO Low Level Control APIs
+    Functions in this group can be used to set specific channel's result related options.
+
+# Channel Conversion Low Level Control APIs
+    Functions in this group can be used to set specific channel's conversion related options.
+
+# Channel Protection Low Level Control APIs
+    Functions in this group can be used to set specific channel's protection related options.
+
+# Channel Debug Low Level Control APIs
+    Functions in this group can be used to set specific channel's debug options.
+
+# Interrupt Control APIs
+    Functions in this group are used to enable/disable SINC module interrupts.
+*/

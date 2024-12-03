@@ -1,0 +1,11 @@
+/*!
+@defgroup utick UTICK: MictoTick Timer Driver
+@details The MCUXpresso SDK provides a peripheral driver for the UTICK module of MCUXpresso SDK devices.
+
+UTICK driver is created to help user to operate the UTICK module. The UTICK timer can be used as a low power timer. The APIs can be used to enable the UTICK module, initialize it and set the time.
+UTICK can be used as a wake up source from low power mode.
+
+
+# Typical use case {#UTICKTpyUC}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/utick*/

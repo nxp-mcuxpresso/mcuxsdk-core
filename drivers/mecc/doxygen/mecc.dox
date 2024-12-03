@@ -1,0 +1,10 @@
+/*!
+@defgroup mecc MECC: internal error correction code
+@details The MCUXpresso SDK provides a driver for the MECC module of MCUXpresso SDK devices.
+
+The MECC64 module supports Single Error Correction and Double Error Detection(SECDED) ECC function to provide reliability for 4 banks On-Chip RAM(OCRAM) access.
+
+
+This example code shows how to correct single error and detect multiple error using the MECC driver.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/mecc*/

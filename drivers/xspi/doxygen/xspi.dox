@@ -1,0 +1,38 @@
+/*!
+@defgroup xspi XSPI: Serial Peripheral Interface Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Serial Peripheral Interface (XSPI)
+         module of MCUXpresso SDK/i.MX devices.
+
+
+XSPI driver includes functional APIs and interrupt/EDMA non-blocking transactional APIs.
+
+Functional APIs are feature/property target low level APIs.
+Functional APIs can be used for XSPI initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the
+knowledge of the XSPI peripheral and how to organize functional APIs to
+meet the application requirements. All functional API use the peripheral base
+address as the first parameter. XSPI functional operation groups provide the
+functional API set.
+
+Transactional APIs are transaction target high level APIs.
+Transactional APIs can be used to enable the peripheral and in the
+application if the code size and performance of transactional APIs satisfy the
+requirements. If the code size and performance are a critical requirement,
+see the transactional API implementation and write a custom code. All
+transactional APIs use the xspi_handle_t/xspi_edma_handle_t as the second parameter.
+Initialize the handle for interrupt non-blocking transfer by calling the XSPI_TransferCreateHandle API.
+Initialize the handle for interrupt non-blocking transfer by calling the XSPI_TransferCreateHandleEDMA API.
+
+Transactional APIs support asynchronous transfer. This means that the functions
+XSPI_TransferNonBlocking() and XSPI_TransferEDMA() set up data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_XSPI_Idle status.
+*/
+
+/*!
+@if dox_section_xspi_edma
+@defgroup xspi_edma XSPI eDMA Driver
+@ingroup xspi
+@endif
+*/
+

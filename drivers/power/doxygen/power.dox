@@ -1,0 +1,98 @@
+/*!
+@defgroup power Power driver
+@ingroup syscon
+@details The MCUXpresso SDK provides a power driver for the MCUXpresso SDK devices.
+
+# Function description {#POWERFunc}
+
+Power driver and library provides these functions:
+ - Functions to enable and disable power to different peripherals
+ - Functions to enable and disable deep sleep in the ARM Core.
+ - Functions to enter deep sleep mode and deep power down mode
+ - Functions to set the voltages for different frequency for both normal regulation and low power regulation modes
+
+## Power enable and disable {#POWEREnableDisable}
+
+Power driver provides two API's POWER_EnablePD() and POWER_DisablePD() to enable or disable the PDRUNCFG bits in SYSCON
+The PDRUNCFG has an inverted logic, for example, the peripheral is powered on when the bit is cleared and powered off when bit is set.
+The API POWER_DisablePD() is used to power on a peripheral and POWER_EnablePD() is used to power off a peripheral. The API takes
+a parameter type pd_bit_t, which organizes the PDRUNCFG bits.
+The driver also provides two separate API's to power down and power up Flash, POWER_PowerDownFlash(), and POWER_PowerUpFlash()
+
+## Enable and Disable Deep Sleep in Core {#POWERDeepSleep}
+
+The power driver provides two API's POWER_EnableDeepSleep() and POWER_DisableDeepSleep() to enable or disable the deep sleep bit in the
+ARM Core. POWER_EnableDeepSleep() is used to enable deep sleep, and POWER_DisableDeepSleep() is used to disable deep sleep.
+
+## Entering Power Modes {#POWERModes}
+
+The Power library provides two API's to enter low power modes, for example, Deep Sleep and Deep Power Down. Deep Sleep is a sleep mode in which the
+ARM Core, Flash, and many other peripheral are turned off to save power. The processor can be woken by an IO activity and resumes 
+executing from next instruction after sleep. If a peripheral or RAM needs to On for wakeup or to retain memory then those peripheral need to be kept on
+during deep sleep. Deep power down is a power down mode where the processor resets upon wake up and during power down the entire part is powered down except
+for the RTC. For Deep Power Down only the Reset and RTC Alarm or WakeUp can be wakeup sources.
+The power library provides an API POWER_EnterDeepSleep() to enter deep sleep mode. This function takes a parameter which is a bit mask of the PDRUNCFG register.
+Any bit that is set is powered on during deep sleep. This mask would usually has the RAM memory that needs to retain power and also any wakeup source. 
+The API POWER_EnterDeepPowerDown() is used to enter deep power down mode. This API also has a parameter but since the voltage is cut off for the peripheral this 
+parameter has no effect
+
+## Set Voltages for Frequency {#POWERSetVoltage}
+
+The power library provides API's to set the voltage for the desired operating frequency of the processor. The voltage regulation system can be in normal regulation
+mode or in low power regulation mode. The API POWER_SetVoltageForFreq() is used to set the voltage for normal regulation mode. Based on the frequency parameter the
+optimum voltage level is set. The API POWER_SetLowPowerVoltageForFreq() is used to set the low-power voltage regulation mode and set the voltages for the desired
+frequency. For POWER_SetLowPowerVoltageForFreq() only two FRO frequencies are supported, 12MHz and 48 MHz.
+
+# Typical use case {#PowerExample}
+
+## Power Enable and Set Voltage example {#PowerEnableExample}
+
+	POWER_DisablePD(kPDRUNCFG_PD_FRO_EN); /*!< Ensure FRO is on so that we can switch to its 12MHz mode temporarily*/
+    CLOCK_AttachClk(
+        kFRO12M_to_MAIN_CLK);          /*!< Switch to 12MHz first to ensure we can change voltage without accidentally
+                                       being below the voltage for current speed */
+    POWER_SetVoltageForFreq(48000000); /*!< Set voltage for core */
+    CLOCK_SetFLASHAccessCyclesForFreq(48000000); /*!< Set FLASH waitstates for core */
+    CLOCK_SetupFROClocking(48000000);            /*!< Setup CPU to run off FRO 48MHz output*/
+    CLOCK_AttachClk(kFRO_HF_to_MAIN_CLK);        /*!< Switch main clock to 48MHz */
+	
+## Power Mode example {#PowerModeExample}
+
+	int main(void)
+	{
+		/* Init board hardware. */
+		BOARD_InitHardware();
+
+		/* Running FRO = 12 MHz*/
+		BOARD_BootClockVLPR();
+
+		/* Init output LED GPIO. */
+		LED_GREEN_INIT(1);
+
+		/* Attach Main Clock as CLKOUT */
+		CLOCK_AttachClk(kMAIN_CLK_to_CLKOUT);
+
+		/* Set the clock dividor to divide by 2*/
+		CLOCK_SetClkDiv(kCLOCK_DivClkOut, 2, false);
+
+		/* Intiialize UTICK */
+		UTICK_Init(UTICK0);
+
+		/* Set the UTICK timer to wake up the device from reduced power mode */
+		UTICK_SetTick(UTICK0, kUTICK_Repeat, UTICK_TIME, NULL);
+
+		/* Enter Deep Sleep mode */
+		POWER_EnterDeepSleep(SYSCON_PDRUNCFG_PDEN_SRAM0_MASK | SYSCON_PDRUNCFG_PDEN_SRAMX_MASK | SYSCON_PDRUNCFG_PDEN_WDT_OSC_MASK);
+
+		/* Set the clock dividor to divide by 1*/
+		CLOCK_SetClkDiv(kCLOCK_DivClkOut, 1, false);
+
+		while (1)
+		{
+			/* Toggle LED */
+			LED_GREEN_TOGGLE();
+			delay();
+		}
+	}
+	
+	

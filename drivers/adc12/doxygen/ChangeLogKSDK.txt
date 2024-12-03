@@ -1,0 +1,35 @@
+/*!
+@page driver_log Driver Change Log
+
+@section adc12 ADC12
+  The current ADC12 driver version is 2.0.6.
+
+  - 2.0.6
+    - Improvements
+      - Removed useless comments of ADC12_DoAutoCalibration() function.
+
+  - 2.0.5
+    - Bug Fixes
+      - Fixed the violations of MISRA C-2012 rule 10.4.
+
+  - 2.0.4
+    - Bug Fixes
+      - Fixed the violations of MISRA C-2012 rules:
+        - Rule 4.7 10.1 10.3 10.4 10.8 12.2 16.4 17.7
+
+  - 2.0.3
+    - Improvements
+      - Used conversion control feature macro instead of that in IO map.
+
+  - 2.0.2
+    - Bug Fixes
+      - Set ADC clock frequency as half of the maximum value for calibration.
+
+  - 2.0.1
+    - New Features
+      - Added a feature to control enablement of DMA.
+
+  - 2.0.0
+    - Initial version.
+
+*/

@@ -1,0 +1,10 @@
+/*!
+@defgroup tdet Digital Tamper
+@ingroup tdet
+@details The MCUXpresso SDK provides a peripheral driver for the Digital Tamper (TDET) module.@n
+ @n
+TDET detects potential on-chip and external device tampering, triggering an interrupt or chip reset. In addition to passive tamper
+detection where a static value is expected, TDET also provides active tamper detection on a board by streaming a known bit
+sequence and checking that their return values match what was sent.
+ @n
+*/

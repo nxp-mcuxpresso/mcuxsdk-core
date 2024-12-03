@@ -1,0 +1,103 @@
+/*!
+@page drv_err Driver errors status
+ - #kStatus_UART_TxBusy = 1000
+ - #kStatus_UART_RxBusy = 1001
+ - #kStatus_UART_TxIdle = 1002
+ - #kStatus_UART_RxIdle = 1003
+ - #kStatus_UART_TxWatermarkTooLarge = 1004
+ - #kStatus_UART_RxWatermarkTooLarge = 1005
+ - #kStatus_UART_FlagCannotClearManually = 1006
+ - #kStatus_UART_Error = 1007
+ - #kStatus_UART_RxRingBufferOverrun = 1008
+ - #kStatus_UART_RxHardwareOverrun = 1009
+ - #kStatus_UART_NoiseError = 1010
+ - #kStatus_UART_FramingError = 1011
+ - #kStatus_UART_ParityError = 1012
+ - #kStatus_UART_BaudrateNotSupport = 1013
+ - #kStatus_UART_IdleLineDetected = 1014
+*/
+
+/*!
+@defgroup uart UART: Universal Asynchronous Receiver/Transmitter Driver
+*/
+
+/*!
+@defgroup uart_driver UART Driver
+@ingroup uart
+@details The MCUXpresso SDK provides a peripheral driver for the Universal Asynchronous Receiver/Transmitter (UART)
+         module of MCUXpresso SDK devices.
+
+The UART driver includes functional APIs and transactional APIs.
+
+Functional APIs are used for UART initialization/configuration/operation for
+optimization/customization purpose. Using the functional API requires the
+knowledge of the UART peripheral and how to organize functional APIs to
+meet the application requirements. All functional APIs use the peripheral base
+address as the first parameter. UART functional operation groups provide the
+functional API set.
+
+Transactional APIs can be used to enable the peripheral quickly and in the
+application if the code size and performance of transactional APIs can satisfy the
+requirements. If the code size and performance are critical requirements,
+see the transactional API implementation and write custom code. All
+transactional APIs use the uart_handle_t as the second parameter.
+Initialize the handle by calling the UART_TransferCreateHandle() API.
+
+Transactional APIs support asynchronous transfer, which means that the functions
+UART_TransferSendNonBlocking() and UART_TransferReceiveNonBlocking() set up an interrupt for data
+transfer. When the transfer completes, the upper layer is notified through a callback
+function with the kStatus_UART_TxIdle and kStatus_UART_RxIdle.
+
+Transactional receive APIs support the ring buffer. Prepare the
+memory for the ring buffer and pass in the start address and size while calling the
+UART_TransferCreateHandle(). If passing  NULL, the ring buffer feature is disabled.
+When the ring buffer is enabled, the received data is saved to the ring buffer in the background.
+The UART_TransferReceiveNonBlocking() function first gets data from the ring buffer. If
+the ring buffer does not have enough data, the function first returns the data in the
+ring buffer and then saves the received data to user memory. When all data is received,
+the upper layer is informed through a callback with the kStatus_UART_RxIdle.
+
+If the receive ring buffer is full, the upper layer is informed through a callback with the
+kStatus_UART_RxRingBufferOverrun. In the callback function, the upper layer reads
+data out from the ring buffer. If not, existing data is overwritten by the new data.
+
+The ring buffer size is specified when creating the handle. Note that
+one byte is reserved for the ring buffer maintenance. When
+creating handle using the following code.
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/uart
+In this example, the buffer size is 32, but only 31 bytes are used for
+saving data.
+
+# Typical use case {#UARTCase}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/uart
+*/
+
+/*!
+@if dox_section_uart_dma_driver
+@defgroup uart_dma_driver UART DMA Driver
+@ingroup uart
+@endif
+*/
+
+/*!
+@if dox_section_uart_edma_driver
+@defgroup uart_edma_driver UART eDMA Driver
+@ingroup uart
+@endif
+*/
+
+/*!
+@if dox_section_uart_freertos_driver
+@defgroup uart_freertos_driver UART FreeRTOS Driver
+@ingroup uart
+@endif
+*/
+
+/*!
+@if dox_section_uart_cmsis_driver
+@defgroup uart_cmsis_driver UART CMSIS Driver
+@ingroup uart
+@endif
+*/

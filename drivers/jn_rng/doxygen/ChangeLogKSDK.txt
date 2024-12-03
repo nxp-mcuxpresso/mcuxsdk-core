@@ -1,0 +1,10 @@
+/*!
+@page driver_log Driver Change Log
+
+@section rng RNG
+  The current RNG driver version is 2.0.0.
+
+  - 2.0.0
+    - Initial version.
+
+*/

@@ -1,0 +1,1972 @@
+/*
+ * Copyright (c) 2015, Freescale Semiconductor, Inc.
+ * Copyright 2016-2018 NXP
+ * All rights reserved.
+ * 
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+#include "fsl_scg.h"
+
+/******************************************************************************
+ * Definitions
+ *****************************************************************************/
+
+/* ## Start:DefineFront */
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.clock"
+#endif
+
+#if (defined(FSL_FEATURE_SOC_ULP1) && FSL_FEATURE_SOC_ULP1)
+#define SCG_SIRC_LOW_RANGE_FREQ 4000000U  /* Slow IRC low range clock frequency. */
+#define SCG_SIRC_HIGH_RANGE_FREQ 16000000U /* Slow IRC high range clock frequency.   */
+#else
+#define SCG_SIRC_LOW_RANGE_FREQ 2000000U  /* Slow IRC low range clock frequency. */
+#define SCG_SIRC_HIGH_RANGE_FREQ 8000000U /* Slow IRC high range clock frequency.   */
+#endif
+
+#define SCG_FIRC_FREQ0 48000000U /* Fast IRC trimed clock frequency(48MHz). */
+#if !(defined(FSL_FEATURE_SCG_HAS_FIRC_RANGE_48M_ONLY) && FSL_FEATURE_SCG_HAS_FIRC_RANGE_48M_ONLY)
+#define SCG_FIRC_FREQ1 52000000U /* Fast IRC trimed clock frequency(52MHz). */
+#define SCG_FIRC_FREQ2 56000000U /* Fast IRC trimed clock frequency(56MHz). */
+#define SCG_FIRC_FREQ3 60000000U /* Fast IRC trimed clock frequency(60MHz). */
+#endif /* FSL_FEATURE_SCG_HAS_FIRC_RANGE_48M_ONLY */
+
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLL) && FSL_FEATURE_SCG_HAS_LPFLL)
+
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLL_RANGE_48M_ONLY) && FSL_FEATURE_SCG_HAS_LPFLL_RANGE_48M_ONLY)
+#define SCG_LPFLL_FREQ0 48000000U  /* LPFLL trimed clock frequency(48MHz). */
+#elseif (defined(FSL_FEATURE_SCG_HAS_LPFLL_RANGE_UP_TO_72M) && FSL_FEATURE_SCG_HAS_LPFLL_RANGE_UP_TO_72M)
+#define SCG_LPFLL_FREQ0 48000000U  /* LPFLL trimed clock frequency(48MHz). */
+#define SCG_LPFLL_FREQ1 72000000U  /* LPFLL trimed clock frequency(72MHz). */
+#else
+#define SCG_LPFLL_FREQ0 48000000U  /* LPFLL trimed clock frequency(48MHz). */
+#define SCG_LPFLL_FREQ1 72000000U  /* LPFLL trimed clock frequency(72MHz). */
+#define SCG_LPFLL_FREQ2 96000000U  /* LPFLL trimed clock frequency(96MHz). */
+#define SCG_LPFLL_FREQ3 120000000U /* LPFLL trimed clock frequency(120MHz). */
+#endif /* FSL_FEATURE_SCG_HAS_LPFLL_RANGE_48M_ONLY */
+#endif /* FSL_FEATURE_SCG_HAS_LPFLL */
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL) && FSL_FEATURE_SCG_HAS_SPLL)
+/*
+ * System PLL base divider value, it is the PLL reference clock divider
+ * value when SCG_SPLLCFG[PREDIV]=0.
+ */
+#define SCG_SPLL_PREDIV_BASE_VALUE 1U
+
+/*
+ * System PLL base multiplier value, it is the PLL multiplier value
+ * when SCG_SPLLCFG[MULT]=0.
+ */
+#if (defined(FSL_FEATURE_SOC_ULP1) && FSL_FEATURE_SOC_ULP1)
+#define SCG_SPLL_MULT_BASE_VALUE 0U
+#else
+#define SCG_SPLL_MULT_BASE_VALUE 16U
+#endif
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1)
+/*
+ * System PLL post divider 1 value
+ * value when SCG_SPLLCFG[PLLPOSTDIV1]=0.
+ */
+#define SCG_SPLL_POSTDIV1_BASE_VALUE 1U
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1 */
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2)
+/*
+ * System PLL post divider 2 value
+ * value when SCG_SPLLCFG[PLLPOSTDIV2]=0.
+ */
+#define SCG_SPLL_POSTDIV2_BASE_VALUE 1U
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2 */
+
+#if (!(defined(FSL_FEATURE_SOC_ULP1) && FSL_FEATURE_SOC_ULP1))
+#define SCG_SPLL_PREDIV_MAX_VALUE 7U /* Max value of SCG_SPLLCFG[PREDIV]. */
+#define SCG_SPLL_MULT_MAX_VALUE 31U  /* Max value of SCG_SPLLCFG[MULT].   */
+
+/*
+ * System PLL reference clock after SCG_SPLLCFG[PREDIV] should be in
+ * the range of SCG_SPLL_REF_MIN to SCG_SPLL_REF_MAX.
+ */
+#define SCG_SPLL_REF_MIN 8000000UL
+#define SCG_SPLL_REF_MAX 32000000UL
+#endif
+#endif /* FSL_FEATURE_SCG_HAS_SPLL */
+
+#if (defined(FSL_FEATURE_SCG_HAS_APLL) && FSL_FEATURE_SCG_HAS_APLL)
+/*
+ * Auxiliary PLL base divider value, it is the PLL reference clock divider
+ * value when SCG_APLLCFG[PREDIV]=0.
+ */
+#define SCG_APLL_PREDIV_BASE_VALUE 1U
+
+/*
+ * Auxiliary PLL base multiplier value, it is the PLL multiplier value
+ * when SCG_APLLCFG[MULT]=0.
+ */
+#define SCG_APLL_MULT_BASE_VALUE 0U
+
+/*
+ * Auxiliary PLL post divider 1 value
+ * value when SCG_APLLCFG[PLLPOSTDIV1]=0.
+ */
+#define SCG_APLL_POSTDIV1_BASE_VALUE 1U
+
+/*
+ * Auxiliary PLL post divider 2 value
+ * value when SCG_APLLCFG[PLLPOSTDIV2]=0.
+ */
+#define SCG_APLL_POSTDIV2_BASE_VALUE 1U
+#endif /* FSL_FEATURE_SCG_HAS_APLL */
+
+#define SCG_CSR_SCS_VAL ((SCG->CSR & SCG_CSR_SCS_MASK) >> SCG_CSR_SCS_SHIFT)
+#if (defined(FSL_FEATURE_SCG_HAS_SOSCDIV1) && FSL_FEATURE_SCG_HAS_SOSCDIV1)
+#define SCG_SOSCDIV_SOSCDIV1_VAL ((SCG->SOSCDIV & SCG_SOSCDIV_SOSCDIV1_MASK) >> SCG_SOSCDIV_SOSCDIV1_SHIFT)
+#endif
+#define SCG_SOSCDIV_SOSCDIV2_VAL ((SCG->SOSCDIV & SCG_SOSCDIV_SOSCDIV2_MASK) >> SCG_SOSCDIV_SOSCDIV2_SHIFT)
+#if (defined(FSL_FEATURE_SCG_HAS_SOSCDIV3) && FSL_FEATURE_SCG_HAS_SOSCDIV3)
+#define SCG_SOSCDIV_SOSCDIV3_VAL ((SCG->SOSCDIV & SCG_SOSCDIV_SOSCDIV3_MASK) >> SCG_SOSCDIV_SOSCDIV3_SHIFT)
+#endif
+#if (defined(FSL_FEATURE_SCG_HAS_SIRCDIV1) && FSL_FEATURE_SCG_HAS_SIRCDIV1)
+#define SCG_SIRCDIV_SIRCDIV1_VAL ((SCG->SIRCDIV & SCG_SIRCDIV_SIRCDIV1_MASK) >> SCG_SIRCDIV_SIRCDIV1_SHIFT)
+#endif
+#define SCG_SIRCDIV_SIRCDIV2_VAL ((SCG->SIRCDIV & SCG_SIRCDIV_SIRCDIV2_MASK) >> SCG_SIRCDIV_SIRCDIV2_SHIFT)
+#if (defined(FSL_FEATURE_SCG_HAS_SIRCDIV3) && FSL_FEATURE_SCG_HAS_SIRCDIV3)
+#define SCG_SIRCDIV_SIRCDIV3_VAL ((SCG->SIRCDIV & SCG_SIRCDIV_SIRCDIV3_MASK) >> SCG_SIRCDIV_SIRCDIV3_SHIFT)
+#endif
+#if (defined(FSL_FEATURE_SCG_HAS_FIRCDIV1) && FSL_FEATURE_SCG_HAS_FIRCDIV1)
+#define SCG_FIRCDIV_FIRCDIV1_VAL ((SCG->FIRCDIV & SCG_FIRCDIV_FIRCDIV1_MASK) >> SCG_FIRCDIV_FIRCDIV1_SHIFT)
+#endif
+#define SCG_FIRCDIV_FIRCDIV2_VAL ((SCG->FIRCDIV & SCG_FIRCDIV_FIRCDIV2_MASK) >> SCG_FIRCDIV_FIRCDIV2_SHIFT)
+#if (defined(FSL_FEATURE_SCG_HAS_FIRCDIV3) && FSL_FEATURE_SCG_HAS_FIRCDIV3)
+#define SCG_FIRCDIV_FIRCDIV3_VAL ((SCG->FIRCDIV & SCG_FIRCDIV_FIRCDIV3_MASK) >> SCG_FIRCDIV_FIRCDIV3_SHIFT)
+#endif
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL) && FSL_FEATURE_SCG_HAS_SPLL)
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLDIV1) && FSL_FEATURE_SCG_HAS_SPLLDIV1)
+#define SCG_SPLLDIV_SPLLDIV1_VAL ((SCG->SPLLDIV & SCG_SPLLDIV_SPLLDIV1_MASK) >> SCG_SPLLDIV_SPLLDIV1_SHIFT)
+#endif
+#define SCG_SPLLDIV_SPLLDIV2_VAL ((SCG->SPLLDIV & SCG_SPLLDIV_SPLLDIV2_MASK) >> SCG_SPLLDIV_SPLLDIV2_SHIFT)
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLDIV3) && FSL_FEATURE_SCG_HAS_SPLLDIV3)
+#define SCG_SPLLDIV_SPLLDIV3_VAL ((SCG->SPLLDIV & SCG_SPLLDIV_SPLLDIV3_MASK) >> SCG_SPLLDIV_SPLLDIV3_SHIFT)
+#endif
+#endif /* FSL_FEATURE_SCG_HAS_SPLL */
+
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLL) && FSL_FEATURE_SCG_HAS_LPFLL)
+#if (defined(FSL_FEATURE_SCG_HAS_FLLDIV1) && FSL_FEATURE_SCG_HAS_FLLDIV1)
+#define SCG_LPFLLDIV_LPFLLDIV1_VAL ((SCG->LPFLLDIV & SCG_LPFLLDIV_LPFLLDIV1_MASK) >> SCG_LPFLLDIV_LPFLLDIV1_SHIFT)
+#endif
+#define SCG_LPFLLDIV_LPFLLDIV2_VAL ((SCG->LPFLLDIV & SCG_LPFLLDIV_LPFLLDIV2_MASK) >> SCG_LPFLLDIV_LPFLLDIV2_SHIFT)
+#if (defined(FSL_FEATURE_SCG_HAS_FLLDIV3) && FSL_FEATURE_SCG_HAS_FLLDIV3)
+#define SCG_LPFLLDIV_LPFLLDIV3_VAL ((SCG->LPFLLDIV & SCG_LPFLLDIV_LPFLLDIV3_MASK) >> SCG_LPFLLDIV_LPFLLDIV3_SHIFT)
+#endif
+#endif /* FSL_FEATURE_SCG_HAS_LPFLL */
+
+#define SCG_SIRCCFG_RANGE_VAL ((SCG->SIRCCFG & SCG_SIRCCFG_RANGE_MASK) >> SCG_SIRCCFG_RANGE_SHIFT)
+#define SCG_FIRCCFG_RANGE_VAL ((SCG->FIRCCFG & SCG_FIRCCFG_RANGE_MASK) >> SCG_FIRCCFG_RANGE_SHIFT)
+
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLL) && FSL_FEATURE_SCG_HAS_LPFLL)
+#define SCG_LPFLLCFG_FSEL_VAL ((SCG->LPFLLCFG & SCG_LPFLLCFG_FSEL_MASK) >> SCG_LPFLLCFG_FSEL_SHIFT)
+#endif
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL) && FSL_FEATURE_SCG_HAS_SPLL)
+#define SCG_SPLLCFG_PREDIV_VAL ((SCG->SPLLCFG & SCG_SPLLCFG_PREDIV_MASK) >> SCG_SPLLCFG_PREDIV_SHIFT)
+#define SCG_SPLLCFG_MULT_VAL ((SCG->SPLLCFG & SCG_SPLLCFG_MULT_MASK) >> SCG_SPLLCFG_MULT_SHIFT)
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPFD) && FSL_FEATURE_SCG_HAS_SPLLPFD)
+#define SCG_SPLLPFD_PFD_MAX_VAL (SCG_SPLLPFD_PFD0_MASK >> SCG_SPLLPFD_PFD0_SHIFT)
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPFD */
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1)
+#define SCG_SPLLCFG_POSTDIV1_VAL ((SCG->SPLLCFG & SCG_SPLLCFG_PLLPOSTDIV1_MASK) >> SCG_SPLLCFG_PLLPOSTDIV1_SHIFT)
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1 */
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2)
+#define SCG_SPLLCFG_POSTDIV2_VAL ((SCG->SPLLCFG & SCG_SPLLCFG_PLLPOSTDIV2_MASK) >> SCG_SPLLCFG_PLLPOSTDIV2_SHIFT)
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2 */
+#endif /* FSL_FEATURE_SCG_HAS_SPLL */
+
+#if (defined(FSL_FEATURE_SCG_HAS_APLL) && FSL_FEATURE_SCG_HAS_APLL)
+#define SCG_APLLCFG_PREDIV_VAL ((SCG->APLLCFG & SCG_APLLCFG_PREDIV_MASK) >> SCG_APLLCFG_PREDIV_SHIFT)
+#define SCG_APLLCFG_MULT_VAL ((SCG->APLLCFG & SCG_APLLCFG_MULT_MASK) >> SCG_APLLCFG_MULT_SHIFT)
+#define SCG_APLLNUM_NUM_VAL ((SCG->APLLNUM & SCG_APLLNUM_NUM_MASK) >> SCG_APLLNUM_NUM_SHIFT)
+#define SCG_APLLDENOM_DENOM_VAL ((SCG->APLLDENOM & SCG_APLLDENOM_DENOM_MASK) >> SCG_APLLDENOM_DENOM_SHIFT)
+#define SCG_APLLPFD_PFD_MAX_VAL (SCG_APLLPFD_PFD0_MASK >> SCG_SPLLPFD_PFD0_SHIFT)
+#define SCG_APLLCFG_POSTDIV1_VAL ((SCG->APLLCFG & SCG_APLLCFG_PLLPOSTDIV1_MASK) >> SCG_APLLCFG_PLLPOSTDIV1_SHIFT)
+#define SCG_APLLCFG_POSTDIV2_VAL ((SCG->APLLCFG & SCG_APLLCFG_PLLPOSTDIV2_MASK) >> SCG_APLLCFG_PLLPOSTDIV2_SHIFT)
+#define SCG_APLLDIV_APLLDIV1_VAL ((SCG->APLLDIV & SCG_APLLDIV_APLLDIV1_MASK) >> SCG_APLLDIV_APLLDIV1_SHIFT)
+#define SCG_APLLDIV_APLLDIV2_VAL ((SCG->APLLDIV & SCG_APLLDIV_APLLDIV2_MASK) >> SCG_APLLDIV_APLLDIV2_SHIFT)
+#define SCG_APLLDIV_APLLDIV3_VAL ((SCG->APLLDIV & SCG_APLLDIV_APLLDIV3_MASK) >> SCG_APLLDIV_APLLDIV3_SHIFT)
+#endif /* FSL_FEATURE_SCG_HAS_APLL */
+
+#if ((defined(FSL_FEATURE_SCG_HAS_SPLLPFD) && FSL_FEATURE_SCG_HAS_SPLLPFD) || (defined(FSL_FEATURE_SCG_HAS_APLL) && FSL_FEATURE_SCG_HAS_APLL))
+/*
+ * Constant used to calcul PLL PFD clock frequency
+ * PFD Clock Frequency = PLL output frequency * 18/frac value
+ */
+#define PFD_FREQ_CALCUL_CONSTANT 18
+#endif
+/* ## End:DefineFront */
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+/* ## Start:Prototypes */
+#if (defined(FSL_FEATURE_SCG_HAS_APLL) && FSL_FEATURE_SCG_HAS_APLL)
+/*!
+ * @brief Get the common Auxiliary PLL frequency for both RAW APLL output and APLL PFD output.
+ *
+ * The "raw" APLL output is the clkout divided by postdiv1-2 of APLL.
+ * The "common" Auxiliary PLL frequency is the common part for both RAW APLL and APLL PFD output.
+ * That is the frequency calculated based on the clock source which passes through POSTDIV & MULT.
+ * "Common" APLL Frequency = Divided Reference Frequency * MULT
+ * 
+ * @return  Clock frequency; If the clock is invalid, returns 0.
+ */
+static uint32_t CLOCK_GetAuxPllCommonFreq(void);
+#endif /* FSL_FEATURE_SCG_HAS_APLL */
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL) && FSL_FEATURE_SCG_HAS_SPLL)
+/*!
+ * @brief Get the common System PLL frequency for both RAW SPLL output and SPLL PFD output.
+ *
+ * The "raw" SPLL output is the clkout divided by postdiv1-2 of SAPLL.
+ * The "common" System PLL frequency is the common part for both RAW SPLL and SPLL PFD output.
+ * That is the frequency calculated based on the clock source which passes through POSTDIV & MULT.
+ * "Common" SPLL Frequency = Divided Reference Frequency * MULT
+ *
+ * @return  Clock frequency; If the clock is invalid, returns 0.
+ */
+static uint32_t CLOCK_GetSysPllCommonFreq(void);
+#endif /* FSL_FEATURE_SCG_HAS_SPLL */
+/* ## End:Prototypes */
+
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+/* ## Start:Variable */
+/* External XTAL0 (OSC0) clock frequency. */
+volatile uint32_t g_xtal0Freq;
+#if (!(defined(FSL_FEATURE_SOC_NO_XTAL32_RTCCLKIN) && FSL_FEATURE_SOC_NO_XTAL32_RTCCLKIN))
+/* External XTAL32K clock frequency. */
+volatile uint32_t g_xtal32Freq;
+#endif
+#if (defined(FSL_FEATURE_SOC_HAS_LVDS) && FSL_FEATURE_SOC_HAS_LVDS)
+/* External LVDS pad clock frequency. */
+uint32_t g_lvdsFreq;
+#endif /* FSL_FEATURE_SOC_HAS_LVDS */
+/* ## End:Variable */
+
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+/* ## Start:FuncMisc */
+#if (defined(FSL_FEATURE_SOC_OSC32_COUNT) && FSL_FEATURE_SOC_OSC32_COUNT)
+/*!
+ * brief Initializes OSC32.
+ *
+ * param base OSC32 peripheral base address.
+ * param mode OSC32 work mode, see ref osc32_mode_t
+ */
+void OSC32_Init(OSC32_Type *base, osc32_mode_t mode)
+{
+    /* Only support one instance now. */
+#if (defined(FSL_FEATURE_SOC_OSC32_COUNT) && (FSL_FEATURE_SOC_OSC32_COUNT > 1))
+#error Need to update for multiple OSC32 instance.
+#endif
+    assert(OSC32 == base);
+
+    CLOCK_EnableClock(kCLOCK_RtcOsc0);
+
+    /* Set work mode. */
+    base->CR = (uint8_t)mode;
+
+    if (((uint8_t)mode & OSC32_CR_ROSCEREFS_MASK) != 0U)
+    {
+        /* If use crystal mode, wait for stable. */
+        while (0U == (base->CR & OSC32_CR_ROSCSTB_MASK))
+        {
+        }
+    }
+}
+
+/*!
+ * brief Deinitializes OSC32.
+ *
+ * param base OSC32 peripheral base address.
+ */
+void OSC32_Deinit(OSC32_Type *base)
+{
+    /* Only support one instance now. */
+#if (defined(FSL_FEATURE_SOC_OSC32_COUNT) && (FSL_FEATURE_SOC_OSC32_COUNT > 1))
+#error Need to update for multiple OSC32 instance.
+#endif
+    assert(OSC32 == base);
+
+    base->CR = 0U;
+    CLOCK_DisableClock(kCLOCK_RtcOsc0);
+}
+#endif /* FSL_FEATURE_SOC_OSC32_COUNT */
+
+/*!
+ * brief Gets the SCG system clock frequency.
+ *
+ * This function gets the SCG system clock frequency. These clocks are used for
+ * core, platform, external, and bus clock domains.
+ *
+ * param type     Which type of clock to get, core clock or slow clock.
+ * return  Clock frequency.
+ */
+uint32_t CLOCK_GetSysClkFreq(scg_sys_clk_t type)
+{
+    uint32_t freq;
+
+    scg_sys_clk_config_t sysClkConfig;
+
+    CLOCK_GetCurSysClkConfig(&sysClkConfig); /* Get the main clock for SoC platform. */
+
+    switch (sysClkConfig.src)
+    {
+        case (uint8_t)kSCG_SysClkSrcSysOsc:
+            freq = CLOCK_GetSysOscFreq();
+            break;
+        case (uint8_t)kSCG_SysClkSrcSirc:
+            freq = CLOCK_GetSircFreq();
+            break;
+        case (uint8_t)kSCG_SysClkSrcFirc:
+            freq = CLOCK_GetFircFreq();
+            break;
+#if (defined(FSL_FEATURE_SCG_HAS_ROSC_SYS_CLK_SRC) && FSL_FEATURE_SCG_HAS_ROSC_SYS_CLK_SRC)
+        case (uint8_t)kSCG_SysClkSrcRosc:
+            freq = CLOCK_GetRtcOscFreq();
+            break;
+#endif /* FSL_FEATURE_SCG_HAS_ROSC_SYS_CLK_SRC */
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLL) && FSL_FEATURE_SCG_HAS_LPFLL)
+        case (uint8_t)kSCG_SysClkSrcLpFll:
+            freq = CLOCK_GetLpFllFreq();
+            break;
+#endif /* FSL_FEATURE_SCG_HAS_LPFLL */
+#if (defined(FSL_FEATURE_SCG_HAS_APLL) && FSL_FEATURE_SCG_HAS_APLL)
+        case (uint8_t)kSCG_SysClkSrcAuxPll:
+            freq = CLOCK_GetAuxPllFreq();
+            break;
+#endif /* FSL_FEATURE_SCG_HAS_APLL */
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL) && FSL_FEATURE_SCG_HAS_SPLL)
+        case (uint8_t)kSCG_SysClkSrcSysPll:
+            freq = CLOCK_GetSysPllFreq();
+            break;
+#endif /* FSL_FEATURE_SCG_HAS_SPLL */
+        default:
+            freq = 0U;
+            break;
+    }
+
+    freq /= ((uint32_t)sysClkConfig.divCore + 1UL); /* divided by the DIVCORE firstly. */
+
+    if (kSCG_SysClkSlow == type)
+    {
+        freq /= ((uint32_t)sysClkConfig.divSlow + 1UL);
+    }
+#if (defined(FSL_FEATURE_SCG_HAS_DIVPLAT) && FSL_FEATURE_SCG_HAS_DIVPLAT)
+    else if (kSCG_SysClkPlat == type)
+    {
+        freq /= ((uint32_t)sysClkConfig.divPlat + 1UL);
+    }
+#endif /* (defined(FSL_FEATURE_SCG_HAS_DIVPLAT) && FSL_FEATURE_SCG_HAS_DIVPLAT) */
+#if (defined(FSL_FEATURE_SCG_HAS_DIVBUS) && FSL_FEATURE_SCG_HAS_DIVBUS)
+    else if (kSCG_SysClkBus == type)
+    {
+        freq /= ((uint32_t)sysClkConfig.divBus + 1UL);
+    }
+#endif /* (defined(FSL_FEATURE_SCG_HAS_DIVBUS) && FSL_FEATURE_SCG_HAS_DIVBUS) */
+#if (defined(FSL_FEATURE_SCG_HAS_DIVEXT) && FSL_FEATURE_SCG_HAS_DIVEXT)
+    else if (kSCG_SysClkExt == type)
+    {
+        freq /= ((uint32_t)sysClkConfig.divExt + 1UL);
+    }
+#endif /* (defined(FSL_FEATURE_SCG_HAS_DIVEXT) && FSL_FEATURE_SCG_HAS_DIVEXT) */
+    else
+    {
+        /* Add comment to prevent the case of MISRA C-2012 rule 15.7 */
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Initializes the SCG system OSC.
+ *
+ * This function enables the SCG system OSC clock according to the
+ * configuration.
+ *
+ * param config   Pointer to the configuration structure.
+ * retval kStatus_Success System OSC is initialized.
+ * retval kStatus_SCG_Busy System OSC has been enabled and is used by the system clock.
+ * retval kStatus_ReadOnly System OSC control register is locked.
+ *
+ * note This function can't detect whether the system OSC has been enabled and
+ * used by an IP.
+ */
+status_t CLOCK_InitSysOsc(const scg_sosc_config_t *config)
+{
+    assert(config);
+#if (defined(FSL_FEATURE_SCG_HAS_SOSC_RANGE) && FSL_FEATURE_SCG_HAS_SOSC_RANGE)
+    uint8_t range = 0U; /* SCG_SOSCCFG[RANGE] */
+#endif /* FSL_FEATURE_SCG_HAS_SOSC_RANGE */
+    status_t status;
+    uint8_t tmp8;
+
+#if (defined(FSL_FEATURE_SCG_HAS_SOSC_RANGE) && FSL_FEATURE_SCG_HAS_SOSC_RANGE)
+    /* If crystal oscillator used, need to get RANGE value base on frequency. */
+    if (kSCG_SysOscModeExt != config->workMode)
+    {
+        if ((config->freq >= 32768U) && (config->freq <= 40000U))
+        {
+            range = 1U;
+        }
+        else if ((config->freq >= 1000000U) && (config->freq <= 8000000U))
+        {
+            range = 2U;
+        }
+        else if ((config->freq >= 8000000U) && (config->freq <= 32000000U))
+        {
+            range = 3U;
+        }
+        else
+        {
+            return kStatus_InvalidArgument;
+        }
+    }
+#endif /* FSL_FEATURE_SCG_HAS_SOSC_RANGE */
+
+    /* De-init the SOSC first. */
+    status = CLOCK_DeinitSysOsc();
+
+    if (kStatus_Success != status)
+    {
+        return status;
+    }
+
+    /* Now start to set up OSC clock. */
+    /* Step 1. Setup dividers. */
+    SCG->SOSCDIV = 
+#if (defined(FSL_FEATURE_SCG_HAS_SOSCDIV1) && FSL_FEATURE_SCG_HAS_SOSCDIV1)
+                 SCG_SOSCDIV_SOSCDIV1(config->div1) |
+#endif
+                 SCG_SOSCDIV_SOSCDIV2(config->div2)
+#if (defined(FSL_FEATURE_SCG_HAS_SOSCDIV3) && FSL_FEATURE_SCG_HAS_SOSCDIV3)
+                 | SCG_SOSCDIV_SOSCDIV3(config->div3)
+#endif /* FSL_FEATURE_SCG_HAS_SOSCDIV3 */
+                 ;
+
+/* Step 2. Set OSC configuration. */
+#if !(defined(FSL_FEATURE_SCG_HAS_NO_SOSCCFG) && FSL_FEATURE_SCG_HAS_NO_SOSCCFG)
+#if (defined(FSL_FEATURE_SCG_HAS_OSC_SCXP) && FSL_FEATURE_SCG_HAS_OSC_SCXP)
+    SCG->SOSCCFG = config->capLoad | (uint32_t)config->workMode | SCG_SOSCCFG_RANGE(range);
+#else  /* FSL_FEATURE_SCG_HAS_OSC_SCXP */
+#if (defined(FSL_FEATURE_SCG_HAS_SOSC_RANGE) && FSL_FEATURE_SCG_HAS_SOSC_RANGE)
+    SCG->SOSCCFG = (uint32_t)(config->workMode) | SCG_SOSCCFG_RANGE(range);
+#else
+    SCG->SOSCCFG = config->workMode;
+#endif /* FSL_FEATURE_SCG_HAS_SOSC_RANGE */
+#endif /* FSL_FEATURE_SCG_HAS_OSC_SCXP */
+#endif /* FSL_FEATURE_SCG_HAS_NO_SOSCCFG */
+
+    /* Step 3. Enable clock. */
+    /* SCG->SOSCCSR = SCG_SOSCCSR_SOSCEN_MASK | (config->enableMode); */
+    tmp8 = config->enableMode;
+#if !(defined(FSL_FEATURE_SCG_HAS_NO_SOSCCSR_SOSCEN) && FSL_FEATURE_SCG_HAS_NO_SOSCCSR_SOSCEN)
+    tmp8 |= SCG_SOSCCSR_SOSCEN_MASK;
+#endif /* FSL_FEATURE_SCG_HAS_NO_SOSCCSR_SOSCEN */
+    SCG->SOSCCSR = tmp8;
+
+    /* Step 4. Wait for OSC clock to be valid. */
+    while (0UL == (SCG->SOSCCSR & SCG_SOSCCSR_SOSCVLD_MASK))
+    {
+    }
+
+    /* Step 5. Enabe monitor. */
+    SCG->SOSCCSR |= (uint32_t)config->monitorMode;
+
+    return kStatus_Success;
+}
+
+/*!
+ * brief De-initializes the SCG system OSC.
+ *
+ * This function disables the SCG system OSC clock.
+ *
+ * retval kStatus_Success System OSC is deinitialized.
+ * retval kStatus_SCG_Busy System OSC is used by the system clock.
+ * retval kStatus_ReadOnly System OSC control register is locked.
+ *
+ * note This function can't detect whether the system OSC is used by an IP.
+ */
+status_t CLOCK_DeinitSysOsc(void)
+{
+    uint32_t reg = SCG->SOSCCSR;
+    status_t status;
+
+    /* If clock is used by system, return error. */
+    if ((reg & SCG_SOSCCSR_SOSCSEL_MASK) != 0UL)
+    {
+        status = kStatus_SCG_Busy;
+    }
+
+    /* If configure register is locked, return error. */
+    else if ((reg & SCG_SOSCCSR_LK_MASK) != 0UL)
+    {
+        status = kStatus_ReadOnly;
+    }
+    else
+    {
+        SCG->SOSCCSR = SCG_SOSCCSR_SOSCERR_MASK;
+        status = kStatus_Success;
+    }
+
+    return status;
+}
+
+/*!
+ * brief Gets the SCG system OSC clock frequency (SYSOSC).
+ *
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetSysOscFreq(void)
+{
+    uint32_t freq;
+
+    if ((SCG->SOSCCSR & SCG_SOSCCSR_SOSCVLD_MASK) != 0UL) /* System OSC clock is valid. */
+    {
+        /* Please call CLOCK_SetXtal0Freq base on board setting before using OSC0 clock. */
+        assert(g_xtal0Freq);
+        freq = g_xtal0Freq;
+    }
+    else
+    {
+        freq = 0U;
+    }
+    
+    return freq;
+}
+
+/*!
+ * brief Gets the SCG asynchronous clock frequency from the system OSC.
+ *
+ * param type     The asynchronous clock type.
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetSysOscAsyncFreq(scg_async_clk_t type)
+{
+    uint32_t oscFreq = CLOCK_GetSysOscFreq();
+    uint32_t divider = 0U;
+    uint32_t freq;
+
+    /* Get divider. */
+    if (oscFreq != 0UL)
+    {
+        switch (type)
+        {
+#if (defined(FSL_FEATURE_SCG_HAS_SOSCDIV3) && FSL_FEATURE_SCG_HAS_SOSCDIV3)
+            case kSCG_AsyncDiv3Clk: /* SOSCDIV3_CLK. */
+                divider = SCG_SOSCDIV_SOSCDIV3_VAL;
+                break;
+#endif /* FSL_FEATURE_SCG_HAS_SOSCDIV3 */
+            case kSCG_AsyncDiv2Clk: /* SOSCDIV2_CLK. */
+                divider = SCG_SOSCDIV_SOSCDIV2_VAL;
+                break;
+#if (defined(FSL_FEATURE_SCG_HAS_SOSCDIV1) && FSL_FEATURE_SCG_HAS_SOSCDIV1)
+            case kSCG_AsyncDiv1Clk: /* SOSCDIV1_CLK. */
+                divider = SCG_SOSCDIV_SOSCDIV1_VAL;
+                break;
+#endif /* FSL_FEATURE_SCG_HAS_SOSCDIV1 */
+            default:
+                divider = 0U;
+                break;
+        }
+    }
+    if (divider != 0U)
+    {
+        freq = (oscFreq >> (divider - 1U));
+    }
+    else /* Output disabled. */
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Initializes the SCG slow IRC clock.
+ *
+ * This function enables the SCG slow IRC clock according to the
+ * configuration.
+ *
+ * param config   Pointer to the configuration structure.
+ * retval kStatus_Success SIRC is initialized.
+ * retval kStatus_SCG_Busy SIRC has been enabled and is used by system clock.
+ * retval kStatus_ReadOnly SIRC control register is locked.
+ *
+ * note This function can't detect whether the system OSC has been enabled and
+ * used by an IP.
+ */
+status_t CLOCK_InitSirc(const scg_sirc_config_t *config)
+{
+    assert(config);
+
+    status_t status;
+
+    /* De-init the SIRC first. */
+    status = CLOCK_DeinitSirc();
+
+    if (status == kStatus_Success)
+    {
+        /* Now start to set up SIRC clock. */
+        /* Step 1. Setup dividers. */
+        SCG->SIRCDIV = 
+#if (defined(FSL_FEATURE_SCG_HAS_SIRCDIV1) && FSL_FEATURE_SCG_HAS_SIRCDIV1)
+                    SCG_SIRCDIV_SIRCDIV1(config->div1) |
+#endif /* FSL_FEATURE_SCG_HAS_SIRCDIV1 */
+                    SCG_SIRCDIV_SIRCDIV2(config->div2)
+    #if (defined(FSL_FEATURE_SCG_HAS_SIRCDIV3) && FSL_FEATURE_SCG_HAS_SIRCDIV3)
+                    | SCG_SIRCDIV_SIRCDIV3(config->div3)
+    #endif /* FSL_FEATURE_SCG_HAS_SIRCDIV3 */
+                    ;
+
+        /* Step 2. Set SIRC configuration. */
+        SCG->SIRCCFG = SCG_SIRCCFG_RANGE(config->range);
+
+        /* Step 3. Enable clock. */
+        SCG->SIRCCSR = SCG_SIRCCSR_SIRCEN_MASK | config->enableMode;
+
+        /* Step 4. Wait for SIRC clock to be valid. */
+        while (0UL == (SCG->SIRCCSR & SCG_SIRCCSR_SIRCVLD_MASK))
+        {
+        }
+    }
+
+    return status;
+}
+
+/*!
+ * brief De-initializes the SCG slow IRC.
+ *
+ * This function disables the SCG slow IRC.
+ *
+ * retval kStatus_Success SIRC is deinitialized.
+ * retval kStatus_SCG_Busy SIRC is used by system clock.
+ * retval kStatus_ReadOnly SIRC control register is locked.
+ *
+ * note This function can't detect whether the SIRC is used by an IP.
+ */
+status_t CLOCK_DeinitSirc(void)
+{
+    uint32_t reg = SCG->SIRCCSR;
+    status_t status;
+
+    /* If clock is used by system, return error. */
+    if ((reg & SCG_SIRCCSR_SIRCSEL_MASK) != 0UL)
+    {
+        status = kStatus_SCG_Busy;
+    }
+    /* If configure register is locked, return error. */
+    else if ((reg & SCG_SIRCCSR_LK_MASK) != 0UL)
+    {
+        status = kStatus_ReadOnly;
+    }
+    else
+    {
+        SCG->SIRCCSR = 0U;
+        status = kStatus_Success;
+    }
+    
+    return status;
+}
+
+/*!
+ * brief Gets the SCG SIRC clock frequency.
+ *
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetSircFreq(void)
+{
+    static const uint32_t sircFreq[] = {SCG_SIRC_LOW_RANGE_FREQ, SCG_SIRC_HIGH_RANGE_FREQ};
+    uint32_t freq;
+
+    if ((SCG->SIRCCSR & SCG_SIRCCSR_SIRCVLD_MASK) != 0UL) /* SIRC is valid. */
+    {
+        freq = sircFreq[SCG_SIRCCFG_RANGE_VAL];
+    }
+    else
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Gets the SCG asynchronous clock frequency from the SIRC.
+ *
+ * param type     The asynchronous clock type.
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetSircAsyncFreq(scg_async_clk_t type)
+{
+    uint32_t sircFreq = CLOCK_GetSircFreq();
+    uint32_t divider = 0U;
+    uint32_t freq;
+
+    /* Get divider. */
+    if (sircFreq != 0UL)
+    {
+        switch (type)
+        {
+#if (defined(FSL_FEATURE_SCG_HAS_SIRCDIV3) && FSL_FEATURE_SCG_HAS_SIRCDIV3)
+            case kSCG_AsyncDiv3Clk: /* SIRCDIV3_CLK. */
+                divider = SCG_SIRCDIV_SIRCDIV3_VAL;
+                break;
+#endif /* FSL_FEATURE_SCG_HAS_SIRCDIV3 */
+            case kSCG_AsyncDiv2Clk: /* SIRCDIV2_CLK. */
+                divider = SCG_SIRCDIV_SIRCDIV2_VAL;
+                break;
+#if (defined(FSL_FEATURE_SCG_HAS_SIRCDIV1) && FSL_FEATURE_SCG_HAS_SIRCDIV1)
+            case kSCG_AsyncDiv1Clk: /* SIRCDIV2_CLK. */
+                divider = SCG_SIRCDIV_SIRCDIV1_VAL;
+                break;
+#endif /* FSL_FEATURE_SCG_HAS_SIRCDIV1 */
+            default:
+                divider = 0U;
+                break;
+        }
+    }
+    if (divider != 0UL)
+    {
+        freq = (sircFreq >> (divider - 1U));
+    }
+    else /* Output disabled. */
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Initializes the SCG fast IRC clock.
+ *
+ * This function enables the SCG fast IRC clock according to the configuration.
+ *
+ * param config   Pointer to the configuration structure.
+ * retval kStatus_Success FIRC is initialized.
+ * retval kStatus_SCG_Busy FIRC has been enabled and is used by the system clock.
+ * retval kStatus_ReadOnly FIRC control register is locked.
+ *
+ * note This function can't detect whether the FIRC has been enabled and
+ * used by an IP.
+ */
+status_t CLOCK_InitFirc(const scg_firc_config_t *config)
+{
+    assert(config);
+
+    status_t status;
+
+    /* De-init the FIRC first. */
+    status = CLOCK_DeinitFirc();
+
+    if (kStatus_Success != status)
+    {
+        return status;
+    }
+
+    /* Now start to set up FIRC clock. */
+    /* Step 1. Setup dividers. */
+    SCG->FIRCDIV = 
+#if (defined(FSL_FEATURE_SCG_HAS_FIRCDIV1) && FSL_FEATURE_SCG_HAS_FIRCDIV1)
+                 SCG_FIRCDIV_FIRCDIV1(config->div1) |
+#endif /* FSL_FEATURE_SCG_HAS_FIRCDIV1 */
+                 SCG_FIRCDIV_FIRCDIV2(config->div2)
+#if (defined(FSL_FEATURE_SCG_HAS_FIRCDIV3) && FSL_FEATURE_SCG_HAS_FIRCDIV3)
+                 | SCG_FIRCDIV_FIRCDIV3(config->div3)
+#endif /* FSL_FEATURE_SCG_HAS_FIRCDIV3 */
+                 ;
+
+    /* Step 2. Set FIRC configuration. */
+    SCG->FIRCCFG = SCG_FIRCCFG_RANGE(config->range);
+
+    /* Step 3. Set trimming configuration. */
+    if ((config->trimConfig) != NULL)
+    {
+#if !(defined(FSL_FEATURE_SCG_HAS_NO_FIRCTCFG) && FSL_FEATURE_SCG_HAS_NO_FIRCTCFG)
+        SCG->FIRCTCFG =
+            SCG_FIRCTCFG_TRIMDIV(config->trimConfig->trimDiv) | SCG_FIRCTCFG_TRIMSRC(config->trimConfig->trimSrc);
+#endif /* FSL_FEATURE_SCG_HAS_NO_FIRCTCFG */
+
+        /* TODO: Write FIRCSTAT cause bus error: TKT266932. */
+        if (kSCG_FircTrimNonUpdate == config->trimConfig->trimMode)
+        {
+            SCG->FIRCSTAT = SCG_FIRCSTAT_TRIMCOAR(config->trimConfig->trimCoar) |
+                            SCG_FIRCSTAT_TRIMFINE(config->trimConfig->trimFine);
+        }
+
+        /* trim mode. */
+        SCG->FIRCCSR = (uint32_t)(config->trimConfig->trimMode);
+
+#if !(defined(FSL_FEATURE_SCG_HAS_NO_FIRCCSR_FIRCERR) && FSL_FEATURE_SCG_HAS_NO_FIRCCSR_FIRCERR)
+        if ((SCG->FIRCCSR & SCG_FIRCCSR_FIRCERR_MASK) != 0UL)
+        {
+            return kStatus_Fail;
+        }
+#endif /* FSL_FEATURE_SCG_HAS_NO_FIRCCSR_FIRCERR */
+    }
+
+    /* Step 4. Enable clock. */
+#if (defined(FSL_FEATURE_SCG_HAS_FIRC_TREN) && FSL_FEATURE_SCG_HAS_FIRC_TREN)
+    SCG->FIRCCSR |= (SCG_FIRCCSR_FIRCEN_MASK | SCG_FIRCCSR_FIRCTREN_MASK | config->enableMode);
+#else
+    SCG->FIRCCSR |= (SCG_FIRCCSR_FIRCEN_MASK | config->enableMode);
+#endif
+
+    /* Step 5. Wait for FIRC clock to be valid. */
+    while (0UL == (SCG->FIRCCSR & SCG_FIRCCSR_FIRCVLD_MASK))
+    {
+    }
+
+    return kStatus_Success;
+}
+
+/*!
+ * brief De-initializes the SCG fast IRC.
+ *
+ * This function disables the SCG fast IRC.
+ *
+ * retval kStatus_Success FIRC is deinitialized.
+ * retval kStatus_SCG_Busy FIRC is used by the system clock.
+ * retval kStatus_ReadOnly FIRC control register is locked.
+ *
+ * note This function can't detect whether the FIRC is used by an IP.
+ */
+status_t CLOCK_DeinitFirc(void)
+{
+    uint32_t reg = SCG->FIRCCSR;
+    status_t status = kStatus_Success;
+
+    /* If clock is used by system, return error. */
+    if ((reg & SCG_FIRCCSR_FIRCSEL_MASK) != 0UL)
+    {
+        status = kStatus_SCG_Busy;
+    }
+    /* If configure register is locked, return error. */
+    else if ((reg & SCG_FIRCCSR_LK_MASK) != 0UL)
+    {
+        status = kStatus_ReadOnly;
+    }
+    else
+    {
+#if !(defined(FSL_FEATURE_SCG_HAS_NO_FIRCCSR_FIRCERR) && FSL_FEATURE_SCG_HAS_NO_FIRCCSR_FIRCERR)
+        SCG->FIRCCSR = SCG_FIRCCSR_FIRCERR_MASK;
+#else
+        ; /* Intentional empty. */
+#endif /* FSL_FEATURE_SCG_HAS_NO_FIRCCSR_FIRCERR */
+    }
+
+    return status;
+}
+
+/*!
+ * brief Gets the SCG FIRC clock frequency.
+ *
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetFircFreq(void)
+{
+    uint32_t freq;
+
+    static const uint32_t fircFreq[] = {
+        SCG_FIRC_FREQ0,
+#if !(defined(FSL_FEATURE_SCG_HAS_FIRC_RANGE_48M_ONLY) && FSL_FEATURE_SCG_HAS_FIRC_RANGE_48M_ONLY)
+        SCG_FIRC_FREQ1, SCG_FIRC_FREQ2, SCG_FIRC_FREQ3,
+#endif
+    };
+
+    if ((SCG->FIRCCSR & SCG_FIRCCSR_FIRCVLD_MASK) != 0UL) /* FIRC is valid. */
+    {
+        freq = fircFreq[SCG_FIRCCFG_RANGE_VAL];
+    }
+    else
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Gets the SCG asynchronous clock frequency from the FIRC.
+ *
+ * param type     The asynchronous clock type.
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetFircAsyncFreq(scg_async_clk_t type)
+{
+    uint32_t fircFreq = CLOCK_GetFircFreq();
+    uint32_t divider = 0U;
+    uint32_t freq;
+
+    /* Get divider. */
+    if (fircFreq != 0UL)
+    {
+        switch (type)
+        {
+#if (defined(FSL_FEATURE_SCG_HAS_FIRCDIV3) && FSL_FEATURE_SCG_HAS_FIRCDIV3)
+            case kSCG_AsyncDiv3Clk: /* FIRCDIV3_CLK. */
+                divider = SCG_FIRCDIV_FIRCDIV3_VAL;
+                break;
+#endif /* FSL_FEATURE_SCG_HAS_FIRCDIV3 */
+            case kSCG_AsyncDiv2Clk: /* FIRCDIV2_CLK. */
+                divider = SCG_FIRCDIV_FIRCDIV2_VAL;
+                break;
+#if (defined(FSL_FEATURE_SCG_HAS_FIRCDIV1) && FSL_FEATURE_SCG_HAS_FIRCDIV1)
+            case kSCG_AsyncDiv1Clk: /* FIRCDIV1_CLK. */
+                divider = SCG_FIRCDIV_FIRCDIV1_VAL;
+                break;
+#endif /* FSL_FEATURE_SCG_HAS_FIRCDIV1 */
+            default:
+                divider = 0U;
+                break;
+        }
+    }
+    if (divider != 0U)
+    {
+        freq = (fircFreq >> (divider - 1U));
+    }
+    else /* Output disabled. */
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+#if (defined(FSL_FEATURE_SCG_HAS_ROSC) && FSL_FEATURE_SCG_HAS_ROSC)
+/*!
+ * brief Gets the SCG RTC OSC clock frequency.
+ *
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetRtcOscFreq(void)
+{
+    uint32_t freq;
+
+    if ((SCG->ROSCCSR & SCG_ROSCCSR_ROSCVLD_MASK) != 0UL) /* RTC OSC clock is valid. */
+    {
+        /* Please call CLOCK_SetXtal32Freq base on board setting before using RTC OSC clock. */
+        assert(g_xtal32Freq);
+        freq = g_xtal32Freq;
+    }
+    else
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+#endif /* FSL_FEATURE_SCG_HAS_ROSC */
+
+#if (defined(FSL_FEATURE_SCG_HAS_APLL) && FSL_FEATURE_SCG_HAS_APLL)
+/*!
+ * brief Initializes the SCG auxiliary PLL.
+ *
+ * This function enables the SCG auxiliary PLL clock according to the
+ * configuration. The auxiliary PLL can use the system OSC or FIRC as
+ * the clock source. Ensure that the source clock is valid before
+ * calling this function.
+ *
+ * Example code for initializing APLL clock output:
+ * code
+ * const scg_apll_config_t g_scgAuxPllConfig = {.enableMode = kSCG_AuxPllEnable,
+ *                                            .div1 = kSCG_AsyncClkDisable,
+ *                                            .div2 = kSCG_AsyncClkDisable,
+ *                                            .div3 = kSCG_AsyncClkDisable,
+ *                                            .src = kSCG_SysPllSrcFirc,
+ *                                            .isBypassSelected = false,
+ *                                            .isPfdSelected = false, // Configure APLL PFD as diabled
+ *                                            .prediv = 5U,
+ *                                            .pfdClkout = kSCG_AuxPllPfd0Clk, // No need to configure pfdClkout; only needed for initialization
+ *                                            .mult = 20U,
+ *                                            .pllPostdiv1 = kSCG_SysClkDivBy3,
+ *                                            .pllPostdiv2 = kSCG_SysClkDivBy4,
+ *                                            .num = 578,
+ *                                            .denom = 1000};
+ * CLOCK_InitAuxPll(&g_scgAuxPllConfig);
+ * endcode
+ *
+ * param config   Pointer to the configuration structure.
+ * retval kStatus_Success auxiliary PLL is initialized.
+ * retval kStatus_SCG_Busy auxiliary PLL has been enabled and is used by the system clock.
+ * retval kStatus_ReadOnly auxiliary PLL control register is locked.
+ *
+ * note This function can't detect whether the auxiliary PLL has been enabled and
+ * is used by an IP.
+ */
+status_t CLOCK_InitAuxPll(const scg_apll_config_t *config)
+{
+    assert(config);
+    /* For ULP1, valid MULT values are 33, 27, 22, 20, 17, 16. */
+    assert((33U == config->mult) || (27U == config->mult) || (22U == config->mult)
+        || (20U == config->mult) || (17U == config->mult) || (16U == config->mult));
+
+    status_t status;
+
+    /* De-init the APLL first. */
+    status = CLOCK_DeinitAuxPll();
+
+    if (kStatus_Success != status)
+    {
+        return status;
+    }
+
+    /* Now start to set up PLL clock. */
+    /* Step 1. Setup dividers. */
+    SCG->APLLDIV = SCG_APLLDIV_APLLDIV1(config->div1) | SCG_APLLDIV_APLLDIV2(config->div2) | SCG_APLLDIV_APLLDIV3(config->div3);
+
+    /* Step 2. Set PLL configuration. */
+    SCG->APLLCFG =
+        SCG_APLLCFG_SOURCE(config->src) | SCG_APLLCFG_PREDIV(config->prediv) | SCG_APLLCFG_MULT(config->mult)
+      | SCG_APLLCFG_PLLS(config->isPfdSelected) | SCG_APLLCFG_BYPASS(config->isPfdSelected)
+      | SCG_APLLCFG_PFDSEL(((uint32_t)config->pfdClkout)>>3U)
+      | SCG_APLLCFG_PLLPOSTDIV1(config->pllPostdiv1) | SCG_APLLCFG_PLLPOSTDIV2(config->pllPostdiv2)
+        ;
+
+    /* Step 3. Enable clock. */
+    SCG->APLLCSR = SCG_APLLCSR_APLLEN_MASK | config->enableMode;
+
+    /* Step 4. Wait for PLL clock to be valid. */
+    while (0UL == (SCG->APLLCSR & SCG_APLLCSR_APLLVLD_MASK))
+    {
+    }
+
+    return kStatus_Success;
+}
+
+/*!
+ * brief De-initializes the SCG auxiliary PLL.
+ *
+ * This function disables the SCG auxiliary PLL.
+ *
+ * retval kStatus_Success auxiliary PLL is deinitialized.
+ * retval kStatus_SCG_Busy auxiliary PLL is used by the system clock.
+ * retval kStatus_ReadOnly auxiliary PLL control register is locked.
+ *
+ * note This function can't detect whether the auxiliary PLL is used by an IP.
+ */
+status_t CLOCK_DeinitAuxPll(void)
+{
+    uint32_t reg = SCG->APLLCSR;
+    status_t status;
+
+    /* If clock is used by system, return error. */
+    if ((reg & SCG_APLLCSR_APLLSEL_MASK) != 0UL)
+    {
+        status = kStatus_SCG_Busy;
+    }
+    /* If configure register is locked, return error. */
+    else if ((reg & SCG_APLLCSR_LK_MASK) != 0UL)
+    {
+        status = kStatus_ReadOnly;
+    }
+    else
+    {
+        /* Deinit and clear the error. */
+        SCG->APLLCSR = 0;
+        status = kStatus_Success
+    }
+    return status;
+}
+
+#if (defined(FSL_FEATURE_SCG_HAS_APLL) && FSL_FEATURE_SCG_HAS_APLL)
+static uint32_t CLOCK_GetAuxPllCommonFreq(void)
+{
+    uint32_t freq = 0U;
+
+    if ((SCG->APLLCFG & SCG_APLLCFG_SOURCE_MASK) !=0UL ) /* If use FIRC */
+    {
+        freq = CLOCK_GetFircFreq();
+    }
+    else /* Use System OSC. */
+    {
+        freq = CLOCK_GetSysOscFreq();
+    }
+
+    if (freq != 0UL) /* If source is valid. */
+    {
+        freq /= (SCG_APLLCFG_PREDIV_VAL + SCG_APLL_PREDIV_BASE_VALUE); /* Pre-divider. */
+        freq *= (SCG_APLLCFG_MULT_VAL + SCG_APLL_MULT_BASE_VALUE + SCG_APLLNUM_NUM_VAL / SCG_APLLDENOM_DENOM_VAL);     /* Multiplier. */
+    }
+
+    return freq;
+}
+#endif /* FSL_FEATURE_SCG_HAS_APLL */
+
+/*!
+ * brief Gets the SCG auxiliary PLL clock frequency.
+ *
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetAuxPllFreq(void)
+{
+    uint32_t freq;
+    scg_apll_pfd_clkout_t pfdClkout;
+
+    if ((SCG->APLLCFG & SCG_APLLCFG_PLLS_MASK) != 0UL)
+    {
+        /* pfdClkout is SCG_APLLCFG[PFDSEL] x 8. */
+        pfdClkout = (scg_apll_pfd_clkout_t)(((SCG->APLLCFG & SCG_APLLCFG_PFDSEL_MASK) >> SCG_APLLCFG_PFDSEL_SHIFT) << 3U);
+        freq = CLOCK_GetAuxPllPfdFreq(pfdClkout);
+    }
+    else 
+    {
+        if (SCG->APLLCSR & SCG_APLLCSR_APLLVLD_MASK) /* Auxiliary PLL is valid. */
+        {
+            freq = CLOCK_GetAuxPllCommonFreq();
+
+            if (freq != 0UL)
+            {
+                freq /= (SCG_APLLCFG_POSTDIV1_VAL + SCG_APLL_POSTDIV1_BASE_VALUE); /* Post-divider 1. */
+                freq /= (SCG_APLLCFG_POSTDIV2_VAL + SCG_APLL_POSTDIV2_BASE_VALUE); /* Post-divider 2. */
+            }
+
+            return freq;
+        }
+        else
+        {
+            return 0U;
+        }
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Gets the SCG asynchronous clock frequency from the auxiliary PLL.
+ *
+ * param type     The asynchronous clock type.
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetAuxPllAsyncFreq(scg_async_clk_t type)
+{
+    uint32_t pllFreq = CLOCK_GetAuxPllFreq();
+    uint32_t divider = 0U;
+    uint32_t freq;
+
+    /* Get divider. */
+    if (pllFreq != 0UL)
+    {
+        switch (type)
+        {
+            case kSCG_AsyncDiv3Clk: /* APLLDIV3_CLK. */
+                divider = SCG_APLLDIV_APLLDIV3_VAL;
+                break;
+            case kSCG_AsyncDiv2Clk: /* APLLDIV2_CLK. */
+                divider = SCG_APLLDIV_APLLDIV2_VAL;
+                break;
+            case kSCG_AsyncDiv1Clk: /* APLLDIV1_CLK. */
+                divider = SCG_APLLDIV_APLLDIV1_VAL;
+                break;
+            default:
+                divider = 0U;
+                break;
+        }
+    }
+    if (divider)
+    {
+        freq = (pllFreq >> (divider - 1U));
+    }
+    else /* Output disabled. */
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Gets the SCG auxiliary PLL PFD clock frequency.
+ *
+ * param pfdClkout     The selected PFD clocks out. See "scg_apll_pfd_clkout_t".
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetAuxPllPfdFreq(scg_apll_pfd_clkout_t pfdClkout)
+{
+    uint32_t freq;
+    uint32_t fracValue = 0U;
+
+    if ((SCG->APLLPFD & SCG_PLLPFD_PFD_VALID_MASK(pfdClkout)) != 0UL) /* Auxiliary PLL PFD is valid. */
+    {
+        if (0UL == (SCG->APLLPFD & SCG_PLLPFD_PFD_CLKGATE_MASK(pfdClkout)))
+        {
+            if ((SCG->APLLCFG & SCG_APLLCFG_BYPASS_MASK) != 0UL)
+            {
+                freq = CLOCK_GetLvdsClkFreq();
+            }
+            else
+            {
+                fracValue = (SCG->APLLPFD & SCG_PLLPFD_PFD_MASK(pfdClkout)) >> pfdClkout;
+
+                if (fracValue != 0UL)
+                {
+                    freq = CLOCK_GetAuxPllCommonFreq();
+
+                    if (freq != 0UL) /* If source is valid. */
+                    {
+                        freq *= (PFD_FREQ_CALCUL_CONSTANT / fracValue); /* PFD Clock Frequency = PLL output frequency * 18/frac value. */
+                    }
+                }
+            }
+        }
+        else
+        {
+            freq = 0U;
+        }
+
+        return freq;
+    }
+    else
+    {
+        return 0U;
+    }
+}
+   
+/*!
+ * brief Enables the SCG auxiliary PLL Fractional Divide (PFD) clock out with configurations.
+ *
+ * APLL Frequency = Fref * (MULT + NUM/DENOM)
+ * PFD Clock Frequency = PLL output frequency * 18/frac value
+ *
+ * Example code for configuring APLL as APLL PFD clock output:
+ * code
+ * const scg_apll_config_t g_scgAuxPllConfig = {.enableMode = kSCG_AuxPllEnable,
+ *                                            .div1 = kSCG_AsyncClkDisable,
+ *                                            .div2 = kSCG_AsyncClkDisable,
+ *                                            .div3 = kSCG_AsyncClkDisable,
+ *                                            .src = kSCG_SysPllSrcFirc,
+ *                                            .isBypassSelected = false,
+ *                                            .isPfdSelected = true, // Configure APLL PFD as enabled
+ *                                            .prediv = 5U,
+ *                                            .pfdClkout = kSCG_AuxPllPfd3Clk, // Configure APLL PFD3 as the output clock
+ *                                            .mult = 20U,
+ *                                            .pllPostdiv1 = kSCG_SysClkDivBy1,
+ *                                            .pllPostdiv2 = kSCG_SysClkDivBy1,
+ *                                            .num = 578,
+ *                                            .denom = 1000};
+ * CLOCK_InitAuxPll(&g_scgAuxPllConfig);
+ * CLOCK_EnableAuxPllPfdClkout(g_scgAuxPllConfig.pfdClkout, 15U);
+ * endcode
+ *
+ * param pfdClkout  APLL PFD clock out select.
+ * param fracValue  Fractional Divider value. Recommended to be kept between 12-35 for all PFDs.
+ */
+void CLOCK_EnableAuxPllPfdClkout(scg_apll_pfd_clkout_t pfdClkout, uint8_t fracValue)
+{
+    /* 
+     * Input fractional divider value should have a maximum size of 6 bits (64U).
+     * Note: It is recommended that PFD settings are kept between 12-35 for all PFDs.
+     */
+    assert(fracValue);
+    assert(fracValue < SCG_APLLPFD_PFD_MAX_VAL);
+
+    /* Step 1. Gate PFD clock. */
+    SCG->APLLPFD |= SCG_PLLPFD_PFD_CLKGATE_MASK(pfdClkout);
+
+    /* Step 2. Program the new PFD value. */
+    SCG->APLLPFD = (SCG->APLLPFD & ~SCG_PLLPFD_PFD_MASK(pfdClkout)) | SCG_PLLPFD_PFD_VAL(pfdClkout, fracValue);
+
+    /* Step 3. Wait for PFD clock to be stable. */
+    while (0UL == (SCG->APLLPFD & SCG_PLLPFD_PFD_VALID_MASK(pfdClkout)))
+    {
+    }
+
+    /* Step 4. Ungate PFD clock. */
+    SCG->APLLPFD &= ~SCG_PLLPFD_PFD_CLKGATE_MASK(pfdClkout);
+}
+#endif /* FSL_FEATURE_SCG_HAS_APLL */
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL) && FSL_FEATURE_SCG_HAS_SPLL)
+#if (!(defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1))
+/*!
+ * brief Calculates the MULT and PREDIV for the PLL.
+ *
+ * This function calculates the proper MULT and PREDIV to generate the desired PLL
+ * output frequency with the input reference clock frequency. It returns the closest
+ * frequency match that the PLL can generate. The corresponding MULT/PREDIV are returned with
+ * parameters. If the desired frequency is not valid, this function returns 0.
+ *
+ * param refFreq     The input reference clock frequency.
+ * param desireFreq  The desired output clock frequency.
+ * param mult        The value of MULT.
+ * param prediv      The value of PREDIV.
+ * return The PLL output frequency with the MULT and PREDIV; If
+ * the desired frequency can't be generated, this function returns 0U.
+ */
+uint32_t CLOCK_GetSysPllMultDiv(uint32_t refFreq, uint32_t desireFreq, uint8_t *mult, uint8_t *prediv)
+{
+    uint8_t ret_prediv;          /* PREDIV to return */
+    uint8_t ret_mult;            /* MULT to return */
+    uint8_t prediv_min;          /* Minimal PREDIV value to make reference clock in allowed range. */
+    uint8_t prediv_max;          /* Max PREDIV value to make reference clock in allowed range. */
+    uint8_t prediv_cur;          /* PREDIV value for iteration. */
+    uint8_t mult_cur;            /* MULT value for iteration. */
+    uint32_t ret_freq = 0U;      /* Output frequency to return .*/
+    uint32_t diff = 0xFFFFFFFFU; /* Difference between desireFreq and return frequency. */
+    uint32_t ref_div;            /* Reference frequency after PREDIV. */
+
+    /*
+     * Steps:
+     * 1. Get allowed prediv with such rules:
+     *    1). refFreq / prediv >= SCG_PLL_REF_MIN.
+     *    2). refFreq / prediv <= SCG_PLL_REF_MAX.
+     * 2. For each allowed prediv, there are two candidate mult values:
+     *    1). (desireFreq / (refFreq / prediv)).
+     *    2). (desireFreq / (refFreq / prediv)) + 1.
+     *    If could get the precise desired frequency, return current prediv and
+     *    mult directly. Otherwise choose the one which is closer to desired
+     *    frequency.
+     */
+
+    /* Reference frequency is out of range. */
+    if ((refFreq < SCG_SPLL_REF_MIN) ||
+        (refFreq > (SCG_SPLL_REF_MAX * (SCG_SPLL_PREDIV_MAX_VALUE + SCG_SPLL_PREDIV_BASE_VALUE))))
+    {
+        return 0U;
+    }
+
+    /* refFreq/PREDIV must in a range. First get the allowed PREDIV range. */
+    prediv_max = (uint8_t)(refFreq / SCG_SPLL_REF_MIN);
+    prediv_min = (uint8_t)((refFreq + SCG_SPLL_REF_MAX - 1UL) / SCG_SPLL_REF_MAX);
+
+    desireFreq *= 2U;
+
+    /* PREDIV traversal. */
+    for (prediv_cur = prediv_max; prediv_cur >= prediv_min; prediv_cur--)
+    {
+        /*
+         * For each PREDIV, the available MULT is (desireFreq*PREDIV/refFreq)
+         * or (desireFreq*PREDIV/refFreq + 1U). This function chooses the closer
+         * one.
+         */
+        /* Reference frequency after PREDIV. */
+        ref_div = refFreq / prediv_cur;
+
+        mult_cur = (uint8_t)(desireFreq / ref_div);
+
+        if ((mult_cur < SCG_SPLL_MULT_BASE_VALUE - 1U) ||
+            (mult_cur > SCG_SPLL_MULT_BASE_VALUE + SCG_SPLL_MULT_MAX_VALUE))
+        {
+            /* No MULT is available with this PREDIV. */
+            continue;
+        }
+
+        ret_freq = mult_cur * ref_div;
+
+        if (mult_cur >= SCG_SPLL_MULT_BASE_VALUE)
+        {
+            if (ret_freq == desireFreq) /* If desire frequency is got. */
+            {
+                *prediv = prediv_cur - SCG_SPLL_PREDIV_BASE_VALUE;
+                *mult = mult_cur - SCG_SPLL_MULT_BASE_VALUE;
+                return ret_freq / 2U;
+            }
+            if (diff > desireFreq - ret_freq) /* New PRDIV/VDIV is closer. */
+            {
+                diff = desireFreq - ret_freq;
+                ret_prediv = prediv_cur;
+                ret_mult = mult_cur;
+            }
+        }
+        mult_cur++;
+        if (mult_cur <= (SCG_SPLL_MULT_BASE_VALUE + SCG_SPLL_MULT_MAX_VALUE))
+        {
+            ret_freq += ref_div;
+            if (diff > ret_freq - desireFreq) /* New PRDIV/VDIV is closer. */
+            {
+                diff = ret_freq - desireFreq;
+                ret_prediv = prediv_cur;
+                ret_mult = mult_cur;
+            }
+        }
+    }
+
+    if (0xFFFFFFFFU != diff)
+    {
+        /* PREDIV/MULT found. */
+        *prediv = ret_prediv - SCG_SPLL_PREDIV_BASE_VALUE;
+        *mult = ret_mult - SCG_SPLL_MULT_BASE_VALUE;
+        return ((refFreq / ret_prediv) * ret_mult) / 2U;
+    }
+    else
+    {
+        return 0U; /* No proper PREDIV/MULT found. */
+    }
+}
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1 */
+
+/*!
+ * brief Initializes the SCG system PLL.
+ *
+ * This function enables the SCG system PLL clock according to the
+ * configuration. The system PLL can use the system OSC or FIRC as
+ * the clock source. Ensure that the source clock is valid before
+ * calling this function.
+ *
+ * Example code for initializing SPLL clock output:
+ * code
+ * const scg_spll_config_t g_scgSysPllConfig = {.enableMode = kSCG_SysPllEnable,
+ *                                            .monitorMode = kSCG_SysPllMonitorDisable,
+ *                                            .div1 = kSCG_AsyncClkDivBy1,
+ *                                            .div2 = kSCG_AsyncClkDisable,
+ *                                            .div3 = kSCG_AsyncClkDivBy2,
+ *                                            .src = kSCG_SysPllSrcFirc,
+ *                                            .isBypassSelected = false,
+ *                                            .isPfdSelected = false, // Configure SPLL PFD as diabled
+ *                                            .prediv = 5U,
+ *                                            .pfdClkout = kSCG_AuxPllPfd0Clk, // No need to configure pfdClkout; only needed for initialization
+ *                                            .mult = 20U,
+ *                                            .pllPostdiv1 = kSCG_SysClkDivBy3,
+ *                                            .pllPostdiv2 = kSCG_SysClkDivBy4};
+ * CLOCK_InitSysPll(&g_scgSysPllConfig);
+ * endcode
+ *
+ * param config   Pointer to the configuration structure.
+ * retval kStatus_Success System PLL is initialized.
+ * retval kStatus_SCG_Busy System PLL has been enabled and is used by the system clock.
+ * retval kStatus_ReadOnly System PLL control register is locked.
+ *
+ * note This function can't detect whether the system PLL has been enabled and
+ * used by an IP.
+ */
+status_t CLOCK_InitSysPll(const scg_spll_config_t *config)
+{
+    assert(config);
+#if (defined(FSL_FEATURE_SOC_ULP1) && FSL_FEATURE_SOC_ULP1)
+    /* For ULP1, valid MULT values are 33, 27, 22, 20, 17, 16. */
+    assert((33U == config->mult) || (27U == config->mult) || (22U == config->mult)
+        || (20U == config->mult) || (17U == config->mult) || (16U == config->mult));
+#endif
+
+    status_t status;
+
+    /* De-init the SPLL first. */
+    status = CLOCK_DeinitSysPll();
+
+    if (kStatus_Success != status)
+    {
+        return status;
+    }
+
+    /* Now start to set up PLL clock. */
+    /* Step 1. Setup dividers. */
+    SCG->SPLLDIV = 
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLDIV1) && FSL_FEATURE_SCG_HAS_SPLLDIV1)
+                 SCG_SPLLDIV_SPLLDIV1(config->div1) |
+#endif /* FSL_FEATURE_SCG_HAS_SPLLDIV1 */
+                 SCG_SPLLDIV_SPLLDIV2(config->div2)
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLDIV3) && FSL_FEATURE_SCG_HAS_SPLLDIV3)
+                 | SCG_SPLLDIV_SPLLDIV3(config->div3)
+#endif /* FSL_FEATURE_SCG_HAS_SPLLDIV3 */
+                 ;
+
+    /* Step 2. Set PLL configuration. */
+    SCG->SPLLCFG =
+        SCG_SPLLCFG_SOURCE(config->src) | SCG_SPLLCFG_PREDIV(config->prediv) | SCG_SPLLCFG_MULT(config->mult)
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL_PLLS) && FSL_FEATURE_SCG_HAS_SPLL_PLLS)
+      | SCG_SPLLCFG_PLLS(config->isPfdSelected)
+#endif /* FSL_FEATURE_SCG_HAS_SPLL_PLLS */
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL_BYPASS) && FSL_FEATURE_SCG_HAS_SPLL_BYPASS)
+      | SCG_SPLLCFG_BYPASS(config->isPfdSelected)
+#endif /* FSL_FEATURE_SCG_HAS_SPLL_BYPASS */
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL_PFDSEL) && FSL_FEATURE_SCG_HAS_SPLL_PFDSEL)
+      | SCG_SPLLCFG_PFDSEL(((uint32_t)config->pfdClkout >> 3U))
+#endif /* FSL_FEATURE_SCG_HAS_SPLL_PFDSEL */
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1)
+      | SCG_SPLLCFG_PLLPOSTDIV1(config->pllPostdiv1)
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1 */
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2)
+      | SCG_SPLLCFG_PLLPOSTDIV2(config->pllPostdiv2)
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2 */
+        ;
+
+    /* Step 3. Enable clock. */
+    SCG->SPLLCSR = (uint32_t)SCG_SPLLCSR_SPLLEN_MASK | config->enableMode;
+
+    /* Step 4. Wait for PLL clock to be valid. */
+    while (0UL == (SCG->SPLLCSR & SCG_SPLLCSR_SPLLVLD_MASK))
+    {
+    }
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL_MONITOR) && FSL_FEATURE_SCG_HAS_SPLL_MONITOR)
+    /* Step 5. Enabe monitor. */
+    SCG->SPLLCSR |= (uint32_t)config->monitorMode;
+#endif /* FSL_FEATURE_SCG_HAS_SPLL_MONITOR */
+    
+    return kStatus_Success;
+}
+
+/*!
+ * brief De-initializes the SCG system PLL.
+ *
+ * This function disables the SCG system PLL.
+ *
+ * retval kStatus_Success system PLL is deinitialized.
+ * retval kStatus_SCG_Busy system PLL is used by the system clock.
+ * retval kStatus_ReadOnly System PLL control register is locked.
+ *
+ * note This function can't detect whether the system PLL is used by an IP.
+ */
+status_t CLOCK_DeinitSysPll(void)
+{
+    uint32_t reg = SCG->SPLLCSR;
+    status_t status;
+
+    /* If clock is used by system, return error. */
+    if ((reg & SCG_SPLLCSR_SPLLSEL_MASK) != 0UL)
+    {
+        status = kStatus_SCG_Busy;
+    }
+    /* If configure register is locked, return error. */
+    else if ((reg & SCG_SPLLCSR_LK_MASK) != 0UL)
+    {
+        status = kStatus_ReadOnly;
+    }
+    else
+    {
+        /* Deinit and clear the error. */
+        SCG->SPLLCSR = SCG_SPLLCSR_SPLLERR_MASK;
+        status = kStatus_Success;
+    }
+
+    return status;
+}
+
+static uint32_t CLOCK_GetSysPllCommonFreq(void)
+{
+    uint32_t freq = 0U;
+
+    if ((SCG->SPLLCFG & SCG_SPLLCFG_SOURCE_MASK) != 0UL) /* If use FIRC */
+    {
+        freq = CLOCK_GetFircFreq();
+    }
+    else /* Use System OSC. */
+    {
+        freq = CLOCK_GetSysOscFreq();
+    }
+
+    if (freq != 0UL) /* If source is valid. */
+    {
+        freq /= (SCG_SPLLCFG_PREDIV_VAL + SCG_SPLL_PREDIV_BASE_VALUE); /* Pre-divider. */
+        freq *= (SCG_SPLLCFG_MULT_VAL + SCG_SPLL_MULT_BASE_VALUE);     /* Multiplier. */
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Gets the SCG system PLL clock frequency.
+ *
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetSysPllFreq(void)
+{
+    uint32_t freq;
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL_PLLS) && FSL_FEATURE_SCG_HAS_SPLL_PLLS)  
+    scg_spll_pfd_clkout_t pfdClkout;
+
+    if ((SCG->SPLLCFG & SCG_SPLLCFG_PLLS_MASK) != 0UL)
+    {
+        /* pfdClkout is SCG_SPLLCFG[PFDSEL] x 8. */
+        pfdClkout = (scg_spll_pfd_clkout_t)(((SCG->SPLLCFG & SCG_SPLLCFG_PFDSEL_MASK) >> SCG_SPLLCFG_PFDSEL_SHIFT) << 3U);
+        freq = CLOCK_GetSysPllPfdFreq(pfdClkout);
+    }
+    else 
+    {
+#endif /* FSL_FEATURE_SCG_HAS_SPLL_PLLS */
+        if ((SCG->SPLLCSR & SCG_SPLLCSR_SPLLVLD_MASK) != 0UL) /* System PLL is valid. */
+        {
+            freq = CLOCK_GetSysPllCommonFreq();
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1)
+            if (freq != 0UL)
+            {
+                freq /= (SCG_SPLLCFG_POSTDIV1_VAL + SCG_SPLL_POSTDIV1_BASE_VALUE); /* Post-divider 1. */
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2) && FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2) 
+                freq /= (SCG_SPLLCFG_POSTDIV2_VAL + SCG_SPLL_POSTDIV2_BASE_VALUE); /* Post-divider 2. */
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV2 */
+            }
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPOSTDIV1 */
+
+#if (defined(FSL_FEATURE_SOC_ULP1) && FSL_FEATURE_SOC_ULP1)
+            return freq;
+#else
+            return freq >> 1U;
+#endif
+        }
+        else
+        {
+            return 0U;
+        }
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL_PLLS) && FSL_FEATURE_SCG_HAS_SPLL_PLLS)  
+    }
+    
+    return freq;
+#endif /* FSL_FEATURE_SCG_HAS_SPLL_PLLS */
+}
+
+/*!
+ * brief Gets the SCG asynchronous clock frequency from the system PLL.
+ *
+ * param type     The asynchronous clock type.
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetSysPllAsyncFreq(scg_async_clk_t type)
+{
+    uint32_t pllFreq = CLOCK_GetSysPllFreq();
+    uint32_t divider = 0U;
+    uint32_t freq;
+
+    /* Get divider. */
+    if (pllFreq != 0UL)
+    {
+        switch (type)
+        {
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLDIV3) && FSL_FEATURE_SCG_HAS_SPLLDIV3)
+            case kSCG_AsyncDiv3Clk: /* SPLLDIV3_CLK. */
+                divider = SCG_SPLLDIV_SPLLDIV3_VAL;
+                break;
+#endif
+            case kSCG_AsyncDiv2Clk: /* SPLLDIV2_CLK. */
+                divider = SCG_SPLLDIV_SPLLDIV2_VAL;
+                break;
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLDIV1) && FSL_FEATURE_SCG_HAS_SPLLDIV1)
+            case kSCG_AsyncDiv1Clk: /* SPLLDIV1_CLK. */
+                divider = SCG_SPLLDIV_SPLLDIV1_VAL;
+                break;
+#endif
+            default:
+                divider = 0U;
+                break;
+        }
+    }
+    if (divider != 0UL)
+    {
+        freq = (pllFreq >> (divider - 1U));
+    }
+    else /* Output disabled. */
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+#if (defined(FSL_FEATURE_SCG_HAS_SPLLPFD) && FSL_FEATURE_SCG_HAS_SPLLPFD)
+/*!
+ * brief Gets the SCG system PLL PFD clock frequency.
+ *
+ * param pfdClkout     The selected PFD clock out. See "scg_spll_pfd_clkout_t".
+ * return  Clock frequency; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetSysPllPfdFreq(scg_spll_pfd_clkout_t pfdClkout)
+{
+    uint32_t freq;
+    uint32_t fracValue = 0U;
+
+    if ((SCG->SPLLPFD & SCG_PLLPFD_PFD_VALID_MASK(pfdClkout)) != 0UL) /* System PLL PFD is valid. */
+    {
+        if (0UL == (SCG->SPLLPFD & SCG_PLLPFD_PFD_CLKGATE_MASK(pfdClkout)))
+        {
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL_BYPASS) && FSL_FEATURE_SCG_HAS_SPLL_BYPASS)
+            if ((SCG->SPLLCFG & SCG_SPLLCFG_BYPASS_MASK) != 0UL)
+            {
+                freq = CLOCK_GetLvdsClkFreq();
+            }
+            else
+            {
+#endif /* FSL_FEATURE_SCG_HAS_SPLL_BYPASS */
+                fracValue = (SCG->SPLLPFD & SCG_PLLPFD_PFD_MASK(pfdClkout)) >> pfdClkout;
+
+                if (fracValue != 0UL)
+                {
+                    freq = CLOCK_GetSysPllCommonFreq();
+
+                    if (freq != 0UL) /* If source is valid. */
+                    {
+                        freq *= (PFD_FREQ_CALCUL_CONSTANT / fracValue); /* PFD Clock Frequency = PLL output frequency * 18/frac value. */
+                    }
+                }
+#if (defined(FSL_FEATURE_SCG_HAS_SPLL_BYPASS) && FSL_FEATURE_SCG_HAS_SPLL_BYPASS)
+            }
+#endif /* FSL_FEATURE_SCG_HAS_SPLL_BYPASS */
+        }
+        else
+        {
+            freq = 0U;
+        }
+
+        return freq;
+    }
+    else
+    {
+        return 0U;
+    }
+}
+
+/*!
+ * brief Enables the SCG system PLL Fractional Divide (PFD) clock out with configurations.
+ *
+ * SPLL Frequency = Fref * (MULT + NUM/DENOM)
+ * PFD Clock Frequency = PLL output frequency * 18/frac value
+ *
+ * code
+ * Example code for configuring SPLL as SPLL PFD clock output:
+ * const scg_spll_config_t g_scgSysPllConfig = {.enableMode = kSCG_SysPllEnable,
+ *                                            .div1 = kSCG_AsyncClkDisable,
+ *                                            .div2 = kSCG_AsyncClkDisable,
+ *                                            .div3 = kSCG_AsyncClkDisable,
+ *                                            .src = kSCG_SysPllSrcFirc,
+ *                                            .isBypassSelected = false,
+ *                                            .isPfdSelected = true, // Configure SPLL PFD as enabled
+ *                                            .prediv = 5U,
+ *                                            .pfdClkout = kSCG_AuxPllPfd3Clk, // Selects the SPLL PFD3 as the output clock
+ *                                            .mult = 20U,
+ *                                            .pllPostdiv1 = kSCG_SysClkDivBy1,
+ *                                            .pllPostdiv2 = kSCG_SysClkDivBy1};
+ * CLOCK_InitSysPll(&g_scgSysPllConfig);
+ * CLOCK_EnableSysPllPfdClkout(g_scgSysPllConfig.pfdClkout, 15U);
+ * endcode
+ *
+ * param pfdClkout  SPLL PFD clock out select.
+ * param fracValue  Fractional Divider value. Recommended to be kept between 12-35 for all PFDs.
+ */
+void CLOCK_EnableSysPllPfdClkout(scg_spll_pfd_clkout_t pfdClkout, uint8_t fracValue)
+{
+    /* 
+     * Input fractional divider value should have a maximum size of 6 bits (64U).
+     * Note: It is recommended that PFD settings are kept between 12-35 for all PFDs.
+     */
+    assert(fracValue);
+    assert(fracValue < SCG_SPLLPFD_PFD_MAX_VAL);
+
+    /* Step 1. Gate PFD clock. */
+    SCG->SPLLPFD |= SCG_PLLPFD_PFD_CLKGATE_MASK(pfdClkout);
+
+    /* Step 2. Program the new PFD value. */
+    SCG->SPLLPFD = (SCG->SPLLPFD & ~SCG_PLLPFD_PFD_MASK(pfdClkout)) | SCG_PLLPFD_PFD_VAL(pfdClkout, fracValue);
+
+    /* Step 3. Wait for PFD clock to be stable. */
+    while (0UL == (SCG->SPLLPFD & SCG_PLLPFD_PFD_VALID_MASK(pfdClkout)))
+    {
+    }
+
+    /* Step 4. Ungate PFD clock. */
+    SCG->SPLLPFD &= ~SCG_PLLPFD_PFD_CLKGATE_MASK(pfdClkout);
+}
+#endif /* FSL_FEATURE_SCG_HAS_SPLLPFD */
+#endif /* FSL_FEATURE_SCG_HAS_SPLL */
+
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLL) && FSL_FEATURE_SCG_HAS_LPFLL)
+/*!
+ * brief Initializes the SCG LPFLL clock.
+ *
+ * This function enables the SCG LPFLL clock according to the configuration.
+ *
+ * param config   Pointer to the configuration structure.
+ * retval kStatus_Success LPFLL is initialized.
+ * retval kStatus_SCG_Busy LPFLL has been enabled and is used by the system clock.
+ * retval kStatus_ReadOnly LPFLL control register is locked.
+ *
+ * note This function can't detect whether the LPFLL has been enabled and
+ * used by an IP.
+ */
+status_t CLOCK_InitLpFll(const scg_lpfll_config_t *config)
+{
+    assert(config);
+
+    status_t status;
+
+    /* De-init the LPFLL first. */
+    status = CLOCK_DeinitLpFll();
+
+    if (kStatus_Success != status)
+    {
+        return status;
+    }
+
+    /* Now start to set up LPFLL clock. */
+    /* Step 1. Setup dividers. */
+    SCG->LPFLLDIV = 
+#if (defined(FSL_FEATURE_SCG_HAS_FLLDIV1) && FSL_FEATURE_SCG_HAS_FLLDIV1)
+                  SCG_LPFLLDIV_LPFLLDIV1(config->div1) |
+#endif /* FSL_FEATURE_SCG_HAS_FLLDIV1 */
+                  SCG_LPFLLDIV_LPFLLDIV2(config->div2)
+#if (defined(FSL_FEATURE_SCG_HAS_FLLDIV3) && FSL_FEATURE_SCG_HAS_FLLDIV3)
+                  | SCG_LPFLLDIV_LPFLLDIV3(config->div3)
+#endif /* FSL_FEATURE_SCG_HAS_FLLDIV3 */
+                  ;
+
+    /* Step 2. Set LPFLL configuration. */
+    SCG->LPFLLCFG = SCG_LPFLLCFG_FSEL(config->range);
+
+    /* Step 3. Set trimming configuration. */
+    if ((config->trimConfig) != NULL)
+    {
+        SCG->LPFLLTCFG = SCG_LPFLLTCFG_TRIMDIV(config->trimConfig->trimDiv)
+                       | SCG_LPFLLTCFG_TRIMSRC(config->trimConfig->trimSrc)
+                       | SCG_LPFLLTCFG_LOCKW2LSB(config->trimConfig->lockMode);
+
+        if (kSCG_LpFllTrimNonUpdate == config->trimConfig->trimMode)
+        {
+            SCG->LPFLLSTAT = config->trimConfig->trimValue;
+        }
+
+        /* Trim mode. */
+        SCG->LPFLLCSR = (uint32_t)(config->trimConfig->trimMode);
+
+        if ((SCG->LPFLLCSR & SCG_LPFLLCSR_LPFLLERR_MASK) != 0UL)
+        {
+            return kStatus_Fail;
+        }
+    }
+
+    /* Step 4. Enable clock. */
+    SCG->LPFLLCSR |= ((uint32_t)SCG_LPFLLCSR_LPFLLEN_MASK | config->enableMode);
+
+    /* Step 5. Wait for LPFLL clock to be valid. */
+    while (0UL == (SCG->LPFLLCSR & SCG_LPFLLCSR_LPFLLVLD_MASK))
+    {
+    }
+
+    /* Step 6. Wait for LPFLL trim lock. */
+    if (((config->trimConfig) != NULL) && (kSCG_LpFllTrimUpdate == config->trimConfig->trimMode))
+    {
+        while (0UL == (SCG->LPFLLCSR & SCG_LPFLLCSR_LPFLLTRMLOCK_MASK))
+        {
+        }
+    }
+
+    return kStatus_Success;
+}
+
+/*!
+ * brief De-initializes the SCG LPFLL.
+ *
+ * This function disables the SCG LPFLL.
+ *
+ * retval kStatus_Success LPFLL is deinitialized.
+ * retval kStatus_SCG_Busy LPFLL is used by the system clock.
+ * retval kStatus_ReadOnly LPFLL control register is locked.
+ *
+ * note This function can't detect whether the LPFLL is used by an IP.
+ */
+status_t CLOCK_DeinitLpFll(void)
+{
+    uint32_t reg = SCG->LPFLLCSR;
+    status_t status;
+
+    /* If clock is used by system, return error. */
+    if ((reg & SCG_LPFLLCSR_LPFLLSEL_MASK) != 0UL)
+    {
+        status = kStatus_SCG_Busy;
+    }
+    /* If configure register is locked, return error. */
+    else if ((reg & SCG_LPFLLCSR_LK_MASK) != 0UL)
+    {
+        status = kStatus_ReadOnly;
+    }
+    else
+    {
+        SCG->LPFLLCSR = SCG_LPFLLCSR_LPFLLERR_MASK;
+        status = kStatus_Success;
+    }
+    
+    return status;
+}
+
+/*!
+ * brief Gets the SCG LPFLL clock frequency.
+ *
+ * return  Clock frequency in Hz; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetLpFllFreq(void)
+{
+    uint32_t freq;
+
+    static const uint32_t lpfllFreq[] = {
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLL_RANGE_48M_ONLY) && FSL_FEATURE_SCG_HAS_LPFLL_RANGE_48M_ONLY)
+        SCG_LPFLL_FREQ0,
+#elif (defined(FSL_FEATURE_SCG_HAS_LPFLL_RANGE_UP_TO_72M) && FSL_FEATURE_SCG_HAS_LPFLL_RANGE_UP_TO_72M)
+        SCG_LPFLL_FREQ0, SCG_LPFLL_FREQ1,
+#else
+        SCG_LPFLL_FREQ0, SCG_LPFLL_FREQ1, SCG_LPFLL_FREQ2, SCG_LPFLL_FREQ3,
+#endif
+    };
+
+    if ((SCG->LPFLLCSR & SCG_LPFLLCSR_LPFLLVLD_MASK) != 0UL) /* LPFLL is valid. */
+    {
+        freq = lpfllFreq[SCG_LPFLLCFG_FSEL_VAL];
+    }
+    else
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+/*!
+ * brief Gets the SCG asynchronous clock frequency from the LPFLL.
+ *
+ * param type     The asynchronous clock type.
+ * return  Clock frequency in Hz; If the clock is invalid, returns 0.
+ */
+uint32_t CLOCK_GetLpFllAsyncFreq(scg_async_clk_t type)
+{
+    uint32_t lpfllFreq = CLOCK_GetLpFllFreq();
+    uint32_t divider = 0U;
+    uint32_t freq;
+
+    /* Get divider. */
+    if (lpfllFreq != 0UL)
+    {
+        switch (type)
+        {
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLLDIV3) && FSL_FEATURE_SCG_HAS_LPFLLDIV3)
+            case kSCG_AsyncDiv3Clk: /* LPFLLDIV3_CLK. */
+                divider = SCG_LPFLLDIV_LPFLLDIV3_VAL;
+                break;
+#endif /* FSL_FEATURE_SCG_HAS_LPFLLDIV3 */
+            case kSCG_AsyncDiv2Clk: /* LPFLLDIV2_CLK. */
+                divider = SCG_LPFLLDIV_LPFLLDIV2_VAL;
+                break;
+#if (defined(FSL_FEATURE_SCG_HAS_LPFLLDIV1) && FSL_FEATURE_SCG_HAS_LPFLLDIV1)
+            case kSCG_AsyncDiv1Clk: /* LPFLLDIV1_CLK. */
+                divider = SCG_LPFLLDIV_LPFLLDIV1_VAL;
+                break;
+#endif /* FSL_FEATURE_SCG_HAS_LPFLLDIV1 */
+            default:
+                divider = 0U;
+                break;
+        }
+    }
+    if (divider != 0UL)
+    {
+        freq = lpfllFreq >> (divider - 1U);
+    }
+    else /* Output disabled. */
+    {
+        freq = 0U;
+    }
+
+    return freq;
+}
+
+#endif /* FSL_FEATURE_SCG_HAS_LPFLL */
+/* ## End:FuncMisc */

@@ -1,0 +1,12 @@
+/*!
+@defgroup tmu TMU: Thermal Management Unit Driver
+@details The MCUXpresso SDK provides a peripheral driver for the thermal management unit (TMU)
+         module of MCUXpresso SDK devices.
+
+# Typical use case {#TMUTpyUC}
+
+## Monitor and report Configuration {#TMUConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/tmu
+*/
+

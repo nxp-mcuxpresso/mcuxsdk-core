@@ -1,0 +1,6 @@
+/*!
+@defgroup wdog WDOG: Watchdog Timer Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Watchdog module (WDOG) of MCUXpresso SDK devices.
+
+# Typical use case {#WDOGTypUC}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/wdog*/

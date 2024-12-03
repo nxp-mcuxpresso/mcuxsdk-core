@@ -1,0 +1,10 @@
+/*!
+@defgroup ci_pi CI_PI: Parallel Camera Interface
+@details The MCUXpresso SDK provides a peripheral driver for the CI_PI
+         module of MCUXpresso SDK devices.
+
+The CI_PI module receives the camera input frame, so it should work
+together with ISI.
+
+*/
+

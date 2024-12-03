@@ -1,0 +1,40 @@
+/*!
+@defgroup cmp_1 CMP: Analog Comparator Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Analog Comparator (CMP) module of MCUXpresso SDK devices.
+
+# Function groups {#CMPFunc}
+The driver provides a set of functions to set two input sources of the on-chip comparator and compare the voltage
+of them. 
+
+## Initialization and deinitialization {#CMPInit}
+The function CMP_Init() initializes the CMP with specified configurations. The function
+CMP_GetDefaultConfig() gets the default configurations.
+
+The function CMP_Deinit() disables the module clock.
+
+## Compare {#CMPCompare}
+The function CMP_SetInputChannels() configures the P-side and N-side input sources.
+
+The function CMP_SetVREF() sets the reference voltage which can be dedicated to input 0 of both P and N sides.
+
+The function CMP_GetOutput() gets the compare result of the two sides.
+
+## Interrupt {#CMPInterrupt}
+Provides functions to enable/disable/clear CMP interrupts.
+
+The function CMP_EnableFilteredInterruptSource() allows users to select which analog comparator output (filtered or
+un-filtered) is used for interrupt detection.
+
+## Status {#CMPStatus}
+Provides functions to get the CMP status.
+
+
+# Typical use case {#CMPTpyUC}
+
+## Polling Configuration {#CMPPolConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cmp_1
+## Interrupt Configuration {#CMPIntConfig}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cmp_1
+*/
