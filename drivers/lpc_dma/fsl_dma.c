@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2022, 2024 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -64,13 +64,8 @@ static dma_handle_t *s_DMAHandle[FSL_FEATURE_DMA_ALL_CHANNELS];
 SDK_ALIGN(static dma_descriptor_t s_dma_descriptor_table0[FSL_FEATURE_DMA_MAX_CHANNELS],
           FSL_FEATURE_DMA0_DESCRIPTOR_ALIGN_SIZE);
 #else
-#if (defined(CPU_MIMXRT685SEVKA_dsp) || defined(CPU_MIMXRT685SFVKB_dsp))
 AT_NONCACHEABLE_SECTION_ALIGN(static dma_descriptor_t s_dma_descriptor_table0[FSL_FEATURE_DMA_MAX_CHANNELS],
                               FSL_FEATURE_DMA_DESCRIPTOR_ALIGN_SIZE);
-#else
-SDK_ALIGN(static dma_descriptor_t s_dma_descriptor_table0[FSL_FEATURE_DMA_MAX_CHANNELS],
-          FSL_FEATURE_DMA_DESCRIPTOR_ALIGN_SIZE);
-#endif /* (defined(CPU_MIMXRT685SEVKA_dsp) || defined(CPU_MIMXRT685SFVKB_dsp)) */
 #endif /* FSL_FEATURE_DMA0_DESCRIPTOR_ALIGN_SIZE */
 
 #if defined(DMA1)
@@ -78,13 +73,8 @@ SDK_ALIGN(static dma_descriptor_t s_dma_descriptor_table0[FSL_FEATURE_DMA_MAX_CH
 SDK_ALIGN(static dma_descriptor_t s_dma_descriptor_table1[FSL_FEATURE_DMA_MAX_CHANNELS],
           FSL_FEATURE_DMA1_DESCRIPTOR_ALIGN_SIZE);
 #else
-#if (defined(CPU_MIMXRT685SEVKA_dsp) || defined(CPU_MIMXRT685SFVKB_dsp))
 AT_NONCACHEABLE_SECTION_ALIGN(static dma_descriptor_t s_dma_descriptor_table1[FSL_FEATURE_DMA_MAX_CHANNELS],
                               FSL_FEATURE_DMA_DESCRIPTOR_ALIGN_SIZE);
-#else
-SDK_ALIGN(static dma_descriptor_t s_dma_descriptor_table1[FSL_FEATURE_DMA_MAX_CHANNELS],
-          FSL_FEATURE_DMA_DESCRIPTOR_ALIGN_SIZE);
-#endif /* (defined(CPU_MIMXRT685SEVKA_dsp) || defined(CPU_MIMXRT685SFVKB_dsp)) */
 #endif /* FSL_FEATURE_DMA1_DESCRIPTOR_ALIGN_SIZE */
 static dma_descriptor_t *s_dma_descriptor_table[] = {s_dma_descriptor_table0, s_dma_descriptor_table1};
 #else

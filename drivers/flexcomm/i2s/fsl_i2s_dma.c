@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2022, 2024 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -74,13 +74,8 @@ static void I2S_AddTransferDMA(I2S_Type *base, i2s_dma_handle_t *handle);
  * Variables
  ******************************************************************************/
 /*<! @brief Allocate DMA transfer descriptors. */
-#if (defined(CPU_MIMXRT685SEVKA_dsp) || defined(CPU_MIMXRT685SFVKB_dsp))
 AT_NONCACHEABLE_SECTION_ALIGN(static dma_descriptor_t s_DmaDescriptors[DMA_DESCRIPTORS * FSL_FEATURE_SOC_I2S_COUNT],
                               FSL_FEATURE_DMA_LINK_DESCRIPTOR_ALIGN_SIZE);
-#else
-SDK_ALIGN(static dma_descriptor_t s_DmaDescriptors[DMA_DESCRIPTORS * FSL_FEATURE_SOC_I2S_COUNT],
-          FSL_FEATURE_DMA_LINK_DESCRIPTOR_ALIGN_SIZE);
-#endif
 
 /*<! @brief Buffer with dummy TX data. */
 SDK_ALIGN(static uint32_t s_DummyBufferTx, 4U);
