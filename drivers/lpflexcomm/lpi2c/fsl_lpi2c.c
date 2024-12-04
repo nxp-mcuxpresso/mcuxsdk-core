@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2024 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1709,6 +1709,9 @@ void LPI2C_SlaveInit(LPI2C_Type *base, const lpi2c_slave_config_t *slaveConfig, 
       
     }
 
+    /* Check target feature */
+    assert((base->VERID & LPI2C_VERID_FEATURE_MASK) == 0x3U);
+
     /* Restore to reset conditions. */
     LPI2C_SlaveReset(base);
 
@@ -2398,7 +2401,7 @@ void LPI2C_CommonIRQHandler(LPI2C_Type *base, uint32_t instance)
     }
 
     /* Check for slave IRQ. */
-    if ((0U != (base->SCR & LPI2C_SCR_SEN_MASK)) && (NULL != s_lpi2cSlaveIsr))
+    if (((base->VERID & LPI2C_VERID_FEATURE_MASK) == 0x3U) && (0U != (base->SCR & LPI2C_SCR_SEN_MASK)) && (NULL != s_lpi2cSlaveIsr))
     {
         /* Slave mode. */
         s_lpi2cSlaveIsr(instance, s_lpi2cSlaveHandle[instance]);
