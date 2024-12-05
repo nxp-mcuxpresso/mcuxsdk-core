@@ -26,7 +26,7 @@ _ARG_SEPARATOR = '--'
 SYSBUILD_PROJ_DIR = pathlib.Path(__file__).resolve().parent.parent.parent \
                     / pathlib.Path('cmake/extension/sysbuild')
 
-BUILD_HELP_DOC_URL = 'https://nl2-nxrm.sw.nxp.com/repository/elastic-jenkins/sdk3_doc/latest_build//develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#build'
+BUILD_HELP_DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#build'
 
 BUILD_USAGE = '''\
 west build [-h] [-b BOARD[@REV]]] [-d BUILD_DIR]
