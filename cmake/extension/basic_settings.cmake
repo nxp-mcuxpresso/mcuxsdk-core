@@ -105,6 +105,11 @@ list(
   CONFIG_MCUX_TOOLCHAIN_JLINK_CPU_IDENTIFIER
   CONFIG_MCUX_HW_SOC_MULTICORE_DEVICE)
 
+list(
+  APPEND
+  USED_CONFIG_SYMBOLS
+  CONFIG_TOOLCHAIN)
+
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.25.0")
     # Get log level, can be ERROR, WARNING, NOTICE, STATUS (default), VERBOSE, DEBUG, or TRACE.
     # Note it only support CMake >= 3.25. https://cmake.org/cmake/help/latest/command/cmake_language.html#query-message-log-level

@@ -290,6 +290,64 @@ if(CONF_FILE)
   list(APPEND merge_config_files ${CONF_FILE_AS_LIST})
 endif()
 
+# Support assigning Kconfig symbols on the command-line with CMake
+# cache variables prefixed according to the Kconfig namespace.
+# This feature is experimental and undocumented until it has undergone more
+# user-testing.
+unset(EXTRA_KCONFIG_OPTIONS)
+if(SYSBUILD)
+  get_property(sysbuild_variable_names TARGET sysbuild_cache PROPERTY "SYSBUILD_CACHE:VARIABLES")
+  zephyr_get(SYSBUILD_MAIN_APP)
+  zephyr_get(SYSBUILD_NAME)
+
+  foreach (name ${sysbuild_variable_names})
+    if("${name}" MATCHES "^${SYSBUILD_NAME}_${KCONFIG_NAMESPACE}_")
+      string(REGEX REPLACE "^${SYSBUILD_NAME}_" "" org_name ${name})
+      get_property(${org_name} TARGET sysbuild_cache PROPERTY ${name})
+      list(APPEND cache_variable_names ${org_name})
+    elseif(SYSBUILD_MAIN_APP AND "${name}" MATCHES "^${KCONFIG_NAMESPACE}_")
+      get_property(${name} TARGET sysbuild_cache PROPERTY ${name})
+      list(APPEND cache_variable_names ${name})
+    endif()
+  endforeach()
+  LIST(REMOVE_ITEM cache_variable_names ${USED_CONFIG_SYMBOLS})
+else()
+  get_cmake_property(cache_variable_names CACHE_VARIABLES)
+  list(FILTER cache_variable_names INCLUDE REGEX "${KCONFIG_NAMESPACE}_")
+  list(REMOVE_DUPLICATES cache_variable_names)
+  LIST(REMOVE_ITEM cache_variable_names ${USED_CONFIG_SYMBOLS})
+endif()
+
+# Sorting the variable names will make checksum calculation more stable.
+list(SORT cache_variable_names)
+foreach (name ${cache_variable_names})
+  if(DEFINED ${name})
+    # When a cache variable starts with the 'KCONFIG_NAMESPACE' value, it is
+    # assumed to be a Kconfig symbol assignment from the CMake command line.
+    set(EXTRA_KCONFIG_OPTIONS
+            "${EXTRA_KCONFIG_OPTIONS}\n${name}=${${name}}"
+    )
+    set(CLI_${name} "${${name}}")
+    list(APPEND cli_config_list ${name})
+  elseif(DEFINED CLI_${name})
+    # An additional 'CLI_' prefix means that the value was set by the user in
+    # an earlier invocation. Append it to extra config only if no new value was
+    # assigned above.
+    set(EXTRA_KCONFIG_OPTIONS
+            "${EXTRA_KCONFIG_OPTIONS}\n${name}=${CLI_${name}}"
+    )
+  endif()
+endforeach()
+
+if(EXTRA_KCONFIG_OPTIONS)
+  set(EXTRA_KCONFIG_OPTIONS_FILE ${CMAKE_CURRENT_BINARY_DIR}/kconfig/extra_kconfig_options.conf)
+  file(WRITE
+          ${EXTRA_KCONFIG_OPTIONS_FILE}
+          ${EXTRA_KCONFIG_OPTIONS}
+  )
+  list(APPEND merge_config_files ${EXTRA_KCONFIG_OPTIONS_FILE})
+endif()
+
 # merge_config_files can be empty
 if (merge_config_files)
   # Calculate a checksum of merge_config_files to determine if we need to
@@ -408,9 +466,36 @@ foreach(kconfig_input ${merge_config_files} ${DOTCONFIG}
     PROPERTY CMAKE_CONFIGURE_DEPENDS ${kconfig_input})
 endforeach()
 
+# Before importing the symbol values from DOTCONFIG, process the CLI values by
+# re-importing them from EXTRA_KCONFIG_OPTIONS_FILE. Later, we want to compare
+# the values from both files, and 'import_kconfig' will make this easier.
+if(EXTRA_KCONFIG_OPTIONS_FILE)
+  import_kconfig(${KCONFIG_NAMESPACE} ${EXTRA_KCONFIG_OPTIONS_FILE})
+  foreach (name ${cache_variable_names})
+    if(DEFINED ${name})
+      set(temp_${name} "${${name}}")
+      unset(${name})
+    endif()
+  endforeach()
+endif()
+
 # sysbuild config need to be imported for sub project
 if(DEFINED SB_CONF_FILE)
   import_kconfig(${KCONFIG_NAMESPACE} ${DOTCONFIG})
 else()
   mcux_load_prjconf(${CMAKE_CURRENT_BINARY_DIR} .config)
 endif()
+
+# Cache the CLI Kconfig symbols that survived through Kconfig, prefixed with CLI_.
+# Remove those who might have changed compared to earlier runs, if they no longer appears.
+foreach (name ${cache_variable_names})
+  # Note: "${CLI_${name}}" is the verbatim value of ${name} from command-line,
+  # while "${temp_${name}}" is the same value processed by 'import_kconfig'.
+  if(((NOT DEFINED ${name}) AND (NOT DEFINED temp_${name})) OR
+  ((DEFINED ${name}) AND (DEFINED temp_${name}) AND (${name} STREQUAL temp_${name})))
+    set(CLI_${name} ${CLI_${name}} CACHE INTERNAL "")
+  else()
+    unset(CLI_${name} CACHE)
+  endif()
+  unset(temp_${name})
+endforeach()
