@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section mcx_cmc MCX_CMC
-  The current MCX_CMC driver version is 2.2.2.
+  The current MCX_CMC driver version is 2.2.3.
+
+  - 2.2.3
+    - Improvements
+      - Clear SCB SCR[SLEEPDEEP] bitfield after wakeup.
 
   - 2.2.2
     - Improvements

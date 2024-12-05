@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section cmc CMC
-  The current CMC driver version is 2.4.0.
+  The current CMC driver version is 2.4.1.
+
+  - 2.4.1
+    - Improvements
+      - Clear SCB SCR[SLEEPDEEP] bitfield after wakeup.
 
   - 2.4.0
     - New Features

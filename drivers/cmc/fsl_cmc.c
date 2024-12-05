@@ -1,6 +1,5 @@
 /*
- * Copyright 2019-2022 NXP
- * All rights reserved.
+ * Copyright 2019-2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -296,6 +295,12 @@ void CMC_EnterLowPowerMode(CMC_Type *base, const cmc_power_domain_config_t *conf
         __DSB();
         __WFI();
         __ISB();
+
+        /* Clear the SLEEPDEEP bitfield, when wake up from sleep mode. */
+        if ((SCB->SCR & SCB_SCR_SLEEPDEEP_Msk) == SCB_SCR_SLEEPDEEP_Msk)
+        {
+            SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
+        }
     }
     else
     {
@@ -312,6 +317,12 @@ void CMC_EnterLowPowerMode(CMC_Type *base, const cmc_power_domain_config_t *conf
             __DSB();
             __WFI();
             __ISB();
+
+            /* Clear the SLEEPDEEP bitfield, when wake up from low power mode. */
+            if ((SCB->SCR & SCB_SCR_SLEEPDEEP_Msk) == SCB_SCR_SLEEPDEEP_Msk)
+            {
+                SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
+            }
         }
     }
 }

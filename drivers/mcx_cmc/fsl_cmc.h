@@ -1,6 +1,5 @@
 /*
  * Copyright 2022-2024 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -17,8 +16,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*@{*/
-/*! @brief CMC driver version 2.2.2. */
-#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 2, 2))
+/*! @brief CMC driver version 2.2.3. */
+#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 2, 3))
 /* @} */
 
 /*!
