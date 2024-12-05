@@ -130,6 +130,7 @@ class UpdateToolDataRepo(WestCommand):
                 if 'copyright' not in contents.lower():
                     # add copyright
                     contents = COPYRIGHT_HEADER + contents
+                contents = contents.replace('MIR/marketing_data/1.0', 'tool_data')
                 # dump to new yml
                 with open(new_yml, 'w', encoding='UTF-8',  errors='ignore') as f:
                     f.write(contents)
@@ -176,6 +177,7 @@ class UpdateToolDataRepo(WestCommand):
                 if 'copyright' not in contents.lower():
                     # add copyright
                     contents = COPYRIGHT_HEADER + contents
+                contents = contents.replace('MIR/marketing_data/1.0', 'tool_data')
                 # dump to new yml
                 with open(new_yml, 'w', encoding='UTF-8',  errors='ignore') as f:
                     f.write(contents)
