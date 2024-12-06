@@ -178,6 +178,14 @@ if(NOT DEFINED SB_CONF_FILE)
   list(APPEND COMMON_KCONFIG_ENV_SETTINGS ${_VARIABLE_FROM_CMAKE})
 endif ()
 
+if(${MCUX_SDK_PROJECT_NAME} STREQUAL sysbuild)
+  if(EXISTS ${SdkRootDirPath}/examples/_boards/${board})
+    list(APPEND COMMON_KCONFIG_ENV_SETTINGS board_root=examples/_boards)
+  elseif(EXISTS ${SdkRootDirPath}/examples_int/_boards/${board})
+    list(APPEND COMMON_KCONFIG_ENV_SETTINGS board_root=examples_int/_boards)
+  endif()
+endif()
+
 set(EXTRA_KCONFIG_TARGET_COMMAND_FOR_menuconfig
     ${SdkRootDirPath}/scripts/kconfig/menuconfig.py)
 
