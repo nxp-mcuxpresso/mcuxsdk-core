@@ -21,7 +21,7 @@ if(CONFIG_MCUX_COMPONENT_driver.netc_imx95)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.netc)
-    mcux_component_version(2.8.0)
+    mcux_component_version(2.8.1)
 
     mcux_add_source(
         SOURCES
@@ -49,7 +49,7 @@ if(CONFIG_MCUX_COMPONENT_driver.netc)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.netc_switch)
-    mcux_component_version(2.8.0)
+    mcux_component_version(2.8.1)
 
     mcux_add_source(
         SOURCES
@@ -62,7 +62,7 @@ if(CONFIG_MCUX_COMPONENT_driver.netc_switch)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.netc_phywrapper)
-    mcux_component_version(2.8.0)
+    mcux_component_version(2.8.1)
 
     mcux_add_source(
         SOURCES
@@ -75,7 +75,7 @@ if(CONFIG_MCUX_COMPONENT_driver.netc_phywrapper)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.netc_msg)
-    mcux_component_version(2.8.0)
+    mcux_component_version(2.8.1)
 
     mcux_add_source(
         SOURCES

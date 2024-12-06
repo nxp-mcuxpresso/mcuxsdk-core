@@ -2,7 +2,7 @@
 @page driver_log Driver Change Log
 
 @section prince PRINCE
-  The current PRINCE driver version is 2.5.1.
+  The current PRINCE driver version is 2.6.0.
 
   - Version 2.6.0
     - Renamed CSS to ELS.

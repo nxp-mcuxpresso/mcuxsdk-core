@@ -2,7 +2,7 @@
 @page driver_log Driver Change Log
 
 @section hashcrypt HASHCRYPT
-  The current HASHCRYPT driver version is 2.2.15.
+  The current HASHCRYPT driver version is 2.2.16.
 
   - 2.0.0
     - Initial version.

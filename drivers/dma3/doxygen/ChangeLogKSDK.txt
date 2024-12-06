@@ -2,7 +2,7 @@
 @page driver_log Driver Change Log
 
 @section dma3 EDMA
-  The current eDMA driver version is 2.3.0.
+  The current eDMA driver version is 2.3.1.
 
   - 2.3.1
     - Bug Fixes

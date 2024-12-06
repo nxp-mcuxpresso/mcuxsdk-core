@@ -1,6 +1,5 @@
 /*
- * Copyright 2019-2023 NXP
- * All rights reserved.
+ * Copyright 2019-2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -33,7 +32,7 @@
 /*! @name Driver version */
 /*@{*/
 /*! @brief SMARTDMA driver version */
-#define FSL_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 9, 1))
+#define FSL_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 0))
 /*@}*/
 
 /*! @brief Callback function prototype for the smartdma driver. */

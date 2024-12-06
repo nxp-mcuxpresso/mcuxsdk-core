@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
- * All rights reserved.
+ * Copyright 2016-2020, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,7 +20,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_PWM_DRIVER_VERSION (MAKE_VERSION(2, 0, 0)) /*!< Version 2.0.0 */
+#define FSL_PWM_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*! @} */
 
 /*! @brief PWM clock source select. */
