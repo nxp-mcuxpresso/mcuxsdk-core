@@ -12,7 +12,7 @@ if(CONFIG_MCUX_COMPONENT_driver.dspi_dma)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.dspi_edma)
-    mcux_component_version(2.2.6)
+    mcux_component_version(2.2.7)
 
     mcux_add_source(SOURCES fsl_dspi_edma.h fsl_dspi_edma.c)
 
@@ -21,7 +21,7 @@ if(CONFIG_MCUX_COMPONENT_driver.dspi_edma)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.dspi)
-    mcux_component_version(2.2.6)
+    mcux_component_version(2.2.7)
 
     mcux_add_source(SOURCES fsl_dspi.h fsl_dspi.c)
 

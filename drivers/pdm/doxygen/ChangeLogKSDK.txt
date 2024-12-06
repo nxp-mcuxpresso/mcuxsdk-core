@@ -4,7 +4,7 @@
 @section pdm PDM
   The current PDM driver version is 2.9.1.
 
-  - 2.7.4
+  - 2.9.1
     - Bug Fixes
       - Fixed the issue that the driver still enters the interrupt after disabling clock.
 

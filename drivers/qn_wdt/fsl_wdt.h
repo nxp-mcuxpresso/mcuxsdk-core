@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
- * All rights reserved.
+ * Copyright 2016-2019, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,7 +23,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief WDT driver version */
-#define FSL_WDT_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
+#define FSL_WDT_DRIVER_VERSION (MAKE_VERSION(2, 0, 2))
 /*! @} */
 
 /*! @brief Describes WDT configuration structure. */

@@ -1,6 +1,5 @@
 /*
- * Copyright 2018-2021 NXP
- * All rights reserved.
+ * Copyright 2018-2021, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,8 +20,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief IAP driver version 2.1.2. */
-#define FSL_IAP_DRIVER_VERSION (MAKE_VERSION(2, 1, 2))
+/*! @brief IAP driver version. */
+#define FSL_IAP_DRIVER_VERSION (MAKE_VERSION(2, 1, 3))
 /*! @} */
 
 /*!

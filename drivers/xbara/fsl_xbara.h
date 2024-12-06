@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2019, 2022 NXP
+ * Copyright 2016-2019, 2022, 2024 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -20,7 +20,7 @@
  * Definitions
  ******************************************************************************/
 
-#define FSL_XBARA_DRIVER_VERSION (MAKE_VERSION(2, 0, 5))
+#define FSL_XBARA_DRIVER_VERSION (MAKE_VERSION(2, 0, 6))
 
 /* Macros for entire XBARA_SELx register.  */
 #define XBARA_SELx(base, output) (((volatile uint16_t *)(&((base)->SEL0)))[(uint32_t)(output) / 2UL])

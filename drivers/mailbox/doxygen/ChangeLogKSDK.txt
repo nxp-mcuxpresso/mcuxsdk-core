@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section mailbox MAILBOX
-  The current MAILBOX driver version is 2.3.1.
+  The current MAILBOX driver version is 2.3.2.
+
+  - 2.3.2
+    - Improvements
+      - Added support for the MCXN946 and MCXN546 series
 
   - 2.3.1
     - Improvements
