@@ -1,0 +1,37 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: Apache-2.0
+
+source "https://rubygems.org"
+# mirrors for china users
+# If you meet SSL error, please log out Zscaler by temp
+# source 'https://mirrors.tuna.tsinghua.edu.cn/rubygems/'
+
+# Notes:
+# 1. JRuby support is experimental
+# 2. Prefer use native extensions as they are more stable and save disk size for portable ruby
+#   sqlite3: > 2.0.0
+#   nokogiri: > 1.11
+#   Rubygems: >= 3.3.22 see: https://github.com/sparklemotion/sqlite3-ruby/releases/tag/v2.0.0
+# 3. Run gem update --system to use the latest RubyGems
+
+gem 'deep_merge'
+# https://github.com/ruby-git/ruby-git/releases/tag/v1.17.0 introduced ActiveSupport
+gem 'git', '< 1.17.0'
+gem 'hashie'
+gem 'json-schema'
+gem 'json_schemer'
+# x86_64-linux: requires: glibc >= 2.17
+gem 'nokogiri', '1.15.3'
+gem 'nokogiri-happymapper', '0.9.0'
+gem 'rubyzip'
+gem 'zlib', platforms: [:mri, :windows]
+gem 'sequel'
+# x86_64-linux: requires: glibc >= 2.17
+gem 'sqlite3', '2.0.4', platforms: [:mri, :windows]
+gem 'jdbc-sqlite3', platforms: [:jruby]
+gem 'securerandom'
+gem 'parallel', '1.26.2'
+gem 'rubytree'
+gem 'rexml'
+gem 'ruby-graphviz'
