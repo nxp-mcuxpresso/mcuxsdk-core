@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.dcp
     default y if MCUX_HW_IP_DriverType_DCP
 
 config MCUX_COMPONENT_driver.dcp
-    bool "Use driver dcp"
+    bool "dcp"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.dcp

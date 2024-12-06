@@ -15,13 +15,13 @@ config MCUX_HAS_COMPONENT_driver.lpuart
     default y if MCUX_HW_IP_DriverType_LPUART
 
 config MCUX_COMPONENT_driver.lpuart_dma
-    bool "Use driver lpuart_dma"
+    bool "lpuart_dma"
     select MCUX_COMPONENT_driver.lpuart
     select MCUX_COMPONENT_driver.dma
     depends on MCUX_HAS_COMPONENT_driver.lpuart_dma
 
 config MCUX_COMPONENT_driver.lpuart_edma
-    bool "Use driver lpuart_edma"
+    bool "lpuart_edma"
     select MCUX_COMPONENT_driver.lpuart
     select MCUX_COMPONENT_driver.dma3 if MCUX_HAS_COMPONENT_driver.dma3
     select MCUX_COMPONENT_driver.edma if MCUX_HAS_COMPONENT_driver.edma
@@ -29,6 +29,6 @@ config MCUX_COMPONENT_driver.lpuart_edma
     depends on MCUX_HAS_COMPONENT_driver.lpuart_edma
 
 config MCUX_COMPONENT_driver.lpuart
-    bool "Use driver lpuart"
+    bool "lpuart"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lpuart

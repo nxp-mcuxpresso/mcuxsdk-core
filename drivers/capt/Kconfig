@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.capt
     default y if MCUX_HW_IP_DriverType_CAPT
 
 config MCUX_COMPONENT_driver.capt
-    bool "Use driver capt"
+    bool "capt"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.capt

@@ -15,18 +15,18 @@ config MCUX_HAS_COMPONENT_driver.i3c
     default y if MCUX_HW_IP_DriverType_I3C
 
 config MCUX_COMPONENT_driver.i3c_dma
-    bool "Use driver i3c_dma"
+    bool "i3c_dma"
     select MCUX_COMPONENT_driver.i3c
     select MCUX_COMPONENT_driver.lpc_dma
     depends on MCUX_HAS_COMPONENT_driver.i3c_dma
 
 config MCUX_COMPONENT_driver.i3c_edma
-    bool "Use driver i3c_edma"
+    bool "i3c_edma"
     select MCUX_COMPONENT_driver.i3c
     select MCUX_COMPONENT_driver.edma4
     depends on MCUX_HAS_COMPONENT_driver.i3c_edma
 
 config MCUX_COMPONENT_driver.i3c
-    bool "Use driver i3c"
+    bool "i3c"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.i3c

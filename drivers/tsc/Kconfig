@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.tsc
     default y if MCUX_HW_IP_DriverType_TSC
 
 config MCUX_COMPONENT_driver.tsc
-    bool "Use driver tsc"
+    bool "tsc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.tsc

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.cmc
     default y if MCUX_HW_IP_DriverType_CMC
 
 config MCUX_COMPONENT_driver.cmc
-    bool "Use driver cmc"
+    bool "cmc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.cmc

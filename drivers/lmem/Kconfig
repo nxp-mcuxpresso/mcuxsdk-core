@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.lmem
     default y if MCUX_HW_IP_DriverType_AHB_LMEM
 
 config MCUX_COMPONENT_driver.lmem
-    bool "Use driver lmem"
+    bool "lmem"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lmem

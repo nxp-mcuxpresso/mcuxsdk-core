@@ -8,6 +8,6 @@ config MCUX_HAS_COMPONENT_driver.dsc_flash
       && !(MCUX_HAS_COMPONENT_driver.dsc_flash_romapi)
 
 config MCUX_COMPONENT_driver.dsc_flash
-    bool "Use driver dsc_flash"
+    bool "dsc_flash"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.dsc_flash

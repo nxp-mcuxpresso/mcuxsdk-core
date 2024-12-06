@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.llwu
     default y if MCUX_HW_IP_DriverType_LLWU
 
 config MCUX_COMPONENT_driver.llwu
-    bool "Use driver llwu"
+    bool "llwu"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.llwu

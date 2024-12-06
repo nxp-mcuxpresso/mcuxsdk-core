@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.flash_k4_iap
     default y if MCUX_HW_IP_DriverType_FLASH_K4_IAP
 
 config MCUX_COMPONENT_driver.flash_k4_iap
-    bool "Use driver flash_k4_iap"
+    bool "flash_k4_iap"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.flash_k4_iap

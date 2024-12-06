@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.ci_pi
     default y if MCUX_HW_IP_DriverType_CI_PI_CSR
 
 config MCUX_COMPONENT_driver.ci_pi
-    bool "Use driver ci_pi"
+    bool "ci_pi"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.ci_pi

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.epdc
     default y if MCUX_HW_IP_DriverType_EPDC
 
 config MCUX_COMPONENT_driver.epdc
-    bool "Use driver epdc"
+    bool "epdc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.epdc

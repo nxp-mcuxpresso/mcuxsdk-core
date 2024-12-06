@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.jn_cmp
     default y if MCUX_HW_IP_DriverType_JN_CMP
 
 config MCUX_COMPONENT_driver.jn_cmp
-    bool "Use driver jn_cmp"
+    bool "jn_cmp"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.jn_cmp

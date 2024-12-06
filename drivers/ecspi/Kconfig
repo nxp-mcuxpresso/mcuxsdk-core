@@ -11,12 +11,12 @@ config MCUX_HAS_COMPONENT_driver.ecspi
     default y if MCUX_HW_IP_DriverType_ECSPI
 
 config MCUX_COMPONENT_driver.ecspi_sdma
-    bool "Use driver ecspi_sdma"
+    bool "ecspi_sdma"
     select MCUX_COMPONENT_driver.ecspi
     select MCUX_COMPONENT_driver.sdma
     depends on MCUX_HAS_COMPONENT_driver.ecspi_sdma
 
 config MCUX_COMPONENT_driver.ecspi
-    bool "Use driver ecspi"
+    bool "ecspi"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.ecspi

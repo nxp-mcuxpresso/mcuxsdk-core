@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.bee
     default y if MCUX_HW_IP_DriverType_BEE
 
 config MCUX_COMPONENT_driver.bee
-    bool "Use driver bee"
+    bool "bee"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.bee

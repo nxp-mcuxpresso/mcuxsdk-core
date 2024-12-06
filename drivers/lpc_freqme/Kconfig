@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.lpc_freqme
     default y if MCUX_HW_IP_DriverType_FREQME
 
 config MCUX_COMPONENT_driver.lpc_freqme
-    bool "Use driver lpc_freqme"
+    bool "lpc_freqme"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lpc_freqme

@@ -11,12 +11,12 @@ config MCUX_HAS_COMPONENT_driver.lpsci
     default y if MCUX_HW_IP_DriverType_LPSCI
 
 config MCUX_COMPONENT_driver.lpsci_dma
-    bool "Use driver lpsci_dma"
+    bool "lpsci_dma"
     select MCUX_COMPONENT_driver.lpsci
     select MCUX_COMPONENT_driver.dma
     depends on MCUX_HAS_COMPONENT_driver.lpsci_dma
 
 config MCUX_COMPONENT_driver.lpsci
-    bool "Use driver lpsci"
+    bool "lpsci"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lpsci

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.flash
     default y if MCUX_HW_IP_DriverType_FTFE || MCUX_HW_IP_DriverType_FTFA || MCUX_HW_IP_DriverType_FTFL
 
 config MCUX_COMPONENT_driver.flash
-    bool "Use driver flash"
+    bool "flash"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.flash

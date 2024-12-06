@@ -7,5 +7,5 @@ config MCUX_HAS_COMPONENT_driver.ipwm
     default y if MCUX_HW_IP_DriverType_IPWM
 
 config MCUX_COMPONENT_driver.ipwm
-    bool "Use driver ipwm"
+    bool "ipwm"
     depends on MCUX_HAS_COMPONENT_driver.ipwm

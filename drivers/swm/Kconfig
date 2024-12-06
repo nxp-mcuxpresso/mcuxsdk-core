@@ -7,7 +7,7 @@ config MCUX_HAS_COMPONENT_driver.swm
     default y if MCUX_HW_IP_DriverType_SWM
 
 config MCUX_COMPONENT_driver.swm
-    bool "Use driver swm"
+    bool "swm"
     select MCUX_COMPONENT_driver.common
     select MCUX_COMPONENT_driver.swm_connections
     depends on MCUX_HAS_COMPONENT_driver.swm

@@ -11,7 +11,7 @@ config MCUX_HAS_COMPONENT_driver.xspi
     default y if MCUX_HW_IP_DriverType_XSPI
 
 config MCUX_COMPONENT_driver.xspi_edma
-    bool "Use driver xspi_edma"
+    bool "xspi_edma"
     select MCUX_COMPONENT_driver.xspi
     select MCUX_COMPONENT_driver.dma3 if MCUX_HAS_COMPONENT_driver.dma3
     select MCUX_COMPONENT_driver.edma if MCUX_HAS_COMPONENT_driver.edma
@@ -19,6 +19,6 @@ config MCUX_COMPONENT_driver.xspi_edma
     depends on MCUX_HAS_COMPONENT_driver.xspi_edma
 
 config MCUX_COMPONENT_driver.xspi
-    bool "Use driver xspi"
+    bool "xspi"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.xspi

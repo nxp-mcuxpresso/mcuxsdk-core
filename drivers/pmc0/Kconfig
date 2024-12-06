@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.pmc0
     default y if MCUX_HW_IP_DriverType_PMC0
 
 config MCUX_COMPONENT_driver.pmc0
-    bool "Use driver pmc0"
+    bool "pmc0"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.pmc0

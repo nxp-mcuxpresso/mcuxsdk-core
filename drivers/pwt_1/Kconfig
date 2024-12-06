@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.pwt_1
     default y if MCUX_HW_IP_DriverType_PWT_1
 
 config MCUX_COMPONENT_driver.pwt_1
-    bool "Use driver pwt_1"
+    bool "pwt_1"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.pwt_1

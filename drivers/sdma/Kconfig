@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.sdma
     default y if MCUX_HW_IP_DriverType_SDMAARM
 
 config MCUX_COMPONENT_driver.sdma
-    bool "Use driver sdma"
+    bool "sdma"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.sdma

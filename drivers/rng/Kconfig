@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.rng
     default y if MCUX_HW_IP_DriverType_RNG
 
 config MCUX_COMPONENT_driver.rng
-    bool "Use driver rng"
+    bool "rng"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.rng

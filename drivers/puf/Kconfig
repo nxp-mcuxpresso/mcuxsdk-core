@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.puf
     default y if MCUX_HW_IP_DriverType_PUF || MCUX_HW_IP_DriverType_LPC_PUF
 
 config MCUX_COMPONENT_driver.puf
-    bool "Use driver puf"
+    bool "puf"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.puf

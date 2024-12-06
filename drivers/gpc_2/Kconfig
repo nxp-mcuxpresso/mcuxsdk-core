@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.gpc_2
     default y if MCUX_HW_IP_DriverType_GPC_2
 
 config MCUX_COMPONENT_driver.gpc_2
-    bool "Use driver gpc_2"
+    bool "gpc_2"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.gpc_2

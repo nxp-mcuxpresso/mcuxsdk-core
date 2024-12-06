@@ -3,6 +3,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 config MCUX_COMPONENT_driver.mx25
-    bool "Use driver mx25"
+    bool "mx25"
     select MCUX_COMPONENT_driver.spifi_dma
     depends on MCUX_HAS_COMPONENT_driver.spifi_dma

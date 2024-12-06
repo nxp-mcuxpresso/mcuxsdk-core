@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.wdog32
     default y if MCUX_HW_IP_DriverType_WDOG32
 
 config MCUX_COMPONENT_driver.wdog32
-    bool "Use driver wdog32"
+    bool "wdog32"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.wdog32

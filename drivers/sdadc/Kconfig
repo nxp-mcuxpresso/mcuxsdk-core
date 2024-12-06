@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.sdadc
     default y if MCUX_HW_IP_DriverType_SDADC
 
 config MCUX_COMPONENT_driver.sdadc
-    bool "Use driver sdadc"
+    bool "sdadc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.sdadc

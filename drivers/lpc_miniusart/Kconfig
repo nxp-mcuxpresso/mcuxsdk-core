@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.lpc_miniusart
     default y if MCUX_HW_IP_DriverType_MINI_USART
 
 config MCUX_COMPONENT_driver.lpc_miniusart
-    bool "Use driver lpc_miniusart"
+    bool "lpc_miniusart"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lpc_miniusart

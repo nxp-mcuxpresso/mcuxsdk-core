@@ -11,12 +11,12 @@ config MCUX_HAS_COMPONENT_driver.flexcomm_usart
     default y if MCUX_HW_IP_DriverType_FLEXCOMM_USART
 
 config MCUX_COMPONENT_driver.flexcomm_usart_dma
-    bool "Use driver flexcomm_usart_dma"
+    bool "flexcomm_usart_dma"
     select MCUX_COMPONENT_driver.flexcomm_usart
     select MCUX_COMPONENT_driver.lpc_dma
     depends on MCUX_HAS_COMPONENT_driver.flexcomm_usart_dma
 
 config MCUX_COMPONENT_driver.flexcomm_usart
-    bool "Use driver flexcomm_usart"
+    bool "flexcomm_usart"
     select MCUX_COMPONENT_driver.flexcomm
     depends on MCUX_HAS_COMPONENT_driver.flexcomm_usart

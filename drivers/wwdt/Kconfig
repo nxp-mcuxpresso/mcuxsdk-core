@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.wwdt
     default y if MCUX_HW_IP_DriverType_WWDT
 
 config MCUX_COMPONENT_driver.wwdt
-    bool "Use driver wwdt"
+    bool "wwdt"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.wwdt

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.imu
     default y if MCUX_HW_IP_DriverType_CNS_CIU1_IMU || MCUX_HW_IP_DriverType_CNS_CIU2_IMU || MCUX_HW_IP_DriverType_IMU
 
 config MCUX_COMPONENT_driver.imu
-    bool "Use driver imu"
+    bool "imu"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.imu
