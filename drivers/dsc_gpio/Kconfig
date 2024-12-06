@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.dsc_gpio
     default y if MCUX_HW_IP_DriverType_DSC_GPIO
 
 config MCUX_COMPONENT_driver.dsc_gpio
-    bool "Use driver dsc_gpio"
+    bool "dsc_gpio"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.dsc_gpio

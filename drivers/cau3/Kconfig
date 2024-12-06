@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.cau3
     default y if MCUX_HW_IP_DriverType_CAU3
 
 config MCUX_COMPONENT_driver.cau3
-    bool "Use driver cau3"
+    bool "cau3"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.cau3

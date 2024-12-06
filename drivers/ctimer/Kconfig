@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.ctimer
     default y if MCUX_HW_IP_DriverType_CTIMER
 
 config MCUX_COMPONENT_driver.ctimer
-    bool "Use driver ctimer"
+    bool "ctimer"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.ctimer

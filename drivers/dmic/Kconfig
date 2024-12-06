@@ -11,17 +11,17 @@ config MCUX_HAS_COMPONENT_driver.dmic_dma
     default y if MCUX_HAS_COMPONENT_driver.dmic && MCUX_HAS_COMPONENT_driver.lpc_dma
 
 config MCUX_COMPONENT_driver.dmic_dma
-    bool "Use driver dmic_dma"
+    bool "dmic_dma"
     select MCUX_COMPONENT_driver.dmic
     select MCUX_COMPONENT_driver.lpc_dma
     depends on MCUX_HAS_COMPONENT_driver.dmic_dma
 
 config MCUX_COMPONENT_driver.dmic_hwvad
-    bool "Use driver dmic_hwvad"
+    bool "dmic_hwvad"
     select MCUX_COMPONENT_driver.dmic
     depends on MCUX_HAS_COMPONENT_driver.dmic
 
 config MCUX_COMPONENT_driver.dmic
-    bool "Use driver dmic"
+    bool "dmic"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.dmic

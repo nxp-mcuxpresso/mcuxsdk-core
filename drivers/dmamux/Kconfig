@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.dmamux
     default y if MCUX_HW_IP_DriverType_DMAMUX || MCUX_HW_IP_DriverType_DMAMUX32
 
 config MCUX_COMPONENT_driver.dmamux
-    bool "Use driver dmamux"
+    bool "dmamux"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.dmamux

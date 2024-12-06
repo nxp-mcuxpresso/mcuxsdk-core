@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.smartdma
     default y if MCUX_HW_IP_DriverType_SMARTDMA
 
 config MCUX_COMPONENT_driver.smartdma
-    bool "Use driver smartdma"
+    bool "smartdma"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.smartdma

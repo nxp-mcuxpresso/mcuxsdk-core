@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.mmu
     default y if MCUX_HW_IP_DriverType_MMU
 
 config MCUX_COMPONENT_driver.mmu
-    bool "Use driver mmu"
+    bool "mmu"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.mmu

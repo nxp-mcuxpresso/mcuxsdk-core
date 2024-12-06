@@ -25,24 +25,24 @@ config MCUX_COMPONENT_driver.netc_imx95
     depends on MCUX_HW_DEVICE_ID_MIMX9596xxxxQ || MCUX_HW_DEVICE_ID_MIMX9596xxxxN || MCUX_HW_DEVICE_ID_MIMX9596xxxxL
 
 config MCUX_COMPONENT_driver.netc
-    bool "Use driver netc"
+    bool "netc"
     select MCUX_COMPONENT_driver.common
     select MCUX_COMPONENT_driver.netc_rt1180 if MCUX_HAS_COMPONENT_driver.netc_rt1180
     select MCUX_COMPONENT_driver.netc_imx95 if MCUX_HAS_COMPONENT_driver.netc_imx95
     depends on MCUX_HAS_COMPONENT_driver.netc
 
 config MCUX_COMPONENT_driver.netc_switch
-    bool "Use driver netc switch"
+    bool "netc switch"
     default y
     depends on MCUX_COMPONENT_driver.netc
     depends on MCUX_HAS_COMPONENT_driver.netc_rt1180
 
 config MCUX_COMPONENT_driver.netc_phywrapper
-    bool "Use driver netc phy wrapper"
+    bool "netc phy wrapper"
     default y
     depends on MCUX_COMPONENT_driver.netc
     depends on MCUX_HAS_COMPONENT_driver.netc_imx95
 
 config MCUX_COMPONENT_driver.netc_msg
-    bool "Use driver netc VSI-PSI message"
+    bool "netc VSI-PSI message"
     depends on MCUX_COMPONENT_driver.netc

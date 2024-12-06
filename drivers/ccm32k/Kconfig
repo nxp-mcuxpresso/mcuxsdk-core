@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.ccm32k
     default y if MCUX_HW_IP_DriverType_CCM32K
 
 config MCUX_COMPONENT_driver.ccm32k
-    bool "Use driver ccm32k"
+    bool "ccm32k"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.ccm32k

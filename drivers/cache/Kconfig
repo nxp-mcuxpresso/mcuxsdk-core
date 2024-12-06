@@ -5,7 +5,7 @@
 rsource "./*/Kconfig"
 
 config MCUX_PRJSEG_driver.cache
-    bool "Use driver cache"
+    bool "cache"
     default n
     select MCUX_COMPONENT_driver.cache_xcache if MCUX_HAS_COMPONENT_driver.cache_xcache
     select MCUX_COMPONENT_driver.cache_lplmem if MCUX_HAS_COMPONENT_driver.cache_lplmem
@@ -16,5 +16,5 @@ config MCUX_PRJSEG_driver.cache
 
 
 config MCUX_PRJSEG_driver.flash_cache
-    bool "Use driver flash cache"
+    bool "flash cache"
     select MCUX_COMPONENT_driver.cache_cache64 if MCUX_HAS_COMPONENT_driver.cache_cache64

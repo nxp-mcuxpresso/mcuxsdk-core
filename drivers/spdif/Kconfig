@@ -7,10 +7,10 @@ config MCUX_HAS_COMPONENT_driver.spdif
     default y if MCUX_HW_IP_DriverType_SPDIF
 
 config MCUX_COMPONENT_driver.spdif_edma
-    bool "Use driver spdif_edma"
+    bool "spdif_edma"
     select MCUX_COMPONENT_driver.spdif
 
 config MCUX_COMPONENT_driver.spdif
-    bool "Use driver spdif"
+    bool "spdif"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.spdif

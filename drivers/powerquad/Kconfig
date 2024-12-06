@@ -11,12 +11,12 @@ config MCUX_HAS_COMPONENT_driver.powerquad_cmsis
     default y if MCUX_HW_IP_DriverType_LPC_POWERQUAD || MCUX_HW_IP_DriverType_POWERQUAD
 
 config MCUX_COMPONENT_driver.powerquad
-    bool "Use driver powerquad"
+    bool "powerquad"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.powerquad
 
 config MCUX_COMPONENT_driver.powerquad_cmsis
-    bool "Use driver powerquad_cmsis"
+    bool "powerquad_cmsis"
     select MCUX_COMPONENT_driver.powerquad
     select MCUX_COMPONENT_CMSIS_DSP_Include
     depends on MCUX_HAS_COMPONENT_driver.powerquad_cmsis

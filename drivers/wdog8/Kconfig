@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.wdog8
     default y if MCUX_HW_IP_DriverType_WDOG8
 
 config MCUX_COMPONENT_driver.wdog8
-    bool "Use driver wdog8"
+    bool "wdog8"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.wdog8

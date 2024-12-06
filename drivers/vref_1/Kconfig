@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.vref_1
     default y if MCUX_HW_IP_DriverType_VREF_1
 
 config MCUX_COMPONENT_driver.vref_1
-    bool "Use driver vref_1"
+    bool "vref_1"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.vref_1

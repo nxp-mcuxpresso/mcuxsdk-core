@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.csi
     default y if MCUX_HW_IP_DriverType_CSI
 
 config MCUX_COMPONENT_driver.csi
-    bool "Use driver csi"
+    bool "csi"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.csi

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.dpu_1
     default y if MCUX_HW_IP_DriverType_DISPLAY_SEERIS
 
 config MCUX_COMPONENT_driver.dpu_1
-    bool "Use driver dpu_1"
+    bool "dpu_1"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.dpu_1

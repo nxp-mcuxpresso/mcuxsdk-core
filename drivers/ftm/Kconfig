@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.ftm
     default y if MCUX_HW_IP_DriverType_FTM
 
 config MCUX_COMPONENT_driver.ftm
-    bool "Use driver ftm"
+    bool "ftm"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.ftm

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.spm
     default y if MCUX_HW_IP_DriverType_SPM
 
 config MCUX_COMPONENT_driver.spm
-    bool "Use driver spm"
+    bool "spm"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.spm

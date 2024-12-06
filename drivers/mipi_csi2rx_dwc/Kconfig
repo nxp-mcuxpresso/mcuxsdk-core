@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.mipi_csi2rx_dwc
     default y if MCUX_HW_IP_DriverType_MIPI_CSI2
 
 config MCUX_COMPONENT_driver.mipi_csi2rx_dwc
-    bool "Use driver mipi_csi2rx_dwc"
+    bool "mipi_csi2rx_dwc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.mipi_csi2rx_dwc

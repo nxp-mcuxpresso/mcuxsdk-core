@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.tstmr
     default y if MCUX_HW_IP_DriverType_TSTMR
 
 config MCUX_COMPONENT_driver.tstmr
-    bool "Use driver tstmr"
+    bool "tstmr"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.tstmr

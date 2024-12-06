@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.msmc
     default y if MCUX_HW_IP_DriverType_MSMC
 
 config MCUX_COMPONENT_driver.msmc
-    bool "Use driver msmc"
+    bool "msmc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.msmc

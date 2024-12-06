@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.rtd_cmc
     default y if MCUX_HW_IP_DriverType_RTD_CMC
 
 config MCUX_COMPONENT_driver.rtd_cmc
-    bool "Use driver rtd_cmc"
+    bool "rtd_cmc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.rtd_cmc

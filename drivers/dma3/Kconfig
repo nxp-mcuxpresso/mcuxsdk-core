@@ -11,9 +11,9 @@ config MCUX_HAS_COMPONENT_driver.dma3
     default y if MCUX_HW_IP_DriverType_DMA3
 
 config MCUX_COMPONENT_driver.ad_dma3
-    bool "Use driver ad_dma3"
+    bool "ad_dma3"
     depends on MCUX_HAS_COMPONENT_driver.ad_dma3
 
 config MCUX_COMPONENT_driver.dma3
-    bool "Use driver dma3"
+    bool "dma3"
     depends on MCUX_HAS_COMPONENT_driver.dma3

@@ -11,11 +11,11 @@ config MCUX_HAS_COMPONENT_driver.iuart
     default y if MCUX_HW_IP_DriverType_IUART
 
 config MCUX_COMPONENT_driver.iuart_sdma
-    bool "Use driver iuart_sdma"
+    bool "iuart_sdma"
     select MCUX_COMPONENT_driver.iuart
     select MCUX_COMPONENT_driver.sdma
     depends on MCUX_HAS_COMPONENT_driver.iuart_sdma
 
 config MCUX_COMPONENT_driver.iuart
-    bool "Use driver iuart"
+    bool "iuart"
     depends on MCUX_HAS_COMPONENT_driver.iuart

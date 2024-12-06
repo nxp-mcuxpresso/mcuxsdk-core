@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.itrc
     default y if MCUX_HW_IP_DriverType_ITRC
 
 config MCUX_COMPONENT_driver.itrc
-    bool "Use driver itrc"
+    bool "itrc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.itrc

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.camera_csr
     default y if MCUX_HW_IP_DriverType_BLK_CTRL_CAMERAMIX
 
 config MCUX_COMPONENT_driver.camera_csr
-    bool "Use driver camera_csr"
+    bool "camera_csr"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.camera_csr

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.wdog01
     default y if MCUX_HW_IP_DriverType_WDOG01
 
 config MCUX_COMPONENT_driver.wdog01
-    bool "Use driver wdog01"
+    bool "wdog01"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.wdog01

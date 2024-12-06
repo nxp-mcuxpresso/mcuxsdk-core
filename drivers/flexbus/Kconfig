@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.flexbus
     default y if MCUX_HW_IP_DriverType_FB
 
 config MCUX_COMPONENT_driver.flexbus
-    bool "Use driver flexbus"
+    bool "flexbus"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.flexbus

@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.snvs_hp
     default y if MCUX_HW_IP_DriverType_SNVS
 
 config MCUX_COMPONENT_driver.snvs_hp
-    bool "Use driver snvs_hp"
+    bool "snvs_hp"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.snvs_hp

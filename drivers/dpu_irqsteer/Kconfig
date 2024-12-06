@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.dpu_irqsteer
     default y if MCUX_HW_IP_DriverType_DPU_IRQSTEER
 
 config MCUX_COMPONENT_driver.dpu_irqsteer
-    bool "Use driver dpu_irqsteer"
+    bool "dpu_irqsteer"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.dpu_irqsteer

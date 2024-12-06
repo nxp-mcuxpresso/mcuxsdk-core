@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.cdog
     default y if MCUX_HW_IP_DriverType_CDOG
 
 config MCUX_COMPONENT_driver.cdog
-    bool "Use driver cdog"
+    bool "cdog"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.cdog

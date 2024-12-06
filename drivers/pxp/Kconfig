@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.pxp
     default y if MCUX_HW_IP_DriverType_PXP
 
 config MCUX_COMPONENT_driver.pxp
-    bool "Use driver pxp"
+    bool "pxp"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.pxp

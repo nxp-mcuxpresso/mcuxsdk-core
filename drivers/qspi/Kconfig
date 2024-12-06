@@ -11,12 +11,12 @@ config MCUX_HAS_COMPONENT_driver.qspi
     default y if MCUX_HW_IP_DriverType_QUADSPI
 
 config MCUX_COMPONENT_driver.qspi_edma
-    bool "Use driver qspi_edma"
+    bool "qspi_edma"
     select MCUX_COMPONENT_driver.qspi
     select MCUX_COMPONENT_driver.edma
     depends on MCUX_HAS_COMPONENT_driver.qspi_edma
 
 config MCUX_COMPONENT_driver.qspi
-    bool "Use driver qspi"
+    bool "qspi"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.qspi
