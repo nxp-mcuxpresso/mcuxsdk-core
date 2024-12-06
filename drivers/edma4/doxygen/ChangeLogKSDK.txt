@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section eDMA EDMA
-  The current eDMA driver version is 2.10.2.
+  The current eDMA driver version is 2.10.3.
+
+  - 2.10.3
+    - Bug Fixes
+      - Clear interrupt status flags in EDMA_CreateHandle to avoid triggering interrupt by mistake.
 
   - 2.10.2
     - Bug Fixes

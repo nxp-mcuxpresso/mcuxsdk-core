@@ -1454,12 +1454,12 @@ void EDMA_CreateHandle(edma_handle_t *handle, EDMA_Type *base, uint32_t channel)
     /* Get the DMA instance number */
     edmaInstance                        = EDMA_GetInstance(base);
     s_EDMAHandle[edmaInstance][channel] = handle;
-    /* Enable NVIC interrupt */
-    (void)EnableIRQ(s_edmaIRQNumber[edmaInstance][channel]);
 
     handle->tcdBase     = EDMA_TCD_BASE(base, channel);
     handle->channelBase = EDMA_CHANNEL_BASE(base, channel);
     handle->base        = base;
+    DMA_CLEAR_INT_STATUS(base, channel);
+
     /*
        Reset TCD registers to zero. Unlike the EDMA_TcdReset(DREQ will be set),
        CSR will be 0. Because in order to suit EDMA busy check mechanism in
@@ -1477,6 +1477,9 @@ void EDMA_CreateHandle(edma_handle_t *handle, EDMA_Type *base, uint32_t channel)
     EDMA_TCD_DLAST_SGA(tcdRegs, EDMA_TCD_TYPE(base)) = 0;
     EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(base))       = 0;
     EDMA_TCD_BITER(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
+
+    /* Enable NVIC interrupt */
+    (void)EnableIRQ(s_edmaIRQNumber[edmaInstance][channel]);
 }
 
 /*!
