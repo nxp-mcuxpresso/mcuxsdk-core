@@ -38,6 +38,13 @@ if(NOT DEFINED APPLICATION_BINARY_DIR)
           )
 endif()
 
+
+if(EXISTS ${SdkRootDirPath}/examples/_boards/${board})
+  set(board_root examples/_boards)
+elseif(EXISTS ${SdkRootDirPath}/examples_int/_boards/${board})
+  set(board_root examples_int/_boards)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/extensions.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/modules/sysbuild_extensions.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/modules/sysbuild_kconfig.cmake)
