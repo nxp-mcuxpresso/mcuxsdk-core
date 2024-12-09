@@ -94,7 +94,7 @@ if (CONFIG_MCUX_PRJSEG_config.arm.core.cm33_nodsp_sau)
         AS "-mcpu=cortex-m33+nodsp --target=arm-arm-none-eabi"
         CC "-mcpu=cortex-m33+nodsp"
         CX "-mcpu=cortex-m33+nodsp"
-        LD "--cpu Cortex-M33"
+        LD "--cpu=Cortex-M33.no_dsp"
     )
 
     mcux_add_armgcc_mcux_configuration(
