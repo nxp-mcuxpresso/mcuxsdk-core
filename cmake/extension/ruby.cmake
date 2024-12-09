@@ -4,7 +4,7 @@
 
 include_guard(GLOBAL)
 set(RUBY_MINIMUM_REQUIRED 3.1.2)
-set(ruby_install_link "https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#prerequisite")
+set(ruby_install_link "https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/misc/Ruby_environment_set_up.html#ruby-environment-setup")
 
 if(NOT FOUND_RUBY_EXECUTABLE)
     find_program(RUBY_EXECUTABLE ruby)
