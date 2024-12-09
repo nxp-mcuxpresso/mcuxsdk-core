@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section irtc IRTC
-  The current IRTC driver version is 2.3.1.
+  The current IRTC driver version is 2.3.2.
+
+  - 2.3.2
+    - Bug Fixes
+      - Fixed API IRTC_GetDatetime read YEARMON, DAYS, HOURMIN, SECONDS registers issue.
 
   - 2.3.1
     - Bug Fixes
