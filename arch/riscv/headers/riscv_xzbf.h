@@ -184,7 +184,7 @@ static inline uint_xlen_t XZBF_Bfins(uint_xlen_t dst, uint_xlen_t src, uint_xlen
    result[31:0] = src[31:0] | msk[31:0]
    @endverbatim
  *
- * @param src Containing bit field to extract
+ * @param src Containing bit field to set
  * @param bfw Bit field width minus one, must be immediate, range from 31 to 0
  * @param bfe Bit field end location, must be immediate, range from 31 to 0
  *
@@ -210,7 +210,7 @@ static inline uint_xlen_t XZBF_Bfins(uint_xlen_t dst, uint_xlen_t src, uint_xlen
    result[31:0] = src[31:0] | msk[31:0]
    @endverbatim
  *
- * @param src Containing bit field to extract
+ * @param src Containing bit field to set
  * @param bfwBfe bfwBfe[9:5] is bit field width minus one, bfwBfe[4:0] is bit field end location
  *
  * @return Set the bit field of src and return the result
@@ -234,7 +234,7 @@ static inline uint_xlen_t XZBF_Bfins(uint_xlen_t dst, uint_xlen_t src, uint_xlen
    rd[31:0] = rs1[31:0] & ~msk[31:0]
    @endverbatim
  *
- * @param src Containing bit field to extract
+ * @param src Containing bit field to clear
  * @param bfw Bit field width minus one, must be immediate, range from 31 to 0
  * @param bfe Bit field end location, must be immediate, range from 31 to 0
  *
@@ -260,7 +260,7 @@ static inline uint_xlen_t XZBF_Bfins(uint_xlen_t dst, uint_xlen_t src, uint_xlen
    result[31:0] = src[31:0] & ~msk[31:0]
    @endverbatim
  *
- * @param src Containing bit field to extract
+ * @param src Containing bit field to clear
  * @param bfwBfe bfwBfe[9:5] is bit field width minus one, bfwBfe[4:0] is bit field end location
  *
  * @return Clear the bit field of src and return the result
