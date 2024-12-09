@@ -7,6 +7,7 @@ require 'logger'
 require_relative './generator'
 require_relative './ninja_parser'
 require_relative 'core/_fileutils'
+require 'rubygems'
 
 PACKAGE_YML_PATH = 'yml_data/shared/misc/package.yml'
 SCRIPT_SUPPORTED_TOOLCHAIN = %w[iar mdk armgcc xtensa codewarrior]
@@ -17,6 +18,7 @@ CMAKE_LOG_LEVEL_MAP = { 'TRACE' => Logger::DEBUG,
                         'NOTICE' => Logger::INFO,
                         'WARNING' => Logger::WARN,
                         'ERROR' => Logger::ERROR }
+RUBY_MINIMUM_REQUIRED = '3.1.2'
 
 def make_up_build_option(project, toolchain, config, outdir)
   build_option = {}
@@ -106,9 +108,16 @@ if $PROGRAM_NAME == __FILE__
         puts "Currently supported toolchain: #{SCRIPT_SUPPORTED_TOOLCHAIN}, but script get #{toolchain}, please check --toolchain in west command, or try run with -p always to prevent setting by cache."
         return
     end
+
     puts "Generate GUI project"
     logger = Logger.new(STDOUT)
     logger.level = CMAKE_LOG_LEVEL_MAP[ENV['log_level']]
+
+    # validate ruby version
+    if (Gem::Version.new(RUBY_MINIMUM_REQUIRED) > Gem::Version.new(RUBY_VERSION))
+        logger.warn("The system Ruby version #{RUBY_VERSION} is lower than the minimum version #{RUBY_MINIMUM_REQUIRED}.")
+    end
+
     build_data = NinjaParser.new(ninja, project, toolchain, config, outdir, logger).process
     build_option = make_up_build_option(project, toolchain, config, outdir)
 
