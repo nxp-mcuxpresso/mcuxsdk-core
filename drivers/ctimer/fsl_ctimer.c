@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
- * All rights reserved.
+ * Copyright 2016-2022, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -105,15 +104,22 @@ void CTIMER_Init(CTIMER_Type *base, const ctimer_config_t *config)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_RESET_CONTROL) && FSL_SDK_DISABLE_DRIVER_RESET_CONTROL)
-/* Reset the module. */
+    /* Reset the module. */
 #if !(defined(FSL_FEATURE_CTIMER_HAS_NO_RESET) && (FSL_FEATURE_CTIMER_HAS_NO_RESET))
     RESET_PeripheralReset(s_ctimerResets[CTIMER_GetInstance(base)]);
 #endif
 #endif /* FSL_SDK_DISABLE_DRIVER_RESET_CONTROL */
 
-/* Setup the cimer mode and count select */
 #if !(defined(FSL_FEATURE_CTIMER_HAS_NO_INPUT_CAPTURE) && (FSL_FEATURE_CTIMER_HAS_NO_INPUT_CAPTURE))
+    /* Make sure clear possible DMA request. */
+    base->IR = 0xFFU;
+    base->IR = 0xFFU;
+    /* Setup the cimer mode and count select */
     base->CTCR = CTIMER_CTCR_CTMODE(config->mode) | CTIMER_CTCR_CINSEL(config->input);
+#else
+    /* Make sure clear possible DMA request. */
+    base->IR = 0xFU;
+    base->IR = 0xFU;
 #endif
     /* Setup the timer prescale value */
     base->PR = CTIMER_PR_PRVAL(config->prescale);
