@@ -366,7 +366,7 @@ status_t XSPI_CheckAndClearError(XSPI_Type *base, uint32_t status)
     status &= (uint32_t)(kXSPI_ErrorNoFradMatch | kXSPI_ErrorFrad0Access | kXSPI_ErrorFrad1Access | \
                     kXSPI_ErrorFrad2Access | kXSPI_ErrorFrad3Access | kXSPI_ErrorFrad4Access | kXSPI_ErrorFrad5Access |
                     kXSPI_ErrorFrad6Access | kXSPI_ErrorFrad7Access | kXSPI_ErrorIpBusTransfer | kXSPI_ErrorTg0Ipcr |
-                    kXSPI_ErrorTg0Sfar | kXSPI_ErrorTg1Ipcr | kXSPI_ErrorTg1Sfar);
+                    kXSPI_ErrorTg0Sfar | kXSPI_ErrorTg1Ipcr | kXSPI_ErrorTg1Sfar | kXSPI_ErrorTimeout);
     if (0U != status)
     {
         /* Select the correct error code.. */
@@ -374,7 +374,7 @@ status_t XSPI_CheckAndClearError(XSPI_Type *base, uint32_t status)
         {
             result = kStatus_XSPI_SequenceExecutionTimeout;
             /* Clear the flags. */
-            base->ERRSTAT |= (uint32_t)kXSPI_SequenceExecutionTimeoutFlag;
+            base->ERRSTAT = (uint32_t)kXSPI_SequenceExecutionTimeoutFlag;
         }
         else if (0U != ((status & (uint32_t)kXSPI_FradMatchErrorFlag) | (status & (uint32_t)kXSPI_FradnAccErrorFlag)))
         {
@@ -382,11 +382,11 @@ status_t XSPI_CheckAndClearError(XSPI_Type *base, uint32_t status)
             /* Clear the flags. */
             if (0U != (status & (uint32_t)kXSPI_FradMatchErrorFlag))
             {
-                base->ERRSTAT |= (uint32_t)kXSPI_FradMatchErrorFlag;
+                base->ERRSTAT = (uint32_t)kXSPI_FradMatchErrorFlag;
             }
             else
             {
-                base->ERRSTAT |= (uint32_t)kXSPI_FradnAccErrorFlag;
+                base->ERRSTAT = (uint32_t)kXSPI_FradnAccErrorFlag;
             }
         }
         else if (0U != (status & (uint32_t)kXSPI_IpsErrorFlag))
@@ -1608,29 +1608,45 @@ status_t XSPI_WriteBlocking(XSPI_Type *base, uint8_t *buffer, size_t size)
  */
 status_t XSPI_ReadBlocking(XSPI_Type *base, uint8_t *buffer, size_t size)
 {
+    assert(size <= XSPI_IP_RX_BUFFER_SIZE);
+
     uint32_t rxWatermark  = base->RBCT + 1UL;
     status_t status       = kStatus_Success;
     uint32_t i            = 0UL;
     uint32_t removedCount = 0UL;
+    uint32_t pollingBitMask     = XSPI_SR_RXWE_MASK;
+
+    if (XSPI_CheckFSMValid(base) == false)
+    {
+        XSPI_ClearRxBuffer(base);
+        return kStatus_NoTransferInProgress;
+    }
+
+    if (size == XSPI_IP_RX_BUFFER_SIZE)
+    {
+        pollingBitMask = XSPI_SR_RXFULL_MASK;
+    }
 
     while ((1UL != (base->SR & XSPI_SR_BUSY_MASK)) && (((base->SR & XSPI_SR_IP_ACC_MASK) >> XSPI_SR_IP_ACC_SHIFT) != 0UL))
     {
     }
 
-    /* Loop until Rx buffer watermark exceeded status asserted. */
-    while ((base->SR & XSPI_SR_RXWE_MASK) == 0UL)
-    {
-        if((base->ERRSTAT & XSPI_ERRSTAT_TO_ERR_MASK) != 0UL)
-        {
-            base->ERRSTAT = XSPI_ERRSTAT_TO_ERR_MASK;
-            return kStatus_Timeout;
-        }
-    }
+      /* Loop until Rx buffer watermark exceeded status asserted. */
+      while ((base->SR & pollingBitMask) == 0UL)
+      {
+          if((base->ERRSTAT & XSPI_ERRSTAT_TO_ERR_MASK) != 0UL)
+          {
+              XSPI_ClearRxBuffer(base);
+              base->ERRSTAT = XSPI_ERRSTAT_TO_ERR_MASK;
+              return kStatus_Timeout;
+          }
+      }
 
     uint32_t adjuestedSize = size + (4UL - size % 4UL) % 4UL;
 
     if (XSPI_GetRxBufferAvailableBytesCount(base) != adjuestedSize)
     {
+        XSPI_ClearRxBuffer(base);
         return kStatus_XSPI_RxBufferEntriesCountError;
     }
     /* Send data buffer */

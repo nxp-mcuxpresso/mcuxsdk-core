@@ -8,6 +8,7 @@
     - Improvements
       - Updated XSPI_TransferBlocking() to support use case the transfersize bigger than page size.
       - Updated xspi_device_interface_type_t to support changes of page size for hyperram interface.
+      - Updated XSPI_ReadBlocking() to fix an potential issue which cause TIMEOUT error.
 
   - 2.4.0
     - New Features
