@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section netc NETC
-  The current NETC driver version is 2.8.1.
+  The current NETC driver version is 2.8.2.
+
+  - 2.8.2
+    - Bug Fixes
+      - Fixed ingress port filter table frame attribute flags mask field issue.
 
   - 2.8.1
     - Bug Fixes

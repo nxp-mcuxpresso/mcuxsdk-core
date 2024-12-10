@@ -50,7 +50,7 @@
  */
 
 /*! @brief Driver Version */
-#define FSL_NETC_DRIVER_VERSION (MAKE_VERSION(2, 8, 1))
+#define FSL_NETC_DRIVER_VERSION (MAKE_VERSION(2, 8, 2))
 
 /*! @brief Macro to divides an address into a low 32 bits and a possible high 32 bits */
 #define NETC_ADDR_LOW_32BIT(x)  ((uint32_t)(x)&0xFFFFFFFFU)
@@ -1215,8 +1215,8 @@ typedef enum _netc_tb_ipf_attr_mask
     kNETC_IPFIpHeaderMask   = 0x80U,  /*!< IP Header Mask */
     kNETC_IPFIpVersionMask  = 0x100U, /*!< IP Version Mask */
     kNETC_IPFIpExtMask      = 0x200U, /*!< IPv4 option / IPv6 extension Mask */
-    kNETC_IPFL4HeaderMask   = 0x400U, /*!< L4 Code Mask */
-    kNETC_IPFWakeOnLanMask  = 0x800U  /*!< Wake-on-LAN Magic Packet Mask */
+    kNETC_IPFL4HeaderMask   = 0xC00U, /*!< L4 Code Mask */
+    kNETC_IPFWakeOnLanMask  = 0x1000U /*!< Wake-on-LAN Magic Packet Mask */
 } netc_tb_ipf_attr_mask_t;
 
 /*! @brief Ingress Port Filter frame attribute Sequence Tag Code */
