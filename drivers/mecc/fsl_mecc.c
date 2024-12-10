@@ -163,7 +163,7 @@ status_t MECC_GetSingleErrorInfo(MECC_Type *base, mecc_single_error_info_t *info
     status_t status     = kStatus_Success;
     uint8_t tempPosLow  = 0U;
     uint8_t tempPosHigh = 0U;
-    uint32_t counter    = 0U;
+    volatile uint32_t counter    = 0U;
 
     switch (banknumber)
     {
