@@ -4,6 +4,10 @@
 @section mecc MECC
   The current FLEXRAM driver version is 2.1.0.
 
+  - 2.1.1
+    - Bug fixes:
+      - Add volatile to variable counter to fix armgcc 13.2.1 -Os optimization issue.
+
   - 2.1.0
     - Bug fixes:
       - Removed Ocram1StartAddress, Ocram1EndAddress, Ocram2StartAddress, Ocram2EndAddress in mecc_config_t structure.
