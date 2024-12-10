@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2019, 2021 NXP
- * All rights reserved.
+ * Copyright 2016-2019, 2021, 2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -318,10 +317,13 @@ status_t ADC12_DoAutoCalibration(ADC_Type *base)
     tmp32 |= (ADC_SC3_AVGE_MASK | ADC_SC3_AVGS(((uint32_t)ADC_SC3_AVGS_MASK >> (uint32_t)ADC_SC3_AVGS_SHIFT)));
 
     /* Trigger calibration and wait until it complete. */
+    base->SC1[0] &= ~ADC_SC1_COCO_MASK; /* Clear SC1A[COCO] before calibration. */
+    
     tmp32 |= ADC_SC3_CAL_MASK;
     base->SC3 = tmp32;
-    while ((uint32_t)kADC12_ChannelConversionCompletedFlag !=
-           (ADC12_GetChannelStatusFlags(base, 0U) & (uint32_t)kADC12_ChannelConversionCompletedFlag))
+    __ISB();
+
+    while ((base->SC3 & ADC_SC3_CAL_MASK) == ADC_SC3_CAL_MASK)
     {
     }
 

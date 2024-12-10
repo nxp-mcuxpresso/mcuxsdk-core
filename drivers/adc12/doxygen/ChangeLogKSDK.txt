@@ -2,7 +2,15 @@
 @page driver_log Driver Change Log
 
 @section adc12 ADC12
-  The current ADC12 driver version is 2.0.6.
+  The current ADC12 driver version is 2.0.7.
+
+  - 2.0.7
+    - Improvements
+      - Change the method for judging the end of calibration. Previously, it 
+        was judged based on the COCO bit of the SC1 register. After the update, 
+        it is judged based on the CAL bit of the SC3 register. In some cases, 
+        SC1[COCO] was already set to 1 before calibration was performed, which
+        caused calibration to fail.
 
   - 2.0.6
     - Improvements
