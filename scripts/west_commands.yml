@@ -41,3 +41,8 @@ west-commands:
       - name: install_ruby
         help: Install portable ruby for Windows
         class: InstallRuby
+  - file: scripts/west_commands/export_app.py
+    commands:
+      - name: export_app
+        class: ExportApp
+        help: Create a freestanding application

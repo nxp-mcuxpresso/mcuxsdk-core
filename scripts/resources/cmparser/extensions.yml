@@ -1,0 +1,130 @@
+---
+__variables__:
+  MCUX_SOURCE_CONDITION: COMPILERS TOOLCHAINS CORES CORE_IDS BOARDS DEVICE_IDS FPU
+    DSP MPU TRUSTZONE COMPONENTS
+if: {}
+endif: {}
+project:
+  options: NO_DEFAULT_CONFIG
+  single_value: PROJECT_BOARD_PORT_PATH
+  multi_value: LANGUAGES CUSTOM_PRJ_CONF_PATH
+include: {}
+mcux_set_variable: {}
+mcux_add_cmakelists: {}
+mcux_load_all_dotcmakes_in_directory: {}
+mcux_load_all_cmakelists_in_directory: {}
+mcux_add_source:
+  single_value: BASE_PATH CONFIG PREINCLUDE EXCLUDE HIDDEN
+  multi_value: SOURCES ${MCUX_SOURCE_CONDITION}
+mcux_add_include:
+  single_value: BASE_PATH CONFIG
+  multi_value: INCLUDES TARGET_FILES ${MCUX_SOURCE_CONDITION}
+mcux_add_library:
+  single_value: BASE_PATH GENERATED EXCLUDE HIDDEN
+  multi_value: LIBS TARGETS ${MCUX_SOURCE_CONDITION}
+mcux_remove_library:
+  single_value: BASE_PATH
+  multi_value: LIBS
+mcux_remove_build_config:
+  multi_value: TARGETS TOOLCHAINS
+mcux_remove_toolchain: {}
+mcux_add_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB TOOLCHAINS
+mcux_remove_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB TOOLCHAINS
+mcux_add_iar_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_remove_iar_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_add_mdk_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_remove_mdk_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_add_armgcc_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_remove_armgcc_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_add_armgcc_mcux_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_add_mcux_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_add_xtensa_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_remove_xtensa_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_add_riscvllvm_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_remove_riscvllvm_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_add_codewarrior_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_remove_codewarrior_configuration:
+  single_value: AS CC CX LD
+  multi_value: TARGETS LIB
+mcux_add_codewarrior_sys_include:
+  multi_value: TARGETS SYS_SEARCH_PATH SYS_PATH_RECURSIVELY
+mcux_add_iar_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_remove_iar_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_add_mdk_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_remove_mdk_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_add_armgcc_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_remove_armgcc_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_add_riscvllvm_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_remove_riscvllvm_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_add_codewarrior_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_remove_codewarrior_linker_script:
+  single_value: LINKER BASE_PATH
+  multi_value: TARGETS
+mcux_add_macro:
+  single_value: AS CC CX
+  multi_value: TARGETS TOOLCHAINS
+mcux_remove_macro:
+  single_value: AS CC CX
+  multi_value: TARGETS TOOLCHAINS
+mcux_convert_binary:
+  single_value: BINARY
+  multi_value: TOOLCHAINS
+mcux_add_custom_command:
+  single_value: BUILD_EVENT
+  multi_value: TARGETS TOOLCHAINS BUILD_COMMAND
+mcux_component_version: {}
+mcux_set_list: {}
+mcux_add_linker_symbol:
+  single_value: SYMBOLS
+  multi_value: TARGETS
+mcux_remove_linker_symbol:
+  single_value: SYMBOLS
+  multi_value: TARGETS
