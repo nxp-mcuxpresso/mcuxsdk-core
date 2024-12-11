@@ -2,7 +2,14 @@
 @page driver_log Driver Change Log
 
 @section lpc_adc ADC
-  The current ADC driver version is 2.5.3.
+  The current ADC driver version is 2.6.0.
+
+  - 2.6.0
+    - New Features
+      - Added new feature macro to distinguish whether the GPADC_CTRL0_GPADC_TSAMP control bit is on the device.
+      - Added new variable extendSampleTimeNumber to indicate the ADC extend sample time.
+    - Bugfix
+      - Fixed the bug that incorrectly sets the PASS_ENABLE bit based on the sample time setting.
 
   - 2.5.3
     - Improvements
