@@ -16,6 +16,7 @@ MIR/
 ecosystem/
 manifest_int/
 devices/internal
+devices_int/
 examples_int/
 svd/
 
