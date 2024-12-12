@@ -1,0 +1,8 @@
+config MCUX_HAS_COMPONENT_driver.ecat
+    bool
+    default y if MCUX_HW_IP_DriverType_ECAT
+
+config MCUX_COMPONENT_driver.ecat
+    bool "Use driver ecat"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.ecat
