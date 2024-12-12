@@ -117,6 +117,8 @@ class Build(Forceable):
 
         parser.add_argument('-b', '--board',
                         help='board to build for with optional board revision')
+        parser.add_argument('--device', help='device to build for with optional device revision')
+
         # Hidden option for backwards compatibility
         parser.add_argument('-s', '--source-dir', help=argparse.SUPPRESS)
         parser.add_argument('-d', '--build-dir',
@@ -162,7 +164,6 @@ class Build(Forceable):
                            default='debug', help='SDK build config type')
         group.add_argument('--show-configs', dest='show_configs', action='store_true', 
                            help='Show supported build config targets for build project')        
-        group.add_argument('--device', action='store', help='Target device')
         group.add_argument('-k', '--kit', action='store', help='Kit id')
         group.add_argument('--shield', action='store', help='')
         group.add_argument('--hint', action='store_true', default=False, help='Execute external assistant command like'
@@ -186,6 +187,7 @@ class Build(Forceable):
     def do_run(self, args, remainder):
         self.args = args        # Avoid having to pass them around
         self.config_board = config_get('board', None)
+        self.config_device = config_get('device', None)
         log.dbg('args: {} remainder: {}'.format(args, remainder),
                 level=log.VERBOSE_EXTREME)
         # Store legacy -s option locally
@@ -246,8 +248,9 @@ class Build(Forceable):
         self.source_dir = self._find_source_dir()
         self._sanity_check()
 
+        device, origin = self._find_device()
         board, origin = self._find_board()
-        self._run_cmake(board, origin, self.args.cmake_opts)
+        self._run_cmake(board, device, origin, self.args.cmake_opts)
         if args.cmake_only:
             return
 
@@ -275,6 +278,25 @@ class Build(Forceable):
         elif self.config_board is not None:
             board, origin = self.config_board, 'configfile'
         return board, origin
+
+    def _find_device(self):
+        device, origin = None, None
+        if self.cmake_cache:
+            device, origin = (self.cmake_cache.get('CACHED_DEVICE'),
+                             'CMakeCache.txt')
+
+            # A malformed CMake cache may exist, but not have a device.
+            # This happens if there's a build error from a previous run.
+            if device is not None:
+                return (device, origin)
+
+        if self.args.device:
+            device, origin = self.args.device, 'command line'
+        elif 'BOARD' in os.environ:
+            device, origin = os.environ['BOARD'], 'env'
+        elif self.config_device is not None:
+            device, origin = self.config_device, 'configfile'
+        return device, origin
 
     def _parse_remainder(self, remainder):
         self.args.source_dir = None
@@ -565,14 +587,19 @@ class Build(Forceable):
                 self.source_dir = self._find_source_dir()
                 self._sanity_check_source_dir()
 
-    def _run_cmake(self, board, origin, cmake_opts):
+    def _run_cmake(self, board, device, origin, cmake_opts):
         if board is None and config_getboolean('board_warn', True):
             log.wrn('This looks like a fresh build and BOARD is unknown;',
                     "so it probably won't work. To fix, use",
                     '--board=<your-board>.')
             log.inf('Note: to silence the above message, run',
                     "'west config build.board_warn false'")
-
+        if device is None and config_getboolean('device_warn', True):
+            log.wrn('This looks like a fresh build and DEVICE is unknown;',
+                    "so it probably won't work. To fix, use",
+                    '--device=<your-device>.')
+            log.inf('Note: to silence the above message, run',
+                    "'west config build.board_warn false'")
         if not self.run_cmake:
             return
 
@@ -582,6 +609,13 @@ class Build(Forceable):
             cmake_opts = ['-Dboard={}'.format(board)]
         else:
             cmake_opts = []
+
+        if device is not None and origin != 'CMakeCache.txt':
+            if len(cmake_opts) == 0:
+                cmake_opts = ['-Ddevice={}'.format(device)]
+            else:
+                cmake_opts.append('-Ddevice={}'.format(device))
+
         if self.args.cmake_opts:
             cmake_opts.extend(self.args.cmake_opts)
         if self.args.snippets:
@@ -604,8 +638,6 @@ class Build(Forceable):
             "CMAKE_BUILD_TYPE": self.args.config,
             "HINT": self.args.hint
             }
-        if self.args.device:
-            extra_args['device'] = self.args.device
         if self.args.toolchain == 'zephyr':
             extra_args['ZEPHYR_SDK'] = 'y'
             self.args.toolchain = 'armgcc'
