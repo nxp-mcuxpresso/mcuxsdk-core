@@ -148,12 +148,30 @@ class MCUXAppTargets(object):
     SHIELDS_FILTER = []
     SHIELDS_EXCLUDE_FILTER = []
 
+    INT_EXAMPLE_DATA = {}
+
     def __init__(self):
         super().__init__()
         self.tgt_dict = {}
 
     def reset_targets(self):
         self.tgt_dict = {}
+
+    @classmethod
+    def config_internal_data(cls):
+        # Try get internal data
+        try:
+            if not os.path.isdir(internal_module := os.path.join(sdk_root_dir, 'examples_int/scripts/list_project')):
+                raise FileNotFoundError
+            sys.path.append(internal_module)
+            from list_project_mod import IntMCUXAppTargets
+            IntMCUXAppTargets.parse()
+            MCUXAppTargets.BOARD_DEF_TARGETS = IntMCUXAppTargets.BOARD_DEF_TARGETS
+            MCUXAppTargets.INT_EXAMPLE_DATA = IntMCUXAppTargets.INT_EXAMPLE_DATA
+        except Exception:
+            # reset if encounter any exception
+            cls.BOARD_DEF_TARGETS = {}
+            cls.INT_EXAMPLE_DATA = {}
 
     @classmethod
     def config_filter(cls, toolchains_filter=[], boards_filter=[], shields_filter=[], targets_filter=[]):
@@ -307,20 +325,22 @@ class MCUXAppTargets(object):
             return apps
 
         for app_name, app_data in example_data.items():
-            if app_data.get('boards', None) is None:
+            boards_data = app_data.get('boards', {})
+            if app_name in MCUXAppTargets.INT_EXAMPLE_DATA:
+                boards_data = { **boards_data, **MCUXAppTargets.INT_EXAMPLE_DATA[app_name] }
+            if not boards_data:
                 # No board supported for current example
                 continue
             use_sysbuild = app_data.get('use_sysbuild', False)
             skip_build = app_data.get('skip_build', False)
             if skip_build:
                 continue
-            if not app_data.get('boards'):
-                continue
             # SDKGEN-3118 Currently one example shall be bound with only one shield
             shield = list(app_data['shields'])[0] if app_data.get('shields', {}).keys() else None
             if shield and not self.filter_shield(shield):
                 continue
-            for board_core, board_core_delta_data in app_data['boards'].items():
+
+            for board_core, board_core_delta_data in boards_data.items():
                 if not self.filter_board_core(board_core):
                     continue
                 self.reset_targets()
@@ -371,7 +391,7 @@ class MCUXRepoProjects(object):
     def __init__(self):
         super().__init__()
 
-    def  search_app_targets(
+    def search_app_targets(
             self,
             app_path,
             board_cores_filter=[],

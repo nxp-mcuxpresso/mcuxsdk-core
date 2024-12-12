@@ -91,6 +91,7 @@ class ListProject(WestCommand):
 
     def do_run(self, args, unknow) -> None:
         mcux_log_init(logging.DEBUG if args.verbose else logging.INFO)
+        sdk_project_target.MCUXAppTargets.config_internal_data()
         # Search for the testcase
         op = sdk_project_target.MCUXRepoProjects()
         output_format = args.list_format or config_get('list_format', 'cmd')
