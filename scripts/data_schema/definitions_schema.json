@@ -71,15 +71,28 @@
                     ]
                 },
                 "boards": {
-                    "$ref": "#/definitions/BoardToolchainTargetSupportType"
+                    "$ref": "#/definitions/BoardDeviceToolchainTargetSupportType"
+                },
+                "devices": {
+                    "$ref": "#/definitions/BoardDeviceToolchainTargetSupportType"
                 },
                 "shields": {
                     "$ref": "#/definitions/shieldsType"
                 }
             },
-            "required": [
-                "contents",
-                "boards"
+            "anyOf": [
+                {
+                    "required": [
+                        "contents",
+                        "boards"
+                    ]
+                },
+                {
+                    "required": [
+                        "contents",
+                        "devices"
+                    ]
+                }
             ]
         },
         "configurationDocumentType": {
@@ -110,6 +123,11 @@
                         "type": "string",
                         "description": "The path of readme file"
                     }
+                },
+                "device_example": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Specify it is a device example, not board example"
                 }
             },
             "required": [
@@ -118,7 +136,7 @@
                 "brief"
             ]
         },
-        "BoardToolchainTargetSupportType": {
+        "BoardDeviceToolchainTargetSupportType": {
             "type": "object",
             "additionalProperties": false,
             "patternProperties": {

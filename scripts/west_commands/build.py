@@ -292,8 +292,8 @@ class Build(Forceable):
 
         if self.args.device:
             device, origin = self.args.device, 'command line'
-        elif 'BOARD' in os.environ:
-            device, origin = os.environ['BOARD'], 'env'
+        elif 'DEVICE' in os.environ:
+            device, origin = os.environ['DEVICE'], 'env'
         elif self.config_device is not None:
             device, origin = self.config_device, 'configfile'
         return device, origin
@@ -550,30 +550,55 @@ class Build(Forceable):
         # If CACHED_BOARD is not defined, we need some other way to
         # find the board.
         cached_board = self.cmake_cache.get('CACHED_BOARD')
-        log.dbg('CACHED_BOARD:', cached_board, level=log.VERBOSE_EXTREME)
+        if cached_board:
+            log.dbg('CACHED_BOARD:', cached_board, level=log.VERBOSE_EXTREME)
+        else:
+            log.dbg('CACHED_BOARD: not defined', level=log.VERBOSE_EXTREME)
+
+        cached_device = self.cmake_cache.get('CACHED_DEVICE')
+        if cached_device:
+            log.dbg('CACHED_DEVICE:', cached_device, level=log.VERBOSE_EXTREME)
+        else:
+            log.dbg('CACHED_DEVICE: not defined', level=log.VERBOSE_EXTREME)
+
         # If apps_mismatched and self.auto_pristine are true, we will
         # run pristine on the build, invalidating the cached
         # board. In that case, we need some way of getting the board.
-        self.check_force((cached_board and
-                          not (apps_mismatched and self.auto_pristine))
-                         or self.args.board or self.config_board or
-                         os.environ.get('BOARD'),
-                         'Cached board not defined, please provide it '
-                         '(provide --board, set default with '
+        self.check_force(((cached_board or cached_device) and not (apps_mismatched and self.auto_pristine))
+                         or self.args.board or self.config_board or os.environ.get('BOARD') or self.args.device or self.config_device or os.environ.get('DEVICE'),
+                         'Cached board or device not defined, please provide it '
+                         '(for board'
+                         'provide --board, set default with '
                          '"west config build.board <BOARD>", or set '
-                         'BOARD in the environment)')
+                         'BOARD in the environment)'
+                         '(for device'
+                         'provide --device, set default with '
+                         '"west config build.device <DEVICE>", or set '
+                         'DEVICE in the environment)')
 
-        # Check consistency between cached board and --board.
-        boards_mismatched = (self.args.board and cached_board and
-                             self.args.board != cached_board)
-        self.check_force(
-            not boards_mismatched or self.auto_pristine,
-            'Build directory {} targets board {}, but board {} was specified. '
-            '(Clean the directory, use --pristine, or use --build-dir to '
-            'specify a different one.)'.
-            format(self.build_dir, cached_board, self.args.board))
+        if cached_board:
+            # Check consistency between cached board and --board.
+            boards_mismatched = (self.args.board and cached_board and
+                                 self.args.board != cached_board)
+            self.check_force(
+                not boards_mismatched or self.auto_pristine,
+                'Build directory {} targets board {}, but board {} was specified. '
+                '(Clean the directory, use --pristine, or use --build-dir to '
+                'specify a different one.)'.
+                format(self.build_dir, cached_board, self.args.board))
 
-        if self.auto_pristine and (apps_mismatched or boards_mismatched):
+        if cached_device:
+            # Check consistency between cached device and --device.
+            devices_mismatched = (self.args.device and cached_device and
+                                  self.args.device != cached_device)
+            self.check_force(
+                not devices_mismatched or self.auto_pristine,
+                'Build directory {} targets device {}, but device {} was specified. '
+                '(Clean the directory, use --pristine, or use --build-dir to '
+                'specify a different one.)'.
+                format(self.build_dir, cached_device, self.args.device))
+
+        if self.auto_pristine and (apps_mismatched or boards_mismatched or devices_mismatched):
             self._run_pristine()
             self.cmake_cache = None
             log.dbg('run_cmake:', True, level=log.VERBOSE_EXTREME)
@@ -582,24 +607,18 @@ class Build(Forceable):
             # Tricky corner-case: The user has not specified a build folder but
             # there was one in the CMake cache. Since this is going to be
             # invalidated, reset to CWD and re-run the basic tests.
-            if ((boards_mismatched and not apps_mismatched) and
+            if (((boards_mismatched or devices_mismatched) and not apps_mismatched) and
                     (not source_abs and cached_abs)):
                 self.source_dir = self._find_source_dir()
                 self._sanity_check_source_dir()
 
     def _run_cmake(self, board, device, origin, cmake_opts):
-        if board is None and config_getboolean('board_warn', True):
-            log.wrn('This looks like a fresh build and BOARD is unknown;',
+        if (board is None and device is None) and (config_getboolean('board_warn', True) or config_getboolean('build.device_warn', True)):
+            log.wrn('This looks like a fresh build and BOARD/DEVICE is unknown;',
                     "so it probably won't work. To fix, use",
-                    '--board=<your-board>.')
+                    '--board=<your-board> or --device=<your-device>')
             log.inf('Note: to silence the above message, run',
-                    "'west config build.board_warn false'")
-        if device is None and config_getboolean('device_warn', True):
-            log.wrn('This looks like a fresh build and DEVICE is unknown;',
-                    "so it probably won't work. To fix, use",
-                    '--device=<your-device>.')
-            log.inf('Note: to silence the above message, run',
-                    "'west config build.board_warn false'")
+                    "'west config build.board_warn false' or 'west config build.device_warn false'")
         if not self.run_cmake:
             return
 

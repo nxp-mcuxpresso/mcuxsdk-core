@@ -50,7 +50,7 @@ macro(project project_name)
   clear_default_added_compiler_flags()
   # parse arguments
   set(options NO_DEFAULT_CONFIG)
-  set(single_value PROJECT_BOARD_PORT_PATH PROJECT_TYPE CUSTOM_LINKER)
+  set(single_value PROJECT_BOARD_PORT_PATH PROJECT_DEVICE_PORT_PATH PROJECT_TYPE CUSTOM_LINKER)
   set(multi_value CUSTOM_PRJ_CONF_PATH)
 
   cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}"
@@ -96,6 +96,10 @@ macro(project project_name)
 
   if(${INDEX} GREATER -1)
     set(INTERNAL_EXAMPLE TRUE)
+    set(EXAMPLE_FOLDER "examples_int")
+  else()
+    set(INTERNAL_EXAMPLE FALSE)
+    set(EXAMPLE_FOLDER "examples")
   endif()
 
   # If using find_package McuxSDK
@@ -188,14 +192,24 @@ macro(project project_name)
 
     # get full_project_board_port_path
     set(project_board_port_path ${__PROJECT_BOARD_PORT_PATH})
+    set(project_device_port_path ${__PROJECT_DEVICE_PORT_PATH})
 
     if (DEFINED project_board_port_path)
       if (DEFINED core_id)
-        cmake_path(APPEND full_project_board_port_path ${SdkRootDirPath} ${project_board_port_path} ${core_id})
+        cmake_path(APPEND full_project_port_path ${SdkRootDirPath} ${project_board_port_path} ${core_id})
       else()
-        cmake_path(APPEND full_project_board_port_path ${SdkRootDirPath} ${project_board_port_path})
+        cmake_path(APPEND full_project_port_path ${SdkRootDirPath} ${project_board_port_path})
       endif()
-      log_debug("full_project_board_port_path: ${full_project_board_port_path}")
+      set(board_device_folder "${board}")
+      log_debug("full_project_port_path: ${full_project_port_path}")
+    elseif (DEFINED project_device_port_path)
+      if (DEFINED core_id)
+        cmake_path(APPEND full_project_port_path ${SdkRootDirPath} ${project_device_port_path} ${core_id})
+      else()
+        cmake_path(APPEND full_project_port_path ${SdkRootDirPath} ${project_device_port_path})
+      endif()
+      set(board_device_folder "${device}")
+      log_debug("full_project_port_path: ${full_project_port_path}")
     endif ()
 
     # Get custom prj.conf

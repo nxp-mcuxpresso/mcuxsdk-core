@@ -234,14 +234,23 @@ elseif (NOT NO_DEFAULT_CONFIG)
       ${SdkRootDirPath}/devices/prj.conf
       ${SdkRootDirPath}/devices/${soc_portfolio}/prj.conf
       ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/prj.conf
-      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/prj.conf
-      ${SdkRootDirPath}/examples/prj.conf
-      ${SdkRootDirPath}/examples/_boards/prj.conf
-      ${SdkRootDirPath}/${board_root}/${board}/prj.conf)
+      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/prj.conf)
       if(EXISTS ${f})
         list(APPEND merge_config_files ${f})
       endif()
     endforeach()
+    
+    if (DEFINED board)
+      foreach(
+        f
+        ${SdkRootDirPath}/examples/prj.conf
+        ${SdkRootDirPath}/examples/_boards/prj.conf
+        ${SdkRootDirPath}/${board_root}/${board}/prj.conf)
+        if(EXISTS ${f})
+          list(APPEND merge_config_files ${f})
+        endif()
+      endforeach()
+    endif()
   else()
     foreach(
       f
@@ -249,26 +258,31 @@ elseif (NOT NO_DEFAULT_CONFIG)
       ${SdkRootDirPath}/devices/${soc_portfolio}/prj.conf
       ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/prj.conf
       ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/prj.conf
-      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/${core_id}/prj.conf
-      ${SdkRootDirPath}/examples/prj.conf
-      ${SdkRootDirPath}/examples/_boards/prj.conf
-      ${SdkRootDirPath}/${board_root}/${board}/prj.conf
-      ${SdkRootDirPath}/${board_root}/${board}/${core_id}/prj.conf)
+      ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/${core_id}/prj.conf)
       if(EXISTS ${f})
         list(APPEND merge_config_files ${f})
       endif()
+      
+      if (DEFINED board)
+        foreach(
+          f
+          ${SdkRootDirPath}/examples/prj.conf
+          ${SdkRootDirPath}/examples/_boards/prj.conf
+          ${SdkRootDirPath}/${board_root}/${board}/prj.conf
+          ${SdkRootDirPath}/${board_root}/${board}/${core_id}/prj.conf)
+          if(EXISTS ${f})
+            list(APPEND merge_config_files ${f})
+          endif()
+        endforeach()
+      endif()      
     endforeach()
   endif()
   
-  if (DEFINED project_board_port_path)
-    if (DEFINED INTERNAL_EXAMPLE)
-      get_target_source_in_sub_folders(${APPLICATION_SOURCE_DIR} ${INTERNAL_EXAMPLE_FOLDER} "prj.conf")
-    else ()
-      get_target_source_in_sub_folders(${APPLICATION_SOURCE_DIR} "examples" "prj.conf")
-    endif ()
+  if (DEFINED project_board_port_path OR DEFINED project_device_port_path)
+    get_target_source_in_sub_folders(${APPLICATION_SOURCE_DIR} ${EXAMPLE_FOLDER} "prj.conf")
     list(APPEND merge_config_files ${GET_TARGET_SOURCE_IN_SUB_FOLDERS_OUTPUT})
 
-    get_target_source_in_sub_folders(${full_project_board_port_path} "${board}" "prj.conf")
+    get_target_source_in_sub_folders(${full_project_port_path} "${board_device_folder}" "prj.conf")
     list(APPEND merge_config_files ${GET_TARGET_SOURCE_IN_SUB_FOLDERS_OUTPUT})
   else()
     if (EXISTS ${APPLICATION_SOURCE_DIR}/prj.conf)

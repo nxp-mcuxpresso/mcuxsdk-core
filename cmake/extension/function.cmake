@@ -480,6 +480,13 @@ function(mcux_set_variable name value)
         CACHE STRING "Selected ${name}: ${value}")
   endif()
 
+  if(${name} STREQUAL device)
+    # for west cmd to find cached variable
+    set(CACHED_DEVICE
+        ${value}
+        CACHE STRING "Selected ${name}: ${value}")
+  endif()
+
   set(${name} ${value} CACHE STRING "The variable ${name}: ${value}" FORCE)
 
   log_debug("Variable ${name} is set to ${value}" ${CMAKE_CURRENT_LIST_FILE})
@@ -1136,40 +1143,52 @@ function(mcux_load_project_ide_data)
             ${SdkRootDirPath}/devices/IDE.yml
             ${SdkRootDirPath}/devices/${soc_portfolio}/IDE.yml
             ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/IDE.yml
-            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/IDE.yml
-            ${SdkRootDirPath}/examples/IDE.yml
-            ${SdkRootDirPath}/examples/_boards/IDE.yml
-            ${SdkRootDirPath}/${board_root}/${board}/IDE.yml)
+            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/IDE.yml)
       if(EXISTS ${f})
         list(APPEND IDE_yml_list ${f})
       endif()
     endforeach()
+
+    if (DEFINED board)
+      foreach(f
+            ${SdkRootDirPath}/examples/IDE.yml
+            ${SdkRootDirPath}/examples/_boards/IDE.yml
+            ${SdkRootDirPath}/${board_root}/${board}/IDE.yml)
+        if(EXISTS ${f})
+          list(APPEND IDE_yml_list ${f})
+        endif()
+      endforeach()
+    endif()
   else()
     foreach(f
             ${SdkRootDirPath}/devices/IDE.yml
             ${SdkRootDirPath}/devices/${soc_portfolio}/IDE.yml
             ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/IDE.yml
             ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/IDE.yml
-            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/${core_id}/IDE.yml
-            ${SdkRootDirPath}/examples/IDE.yml
-            ${SdkRootDirPath}/examples/_boards/IDE.yml
-            ${SdkRootDirPath}/${board_root}/${board}/IDE.yml
-            ${SdkRootDirPath}/${board_root}/${board}/${core_id}/IDE.yml)
+            ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}/${core_id}/IDE.yml)
       if(EXISTS ${f})
         list(APPEND IDE_yml_list ${f})
       endif()
     endforeach()
+
+    if (DEFINED board)
+      foreach(f
+            ${SdkRootDirPath}/examples/IDE.yml
+            ${SdkRootDirPath}/examples/_boards/IDE.yml
+            ${SdkRootDirPath}/${board_root}/${board}/IDE.yml
+            ${SdkRootDirPath}/${board_root}/${board}/${core_id}/IDE.yml)
+        if(EXISTS ${f})
+          list(APPEND IDE_yml_list ${f})
+        endif()
+      endforeach()
+    endif()
   endif()
 
-  if (DEFINED project_board_port_path)
-    if (DEFINED INTERNAL_EXAMPLE)
-      get_target_source_in_sub_folders(${APPLICATION_SOURCE_DIR} ${INTERNAL_EXAMPLE_FOLDER} "IDE.yml")
-    else ()
-      get_target_source_in_sub_folders(${APPLICATION_SOURCE_DIR} "examples" "IDE.yml")
-    endif ()
+  if (DEFINED project_board_port_path OR DEFINED project_device_port_path)
+    get_target_source_in_sub_folders(${APPLICATION_SOURCE_DIR} ${EXAMPLE_FOLDER} "IDE.yml")
     list(APPEND IDE_yml_list ${GET_TARGET_SOURCE_IN_SUB_FOLDERS_OUTPUT})
 
-    get_target_source_in_sub_folders(${full_project_board_port_path} "${board}" "IDE.yml")
+    get_target_source_in_sub_folders(${full_project_port_path} "${board_device_folder}" "IDE.yml")
     list(APPEND IDE_yml_list ${GET_TARGET_SOURCE_IN_SUB_FOLDERS_OUTPUT})
   else()
     if (EXISTS ${APPLICATION_SOURCE_DIR}/IDE.yml)
@@ -2393,3 +2412,44 @@ function(reset_app_link_order)
   target_link_libraries(app PRIVATE McuxSDK)
 endfunction()
 
+# Usage
+#   _get_subfolder_file(<output-var> <directory> <pattern> <level>)
+#
+# get designated file path from subfolder with designed deepth level
+function(_get_subfolder_file OUTPUT_VAR CURRENT_DIR PATTERN LEVEL)
+  set(current_level 1) 
+  set(dir_queue "${CURRENT_DIR}")
+
+  while( dir_queue AND (${current_level} LESS_EQUAL ${LEVEL}))
+    list(LENGTH dir_queue queue_length)
+
+    math(EXPR end_index "${queue_length} - 1")
+    foreach(index RANGE ${end_index})
+      list(GET dir_queue ${index} dir)
+      file(GLOB children RELATIVE "${dir}" "${dir}/*/")
+
+      foreach(child ${children})
+        if(IS_DIRECTORY "${dir}/${child}")
+          list(APPEND dir_queue "${dir}/${child}")
+        endif ()
+      endforeach()
+
+    endforeach()
+
+    math(EXPR end_index "${queue_length} - 1")
+    foreach(index RANGE ${end_index})
+      list(REMOVE_AT dir_queue 0)
+    endforeach ()
+
+
+    math(EXPR current_level "${current_level} + 1")
+  endwhile()
+
+  foreach (dir ${dir_queue})
+    if(EXISTS ${dir}/${PATTERN})
+      set(${OUTPUT_VAR} ${dir}/${PATTERN} PARENT_SCOPE)
+      break()
+    endif ()
+  endforeach ()
+
+endfunction()

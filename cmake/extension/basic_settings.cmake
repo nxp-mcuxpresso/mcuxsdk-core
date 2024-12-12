@@ -135,12 +135,15 @@ if(DEFINED board)
             ${CMAKE_CURRENT_LIST_LINE})
   include(${board_variable_path} OPTIONAL)
 else()
-  # for device lib case
-  get_filename_component(
-    device_variable_path
-    "${SdkRootDirPath}/devices/${soc_portfolio}/${soc_series}/${device}/variable.cmake" ABSOLUTE)
-  log_debug("Include ${device_variable_path}" ${CMAKE_CURRENT_LIST_FILE}
-            ${CMAKE_CURRENT_LIST_LINE})
+  _get_subfolder_file(device_variable_path "${SdkRootDirPath}/devices" "${device}/variable.cmake" 2)
+  if(NOT device_variable_path)
+    log_debug("Cannot find device variable file for ${device} under 'devices' folder, build system will search the internal repo to get device variable.cmake")
+    _get_subfolder_file(device_variable_path "${SdkRootDirPath}/devices_int" "${device}/variable.cmake" 2)
+    if(NOT device_variable_path)
+      log_fatal("Cannot find device variable file for ${device} under 'devices' or 'devices_int' folders, please check whether ${device} is supported or not" ${CMAKE_CURRENT_LIST_FILE} ${CMAKE_CURRENT_LIST_LINE})
+    endif()
+  endif()
+  log_debug("Include ${device_variable_path}" ${CMAKE_CURRENT_LIST_FILE} ${CMAKE_CURRENT_LIST_LINE})
   include(${device_variable_path} OPTIONAL)
 endif()
 
