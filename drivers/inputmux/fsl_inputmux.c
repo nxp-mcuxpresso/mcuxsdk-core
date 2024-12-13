@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021, 2023 NXP
+ * Copyright 2016-2021, 2023-2024 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -123,7 +123,7 @@ void INPUTMUX_AttachSignal(INPUTMUX_Type *base, uint32_t index, inputmux_connect
     *(volatile uint32_t *)(((uint32_t)base) + pmux_id + (index * 4U)) = output_id;
 }
 
-#if defined(FSL_FEATURE_INPUTMUX_HAS_SIGNAL_ENA)
+#if defined(FSL_FEATURE_INPUTMUX_HAS_SIGNAL_ENA) && FSL_FEATURE_INPUTMUX_HAS_SIGNAL_ENA
 /*!
  * brief Enable/disable a signal
  *
