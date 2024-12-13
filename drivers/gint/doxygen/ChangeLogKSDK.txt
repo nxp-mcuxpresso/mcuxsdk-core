@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section gint GINT
-  The current GINT driver version is 2.1.0.
+  The current GINT driver version is 2.1.1.
+
+  - 2.1.1
+    - Improvements
+      - Added support for platforms with PORT_POL and PORT_ENA registers without arrays.
 
   - 2.1.0
     - Improvements
