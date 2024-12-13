@@ -498,10 +498,8 @@ static inline uint32_t USART_GetStatusFlags(USART_Type *base)
 /*!
  * @brief Clear USART status flags.
  *
- * This function clear supported USART status flags
- * Flags that can be cleared or set are:
- *      kUSART_TxError
- *      kUSART_RxError
+ * This function clear supported USART status flags.
+ * The mask is a logical OR of enumeration members. See @ref kUSART_AllClearFlags.
  * For example:
  * @code
  *     USART_ClearStatusFlags(USART1, kUSART_TxError | kUSART_RxError)
