@@ -1027,8 +1027,23 @@ module Mdk
                 @logger.debug("drop: #{result[ 0 ]}")
                 line.sub!(result[ 0 ], '')
             end
+            # cpu/fpu has been identified by cc-flags, no need to set it again in linker tab
             # --cpu Cortex-M4
-            pattern = /(?i)\s--cpu\s+(\S+)\s/
+            pattern = /(?i)\s--cpu(\s+|=)(\S+)\s/
+            result  = line.match(pattern)
+            if (result)
+                @logger.debug("drop: #{result[ 0 ]}")
+                line.sub!(result[ 0 ], '')
+            end
+            # -mcpu=cortex-m7
+            pattern = /(?i)\s-mcpu(\s+|=)(\S+)\s/
+            result  = line.match(pattern)
+            if (result)
+                @logger.debug("drop: #{result[ 0 ]}")
+                line.sub!(result[ 0 ], '')
+            end
+            # -mfpu=fpv4-sp-d16
+            pattern = /(?i)\s-mfpu(\s+|=)(\S+)\s/
             result  = line.match(pattern)
             if (result)
                 @logger.debug("drop: #{result[ 0 ]}")
