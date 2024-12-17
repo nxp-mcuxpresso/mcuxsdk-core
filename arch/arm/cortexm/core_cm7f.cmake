@@ -15,7 +15,7 @@ if (CONFIG_MCUX_PRJSEG_config.arm.core.cm7f)
         AS "-mcpu=cortex-m7 --target=arm-arm-none-eabi"
         CC "-mcpu=cortex-m7"
         CX "-mcpu=cortex-m7"
-        LD "--cpu=Cortex-M7.fp.dp"
+        LD "--cpu=Cortex-M7"
     )
 
     mcux_add_armgcc_mcux_configuration(

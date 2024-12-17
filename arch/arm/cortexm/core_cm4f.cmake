@@ -15,7 +15,7 @@ if (CONFIG_MCUX_PRJSEG_config.arm.core.cm4f)
         AS "-mcpu=cortex-m4 --target=arm-arm-none-eabi"
         CC "-mcpu=cortex-m4"
         CX "-mcpu=cortex-m4"
-        LD "--cpu=Cortex-M4.fp.sp"
+        LD "--cpu=Cortex-M4"
     )
 
     mcux_add_armgcc_mcux_configuration(

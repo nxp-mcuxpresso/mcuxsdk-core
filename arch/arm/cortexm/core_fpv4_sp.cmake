@@ -14,6 +14,7 @@ if (CONFIG_MCUX_PRJSEG_config.arm.core.fpu.fpv4_sp)
         AS "-mfpu=fpv4-sp-d16"
         CC "-mfpu=fpv4-sp-d16"
         CX "-mfpu=fpv4-sp-d16"
+        LD "--fpu=FPv4-SP"
     )
 
     mcux_add_armgcc_mcux_configuration(

@@ -14,6 +14,7 @@ if (CONFIG_MCUX_PRJSEG_config.arm.core.fpu.fpv5_dp)
         AS "-mfpu=fpv5-d16"
         CC "-mfpu=fpv5-d16"
         CX "-mfpu=fpv5-d16"
+        LD "--fpu=FPv5_D16"
     )
 
     mcux_add_armgcc_mcux_configuration(
