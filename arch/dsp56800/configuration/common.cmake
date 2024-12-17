@@ -37,9 +37,9 @@ if (CONFIG_MCUX_PRJSEG_config.dsp56800.shared)
             CC "-D__LPM__"
     )
 
-#    mcux_add_codewarrior_configuration(
-#            CC "-opt speed"
-#    )
+    mcux_add_codewarrior_configuration(
+            CC "-opt speed"
+    )
 
     mcux_add_codewarrior_sys_include(
         SYS_SEARCH_PATH "\"${MCUToolsBaseDir}/DSP56800x_EABI_Tools/M56800E Support/runtime_56800E/include\""
