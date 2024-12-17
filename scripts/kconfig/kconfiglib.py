@@ -869,7 +869,7 @@ class Kconfig(object):
     #
 
     def __init__(self, filename="Kconfig", warn=True, warn_to_stderr=True,
-                 encoding="utf-8", suppress_traceback=False):
+                 encoding="utf-8", suppress_traceback=False, enable_all_drivers=False):
         """
         Creates a new Kconfig object by parsing Kconfig files.
         Note that Kconfig files are not the same as .config files (which store
@@ -946,9 +946,13 @@ class Kconfig(object):
 
           Other exceptions besides EnvironmentError and KconfigError are still
           propagated when suppress_traceback is True.
+
+        enable_all_drivers (default: False):
+          True if all base SDK drivers should be enabled if the dependency ok.
+          Technically equals add default y to all driver kconfig symbol.
         """
         try:
-            self._init(filename, warn, warn_to_stderr, encoding)
+            self._init(filename, warn, warn_to_stderr, encoding, enable_all_drivers)
         except (EnvironmentError, KconfigError) as e:
             if suppress_traceback:
                 cmd = sys.argv[0]  # Empty string if missing
@@ -960,7 +964,7 @@ class Kconfig(object):
                 sys.exit(cmd + str(e).strip())
             raise
 
-    def _init(self, filename, warn, warn_to_stderr, encoding):
+    def _init(self, filename, warn, warn_to_stderr, encoding, enable_all_drivers):
         # See __init__()
 
         self._encoding = encoding
@@ -1101,7 +1105,8 @@ class Kconfig(object):
         self._readline.__self__.close()
 
         self._parsing_kconfigs = False
-
+        if enable_all_drivers:
+            self._make_up_node(self.top_node)
         # Do various menu tree post-processing
         self._finalize_node(self.top_node, self.y)
         for s in self.syms.values():
@@ -3695,6 +3700,14 @@ class Kconfig(object):
                 default = (d[0], self._make_and(sym.direct_dep, d[1]))
                 sym.defaults.insert(inserted + idx, default)
                 inserted += 1
+
+    def _make_up_node(self, node):
+        for sym in self.defined_syms:
+            if _MCUX_DRIVER_PREFIX in sym.name and len(sym.nodes[0].defaults) == 0:
+                if sym.nodes[0].parent.item.__class__ is Choice:
+                    pass
+                else:
+                    sym.nodes[0].defaults.append((self.const_syms['y'], self.const_syms['y']))
 
     def _finalize_node(self, node, visible_if):
         # Finalizes a menu node and its children:
@@ -7290,6 +7303,8 @@ _MCUX_AUX_MACRO_PREFIXES = frozenset({
     # "DEPENDENCY_COMPONENT",
     "MCUX_"
 })
+
+_MCUX_DRIVER_PREFIX = "MCUX_COMPONENT_driver"
 
 # No prefix
 _NO_PREFIX = "no prefix"

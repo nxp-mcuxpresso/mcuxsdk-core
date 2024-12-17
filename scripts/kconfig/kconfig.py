@@ -35,7 +35,7 @@ def main():
 
     print("Parsing " + args.kconfig_file)
     kconf = Kconfig(args.kconfig_file, warn_to_stderr=True,
-                    suppress_traceback=True)
+                    suppress_traceback=True, enable_all_drivers=args.enable_all_drivers)
 
     # support override. In MCUX SDK, prj.confs have different priorities
     kconf.disable_override_warnings()
@@ -286,6 +286,9 @@ def parse_args():
                              "set specific configuration settings to a "
                              "pre-defined value and thereby remove any user "
                              " adjustments.")
+    parser.add_argument("--enable-all-drivers",
+                        action="store_true",
+                        help="Indicate the all base SDK drivers should be enabled if the dependency is ok. Technically equals add default y to all driver kconfig symbol.")
     parser.add_argument("--zephyr-base",
                         help="Path to current Zephyr installation")
     parser.add_argument("kconfig_file",
