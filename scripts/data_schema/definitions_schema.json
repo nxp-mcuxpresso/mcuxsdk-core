@@ -63,6 +63,10 @@
                                     "meta_path": "examples/src/demo_apps/hello_world"
                                 }
                             ]
+                        },
+                        "toolchains": {
+                            "$ref": "#/definitions/boardSupportToolchainType",
+                            "description": "The project supported toolchains and targets."
                         }
                     },
                     "required": [
@@ -128,6 +132,16 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Specify it is a device example, not board example"
+                },
+                "extra_cmake_args": {
+                    "type": "array",
+                    "description": "The extra cmake cmd arguments",
+                    "minItems": 0,
+                    "uniqueItems": true,
+                    "items": {
+                        "type": "string",
+                        "description": "The extra cmake arguments"
+                    }
                 }
             },
             "required": [
