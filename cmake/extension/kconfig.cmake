@@ -114,9 +114,11 @@ function(mcux_load_prjconf prjconf_dir conf_name)
   endif()
 
   if (NOT DEFINED CONFIG_MCUX_HW_SAU)
+    # "NO_TZ" means that TRUSTZONE is not supported
     set(CONFIG_MCUX_HW_SAU "NO_TZ")
     set(CONFIG_MCUX_HW_SAU "NO_TZ" PARENT_SCOPE)
   else ()
+    # "TZ" means that TRUSTZONE is supported
     set(CONFIG_MCUX_HW_SAU "TZ")
     set(CONFIG_MCUX_HW_SAU "TZ" PARENT_SCOPE)
   endif()  
