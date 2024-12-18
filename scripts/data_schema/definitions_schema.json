@@ -65,8 +65,13 @@
                             ]
                         },
                         "toolchains": {
-                            "$ref": "#/definitions/boardSupportToolchainType",
-                            "description": "The project supported toolchains and targets."
+                            "type": "array",
+                            "minItems": 0,
+                            "uniqueItems": true,
+                            "additionalItems": false,
+                            "items": {
+                                "$ref": "#/definitions/toolchainTargetSupportType"
+                            }
                         }
                     },
                     "required": [
@@ -85,18 +90,8 @@
                 }
             },
             "anyOf": [
-                {
-                    "required": [
-                        "contents",
-                        "boards"
-                    ]
-                },
-                {
-                    "required": [
-                        "contents",
-                        "devices"
-                    ]
-                }
+                { "required": ["contents", "boards"] },
+                { "required": ["contents", "devices"] }
             ]
         },
         "configurationDocumentType": {
@@ -133,9 +128,9 @@
                     "default": true,
                     "description": "Specify it is a device example, not board example"
                 },
-                "extra_cmake_args": {
+                "extra_build_args": {
                     "type": "array",
-                    "description": "The extra cmake cmd arguments",
+                    "description": "The extra arguments to west build command",
                     "minItems": 0,
                     "uniqueItems": true,
                     "items": {
