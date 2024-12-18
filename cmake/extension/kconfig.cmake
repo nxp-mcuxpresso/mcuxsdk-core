@@ -397,6 +397,11 @@ if(CREATE_NEW_DOTCONFIG)
 else()
   set(input_configs ${DOTCONFIG} ${FORCED_CONF_FILE})
 endif()
+
+if(ENABLE_ALL_DRIVERS)
+  list(APPEND input_configs_flags --enable-all-drivers)
+endif()
+
 # set(FORCED_CONF_FILE)
 if(DEFINED FORCED_CONF_FILE)
   list(APPEND input_configs_flags --forced-input-configs)

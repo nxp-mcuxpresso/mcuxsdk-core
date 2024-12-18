@@ -181,7 +181,9 @@ class Build(Forceable):
         group.add_argument('-p', '--pristine', choices=['auto', 'always',
                             'never'], action=AlwaysIfMissing, nargs='?',
                             help='pristine build folder setting')
-
+        group.add_argument('--enable-all-drivers', action='store_true',
+                           help='''Enable all base SDK drivers starting with "mcux_component_driver" if the dependency is ok which technically equals add "default y" to all driver kconfig symbol.
+                           This is especially useful for device specific platform library project to get all depended and supported drivers enabled automatically without manually specify all the drivers in prj.conf.''')
         return parser
 
     def do_run(self, args, remainder):
@@ -651,6 +653,12 @@ class Build(Forceable):
         else:
             # self.args.no_sysbuild == True or config sysbuild False
             cmake_opts.extend(['-S{}'.format(self.source_dir)])
+
+        config_enable_all_drivers = config_getboolean('enable_all_drivers', False)
+        if self.args.enable_all_drivers or config_enable_all_drivers:
+            cmake_opts.append('-DENABLE_ALL_DRIVERS=True')
+        else:
+            cmake_opts.append('-DENABLE_ALL_DRIVERS=False')
 
         extra_args = {
             'SdkRootDirPath': pathlib.Path(__file__).resolve().parent.parent.parent,
