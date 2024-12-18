@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2024 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -456,7 +455,7 @@ void LPADC_SetConvTriggerConfig(ADC_Type *base, uint32_t triggerId, const lpadc_
             | ADC_TCTRL_TPRI(config->priority)      /* Trigger priority setting. */
 #if (defined(FSL_FEATURE_LPADC_FIFO_COUNT) && (FSL_FEATURE_LPADC_FIFO_COUNT == 2))
             | ADC_TCTRL_FIFO_SEL_A(config->channelAFIFOSelect)
-#if (defined(FSL_FEATURE_LPADC_HAS_NO_TCTRL_FIFO_SEL_B) && (FSL_FEATURE_LPADC_HAS_NO_TCTRL_FIFO_SEL_B == 0U))
+#if !(defined(FSL_FEATURE_LPADC_HAS_NO_TCTRL_FIFO_SEL_B) && FSL_FEATURE_LPADC_HAS_NO_TCTRL_FIFO_SEL_B)
             | ADC_TCTRL_FIFO_SEL_B(config->channelBFIFOSelect)
 #endif /* FSL_FEATURE_LPADC_HAS_NO_TCTRL_FIFO_SEL_B  */
 #endif /* FSL_FEATURE_LPADC_FIFO_COUNT */
