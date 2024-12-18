@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2024 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -23,8 +22,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief LPADC driver version 2.9.0. */
-#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 9, 0))
+/*! @brief LPADC driver version 2.9.1. */
+#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 9, 1))
 /*! @} */
 
 #if (defined(FSL_FEATURE_LPADC_OFSTRIM_COUNT) && (FSL_FEATURE_LPADC_OFSTRIM_COUNT == 1))
