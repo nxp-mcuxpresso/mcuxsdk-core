@@ -1,16 +1,20 @@
-import os
+import os, sys
 import argparse
 import platform
 import yaml
 import logging
 import shutil
+import re
 from subprocess import CalledProcessError, DEVNULL
 from copy import deepcopy
 from pathlib import Path
 from west.commands import WestCommand
 
-_ARG_SEPARATOR = '--'
 SCRIPT_DIR = Path(__file__).parent.parent
+sys.path.append(SCRIPT_DIR.as_posix())
+from misc import sdk_project_target
+
+_ARG_SEPARATOR = '--'
 SDK_ROOT_DIR = SCRIPT_DIR.parent
 DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#freestanding-example'
 # VARIABLES_MAP = {
@@ -19,6 +23,7 @@ DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/B
 USAGE = '''\
 west export_app [-h] [source_dir] [-o OUTPUT_DIR]
 '''
+
 logger = logging.getLogger('export_app.misc')
 
 def cmake_func(func):
@@ -27,13 +32,22 @@ def cmake_func(func):
             raise InvalidCmakeMethod(func.__name__, 'Invalid function argument type, should be dict.')
         if (cm_func_name := func_args.get('original_name', '').lower()) != func.__name__.replace('cm_', ''):
             raise InvalidCmakeMethod(func.__name__, f'The cmake function name {cm_func_name} is not aligned with class method name.')
-        return cmake_statement(func(cls, func_args, ExtensionMap.parser_args(func_args)))
+        ret_func = func(cls, func_args, ExtensionMap.parser_args(func_args)) or func_args
+        return cmake_statement(ret_func)
     return wrapper
 
 def cmake_statement(func):
     args = ' '.join([arg.get('value') for arg in func.get('args', [])])
     return f"{func['original_name']}({args})"
 
+def current_list_dir_context(func):
+    def wrapper(self, source_dir: Path):
+        backup = self.current_list_dir
+        self.current_list_dir = '${SdkRootDirPath}/' + source_dir.relative_to(SDK_ROOT_DIR).as_posix()
+        ret = func(self, source_dir)
+        self.current_list_dir = backup
+        return ret
+    return wrapper
 
 class InvalidCmakeMethod(Exception):
     def __init__(self, func_name='undefined', msg=None, *args, **kwargs):
@@ -55,14 +69,14 @@ class ExtensionMap(object):
         if not (extension_yml := SCRIPT_DIR / 'resources/cmparser/extensions.yml').exists():
             logger.fatal(f'Mandatory resource {extension_yml.as_posix()} does not exist!')
             return {}
-        extensions = yaml.load(open(extension_yml, 'r'), yaml.Loader)
+        extensions = yaml.load(open(extension_yml, 'r'), yaml.BaseLoader)
         variables = extensions.get('__variables__', {})
         del extensions['__variables__']
         extensions = yaml.dump(extensions)
         for k, v in variables.items():
             extensions = extensions.replace(f"${{{k}}}", v)
 
-        return yaml.load(extensions, yaml.Loader)
+        return yaml.load(extensions, yaml.BaseLoader)
 
     _extensions = extensions()
 
@@ -113,6 +127,8 @@ class ExportApp(WestCommand):
             accepts_unknown_args=True
         )
         self.cmparser = None
+        self.sysbuild = False
+        self.current_list_dir = None
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(
@@ -121,8 +137,9 @@ class ExportApp(WestCommand):
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.description,
             usage=USAGE)
-        # Hidden option for backwards compatibility
-        parser.add_argument('-o', '--output-dir',
+        parser.add_argument('-b', '--board', nargs=None, default=None, help="board id like mimxrt700evk", required=True)
+        parser.add_argument('--core_id', nargs='?', default=None, help="core id like cm33_core0")
+        parser.add_argument('-o', '--output-dir', required=True,
                             help='output directory to hold the freestanding project')
         return parser
     
@@ -131,24 +148,23 @@ class ExportApp(WestCommand):
         # To align with west build usage
         self._parse_remainder(remainder)
         self._sanity_precheck()
+        self._app_precheck()
         self._find_parser()
-        self.parse_app()
-        self.format_listfile()
-        self.banner(f'Successfully create the freestanding project, see {self.dest_list_file.as_posix()}')
-
-    def parse_app(self):
         self.output_dir.mkdir(exist_ok=True)
-        self.dest_list_file = self.output_dir / self.source_dir.relative_to(SDK_ROOT_DIR) / 'CMakeLists.txt'
-        shutil.copytree(self.source_dir, self.output_dir / self.dest_list_file.parent)
-        list_file = self.source_dir / 'CMakeLists.txt'
-        completed_process = self.run_subprocess(
-            [self.cmparser.as_posix(), list_file.as_posix()],
-            capture_output=True,
-            text=True
-        )
-        self.check_force(completed_process.returncode == 0, f'Cannot parse {list_file.as_posix()}: {completed_process.stderr}')
-        io_content = completed_process.stdout
-        list_content = yaml.load(io_content, yaml.Loader)
+        self.dest_list_file = self.parse_app(self.source_dir)
+        self.dest_prj_conf = self.dest_list_file.parent  / 'prj.conf'
+        self.banner(f'Successfully create the freestanding project, see {self.dest_list_file}, you can use following command to build it.')
+        print(self.build_cmd)
+
+    @current_list_dir_context
+    def parse_app(self, source_dir):
+        dest_list_file = self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'CMakeLists.txt'
+        shutil.copytree(source_dir, dest_list_file.parent)
+        example_yml = yaml.load(open(source_dir / 'example.yml'), yaml.BaseLoader)
+        example_name, example_info = next(iter(example_yml.items()))
+
+        list_file = source_dir / 'CMakeLists.txt'
+        list_content = self._parse_list_file(list_file)
         new_list_content = []
         for func in list_content:
             try:
@@ -165,17 +181,110 @@ class ExportApp(WestCommand):
             except InvalidCmakeMethod as exec:
                 print(str(exec))
                 self.die(f'Script error, please contact us.')
-        open(self.dest_list_file, 'w').write(os.linesep.join(new_list_content))
+        open(dest_list_file, 'w').write(os.linesep.join(new_list_content))
+        self.format_listfile(dest_list_file)
+        self.combine_prj_conf(source_dir)
 
-    def format_listfile(self):
+        if example_info.get('use_sysbuild'):
+            self.sysbuild = True
+            self.parse_linked_app(source_dir)
+
+        return dest_list_file
+
+    def parse_linked_app(self, source_dir):
+        self.check_force(
+            'sysbuild.cmake' in os.listdir(source_dir),
+            "{} doesn't contain a sysbuild.cmake".format(source_dir))
+        
+        sysbuild_content = self._parse_list_file(source_dir / 'sysbuild.cmake')
+        for func in sysbuild_content:
+            if func['original_name'].lower() not in ['externalzephyrproject_add', 'externalmcuxproject_add']:
+                continue
+            linked_source = None
+            for arg in func.get('args', []):
+                if arg['value'].upper() == 'SOURCE_DIR':
+                    linked_source = True
+                    continue
+                if linked_source:
+                    linked_source = arg['value']
+                    break
+            self.check_force(
+                isinstance(linked_source, str),
+                "Cannot find correct SOURCE_DIR from sysbuild.cmake")
+            linked_source = Path(linked_source.replace('${APP_DIR}', source_dir.as_posix())).resolve()
+            self.check_force(
+                linked_source.exists(),
+                f"Cannot find the sysbuild app dir {linked_source.as_posix()}")
+            self.parse_app(linked_source)
+        if (sysbuild_kconfig := source_dir / 'Kconfig.sysbuild').exists():
+            sysbuild_kconfig_content = open(sysbuild_kconfig, 'r').read().splitlines()
+            for i, line in enumerate(sysbuild_kconfig_content):
+                if not 'source' in line:
+                    continue
+                prefix_id = re.search(r'[ro]*source\s*', line).group(0)
+                rel_kconfig_path = line.replace(prefix_id, '').strip('"').strip("'")
+                dest_kconfig_path = '"${SdkRootDirPath}/' + (source_dir / rel_kconfig_path).resolve().relative_to(SDK_ROOT_DIR).as_posix() + '"'
+                sysbuild_kconfig_content[i] = prefix_id + dest_kconfig_path
+            open(self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'Kconfig.sysbuild', 'w').write(os.linesep.join(sysbuild_kconfig_content))
+
+
+    def combine_prj_conf(self, source_dir):
+        prj_conf = {}
+        search_list = [source_dir]
+        example_common = source_dir.parent
+        while example_common.stem != 'examples':
+            search_list.insert(0, example_common)
+            example_common = example_common.parent
+        for s_p in search_list:
+            if not (e_conf := (s_p / 'prj.conf')).exists():
+                continue
+            for k, v in ExportApp.parse_prj_conf(e_conf).items():
+                prj_conf[k] = v
+        with open(self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'prj.conf', 'w') as f:
+            for k, v in prj_conf.items():
+                f.write(f"{k}={v}\n")
+
+    def _parse_list_file(self, list_file):
+        completed_process = self.run_subprocess(
+            [self.cmparser.as_posix(), list_file.as_posix()],
+            capture_output=True,
+            text=True
+        )
+        self.check_force(completed_process.returncode == 0, f'Cannot parse {list_file.as_posix()}: {completed_process.stderr}')
+        return yaml.load(completed_process.stdout, yaml.BaseLoader)
+
+    @property
+    def build_cmd(self):
+        cmd_list = ['west', 'build', '-b', self.board, 
+                    '-p', 'always', self.dest_list_file.parent.as_posix(),
+                    f'-DPrjRootDirPath={self.output_dir.as_posix()}',
+                    '-d', (self.output_dir/'build').as_posix(),
+                    # f'-DCUSTOM_PRJ_CONF_PATHS={self.dest_prj_conf.as_posix()}'
+                    ]
+        if self.sysbuild:
+            cmd_list.append('--sysbuild')
+        if self.core_id:
+            cmd_list.append(f'-Dcore_id={self.core_id}')
+        return ' '.join(cmd_list)
+
+    @staticmethod
+    def parse_prj_conf(path):
+        result = {}
+        for line in open(path).read().splitlines():
+            if len(conf := line.split('=')) != 2:
+                continue
+            result[conf[0]] = conf[1]
+        return result
+
+    def format_listfile(self, list_file: Path):
         try:
             # cmake-format can be used only by cli due to license
             self.check_call(['cmake-format', '-v'], stdout=DEVNULL)
 
             cmd = ['cmake-format', '--in-place']
-            # if (default_config_file := (SDK_ROOT_DIR / 'cmake_format_config.yml')).exists():
-            #     cmd.extend(['-c', default_config_file.as_posix()])
-            cmd.extend(['--', self.dest_list_file.as_posix()])
+            if (default_config_file := (SDK_ROOT_DIR / 'cmake_format_config.yml')).exists():
+                cmd.extend(['-c', default_config_file.as_posix()])
+            cmd.extend(['--', list_file.as_posix()])
             self.run_subprocess(cmd)
         except CalledProcessError:
             self.wrn('Please run "pip install cmake-format" to get a formatted CMakeLists.txt')
@@ -184,28 +293,46 @@ class ExportApp(WestCommand):
         return True
 
     @cmake_func
+    def cm_include(self, func: dict, argv: dict) -> dict:
+        for arg in func.get('args'):
+            arg['value'] = arg['value'].replace('${CMAKE_CURRENT_LIST_DIR}', self.current_list_dir)
+
+    # @cmake_func
+    # def cm_project(self, func: dict, argv: dict) -> dict:
+    #     ExportApp.remove_arg(func, argv, 'PROJECT_BOARD_PORT_PATH')
+
+    @cmake_func
     def cm_mcux_add_source(self, func: dict, argv: dict) -> dict:
         base_path = argv.get('BASE_PATH')
-        updated_func = deepcopy(func)
         for src in argv.get('SOURCES'):
-            ExportApp.update_func_val(updated_func, src, self._process_path(base_path, src))
+            ExportApp.update_func_val(func, src, self._process_path(base_path, src))
         if base_path:
-            ExportApp.update_func_val(updated_func, base_path, base_path.replace('${SdkRootDirPath}', '${PrjRootDirPath}'))
-        return updated_func
+            ExportApp.update_func_val(func, base_path, base_path.replace('${SdkRootDirPath}', '${PrjRootDirPath}'))
 
     @cmake_func
     def cm_mcux_add_include(self, func: dict, argv: dict) -> dict:
         base_path = argv.get('BASE_PATH')
-        updated_func = deepcopy(func)
         for inc in argv.get('INCLUDES'):
-            ExportApp.update_func_val(updated_func, inc, self._process_path(base_path, inc, 'inc'))
+            ExportApp.update_func_val(func, inc, self._process_path(base_path, inc, 'inc'))
         if base_path:
-            ExportApp.update_func_val(updated_func, base_path, base_path.replace('${SdkRootDirPath}', '${PrjRootDirPath}'))
-        return updated_func
+            ExportApp.update_func_val(func, base_path, base_path.replace('${SdkRootDirPath}', '${PrjRootDirPath}'))
 
     def check_force(self, cond, msg):
         if not cond:
             self.die(msg)
+
+    @staticmethod
+    def remove_arg(func, argv, key):
+        match_key = False
+        for i, arg in enumerate(func.get('args', [])):
+            if arg['value'] == key:
+                del func['args'][i]
+                match_key = True
+                continue
+            if not match_key:
+                continue
+            if arg['value'] in argv[key]:
+                del func['args'][i]
 
     # TODO this is not safe
     @staticmethod
@@ -225,9 +352,8 @@ class ExportApp(WestCommand):
             else:
                 s_src = self.source_dir / src
         if not s_src.exists():
-            self.err(f'Cannot handle path {s_src}')
-        else:
-            d_src = (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))
+            self.wrn(f'Cannot handle path {src}, will not update it.')
+        elif not (d_src := (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))).exists():
             if type == 'file':
                 os.makedirs(d_src.parent, exist_ok=True)
                 shutil.copy(s_src, d_src)
@@ -256,6 +382,9 @@ class ExportApp(WestCommand):
         self.check_force(
             'CMakeLists.txt' in os.listdir(app),
             "{} doesn't contain a CMakeLists.txt".format(app))
+        self.check_force(
+            'example.yml' in os.listdir(app),
+            "{} doesn't contain a example.yml".format(app))
         out = self.args.output_dir
         self.check_force(
             (not os.path.isdir(out)) or (len(os.listdir(out)) == 0),
@@ -263,7 +392,20 @@ class ExportApp(WestCommand):
 
         self.source_dir = Path(app).resolve()
         self.output_dir = Path(out).resolve()
-            
+
+    def _app_precheck(self):
+        # NOTE do not support internal examples yet
+        op = sdk_project_target.MCUXRepoProjects()
+        self.board = self.args.board
+        self.core_id = self.args.core_id
+        board_core = self.board
+        if self.core_id:
+            board_core = board_core + '@' + self.core_id
+        matched_app = op.search_app_targets(app_path=self.source_dir, board_cores_filter=[board_core])
+        self.check_force(matched_app,
+                         f'Cannot find any app match your input, please ensure following command can get a valid output\
+                          {os.linesep}west list_project -p {self.source_dir} -b {board_core}')
+
     def _find_parser(self):
         arch = platform.machine()
         sys_name = platform.system()
