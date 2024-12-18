@@ -262,20 +262,20 @@ elseif (NOT NO_DEFAULT_CONFIG)
       if(EXISTS ${f})
         list(APPEND merge_config_files ${f})
       endif()
-      
-      if (DEFINED board)
-        foreach(
-          f
-          ${SdkRootDirPath}/examples/prj.conf
-          ${SdkRootDirPath}/examples/_boards/prj.conf
-          ${SdkRootDirPath}/${board_root}/${board}/prj.conf
-          ${SdkRootDirPath}/${board_root}/${board}/${core_id}/prj.conf)
-          if(EXISTS ${f})
-            list(APPEND merge_config_files ${f})
-          endif()
-        endforeach()
-      endif()      
     endforeach()
+      
+    if (DEFINED board)
+      foreach(
+        f
+        ${SdkRootDirPath}/examples/prj.conf
+        ${SdkRootDirPath}/examples/_boards/prj.conf
+        ${SdkRootDirPath}/${board_root}/${board}/prj.conf
+        ${SdkRootDirPath}/${board_root}/${board}/${core_id}/prj.conf)
+        if(EXISTS ${f})
+          list(APPEND merge_config_files ${f})
+        endif()
+      endforeach()
+    endif()
   endif()
   
   if (DEFINED project_board_port_path OR DEFINED project_device_port_path)
