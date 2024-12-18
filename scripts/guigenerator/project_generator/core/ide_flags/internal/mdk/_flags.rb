@@ -1035,6 +1035,13 @@ module Mdk
                 @logger.debug("drop: #{result[ 0 ]}")
                 line.sub!(result[ 0 ], '')
             end
+            # --fpu
+            pattern = /(?i)\s--fpu(\s+|=)(\S+)\s/
+            result  = line.match(pattern)
+            if (result)
+                @logger.debug("drop: #{result[ 0 ]}")
+                line.sub!(result[ 0 ], '')
+            end
             # -mcpu=cortex-m7
             pattern = /(?i)\s-mcpu(\s+|=)(\S+)\s/
             result  = line.match(pattern)
