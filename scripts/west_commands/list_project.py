@@ -74,6 +74,8 @@ class ListProject(WestCommand):
                                                     help= 'Path regex to match examples.yml in its dir or child-dirs. -p pathA -p pathB. Glob pattern match. -p example/src/driver_examples/** to match all driver_exmaples.  Note in shell, wrap them by ", otherwise it will be parsed shell itself.')
         parser.add_argument('-b', '--board',        nargs='+', action="extend", type=str, default=[],
                                                     help='boards to build, default to include all boards. -b frdmk22f evkmimxrt1170@cm7')
+        parser.add_argument('-d', '--device',       nargs='+', action="extend", type=str, default=[],
+                                                    help='devices to build, default to include all devices, -d MIMXRT1176@cm7')
         parser.add_argument('--shield',             nargs='+', action="extend", type=str, default=[], help='shield to build')
         parser.add_argument('-t', '--toolchain',    nargs='+', action="extend", choices=['iar', 'armgcc', 'mdk', 'xtensa', 'codewarrior', 'riscvllvm'], default=[],
                                                     help='Toolchains to build, the default value is armgcc, e.g, -t armgcc iar')
@@ -103,6 +105,7 @@ class ListProject(WestCommand):
                     app_path=app_path,
                     board_cores_filter=args.board,
                     shields_filter=args.shield,
+                    devices_filter=args.device,
                     toolchains_filter=args.toolchain,
                     targets_filter=args.config if not args.cmake_invoke else [],
                     is_pick_one_target_for_app=args.pick_one_target,

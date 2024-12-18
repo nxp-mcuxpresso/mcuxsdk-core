@@ -18,6 +18,7 @@ SCHEMA_DIR = 'scripts/data_schema'
 EXAMPLE_YML_SCHEMA = 'example_description_schema.json'
 DEFINITION_YAL_SCHEMA = 'definitions_schema.json'
 
+SUPPORTED_TOOLCHAINS = ['armgcc', 'iar', 'mdk', 'xcc', 'xtensa', 'codewarrior', 'riscvllvm']
 
 class MCUXProjectData(object):
     def __init__(self):
@@ -32,17 +33,21 @@ class MCUXProjectData(object):
     def from_fields(cls,
                     name,
                     board,
+                    device,
                     core_id,
                     toolchain,
                     target,
                     project_file,
                     category,
                     use_sysbuild,
-                    shield=None
+                    shield=None,
+                    extra_build_args=[]
                     ):
         case = cls()
+        assert(board or device)
         case.name = name
         case.board = board
+        case.device = device
         case.shield = shield
         case.core_id = core_id
         case.toolchain = toolchain
@@ -50,15 +55,24 @@ class MCUXProjectData(object):
         case.project_file = project_file
         case.category = category
         case.use_sysbuild = use_sysbuild
+        case.extra_build_args = extra_build_args
         return case
 
     @property
     def board(self):
-        return self.raw.get('board', '')
+        return self.raw.get('board')
 
     @board.setter
     def board(self, value):
         self.raw['board'] = value
+
+    @property
+    def device(self):
+        return self.raw.get('device')
+
+    @device.setter
+    def device(self, value):
+        self.raw['device'] = value
 
     @property
     def shield(self):
@@ -99,7 +113,7 @@ class MCUXProjectData(object):
 
     @toolchain.setter
     def toolchain(self, value):
-        if value in ['armgcc', 'iar', 'mdk', 'xtensa', 'codewarrior', 'riscvllvm']:
+        if value in SUPPORTED_TOOLCHAINS:
             self.raw['toolchain'] = value
 
     @property
@@ -121,16 +135,41 @@ class MCUXProjectData(object):
         self.raw['category'] = value
 
     @property
-    def build_cmd_board_core(self):
-        return f'-b {self.board}{" --shield " + self.shield if self.shield else ""}{" -Dcore_id=" + self.core_id if self.core_id else ""}'
+    def extra_build_args(self):
+        return self.raw.get('extra_build_args', [])
+
+    @extra_build_args.setter
+    def extra_build_args(self, value: list):
+        self.raw['extra_build_args'] = value
+
+    @property
+    def build_cmd_board_device_core(self):
+        if self.board:
+            args = ['-b', self.board]
+            if self.shield:
+                args.extend(['--shield', self.shield])
+        elif self.device:
+            args = ['--device', self.device]
+
+        if self.core_id:
+            args.append(f'-Dcore_id={self.core_id}')
+        return ' '.join(args)
 
     @property
     def build_cmd_pretty(self):
-        return f'west build -p always{" --sysbuild" if self.use_sysbuild else ""} {self.project_file} --toolchain {self.toolchain:6} --config {self.target:10} {self.build_cmd_board_core:0}'
+        # FIXME not sure the usage of this api
+        return f'west build -p always{" --sysbuild" if self.use_sysbuild else ""} {self.project_file} --toolchain {self.toolchain:6} --config {self.target:10} {self.build_cmd_board_device_core:0}'
 
     @property
     def build_cmd(self):
-        return f'west build -p always{" --sysbuild" if self.use_sysbuild else ""} {self.project_file} --toolchain {self.toolchain} --config {self.target} {self.build_cmd_board_core}'
+        args = ['west', 'build', '-p', 'always']
+        # Keep order with original api
+        if self.use_sysbuild:
+            args.append('--sysbuild')
+        args.extend([self.project_file, '--toolchain', self.toolchain, '--config', self.target, self.build_cmd_board_device_core])
+        if self.extra_build_args:
+            args.extend(self.extra_build_args)
+        return ' '.join(args)
 
     @property
     def board_core(self):
@@ -138,6 +177,7 @@ class MCUXProjectData(object):
 
 class MCUXAppTargets(object):
     BOARD_DEF_TARGETS = {}
+    DEVICE_DEF_TARGETS = {}
 
     TOOLCHAINS_FILTER = []
     TOOLCHAINS_EXCLUDE_FILTER = []
@@ -147,6 +187,8 @@ class MCUXAppTargets(object):
     BOARDS_EXCLUDE_FILTER = []
     SHIELDS_FILTER = []
     SHIELDS_EXCLUDE_FILTER = []
+    DEVICES_FILTER = []
+    DEVICES_EXCLUDE_FILTER = []
 
     INT_EXAMPLE_DATA = {}
 
@@ -167,14 +209,14 @@ class MCUXAppTargets(object):
             from list_project_mod import IntMCUXAppTargets
             IntMCUXAppTargets.parse()
             MCUXAppTargets.BOARD_DEF_TARGETS = IntMCUXAppTargets.BOARD_DEF_TARGETS
+            MCUXAppTargets.DEVICE_DEF_TARGETS = IntMCUXAppTargets.DEVICE_DEF_TARGETS
             MCUXAppTargets.INT_EXAMPLE_DATA = IntMCUXAppTargets.INT_EXAMPLE_DATA
         except Exception:
             # reset if encounter any exception
-            cls.BOARD_DEF_TARGETS = {}
-            cls.INT_EXAMPLE_DATA = {}
+            pass
 
     @classmethod
-    def config_filter(cls, toolchains_filter=[], boards_filter=[], shields_filter=[], targets_filter=[]):
+    def config_filter(cls, toolchains_filter=[], boards_filter=[], shields_filter=[], targets_filter=[], devices_filter=[]):
         '''
         Filter format: [e@][r@]filter_string
         - [e@] optional: means exclude these stuffs
@@ -199,11 +241,18 @@ class MCUXAppTargets(object):
         if targets_filter:
             cls.TARGETS_FILTER = [item for item in targets_filter if not item.startswith('e@')]
             cls.TARGETS_EXCLUDE_FILTER = [item[2:] for item in targets_filter if item.startswith('e@')]
+
+        if devices_filter:
+            cls.DEVICES_FILTER = [item for item in devices_filter if not item.startswith('e@')]
+            cls.DEVICES_EXCLUDE_FILTER = [item[2:] for item in devices_filter if item.startswith('e@')]
+
         mcux_debug(f'Create Filters')
         mcux_debug(f'  Toolchains Include: ' + ', '.join(cls.TOOLCHAINS_FILTER))
         mcux_debug(f'  Toolchains Exclude: ' + ', '.join(cls.TOOLCHAINS_EXCLUDE_FILTER))
         mcux_debug(f'  Boards Include: ' + ', '.join(cls.BOARDS_FILTER))
         mcux_debug(f'  Boards Exclude: ' + ', '.join(cls.BOARDS_EXCLUDE_FILTER))
+        mcux_debug(f'  Devices Include: ' + ', '.join(cls.DEVICES_FILTER))
+        mcux_debug(f'  Devices Exclude: ' + ', '.join(cls.DEVICES_EXCLUDE_FILTER))
         mcux_debug(f'  Shields Include: ' + ', '.join(cls.SHIELDS_FILTER))
         mcux_debug(f'  Shields Exclude: ' + ', '.join(cls.SHIELDS_EXCLUDE_FILTER))
         mcux_debug(f'  Targets Include: ' + ', '.join(cls.TARGETS_FILTER))
@@ -226,42 +275,47 @@ class MCUXAppTargets(object):
         else:
             raise RuntimeError(f"Invalid action {action} in {target_str}")
 
-    def inject_targets_from_shared_file(self, name, shared_file):
-        if name not in self.BOARD_DEF_TARGETS.keys():
+    def inject_targets_from_shared_file(self, name, shared_file, instance_type):
+        instance_def_targets = getattr(self, f'{instance_type.upper()}_DEF_TARGETS')
+        if name not in instance_def_targets.keys():
             if not os.path.exists(shared_file):
-                self.BOARD_DEF_TARGETS[name] = []
+                instance_def_targets[name] = []
             else:
-                self.BOARD_DEF_TARGETS[name] = mcux_read_yaml(shared_file).get('board.toolchains', [])
+                instance_def_targets[name] = mcux_read_yaml(shared_file).get(f'{instance_type}.toolchains', [])
 
-        for toolchain_target in self.BOARD_DEF_TARGETS[name]:
+        for toolchain_target in instance_def_targets[name]:
             self.inject_target(toolchain_target)
 
-    def inject_targets_from_board_default(self, board_core):
-        board = re.sub(r'@.*$', '', board_core)
+    def inject_targets_from_instance_default(self, instance_core, instance_type):
+        instance = re.sub(r'@.*$', '', instance_core)
         self.inject_targets_from_shared_file(
-            board_core,
-            os.path.join(sdk_root_dir, f"examples/_boards/{board_core.replace('@', '/')}/example.yml")
+            instance_core,
+            os.path.join(sdk_root_dir, f"examples/_{instance_type}s/{instance_core.replace('@', '/')}/example.yml"),
+            instance_type
         )
 
         self.inject_targets_from_shared_file(
-            board,
-            os.path.join(sdk_root_dir, f"examples/_boards/{board}/example.yml")
+            instance,
+            os.path.join(sdk_root_dir, f"examples/_{instance_type}s/{instance}/example.yml"),
+            instance_type
         )
 
-    def inject_targets_from_board_category(self, board, category):
+    def inject_targets_from_instance_category(self, instance, category, instance_type):
         return self.inject_targets_from_shared_file(
-            f'{board}@{category}',
-            os.path.join(sdk_root_dir, f"examples/_boards/{board}/{category}/example.yml")
+            f'{instance}@{category}',
+            os.path.join(sdk_root_dir, f"examples/_{instance_type}s/{instance}/{category}/example.yml"),
+            instance_type
         )
 
-    def inject_targets_from_app_category(self, category):
+    def inject_targets_from_app_category(self, category, instance_type='board'):
         return self.inject_targets_from_shared_file(
             f'src@{category}',
-            os.path.join(sdk_root_dir, f"examples/{category}/example.yml")
+            os.path.join(sdk_root_dir, f"examples/{category}/example.yml"),
+            instance_type
         )
 
-    def inject_targets_from_app(self, app_board_core_target_delta):
-        for toolchain_target in app_board_core_target_delta:
+    def inject_targets_from_app(self, app_instance_core_target_delta):
+        for toolchain_target in app_instance_core_target_delta:
             self.inject_target(toolchain_target)
 
     def do_filter(self, input_string: str, in_filter_list: list, exclude_filter_list: list)->bool:
@@ -308,6 +362,9 @@ class MCUXAppTargets(object):
 
     def filter_board_core(self, board_core):
         return self.do_filter(board_core, self.BOARDS_FILTER, self.BOARDS_EXCLUDE_FILTER)
+    
+    def filter_device_core(self, device_core):
+        return self.do_filter(device_core, self.DEVICES_FILTER, self.DEVICES_EXCLUDE_FILTER)
 
     def filter_shield(self, shield):
         return self.do_filter(shield, self.SHIELDS_FILTER, self.SHIELDS_EXCLUDE_FILTER)
@@ -315,7 +372,6 @@ class MCUXAppTargets(object):
     def get_app_targets(self, app_example_file: str, is_pick_one_target_for_app=False, validate=False) -> list:
         apps = []
         app_dir = os.path.relpath(os.path.dirname(app_example_file), sdk_root_dir)
-        category = app_dir.replace('\\', '/').split('/')[1]
         example_data = mcux_read_yaml(app_example_file)
         if validate:
             self._validate_example_data(app_example_file, example_data)
@@ -325,53 +381,64 @@ class MCUXAppTargets(object):
             return apps
 
         for app_name, app_data in example_data.items():
-            boards_data = app_data.get('boards', {})
-            if app_name in MCUXAppTargets.INT_EXAMPLE_DATA:
-                boards_data = { **boards_data, **MCUXAppTargets.INT_EXAMPLE_DATA[app_name] }
-            if not boards_data:
-                # No board supported for current example
+            if app_data.get('skip_build', False):
                 continue
-            use_sysbuild = app_data.get('use_sysbuild', False)
-            skip_build = app_data.get('skip_build', False)
-            if skip_build:
-                continue
-            # SDKGEN-3118 Currently one example shall be bound with only one shield
-            shield = list(app_data['shields'])[0] if app_data.get('shields', {}).keys() else None
-            if shield and not self.filter_shield(shield):
-                continue
+            if (boards_data := app_data.get('boards', {})):
+                self.get_instance_targets(app_dir, apps, app_name, app_data, boards_data, is_pick_one_target_for_app, 'board')
+            elif (devices_data := app_data.get('devices', {})):
+                self.get_instance_targets(app_dir, apps, app_name, app_data, devices_data, is_pick_one_target_for_app, 'device')
 
-            for board_core, board_core_delta_data in boards_data.items():
-                if not self.filter_board_core(board_core):
-                    continue
-                self.reset_targets()
-
-                board, core_id = board_core.split('@') if '@' in board_core else (board_core, '')
-                # Parse the targets
-                self.inject_targets_from_board_default(board_core)
-                self.inject_targets_from_board_category(board, category)
-                self.inject_targets_from_app_category(category)
-                self.inject_targets_from_app(board_core_delta_data)
-                for toolchain_target, is_enabled in self.tgt_dict.items():
-                    if not is_enabled:
-                        continue
-                    toolchain, target = toolchain_target.split('@')
-                    if not self.filter_toolchain(toolchain) or not self.filter_target(target):
-                        continue
-                    real_app_name = app_name.replace('${core_id}', core_id)
-                    apps.append(MCUXProjectData.from_fields(
-                        name=real_app_name,
-                        board=board,
-                        core_id=core_id,
-                        toolchain=toolchain,
-                        target=target,
-                        project_file=app_dir,
-                        category=category,
-                        use_sysbuild=use_sysbuild,
-                        shield=shield
-                    ))
-                    if is_pick_one_target_for_app:
-                        break
         return apps
+
+    def get_instance_targets(self, app_dir, apps, app_name, app_data, instance_data, is_pick_one_target_for_app=False, instance_type='board'):
+        assert(instance_type in ['board', 'device'])
+        if app_name in MCUXAppTargets.INT_EXAMPLE_DATA:
+            instance_data = { **instance_data, **MCUXAppTargets.INT_EXAMPLE_DATA[app_name] }
+        use_sysbuild = app_data.get('use_sysbuild', False)
+
+        extra_build_args = app_data.get('contents', {}).get('document', {}).get('extra_build_args', [])
+        app_toolchains = app_data.get('contents', {}).get('toolchains', [])
+        app_category = app_data.get('contents', {}).get('document', {}).get('category', app_dir.replace('\\', '/').split('/')[1])
+        # SDKGEN-3118 Currently one example shall be bound with only one shield
+        shield = list(app_data['shields'])[0] if app_data.get('shields', {}).keys() else None
+        if shield and not self.filter_shield(shield):
+            return
+        for instance_core, instance_core_delta_data in instance_data.items():
+            if not getattr(self, f'filter_{instance_type}_core')(instance_core):
+                continue
+            self.reset_targets()
+
+            instance, core_id = instance_core.split('@') if '@' in instance_core else (instance_core, '')
+            # Parse the targets
+            self.inject_targets_from_instance_default(instance_core, instance_type)
+            self.inject_targets_from_instance_category(instance, app_category, instance_type)
+            self.inject_targets_from_app_category(app_category, instance_type)
+            if instance_core_delta_data:
+                self.inject_targets_from_app(instance_core_delta_data)
+            elif app_toolchains:
+                self.inject_targets_from_app(app_toolchains)
+            for toolchain_target, is_enabled in self.tgt_dict.items():
+                if not is_enabled:
+                    continue
+                toolchain, target = toolchain_target.split('@')
+                if not self.filter_toolchain(toolchain) or not self.filter_target(target):
+                    continue
+                real_app_name = app_name.replace('${core_id}', core_id)
+                apps.append(MCUXProjectData.from_fields(
+                    name=real_app_name,
+                    board=instance if instance_type=='board' else None,
+                    device=instance if instance_type=='device' else None,
+                    core_id=core_id,
+                    toolchain=toolchain,
+                    target=target,
+                    project_file=app_dir,
+                    category=app_category,
+                    use_sysbuild=use_sysbuild,
+                    shield=shield,
+                    extra_build_args=extra_build_args
+                ))
+                if is_pick_one_target_for_app:
+                    break
 
     def _validate_example_data(self, example_yml, example_data):
         example_schema = mcux_read_json((Path(sdk_root_dir) / SCHEMA_DIR / EXAMPLE_YML_SCHEMA).as_posix())
@@ -396,6 +463,7 @@ class MCUXRepoProjects(object):
             app_path,
             board_cores_filter=[],
             shields_filter=[],
+            devices_filter=[],
             toolchains_filter=[],
             targets_filter=[],
             is_pick_one_target_for_app=False,
@@ -407,6 +475,7 @@ class MCUXRepoProjects(object):
             toolchains_filter=toolchains_filter,
             boards_filter=board_cores_filter,
             shields_filter=shields_filter,
+            devices_filter=devices_filter,
             targets_filter=targets_filter,
         )
 
@@ -416,7 +485,7 @@ class MCUXRepoProjects(object):
         #print(expanded_example_files)
         expanded_example_files_filtered = []
         for example_file in expanded_example_files:
-            if r"_board" not in example_file:
+            if not any(prefix in example_file for prefix in [r"_board", r"_device"]):
                 expanded_example_files_filtered.append(example_file)
 
         # mcux_debug(f"Searching app targets in {example_file_pattern}")
