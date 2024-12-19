@@ -200,6 +200,8 @@ macro(project project_name)
       else()
         cmake_path(APPEND full_project_port_path ${SdkRootDirPath} ${project_board_port_path})
       endif()
+      # remain the full_project_board_port_path for backward compatible
+      set(full_project_board_port_path ${full_project_port_path})
       set(board_device_folder "${board}")
       log_debug("full_project_port_path: ${full_project_port_path}")
     elseif (DEFINED project_device_port_path)
