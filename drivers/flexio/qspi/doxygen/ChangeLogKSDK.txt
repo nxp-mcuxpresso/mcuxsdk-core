@@ -16,7 +16,11 @@
       - Simplex QSPI.
 
 @section flexio_qspi_smartdma FLEXIO_QSPI_SMARTDMA
-  The current FLEXIO_QSPI_EDMA driver version is 2.0.0.
+  The current FLEXIO_QSPI_EDMA driver version is 2.0.1.
+
+  - 2.0.1
+    - Improvements
+      - Update driver to work with SmartDMA driver 2.11.0.
 
   - 2.0.0
     - New Features
