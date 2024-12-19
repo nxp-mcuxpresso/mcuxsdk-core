@@ -19,7 +19,6 @@ if(NOT CMAKE_LOG_LEVEL)
 endif ()
 
 set(COMMON_ENV_SETTINGS
-    board=${board}
     device=${device}
     platform_devices_soc_name=${device}
     soc_series=${soc_series}
@@ -44,6 +43,12 @@ set(COMMON_ENV_SETTINGS
     IDE_YML_LIST=${IDE_YML_LIST}
     log_level=${CMAKE_LOG_LEVEL}
     project_type=${__PROJECT_TYPE})
+if(NOT DEFINED board)
+    # for platformlib
+    list(APPEND COMMON_ENV_SETTINGS board=${device})
+else()
+    list(APPEND COMMON_ENV_SETTINGS board=${board})
+endif()
 
 if(NOT DEFINED SB_CONF_FILE)
     # VARIABLE_FROM_CMAKE does not work for sysbuild
