@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 NXP
+ * Copyright 2017-2024 NXP
  * All rights reserved.
  *
  *
@@ -283,7 +283,8 @@ typedef enum _pxp_flip_mode
 typedef enum _pxp_rotate_position
 {
     kPXP_RotateOutputBuffer = 0U, /*!< Rotate the output buffer. */
-    kPXP_RotateProcessSurface,    /*!< Rotate the process surface. */
+    kPXP_RotateProcessSurface,    /*!< Rotate the process surface. Cannot be used together
+                                       with flip, scale, or decimation function. */
 } pxp_rotate_position_t;
 
 /*! @brief PXP rotate degree. */
