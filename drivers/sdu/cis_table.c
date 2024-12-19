@@ -6,7 +6,7 @@
  */
 
 #include <stdint.h>
-#include <RW612.h>
+#include "fsl_device_registers.h"
 #include "cis_table.h"
 
 #define CISTPL_VERS_1 0x15U
