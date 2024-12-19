@@ -22,7 +22,7 @@
 
 /*@{*/
 /*! @brief FlexIO QSPI SMARTDMA driver version. */
-#define FSL_FLEXIO_QSPI_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 0, 2))
+#define FSL_FLEXIO_QSPI_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
 /*@}*/
 
 /*! @brief  typedef for flexio_qspi_smartdma_handle_t in advance. */
