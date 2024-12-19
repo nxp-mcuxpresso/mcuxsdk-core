@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section smartdma SMARTDMA
-  The current SMARTDMA driver version is 2.10.0.
+  The current SMARTDMA driver version is 2.11.0.
+
+  - 2.11.0
+    - Improvements
+      - Make the RT500 QSPI firmware can work with other display firmware in
+        the same project.
 
   - 2.10.0
     - New Features
