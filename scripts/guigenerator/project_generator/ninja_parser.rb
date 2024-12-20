@@ -185,18 +185,30 @@ class NinjaParser
           all_flags = preprocess_flags_with_prefix(result[1].split(/\s+/))
           all_flags.each do |flag|
             case flag
-            when /-D([A-Za-z0-9_\(\)]+)=?(.*)?/
-              _flag = flag.match(/-D([A-Za-z0-9_\(\)]+)=?(.*)?/)
-              if _flag[2]
+            when /-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/
+              _flag = flag.match(/-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/)
+              if _flag[2] && _flag[2] != ''
                 if _flag[2].strip.match(/\S+,\S+/) && @toolchain == 'mdk'
                     # mdk GUI define does not support A=B,C add it in misc flags
                     @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-flags"] << flag
                     next
-                elsif _flag[2].match(/^\\\".*\\\"$/)
-                  # flags like -DSSCP_CONFIG_FILE=\"fsl_sscp_config_elemu.h\", should be parsed as yml format:
-                  # SSCP_CONFIG_FILE: '"fsl_sscp_config_elemu.h"'
-                  @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-define"][_flag[1]] = _flag[2].gsub("\\", '')
-                  next
+                elsif _flag[2].match(/^\\\".*(\\\"|\\\"\")$/)
+                  if @toolchain == 'mdk'
+                    # mdk GUI define does not support quotes, add it in misc flags
+                    @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-flags"] << flag
+                    next
+                    # handle case like -D"COMPILER_FLAGS=\"-Ohs --no_size_constraints\""
+                  elsif _flag[1].start_with?("\"") && _flag[2].end_with?("\"")
+                     key = _flag[1].gsub(/^\"/,'')
+                     value= _flag[2].gsub(/\"$/, '')
+                     @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-define"][key] = value.gsub("\\", '')
+                     next
+                  else
+                    # flags like -DSSCP_CONFIG_FILE=\"fsl_sscp_config_elemu.h\", should be parsed as yml format:
+                    # SSCP_CONFIG_FILE: '"fsl_sscp_config_elemu.h"'
+                    @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-define"][_flag[1]] = _flag[2].gsub("\\", '')
+                    next
+                  end
                 end
               end
               @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["#{type}-define"][_flag[1]] = _flag[2].empty? ? nil : _flag[2]
@@ -466,6 +478,19 @@ class NinjaParser
           if res && res[1]
             path = File.join('$PROJ_DIR$', translate_project_relative_path(res[1]))
             result.push flag.gsub(res[1], path)
+          end
+        elsif flag.strip.match(/-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/)
+          _flag = flag.match(/-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/)
+          if _flag[2] && _flag[2] != ''
+            # if macro value like \"-Ohs without ending \",  means there is a space in macro value
+            if _flag[2].start_with?("\\\"") && !_flag[2].end_with?("\\\"")
+              result.push "#{flag} #{all_flags[index+1]}"
+              all_flags[index+1] = nil
+            else
+              result.push flag
+            end
+          else
+            result.push flag
           end
         elsif @toolchain == 'codewarrior'
           if flag.strip == '-I-'
