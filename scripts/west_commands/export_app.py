@@ -16,12 +16,15 @@ from misc import sdk_project_target
 
 _ARG_SEPARATOR = '--'
 SDK_ROOT_DIR = SCRIPT_DIR.parent
+BOARD_DIR_NAME = '_boards'
 DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#freestanding-example'
 # VARIABLES_MAP = {
 #     '${SdkRootDirPath}': '${PrjRootDirPath}'
 #     }
-USAGE = '''\
-west export_app [-h] [source_dir] [-o OUTPUT_DIR]
+USAGE = f'''\
+west export_app [-h] [source_dir] [-b board_id] [--core_id core_id] [-o OUTPUT_DIR] [--build]
+To know what is freestanding example and how it works, see
+{DOC_URL}
 '''
 
 logger = logging.getLogger('export_app.misc')
@@ -123,7 +126,7 @@ class ExportApp(WestCommand):
         super().__init__(
             'export_app',
             'Create a freestanding application',
-            f'Create a freestanding application. For more info about freestanding app, see {DOC_URL}',
+            f'Create a freestanding application.',
             accepts_unknown_args=True
         )
         self.cmparser = None
@@ -141,6 +144,7 @@ class ExportApp(WestCommand):
         parser.add_argument('--core_id', nargs='?', default=None, help="core id like cm33_core0")
         parser.add_argument('-o', '--output-dir', required=True,
                             help='output directory to hold the freestanding project')
+        parser.add_argument('--build', action="store_true", default=False, help="Build the project after creating.")
         return parser
     
     def do_run(self, args, remainder):
@@ -153,7 +157,12 @@ class ExportApp(WestCommand):
         self.output_dir.mkdir(exist_ok=True)
         self.dest_list_file = self.parse_app(self.source_dir)
         self.dest_prj_conf = self.dest_list_file.parent  / 'prj.conf'
-        self.banner(f'Successfully create the freestanding project, see {self.dest_list_file}, you can use following command to build it.')
+        self.banner(f'Successfully create the freestanding project, see {self.dest_list_file}.')
+        if self.args.build:
+            self.banner('Start building the project')
+            self.run_subprocess(self.build_cmd_list, cwd=SDK_ROOT_DIR.as_posix())
+        else:
+            self.banner('you can use following command to build it.')
         print(self.build_cmd)
 
     @current_list_dir_context
@@ -161,7 +170,7 @@ class ExportApp(WestCommand):
         dest_list_file = self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'CMakeLists.txt'
         shutil.copytree(source_dir, dest_list_file.parent)
         example_yml = yaml.load(open(source_dir / 'example.yml'), yaml.BaseLoader)
-        example_name, example_info = next(iter(example_yml.items()))
+        _, example_info = next(iter(example_yml.items()))
 
         list_file = source_dir / 'CMakeLists.txt'
         list_content = self._parse_list_file(list_file)
@@ -184,6 +193,7 @@ class ExportApp(WestCommand):
         open(dest_list_file, 'w').write(os.linesep.join(new_list_content))
         self.format_listfile(dest_list_file)
         self.combine_prj_conf(source_dir)
+        self.update_kconfig_path(source_dir)
 
         if example_info.get('use_sysbuild'):
             self.sysbuild = True
@@ -216,25 +226,22 @@ class ExportApp(WestCommand):
                 linked_source.exists(),
                 f"Cannot find the sysbuild app dir {linked_source.as_posix()}")
             self.parse_app(linked_source)
-        if (sysbuild_kconfig := source_dir / 'Kconfig.sysbuild').exists():
-            sysbuild_kconfig_content = open(sysbuild_kconfig, 'r').read().splitlines()
-            for i, line in enumerate(sysbuild_kconfig_content):
-                if not 'source' in line:
-                    continue
-                prefix_id = re.search(r'[ro]*source\s*', line).group(0)
-                rel_kconfig_path = line.replace(prefix_id, '').strip('"').strip("'")
-                dest_kconfig_path = '"${SdkRootDirPath}/' + (source_dir / rel_kconfig_path).resolve().relative_to(SDK_ROOT_DIR).as_posix() + '"'
-                sysbuild_kconfig_content[i] = prefix_id + dest_kconfig_path
-            open(self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'Kconfig.sysbuild', 'w').write(os.linesep.join(sysbuild_kconfig_content))
-
 
     def combine_prj_conf(self, source_dir):
+        example_root_stem = self.examples_root.stem
         prj_conf = {}
-        search_list = [source_dir]
-        example_common = source_dir.parent
-        while example_common.stem != 'examples':
+        search_list = []
+        example_common = source_dir
+        while example_common.stem != example_root_stem:
             search_list.insert(0, example_common)
             example_common = example_common.parent
+        example_common_len = len(search_list)
+        example_specific = SDK_ROOT_DIR / example_root_stem / BOARD_DIR_NAME / self.board / source_dir.relative_to(self.examples_root)
+        if self.core_id:
+            example_specific = example_specific / self.core_id
+        while example_specific.stem != self.board:
+            search_list.insert(example_common_len, example_specific)
+            example_specific = example_specific.parent
         for s_p in search_list:
             if not (e_conf := (s_p / 'prj.conf')).exists():
                 continue
@@ -243,6 +250,22 @@ class ExportApp(WestCommand):
         with open(self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'prj.conf', 'w') as f:
             for k, v in prj_conf.items():
                 f.write(f"{k}={v}\n")
+
+    def update_kconfig_path(self, source_dir):
+        for f in source_dir.iterdir():
+            if not f.stem.startswith('Kconfig'):
+                continue
+            kconfig_content = open(f, 'r').read().splitlines()
+            for i, line in enumerate(kconfig_content):
+                if not 'source' in line:
+                    continue
+                prefix_id = re.search(r'[ro]*source\s*', line).group(0)
+                rel_kconfig_path = line.replace(prefix_id, '').strip('"').strip("'")
+                if '${SdkRootDirPath}' in rel_kconfig_path:
+                    continue
+                dest_kconfig_path = '"${SdkRootDirPath}/' + (source_dir / rel_kconfig_path).resolve().relative_to(SDK_ROOT_DIR).as_posix() + '"'
+                kconfig_content[i] = prefix_id + dest_kconfig_path
+            open(self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / f.name, 'w').write(os.linesep.join(kconfig_content))
 
     def _parse_list_file(self, list_file):
         completed_process = self.run_subprocess(
@@ -254,7 +277,7 @@ class ExportApp(WestCommand):
         return yaml.load(completed_process.stdout, yaml.BaseLoader)
 
     @property
-    def build_cmd(self):
+    def build_cmd_list(self):
         cmd_list = ['west', 'build', '-b', self.board, 
                     '-p', 'always', self.dest_list_file.parent.as_posix(),
                     f'-DPrjRootDirPath={self.output_dir.as_posix()}',
@@ -265,7 +288,11 @@ class ExportApp(WestCommand):
             cmd_list.append('--sysbuild')
         if self.core_id:
             cmd_list.append(f'-Dcore_id={self.core_id}')
-        return ' '.join(cmd_list)
+        return cmd_list
+
+    @property
+    def build_cmd(self):
+        return ' '.join(self.build_cmd_list)
 
     @staticmethod
     def parse_prj_conf(path):
@@ -392,6 +419,7 @@ class ExportApp(WestCommand):
 
         self.source_dir = Path(app).resolve()
         self.output_dir = Path(out).resolve()
+        self.examples_root = SDK_ROOT_DIR / self.source_dir.relative_to(SDK_ROOT_DIR).parts[0]
 
     def _app_precheck(self):
         # NOTE do not support internal examples yet
