@@ -208,6 +208,7 @@ enum _status_groups
     kStatusGroup_GLIKEY         = 168, /*!< Group number for GLIKEY status codes. */
     kStatusGroup_AON_POWER      = 169, /*!< Group number for AON_POWER status codes. */
     kStatusGroup_AON_COMMON     = 170, /*!< Group number for AON_COMMON status codes. */
+    kStatusGroup_ENDAT3     	= 171, /*!< Group number for ENDAT3 status codes. */
 };
 
 /*! \public

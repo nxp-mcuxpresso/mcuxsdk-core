@@ -1,0 +1,9 @@
+/*!
+@defgroup endat3_driver Endat3: Endat3 encoder Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Endat3 encoder interface. 
+module of MCUXpresso SDK devices.
+
+# Typical use case {#Endat3TpyUC}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/digital_encoder/endat3
+*/
