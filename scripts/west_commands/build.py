@@ -162,8 +162,6 @@ class Build(Forceable):
         group.add_argument('--compiler', dest='compiler', action='store', help='Specify compiler. Compiler must follow toolchain.')        
         group.add_argument('--config', dest='config', action='store', 
                            default='debug', help='SDK build config type')
-        group.add_argument('--show-configs', dest='show_configs', action='store_true', 
-                           help='Show supported build config targets for build project')        
         group.add_argument('-k', '--kit', action='store', help='Kit id')
         group.add_argument('--shield', action='store', help='')
         group.add_argument('--hint', action='store_true', default=False, help='Execute external assistant command like'
@@ -689,9 +687,6 @@ class Build(Forceable):
                     log.die(f'compiler {self.args.compiler} not supported with toolchain mdk')
             
             extra_args['CONFIG_COMPILER'] = self.args.compiler
-
-        if self.args.show_configs:
-            extra_args['CMAKE_SHOW_BUILD_CONFIGS'] = _CMAKE_TRUE
 
         for k,v in extra_args.items():
             cmake_opts.extend([f'-D{k}={v}'])
