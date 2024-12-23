@@ -12,6 +12,10 @@
 /*
  * Change log:
  *
+ *   1.1.0
+ *     - Add definitions for DCR registers
+ *     - Add API to modify the index for given AGU pointer
+ * 
  *   1.0.1
  *     - Update definition for source and destination operand
  *     - Update APIs
@@ -277,6 +281,106 @@ typedef struct _dspv_info
 /*! @brief definition of scaling offset in the info register */
 #define DSPV_INFO_SCALING_OFFSET   24U
 
+/*! @brief definition for the stat register */
+typedef struct _dspv_stat_reg
+{
+    uint32_t dinv  :1; /*!< this bit will be set when a destination pointer has
+                            an invalid AGU configuration. writing 1 to clear */
+    uint32_t s1inv :1; /*!< this bit will be set when the 1st source pointer has 
+                            an invalid AGU configuration. writing 1 to clear */
+    uint32_t s2inv :1; /*!< this bit will be set when the 2nd source pointer has
+                            an invalid AGU configuration. writing 1 to clear */
+    uint32_t s3inv :1; /*!< this bit will be set when the 3th source pointer has
+                            an invalid AGU configuration. writing 1 to clear */
+    uint32_t awerr :1; /*!< this be will be set when an AXI write returns an 
+                            error. writing 1 to clear */
+    uint32_t arerr :1; /*!< this bit will be set when an AXI read returns an
+                            error. writing 1 to clear */
+    uint32_t rsv   :26;
+} dspv_stat_reg_t;
+
+/*! @brief definition for the config register */
+typedef struct _dspv_config_reg
+{
+    uint32_t nx        :1; /*!< vector inexact result */
+    uint32_t uf        :1; /*!< vector underflow */
+    uint32_t of        :1; /*!< vector overflow */
+    uint32_t dv        :1; /*!< vector divide by zero */
+    uint32_t nv        :1; /*!< vector invalid operation, i.e. NaN */
+    uint32_t rnd       :3; /*!< vector global rounding mode, 0:RNE,1:RNZ,2:RDN
+                                3:RUP; 4:RMM; 5-7:rsv */
+    uint32_t rsv       :20;
+    uint32_t log2_vlen :4; /*!< this field contains bits 3:0 of log2(VLEN),
+                                read-only, it's value is 0x3 */
+} dspv_config_reg_t;
+
+/*! @brief definition for the nco config register */
+typedef struct _dspv_nco_config_reg
+{
+    uint32_t k    : 16; /*!< this field contains the NCO k value */
+    uint32_t fftn : 16; /*!< this field contains the NCO fftn value */
+} dspv_nco_config_reg_t;
+
+/*! @brief definition for the smart cache control */
+typedef struct _dspv_cache_control_reg
+{
+    uint32_t clean     :1; /*!< write 1 to clear, all dirty cache lines will be 
+                        written to memory as soon as possible.
+                        if clean bit and invalidate/pf_reset are both written 1
+                        in the same write, the clean will be performaned before
+                        invalidate/pf_reset. */
+    uint32_t invalidate:1; /*!< write 1 to invalidate, all he cache lines are
+                        marked as containing no valid data. This bit will read
+                        back as a 1 when there is a pending invalidate operation
+                        the invalidate will not complete until all pending AXI
+                        reads have completed. */
+    uint32_t pf_reset  :1; /*! write 1 to reset, the prefetch state machine for
+                        all smart pointers is reset, and no prefetch will occur
+                        on any of them until they are reinitialized(e.g. with
+                        vvbasew). no dcr values are modified, and the smart pointer
+                        still have the same config. the cache allocation sub-sys
+                        is also reset. and all the cache lines are marked as
+                        containing no valid data. */
+    uint32_t prefetch_sus:1; /*!< This is the prefetch suspend bit. No new prefetch
+                        read request will be made on the AXI bus while this bit 
+                        is high. prefetch read request still in process on the AXI
+                        bus are not canceled. the smart pointer prefetch stat 
+                        is preserved. and when this bit is cleared after being
+                        set, smart pointer prefetching picks up where it left off.*/
+    uint32_t zero_count:1; /*!< when this bit is written as a 1, all the status 
+                        register counters(e.g. misses, hits,...) will be set 0.*/
+    uint32_t hard_reset:1; /*!< this bit is not intended for use in normal operation
+                        write 1 to reset, the entire smart cache and AGU sub-sys
+                        are reset in a non graceful way. The reset occurs immediately,
+                        and does not wait for anything. instructions in the pipeline
+                        could be missed, the AXI bus protocal could be violated,
+                        and all modified data in the cache will be lost.*/
+    uint32_t rsv:1;
+    uint32_t dirty:1;   /*!< when this bit is 1, the cache contains lines have
+                        been updated but not written to memory. when this bit is
+                        zero. no cache data needs to be written to memory. */
+    uint32_t misses:24; /*!< the number of source pointer cache misses. One miss
+                        can occur for every source pointer used in each instruction(max 3).
+                        this counter is reset to zero by the zero_count bit. This
+                        counter does not wrap, and will stop counting when all 1's*/
+} dspv_cache_control_reg_t;
+
+/*! @brief definition for cache stall register */
+typedef struct _dspv_cache_stall_reg
+{
+    uint32_t wb_stalls: 12; /*!< this field reports the number clock cycles the 
+                        cache waited to write data to the cache. write stalls occur
+                        when a cache line allocated for ALU output data is already
+                        dirty. DSP-V stalls and waits for the cache clean of that
+                        line to complete. This counter is reset to 0 by zero_count
+                        bit. This counter does not wrap, and will stop counting
+                        when all 1's*/
+    uint32_t sm_stalls: 20; /*!< this field reports the number clock cycles the smart
+                        cache waited for source data. The number of cycles waited
+                        depends on the number of cache misses and usage of the 
+                        AXI/AHB bus. */
+} dspv_cache_stall_reg_t;
+
 /*!
  * @brief definition for Source Modifier m1 encoding
  * @note it does not get applied to SAU
@@ -486,6 +590,72 @@ typedef enum _dspv_nco
 #define kDSPV_dstOpnd_p6_dec  0b11011 /*!< p6-, *(p6), p6 -= step0, p6 += step1 */
 #define kDSPV_dstOpnd_p7_dec  0b11111 /*!< p7-, *(p7), p7 -= step0, p7 += step1 */
 
+/*! @brief definitions for DSPV DCR registers */
+#define kDSPV_DCR_p0Base       0  /*!< base address of AGU p0 */
+#define kDSPV_DCR_p0Step0      1  /*!< primary step of AGU p0 */
+#define kDSPV_DCR_p0Step1      2  /*!< length or alternate step of AGU p0 */
+#define kDSPV_DCR_p0Index      3  /*!< index of AGU p0 */
+#define kDSPV_DCR_p1Base       4  /*!< base address of AGU p1 */
+#define kDSPV_DCR_p1Step0      5  /*!< primary step of AGU p1 */
+#define kDSPV_DCR_p1Step1      6  /*!< length or alternate step of AGU p1 */
+#define kDSPV_DCR_p1Index      7 /*!< index of AGU p1 */
+#define kDSPV_DCR_p2Base       8  /*!< base address of AGU p2 */
+#define kDSPV_DCR_p2Step0      9  /*!< primary step of AGU p2 */
+#define kDSPV_DCR_p2Step1      10 /*!< length or alternate step of AGU p2 */
+#define kDSPV_DCR_p2Index      11 /*!< index of AGU p2 */
+#define kDSPV_DCR_p3Base       12 /*!< base address of AGU p3 */
+#define kDSPV_DCR_p3Step0      13 /*!< primary step  of AGU p3 */
+#define kDSPV_DCR_p3Step1      14 /*!< length or alternate step of AGU p3 */
+#define kDSPV_DCR_p3Index      15 /*!< index of AGU p3 */
+#define kDSPV_DCR_p4Base       16 /*!< base address of AGU p4 */
+#define kDSPV_DCR_p4Step0      17 /*!< primary step of AGU p4 */
+#define kDSPV_DCR_p4Step1      18 /*!< length or alternate step  of AGU p4 */
+#define kDSPV_DCR_p4Index      19 /*!< index of AGU p4 */
+#define kDSPV_DCR_p5Base       20 /*!< base address of AGU p5 */
+#define kDSPV_DCR_p5Step0      21 /*!< primary step of AGU p5 */
+#define kDSPV_DCR_p5Step1      22 /*!< length or alternate step  of AGU p5 */
+#define kDSPV_DCR_p5Index      23 /*!< index of AGU p5 */
+#define kDSPV_DCR_p6Base       24 /*!< base address of AGU p6 */
+#define kDSPV_DCR_p6Step0      25 /*!< primary step of AGU p6 */
+#define kDSPV_DCR_p6Step1      26 /*!< length or alternate step  of AGU p6 */
+#define kDSPV_DCR_p6Index      27 /*!< index of AGU p6 */
+#define kDSPV_DCR_p7Base       28 /*!< base address of AGU p7 */
+#define kDSPV_DCR_p7Step0      29 /*!< primary step of AGU p7 */
+#define kDSPV_DCR_p7Step1      20, /*!< length or alternate step of AGU p7  */
+#define kDSPV_DCR_p7Index      31 /*!< index of AGU p7 */
+#define kDSPV_DCR_p0Info       32 /*!< info f AGU p0 */
+#define kDSPV_DCR_p1Info       33 /*!< info of AGU p1 */
+#define kDSPV_DCR_p2Info       34 /*!< info of AGU p2 */
+#define kDSPV_DCR_p3Info       35 /*!< info of AGU p3 */
+#define kDSPV_DCR_p4Info       36 /*!< info of AGU p4 */
+#define kDSPV_DCR_p5Info       37 /*!< info of AGU p5 */
+#define kDSPV_DCR_p6Info       38 /*!< info of AGU p6 */
+#define kDSPV_DCR_p7Info       39 /*!< info f AGU p7 */
+#define kDSPV_DCR_histroy      40 /*!< history about operand size and rounding */
+#define kDSPV_DCR_mux          41 /*!< mux mode */
+#define kDSPV_DCR_scalarSrcLo  42 /*!< scalar source bits 31:0  */
+#define kDSPV_DCR_scalarSrcHi  43 /*!< scalar source bits 63:32 */
+#define kDSPV_DCR_scalarDstLo  44 /*!< scalar destination bits 31:0  */
+#define kDSPV_DCR_scalarDstHi  45 /*!< scalar destination bits 63:32 */
+#define kDSPV_DCR_ncoPhase     46 /*!< NCO phase */
+#define kDSPV_DCR_ncoFreq      47 /*!< NCO frequency */
+#define kDSPV_DCR_ncoConfig    48 /*!< NCO fftn and k configure */
+#define kDSPV_DCR_stat         49 /*!< various error status of VCPU */
+#define kDSPV_DCR_config       50 /*!< config of VCPU */
+#define kDSPV_DCR_cacheContrl  51 /*!< smart cache control */
+#define kDSPV_DCR_cacheHits    52 /*!< contains the number of cache hits */
+#define kDSPV_DCR_cacheStalls  53 /*!< the cache stall */
+#define kDSPV_DCR_scratch54    54 /*!< scratch 54  */
+#define kDSPV_DCR_scratch55    55 /*!< scratch 55  */
+#define kDSPV_DCR_scratch56    56 /*!< scratch 56  */
+#define kDSPV_DCR_scratch57    57 /*!< scratch 57  */
+#define kDSPV_DCR_scratch58    58 /*!< scratch 58  */
+#define kDSPV_DCR_scratch59    59 /*!< scratch 59  */
+#define kDSPV_DCR_scratch60    60 /*!< scratch 60  */
+#define kDSPV_DCR_scratch61    61 /*!< scratch 61  */
+#define kDSPV_DCR_scratch62    62 /*!< scratch 62  */
+#define kDSPV_DCR_scratch63    63 /*!< scratch 63  */
+
 /*******************************************************************************
  * API
  ******************************************************************************/
@@ -505,7 +675,7 @@ extern "C" {
 /*!
  * @brief write single dcr register
  *
- * @param dcr DCR register which will be modified
+ * @param n   DCR register, (kDSPV_DCR_p0Base, and so on.)
  * @param rs1 Source General Purpose Register containing value to write
  * 
  * @result  dcr(n) = rs1
@@ -519,7 +689,7 @@ extern "C" {
 /*!
  * @brief write two dcr registers
  *
- * @param n n it is a even number(n%2==0), between 0 and 62
+ * @param n   even number(n%2==0), (kDSPV_DCR_p0Base, and so on.)
  * @param rs1 General Purpose Register containing value  to write into dcr(n)
  * @param rs2 General Purpose Register containing value  to write dcr(n+1)
  * 
@@ -534,7 +704,7 @@ extern "C" {
 /*!
  * @brief add a value to given dcr register
  *
- * @param n range from 0 to 63
+ * @param n   DCR register, (kDSPV_DCR_p0Base, and so on.)
  * @param rs1 value to add to dcr(n)
  * 
  * @result  dcr(n) += rs1
@@ -548,7 +718,7 @@ extern "C" {
 /*!
  * @brief sub a value to given dcr register
  *
- * @param n range from 0 to 63
+ * @param n   DCR register, (kDSPV_DCR_p0Base, and so on.)
  * @param rs1 value to sub to dcr(n)
  * 
  * @result  dcr(n) -= rs1
@@ -562,7 +732,7 @@ extern "C" {
 /*!
  * @brief write an unsigned 16-bit immediate to given dcr register
  *
- * @param n range from 0 to 63
+ * @param n   DCR register, (kDSPV_DCR_p0Base, and so on.)
  * @param uimm16 it is an unsigned 16-bit immediate number
  * 
  * @result  dcr(n) = zero_extend(uimm16)
@@ -576,7 +746,7 @@ extern "C" {
 /*!
  * @brief write a signed 16-bit immediate to given dcr register
  *
- * @param n range from 0 to 63
+ * @param n   DCR register, (kDSPV_DCR_p0Base, and so on.)
  * @param simm16 it is a signed 16-bit immediate number
  * 
  * @result  dcr(n) = sign_extend(simm16)
@@ -591,7 +761,7 @@ extern "C" {
  * @brief write an un-signed 16-bit immediate to the high 16-bit field 
  *        of given dcr register
  *
- * @param n range from 0 to 63
+ * @param n   DCR register, (kDSPV_DCR_p0Base, and so on.)
  * @param uimm16 it is an unsigned 16-bit immediate number
  * 
  * @result dcr(n)[31:16] = uimm16, dcr(n)[15:0] remain unchanged
@@ -605,7 +775,7 @@ extern "C" {
 /*!
  * @brief add a signed 16-bit immediate to given dcr register
  *
- * @param n range from 0 to 63
+ * @param n   DCR register, (kDSPV_DCR_p0Base, and so on.)
  * @param simm16 it is a signed 16-bit immediate number
  * 
  * @result  dcr(n) += sign_extend(simm16)
@@ -711,7 +881,22 @@ extern "C" {
  * @addtogroup DSPV_mux_instruction
  * @{
  */
-/* todo */
+/*!
+ * @brief Modify index for given AGU pointer
+ *
+ * @param d : 6-bit mux index for destination operandmux
+ * @param s1 : 6-bit mux index for s1 source operand
+ * @param s2 : 6-bit mux index for s1 source operand
+ * @param s3 : 6-bit mux index for s1 source operand
+ * 
+ * @result dcr(41) = {d,s1,s2,s3}
+ */
+#define dspv_vmuxwi(s3, s2, s1, d)                                     \
+({                                                                     \
+    __asm__ __volatile__("vmuxwi %0, %1, %2, %3"                       \
+            : : "i" (s3), "i" (s2), "i" (s1),"i" (d) : "memory");      \
+})
+
 /*!
  * @}
  */ /* end of group DSPV_mux_instruction */
