@@ -5,6 +5,9 @@
   The current I3C driver version is 2.13.1.
 
   - 2.13.1
+    - Bug Fixes
+      - Disabled Rx auto-termination in repeated start interrupt event while transfer API doesn't enable it.
+      - Waited the completion event after loading all Tx data in Tx FIFO.
     - Improvements
       - Conditionally compile interrupt handling code to solve the problem of using this driver on CPU cores that do not support interrupts.
 

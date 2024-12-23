@@ -1738,7 +1738,7 @@ status_t I3C_MasterProcessDAASpecifiedBaudrate(I3C_Type *base,
 i3c_device_info_t *I3C_MasterGetDeviceListAfterDAA(I3C_Type *base, uint8_t *count)
 {
     assert(NULL != count);
-    
+
     uint32_t instance = I3C_GetInstance(base);
 
     *count = usedDevCount[instance];
@@ -2190,9 +2190,8 @@ static void I3C_TransferStateMachineWaitRepeatedStartCompleteState(I3C_Type *bas
         handle->state = (uint8_t)kTransferDataState;
         I3C_MasterDisableInterrupts(base, (uint32_t)kI3C_MasterTxReadyFlag);
 
-        if (handle->remainingBytes < 256U)
+        if ((handle->remainingBytes < 256U) && (handle->rxTermOps == kI3C_RxAutoTerm))
         {
-            handle->rxTermOps = (handle->rxTermOps == kI3C_RxTermDisable) ? handle->rxTermOps : kI3C_RxAutoTerm;
             stateParams->result =
                 I3C_MasterRepeatedStartWithRxSize(base, handle->transfer.busType, handle->transfer.slaveAddress,
                                                   kI3C_Read, (uint8_t)handle->remainingBytes);
@@ -2248,7 +2247,14 @@ static void I3C_TransferStateMachineTransferDataState(I3C_Type *base,
         /* Make sure there is data in the rx fifo. */
         if (0UL == (stateParams->rxCount)--)
         {
-            stateParams->state_complete = true;
+            if (0UL != (stateParams->status & (uint32_t)kI3C_MasterCompleteFlag))
+            {
+                handle->state = (uint8_t)kWaitForCompletionState;
+            }
+            else
+            {
+                stateParams->state_complete = true;
+            }
             return;
         }
 
