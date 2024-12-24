@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021,2023 NXP
+ * Copyright (c) 2019-2021,2023,2024 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -274,6 +274,7 @@ void LCDIF_FrameBufferGetDefaultConfig(lcdif_fb_config_t *config)
     config->inOrder        = kLCDIF_PixelInputOrderARGB;
     config->format         = kLCDIF_PixelFormatRGB565;
     config->standard       = kLCDIF_ConvertBT601;
+    config->decompress     = kLCDIF_DecompressNone;
 
     /* kLCDIF_PorterDuffSrc */
     config->alpha.srcAlphaMode       = kLCDIF_AlphaStraight;
@@ -290,6 +291,7 @@ static uint32_t LCDIF_GetLayerConfig(const lcdif_fb_config_t *config)
 {
     return LCDIF_FRAMEBUFFERCONFIG0_ROT_ANGLE(config->rotateFlipMode) |
            LCDIF_FRAMEBUFFERCONFIG0_UV_SWIZZLE(config->enableUVSwizzle) |
+           LCDIF_FRAMEBUFFERCONFIG0_DEC_MODE(config->decompress) |
            LCDIF_FRAMEBUFFERCONFIG0_SWIZZLE(config->inOrder) |
            LCDIF_FRAMEBUFFERCONFIG0_COLOR_KEY_EN(config->colorkey.enable) |
            LCDIF_FRAMEBUFFERCONFIG0_ENABLE((uint32_t)config->enable) | ((uint32_t)config->format & 0x7UL);

@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section lcdif LCDIF
-  The current LCDIF driver version is 2.2.0.
+  The current LCDIF driver version is 2.3.0.
+
+  - 2.3.0
+    - New Features
+      - Supported layer decompress mode for DC8000.
 
   - 2.2.0
     - New Features
