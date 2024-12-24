@@ -8,7 +8,7 @@ config MCUX_HAS_COMPONENT_driver.lin_stack
 
 config MCUX_HAS_COMPONENT_driver.lin
     bool
-    default y if MCUX_HW_IP_DriverType_LPUART
+    default y if MCUX_HW_IP_DriverType_LPUART_LIN
 
 config MCUX_COMPONENT_driver.lin_stack
     bool "lin_stack"
