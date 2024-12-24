@@ -16,7 +16,7 @@ config MCUX_HAS_COMPONENT_driver.flexio_mculcd_smartdma
 
 config MCUX_HAS_COMPONENT_driver.flexio_mculcd
     bool
-    default y if MCUX_HW_IP_DriverType_FLEXIO
+    default y if MCUX_HW_IP_DriverType_FLEXIO_MCULCD
 
 config MCUX_COMPONENT_driver.flexio_mculcd_dma
     bool "flexio_mculcd_dma"
