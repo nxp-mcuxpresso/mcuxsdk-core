@@ -4,7 +4,7 @@
 
 include_guard(GLOBAL)
 set(RUBY_MINIMUM_REQUIRED 3.1.2)
-set(ruby_install_link "https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#prerequisite")
+set(ruby_install_link "https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/misc/Ruby_environment_set_up.html#ruby-environment-setup")
 
 if(NOT FOUND_RUBY_EXECUTABLE)
     find_program(RUBY_EXECUTABLE ruby)
@@ -15,8 +15,15 @@ if(NOT FOUND_RUBY_EXECUTABLE)
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         message(STATUS "Found Ruby: ${version}")
         set(FOUND_RUBY_EXECUTABLE true CACHE INTERNAL "")
+        if (GENERATE_GUI_PROJECT OR GENERATE_STANDALONE_PROJECT)
+            # only disable warning
+        endif ()
     else()
-        log_debug("Ruby is not found. GUI project and standalone project generation features can not be supported. Please follow ${ruby_install_link} to install ruby.")
-    endif()
+        if (GENERATE_GUI_PROJECT OR GENERATE_STANDALONE_PROJECT)
+            log_fatal("GUI project or standalone project generation depends on ruby environment to work, but ruby is not found in your system. Please follow ${ruby_install_link} to install ruby.")
+        else ()
+            log_debug("Ruby is not found. GUI project or standalone project generation depends on ruby environment to work. If you need to generate GUI project or standalone project, please follow ${ruby_install_link} to install ruby.")
+        endif ()
+    endif ()
 endif()
 

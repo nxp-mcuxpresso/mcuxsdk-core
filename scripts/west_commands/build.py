@@ -672,8 +672,13 @@ class Build(Forceable):
             extra_args['shield'] = self.args.shield
         extra_args['CONFIG_TOOLCHAIN'] = self.args.toolchain
 
-        if self.args.target == 'guiproject' and self.args.toolchain in NO_GUI_TOOLCHAIN:
-            self.die(f'{self.args.toolchain} does not support target guiproject')
+        if self.args.target == 'guiproject':
+            if self.args.toolchain in NO_GUI_TOOLCHAIN:
+                self.die(f'{self.args.toolchain} does not support target guiproject')
+            extra_args['GENERATE_GUI_PROJECT'] = _CMAKE_TRUE
+
+        if self.args.target == 'standalone_project':
+            extra_args['GENERATE_STANDALONE_PROJECT'] = _CMAKE_TRUE
 
         if self.args.compiler:
             if self.args.toolchain == 'armgcc':
