@@ -2,7 +2,14 @@
 @page driver_log Driver Change Log
 
 @section anactrl ANACTRL
-  The current ANACTRL driver version is 2.3.1.
+  The current ANACTRL driver version is 2.4.0.
+
+  - 2.4.0
+    - Improvements
+      - Added some interrupt flags for devices containing BOD1 and BOD2 interrupt controls.
+      - Added a control macro to enable/disable the 32MHz Crystal oscillator code in current driver.
+      - Added a feature macro for bit field ENA_96MHZCLK in FRO192M_CTRL.
+      - Added a feature macro for bit field BODCORE_INT_ENABLE in BOD_DCDC_INT_CTRL.
 
   - 2.3.1
     - Bug Fixes
