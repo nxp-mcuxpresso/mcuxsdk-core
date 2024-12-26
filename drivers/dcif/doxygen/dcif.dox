@@ -1,0 +1,8 @@
+/*!
+@defgroup dcif DCIF: Display control Interface
+@details The MCUXpresso SDK provides a peripheral driver for the DC Interface(DCIF)
+
+The DCIF supports RGB mode (dot clock mode)
+
+Which platforms include the ip DCIF: iMX943.
+*/
