@@ -2,20 +2,20 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-config MCUX_HAS_COMPONENT_driver.lin_stack
+config MCUX_HAS_COMPONENT_driver.lin_lpuart
     bool
-    default y if MCUX_HW_IP_DriverType_LPUART
+    default y if MCUX_HW_IP_DriverType_LPUART_LIN
 
 config MCUX_HAS_COMPONENT_driver.lin
     bool
     default y if MCUX_HW_IP_DriverType_LPUART_LIN
 
-config MCUX_COMPONENT_driver.lin_stack
-    bool "lin_stack"
+config MCUX_COMPONENT_driver.lin_lpuart
+    bool "lin_lpuart"
     select MCUX_COMPONENT_driver.common
-    depends on MCUX_HAS_COMPONENT_driver.lin_stack
+    depends on MCUX_HAS_COMPONENT_driver.lin_lpuart
 
 config MCUX_COMPONENT_driver.lin
     bool "lin"
-    select MCUX_COMPONENT_driver.common
+    select MCUX_COMPONENT_driver.lin_lpuart
     depends on MCUX_HAS_COMPONENT_driver.lin
