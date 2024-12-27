@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
- * All rights reserved.
+ * Copyright 2016-2022, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -285,6 +284,11 @@ status_t FTM_Init(FTM_Type *base, const ftm_config_t *config)
     /* Set the clock prescale factor */
     base->SC = FTM_SC_PS(config->prescale);
 
+#if (defined(FSL_FEATURE_FTM_HAS_FILTER_PRESCALER) && FSL_FEATURE_FTM_HAS_FILTER_PRESCALER)
+    /* Set filter clock prescale factor */
+    base->SC |= FTM_SC_FLTPS(config->filterPrescale);
+#endif  /* FSL_FEATURE_FTM_HAS_FILTER_PRESCALER */
+
     /* Setup the counter operation */
     base->CONF = (FTM_CONF_BDMMODE(config->bdmMode) | FTM_CONF_GTBEEN(config->useGlobalTimeBase));
 
@@ -331,6 +335,11 @@ status_t FTM_Init(FTM_Type *base, const ftm_config_t *config)
     reg |= FTM_FLTCTRL_FFVAL(config->faultFilterValue);
     base->FLTCTRL = reg;
 #endif
+
+#if (defined(FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE) && FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE)
+    /* Set fault output state */
+    base->FLTCTRL |= FTM_FLTCTRL_FSTATE(config->faultOutputState);
+#endif  /* FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE */
 
     return kStatus_Success;
 }
@@ -382,6 +391,10 @@ void FTM_GetDefaultConfig(ftm_config_t *config)
 
     /* Divide FTM clock by 1 */
     config->prescale = kFTM_Prescale_Divide_1;
+#if (defined(FSL_FEATURE_FTM_HAS_FILTER_PRESCALER) && FSL_FEATURE_FTM_HAS_FILTER_PRESCALER)
+    /* Divide FTM clock by 1 */
+    config->filterPrescale = kFTM_Filter_Prescale_Divide_1;
+#endif  /* FSL_FEATURE_FTM_HAS_FILTER_PRESCALER */
     /* FTM behavior in BDM mode */
     config->bdmMode = kFTM_BdmMode_0;
     /* Software trigger will be used to update registers */
@@ -392,6 +405,10 @@ void FTM_GetDefaultConfig(ftm_config_t *config)
     config->faultMode = kFTM_Fault_Disable;
     /* Disable the fault filter */
     config->faultFilterValue = 0;
+#if (defined(FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE) && FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE)
+    /* Configure fault output state. */
+    config->faultOutputState = kFTM_FaultOutput_PreDefined;
+#endif  /* FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE */
     /* Divide the system clock by 1 */
     config->deadTimePrescale = kFTM_Deadtime_Prescale_1;
     /* No counts are inserted */

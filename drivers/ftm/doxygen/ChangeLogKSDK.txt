@@ -2,7 +2,19 @@
 @page driver_log Driver Change Log
 
 @section ftm FTM
-  The current FTM driver version is 2.6.1.
+  The current FTM driver version is 2.7.0.
+
+  - 2.7.0
+    - Improvements
+      - Support period dithering and edge dithering feature with new APIs:
+        - FTM_SetPeriodDithering()
+        - FTM_SetEdgeDithering()
+      - Support get channel n output and input state feature with new APIs:
+        - FTM_GetChannelOutputState()
+        - FTM_GetChannelInputState()
+      - Support configure deadtime for specific combined channel pair with new API:
+        - FTM_SetPairDeadTime()
+      - Support filter clock prescale, fault output state.
 
   - 2.6.1
     - Improvements

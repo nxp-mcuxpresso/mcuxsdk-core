@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
- * All rights reserved.
+ * Copyright 2016-2022, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,8 +20,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief FTM driver version 2.6.1. */
-#define FSL_FTM_DRIVER_VERSION (MAKE_VERSION(2, 6, 1))
+/*! @brief FTM driver version 2.7.0. */
+#define FSL_FTM_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
 /*! @} */
 
 /*!
@@ -171,6 +170,16 @@ typedef struct _ftm_fault_param
                                 False: Use the direct path from fault input */
 } ftm_fault_param_t;
 
+#if (defined(FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE) && FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE)
+/*! @brief FlexTimer pre-scaler factor for the dead time insertion*/
+typedef enum _ftm_fault_output_state
+{
+    kFTM_FaultOutput_PreDefined = 0U,   /*!< FTM outputs will be placed into safe values when fault events
+                                             in ongoing (defined by POL bits). */
+    kFTM_FaultOutput_TriStated          /*!< FTM outputs will be tri-stated when fault event is ongoing. */
+} ftm_fault_output_state_t;
+#endif  /* FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE */
+
 /*! @brief FlexTimer pre-scaler factor for the dead time insertion*/
 typedef enum _ftm_deadtime_prescale
 {
@@ -178,6 +187,17 @@ typedef enum _ftm_deadtime_prescale
     kFTM_Deadtime_Prescale_4,      /*!< Divide by 4 */
     kFTM_Deadtime_Prescale_16      /*!< Divide by 16 */
 } ftm_deadtime_prescale_t;
+
+#if (defined(FSL_FEATURE_FTM_HAS_PAIRED_DEADTIME) && FSL_FEATURE_FTM_HAS_PAIRED_DEADTIME)
+/*! @brief Options to configure FTM combined channel pair deadtime.*/
+typedef struct _ftm_deadtime_param
+{
+    ftm_deadtime_prescale_t deadTimePrescale; /*!< The dead time prescalar value */
+    uint32_t deadTimeValue;                   /*!< The dead time value
+                                                   deadTimeValue's available range is 0-1023 when register has DTVALEX,
+                                                   otherwise its available range is 0-63. */
+} ftm_deadtime_param_t;
+#endif  /* FSL_FEATURE_FTM_HAS_PAIRED_DEADTIME */
 
 /*! @brief FlexTimer clock source selection*/
 typedef enum _ftm_clock_source
@@ -199,6 +219,29 @@ typedef enum _ftm_clock_prescale
     kFTM_Prescale_Divide_64,     /*!< Divide by 64 */
     kFTM_Prescale_Divide_128     /*!< Divide by 128 */
 } ftm_clock_prescale_t;
+
+#if (defined(FSL_FEATURE_FTM_HAS_FILTER_PRESCALER) && FSL_FEATURE_FTM_HAS_FILTER_PRESCALER)
+/*! @brief FlexTimer filter clock prescaler selection */
+typedef enum _ftm_filter_prescale
+{
+    kFTM_Filter_Prescale_Divide_1 = 0U, /*!< Divide by 1 */
+    kFTM_Filter_Prescale_Divide_2,      /*!< Divide by 2 */
+    kFTM_Filter_Prescale_Divide_3,      /*!< Divide by 3 */
+    kFTM_Filter_Prescale_Divide_4,      /*!< Divide by 4 */
+    kFTM_Filter_Prescale_Divide_5,      /*!< Divide by 5 */
+    kFTM_Filter_Prescale_Divide_6,      /*!< Divide by 6 */
+    kFTM_Filter_Prescale_Divide_7,      /*!< Divide by 7 */
+    kFTM_Filter_Prescale_Divide_8,      /*!< Divide by 8 */
+    kFTM_Filter_Prescale_Divide_9,      /*!< Divide by 9 */
+    kFTM_Filter_Prescale_Divide_10,     /*!< Divide by 10 */
+    kFTM_Filter_Prescale_Divide_11,     /*!< Divide by 11 */
+    kFTM_Filter_Prescale_Divide_12,     /*!< Divide by 12 */
+    kFTM_Filter_Prescale_Divide_13,     /*!< Divide by 13 */
+    kFTM_Filter_Prescale_Divide_14,     /*!< Divide by 14 */
+    kFTM_Filter_Prescale_Divide_15,     /*!< Divide by 15 */
+    kFTM_Filter_Prescale_Divide_16      /*!< Divide by 16 */
+} ftm_filter_prescale_t;
+#endif  /* FSL_FEATURE_FTM_HAS_FILTER_PRESCALER */
 
 /*! @brief Options for the FlexTimer behaviour in BDM Mode */
 typedef enum _ftm_bdm_mode
@@ -344,6 +387,9 @@ enum
 typedef struct _ftm_config
 {
     ftm_clock_prescale_t prescale;            /*!< FTM clock prescale value */
+#if (defined(FSL_FEATURE_FTM_HAS_FILTER_PRESCALER) && FSL_FEATURE_FTM_HAS_FILTER_PRESCALER)
+    ftm_filter_prescale_t filterPrescale;     /*!< Clock prescaler used in FTM filters */
+#endif  /* FSL_FEATURE_FTM_HAS_FILTER_PRESCALER */
     ftm_bdm_mode_t bdmMode;                   /*!< FTM behavior in BDM mode */
     uint32_t pwmSyncMode;                     /*!< Synchronization methods to use to update buffered registers; Multiple
                                                    update modes can be used by providing an OR'ed list of options
@@ -354,6 +400,9 @@ typedef struct _ftm_config
                                                    enumeration ::ftm_reload_point_t. */
     ftm_fault_mode_t faultMode;               /*!< FTM fault control mode */
     uint8_t faultFilterValue;                 /*!< Fault input filter value */
+#if (defined(FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE) && FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE)
+    ftm_fault_output_state_t faultOutputState;  /*!< Fault output state */
+#endif  /* FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE */
     ftm_deadtime_prescale_t deadTimePrescale; /*!< The dead time prescalar value */
     uint32_t deadTimeValue;                   /*!< The dead time value
                                                    deadTimeValue's available range is 0-1023 when register has DTVALEX,
@@ -1152,6 +1201,107 @@ static inline void FTM_SetLoadFreq(FTM_Type *base, uint32_t loadfreq)
     base->CONF = reg;
 }
 #endif /* FSL_FEATURE_FTM_HAS_CONF_LDFQ_BIT */
+
+#if (defined(FSL_FEATURE_FTM_HAS_PAIRED_DEADTIME) && FSL_FEATURE_FTM_HAS_PAIRED_DEADTIME)
+/*!
+ * brief Configure deadtime for specific combined channel pair.
+ *
+ * param base           FTM peripheral base address
+ * param config         Pointer to the user configuration structure.
+ * param chnlPairNumber The FTM channel pair number; options are 0, 1, 2, 3
+ */
+static inline void FTM_SetPairDeadTime(FTM_Type *base,
+                                       const ftm_deadtime_param_t *config,
+                                       ftm_chnl_t chnlPairNumber)
+{
+    switch (chnlPairNumber)
+    {
+        case kFTM_Chnl_0:
+            base->PAIR0DEADTIME = FTM_PAIR0DEADTIME_DTVALEX(config->deadTimeValue >> 6U) |
+                                  FTM_PAIR0DEADTIME_DTPS(config->deadTimePrescale) |
+                                  FTM_PAIR0DEADTIME_DTVAL(config->deadTimeValue);
+            break;
+        case kFTM_Chnl_1:
+            base->PAIR1DEADTIME = FTM_PAIR1DEADTIME_DTVALEX(config->deadTimeValue >> 6U) |
+                                  FTM_PAIR1DEADTIME_DTPS(config->deadTimePrescale) |
+                                  FTM_PAIR1DEADTIME_DTVAL(config->deadTimeValue);
+            break;
+        case kFTM_Chnl_2:
+            base->PAIR2DEADTIME = FTM_PAIR2DEADTIME_DTVALEX(config->deadTimeValue >> 6U) |
+                                  FTM_PAIR2DEADTIME_DTPS(config->deadTimePrescale) |
+                                  FTM_PAIR2DEADTIME_DTVAL(config->deadTimeValue);
+            break;
+        case kFTM_Chnl_3:
+            base->PAIR3DEADTIME = FTM_PAIR3DEADTIME_DTVALEX(config->deadTimeValue >> 6U) |
+                                  FTM_PAIR3DEADTIME_DTPS(config->deadTimePrescale) |
+                                  FTM_PAIR3DEADTIME_DTVAL(config->deadTimeValue);
+            break;
+        default:
+            assert(false);
+            break;
+    }
+}
+#endif  /* FSL_FEATURE_FTM_HAS_PAIRED_DEADTIME */
+
+#if (defined(FSL_FEATURE_FTM_HAS_DITHERING) && FSL_FEATURE_FTM_HAS_DITHERING)
+/*!
+ * @brief Set PWM Period Dithering. For the PWM period dithering, the register MOD_MIRROR
+ *        should be used instead of the register MOD.
+ *
+ * @param base            FTM peripheral base address.
+ * @param moduloValue     FTM counter modulo value.
+ * @param fractionalValue The modulo fractional value used in the PWM period dithering.
+ */
+static inline void FTM_SetPeriodDithering(FTM_Type *base,
+                                          uint16_t moduloValue,
+                                          uint8_t fractionalValue)
+{
+    base->MOD_MIRROR = FTM_MOD_MIRROR_MOD(moduloValue) | FTM_MOD_MIRROR_FRACMOD(fractionalValue);
+}
+
+/*!
+ * @brief Set PWM Edge Dithering. For the PWM edge dithering, the register CnV_MIRROR
+ *        should be used instead of the register CnV.
+ *
+ * @param base            FTM peripheral base address.
+ * @param chnlNumber      The channel number.
+ * @param matchValue      FTM channel n match value.
+ * @param fractionalValue The channel n match fractional value used in the PWM edge dithering.
+ */
+static inline void FTM_SetEdgeDithering(FTM_Type *base,
+                                        ftm_chnl_t chnlNumber,
+                                        uint16_t matchValue,
+                                        uint8_t fractionalValue)
+{
+    base->CV_MIRROR[chnlNumber] = FTM_CV_MIRROR_VAL(matchValue) | FTM_CV_MIRROR_FRACVAL(fractionalValue);
+}
+#endif  /* FSL_FEATURE_FTM_HAS_DITHERING */
+
+#if (defined(FSL_FEATURE_FTM_HAS_CONF_CHIS_BIT) && FSL_FEATURE_FTM_HAS_CONF_CHIS_BIT)
+/*!
+ * @brief Get value of channel n input after the double-sampling or the filtering.
+ *
+ * @param base       FTM peripheral base address.
+ * @param chnlNumber The channel number.
+ */
+static inline uint32_t FTM_GetChannelInputState(FTM_Type *base, ftm_chnl_t chnlNumber)
+{
+    return (base->CONTROLS[chnlNumber].CnSC & FTM_CnSC_CHIS_MASK) >> FTM_CnSC_CHIS_SHIFT;
+}
+#endif  /* FSL_FEATURE_FTM_HAS_CONF_CHIS_BIT */
+
+#if (defined(FSL_FEATURE_FTM_HAS_CONF_CHOV_BIT) && FSL_FEATURE_FTM_HAS_CONF_CHOV_BIT)
+/*!
+ * @brief Get final value of the channel n output.
+ *
+ * @param base       FTM peripheral base address.
+ * @param chnlNumber The channel number.
+ */
+static inline uint32_t FTM_GetChannelOutputState(FTM_Type *base, ftm_chnl_t chnlNumber)
+{
+    return (base->CONTROLS[chnlNumber].CnSC & FTM_CnSC_CHOV_MASK) >> FTM_CnSC_CHOV_SHIFT;
+}
+#endif  /* FSL_FEATURE_FTM_HAS_CONF_CHOV_BIT */
 
 #if defined(__cplusplus)
 }
