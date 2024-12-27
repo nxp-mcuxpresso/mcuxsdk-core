@@ -49,13 +49,6 @@
  * @ingroup i3c
  * @endif 
  */
-
- /*!
- * @if dox_section_i3c_freertos_driver 
- * @defgroup i3c_freertos_driver I3C FreeRTOS Driver
- * @ingroup i3c
- * @endif 
- */
  
 /*!
  * @defgroup i3c_common_driver I3C Common Driver

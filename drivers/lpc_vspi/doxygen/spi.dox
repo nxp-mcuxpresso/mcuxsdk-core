@@ -55,18 +55,3 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @details This section describes the programming interface of the SPI DMA driver.
 @endif
 */
-
-/*!
-@if dox_section_spi_freertos_driver
-@defgroup spi_freertos_driver SPI FreeRTOS driver
-@ingroup spi
-@details This section describes the programming interface of the SPI FreeRTOS driver.
-@endif
-*/
-
-/*!
-@if dox_section_spi_cmsis_driver
-@defgroup spi_cmsis_driver SPI CMSIS driver
-@ingroup spi
-@endif
-*/

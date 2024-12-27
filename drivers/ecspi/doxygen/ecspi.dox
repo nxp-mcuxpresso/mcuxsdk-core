@@ -50,23 +50,9 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 */
 
 /*!
-@if dox_section_ecspi_freertos_driver
-@defgroup ecspi_freertos_driver ECSPI FreeRTOS Driver
-@ingroup ecspi
-@endif
-*/
-
-/*!
 @if dox_section_ecspi_sdma
 @defgroup ecspi_sdma ECSPI SDMA Driver
 @ingroup ecspi
 @details
-@endif
-*/
-
-/*!
-@if dox_section_ecspi_cmsis_driver
-@defgroup ecspi_cmsis_driver ECSPI CMSIS Driver
-@ingroup ecspi
 @endif
 */

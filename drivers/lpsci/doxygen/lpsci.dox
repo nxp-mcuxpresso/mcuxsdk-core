@@ -78,18 +78,3 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @ingroup lpsci
 @endif
 */
-
-
-/*!
-@if dox_section_lpsci_freertos_driver
-@defgroup lpsci_freertos_driver LPSCI FreeRTOS Driver
-@ingroup lpsci
-@endif
-*/
-
-/*!
-@if dox_section_lpsci_cmsis_driver
-@defgroup lpsci_cmsis_driver LPSCI CMSIS Driver
-@ingroup lpsci
-@endif
-*/

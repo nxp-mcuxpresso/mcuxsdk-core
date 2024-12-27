@@ -77,14 +77,3 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @details
 @endif
 */
-
-/*!
-@if dox_section_i2c_freertos_driver
-@defgroup i2c_freertos_driver I2C FreeRTOS Driver
-@ingroup i2c
-@details
-@endif
-*/
-
-
-

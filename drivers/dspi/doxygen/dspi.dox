@@ -44,17 +44,3 @@ The DSPI driver configures DSPI module and provides functional and transactional
 interfaces to build the DSPI application.
 @endif
 */
-
-/*!
-@if dox_section_dspi_freertos_driver
-@defgroup dspi_freertos_driver DSPI FreeRTOS Driver
-@ingroup dspi
-@endif
-*/
-
-/*!
-@if dox_section_dspi_cmsis_driver
-@defgroup dspi_cmsis_driver DSPI CMSIS Driver
-@ingroup dspi
-@endif
-*/

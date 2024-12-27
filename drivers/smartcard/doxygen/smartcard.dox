@@ -103,13 +103,6 @@ The blocking (synchronous) transfer is supported only by the RTOS adaptation lay
 */
 
 /*!
-@if dox_section_smartcard_freertos_driver
-@defgroup smartcard_freertos_driver Smart Card FreeRTOS Driver
-@ingroup smartcard
-@endif
-*/
-
-/*!
 @defgroup smartcard_phy_driver Smart Card PHY Driver
 @ingroup smartcard
 */

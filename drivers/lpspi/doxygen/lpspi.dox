@@ -62,19 +62,5 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 */
 
 /*!
-@if dox_section_lpspi_freertos_driver
-@defgroup lpspi_freertos_driver LPSPI FreeRTOS Driver
-@ingroup lpspi
-@endif
-*/
-
-/*!
-@if dox_section_lpspi_cmsis_driver
-@defgroup lpspi_cmsis_driver LPSPI CMSIS Driver
-@ingroup lpspi
-@endif
-*/
-
-/*!
  * @}
  */

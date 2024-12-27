@@ -314,18 +314,3 @@ saving data.
 @ingroup usart
 @endif
 */
-
-/*!
-@if dox_section_usart_freertos_driver
-@defgroup usart_freertos_driver USART FreeRTOS Driver
-@ingroup usart
-@endif
-*/
-
-
-/*!
-@if dox_section_usart_cmsis_driver
-@defgroup usart_cmsis_driver USART CMSIS Driver
-@ingroup usart
-@endif
-*/

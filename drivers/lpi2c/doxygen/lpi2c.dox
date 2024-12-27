@@ -35,8 +35,3 @@
  * @defgroup lpi2c_freertos_driver LPI2C FreeRTOS Driver
  * @ingroup lpi2c
  */
-
-/*!
- * @defgroup lpi2c_cmsis_driver LPI2C CMSIS Driver
- * @ingroup lpi2c
- */

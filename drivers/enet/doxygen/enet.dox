@@ -75,10 +75,3 @@ to enable the PTP IEEE 1588 feature. The initialization occurs as follows.
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/enet
 
 */
-
-/*!
-@if dox_section_enet_cmsis_driver
-@defgroup enet_cmsis_driver ENET CMSIS Driver
-@ingroup enet
-@endif
-*/
