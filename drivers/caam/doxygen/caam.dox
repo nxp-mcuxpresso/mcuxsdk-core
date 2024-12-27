@@ -1,8 +1,5 @@
 
-/*!
-@page drv_err Driver errors status
- - #kStatus_CAAM_Again = 6300
-*/
+
 
 /*!
 @defgroup caam_driver CAAM: Cryptographic Acceleration and Assurance Module

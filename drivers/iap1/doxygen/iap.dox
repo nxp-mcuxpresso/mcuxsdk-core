@@ -1,24 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLASH_Success = 0
- - #kStatus_FLASH_InvalidArgument = 4
- - #kStatus_FLASH_AlignmentError = 101
- - #kStatus_FLASH_AddressError = 102
- - #kStatus_FLASH_AccessError = 103
- - #kStatus_FLASH_ProtectionViolation = 104
- - #kStatus_FLASH_CommandFailure = 105
- - #kStatus_FLASH_UnknownProperty = 106
- - #kStatus_FLASH_EraseKeyError = 107
- - #kStatus_FLASH_RegionExecuteOnly = 108
- - #kStatus_FLASH_ExecuteInRamFunctionNotReady = 109
- - #kStatus_FLASH_CommandNotSupported = 111
- - #kStatus_FLASH_HashCheckError = 124
- - #kStatus_FLASH_BlankIfrPageData = 121
- - #kStatus_FLASH_EncryptedRegionsEraseNotDoneAtOnce = 122
- - #kStatus_FLASH_ProgramVerificationNotAllowed = 123
- - #kStatus_FLASH_HashCheckError = 124
 
-*/
 
 /*!
 @defgroup flash_driver IAP: In Application Programming Driver

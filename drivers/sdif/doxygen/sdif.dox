@@ -1,15 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SDIF_DescriptorBufferLenError = 5900
- - #kStatus_SDIF_InvalidArgument = 5901
- - #kStatus_SDIF_SyncCmdTimeout = 5902
- - #kStatus_SDIF_SendCmdFail = 5903
- - #kStatus_SDIF_SendCmdErrorBufferFull = 5904
- - #kStatus_SDIF_DMATransferFailWithFBE = 5905
- - #kStatus_SDIF_DMATransferDescriptorUnavailable = 5906
- - #kStatus_SDIF_DataTransferFail = 5907
- - #kStatus_SDIF_ResponseError = 5908
-*/
+
 
 /*!
 @defgroup sdif SDIF: SD/MMC/SDIO card interface

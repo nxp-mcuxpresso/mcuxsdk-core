@@ -1,9 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLEXIO_SPI_Busy = 501
- - #kStatus_FLEXIO_SPI_Idle = 502
- - #kStatus_FLEXIO_SPI_Error = 503
-*/
+
 
 /*!
 @defgroup flexio_spi FlexIO SPI Driver

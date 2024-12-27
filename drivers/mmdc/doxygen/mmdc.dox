@@ -1,11 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_MMDC_ErrorDGCalibration = 7101
- - #kStatus_MMDC_ErrorReadCalibration = 7102
- - #kStatus_MMDC_ErrorWriteCalibration = 7103
- - #kStatus_MMDC_ErrorWriteLevelingCalibration = 7104
- - #kStatus_MMDC_WaitFlagTimeout = 7105
-*/
+
 
 /*!
 @defgroup mmdc MMDC: Multi Mode DDR Controller Driver

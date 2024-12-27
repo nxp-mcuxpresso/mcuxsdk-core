@@ -1,16 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SMARTCARD_Success = 4300
- - #kStatus_SMARTCARD_TxBusy = 4301
- - #kStatus_SMARTCARD_RxBusy = 4302
- - #kStatus_SMARTCARD_NoTransferInProgress = 4303
- - #kStatus_SMARTCARD_Timeout = 4304
- - #kStatus_SMARTCARD_Initialized = 4305
- - #kStatus_SMARTCARD_PhyInitialized = 4306
- - #kStatus_SMARTCARD_CardNotActivated = 4307
- - #kStatus_SMARTCARD_InvalidInput = 4308
- - #kStatus_SMARTCARD_OtherError = 4309
-*/
+
 
 /*!
 @defgroup smartcard Smart Card

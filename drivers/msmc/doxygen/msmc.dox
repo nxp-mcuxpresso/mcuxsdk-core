@@ -1,7 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SMC_StopAbort = 3900
-*/
+
 
 /*!
 @defgroup msmc MSMC: Multicore System Mode Controller

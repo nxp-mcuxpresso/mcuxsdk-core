@@ -1,11 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLEXIO_I2S_Idle = 2300
- - #kStatus_FLEXIO_I2S_TxBusy = 2301
- - #kStatus_FLEXIO_I2S_RxBusy = 2302
- - #kStatus_FLEXIO_I2S_Error = 2303
- - #kStatus_FLEXIO_I2S_QueueFull = 2304
-*/
+
 
 /*!
 @defgroup flexio_i2s FlexIO I2S Driver

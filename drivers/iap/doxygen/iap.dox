@@ -1,24 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_IAP_Success = 0
- - #kStatus_IAP_InvalidCommand = 10201
- - #kStatus_IAP_SrcAddrError = 10202
- - #kStatus_IAP_DstAddrError = 10203
- - #kStatus_IAP_SrcAddrNotMapped = 10204
- - #kStatus_IAP_DstAddrNotMapped = 10205
- - #kStatus_IAP_CountError = 10206
- - #kStatus_IAP_InvalidSector = 10207
- - #kStatus_IAP_SectorNotblank = 10208
- - #kStatus_IAP_NotPrepared = 10209
- - #kStatus_IAP_CompareError = 10210
- - #kStatus_IAP_Busy = 10211
- - #kStatus_IAP_ParamError = 10212
- - #kStatus_IAP_AddrError = 10213
- - #kStatus_IAP_AddrNotMapped = 10214
- - #kStatus_IAP_NoPower = 10214
- - #kStatus_IAP_NoClock = 10227
- - #kStatus_IAP_ReinvokeISPConfig = 1021C
-*/
+
 
 /*!
 @defgroup IAP_driver IAP: In Application Programming Driver

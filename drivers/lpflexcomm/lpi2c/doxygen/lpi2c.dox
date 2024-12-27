@@ -1,16 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_LPI2C_Busy = 900
- - #kStatus_LPI2C_Idle = 901
- - #kStatus_LPI2C_Nak = 902
- - #kStatus_LPI2C_FifoError = 903
- - #kStatus_LPI2C_BitError = 904
- - #kStatus_LPI2C_ArbitrationLost = 905
- - #kStatus_LPI2C_PinLowTimeout = 906
- - #kStatus_LPI2C_NoTransferInProgress = 907
- - #kStatus_LPI2C_DmaRequestFail = 908
- - #kStatus_LPI2C_Timeout = 909
-*/
+
 
 /*!
  * @defgroup lpi2c LPI2C: Low Power Inter-Integrated Circuit Driver

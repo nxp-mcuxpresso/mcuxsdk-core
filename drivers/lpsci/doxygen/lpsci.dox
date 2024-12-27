@@ -1,19 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_LPSCI_TxBusy = 1200
- - #kStatus_LPSCI_RxBusy = 1201
- - #kStatus_LPSCI_TxIdle = 1202
- - #kStatus_LPSCI_RxIdle = 1203
- - #kStatus_LPSCI_FlagCannotClearManually = 1204
- - #kStatus_LPSCI_BaudrateNotSupport = 1205
- - #kStatus_LPSCI_Error = 1206
- - #kStatus_LPSCI_RxRingBufferOverrun = 1207
- - #kStatus_LPSCI_RxHardwareOverrun = 1208
- - #kStatus_LPSCI_NoiseError = 1209
- - #kStatus_LPSCI_FramingError = 1210
- - #kStatus_LPSCI_ParityError = 1211
- - #kStatus_LPSCI_IdleLineDetected = 1212 
-*/
+
 
 /*!
 @defgroup lpsci LPSCI: Universal Asynchronous Receiver/Transmitter

@@ -1,9 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_QSPI_Idle = 4500
- - #kStatus_QSPI_Busy = 4501
- - #kStatus_QSPI_Error = 4502
-*/
+
 
 /*!
 @defgroup qspi QSPI: Quad Serial Peripheral Interface

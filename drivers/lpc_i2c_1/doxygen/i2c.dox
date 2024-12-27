@@ -1,13 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_I2C_Busy = 9700
- - #kStatus_I2C_Nak = 9701
- - #kStatus_I2C_Addr_Nak = 9702
- - #kStatus_I2C_BusError = 9703
- - #kStatus_I2C_ArbitrationLost = 9704
- - #kStatus_I2C_Timeout = 9705
- - #kStatus_I2C_StateError = 9706
-*/
+
 
 /*!
 @defgroup i2c I2C: Inter-Integrated Circuit Driver

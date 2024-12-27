@@ -1,10 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_LPSPI_Busy = 400
- - #kStatus_LPSPI_Error = 401
- - #kStatus_LPSPI_Idle = 402
- - #kStatus_LPSPI_OutOfRange = 403
-*/
+
 
 /*!
 @defgroup lpspi LPSPI: Low Power Serial Peripheral Interface

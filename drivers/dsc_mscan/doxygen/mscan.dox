@@ -1,18 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_MSCAN_TxBusy = 6800
- - #kStatus_MSCAN_TxIdle = 6801
- - #kStatus_MSCAN_TxSwitchToRx = 6802
- - #kStatus_MSCAN_RxBusy = 6803
- - #kStatus_MSCAN_RxIdle = 6804
- - #kStatus_MSCAN_RxOverflow = 6805
- - #kStatus_MSCAN_RxFifoBusy = 6806
- - #kStatus_MSCAN_RxFifoIdle = 6807
- - #kStatus_MSCAN_RxFifoOverflow = 6808
- - #kStatus_MSCAN_RxFifoWarning = 6809
- - #kStatus_MSCAN_ErrorStatus = 6810
- - #kStatus_MSCAN_UnHandled = 6811
-*/
+
 
 /*!
 @defgroup mscan MSCAN: Scalable Controller Area Network

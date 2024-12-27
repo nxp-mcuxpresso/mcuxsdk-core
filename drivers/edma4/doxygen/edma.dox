@@ -1,8 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_EDMA_QueueFull = 5100
- - #kStatus_EDMA_Busy = 5101
-*/
+
 
 /*!
 @defgroup edma eDMA: Enhanced Direct Memory Access (eDMA) Controller Driver

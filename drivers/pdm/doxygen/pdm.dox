@@ -1,11 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_PDM_Busy = 7200
- - #kStatus_PDM_CLK_LOW = 7201
- - #kStatus_PDM_FIFO_ERROR = 7202
- - #kStatus_PDM_QueueFull = 7203
- - #kStatus_PDM_Idle = 7204
-*/
+
 
 /*!
 @defgroup pdm PDM: Microphone Interface

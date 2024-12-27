@@ -1,9 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SPIFI_Busy = 5900
- - #kStatus_SPIFI_Idle = 5901
- - #kStatus_SPIFI_Error = 5902
-*/
+
 
 /*!
 @defgroup spifi SPIFI: SPIFI flash interface driver

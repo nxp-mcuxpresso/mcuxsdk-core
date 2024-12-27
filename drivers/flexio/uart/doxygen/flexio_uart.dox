@@ -1,13 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLEXIO_UART_TxBusy = 700
- - #kStatus_FLEXIO_UART_RxBusy = 701
- - #kStatus_FLEXIO_UART_TxIdle = 702
- - #kStatus_FLEXIO_UART_RxIdle = 703
- - #kStatus_FLEXIO_UART_ERROR = 704
- - #kStatus_FLEXIO_UART_RxRingBufferOverrun = 705
- - #kStatus_FLEXIO_UART_RxHardwareOverrun = 706
-*/
+
 
 /*!
 @defgroup flexio_uart FlexIO UART Driver

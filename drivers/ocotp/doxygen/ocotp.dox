@@ -1,8 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_OCOTP_AccessError = 14600
- - #kStatus_OCOTP_CrcFail = 14601
-*/
+
 
 /*!
 @defgroup ocotp OCOTP: On Chip One-Time Programmable controller.

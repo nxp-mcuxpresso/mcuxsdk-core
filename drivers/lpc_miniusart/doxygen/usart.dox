@@ -1,18 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_USART_TxBusy = 5700
- - #kStatus_USART_RxBusy = 5701
- - #kStatus_USART_TxIdle = 5702
- - #kStatus_USART_RxIdle = 5703
- - #kStatus_USART_TxError = 5704
- - #kStatus_USART_RxError = 5705
- - #kStatus_USART_RxRingBufferOverrun = 5706
- - #kStatus_USART_NoiseError = 5707
- - #kStatus_USART_FramingError = 5708
- - #kStatus_USART_ParityError = 5709
- - #kStatus_USART_HardwareOverrun = 5710
- - #kStatus_USART_BaudrateNotSupport = 5711
-*/
+
 
 /*!
 @defgroup usart USART: Universal Asynchronous Receiver/Transmitter Driver

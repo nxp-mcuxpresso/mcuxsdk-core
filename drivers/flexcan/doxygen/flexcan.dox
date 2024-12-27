@@ -1,18 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLEXCAN_TxBusy = 5300
- - #kStatus_FLEXCAN_TxIdle = 5301
- - #kStatus_FLEXCAN_TxSwitchToRx = 5302
- - #kStatus_FLEXCAN_RxBusy = 5303
- - #kStatus_FLEXCAN_RxIdle = 5304
- - #kStatus_FLEXCAN_RxOverflow = 5305
- - #kStatus_FLEXCAN_RxFifoBusy = 5306
- - #kStatus_FLEXCAN_RxFifoIdle = 5307
- - #kStatus_FLEXCAN_RxFifoOverflow = 5308
- - #kStatus_FLEXCAN_RxFifoWarning = 5309
- - #kStatus_FLEXCAN_ErrorStatus = 5310
- - #kStatus_FLEXCAN_UnHandled = 5311
-*/
+
 
 /*!
 @defgroup flexcan FlexCAN: Flex Controller Area Network Driver

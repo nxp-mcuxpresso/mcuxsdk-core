@@ -1,9 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_I2S_BufferComplete = 2700
- - #kStatus_I2S_Done = 2701
- - #kStatus_I2S_Busy = 2702
-*/
+
 
 /*!
 @defgroup i2s I2S: I2S Driver

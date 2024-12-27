@@ -1,9 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SPI_Busy = 1400
- - #kStatus_SPI_Idle = 1401
- - #kStatus_SPI_Error = 1402
-*/
+
 
 /*!
 @defgroup spi SPI: Serial Peripheral Interface Driver

@@ -1,10 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_DMIC_Busy = 5800
- - #kStatus_DMIC_Idle = 5801
- - #kStatus_DMIC_OverRunError = 5802
- - #kStatus_DMIC_UnderRunError = 5803
-*/
+
 
 /*!
 @defgroup dmic DMIC: Digital Microphone

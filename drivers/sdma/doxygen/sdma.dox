@@ -1,8 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SDMA_ERROR = 7300
- - #kStatus_SDMA_Busy = 7301
-*/
+
 
 /*!
 @defgroup sdma SDMA: Smart Direct Memory Access (SDMA) Controller Driver

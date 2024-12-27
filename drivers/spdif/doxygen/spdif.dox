@@ -1,23 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SPDIF_RxDPLLLocked = 7500
- - #kStatus_SPDIF_TxFIFOError = 7501
- - #kStatus_SPDIF_TxFIFOResync = 7502
- - #kStatus_SPDIF_RxCnew = 7503
- - #kStatus_SPDIF_ValidatyNoGood = 7504
- - #kStatus_SPDIF_RxIllegalSymbol = 7505
- - #kStatus_SPDIF_RxParityBitError = 7506
- - #kStatus_SPDIF_UChannelOverrun = 7507
- - #kStatus_SPDIF_QChannelOverrun = 7508
- - #kStatus_SPDIF_UQChannelSync = 7509
- - #kStatus_SPDIF_UQChannelFrameError = 7510
- - #kStatus_SPDIF_RxFIFOError = 7511
- - #kStatus_SPDIF_RxFIFOResync = 7512
- - #kStatus_SPDIF_LockLoss = 7513
- - #kStatus_SPDIF_TxIdle = 7514
- - #kStatus_SPDIF_RxIdle = 7515
- - #kStatus_SPDIF_QueueFull = 7516
-*/
+
 
 /*!
 @defgroup spdif SPDIF: Sony/Philips Digital Interface
