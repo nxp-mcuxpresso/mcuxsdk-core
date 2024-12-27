@@ -87,17 +87,3 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @ingroup uart
 @endif
 */
-
-/*!
-@if dox_section_uart_freertos_driver
-@defgroup uart_freertos_driver UART FreeRTOS Driver
-@ingroup uart
-@endif
-*/
-
-/*!
-@if dox_section_uart_cmsis_driver
-@defgroup uart_cmsis_driver UART CMSIS Driver
-@ingroup uart
-@endif
-*/

@@ -99,10 +99,3 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @details
 @endif
 */
-
-/*!
-@if dox_section_uart_cmsis_driver
-@defgroup uart_cmsis_driver UART CMSIS Driver
-@ingroup uart
-@endif
-*/

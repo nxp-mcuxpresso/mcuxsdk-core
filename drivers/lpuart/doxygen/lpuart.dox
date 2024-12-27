@@ -47,17 +47,3 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @ingroup lpuart
 @endif
 */
-
-/*!
-@if dox_section_lpuart_freertos_driver
-@defgroup lpuart_freertos_driver LPUART FreeRTOS Driver
-@ingroup lpuart
-@endif
-*/
-
-/*!
-@if dox_section_lpuart_cmsis_driver
-@defgroup lpuart_cmsis_driver LPUART CMSIS Driver
-@ingroup lpuart
-@endif
-*/

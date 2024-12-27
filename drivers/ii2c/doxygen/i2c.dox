@@ -51,18 +51,3 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/i2c
 */
-
-/*!
-@if dox_section_i2c_freertos_driver
-@defgroup i2c_freertos_driver I2C FreeRTOS Driver
-@ingroup i2c
-@details
-@endif
-*/
-
-/*!
-@if dox_section_i2c_cmsis_driver
-@defgroup i2c_cmsis_driver I2C CMSIS Driver
-@ingroup i2c
-@endif
-*/
