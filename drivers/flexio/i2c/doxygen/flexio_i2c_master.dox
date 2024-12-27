@@ -1,9 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLEXIO_I2C_Busy = 800
- - #kStatus_FLEXIO_I2C_Idle = 801
- - #kStatus_FLEXIO_I2C_Nak = 802
-*/
+
 
 /*!
 @defgroup flexio_i2c_master FlexIO I2C Master Driver

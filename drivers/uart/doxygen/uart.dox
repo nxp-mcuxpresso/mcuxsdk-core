@@ -1,21 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_UART_TxBusy = 1000
- - #kStatus_UART_RxBusy = 1001
- - #kStatus_UART_TxIdle = 1002
- - #kStatus_UART_RxIdle = 1003
- - #kStatus_UART_TxWatermarkTooLarge = 1004
- - #kStatus_UART_RxWatermarkTooLarge = 1005
- - #kStatus_UART_FlagCannotClearManually = 1006
- - #kStatus_UART_Error = 1007
- - #kStatus_UART_RxRingBufferOverrun = 1008
- - #kStatus_UART_RxHardwareOverrun = 1009
- - #kStatus_UART_NoiseError = 1010
- - #kStatus_UART_FramingError = 1011
- - #kStatus_UART_ParityError = 1012
- - #kStatus_UART_BaudrateNotSupport = 1013
- - #kStatus_UART_IdleLineDetected = 1014
-*/
+
 
 /*!
 @defgroup uart UART: Universal Asynchronous Receiver/Transmitter Driver

@@ -1,11 +1,4 @@
-/*!
-@page drv_err Driver errors status
 
- - #kStatus_ECSPI_Busy = 6400
- - #kStatus_ECSPI_Idle = 6401
- - #kStatus_ECSPI_Error = 6402
- - #kStatus_ECSPI_HardwareOverFlow = 6403
-*/
 
 /*!
 @defgroup ecspi ECSPI: Enhanced Configurable Serial Peripheral Interface Driver

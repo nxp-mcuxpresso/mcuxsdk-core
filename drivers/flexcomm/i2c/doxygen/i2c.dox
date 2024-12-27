@@ -1,20 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_I2C_Busy = 2600
- - #kStatus_I2C_Idle = 2601
- - #kStatus_I2C_Nak = 2602
- - #kStatus_I2C_InvalidParameter = 2603
- - #kStatus_I2C_BitError = 2604
- - #kStatus_I2C_ArbitrationLost = 2605
- - #kStatus_I2C_NoTransferInProgress = 2606
- - #kStatus_I2C_DmaRequestFail = 2607
- - #kStatus_I2C_StartStopError = 2608
- - #kStatus_I2C_UnexpectedState = 2609
- - #kStatus_I2C_Timeout = 2610
- - #kStatus_I2C_Addr_Nak = 2611
- - #kStatus_I2C_EventTimeout = 2612
- - #kStatus_I2C_SclLowTimeout = 2613
-*/
+
 
 /*!
 @defgroup i2c I2C: Inter-Integrated Circuit Driver

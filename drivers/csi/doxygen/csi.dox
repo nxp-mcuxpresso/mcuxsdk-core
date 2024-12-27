@@ -1,9 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_CSI_NoEmptyBuffer = 2900
- - #kStatus_CSI_NoFullBuffer = 2901
- - #kStatus_CSI_QueueFull = 2902
-*/
+
 
 /*!
 @defgroup csi_driver CSI: CMOS Sensor Interface

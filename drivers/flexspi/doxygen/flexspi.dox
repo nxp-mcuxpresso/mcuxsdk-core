@@ -1,10 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLEXSPI_Busy = 7001
- - #kStatus_FLEXSPI_SequenceExecutionTimeout = 7002
- - #kStatus_FLEXSPI_IpCommandSequenceError = 7003
- - #kStatus_FLEXSPI_IpCommandGrantTimeout = 7004
-*/
+
 
 /*!
 @defgroup flexspi FLEXSPI: Flexible Serial Peripheral Interface Driver

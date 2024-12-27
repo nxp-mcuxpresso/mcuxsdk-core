@@ -1,14 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_ENET_InitMemoryFail = 4000
- - #kStatus_ENET_RxFrameError = 4001
- - #kStatus_ENET_RxFrameFail = 4002
- - #kStatus_ENET_RxFrameEmpty = 4003
- - #kStatus_ENET_RxFrameDrop = 4004
- - #kStatus_ENET_TxFrameBusy = 4005
- - #kStatus_ENET_TxFrameFail = 4006
- - #kStatus_ENET_TxFrameOverLen = 4007
-*/
+
 
 /*!
 @defgroup mcx_enet ENET: Ethernet Driver

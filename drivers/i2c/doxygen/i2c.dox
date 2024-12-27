@@ -1,12 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_I2C_Busy = 1100
- - #kStatus_I2C_Idle = 1101
- - #kStatus_I2C_Nak = 1102
- - #kStatus_I2C_ArbitrationLost = 1103
- - #kStatus_I2C_Timeout = 1104
- - #kStatus_I2C_Addr_Nak = 1105
-*/
+
 
 /*!
 @defgroup i2c I2C: Inter-Integrated Circuit Driver

@@ -1,7 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_TRGMUX_Locked = 4200
-*/
+
 
 /*!
 @defgroup trgmux TRGMUX: Trigger Mux Driver

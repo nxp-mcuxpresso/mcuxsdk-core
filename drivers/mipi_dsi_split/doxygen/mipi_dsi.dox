@@ -1,10 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_DSI_Busy = 3000
- - #kStatus_DSI_RxDataError = 3001
- - #kStatus_DSI_ErrorReportReceived = 3002
- - #kStatus_DSI_NotSupported = 3003
-*/
+
 
 /*!
 @defgroup mipi_dsi_high MIPI_DSI: MIPI DSI Host Controller

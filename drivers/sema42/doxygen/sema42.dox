@@ -1,8 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SEMA42_Busy = 1600
- - #kStatus_SEMA42_Reseting = 1601
-*/
+
 
 /*!
 @defgroup sema42 SEMA42: Hardware Semaphores Driver

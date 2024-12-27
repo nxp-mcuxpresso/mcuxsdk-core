@@ -1,13 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SAI_TxBusy = 1900
- - #kStatus_SAI_RxBusy = 1901
- - #kStatus_SAI_TxError = 1902
- - #kStatus_SAI_RxError = 1903
- - #kStatus_SAI_QueueFull = 1904
- - #kStatus_SAI_TxIdle = 1905
- - #kStatus_SAI_RxIdle = 1906
-*/
+
 
 /*!
 @defgroup sai SAI: Serial Audio Interface

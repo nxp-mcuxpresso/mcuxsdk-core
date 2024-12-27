@@ -1,9 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLEXIO_MCULCD_Idle = 2400
- - #kStatus_FLEXIO_MCULCD_Busy = 2401
- - #kStatus_FLEXIO_MCULCD_Error = 2302
-*/
+
 
 /*!
 @defgroup flexio_mculcd FlexIO MCU Interface LCD Driver

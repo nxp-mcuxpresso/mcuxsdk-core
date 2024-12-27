@@ -1,22 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLASHIAP_Success = 0
- - #kStatus_FLASHIAP_InvalidCommand = 2501
- - #kStatus_FLASHIAP_SrcAddrError = 2502
- - #kStatus_FLASHIAP_DstAddrError = 2503
- - #kStatus_FLASHIAP_SrcAddrNotMapped = 2504
- - #kStatus_FLASHIAP_DstAddrNotMapped = 2505
- - #kStatus_FLASHIAP_InvalidSector = 2507
- - #kStatus_FLASHIAP_SectorNotblank = 2508
- - #kStatus_FLASHIAP_NotPrepared = 2509
- - #kStatus_FLASHIAP_CompareError = 2510
- - #kStatus_FLASHIAP_Busy = 2511
- - #kStatus_FLASHIAP_ParamError = 2512
- - #kStatus_FLASHIAP_AddrError = 2513
- - #kStatus_FLASHIAP_AddrNotMapped = 2514
- - #kStatus_FLASHIAP_NoPower = 2514
- - #kStatus_FLASHIAP_NoClock = 2527
-*/
+
 
 /*!
 @defgroup flashiap_driver FLASHIAP: Flash In Application Programming Driver

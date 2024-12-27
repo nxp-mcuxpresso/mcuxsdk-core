@@ -1,8 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_FLEXIO_CAMERA_RxBusy = 5500
- - #kStatus_FLEXIO_CAMERA_RxIdle = 5501
-*/
+
 
 /*!
 @defgroup flexio_camera FlexIO Camera Driver

@@ -1,15 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_NETC_RxFrameEmpty = 16600
- - #kStatus_NETC_RxTsrResp = 16601
- - #kStatus_NETC_RxFrameError = 16602
- - #kStatus_NETC_TxFrameOverLen = 16603
- - #kStatus_NETC_LackOfResource = 16604
- - #kStatus_NETC_Unsupported = 16605
- - #kStatus_NETC_RxHRZeroFrame = 16606
- - #kStatus_NETC_RxHRNotZeroFrame = 16607
- - #kStatus_NETC_NotFound = 16608
-*/
+
 
 /*!
  * @defgroup netc NETC driver

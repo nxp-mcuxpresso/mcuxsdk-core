@@ -1,13 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_ESAI_TxBusy = 6900
- - #kStatus_ESAI_RxBusy = 6901
- - #kStatus_ESAI_TxError = 6902
- - #kStatus_ESAI_RxError = 6903
- - #kStatus_ESAI_QueueFull = 6904
- - #kStatus_ESAI_TxIdle = 6905
- - #kStatus_ESAI_RxIdle = 6906
-*/
+
 
 /*!
 @defgroup esai ESAI: Enhanced Serial Audio Interface

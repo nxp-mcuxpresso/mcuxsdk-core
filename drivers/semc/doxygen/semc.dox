@@ -1,18 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SEMC_InvalidDeviceType = 10000
- - #kStatus_SEMC_IpCommandExecutionError = 10001 
- - #kStatus_SEMC_AxiCommandExecutionError = 10002
- - #kStatus_SEMC_InvalidMemorySize = 10003
- - #kStatus_SEMC_InvalidIpcmdDataSize = 10004
- - #kStatus_SEMC_InvalidAddressPortWidth = 10005
- - #kStatus_SEMC_InvalidDataPortWidth = 10006
- - #kStatus_SEMC_InvalidSwPinmuxSelection = 10007
- - #kStatus_SEMC_InvalidBurstLength = 10008
- - #kStatus_SEMC_InvalidColumnAddressBitWidth = 10009
- - #kStatus_SEMC_InvalidBaseAddress = 10010
- - #kStatus_SEMC_InvalidTimerSetting = 10011
-*/
+
 
 /*!
 @defgroup semc SEMC: Smart External DRAM Controller Driver

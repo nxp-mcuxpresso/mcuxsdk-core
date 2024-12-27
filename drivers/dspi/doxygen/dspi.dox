@@ -1,7 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_DSPI_Error = 601
-*/
+
 
 /*!
 @defgroup dspi DSPI: Serial Peripheral Interface Driver

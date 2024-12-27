@@ -1,7 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_XRDC_NoError = 1500
-*/
+
 
 /*!
 @defgroup xrdc XRDC: Extended Resource Domain Controller

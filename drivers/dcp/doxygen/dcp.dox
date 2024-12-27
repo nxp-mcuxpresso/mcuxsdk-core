@@ -1,7 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_DCP_Again = 6700
-*/
+
 
 /*!
 @defgroup dcp_driver DCP: Data Co-Processor

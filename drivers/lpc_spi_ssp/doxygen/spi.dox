@@ -1,11 +1,4 @@
-/*!
-@page drv_err Driver errors status
- - #kStatus_SPI_Busy = 7800
- - #kStatus_SPI_Idle = 7801
- - #kStatus_SPI_ReceiveHardwareOverRun = 7802
- - #kStatus_SPI_Timeout = 7802
- - #kStatus_SPI_BaudrateNotSupport = 7803
-*/
+
 
 /*!
 @defgroup spi SPI: Serial Peripheral Interface Driver
