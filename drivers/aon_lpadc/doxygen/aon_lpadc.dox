@@ -1,0 +1,51 @@
+/*!
+@defgroup aon_lpadc AON_LPADC: 12-bit single-ended SAR Analog-to-Digital Converter Driver
+@details The MCUXpresso SDK provides a peripheral driver for the 12-bit single-ended SAR 
+         Analog-to-Digital Converter (AON_LPADC) module of MCUXpresso SDK devices.
+
+Based on features of the AON_LPADC module, this driver is divided into the following function groups:
+
+# AON_LPADC initialization, de-initialization, and configuration.
+    Functions in this group are used to:
+    1. Gets an available pre-defined settings for AON_LPADC configuration.
+    2. Initializes AON_LPADC module.
+    3. De-Initializes AON_LPADC module.
+    4. Enable or disable AON_LPADC module.
+    5. Reset AON_LPADC module.
+    6. Reset FIFO.
+
+# AON_LPADC status
+    Functions in this group are used to:
+    1. Get AON_LPADC status flags.
+    2. Clear AON_LPADC status flags.
+    3. Get AON_LPADC trigger status flags.
+    4. Clear AON_LPADC trigger status flags.
+
+# AON_LPADC Interrupts
+    Functions in this group are used to:
+    1. Enable interrupts.
+    2. Disable interrupts.
+
+# AON_DMA control
+    Functions in this group are used to:
+    1. Enable or disable AON_LPADC FIFO watermark DAM transfer.
+
+# AON_LPADC trigger, FIFO, and conversion result.
+    Functions in this group are used to:
+    1. Gets an available pre-defined settings for AON_LPADC trigger's configuration.
+    2. Configure the AON_LPADC trigger source.
+    3. Do software trigger.
+    4. Get the count of result kept in specified AON_LPADC conversion result FIFO.
+    5. Get the result in specified conversion FIFO.
+
+# AON_LPADC command.
+    Functions in this group are used to:
+    1. Gets an available pre-defined settings for AON_LPADC command's configuration.
+    2. Do AON_LPADC command configuration.
+
+# AON_LPADC calibration.
+    Functions in this group are used to:
+    1. Set trim value for offset.
+    2. Get trim value of offset.
+    3. Do offset calibration.
+*/
