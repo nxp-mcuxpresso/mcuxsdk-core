@@ -1,7 +1,0 @@
-/*!
-@page driver_log Driver Change Log
-
-@section MX25 External Flash Interface
-  The current MX25 driver version is 0.1.0.
-
-*/
