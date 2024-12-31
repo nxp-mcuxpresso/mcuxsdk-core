@@ -1,0 +1,4 @@
+/*!
+@defgroup flexcan_edma_driver FlexCAN eDMA Driver
+@ingroup flexcan
+*/

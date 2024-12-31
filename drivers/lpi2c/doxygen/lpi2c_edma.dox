@@ -1,0 +1,4 @@
+/*!
+ * @defgroup lpi2c_master_edma_driver LPI2C Master DMA Driver
+ * @ingroup lpi2c
+ */

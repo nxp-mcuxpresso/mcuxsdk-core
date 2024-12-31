@@ -1,0 +1,5 @@
+/*!
+@defgroup ftfx_flexnvm_driver Ftftx FLEXNVM Driver
+@ingroup flash_driver
+@details
+*/

@@ -142,18 +142,3 @@ function with the kStatus_FLEXIO_I2S_TxIdle and kStatus_FLEXIO_I2S_RxIdle status
 ~~~~~
 
 */
-
-/*!
-@if dox_section_flexio_edma_i2s
-@defgroup flexio_edma_i2s FlexIO eDMA I2S Driver
-@ingroup flexio_i2s
-@endif
-*/
-
-/*!
-@if dox_section_flexio_dma_i2s
-@defgroup flexio_dma_i2s FlexIO DMA I2S Driver
-@ingroup flexio_i2s
-@endif
-*/
-

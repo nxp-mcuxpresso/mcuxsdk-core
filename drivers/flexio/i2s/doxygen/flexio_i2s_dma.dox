@@ -1,0 +1,5 @@
+/*!
+@defgroup flexio_dma_i2s FlexIO DMA I2S Driver
+@ingroup flexio_i2s
+*/
+

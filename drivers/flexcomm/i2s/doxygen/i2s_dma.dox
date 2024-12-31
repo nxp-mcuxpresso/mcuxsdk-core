@@ -1,0 +1,5 @@
+/*!
+@defgroup i2s_dma_driver I2S DMA Driver
+@ingroup i2s
+@details
+*/

@@ -1,0 +1,7 @@
+/*!
+@defgroup smartcard_phy_usim_driver Smart Card PHY USIM W
+@ingroup smartcard_phy_driver
+@details The Smart Card interface USIM driver handles the USIM peripheral, which covers all necessary functions to control the ICC. These functions are
+ICC clock setup, ICC voltage turning on/off, ICC card detection, activation/deactivation, and ICC reset sequences. The USIM peripheral covers all features of
+interface ICC chips.
+*/

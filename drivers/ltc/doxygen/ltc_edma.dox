@@ -1,0 +1,5 @@
+/*!
+@defgroup ltc_edma_driver_aes LTC eDMA AES driver
+@details This section describes the programming interface of the LTC eDMA AES driver.
+@ingroup ltc_edma_driver
+*/

@@ -1,0 +1,4 @@
+/*!
+@defgroup flexio_smartdma_mculcd FlexIO SMARTDMA MCU Interface LCD Driver
+@ingroup flexio_mculcd
+*/

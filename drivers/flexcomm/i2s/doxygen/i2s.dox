@@ -1409,10 +1409,4 @@ void RxCallback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionSta
 @details
 */
 
-/*!
-@if dox_section_i2s_dma_driver
-@defgroup i2s_dma_driver I2S DMA Driver
-@ingroup i2s
-@details
-@endif
-*/
+

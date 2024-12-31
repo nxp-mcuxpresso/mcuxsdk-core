@@ -1,0 +1,10 @@
+# PHY driver
+
+The Smart Card interface driver is initialized by calling the function SMARTCARD_PHY_Init().
+During the initialization phase, Smart Card clock is configured and all hardware pins for IC handling are configured.
+*/
+
+/*!
+@defgroup smartcard_phy_driver Smart Card PHY Driver
+@ingroup smartcard
+*/

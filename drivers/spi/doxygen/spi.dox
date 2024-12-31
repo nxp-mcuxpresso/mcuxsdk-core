@@ -42,10 +42,4 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/spi
 */
 
-/*!
-@if dox_section_spi_dma_driver
-@defgroup spi_dma_driver SPI DMA Driver
-@ingroup spi
-@details This section describes the programming interface of the SPI DMA driver.
-@endif
-*/
+

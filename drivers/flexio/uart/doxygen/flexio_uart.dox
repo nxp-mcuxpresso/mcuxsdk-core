@@ -358,17 +358,3 @@ In this example, the buffer size is 32. However, only 31 bytes are used for savi
 ~~~~~
 
 */
-
-/*!
-@if dox_section_flexio_edma_uart
-@defgroup flexio_edma_uart FlexIO eDMA UART Driver
-@ingroup flexio_uart
-@endif
-*/
-
-/*!
-@if dox_section_flexio_dma_uart
-@defgroup flexio_dma_uart FlexIO DMA UART Driver
-@ingroup flexio_uart
-@endif
-*/

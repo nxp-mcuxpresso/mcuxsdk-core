@@ -1,0 +1,6 @@
+/*!
+@defgroup smartcard_uart_driver Smart Card UART Driver
+@ingroup smartcard
+@details The Smart Card UART driver uses a standard UART peripheral which supports the ISO-7816 standard. The driver supports transmission functionality
+in the CPU mode. The driver also supports non-blocking (asynchronous) type of data transfers. The blocking (synchronous) transfer is supported only by the RTOS adaptation layer.
+*/

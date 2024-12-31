@@ -1,0 +1,4 @@
+/*!
+@defgroup xspi_edma XSPI eDMA Driver
+@ingroup xspi
+*/

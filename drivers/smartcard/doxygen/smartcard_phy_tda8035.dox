@@ -1,0 +1,7 @@
+/*!
+@defgroup smartcard_phy_tda8035_driver Smart Card PHY TDA8035 Driver
+@ingroup smartcard_phy_driver
+@details The Smart Card interface TDA8035 driver handles the external interface chip TDA8035 which supports all necessary functions to control the ICC.
+These functions involve PHY pin initialization, ICC voltage selection and activation,
+ICC clock generation, ICC card detection, and activation/deactivation sequences.
+*/

@@ -57,16 +57,6 @@ saving data.
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/uart
 */
 
-/*!
-@if dox_section_uart_dma_driver
-@defgroup uart_dma_driver UART DMA Driver
-@ingroup uart
-@endif
-*/
 
-/*!
-@if dox_section_uart_edma_driver
-@defgroup uart_edma_driver UART eDMA Driver
-@ingroup uart
-@endif
-*/
+
+

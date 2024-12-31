@@ -1,0 +1,7 @@
+/*!
+@defgroup smartcard_phy_emvsim_driver Smart Card PHY EMVSIM Driver
+@ingroup smartcard_phy_driver
+@details The Smart Card interface EMVSIM driver handles the EMVSIM peripheral, which covers all necessary functions to control the ICC. These functions are
+ICC clock setup, ICC voltage turning on/off, ICC card detection, activation/deactivation, and ICC reset sequences. The EMVSIM peripheral covers all features of
+interface ICC chips.
+*/

@@ -22,22 +22,6 @@ Refer to the driver examples codes located at <i>\<SDK_ROOT\>/boards/\<BOARD\>/d
 Refer to the driver examples codes located at <i>\<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dspi.</i>
 */
 
-/*!
-@if dox_section_dspi_dma_driver
-@defgroup dspi_dma_driver DSPI DMA Driver
-@ingroup dspi
-@details This section describes the programming interface of the DSPI peripheral driver.
-The DSPI driver configures DSPI module and provides functional and transactional
-interfaces to build the DSPI application.
-@endif
-*/
 
-/*!
-@if dox_section_dspi_edma_driver
-@defgroup dspi_edma_driver DSPI eDMA Driver
-@ingroup dspi
-@details This section describes the programming interface of the DSPI peripheral driver.
-The DSPI driver configures DSPI module and provides functional and transactional
-interfaces to build the DSPI application.
-@endif
-*/
+
+

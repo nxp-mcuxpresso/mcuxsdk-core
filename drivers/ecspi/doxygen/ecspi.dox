@@ -42,10 +42,4 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ecspi
 */
 
-/*!
-@if dox_section_ecspi_sdma
-@defgroup ecspi_sdma ECSPI SDMA Driver
-@ingroup ecspi
-@details
-@endif
-*/
+

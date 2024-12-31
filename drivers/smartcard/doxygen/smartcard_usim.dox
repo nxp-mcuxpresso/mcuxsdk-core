@@ -1,0 +1,6 @@
+/*!
+@defgroup smartcard_usim_driver Smart Card USIM Driver
+@ingroup smartcard
+@details The SmartCard USIM driver covers the transmission functionality in the CPU mode. The driver supports non-blocking (asynchronous) type of data transfers.
+The blocking (synchronous) transfer is supported only by the RTOS adaptation layer.
+*/

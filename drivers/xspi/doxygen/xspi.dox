@@ -29,10 +29,5 @@ transfer. When the transfer completes, the upper layer is notified through a cal
 function with the kStatus_XSPI_Idle status.
 */
 
-/*!
-@if dox_section_xspi_edma
-@defgroup xspi_edma XSPI eDMA Driver
-@ingroup xspi
-@endif
-*/
+
 

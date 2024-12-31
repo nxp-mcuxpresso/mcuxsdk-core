@@ -1,0 +1,87 @@
+/*!
+@defgroup flexio_edma_mculcd FlexIO eDMA MCU Interface LCD Driver
+@ingroup flexio_mculcd
+
+SDK provide eDMA transactional APIs to transfer data using eDMA, the eDMA method
+is similar with interrupt transactional method.
+
+@note eDMA transactional functions use multiple beats method for better performance,
+in contrast, the blocking functions and interupt functions use single beat method.
+The function @ref FLEXIO_MCULCD_ReadData, @ref FLEXIO_MCULCD_WriteData,
+@ref FLEXIO_MCULCD_GetStatusFlags, and @ref FLEXIO_MCULCD_ClearStatusFlags are
+only used for single beat case, so don't use these functions to work together with
+eDMA functions.
+
+# FlexIO eDMA MCU Interface LCD Driver
+
+## FLEXIO LCD send/receive using a DMA method
+
+~~~~~{.c}
+flexio_MCULCD_edma_handle_t handle;
+volatile bool completeFlag = false;
+edma_handle_t rxEdmaHandle;
+edma_handle_t txEdmaHandle;
+
+void flexioLcdCallback(FLEXIO_MCULCD_Type *base, flexio_MCULCD_edma_handle_t *handle, status_t status, void *userData)
+{
+    if (kStatus_FLEXIO_MCULCD_Idle == status)
+    {
+        completeFlag = true;
+    }
+}
+
+void main(void)
+{
+    // Create the edma Handle.
+    EDMA_CreateHandle(&rxEdmaHandle, DMA0, channel);
+    EDMA_CreateHandle(&txEdmaHandle, DMA0, channel);
+
+    // Configure the DMAMUX.
+    // ...
+    // rxEdmaHandle should use the last FlexIO RX shifters as DMA requst source.
+    // txEdmaHandle should use the first FlexIO TX shifters as DMA requst source.
+
+    // Init the FlexIO LCD driver.
+    FLEXIO_MCULCD_Init(...);
+
+    // Create the transactional handle.
+    FLEXIO_MCULCD_TransferCreateHandleEDMA(&flexioLcdDev, &handle, flexioLcdCallback, NULL, &txEdmaHandle, &rxEdmaHandle);
+
+    ////////////// Send data array. /////////////////////
+    xfer.command = command2;
+    xfer.mode = kFLEXIO_MCULCD_WriteArray;
+    xfer.dataAddrOrSameValue = (uint32_t)dataToSend;
+    xfer.dataCount = sizeof(dataToSend);
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferEDMA(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+
+    ////////////// Send the same data many times. //////////////
+    xfer.command = command2;
+    xfer.mode = kFLEXIO_MCULCD_WriteSameValue;
+    xfer.dataAddrOrSameValue = value;
+    xfer.dataCount = 1000;
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferEDMA(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+
+    ////////////// Read data array. /////////////////////
+    xfer.command = command3;
+    xfer.mode = kFLEXIO_MCULCD_ReadArray;
+    xfer.dataAddrOrSameValue = (uint32_t)dataToReceive;
+    xfer.dataCount = sizeof(dataToReceive);
+    completeFlag = false;
+    FLEXIO_MCULCD_TransferEDMA(&flexioLcdDev, &handle, &xfer);
+
+    while (!completeFlag)
+    {
+    }
+}
+~~~~~
+*/

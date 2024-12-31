@@ -88,9 +88,4 @@ Method 2: Don't include DSC command in TX data array.
 
 */
 
-/*!
-@if dox_section_mipi_dsi_smartdma
-@defgroup mipi_dsi_smartdma MIPI DSI SMARTDMA driver
-@ingroup mipi_dsi_high
-@endif
-*/
+

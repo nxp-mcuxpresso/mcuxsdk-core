@@ -1,0 +1,4 @@
+/*!
+@defgroup flexio_edma_spi FlexIO eDMA SPI Driver
+@ingroup flexio_spi
+*/

@@ -60,42 +60,8 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @ingroup sai
 */
 
-/*!
-@if dox_section_sai_dma
-@defgroup sai_dma SAI DMA Driver
-@endif
-*/
 
-/*!
-@if dox_section_sai_edma
-@defgroup sai_edma SAI EDMA Driver
-@endif
-*/
 
-/*!
-@if dox_section_sai_sdma
-@defgroup sai_sdma SAI SDMA Driver
 
-# Typical use case {#SAICase}
 
-## Multi fifo transfer use sai sdma driver
-The SDMA multi fifo script support transfer data between multi peripheral fifos and memory, a typical user case is that receiving multi sai channel data and put it into memory as
-------------------------------------------------------------------------------
-| channel 0  | channel 1  | channel 2  | channel 3  | channel 4  | .........  |
--------------------------------------------------------------------------------
-Multi fifo script is target to implement above feature, it can supports
-1.configurable fifo watermark range from 1~(2^12-1), it is a value of fifo_watermark * channel_numbers
-2.configurable fifo numbers, support up to 15 continuous fifos
-3.configurable fifo address offset, support address offset up to 64
-@code
-/* load sdma script */
-SDMA_LoadScript()
-/* sai multi channel configurations */
-SAI_GetClassicI2SConfig(&config, DEMO_AUDIO_BIT_WIDTH, kSAI_Stereo, kSAI_Channel0Mask | kSAI_Channel1Mask | kSAI_Channel2Mask| kSAI_Channel3Mask | kSAI_Channel4Mask);
-SAI_TransferRxSetConfigSDMA(SAI, handle, &config);
-SAI_TransferReceiveSDMA(SAI, handle, &config);
-@endcode
 
-Transmitting data using multi fifo is same as above.
-@endif
-*/

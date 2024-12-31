@@ -1,0 +1,4 @@
+/*!
+@defgroup uart_dma_driver UART DMA Driver
+@ingroup uart
+*/

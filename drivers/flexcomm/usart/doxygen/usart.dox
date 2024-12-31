@@ -295,9 +295,4 @@ saving data.
 @ingroup usart
 */
 
-/*!
-@if dox_section_usart_dma_driver
-@defgroup usart_dma_driver USART DMA Driver
-@ingroup usart
-@endif
-*/
+

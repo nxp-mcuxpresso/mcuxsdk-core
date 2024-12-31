@@ -1,0 +1,5 @@
+/*!
+@defgroup skboot_authenticate skboot_authenticate
+@ingroup flash_driver
+@details
+*/

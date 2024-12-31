@@ -32,18 +32,6 @@ When the transfer completes, the upper layer is notified through a callback func
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/i2c
 */
 
-/*!
-@if dox_section_i2c_edma_driver
-@defgroup i2c_edma_driver I2C eDMA Driver
-@ingroup i2c
-@details
-@endif
-*/
 
-/*!
-@if dox_section_i2c_dma_driver
-@defgroup i2c_dma_driver I2C DMA Driver
-@ingroup i2c
-@details
-@endif
-*/
+
+

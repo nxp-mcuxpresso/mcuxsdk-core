@@ -264,10 +264,4 @@ When the transfer completes, the upper layer is notified through a callback func
 @details
 */
 
-/*!
-@if dox_section_i2c_dma_driver
-@defgroup i2c_dma_driver I2C DMA Driver
-@ingroup i2c
-@details
-@endif
-*/
+

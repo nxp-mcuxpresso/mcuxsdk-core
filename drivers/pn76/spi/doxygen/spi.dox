@@ -27,10 +27,4 @@ function with the kStatus_SPI_Idle status.
 
 */
 
-/*!
-@if dox_section_spi_gpdma_driver
-@defgroup spi_gpdma_driver SPI GPDMA Driver
-@ingroup spi
-@details This section describes the programming interface of the SPI GPDMA driver.
-@endif
-*/
+
