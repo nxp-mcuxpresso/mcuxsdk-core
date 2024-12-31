@@ -27,11 +27,11 @@ FFR_Init() Generic APIs for FFR
 
 FFR_Deinit() Generic APIs for FFR
 
-FFR_CustomerPagesInit() APIs to access CFPA pages 
+FFR_CustomerPagesInit() APIs to access CFPA pages
 
 FFR_InfieldPageWrite() APIs to access CFPA pages
 
-FFR_GetCustomerInfieldData() APIs to access CMPA pages 
+FFR_GetCustomerInfieldData() APIs to access CMPA pages
 
 FFR_GetCustomerData() Read data stored in 'Customer Factory CFG Page'
 
@@ -72,22 +72,4 @@ HASH_IRQHandler() Interface for image authentication API
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iap1*/
 ## IAP Flash Operations {#IAPFlashOps}
 
-*/
-
-/*!
-@defgroup flash_ifr_driver IAP_FFR Driver
-@ingroup flash_driver
-@details
-*/
-
-/*!
-@defgroup kb_driver IAP_KBP Driver
-@ingroup flash_driver
-@details
-*/
-
-/*!
-@defgroup skboot_authenticate skboot_authenticate
-@ingroup flash_driver
-@details
 */

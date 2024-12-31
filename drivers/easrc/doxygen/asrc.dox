@@ -56,9 +56,3 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 */
 
 
-/*!
-@if dox_section_asrc_sdma
-@defgroup asrc_sdma ASRC SDMA Driver
-@ingroup asrc
-@endif
-*/

@@ -1,0 +1,4 @@
+/*!
+@defgroup flexio_edma_uart FlexIO eDMA UART Driver
+@ingroup flexio_uart
+*/

@@ -143,10 +143,4 @@ function with the kStatus_SPI_Idle status.
 @details This section describes the programming interface of the SPI DMA driver.
 */
 
-/*!
-@if dox_section_spi_dma_driver
-@defgroup spi_dma_driver SPI DMA Driver
-@ingroup spi
-@details This section describes the programming interface of the SPI DMA driver.
-@endif
-*/
+

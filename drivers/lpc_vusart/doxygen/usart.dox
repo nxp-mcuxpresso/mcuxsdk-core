@@ -68,9 +68,4 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @ingroup usart
 */
 
-/*!
-@if dox_section_usart_dma_driver
-@defgroup usart_dma_driver USART DMA Driver
-@ingroup usart
-@endif
-*/
+

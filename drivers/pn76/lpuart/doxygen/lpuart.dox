@@ -12,9 +12,4 @@ Overview
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpuart
 */
 
-/*!
-@if dox_section_lpuart_gpdma_driver
-@defgroup lpuart_gpdma_driver LPUART GPDMA Driver
-@ingroup lpuart
-@endif
-*/
+

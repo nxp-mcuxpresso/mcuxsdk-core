@@ -1,0 +1,5 @@
+/*!
+@defgroup ftfx_cache_driver Ftftx CACHE Driver
+@ingroup flash_driver
+@details
+*/

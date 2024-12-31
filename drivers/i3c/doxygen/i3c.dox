@@ -15,20 +15,6 @@
  */
 
 /*!
- * @if dox_section_i3c_master_dma_driver
- * @defgroup i3c_master_dma_driver I3C Master DMA Driver
- * @ingroup i3c
- * @endif
- */
-
-/*!
- * @if dox_section_i3c_slave_dma_driver
- * @defgroup i3c_slave_dma_driver I3C Slave DMA Driver
- * @ingroup i3c
- * @endif 
- */
- 
-/*!
  * @defgroup i3c_common_driver I3C Common Driver
  * @ingroup i3c
  */

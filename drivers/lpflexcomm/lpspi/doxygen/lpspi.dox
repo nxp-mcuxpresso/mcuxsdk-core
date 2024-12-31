@@ -48,12 +48,7 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 
 */
 
-/*!
-@if dox_section_lpspi_edma_driver
-@defgroup lpspi_edma_driver LPSPI eDMA Driver
-@ingroup lpspi
-@endif
-*/
+
 
 /*!
  * @}

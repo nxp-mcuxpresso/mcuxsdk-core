@@ -1,0 +1,4 @@
+/*!
+@defgroup esai_edma ESAI eDMA Driver
+@ingroup esai
+*/

@@ -1,0 +1,4 @@
+/*!
+@defgroup qspi_edma_driver Quad Serial Peripheral Interface EDMA Driver
+@ingroup qspi
+*/

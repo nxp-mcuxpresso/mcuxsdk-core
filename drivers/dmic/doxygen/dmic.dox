@@ -63,10 +63,5 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @ingroup dmic
 */
 
-/*!
-@if dox_section_dmic_dma_driver
-@defgroup dmic_dma_driver DMIC DMA Driver
-@ingroup dmic
-@endif
-*/
+
 

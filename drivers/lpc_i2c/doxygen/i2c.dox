@@ -56,10 +56,4 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @details
 */
 
-/*!
-@if dox_section_i2c_dma_driver
-@defgroup i2c_dma_driver I2C DMA Driver
-@ingroup i2c
-@details
-@endif
-*/
+

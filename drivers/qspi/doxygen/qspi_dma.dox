@@ -1,0 +1,4 @@
+/*!
+@defgroup qspi_dma_driver Quad Serial Peripheral Interface DMA Driver
+@ingroup qspi
+*/

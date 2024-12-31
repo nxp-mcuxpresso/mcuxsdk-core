@@ -54,9 +54,4 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @ingroup asrc
 */
 
-/*!
-@if dox_section_asrc_edma_driver
-@defgroup asrc_edma_driver ASRC EDMA Driver
-@ingroup asrc
-@endif
-*/
+

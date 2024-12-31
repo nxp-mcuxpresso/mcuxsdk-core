@@ -1,0 +1,8 @@
+/*!
+@defgroup smartcard_phy_gpio_driver Smart Card PHY GPIO Driver
+@ingroup smartcard_phy_driver
+@details The Smart Card interface GPIO driver handles the GPIO and FTM/TPM peripheral for clock generation, which covers all necessary functions to control
+the ICC. These functions are
+ICC clock setup, ICC voltage turning on/off, activation/deactivation, and ICC reset sequences. This driver doesn't support the ICC pin short circuit protection and
+an emergency deactivation.
+*/

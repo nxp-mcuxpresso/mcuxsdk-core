@@ -1,0 +1,5 @@
+/*!
+@defgroup uart_sdma UART SDMA Driver
+@ingroup uart
+@details
+*/

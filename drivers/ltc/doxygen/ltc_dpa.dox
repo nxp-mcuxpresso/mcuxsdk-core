@@ -1,0 +1,20 @@
+/*!
+\internal @defgroup ltc_driver_dpa LTC DPA driver
+@details This section describes the programming interface of the LTC DPA driver.
+@ingroup ltc
+*/
+/*!
+\internal @defgroup ltc_driver_aes_with_dpa LTC DPA AES driver
+@details This section describes the programming interface of the LTC DPA AES driver.
+@ingroup ltc_driver_dpa
+*/
+/*!
+\internal @defgroup ltc_driver_des_with_dpa LTC DPA DES driver
+@details This section describes the programming interface of the LTC DPA DES driver.
+@ingroup ltc_driver_dpa
+*/
+/*!
+\internal @defgroup ltc_driver_cmac_with_dpa LTC DPA AES CMAC driver
+@details This section describes the programming interface of the LTC DPA AES CMAC driver.
+@ingroup ltc_driver_dpa
+*/

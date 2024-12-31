@@ -25,9 +25,4 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/flexcan
 */
 
-/*!
-@if dox_section_flexcan_edma_driver
-@defgroup flexcan_edma_driver FlexCAN eDMA Driver
-@ingroup flexcan
-@endif
-*/
+

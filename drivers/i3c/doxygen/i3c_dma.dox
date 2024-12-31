@@ -1,0 +1,9 @@
+/*!
+ * @defgroup i3c_master_dma_driver I3C Master DMA Driver
+ * @ingroup i3c
+ */
+
+/*!
+ * @defgroup i3c_slave_dma_driver I3C Slave DMA Driver
+ * @ingroup i3c
+ */

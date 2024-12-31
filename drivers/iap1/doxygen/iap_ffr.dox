@@ -1,0 +1,5 @@
+/*!
+@defgroup flash_ifr_driver IAP_FFR Driver
+@ingroup flash_driver
+@details
+*/

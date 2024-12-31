@@ -1,0 +1,7 @@
+/*!
+@defgroup dspi_dma_driver DSPI DMA Driver
+@ingroup dspi
+@details This section describes the programming interface of the DSPI peripheral driver.
+The DSPI driver configures DSPI module and provides functional and transactional
+interfaces to build the DSPI application.
+*/

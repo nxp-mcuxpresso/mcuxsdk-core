@@ -31,8 +31,3 @@ register callback function.
 @defgroup lcdic LCDIC Driver
 @ingroup lcdic_driver
 */
-
-/*!
-@defgroup lcdic_dma LCDIC DMA Driver
-@ingroup lcdic_driver
-*/

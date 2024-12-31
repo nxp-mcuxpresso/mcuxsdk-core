@@ -3,7 +3,7 @@
 @details The MCUXpresso SDK provides a driver for the Electrophoretic Display Controller (EPDC)
 
 The EPDC is a feature-rich, low power and high performance direct drive active matrix EPD controller.
-It is specifically designed to drive E•INKTM EPD panels supporting a wide variety of TFT backplanes.
+It is specifically designed to drive E-INKTM EPD panels supporting a wide variety of TFT backplanes.
 The goal of the EPDC is to provide an efficient SoC integration of this functionality for e-paper
 applications, allowing a significant BOM cost saving over an external solution, while reaching much
 higher levels of performance at lower power. The EPDC module is defined in the context of an optimized HW/SW

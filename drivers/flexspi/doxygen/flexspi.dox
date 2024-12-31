@@ -33,16 +33,5 @@ function with the kStatus_FLEXSPI_Idle status.
 
 */
 
-/*!
-@if dox_section_flexspi_edma
-@defgroup flexspi_edma FLEXSPI eDMA Driver
-@ingroup flexspi
-@endif
-*/
 
-/*!
-@if dox_section_flexspi_dma
-@defgroup flexspi_dma FLEXSPI DMA Driver
-@ingroup flexspi
-@endif
-*/
+

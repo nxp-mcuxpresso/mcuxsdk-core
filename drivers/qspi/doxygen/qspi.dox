@@ -32,17 +32,7 @@ Initialize the handle by calling the QSPI_TransferTxCreateHandleEDMA() or QSPI_T
 @ingroup qspi
 */
 
-/*!
-@if dox_section_qspi_edma_driver
-@defgroup qspi_edma_driver Quad Serial Peripheral Interface EDMA Driver
-@ingroup qspi
-@endif
-*/
 
-/*!
-@if dox_section_qspi_dma_driver
-@defgroup qspi_dma_driver Quad Serial Peripheral Interface DMA Driver
-@ingroup qspi
-@endif
-*/
+
+
 

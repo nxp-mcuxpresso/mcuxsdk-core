@@ -1,0 +1,4 @@
+/*!
+@defgroup lcdic_dma LCDIC DMA Driver
+@ingroup lcdic_driver
+*/

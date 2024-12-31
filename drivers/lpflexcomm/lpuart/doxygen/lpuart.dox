@@ -17,9 +17,4 @@
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lpuart
 */
 
-/*!
-@if dox_section_lpuart_edma_driver
-@defgroup lpuart_edma_driver LPUART eDMA Driver
-@ingroup lpuart
-@endif
-*/
+

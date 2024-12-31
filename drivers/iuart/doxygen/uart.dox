@@ -74,10 +74,4 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 @details
 */
 
-/*!
-@if dox_section_uart_sdma
-@defgroup uart_sdma UART SDMA Driver
-@ingroup uart
-@details
-@endif
-*/
+

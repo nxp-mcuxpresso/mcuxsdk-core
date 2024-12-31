@@ -40,9 +40,4 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 
 */
 
-/*!
-@if dox_section_esai_edma
-@defgroup esai_edma ESAI eDMA Driver
-@ingroup esai
-@endif
-*/
+

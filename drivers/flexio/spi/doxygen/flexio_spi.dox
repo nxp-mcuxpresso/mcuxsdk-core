@@ -181,17 +181,3 @@ to kFLEXIO_TimerDisableNever to enable a discontinuous PCS access. Only CPHA = 0
 ~~~~~
 
 */
-
-/*!
-@if dox_section_flexio_edma_spi
-@defgroup flexio_edma_spi FlexIO eDMA SPI Driver
-@ingroup flexio_spi
-@endif
-*/
-
-/*!
-@if dox_section_flexio_dma_spi
-@defgroup flexio_dma_spi FlexIO DMA SPI Driver
-@ingroup flexio_spi
-@endif
-*/

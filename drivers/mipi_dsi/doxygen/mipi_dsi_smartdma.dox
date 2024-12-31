@@ -1,0 +1,4 @@
+/*!
+@defgroup mipi_dsi_smartdma MIPI DSI SMARTDMA driver
+@ingroup mipi_dsi_high
+*/
