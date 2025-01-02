@@ -4,11 +4,11 @@
 
 config MCUX_HAS_COMPONENT_driver.smartcard_emvsim
     bool
-    default y if MCUX_HW_IP_DriverType_EMVSIM
+    default y if MCUX_HW_IP_DriverType_SMARTCARD_EMVSIM
 
 config MCUX_HAS_COMPONENT_driver.smartcard_phy_emvsim
     bool
-    default y if MCUX_HW_IP_DriverType_EMVSIM
+    default y if MCUX_HW_IP_DriverType_SMARTCARD_EMVSIM
 
 config MCUX_HAS_COMPONENT_driver.smartcard_phy_gpio
     bool
@@ -20,15 +20,15 @@ config MCUX_HAS_COMPONENT_driver.smartcard_phy_tda8035
 
 config MCUX_HAS_COMPONENT_driver.smartcard_phy_usim
     bool
-    default y if MCUX_HW_IP_DriverType_USIM
+    default y if MCUX_HW_IP_DriverType_SMARTCARD_USIM
 
 config MCUX_HAS_COMPONENT_driver.smartcard_uart
     bool
-    default y if (MCUX_HW_IP_DriverType_UART_ISO7816 && MCUX_HW_IP_DriverType_PIT)
+    default y if MCUX_HW_IP_DriverType_SMARTCARD_UART
 
 config MCUX_HAS_COMPONENT_driver.smartcard_usim
     bool
-    default y if MCUX_HW_IP_DriverType_USIM
+    default y if MCUX_HW_IP_DriverType_SMARTCARD_USIM
 
 config MCUX_COMPONENT_driver.smartcard_emvsim
     bool "smartcard_emvsim"
