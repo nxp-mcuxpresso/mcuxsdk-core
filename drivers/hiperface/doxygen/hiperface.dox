@@ -1,0 +1,9 @@
+/*!
+@defgroup hiperface_driver Hiperface: Hiperface encoder Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Hiperface encoder interface. 
+module of MCUXpresso SDK devices.
+
+# Typical use case {#HiperfaceTpyUC}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/digital_encoder_examples/hiperface
+*/
