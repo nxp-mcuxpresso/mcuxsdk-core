@@ -2,7 +2,23 @@
 @page driver_log Driver Change Log
 
 @section lpcmp LPCMP
-  The current LPCMP driver version is 2.2.0.
+  The current LPCMP driver version is 2.3.0.
+
+  - 2.3.0
+    - New Feature
+      - Added some new features for platforms which support
+        - Plus input source selection.
+        - Minus input source selection.
+        - CMP to DAC link.
+    - Improvements
+      - Removed some new features for platforms which doesn't support
+        - Functional clock source selection.
+        - DAC high power mode selection.
+        - Round Robin clock source selection.
+        - Round Robin trigger source selection.
+        - Round Robin channel sample numbers setting.
+        - Round Robin channel sample time threshold setting.
+        - Round Robin internal trigger configuration.
 
   - 2.2.0
     - Improvements
