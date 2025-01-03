@@ -1,0 +1,11 @@
+/*!
+@defgroup biss BiSS: BiSS Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Digital
+Encoder BiSS module of MCUXpresso SDK devices.
+The BiSS interface is a digital interface for sensors and actuators.
+it stands of Bidirectional Serial Synchronous.
+
+This section describes the programming interface of the BiSS driver.
+The BiSS driver configures the BiSS master and devices and provides
+functional interfaces for the user to control BiSS device.
+*/
