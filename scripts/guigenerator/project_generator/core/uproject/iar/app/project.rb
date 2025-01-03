@@ -227,6 +227,20 @@ module Iar
         @ewp_file.linkerTab.inputTab.set_raw_binary_image(target, value)
       end
 
+      def set_debugger_download(target, check)
+        Core.assert(!@ewd_file.nil?) do
+          "no '.ewd' file set in templates"
+        end
+        @ewd_file.downloadTab.suppress_download(target, check)
+      end
+
+      def set_verify_download(target, check)
+        Core.assert(!@ewd_file.nil?) do
+          "no '.ewd' file set in templates"
+        end
+        @ewd_file.downloadTab.verify_download(target, check)
+      end
+
       # use flash loader
       # ==== arguments
       # target    - target name

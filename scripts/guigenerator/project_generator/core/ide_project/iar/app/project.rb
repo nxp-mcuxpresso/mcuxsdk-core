@@ -188,6 +188,10 @@ module Iar
         super(target, checkbox)
       end
 
+      def set_verify_download(target, checkbox)
+        super(target, checkbox)
+      end
+
       def set_debugger_cmsisdap(target, cmsisdapinterface, cmsisdapmulticpu, cmsisdapmultitarget, cmsisdapresetlist)
         super(target, cmsisdapinterface, cmsisdapmulticpu, cmsisdapmultitarget, cmsisdapresetlist)
       end

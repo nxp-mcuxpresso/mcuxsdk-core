@@ -1161,10 +1161,16 @@ module SDKGenerator
         cmsisdap_multitarget = content['debugger_setting'].key?('cmsisdap_multitarget') ? content['debugger_setting']['cmsisdap_multitarget'] : false
         cmsisdap_multicpu = content['debugger_setting'].key?('cmsisdap_multicpu') ? content['debugger_setting']['cmsisdap_multicpu'] : false
         cmsisdap_resetlist = content['debugger_setting'].key?('cmsisdap_resetlist') ? content['debugger_setting']['cmsisdap_resetlist'] : 'custom'
-        suppress_download = content['debugger_setting'].key?('suppress_download') ? content['debugger_setting']['suppress_download'] : false
-        if project_instance.methods.include?(:set_debugger_download)
-          project_instance.set_debugger_download(identifier, suppress_download) if content['debugger_setting'].key?('suppress_download')
+
+        if content['debugger_setting'].key?('suppress_download')
+          suppress_download = content['debugger_setting']['suppress_download']
+          project_instance.set_debugger_download(identifier, suppress_download) if project_instance.methods.include?(:set_debugger_download)
         end
+        if content['debugger_setting'].key?('verify_download')
+          verify_download = content['debugger_setting']['verify_download']
+          project_instance.set_verify_download(identifier, verify_download) if project_instance.methods.include?(:set_verify_download)
+        end
+
         if project_instance.methods.include?(:set_debugger)
           project_instance.set_debugger(identifier, textbox, checkbox, multicore_check) if content['debugger_setting'].key?('runto_check') || content['debugger_setting'].key?('runto_text') || content['debugger_setting'].key?('multicore_attach')
         end
