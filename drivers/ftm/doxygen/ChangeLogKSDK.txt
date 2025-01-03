@@ -15,6 +15,16 @@
       - Support configure deadtime for specific combined channel pair with new API:
         - FTM_SetPairDeadTime()
       - Support filter clock prescale, fault output state.
+      - Support new APIs to configure PWM and Modified Combine PWM:
+        - FTM_ConfigSinglePWM()
+        - FTM_ConfigCombinePWM()
+      - Support new API to configure channel software output control:
+        - FTM_SetSoftwareOutputCtrl()
+        - FTM_GetSoftwareOutputValue()
+        - FTM_GetSoftwareOutputEnable()
+      - Support new API to update FTM counter initial value, modulo value and chanle value:
+        - FTM_SetInitialModuloValue()
+        - FTM_SetChannelValue()
 
   - 2.6.1
     - Improvements
