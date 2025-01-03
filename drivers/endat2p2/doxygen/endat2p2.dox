@@ -1,0 +1,11 @@
+/*!
+@defgroup endat2p2 EnDat2.2: EnDat2.2 Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Digital
+Encoder EnDat2.2 module of MCUXpresso SDK devices.
+The EnDat2 interface is a digital interface for sensors.
+
+This section describes the programming interface of the EnDat2.2 driver.
+The EnDat2.2 driver configures the EnDat2.2 master and devices and
+provides functional interfaces for the user to control EnDat2.2 device
+and get the position values.
+*/

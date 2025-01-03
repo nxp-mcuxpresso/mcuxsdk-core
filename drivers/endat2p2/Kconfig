@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.endat2p2
+    bool
+    default y if MCUX_HW_IP_DriverType_ENDAT2P2
+
+config MCUX_COMPONENT_driver.endat2p2
+    bool "Use driver EnDat2.2"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.endat2p2
