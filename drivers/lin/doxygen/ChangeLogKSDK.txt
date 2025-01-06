@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section lin LIN
-  Current LIN driver version is 2.2.1
+  Current LIN driver version is 2.2.2
+
+  - 2.2.2
+    - Bug Fixes
+      - Fixed bug in LIN_LPUART_Init, while disabling the LPUART ERROR IRQ, the variable g_linLpuartErrIrqId should
+        be used instead of g_linLpuartRxTxIrqId. This is a typo issue.
 
   - 2.2.1
     - Bug Fixes

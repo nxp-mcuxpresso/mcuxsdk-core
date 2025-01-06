@@ -1055,7 +1055,7 @@ lin_status_t LIN_LPUART_Init(LPUART_Type *base,
 
             (void)DisableIRQ(g_linLpuartRxTxIrqId[instance]);
 #ifdef LPUART_ERR_IRQS
-            (void)DisableIRQ(g_linLpuartRxTxIrqId[instance]);
+            (void)DisableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
 #if defined(FSL_FEATURE_LPUART_HAS_LIN_BREAK_DETECT) && FSL_FEATURE_LPUART_HAS_LIN_BREAK_DETECT
             /* Set Break char detect length as 13 bits minimum and interrupt */

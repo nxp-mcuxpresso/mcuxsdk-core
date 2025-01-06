@@ -29,6 +29,12 @@
  * Definitions
  ******************************************************************************/
 
+/*! @name Driver version */
+/*! @{ */
+/*! @brief LIN LPUART driver version */
+#define FSL_LIN_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 2, 2))
+/*! @} */
+
 typedef enum _lin_lpuart_stop_bit_count
 {
     kLPUART_OneStopBit = 0U, /*!< One stop bit */
