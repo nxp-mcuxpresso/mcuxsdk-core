@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section ce Compute Engine
-  The current CE driver version is 2.0.0.
+  The current CE driver version is 2.0.1.
+
+  - 2.0.1
+    - Bug Fixes
+      - Add the conditional compiling flags KW47_core0_SERIES and MCXW72_core0_SERIES
+        to fix the CE driver compiling issues in Core1.
 
   - 2.0.0
     - Initial version.

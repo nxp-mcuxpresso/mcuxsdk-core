@@ -74,10 +74,23 @@ status_t FLASH_Init(flash_config_t *config)
         /* M33 flash size 512KB */
         config->msf1Config[0].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE_512KB;
-#elif (defined(CPU_KW47B42ZB7AFTA_cm33_core0) || defined(CPU_MCXW727CMFTA_cm33_core0))
+#elif (defined(CPU_KW47B42ZB7AFTA_cm33_core0) || defined(CPU_KW47B42ZB6AFTA_cm33_core0) || \
+     defined(CPU_KW47B42Z97AFTA_cm33_core0) || defined(CPU_KW47B42Z96AFTA_cm33_core0) || \
+     defined(CPU_KW47B42Z83AFTA_cm33_core0) || defined(CPU_KW47B42ZB3AFTA_cm33_core0) || \
+     defined(CPU_KW47B42ZB2AFTA_cm33_core0) || defined(CPU_KW47Z420B2AFTA) || \
+     defined(CPU_KW47Z420B3AFTA) || defined(CPU_KW47Z42092AFTA) || \
+     defined(CPU_KW47Z42082AFTA) || defined(CPU_MCXW727DMFTA_cm33_core0) || \
+     defined(CPU_MCXW727AMFTA_cm33_core0) || defined(CPU_MCXW727CMFTA_cm33_core0))
         config->msf1Config[0].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
 #elif (defined(CPU_MCXW716CMFTA) || (CPU_MCXW716CMFPA) || (CPU_MCXW716AMFTA) || (CPU_MCXW716AMFPA))
+        config->msf1Config[0].flashDesc.totalSize =
+            FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
+#elif (defined(CPU_KW47B42ZB7AFTA_cm33_core1) || defined(CPU_KW47B42ZB6AFTA_cm33_core1) || \
+     defined(CPU_KW47B42Z97AFTA_cm33_core1) || defined(CPU_KW47B42Z96AFTA_cm33_core1) || \
+     defined(CPU_KW47B42Z83AFTA_cm33_core1) || defined(CPU_KW47B42ZB3AFTA_cm33_core1) || \
+     defined(CPU_KW47B42ZB2AFTA_cm33_core1) || defined(CPU_MCXW727DMFTA_cm33_core1) || \
+     defined(CPU_MCXW727AMFTA_cm33_core1) || defined(CPU_MCXW727CMFTA_cm33_core1))
         config->msf1Config[0].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
 #else
@@ -108,7 +121,13 @@ status_t FLASH_Init(flash_config_t *config)
 
         config->msf1Config[1].ifrDesc.pflashIfr0Start   = FLASH_FEATURE_PFLASH1_IFR0_START_ADDRESS;
         config->msf1Config[1].ifrDesc.pflashIfr0MemSize = 0U;
-#elif (defined(CPU_KW47B42ZB7AFTA_cm33_core0) || defined(CPU_MCXW727CMFTA_cm33_core0))
+#elif (defined(CPU_KW47B42ZB7AFTA_cm33_core0) || defined(CPU_KW47B42ZB6AFTA_cm33_core0) || \
+     defined(CPU_KW47B42Z97AFTA_cm33_core0) || defined(CPU_KW47B42Z96AFTA_cm33_core0) || \
+     defined(CPU_KW47B42Z83AFTA_cm33_core0) || defined(CPU_KW47B42ZB3AFTA_cm33_core0) || \
+     defined(CPU_KW47B42ZB2AFTA_cm33_core0) || defined(CPU_KW47Z420B2AFTA) || \
+     defined(CPU_KW47Z420B3AFTA) || defined(CPU_KW47Z42092AFTA) || \
+     defined(CPU_KW47Z42082AFTA) || defined(CPU_MCXW727DMFTA_cm33_core0) || \
+     defined(CPU_MCXW727AMFTA_cm33_core0) || defined(CPU_MCXW727CMFTA_cm33_core0))
         config->msf1Config[1].flashDesc.blockBase  = FLASH_FEATURE_PFLASH1_START_ADDRESS;
         config->msf1Config[1].flashDesc.blockCount = FLASH_FEATURE_PFLASH1_BLOCK_COUNT;
         config->msf1Config[1].flashDesc.totalSize =
@@ -117,6 +136,18 @@ status_t FLASH_Init(flash_config_t *config)
         config->msf1Config[1].ifrDesc.pflashIfr0Start   = FLASH_FEATURE_PFLASH1_IFR0_START_ADDRESS;
         config->msf1Config[1].ifrDesc.pflashIfr0MemSize = FLASH_FEATURE_PFLASH1_IFR0_SIZE;
 #elif (defined(CPU_MCXW716CMFTA) || (CPU_MCXW716CMFPA) || (CPU_MCXW716AMFTA) || (CPU_MCXW716AMFPA))
+        config->msf1Config[1].flashDesc.blockBase  = FLASH_FEATURE_PFLASH1_START_ADDRESS;
+        config->msf1Config[1].flashDesc.blockCount = FLASH_FEATURE_PFLASH1_BLOCK_COUNT;
+        config->msf1Config[1].flashDesc.totalSize =
+            FLASH_FEATURE_PFLASH1_BLOCK_COUNT * FLASH_FEATURE_PFLASH1_BLOCK_SIZE;
+
+        config->msf1Config[1].ifrDesc.pflashIfr0Start   = FLASH_FEATURE_PFLASH1_IFR0_START_ADDRESS;
+        config->msf1Config[1].ifrDesc.pflashIfr0MemSize = FLASH_FEATURE_PFLASH1_IFR0_SIZE;
+#elif (defined(CPU_KW47B42ZB7AFTA_cm33_core1) || defined(CPU_KW47B42ZB6AFTA_cm33_core1) || \
+     defined(CPU_KW47B42Z97AFTA_cm33_core1) || defined(CPU_KW47B42Z96AFTA_cm33_core1) || \
+     defined(CPU_KW47B42Z83AFTA_cm33_core1) || defined(CPU_KW47B42ZB3AFTA_cm33_core1) || \
+     defined(CPU_KW47B42ZB2AFTA_cm33_core1) || defined(CPU_MCXW727DMFTA_cm33_core1) || \
+     defined(CPU_MCXW727AMFTA_cm33_core1) || defined(CPU_MCXW727CMFTA_cm33_core1))
         config->msf1Config[1].flashDesc.blockBase  = FLASH_FEATURE_PFLASH1_START_ADDRESS;
         config->msf1Config[1].flashDesc.blockCount = FLASH_FEATURE_PFLASH1_BLOCK_COUNT;
         config->msf1Config[1].flashDesc.totalSize =
