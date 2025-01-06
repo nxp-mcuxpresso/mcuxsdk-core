@@ -46,3 +46,4 @@ config MCUX_COMPONENT_driver.netc_phywrapper
 config MCUX_COMPONENT_driver.netc_msg
     bool "netc VSI-PSI message"
     depends on MCUX_COMPONENT_driver.netc
+    depends on MCUX_HAS_COMPONENT_driver.netc_imx95
