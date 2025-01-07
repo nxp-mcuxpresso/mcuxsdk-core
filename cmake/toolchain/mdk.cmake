@@ -8,7 +8,6 @@ set(TOOLCHAIN_ROOT $ENV{MDK_DIR})
 string(REGEX REPLACE "\\\\" "/" TOOLCHAIN_ROOT "${TOOLCHAIN_ROOT}")
 
 if(NOT TOOLCHAIN_ROOT)
-    message(WARNING "'MDK_DIR' is not set in environment variables, check ARMCLANG_DIR.")
     set(TOOLCHAIN_ROOT $ENV{ARMCLANG_DIR})
     string(REGEX REPLACE "\\\\" "/" TOOLCHAIN_ROOT "${TOOLCHAIN_ROOT}")
     if(NOT TOOLCHAIN_ROOT)
