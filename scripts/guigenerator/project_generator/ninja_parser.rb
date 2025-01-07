@@ -252,8 +252,12 @@ class NinjaParser
             pattern = /-I(\S+)/
             _flag = path.match(pattern)
             if _flag
-              if _flag[1].include? File.basename(REPO_ROOT_PATH)
-                include_path = _flag[1].split(File.basename(REPO_ROOT_PATH))[-1].sub('/', '')
+              if _flag[1].include? REPO_ROOT_PATH
+                if _flag[1] == REPO_ROOT_PATH
+                  include_path = './'
+                else
+                  include_path = _flag[1].split(REPO_ROOT_PATH)[-1].sub('/', '')
+                end
               else
                 begin
                 include_path = Pathname.new(_flag[1]).relative_path_from(Pathname.new(REPO_ROOT_PATH)).cleanpath.to_s
@@ -345,12 +349,12 @@ class NinjaParser
     if attribute != 'extra-libraries'
       return unless File.exist?(file_path)
     end
-    if file_path.include? File.basename(REPO_ROOT_PATH)
+    if file_path.include? REPO_ROOT_PATH
       # when the file is inside the repo
-      file_path = file_path.split(File.basename(REPO_ROOT_PATH))[-1].sub('/', '')
+      file_path = file_path.split(REPO_ROOT_PATH)[-1].sub('/', '')
     elsif file_path.include? "#{@name}.dir/"
       file_path = file_path.split("#{@name}.dir/")[1]
-      base_path = ENV['APPLICATION_SOURCE_DIR'].split(File.basename(REPO_ROOT_PATH))[-1].sub('/', '')
+      base_path = ENV['APPLICATION_SOURCE_DIR'].split(REPO_ROOT_PATH)[-1].sub('/', '')
       file_path = File.join(base_path, file_path)
     else
       file_path = get_relative_path(REPO_ROOT_PATH, file_path)
@@ -429,7 +433,7 @@ class NinjaParser
       result = nil
     end
     if result
-      path = result[1].tr('\\', '/').split(File.basename(REPO_ROOT_PATH))[-1].sub('/', '')
+      path = result[1].tr('\\', '/').split(REPO_ROOT_PATH)[-1].sub('/', '')
       @data[@name]['contents']['modules']['demo']['files'].push({
                                                                   'source' => path,
                                                                   'attribute' => 'linker-file',
@@ -520,7 +524,7 @@ class NinjaParser
     relative_path = Pathname.new(abs_path).relative_path_from(Pathname.new(@outdir)).to_s
     if ENV['standalone'] == 'true'
       if relative_path.start_with?('..')
-        path = abs_path.split(File.basename(REPO_ROOT_PATH))[-1]
+        path = abs_path.tr('\\', '/').split(REPO_ROOT_PATH)[-1]
       else
         path = relative_path
       end
