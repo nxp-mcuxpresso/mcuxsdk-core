@@ -485,7 +485,8 @@ class MCUXRepoProjects(object):
         #print(expanded_example_files)
         expanded_example_files_filtered = []
         for example_file in expanded_example_files:
-            if not any(prefix in example_file for prefix in [r"_board", r"_device"]):
+            example_category = Path(example_file).relative_to(Path(sdk_root_dir)).parts[1]
+            if example_category not in ["_boards", "_devices"]:
                 expanded_example_files_filtered.append(example_file)
 
         # mcux_debug(f"Searching app targets in {example_file_pattern}")
