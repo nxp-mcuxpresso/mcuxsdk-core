@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section enet_qos ENET_QOS
-  The current ENET_QOS driver version is 2.6.4.
+  The current ENET_QOS driver version is 2.6.5.
+
+  - 2.6.5
+    - Bug Fixes
+      - Fixed ENET_QOS_GetMacAddr address byte order not matching ENET_QOS_SetMacAddr.
 
   - 2.6.4
     - Improvements
