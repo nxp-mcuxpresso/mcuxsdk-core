@@ -160,7 +160,6 @@ set(COMMON_KCONFIG_ENV_SETTINGS
     PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
     CONFIG_=${KCONFIG_NAMESPACE}_
     KCONFIG_CONFIG=${DOTCONFIG}
-    board=${board}
     board_root=${board_root}
     shield=${shield}
     device=${device}
@@ -174,6 +173,12 @@ set(COMMON_KCONFIG_ENV_SETTINGS
     toolchain=${CONFIG_TOOLCHAIN}
     MCUX_SDK_PROJECT_NAME=${MCUX_SDK_PROJECT_NAME})
 
+if(NOT DEFINED board)
+  # for platformlib
+  list(APPEND COMMON_KCONFIG_ENV_SETTINGS board=${device})
+else()
+  list(APPEND COMMON_KCONFIG_ENV_SETTINGS board=${board})
+endif()
 if(NOT DEFINED SB_CONF_FILE)
   # VARIABLE_FROM_CMAKE does not work for sysbuild
   mcux_get_property(_VARIABLE_FROM_CMAKE VARIABLE_FROM_CMAKE)
