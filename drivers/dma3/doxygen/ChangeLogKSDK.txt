@@ -2,12 +2,16 @@
 @page driver_log Driver Change Log
 
 @section dma3 EDMA
-  The current eDMA driver version is 2.3.1.
+  The current eDMA driver version is 2.3.2.
+
+  - 2.3.2
+    - Improvements
+      - Conditionally compile interrupt handling code to solve the problem of using this driver on CPU cores that do not support interrupts.
 
   - 2.3.1
     - Bug Fixes
       - Added clear TCD_CITER_ELINKNO and TCD_BITER_ELINKNO registers in EDMA_AbortTransfer to make sure the TCD registers in a correct state for next
-	    calling of EDMA_SubmitTransfer.
+      calling of EDMA_SubmitTransfer.
 
   - 2.3.0
     - Improvements

@@ -519,7 +519,9 @@ void FLEXIO_I2S_TransferTxCreateHandle(FLEXIO_I2S_Type *base,
 {
     assert(handle != NULL);
 
+#if defined(FLEXIO_IRQS)
     IRQn_Type flexio_irqs[] = FLEXIO_IRQS;
+#endif
 
     /* Zero the handle. */
     (void)memset(handle, 0, sizeof(*handle));
@@ -534,8 +536,10 @@ void FLEXIO_I2S_TransferTxCreateHandle(FLEXIO_I2S_Type *base,
     /* Set the TX/RX state. */
     handle->state = (uint32_t)kFLEXIO_I2S_Idle;
 
+#if defined(FLEXIO_IRQS)
     /* Enable interrupt in NVIC. */
     (void)EnableIRQ(flexio_irqs[FLEXIO_I2S_GetInstance(base)]);
+#endif
 }
 
 /*!
@@ -557,7 +561,9 @@ void FLEXIO_I2S_TransferRxCreateHandle(FLEXIO_I2S_Type *base,
 {
     assert(handle != NULL);
 
+#if defined(FLEXIO_IRQS)
     IRQn_Type flexio_irqs[] = FLEXIO_IRQS;
+#endif
 
     /* Zero the handle. */
     (void)memset(handle, 0, sizeof(*handle));
@@ -572,8 +578,10 @@ void FLEXIO_I2S_TransferRxCreateHandle(FLEXIO_I2S_Type *base,
     /* Set the TX/RX state. */
     handle->state = (uint32_t)kFLEXIO_I2S_Idle;
 
+#if defined(FLEXIO_IRQS)
     /* Enable interrupt in NVIC. */
     (void)EnableIRQ(flexio_irqs[FLEXIO_I2S_GetInstance(base)]);
+#endif
 }
 
 /*!

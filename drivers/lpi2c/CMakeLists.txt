@@ -12,7 +12,7 @@ if(CONFIG_MCUX_COMPONENT_driver.lpi2c_edma)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.lpi2c)
-    mcux_component_version(2.5.5)
+    mcux_component_version(2.5.6)
 
     mcux_add_source(SOURCES fsl_lpi2c.c fsl_lpi2c.h)
 

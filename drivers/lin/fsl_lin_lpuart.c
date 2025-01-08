@@ -87,7 +87,9 @@ static const clock_ip_name_t s_lpuartPeriphClocks[] = LPUART_PERIPH_CLOCKS;
 
 LPUART_Type *const g_linLpuartBase[FSL_FEATURE_SOC_LPUART_COUNT] = LPUART_BASE_PTRS;
 
+#ifdef LPUART_RX_TX_IRQS
 const IRQn_Type g_linLpuartRxTxIrqId[FSL_FEATURE_SOC_LPUART_COUNT] = LPUART_RX_TX_IRQS;
+#endif
 
 #ifdef LPUART_ERR_IRQS
 const IRQn_Type g_linLpuartErrIrqId[FSL_FEATURE_SOC_LPUART_COUNT] = LPUART_ERR_IRQS;
@@ -1053,7 +1055,9 @@ lin_status_t LIN_LPUART_Init(LPUART_Type *base,
                 base->STAT |= LPUART_STAT_BRK13_MASK;
             }
 
+#ifdef LPUART_RX_TX_IRQS
             (void)DisableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
             (void)DisableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
@@ -1065,7 +1069,9 @@ lin_status_t LIN_LPUART_Init(LPUART_Type *base,
 
             LIN_LPUART_EnableInterrupts(
                 base, ((uint32_t)kLPUART_FramingErrorInterruptEnable | (uint32_t)kLPUART_RxDataRegFullInterruptEnable));
+#ifdef LPUART_RX_TX_IRQS
             (void)EnableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
             (void)EnableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
@@ -1140,7 +1146,9 @@ lin_status_t LIN_LPUART_Deinit(LPUART_Type *base)
         base->CTRL &= ~(LPUART_CTRL_TE_MASK | LPUART_CTRL_RE_MASK);
 
         /* Disable LPUART interrupt. */
+#ifdef LPUART_RX_TX_IRQS
         (void)DisableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
         (void)DisableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
@@ -1585,7 +1593,9 @@ lin_status_t LIN_LPUART_GoToSleepMode(LPUART_Type *base)
     /* Set Receive data not inverted */
     LIN_LPUART_SetRxDataPolarity(base, false);
 
+#ifdef LPUART_RX_TX_IRQS
     (void)DisableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
     (void)DisableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
@@ -1596,7 +1606,9 @@ lin_status_t LIN_LPUART_GoToSleepMode(LPUART_Type *base)
     LIN_LPUART_DisableInterrupts(
         base, ((uint32_t)kLPUART_RxDataRegFullInterruptEnable | (uint32_t)kLPUART_FramingErrorInterruptEnable));
     LIN_LPUART_EnableInterrupts(base, (uint32_t)kLPUART_RxActiveEdgeInterruptEnable);
+#ifdef LPUART_RX_TX_IRQS
     (void)EnableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
     (void)EnableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
@@ -1620,7 +1632,9 @@ lin_status_t LIN_LPUART_GotoIdleState(LPUART_Type *base)
     /* Set Receive data not inverted */
     LIN_LPUART_SetRxDataPolarity(base, false);
 
+#ifdef LPUART_RX_TX_IRQS
     (void)DisableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
     (void)DisableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
@@ -1635,7 +1649,9 @@ lin_status_t LIN_LPUART_GotoIdleState(LPUART_Type *base)
 
     LIN_LPUART_DisableInterrupts(base, (uint32_t)kLPUART_RxActiveEdgeInterruptEnable);
 
+#ifdef LPUART_RX_TX_IRQS
     (void)EnableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
     (void)EnableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
@@ -1744,7 +1760,9 @@ lin_status_t LIN_LPUART_EnableIRQ(LPUART_Type *base)
     /* Get the current LIN state of this LPUART instance. */
     const lin_state_t *linCurrentState = (const lin_state_t *)(uint32_t)g_linStatePtr[instance];
 
+#ifdef LPUART_RX_TX_IRQS
     (void)DisableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 
     if (linCurrentState->currentNodeState == LIN_NODE_STATE_SLEEP_MODE)
     {
@@ -1760,7 +1778,9 @@ lin_status_t LIN_LPUART_EnableIRQ(LPUART_Type *base)
             base, ((uint32_t)kLPUART_RxDataRegFullInterruptEnable | (uint32_t)kLPUART_FramingErrorInterruptEnable));
     }
 
+#ifdef LPUART_RX_TX_IRQS
     (void)EnableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
     (void)EnableIRQ(g_linLpuartErrIrqId[instance]);
 #endif
@@ -1797,7 +1817,9 @@ lin_status_t LIN_LPUART_DisableIRQ(LPUART_Type *base)
             base, ((uint32_t)kLPUART_RxDataRegFullInterruptEnable | (uint32_t)kLPUART_FramingErrorInterruptEnable));
     }
 
+#ifdef LPUART_RX_TX_IRQS
     (void)DisableIRQ(g_linLpuartRxTxIrqId[instance]);
+#endif
 #ifdef LPUART_ERR_IRQS
     (void)DisableIRQ(g_linLpuartErrIrqId[instance]);
 #endif

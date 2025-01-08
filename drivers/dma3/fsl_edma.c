@@ -80,7 +80,9 @@ static const clock_ip_name_t s_edmaClockName[] = EDMA_CLOCKS;
 #endif /* FSL_FEATURE_EDMA_HAS_COMMON_CLOCK_GATE */
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
+#if defined(DMA_IRQS)
 static const IRQn_Type s_edmaIRQNumber[][FSL_FEATURE_EDMA_MODULE_CHANNEL] = DMA_IRQS;
+#endif
 
 /*! @brief Pointers to transfer handle for each EDMA channel. */
 static edma_handle_t *s_EDMAHandle[FSL_FEATURE_EDMA_MODULE_CHANNEL * FSL_FEATURE_SOC_EDMA_COUNT];
@@ -867,8 +869,10 @@ void EDMA_CreateHandle(edma_handle_t *handle, DMA_Type *base, uint32_t channel)
     s_EDMAHandle[channelIndex] = handle;
     /* record enabled channel */
     s_EDMAEnabledChannel[edmaInstance][channel] = true;
+#if defined(DMA_IRQS)
     /* Enable NVIC interrupt */
     (void)EnableIRQ(s_edmaIRQNumber[edmaInstance][channel]);
+#endif
 
     /*
        Reset TCD registers to zero. Unlike the EDMA_TcdReset(DREQ will be set),

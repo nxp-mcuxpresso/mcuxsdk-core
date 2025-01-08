@@ -4,7 +4,11 @@
 @if dox_section_flexio_i2c_master
 
 @section flexio_i2c FLEXIO_I2C
-  The current FLEXIO_I2C driver version is 2.5.0.
+  The current FLEXIO_I2C driver version is 2.5.1.
+
+  - 2.5.1
+    - Improvements
+      - Conditionally compile interrupt handling code to solve the problem of using this driver on CPU cores that do not support interrupts.
 
   - 2.5.0
     - Improvements

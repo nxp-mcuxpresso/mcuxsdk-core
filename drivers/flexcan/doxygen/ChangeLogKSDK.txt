@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section flexcan FLEXCAN
-  The current FLEXCAN driver version is 2.13.0.
+  The current FLEXCAN driver version is 2.13.1.
+
+  - 2.13.1
+    - Improvements
+      - Conditionally compile interrupt handling code to solve the problem of using this driver on CPU cores that do not support interrupts.
 
   - 2.13.0
     - Improvements

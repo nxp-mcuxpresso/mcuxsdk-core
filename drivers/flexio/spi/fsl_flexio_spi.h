@@ -24,7 +24,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexIO SPI driver version. */
-#define FSL_FLEXIO_SPI_DRIVER_VERSION (MAKE_VERSION(2, 3, 4))
+#define FSL_FLEXIO_SPI_DRIVER_VERSION (MAKE_VERSION(2, 3, 5))
 /*! @} */
 
 #ifndef FLEXIO_SPI_DUMMYDATA

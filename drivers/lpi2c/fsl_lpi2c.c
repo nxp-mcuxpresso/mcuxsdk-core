@@ -172,9 +172,11 @@ static void LPI2C_TransferStateMachineWaitState(LPI2C_Type *base,
 /*! @brief Array to map LPI2C instance number to base pointer. */
 static LPI2C_Type *const kLpi2cBases[] = LPI2C_BASE_PTRS;
 
+#ifdef LPI2C_IRQS
 /*! @brief Array to map LPI2C instance number to IRQ number, used internally for LPI2C master interrupt and EDMA
 transactional APIs. */
 IRQn_Type const kLpi2cIrqs[] = LPI2C_IRQS;
+#endif
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*! @brief Array to map LPI2C instance number to clock gate enum. */
@@ -1181,10 +1183,12 @@ void LPI2C_MasterTransferCreateHandle(LPI2C_Type *base,
     /* Clear internal IRQ enables and enable NVIC IRQ. */
     LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterIrqFlags);
 
+#ifdef LPI2C_IRQS
     /* Enable NVIC IRQ, this only enables the IRQ directly connected to the NVIC.
      In some cases the LPI2C IRQ is configured through INTMUX, user needs to enable
      INTMUX IRQ in application code. */
     (void)EnableIRQ(kLpi2cIrqs[instance]);
+#endif
 }
 
 static void LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
@@ -2196,7 +2200,9 @@ void LPI2C_SlaveTransferCreateHandle(LPI2C_Type *base,
 
     /* Clear internal IRQ enables and enable NVIC IRQ. */
     LPI2C_SlaveDisableInterrupts(base, (uint32_t)kLPI2C_SlaveIrqFlags);
+#ifdef LPI2C_IRQS
     (void)EnableIRQ(kLpi2cIrqs[instance]);
+#endif
 
     /* Nack by default. */
     base->STAR = LPI2C_STAR_TXNACK_MASK;

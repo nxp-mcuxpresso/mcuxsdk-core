@@ -311,12 +311,24 @@ static status_t FLEXCAN_SubHandlerForEhancedRxFifo(CAN_Type *base, flexcan_handl
 static CAN_Type *const s_flexcanBases[] = CAN_BASE_PTRS;
 
 /* Array of FlexCAN IRQ number. */
+#ifdef CAN_Rx_Warning_IRQS
 static const IRQn_Type s_flexcanRxWarningIRQ[] = CAN_Rx_Warning_IRQS;
+#endif
+#ifdef CAN_Tx_Warning_IRQS
 static const IRQn_Type s_flexcanTxWarningIRQ[] = CAN_Tx_Warning_IRQS;
+#endif
+#ifdef CAN_Wake_Up_IRQS
 static const IRQn_Type s_flexcanWakeUpIRQ[]    = CAN_Wake_Up_IRQS;
+#endif
+#ifdef CAN_Error_IRQS
 static const IRQn_Type s_flexcanErrorIRQ[]     = CAN_Error_IRQS;
+#endif
+#ifdef CAN_Bus_Off_IRQS
 static const IRQn_Type s_flexcanBusOffIRQ[]    = CAN_Bus_Off_IRQS;
+#endif
+#ifdef CAN_ORed_Message_buffer_IRQS
 static const IRQn_Type s_flexcanMbIRQ[]        = CAN_ORed_Message_buffer_IRQS;
+#endif
 
 /* Array of FlexCAN handle. */
 static flexcan_handle_t *s_flexcanHandle[ARRAY_SIZE(s_flexcanBases)];
@@ -3682,12 +3694,24 @@ void FLEXCAN_TransferCreateHandle(CAN_Type *base,
     }
 
     /* Enable interrupts in NVIC. */
+#ifdef CAN_Rx_Warning_IRQS
     (void)EnableIRQ((IRQn_Type)(s_flexcanRxWarningIRQ[instance]));
+#endif
+#ifdef CAN_Tx_Warning_IRQS
     (void)EnableIRQ((IRQn_Type)(s_flexcanTxWarningIRQ[instance]));
+#endif
+#ifdef CAN_Wake_Up_IRQS
     (void)EnableIRQ((IRQn_Type)(s_flexcanWakeUpIRQ[instance]));
+#endif
+#ifdef CAN_Error_IRQS
     (void)EnableIRQ((IRQn_Type)(s_flexcanErrorIRQ[instance]));
+#endif
+#ifdef CAN_Bus_Off_IRQS
     (void)EnableIRQ((IRQn_Type)(s_flexcanBusOffIRQ[instance]));
+#endif
+#ifdef CAN_ORed_Message_buffer_IRQS
     (void)EnableIRQ((IRQn_Type)(s_flexcanMbIRQ[instance]));
+#endif
 }
 
 /*!

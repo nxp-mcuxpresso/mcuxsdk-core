@@ -4,7 +4,11 @@
 @if dox_section_flexio_spi
 
 @section flexio_spi FLEXIO_SPI
-  The current FLEXIO_SPI driver version is 2.3.4.
+  The current FLEXIO_SPI driver version is 2.3.5.
+
+  - 2.3.5
+    - Improvements
+      - Conditionally compile interrupt handling code to solve the problem of using this driver on CPU cores that do not support interrupts.
 
   - 2.3.4
     - Bug Fixes

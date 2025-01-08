@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section tpm TPM
-  The current TPM driver version is 2.3.2.
+  The current TPM driver version is 2.3.3.
+
+  - 2.3.3
+    - Improvements
+      - Conditionally compile interrupt handling code to solve the problem of using this driver on CPU cores that do not support interrupts.
 
   - 2.3.2
     - Bug Fixes

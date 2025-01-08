@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPUART driver version. */
-#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 8, 2))
+#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 8, 3))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */

@@ -4,7 +4,11 @@
 @if dox_section_flexio_i2s
 
 @section flexio_i2s FLEXIO_I2S
-  The current FLEXIO_I2S driver version is 2.2.0.
+  The current FLEXIO_I2S driver version is 2.2.1.
+
+  - 2.2.1
+    - Improvements
+      - Conditionally compile interrupt handling code to solve the problem of using this driver on CPU cores that do not support interrupts.
 
   - 2.2.0
     - New Features

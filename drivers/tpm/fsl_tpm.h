@@ -32,7 +32,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief TPM driver version 2.3.2. */
-#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 3, 2))
+#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 3, 3))
 /*! @} */
 
 /*! @brief Help macro to get the max counter value */

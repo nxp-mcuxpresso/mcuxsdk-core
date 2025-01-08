@@ -126,8 +126,10 @@ static status_t I3C_MasterWaitForTxReady(I3C_Type *base, uint8_t byteCounts);
 /*! @brief Array to map I3C instance number to base pointer. */
 static I3C_Type *const kI3cBases[] = I3C_BASE_PTRS;
 
+#if defined(I3C_IRQS)
 /*! @brief Array to map I3C instance number to IRQ number. */
 IRQn_Type const kI3cIrqs[] = I3C_IRQS;
+#endif
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*! @brief Array to map I3C instance number to clock gate enum. */
@@ -2065,10 +2067,12 @@ void I3C_MasterTransferCreateHandle(I3C_Type *base,
     /* Reset fifos. These flags clear automatically. */
     base->MDATACTRL |= I3C_MDATACTRL_FLUSHTB_MASK | I3C_MDATACTRL_FLUSHFB_MASK;
 
+#if defined(I3C_IRQS)
     /* Enable NVIC IRQ, this only enables the IRQ directly connected to the NVIC.
      In some cases the I3C IRQ is configured through INTMUX, user needs to enable
      INTMUX IRQ in application code. */
     (void)EnableIRQ(kI3cIrqs[instance]);
+#endif
 
     /* Clear internal IRQ enables and enable NVIC IRQ. */
     I3C_MasterEnableInterrupts(base, (uint32_t)kMasterIrqFlags);
@@ -3174,7 +3178,9 @@ void I3C_SlaveTransferCreateHandle(I3C_Type *base,
 
     /* Clear internal IRQ enables and enable NVIC IRQ. */
     I3C_SlaveDisableInterrupts(base, (uint32_t)kSlaveIrqFlags);
+#if defined(I3C_IRQS)
     (void)EnableIRQ(kI3cIrqs[instance]);
+#endif
 }
 
 /*!

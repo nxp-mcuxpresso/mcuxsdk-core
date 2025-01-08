@@ -148,10 +148,16 @@ static LPUART_Type *const s_lpuartBases[] = LPUART_BASE_PTRS;
 void *s_lpuartHandle[ARRAY_SIZE(s_lpuartBases)];
 /* Array of LPUART IRQ number. */
 #if defined(FSL_FEATURE_LPUART_HAS_SEPARATE_RX_TX_IRQ) && FSL_FEATURE_LPUART_HAS_SEPARATE_RX_TX_IRQ
+#if defined(LPUART_RX_IRQS)
 static const IRQn_Type s_lpuartRxIRQ[] = LPUART_RX_IRQS;
+#endif
+#if defined(LPUART_TX_IRQS)
 const IRQn_Type s_lpuartTxIRQ[]        = LPUART_TX_IRQS;
+#endif
 #else
+#if defined(LPUART_RX_TX_IRQS)
 const IRQn_Type s_lpuartIRQ[] = LPUART_RX_TX_IRQS;
+#endif
 #endif
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /* Array of LPUART clock name. */
@@ -1479,10 +1485,16 @@ void LPUART_TransferCreateHandle(LPUART_Type *base,
 
 /* Enable interrupt in NVIC. */
 #if defined(FSL_FEATURE_LPUART_HAS_SEPARATE_RX_TX_IRQ) && FSL_FEATURE_LPUART_HAS_SEPARATE_RX_TX_IRQ
+#if defined(LPUART_RX_IRQS)
     (void)EnableIRQ(s_lpuartRxIRQ[instance]);
+#endif
+#if defined(LPUART_TX_IRQS)
     (void)EnableIRQ(s_lpuartTxIRQ[instance]);
+#endif
 #else
+#if defined(LPUART_RX_TX_IRQS)
     (void)EnableIRQ(s_lpuartIRQ[instance]);
+#endif
 #endif
 }
 

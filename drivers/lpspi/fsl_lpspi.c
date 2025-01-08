@@ -197,8 +197,10 @@ static const uint8_t s_baudratePrescaler[] = {1, 2, 4, 8, 16, 32, 64, 128};
 /*! @brief Pointers to lpspi bases for each instance. */
 static LPSPI_Type *const s_lpspiBases[] = LPSPI_BASE_PTRS;
 
+#if defined(LPSPI_IRQS)
 /*! @brief Pointers to lpspi IRQ number for each instance. */
 static const IRQn_Type s_lpspiIRQ[] = LPSPI_IRQS;
+#endif
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*! @brief Pointers to lpspi clocks for each instance. */
@@ -1453,10 +1455,12 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     /* PCS should be configured separately from the other bits, otherwise it will not take effect. */
     base->TCR = LPSPI_GetTcr(base) | LPSPI_TCR_CONT(isPcsContinuous) | LPSPI_TCR_CONTC(isPcsContinuous) | LPSPI_TCR_RXMSK(isRxMask);
 
+#if defined(LPSPI_IRQS)
     /* Enable the NVIC for LPSPI peripheral. Note that below code is useless if the LPSPI interrupt is in INTMUX ,
      * and you should also enable the INTMUX interupt in your application.
      */
     (void)EnableIRQ(s_lpspiIRQ[LPSPI_GetInstance(base)]);
+#endif
 
     /*TCR is also shared the FIFO , so wait for TCR written.*/
     /*
@@ -1952,10 +1956,12 @@ status_t LPSPI_SlaveTransferNonBlocking(LPSPI_Type *base, lpspi_slave_handle_t *
                                LPSPI_TCR_TXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
                 LPSPI_TCR_RXMSK(isRxMask) | LPSPI_TCR_TXMSK(isTxMask) | LPSPI_TCR_PCS(whichPcs);
 
+#if defined(LPSPI_IRQS)
     /* Enable the NVIC for LPSPI peripheral. Note that below code is useless if the LPSPI interrupt is in INTMUX ,
      * and you should also enable the INTMUX interupt in your application.
      */
     (void)EnableIRQ(s_lpspiIRQ[LPSPI_GetInstance(base)]);
+#endif
 
     /*TCR is also shared the FIFO, so wait for TCR written.*/
     /*
