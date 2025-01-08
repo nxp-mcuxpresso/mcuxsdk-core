@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section lpc_enet ENET
-  The current ENET driver version is 2.3.4.
+  The current ENET driver version is 2.3.5.
+
+  - 2.3.5
+    - Bug Fixes
+      - Fixed ENET_GetMacAddr address byte order not matching ENET_SetMacAddr.
 
   - 2.3.4
     - Bug Fixes
