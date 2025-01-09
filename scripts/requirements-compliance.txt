@@ -7,5 +7,3 @@ lxml
 junitparser>=2
 pylint
 yamllint
-
-jsonschema

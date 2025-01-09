@@ -322,8 +322,8 @@ class ExportApp(WestCommand):
                 cmd.extend(['-c', default_config_file.as_posix()])
             cmd.extend(['--', list_file.as_posix()])
             self.run_subprocess(cmd)
-        except CalledProcessError:
-            self.wrn('Please run "pip install cmake-format" to get a formatted CMakeLists.txt')
+        except (CalledProcessError, FileNotFoundError):
+            self.wrn('Please run "pip install -U cmake-format" to get a formatted CMakeLists.txt')
             return False
 
         return True
@@ -339,7 +339,8 @@ class ExportApp(WestCommand):
             return
         new_result = [func]
         ExportApp.remove_arg(func, argv, 'PROJECT_BOARD_PORT_PATH')
-        new_result.append(f'mcux_set_variable(project_board_port_path {argv['PROJECT_BOARD_PORT_PATH']})')
+        project_board_port_path = argv['PROJECT_BOARD_PORT_PATH']
+        new_result.append(f'mcux_set_variable(project_board_port_path {project_board_port_path})')
         return new_result
 
     @cmake_func

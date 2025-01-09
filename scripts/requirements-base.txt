@@ -42,3 +42,5 @@ mergedeep
 Jinja2
 # Pre commit hooks
 pre-commit
+# list_project extension validate example.yml
+jsonschema

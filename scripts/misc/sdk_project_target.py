@@ -7,7 +7,6 @@ import yaml, json
 import glob
 import re
 from pathlib import Path
-import jsonschema as js
 
 script_dir = os.path.abspath(os.path.dirname(__file__))
 sdk_root_dir = os.path.abspath(os.path.join(script_dir, '..', '..')).replace('\\', '/')
@@ -441,6 +440,7 @@ class MCUXAppTargets(object):
                     break
 
     def _validate_example_data(self, example_yml, example_data):
+        import jsonschema as js
         example_schema = mcux_read_json((Path(sdk_root_dir) / SCHEMA_DIR / EXAMPLE_YML_SCHEMA).as_posix())
         definition_schema = mcux_read_json((Path(sdk_root_dir) / SCHEMA_DIR / DEFINITION_YAL_SCHEMA).as_posix())
         schema_store = {
