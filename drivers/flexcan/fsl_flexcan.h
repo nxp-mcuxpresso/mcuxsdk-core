@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2023 NXP
- * All rights reserved.
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -22,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexCAN driver version. */
-#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 13, 1))
+#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 14, 0))
 /*! @} */
 
 #if !(defined(FLEXCAN_WAIT_TIMEOUT) && FLEXCAN_WAIT_TIMEOUT)
@@ -1497,8 +1496,15 @@ static inline uint64_t FLEXCAN_GetStatusFlags(CAN_Type *base)
 {
     uint64_t tempflag = (uint64_t)base->ESR1;
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
-    /* Get PN Wake Up status. */
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn)
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn(base))
+    {
+        /* Get PN Wake Up status. */
+        tempflag |= FLEXCAN_PN_STATUS_MASK(base->WU_MTC);
+    }
+#else
     tempflag |= FLEXCAN_PN_STATUS_MASK(base->WU_MTC);
+#endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
     /* Get Enhanced Rx FIFO status. */
@@ -1531,8 +1537,15 @@ static inline uint32_t FLEXCAN_GetStatusFlags(CAN_Type *base)
 static inline void FLEXCAN_ClearStatusFlags(CAN_Type *base, uint64_t mask)
 {
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
-    /* Clear PN Wake Up status. */
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn)
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn(base))
+    {
+        /* Clear PN Wake Up status. */
+        base->WU_MTC = FLEXCAN_PN_STATUS_UNMASK(mask);
+    }
+#else
     base->WU_MTC = FLEXCAN_PN_STATUS_UNMASK(mask);
+#endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
     /* Clear Enhanced Rx FIFO status. */
@@ -1686,6 +1699,9 @@ void FLEXCAN_GetMemoryErrorReportStatus(CAN_Type *base, flexcan_memory_error_rep
  */
 static inline uint8_t FLEXCAN_GetPNMatchCount(CAN_Type *base)
 {
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn)
+    assert(1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn(base));
+#endif
     return (uint8_t)((base->WU_MTC & CAN_WU_MTC_MCOUNTER_MASK) >> CAN_WU_MTC_MCOUNTER_SHIFT);
 }
 #endif
@@ -1735,7 +1751,7 @@ static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t mask)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
-    if (0 != FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
     {
         /* Solve CAN FD frames data phase error interrupt. */
         base->CTRL2 |= (uint32_t)(mask & (uint32_t)kFLEXCAN_FDErrorInterruptEnable);
@@ -1743,8 +1759,15 @@ static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t mask)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
-    /* Solve PN Wake Up interrupt. */
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn)
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn(base))
+    {
+        /* Solve PN Wake Up interrupt. */
+        base->CTRL1_PN |= FLEXCAN_PN_INT_UNMASK(mask);
+    }
+#else
     base->CTRL1_PN |= FLEXCAN_PN_INT_UNMASK(mask);
+#endif
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
@@ -1789,7 +1812,7 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t mask)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
-    if (0 != FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
     {
         /* Solve CAN FD frames data phase error interrupt. */
         base->CTRL2 &= ~(uint32_t)(mask & (uint32_t)kFLEXCAN_FDErrorInterruptEnable);
@@ -1797,8 +1820,15 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t mask)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
-    /* Solve PN Wake Up Interrupt. */
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn)
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn(base))
+    {
+        /* Solve PN Wake Up Interrupt. */
+        base->CTRL1_PN &= ~FLEXCAN_PN_STATUS_UNMASK(mask);
+    }
+#else
     base->CTRL1_PN &= ~FLEXCAN_PN_STATUS_UNMASK(mask);
+#endif
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)

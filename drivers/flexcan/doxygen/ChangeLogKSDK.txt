@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section flexcan FLEXCAN
-  The current FLEXCAN driver version is 2.13.1.
+  The current FLEXCAN driver version is 2.14.0.
+
+  - 2.14.0
+    - Improvements
+      - Enter Freeze Mode first when enter Disable Mode on some platform.
+      - Add feature macro for Pretended Networking because some FlexCAN instance do not have this feature.
 
   - 2.13.1
     - Improvements
