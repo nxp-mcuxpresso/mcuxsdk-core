@@ -174,28 +174,28 @@ void EDMA_Init(EDMA_Type *base, const edma_config_t *config)
 
 #if defined(FSL_EDMA_SOC_IP_EDMA) && FSL_EDMA_SOC_IP_EDMA
     /* clear all the enabled request, status to make sure EDMA status is in normal condition */
-    EDMA_BASE(base)->ERQ = 0U;
-    EDMA_BASE(base)->INT = 0xFFFFFFFFU;
-    EDMA_BASE(base)->ERR = 0xFFFFFFFFU;
+    EDMA_CORE_BASE(base)->ERQ = 0U;
+    EDMA_CORE_BASE(base)->INT = 0xFFFFFFFFU;
+    EDMA_CORE_BASE(base)->ERR = 0xFFFFFFFFU;
     /* Configure EDMA peripheral according to the configuration structure. */
-    tmpreg = EDMA_BASE(base)->CR;
+    tmpreg = EDMA_CORE_BASE(base)->CR;
     tmpreg &= ~(DMA_CR_ERCA_MASK | DMA_CR_HOE_MASK | DMA_CR_CLM_MASK | DMA_CR_EDBG_MASK);
     tmpreg |= (DMA_CR_ERCA(config->enableRoundRobinArbitration) | DMA_CR_HOE(config->enableHaltOnError) |
                DMA_CR_CLM(config->enableContinuousLinkMode) | DMA_CR_EDBG(config->enableDebugMode) | DMA_CR_EMLM(1U));
-    EDMA_BASE(base)->CR = tmpreg;
+    EDMA_CORE_BASE(base)->CR = tmpreg;
 #else
     tmpreg = EDMA_MP_BASE(base)->MP_CSR;
 #if defined FSL_FEATURE_EDMA_HAS_GLOBAL_MASTER_ID_REPLICATION && FSL_FEATURE_EDMA_HAS_GLOBAL_MASTER_ID_REPLICATION
-    tmpreg = (tmpreg & ~(DMA_MP_CSR_HAE_MASK | DMA_MP_CSR_ERCA_MASK | DMA_MP_CSR_EDBG_MASK | DMA_MP_CSR_GCLC_MASK |
-                         DMA_MP_CSR_GMRC_MASK | DMA_MP_CSR_HALT_MASK)) |
-             DMA_MP_CSR_GMRC(config->enableMasterIdReplication) | DMA_MP_CSR_HAE(config->enableHaltOnError) |
-             DMA_MP_CSR_ERCA(config->enableRoundRobinArbitration) | DMA_MP_CSR_EDBG(config->enableDebugMode) |
-             DMA_MP_CSR_GCLC(config->enableGlobalChannelLink);
+    tmpreg = (tmpreg & ~(DMA_CORE_MP_CSR_HAE_MASK | DMA_CORE_MP_CSR_ERCA_MASK | DMA_CORE_MP_CSR_EDBG_MASK | DMA_CORE_MP_CSR_GCLC_MASK |
+                         DMA_CORE_MP_CSR_GMRC_MASK | DMA_CORE_MP_CSR_HALT_MASK)) |
+             DMA_CORE_MP_CSR_GMRC(config->enableMasterIdReplication) | DMA_CORE_MP_CSR_HAE(config->enableHaltOnError) |
+             DMA_CORE_MP_CSR_ERCA(config->enableRoundRobinArbitration) | DMA_CORE_MP_CSR_EDBG(config->enableDebugMode) |
+             DMA_CORE_MP_CSR_GCLC(config->enableGlobalChannelLink);
 #else
-    tmpreg = (tmpreg & ~(DMA_MP_CSR_HAE_MASK | DMA_MP_CSR_ERCA_MASK | DMA_MP_CSR_EDBG_MASK | DMA_MP_CSR_GCLC_MASK |
-                         DMA_MP_CSR_HALT_MASK)) |
-             DMA_MP_CSR_HAE(config->enableHaltOnError) | DMA_MP_CSR_ERCA(config->enableRoundRobinArbitration) |
-             DMA_MP_CSR_EDBG(config->enableDebugMode) | DMA_MP_CSR_GCLC(config->enableGlobalChannelLink);
+    tmpreg = (tmpreg & ~(DMA_CORE_MP_CSR_HAE_MASK | DMA_CORE_MP_CSR_ERCA_MASK | DMA_CORE_MP_CSR_EDBG_MASK | DMA_CORE_MP_CSR_GCLC_MASK |
+                         DMA_CORE_MP_CSR_HALT_MASK)) |
+             DMA_CORE_MP_CSR_HAE(config->enableHaltOnError) | DMA_CORE_MP_CSR_ERCA(config->enableRoundRobinArbitration) |
+             DMA_CORE_MP_CSR_EDBG(config->enableDebugMode) | DMA_CORE_MP_CSR_GCLC(config->enableGlobalChannelLink);
 #endif
     EDMA_MP_BASE(base)->MP_CSR = tmpreg;
 
@@ -435,7 +435,7 @@ void EDMA_SetChannelPreemptionConfig(EDMA_Type *base, uint32_t channel, const ed
 
 #if defined FSL_EDMA_SOC_IP_EDMA && FSL_EDMA_SOC_IP_EDMA
 
-    volatile uint8_t *tmpReg = &EDMA_BASE(base)->DCHPRI3;
+    volatile uint8_t *tmpReg = &EDMA_CORE_BASE(base)->DCHPRI3;
 
     ((volatile uint8_t *)tmpReg)[DMA_DCHPRI_INDEX(channel)] =
         (DMA_DCHPRI0_DPA((true == tmpEnablePreemptAbility ? 0U : 1U)) |
@@ -2419,6 +2419,7 @@ void EDMA_StartTransfer(edma_handle_t *handle)
         if (handle->tcdPool == NULL)
     {
         handle->channelBase->CH_CSR |= DMA_CH_CSR_ERQ_MASK;
+        EDMA_TCD_SADDR(tcdRegs, EDMA_TCD_TYPE(handle->base)) = 0x1;
     }
     else
     {

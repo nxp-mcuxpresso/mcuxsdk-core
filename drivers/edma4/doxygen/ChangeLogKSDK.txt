@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section eDMA EDMA
-  The current eDMA driver version is 2.10.3.
+  The current eDMA driver version is 2.10.4.
+
+  - 2.10.4
+    - Improvements
+      - Add new MP register macros to ensure compatibility with different devices.
+      - Add macro DMA_CHANNEL_ARRAY_STEPn to adapt to complex addressing of edma tcd registers.
 
   - 2.10.3
     - Bug Fixes
