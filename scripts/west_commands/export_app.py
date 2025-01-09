@@ -22,7 +22,8 @@ DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/B
 #     '${SdkRootDirPath}': '${PrjRootDirPath}'
 #     }
 USAGE = f'''\
-west export_app [-h] [source_dir] [-b board_id] [--core_id core_id] [-o OUTPUT_DIR] [--build]
+west export_app [-h] [source_dir] [-b board_id] [-DCMAKE_VAR=VAL] [-o OUTPUT_DIR] [--build]
+You can use -Dcore_id=xxx to export multi-core example.
 To know what is freestanding example and how it works, see
 {DOC_URL}
 '''
@@ -36,10 +37,15 @@ def cmake_func(func):
         if (cm_func_name := func_args.get('original_name', '').lower()) != func.__name__.replace('cm_', ''):
             raise InvalidCmakeMethod(func.__name__, f'The cmake function name {cm_func_name} is not aligned with class method name.')
         ret_func = func(cls, func_args, ExtensionMap.parser_args(func_args)) or func_args
-        return cmake_statement(ret_func)
+        if isinstance(ret_func, list):
+            return [cmake_statement(r) for r in ret_func]
+        else:
+            return cmake_statement(ret_func)
     return wrapper
 
 def cmake_statement(func):
+    if isinstance(func, str):
+        return func
     args = ' '.join([arg.get('value') for arg in func.get('args', [])])
     return f"{func['original_name']}({args})"
 
@@ -141,7 +147,8 @@ class ExportApp(WestCommand):
             description=self.description,
             usage=USAGE)
         parser.add_argument('-b', '--board', nargs=None, default=None, help="board id like mimxrt700evk", required=True)
-        parser.add_argument('--core_id', nargs='?', default=None, help="core id like cm33_core0")
+        parser.add_argument('--toolchain', dest='toolchain', action='store',
+                           default='armgcc', help='Specify toolchain')
         parser.add_argument('-o', '--output-dir', required=True,
                             help='output directory to hold the freestanding project')
         parser.add_argument('--build', action="store_true", default=False, help="Build the project after creating.")
@@ -180,7 +187,10 @@ class ExportApp(WestCommand):
                 func_name = func['original_name'].lower()
                 if hasattr(self, f'cm_{func_name}'):
                     result = getattr(self, f'cm_{func_name}')(func)
-                    new_list_content.append(result)
+                    if isinstance(result, list):
+                        new_list_content.extend(result)
+                    elif isinstance(result, str):
+                        new_list_content.append(result)
                 else:
                     self.dbg(f'No special process for {func_name}')
                     new_list_content.append(cmake_statement(func))
@@ -278,16 +288,15 @@ class ExportApp(WestCommand):
 
     @property
     def build_cmd_list(self):
-        cmd_list = ['west', 'build', '-b', self.board, 
+        cmd_list = ['west', 'build', '-b', self.board, '--toolchain', self.args.toolchain,
                     '-p', 'always', self.dest_list_file.parent.as_posix(),
                     f'-DPrjRootDirPath={self.output_dir.as_posix()}',
                     '-d', (self.output_dir/'build').as_posix(),
-                    # f'-DCUSTOM_PRJ_CONF_PATHS={self.dest_prj_conf.as_posix()}'
                     ]
         if self.sysbuild:
             cmd_list.append('--sysbuild')
-        if self.core_id:
-            cmd_list.append(f'-Dcore_id={self.core_id}')
+        if self.args.cmake_opts:
+            cmd_list.extend(self.args.cmake_opts)
         return cmd_list
 
     @property
@@ -324,9 +333,14 @@ class ExportApp(WestCommand):
         for arg in func.get('args'):
             arg['value'] = arg['value'].replace('${CMAKE_CURRENT_LIST_DIR}', self.current_list_dir)
 
-    # @cmake_func
-    # def cm_project(self, func: dict, argv: dict) -> dict:
-    #     ExportApp.remove_arg(func, argv, 'PROJECT_BOARD_PORT_PATH')
+    @cmake_func
+    def cm_project(self, func: dict, argv: dict) -> dict:
+        if 'PROJECT_BOARD_PORT_PATH' not in argv:
+            return
+        new_result = [func]
+        ExportApp.remove_arg(func, argv, 'PROJECT_BOARD_PORT_PATH')
+        new_result.append(f'mcux_set_variable(project_board_port_path {argv['PROJECT_BOARD_PORT_PATH']})')
+        return new_result
 
     @cmake_func
     def cm_mcux_add_source(self, func: dict, argv: dict) -> dict:
@@ -350,16 +364,11 @@ class ExportApp(WestCommand):
 
     @staticmethod
     def remove_arg(func, argv, key):
-        match_key = False
-        for i, arg in enumerate(func.get('args', [])):
+        for i, arg in enumerate(func.get('args', []).copy()):
             if arg['value'] == key:
                 del func['args'][i]
-                match_key = True
-                continue
-            if not match_key:
-                continue
-            if arg['value'] in argv[key]:
-                del func['args'][i]
+                if func['args'][i]['value'] in argv[key]:
+                    del func['args'][i]
 
     # TODO this is not safe
     @staticmethod
@@ -369,6 +378,11 @@ class ExportApp(WestCommand):
                 arg['value'] = new_val
 
     def _process_path(self, base_path=None, src='', type='file'):
+        # for k, v in self.cmake_variables.items():
+        #     if k == 'SdkRootDirPath':
+        #         continue
+        #     cmake_var = f"${{{k}}}"
+        #     src = src.replace(cmake_var, v)
         result = src
         if base_path:
             s_src = SDK_ROOT_DIR / base_path.replace('${SdkRootDirPath}', '') / src
@@ -379,7 +393,8 @@ class ExportApp(WestCommand):
             else:
                 s_src = self.source_dir / src
         if not s_src.exists():
-            self.wrn(f'Cannot handle path {src}, will not update it.')
+            # self.wrn(f'Cannot handle path {src}, will not update it.')
+            pass
         elif not (d_src := (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))).exists():
             if type == 'file':
                 os.makedirs(d_src.parent, exist_ok=True)
@@ -393,11 +408,29 @@ class ExportApp(WestCommand):
 
     def _parse_remainder(self, remainder):
         self.args.source_dir = None
+        self.args.cmake_opts = None
+        self.cmake_variables = {'CONFIG_TOOLCHAIN': self.args.toolchain}
 
         try:
             # Only one source_dir is allowed, as the first positional arg
             if remainder[0] != _ARG_SEPARATOR:
                 self.args.source_dir = remainder[0]
+                remainder = remainder[1:]
+            # Only the first argument separator is consumed, the rest are
+            # passed on to CMake
+            if remainder[0] == _ARG_SEPARATOR:
+                remainder = remainder[1:]
+            if remainder:
+                self.args.cmake_opts = remainder
+                for opt in self.args.cmake_opts:
+                    if not opt.startswith('-D'):
+                        continue
+                    _ = opt.replace('-D', '').split('=')
+                    if len(_) == 1:
+                        self.cmake_variables[_[0]] = ''
+                    else:
+                        self.cmake_variables[_[0]] = opt.replace(f'-D{_[0]}=', '')
+                    
         except IndexError:
             pass
 
@@ -425,7 +458,8 @@ class ExportApp(WestCommand):
         # NOTE do not support internal examples yet
         op = sdk_project_target.MCUXRepoProjects()
         self.board = self.args.board
-        self.core_id = self.args.core_id
+        if 'core_id' in self.cmake_variables:
+            self.core_id = self.cmake_variables['core_id']
         board_core = self.board
         if self.core_id:
             board_core = board_core + '@' + self.core_id
