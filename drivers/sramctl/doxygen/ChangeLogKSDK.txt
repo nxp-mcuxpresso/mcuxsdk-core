@@ -1,0 +1,9 @@
+/*!
+@page driver_log Driver Change Log
+
+@section sramctl SRAMCTL
+  The current SRAMCTL driver version is 3.0.0.
+
+  - 3.0.0
+    - Initial version.
+*/
