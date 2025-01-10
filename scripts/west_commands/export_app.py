@@ -269,9 +269,12 @@ class ExportApp(WestCommand):
             for i, line in enumerate(kconfig_content):
                 if not 'source' in line:
                     continue
+                line = self.replace_var(line, ['SdkRootDirPath'])
                 prefix_id = re.search(r'[ro]*source\s*', line).group(0)
-                rel_kconfig_path = line.replace(prefix_id, '').strip('"').strip("'")
-                if '${SdkRootDirPath}' in rel_kconfig_path:
+                rel_kconfig_path = line.replace(prefix_id, '').replace('"', '').replace("'", '').strip()
+                # Only process rsource
+                if '${SdkRootDirPath}' in rel_kconfig_path or 'rsource' not in prefix_id:
+                    kconfig_content[i] = line
                     continue
                 dest_kconfig_path = '"${SdkRootDirPath}/' + (source_dir / rel_kconfig_path).resolve().relative_to(SDK_ROOT_DIR).as_posix() + '"'
                 kconfig_content[i] = prefix_id + dest_kconfig_path
@@ -340,24 +343,57 @@ class ExportApp(WestCommand):
         new_result = [func]
         ExportApp.remove_arg(func, argv, 'PROJECT_BOARD_PORT_PATH')
         project_board_port_path = argv['PROJECT_BOARD_PORT_PATH']
+        self.cmake_variables['project_board_port_path'] = project_board_port_path
         new_result.append(f'mcux_set_variable(project_board_port_path {project_board_port_path})')
         return new_result
 
     @cmake_func
     def cm_mcux_add_source(self, func: dict, argv: dict) -> dict:
         base_path = argv.get('BASE_PATH')
+        keep_in_repo_paths = []
         for src in argv.get('SOURCES'):
-            ExportApp.update_func_val(func, src, self._process_path(base_path, src))
+            processed_path = self._process_path(base_path, src)
+            if processed_path.startswith('${SdkRootDirPath}/'):
+                keep_in_repo_paths.append(processed_path.replace('${SdkRootDirPath}/', ''))
+                ExportApp.remove_func_val(func, src)
+            else:
+                ExportApp.update_func_val(func, src, processed_path)
         if base_path:
             ExportApp.update_func_val(func, base_path, base_path.replace('${SdkRootDirPath}', '${PrjRootDirPath}'))
+        
+        if not keep_in_repo_paths:
+            return
+        if not (new_argv := ExtensionMap.parser_args(func)).get('SOURCES'):
+            new_result = []
+        else:
+            new_result = [func]
+        src_str = ' '.join(keep_in_repo_paths)
+        new_result.append(f'mcux_add_source(BASE_PATH ${{SdkRootDirPath}} {src_str})')
+        return new_result
 
     @cmake_func
     def cm_mcux_add_include(self, func: dict, argv: dict) -> dict:
         base_path = argv.get('BASE_PATH')
+        keep_in_repo_paths = []
         for inc in argv.get('INCLUDES'):
-            ExportApp.update_func_val(func, inc, self._process_path(base_path, inc, 'inc'))
+            processed_path = self._process_path(base_path, inc, 'inc')
+            if processed_path.startswith('${SdkRootDirPath}/'):
+                keep_in_repo_paths.append(processed_path.replace('${SdkRootDirPath}/', ''))
+                ExportApp.remove_func_val(func, inc)
+            else:
+                ExportApp.update_func_val(func, inc, processed_path)
         if base_path:
             ExportApp.update_func_val(func, base_path, base_path.replace('${SdkRootDirPath}', '${PrjRootDirPath}'))
+
+        if not keep_in_repo_paths:
+            return
+        if not (new_argv := ExtensionMap.parser_args(func)).get('INCLUDES'):
+            new_result = []
+        else:
+            new_result = [func]
+        src_str = ' '.join(keep_in_repo_paths)
+        new_result.append(f'mcux_add_source(BASE_PATH ${{SdkRootDirPath}} INCLUDES {src_str})')
+        return new_result
 
     def check_force(self, cond, msg):
         if not cond:
@@ -378,12 +414,21 @@ class ExportApp(WestCommand):
             if arg['value'] == old_val:
                 arg['value'] = new_val
 
+    @staticmethod
+    def remove_func_val(func, val):
+        for i, arg in enumerate(func.get('args', [])):
+            if arg['value'] == val:
+                del func['args'][i]
+
+    def replace_var(self, var, bypass_list=[]):
+        for k, v in self.cmake_variables.items():
+            if k in bypass_list:
+                continue
+            cmake_var = f"${{{k}}}"
+            var = var.replace(cmake_var, v)
+        return var
+
     def _process_path(self, base_path=None, src='', type='file'):
-        # for k, v in self.cmake_variables.items():
-        #     if k == 'SdkRootDirPath':
-        #         continue
-        #     cmake_var = f"${{{k}}}"
-        #     src = src.replace(cmake_var, v)
         result = src
         if base_path:
             s_src = SDK_ROOT_DIR / base_path.replace('${SdkRootDirPath}', '') / src
@@ -394,8 +439,9 @@ class ExportApp(WestCommand):
             else:
                 s_src = self.source_dir / src
         if not s_src.exists():
-            # self.wrn(f'Cannot handle path {src}, will not update it.')
-            pass
+            # Need add special variables case by case
+            if '${board_root}' in s_src.as_posix():
+                result = '${SdkRootDirPath}/' + s_src.relative_to(SDK_ROOT_DIR).as_posix()
         elif not (d_src := (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))).exists():
             if type == 'file':
                 os.makedirs(d_src.parent, exist_ok=True)
