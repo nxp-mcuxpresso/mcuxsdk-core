@@ -412,10 +412,10 @@ class MCUXAppTargets(object):
             self.inject_targets_from_instance_default(instance_core, instance_type)
             self.inject_targets_from_instance_category(instance, app_category, instance_type)
             self.inject_targets_from_app_category(app_category, instance_type)
+            if app_toolchains:
+                self.inject_targets_from_app(app_toolchains)
             if instance_core_delta_data:
                 self.inject_targets_from_app(instance_core_delta_data)
-            elif app_toolchains:
-                self.inject_targets_from_app(app_toolchains)
             for toolchain_target, is_enabled in self.tgt_dict.items():
                 if not is_enabled:
                     continue
