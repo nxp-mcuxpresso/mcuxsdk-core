@@ -140,9 +140,23 @@ enum
     kStatus_FLEXIO_T_FORMAT_EncErr_BE = MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 10), /*!< Battery error. */
     kStatus_FLEXIO_T_FORMAT_EncErr_BA = MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 11), /*!< Battery alarm. */
 
-    kStatus_FLEXIO_T_FORMAT_FrameErr    = MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 12), /*!< Frame format error. */
+    kStatus_FLEXIO_T_FORMAT_FrameErr  = MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 12), /*!< Frame format error. */
     kStatus_FLEXIO_T_FORMAT_BaudrateNotSupport = MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 13),
-    kStatus_FLEXIO_T_FORMAT_Timeout            = MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 14), /*!< T_FORMAT times out. */
+    kStatus_FLEXIO_T_FORMAT_Timeout   = MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 14), /*!< T_FORMAT times out. */
+    kStatus_FLEXIO_T_FORMAT_TxBusy    = MAKE_STATUS(kStatusGroup_FLEXIO_A_FORMAT, 15), /*!< Transmitter is busy. */
+    kStatus_FLEXIO_T_FORMAT_RxBusy    = MAKE_STATUS(kStatusGroup_FLEXIO_A_FORMAT, 16), /*!< Receiver is busy. */
+    kStatus_FLEXIO_T_FORMAT_TxIdle    = MAKE_STATUS(kStatusGroup_FLEXIO_A_FORMAT, 17), /*!< Transmitter is idle. */
+    kStatus_FLEXIO_T_FORMAT_RxIdle    = MAKE_STATUS(kStatusGroup_FLEXIO_A_FORMAT, 18), /*!< Receiver is idle. */
+    kStatus_FLEXIO_T_FORMAT_RxRingBufferOverrun =
+        MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 19), /*!< A-format RX software ring buffer overrun. */
+    kStatus_FLEXIO_T_FORMAT_RxHardwareOverrun  = MAKE_STATUS(kStatusGroup_FLEXIO_T_FORMAT, 20), /*!< A-format RX receiver overrun. */
+};
+
+/*! @brief Define FlexIO T-format interrupt mask. */
+enum _flexio_t_format_interrupt_enable
+{
+    kFLEXIO_T_FORMAT_TxDataRegEmptyInterruptEnable = 0x1U, /*!< Transmit buffer empty interrupt enable. */
+    kFLEXIO_T_FORMAT_RxDataRegFullInterruptEnable  = 0x2U, /*!< Receive buffer full interrupt enable. */
 };
 
 enum _flexio_t_format_flags
@@ -167,11 +181,15 @@ typedef enum _reset_types
     T_FORMAT_RESET_ABM_ERROR = T_FORMAT_CF_RESET_ABM_ERROR /*!< Reset multi-turn data and all errors. */
 } Reset_Type_e;
 
+/* Forward declaration of the handle typedef. */
+typedef struct _flexio_t_format_handle flexio_t_format_handle_t;
+
 /*! @brief Define FlexIO T_FORMAT access structure typedef. */
 typedef struct _flexio_t_format_type
 {
     FLEXIO_Type *flexioBase; /*!< FlexIO base pointer. */
     edma_handle_t rxEdmaHandle;
+    flexio_t_format_handle_t *hanlde;
     uint16_t timerDiv;       /*!< srcClock_Hz / baudRate_bps */
     uint16_t TxDR_Offset;    /*!< The offset between Tx and DR pins */
     uint16_t interval;       /*!< Interval between frames */
@@ -195,6 +213,50 @@ typedef struct _flexio_t_format_config
 //    flexio_t_format_baud_rate_bps_t baudRate_bps;     /*!< Baud rate in bps. */
     uint8_t userMode;
 } flexio_t_format_config_t;
+
+/*! @brief Define FlexIO T-format transfer structure. */
+typedef struct _flexio_t_format_transfer
+{
+    /*
+     * Use separate TX and RX data pointer, because TX data is const data.
+     * The member data is kept for backward compatibility.
+     */
+    union
+    {
+        uint8_t *data;         /*!< The buffer of data to be transfer.*/
+        uint8_t *rxData;       /*!< The buffer to receive data. */
+        const uint8_t *txData; /*!< The buffer of data to be sent. */
+    };
+    size_t dataSize; /*!< Transfer size*/
+} flexio_t_format_transfer_t;
+
+/*! @brief FlexIO T-format transfer callback function. */
+typedef void (*flexio_t_format_transfer_callback_t)(FLEXIO_T_FORMAT_Type *base,
+                                                    flexio_t_format_handle_t *handle,
+                                                    status_t status,
+                                                    void *userData);
+
+/*! @brief Define FLEXIO T-format handle structure*/
+struct _flexio_t_format_handle
+{
+    const uint8_t *volatile txData; /*!< Address of remaining data to send. */
+    volatile size_t txDataSize;      /*!< Size of the remaining data to send. */
+    uint8_t *volatile rxData;       /*!< Address of remaining data to receive. */
+    volatile size_t rxDataSize;      /*!< Size of the remaining data to receive. */
+    size_t txDataSizeAll;            /*!< Total bytes to be sent. */
+    size_t rxDataSizeAll;            /*!< Total bytes to be received. */
+
+    uint8_t *rxRingBuffer;             /*!< Start address of the receiver ring buffer. */
+    size_t rxRingBufferSize;            /*!< Size of the ring buffer. */
+    volatile uint16_t rxRingBufferHead; /*!< Index for the driver to store received data into ring buffer. */
+    volatile uint16_t rxRingBufferTail; /*!< Index for the user to get data from the ring buffer. */
+
+    flexio_t_format_transfer_callback_t callback; /*!< Callback function. */
+    void *userData;                               /*!< A-format callback function parameter.*/
+
+    volatile uint8_t txState; /*!< TX transfer state. */
+    volatile uint8_t rxState; /*!< RX transfer state */
+};
 
 /*! @brief T-format encoder structure. */
 typedef struct _encoder_T_format
@@ -314,27 +376,80 @@ static inline void FLEXIO_T_Format_EnableRxDMA(FLEXIO_T_FORMAT_Type *base, bool 
     FLEXIO_EnableShifterStatusDMA(base->flexioBase, 1UL << base->shifterIndex[1], enable);
 }
 
-void FLEXIO_T_Format_Config_DR_length(FLEXIO_T_FORMAT_Type *base, uint32_t nFrames);
+/*!
+ * @brief Writes one byte of data.
+ *
+ * @note This is a non-blocking API, which returns directly after the data is put into the
+ * data register. Ensure that the TxEmptyFlag is asserted before calling this API.
+ *
+ * @param base Pointer to the FLEXIO_T_FORMAT_Type structure.
+ * @param buffer The data bytes to send.
+ */
+static inline void FLEXIO_T_Format_WriteByte(FLEXIO_T_FORMAT_Type *base, const uint8_t *buffer)
+{
+    base->flexioBase->SHIFTBUF[base->shifterIndex[0]] = *buffer;
+}
+
+/*!
+ * @brief Reads one byte of data.
+ *
+ * @note This is a non-blocking API, which returns directly after the data is read from the
+ * data register. Ensure that the RxFullFlag is asserted before calling this API.
+ *
+ * @param base Pointer to the FLEXIO_T_FORMAT_Type structure.
+ * @param buffer The buffer to store the received bytes.
+ */
+static inline void FLEXIO_T_Format_ReadByte(FLEXIO_T_FORMAT_Type *base, uint8_t *buffer)
+{
+    *buffer = (uint8_t)(base->flexioBase->SHIFTBUFBYS[base->shifterIndex[1]]);
+}
+
 status_t FLEXIO_T_Format_Init(FLEXIO_T_FORMAT_Type *base, flexio_t_format_config_t *userConfig, uint32_t srcClock_Hz);
 void FLEXIO_T_Format_Deinit(FLEXIO_T_FORMAT_Type *base);
 void FLEXIO_T_Format_GetDefaultConfig(flexio_t_format_config_t *userConfig);
+void FLEXIO_T_Format_EnableInterrupts(FLEXIO_T_FORMAT_Type *base, uint32_t mask);
+void FLEXIO_T_Format_DisableInterrupts(FLEXIO_T_FORMAT_Type *base, uint32_t mask);
 uint32_t FLEXIO_T_Format_GetStatusFlags(FLEXIO_T_FORMAT_Type *base);
 void FLEXIO_T_Format_ClearStatusFlags(FLEXIO_T_FORMAT_Type *base, uint32_t mask);
 status_t FLEXIO_T_Format_WriteBlocking(FLEXIO_T_FORMAT_Type *base, const uint8_t *txData, size_t txSize);
 status_t FLEXIO_T_Format_ReadBlocking(FLEXIO_T_FORMAT_Type *base, uint8_t *rxData, size_t rxSize);
+status_t FLEXIO_T_Format_TransferCreateHandle(FLEXIO_T_FORMAT_Type *base,
+                                              flexio_t_format_handle_t *handle,
+                                              flexio_t_format_transfer_callback_t callback,
+                                              void *userData);
+void FLEXIO_T_Format_TransferStartRingBuffer(FLEXIO_T_FORMAT_Type *base,
+                                             flexio_t_format_handle_t *handle,
+                                             uint8_t *ringBuffer,
+                                             size_t ringBufferSize);
+void FLEXIO_T_Format_TransferStopRingBuffer(FLEXIO_T_FORMAT_Type *base, flexio_t_format_handle_t *handle);
+status_t FLEXIO_T_Format_TransferSendNonBlocking(FLEXIO_T_FORMAT_Type *base,
+                                                 flexio_t_format_handle_t *handle,
+                                                 flexio_t_format_transfer_t *xfer);
+void FLEXIO_T_Format_TransferAbortSend(FLEXIO_T_FORMAT_Type *base, flexio_t_format_handle_t *handle);
+status_t FLEXIO_T_Format_TransferGetSendCount(FLEXIO_T_FORMAT_Type *base, flexio_t_format_handle_t *handle, size_t *count);
+status_t FLEXIO_T_Format_TransferReceiveNonBlocking(FLEXIO_T_FORMAT_Type *base,
+                                                    flexio_t_format_handle_t *handle,
+                                                    flexio_t_format_transfer_t *xfer,
+                                                    size_t *receivedBytes);
+void FLEXIO_T_Format_TransferAbortReceive(FLEXIO_T_FORMAT_Type *base, flexio_t_format_handle_t *handle);
+status_t FLEXIO_T_Format_TransferGetReceiveCount(FLEXIO_T_FORMAT_Type *base, flexio_t_format_handle_t *handle, size_t *count);
+void FLEXIO_T_Format_FlushShifters(FLEXIO_T_FORMAT_Type *base);
 status_t FLEXIO_T_Format_TransferReceiveEDMA(FLEXIO_T_FORMAT_Type *base, void *rxData, size_t dataSize);
 status_t FLEXIO_T_Format_ReceiveEDMA_isCompleted(FLEXIO_T_FORMAT_Type *base);
 status_t FLEXIO_T_Format_SendSyncReq(FLEXIO_T_FORMAT_Type *base, const uint8_t cf);
 
 char *T_Format_GetStatusFlag(status_t status);
 status_t T_Format_Check_SF(uint8_t sf);
+status_t T_Format_Readout_ABS_ABM_Parse(encoder_T_format *enc, encoder_res_all_info_t *res, encoder_all_info_t *all_info);
 status_t T_Format_Readout_ABS_ABM(encoder_T_format *enc, encoder_all_info_t *all_info);
-status_t T_Format_Readout_ABS_ABM_Sync(encoder_T_format *enc, encoder_res_all_info_t *res, encoder_all_info_t *all_info);
+status_t T_Format_Readout_ABS_ABM_IRQ(encoder_T_format *enc, encoder_all_info_t *all_info);
 status_t T_Format_Readout_ABS(encoder_T_format *enc, uint32_t *singleData);
 status_t T_Format_Readout_ABM(encoder_T_format *enc, uint32_t *multiData);
 status_t T_Format_Readout_Encoder_status(encoder_T_format *enc, uint8_t *statusData);
 status_t T_Format_Reset_Request(encoder_T_format *enc, Reset_Type_e reset, uint32_t *abs);
+status_t T_Format_Get_Encoder_ID_Parse(encoder_T_format *enc, encoder_res_id_t *res, uint8_t *encID);
 status_t T_Format_Get_Encoder_ID(encoder_T_format *enc, uint8_t *encID);
+status_t T_Format_Get_Encoder_ID_IRQ(encoder_T_format *enc, uint8_t *encID);
 status_t T_Format_Memory_Set_Page(encoder_T_format *enc, uint8_t page);
 status_t T_Format_Memory_Write(encoder_T_format *enc, encoder_access_eeprom_t eeprom);
 status_t T_Format_Memory_Read(encoder_T_format *enc, encoder_access_eeprom_t *eeprom);
