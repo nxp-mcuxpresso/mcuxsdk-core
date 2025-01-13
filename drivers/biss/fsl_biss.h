@@ -364,6 +364,7 @@ typedef struct _biss_slave_info_t
     uint32_t            crcStart;   /*!< CRC start value, enabled with dataLen != 0 */
     biss_data_type_t    dataType;   /*!< Sensor or Actuator */
     uint8_t             dataLen;    /*!< Data length of tranfered data */
+    uint8_t             errWarLen;  /*!< error and warning bit number */
     uint8_t             mtLen;      /*!< Multiturn number, enabled with role = rotary */
     uint8_t             stLen;      /*!< Singleturn number, enabled with role = rotary */
     biss_align_type_t   dataAlign;  /*!< Data align type, the align show data format which

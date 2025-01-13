@@ -63,13 +63,13 @@ int BISS_CalculateMADiv(biss_master_t *master,
     uint32_t baseFreq_Hz = srcClk_Hz / 2;
 
     if(MAFreq_Hz < BISS_MIN_MA_FREQ || MAFreq_Hz > BISS_MAX_SYS_CLK_FREQ) {
-        return kStatus_OutOfRange;
+        return -kStatus_OutOfRange;
     }
 
     /* Check the max MA frequence.*/
     if (MAFreq_Hz > baseFreq_Hz)
     {
-        return kStatus_InvalidArgument;
+        return -kStatus_InvalidArgument;
     }
 
     if (MAFreq_Hz >= (baseFreq_Hz / 17))
@@ -82,7 +82,7 @@ int BISS_CalculateMADiv(biss_master_t *master,
     }
     else
     {
-        return kStatus_InvalidArgument;
+        return -kStatus_InvalidArgument;
     }
 }
 
@@ -297,6 +297,7 @@ static void BISS_MasterInfoReset(biss_master_t *master)
         master->slvList[index].crcPoly = 0;
         master->slvList[index].crcStart = 0;
         master->slvList[index].dataLen = 0;
+        master->slvList[index].errWarLen = 2;
         master->slvList[index].mtLen = 0;
         master->slvList[index].stLen = 0;
         master->slvList[index].dataAlign = BISS_LeftAlign;
@@ -348,7 +349,6 @@ static status_t BISS_ChannelInit(biss_master_t *master)
 biss_master_t *BISS_MasterInit(BISS_Type *base, uint32_t srcClock_Hz,
                                uint32_t ma_Hz, uint32_t ags_Hz)
 {
-    status_t status = kStatus_Success;
     biss_master_t *master = BISS_GetMaster(base);
 
     master->base = base;
@@ -356,17 +356,18 @@ biss_master_t *BISS_MasterInit(BISS_Type *base, uint32_t srcClock_Hz,
     BISS_MasterInfoReset(master);
 
     /* Configurate the clock div for BISS device */
-    status = BISS_CalculateMADiv(master, srcClock_Hz, ma_Hz);
-    if (kStatus_Success != status)
+    master->freqMADiv = BISS_CalculateMADiv(master, srcClock_Hz, ma_Hz);
+    if (master->freqMADiv < 0)
     {
         return NULL;
     }
+
     BISS_SetFREQS(master, master->freqMADiv);
     BISS_SetFREQR(master, 0x05);
 
     /* Configurate the clock div for BISS device */
-    status = BISS_CalculateAGSDiv(master, srcClock_Hz, ags_Hz);
-    if (kStatus_Success != status)
+    master->freqAGSDiv = BISS_CalculateAGSDiv(master, srcClock_Hz, ags_Hz);
+    if (master->freqAGSDiv < 0)
     {
         return NULL;
     }
@@ -920,15 +921,7 @@ status_t BISS_SLVUpdatewithCommonEDS(biss_master_t *master, uint8_t slvID)
             return status;
         }
 
-        if (BISS_ACTUATOR_ROLE == BISS_EDS_FORMAT_GET_TYPE(format))
-        {
-            slv->dataType = BISS_Actuator;
-        }
-        else
-        {
-            slv->dataType = BISS_DATA_SENSOR;
-        }
-
+        slv->dataType = BISS_EDS_FORMAT_GET_TYPE(format);
         slv->stopBit = BISS_EDS_FORMAT_GET_STOPBIT(format);
         slv->dataAlign = BISS_EDS_FORMAT_GET_ALIGN(format);
 
@@ -997,7 +990,7 @@ status_t BISS_SLVUpdatewithProfileEDS(biss_master_t *master, uint8_t slvID)
         return status;
     }
 
-    slv->stLen = slv->dataLen - slv->mtLen;
+    slv->stLen = slv->dataLen - slv->mtLen - slv->errWarLen;
 
     slv->stMask = ((uint64_t) 1 << slv->stLen) - 1;
     slv->mtMask = ((uint64_t) 1 << slv->mtLen) - 1;
@@ -1200,8 +1193,8 @@ void BISS_SLVSetup(biss_master_t *master, uint8_t slvID)
 
 uint64_t BISS_SLVGetSCDRawData(biss_master_t *master, uint8_t slvID)
 {
-    volatile uint32_t *scdl = (&master->base->SCDATA1_LOW) + (slvID - 1) * 2;
-    volatile uint32_t *scdh = (&master->base->SCDATA1_HIGH) + (slvID - 1) * 2;
+    volatile uint32_t *scdl = (&master->base->SCDATA1_LOW) + (slvID) * 2;
+    volatile uint32_t *scdh = (&master->base->SCDATA1_HIGH) + (slvID) * 2;
 
     return (*scdl) | ((uint64_t) (*scdh) << 32);
 }
@@ -1294,7 +1287,7 @@ uint64_t BISS_SCDGetMtVal(biss_master_t *master,
 {
     biss_slave_info_t *slv = BISS_SLVGet(master, slvID);
 
-    return (SCData >> slv->stLen) & slv->mtMask;
+    return (SCData >> (slv->stLen + slv->errWarLen)) & slv->mtMask;
 }
 
 uint64_t BISS_SLVGetStVal(biss_master_t *master,
@@ -1302,5 +1295,5 @@ uint64_t BISS_SLVGetStVal(biss_master_t *master,
 {
     biss_slave_info_t *slv = BISS_SLVGet(master, slvID);
 
-    return SCData & slv->stMask;
+    return (SCData >> slv->errWarLen) & slv->stMask;
 }
