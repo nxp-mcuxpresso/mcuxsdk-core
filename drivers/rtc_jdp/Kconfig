@@ -1,0 +1,12 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.rtc_jdp
+    bool
+    default y if MCUX_HW_IP_DriverType_RTC_JDP
+
+config MCUX_COMPONENT_driver.rtc_jdp
+    bool "rtc_jdp"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.rtc_jdp
