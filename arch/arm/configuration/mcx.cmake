@@ -17,9 +17,9 @@ if (CONFIG_MCUX_PRJSEG_config.kinetis.shared)
 
     mcux_add_armgcc_configuration(
         AS "-mthumb"
-        CC "-Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -std=gnu99"
-        CX "-Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -fno-rtti -fno-exceptions"
-        LD "--specs=nano.specs --specs=nosys.specs -Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -Wl,--gc-sections -Wl,-static -Wl,-z -Wl,muldefs -Wl,-Map=output.map -Wl,--print-memory-usage"
+        CC "--specs=nano.specs -Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -std=gnu99"
+        CX "--specs=nano.specs -Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -fno-rtti -fno-exceptions"
+        LD "--specs=nosys.specs -Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -Wl,--gc-sections -Wl,-static -Wl,-z -Wl,muldefs -Wl,-Map=output.map -Wl,--print-memory-usage"
         LIB "-lm -lc -lgcc -lnosys"
     )
 
