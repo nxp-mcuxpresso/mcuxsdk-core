@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section flexspi FLEXSPI
-  The current FLEXSPI driver version is 2.6.2.
+  The current FLEXSPI driver version is 2.6.3.
+
+  - 2.6.3
+    - Bug Fixes
+      - Fixed an issue which cause IPCR1[IPAREN] cleared by mistake.
 
   - 2.6.2
     - Bug Fixes

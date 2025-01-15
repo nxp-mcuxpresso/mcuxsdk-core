@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022, 2023-2024 NXP
+ * Copyright 2016-2022, 2023-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1058,10 +1058,11 @@ status_t FLEXSPI_TransferNonBlocking(FLEXSPI_Type *base, flexspi_handle_t *handl
         base->IPTXFCR |= FLEXSPI_IPTXFCR_CLRIPTXF_MASK;
         base->IPRXFCR |= FLEXSPI_IPRXFCR_CLRIPRXF_MASK;
 
+        configValue = (base->IPCR1 & ~(FLEXSPI_IPCR1_IDATSZ_MASK | FLEXSPI_IPCR1_ISEQID_MASK | FLEXSPI_IPCR1_ISEQNUM_MASK));
         /* Configure data size. */
         if ((xfer->cmdType == kFLEXSPI_Read) || (xfer->cmdType == kFLEXSPI_Write))
         {
-            configValue = FLEXSPI_IPCR1_IDATSZ(xfer->dataSize);
+            configValue |= FLEXSPI_IPCR1_IDATSZ(xfer->dataSize);
         }
 
         /* Configure sequence ID. */
