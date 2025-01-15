@@ -23,6 +23,7 @@
 #define FSL_ENDAT2P2_DRIVER_VERSION (MAKE_VERSION(1, 0, 0)) /*!< Version 1.0.0 */
 /*! @} */
 
+#define SSI_MODE            0x1
 #define ENDAT_MODE          0x2
 
 /*! @name EnDat2.2 clock */
@@ -290,8 +291,6 @@ typedef struct _endat2p2_recv_data
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
-
-void ENDAT2P2_DelayUs(uint32_t delay_us);
 
 /*!
  * @brief Convert sensor type to descriptor string.

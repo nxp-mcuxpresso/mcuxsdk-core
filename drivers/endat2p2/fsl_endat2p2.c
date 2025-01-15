@@ -24,7 +24,7 @@ static ENDAT2P2_Type *const s_EnDatBases[] = ENDAT2P2_BASE_PTRS;
 
 static endat2p2_dev_t s_EnDat2p2Dev[FSL_ENDAT2P2_COUNT];
 
-int NumTo2N(uint32_t x)
+static int NumTo2N(uint32_t x)
 {
     int i = 0;
 
@@ -34,6 +34,11 @@ int NumTo2N(uint32_t x)
     }
 
     return i;
+}
+
+static void ENDAT2P2_DelayUs(uint32_t delay_us)
+{
+    SDK_DelayAtLeastUs(delay_us, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
 }
 
 char *ENDAT2P2_GetTypeStr(encode_type_t encode_t)
@@ -87,18 +92,6 @@ char *ENDAT2P2_GetTypeStr(encode_type_t encode_t)
 bool ENDAT2P2_EncoderIsRotary(endat2p2_dev_t *dev)
 {
     return dev->type & (1 << ENDAT2P2_TYPE_ROTARY_SHIFT);
-}
-
-void ENDAT2P2_DelayUs(uint32_t delay_us)
-{
-   /*  SDK_DelayAtLeastUs(delay_us, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY); */
-
-    volatile uint32_t i;
-
-    /* i = delay_us * 1000; */
-    i = 5;
-
-    while (i--) { __asm__ __volatile__("nop"); }
 }
 
 endat2p2_dev_t *ENDAT2P2_GetDev(ENDAT2P2_Type *base)
@@ -936,6 +929,7 @@ uint32_t ENDAT2P2_CalculatePropagationTime(endat2p2_dev_t *dev, int count)
         ENDAT2P2_SetDelayCompensation(dev, false);
         ENDAT2P2_SetCablePropagationTime(dev, 0);
         ENDAT2P2_SetDelayCompensation(dev, true);
+
         ENDAT2P2_CMDProcess(dev, ENDAT2P2_CMD_SEND_POSITION_VALUE, 0, 0);
         status = ENDAT2P2_GetStatus(dev);
         if (status & ENDAT2P2_STATUSREGISTER_PROPAGATION_TIME_MEASUREMENT_MASK)
@@ -1093,8 +1087,6 @@ endat2p2_dev_t *ENDAT2P2_InitMaster(ENDAT2P2_Type *base, uint32_t fsys)
 
     ENDAT2P2_ConfigSYSClock(dev, fsys);
     ENDAT2P2_SetFTCLOCK(dev, ENDAT2P2_CLK_200K);
-
-    ENDAT2P2_EnableDelayCompensation(dev);
 
     return dev;
 }
