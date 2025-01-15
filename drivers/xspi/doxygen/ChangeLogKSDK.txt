@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section xspi XSPI
-  The current XSPI driver version is 2.5.0.
+  The current XSPI driver version is 2.5.1.
+
+  - 2.5.1
+    - Improvements
+      - Updated default value of sfpArbitrationLockTimeoutValue and ipAccessTimeoutValue to 0xFFFFFFFFUL.
+      - Added #if defined(CACHE64_CTRL0_BASE) ... #endif section to support some devices that do not support CACHE64.
 
   - 2.5.0
     - Improvements
