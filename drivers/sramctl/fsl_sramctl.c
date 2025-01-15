@@ -36,7 +36,7 @@ void SRAMCTL_InitMem(uint32_t instance_idx, uint32_t start_addr, uint32_t end_ad
     sramctl->RAMIAE = end_addr;
     sramctl->RAMCR = SRAMCTL_RAMCR_INIT(1U);
 
-    while (sramctl->RAMSR & SRAMCTL_RAMSR_IDONE(1U) == 0U)
+    while ((sramctl->RAMSR & SRAMCTL_RAMSR_IDONE(1U)) == 0U)
     {
     }
 }
