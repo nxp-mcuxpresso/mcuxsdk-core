@@ -461,6 +461,7 @@ typedef struct _encoder_res1
     uint16_t DF;
 } encoder_res1_t;
 
+typedef int (*logFunc)(const char *fmt_s, ...);
 /*******************************************************************************
  * APIs
  ******************************************************************************/
@@ -556,6 +557,8 @@ void FLEXIO_A_Format_FlushShifters(FLEXIO_A_FORMAT_Type *base);
 status_t FLEXIO_A_Format_TransferReceiveEDMA(FLEXIO_A_FORMAT_Type *base, void *rxData, size_t dataSize);
 status_t FLEXIO_A_Format_ReceiveEDMA_isCompleted(FLEXIO_A_FORMAT_Type *base);
 status_t FLEXIO_A_Format_SendSyncReq(FLEXIO_A_FORMAT_Type *base, uint8_t enc_addr, uint8_t cmd);
+
+void A_Format_PrintfES(logFunc logES, uint8_t es);
 status_t A_Format_ABS_Readout_Multi_Single_Parse(encoder_A_format *enc, encoder_res3_t *res,
                                                  encoder_abs_multi_single_t *abs_data);
 status_t A_Format_ABS_Readout_Multi_Single(encoder_A_format *enc, uint8_t enc_addr,

@@ -91,8 +91,8 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         }
 
         timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
-        base->TxDR_Offset = srcClock_Hz * 3 / 2000000;//120; /* 1.5us */
-        base->interval    = srcClock_Hz / 100000;//800; /* 10us */
+        base->TxDR_Offset = srcClock_Hz * 3 / 2000000; /* 1.5us */
+        base->interval    = srcClock_Hz * 3 / 1000000; /* 3us */
         break;
 
     case kFLEXIO_A_FORMAT_4MHZ:
@@ -104,8 +104,8 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         }
 
         timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
-        base->TxDR_Offset = srcClock_Hz / 1000000;//80;  /* 1us */
-        base->interval    = srcClock_Hz / 100000;//800; /* 10us */
+        base->TxDR_Offset = srcClock_Hz / 1000000;     /* 1us */
+        base->interval    = srcClock_Hz * 3 / 1000000; /* 3us */
         break;
 
     case kFLEXIO_A_FORMAT_6_67MHZ: /* Deviation = 0 */
@@ -117,8 +117,8 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         }
 
         timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
-        base->TxDR_Offset = srcClock_Hz / 1000000;//80;  /* 1us */
-        base->interval    = srcClock_Hz / 100000;//800; /* 10us */
+        base->TxDR_Offset = srcClock_Hz / 1000000;     /* 1us */
+        base->interval    = srcClock_Hz * 3 / 1000000; /* 3us */
         break;
 
     case kFLEXIO_A_FORMAT_8MHZ: /* Deviation = 0 */
@@ -130,8 +130,8 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         }
 
         timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
-        base->TxDR_Offset = srcClock_Hz / 10000000 * 7;//56;  /* 0.7us */
-        base->interval    = srcClock_Hz / 100000;//800; /* 10us */
+        base->TxDR_Offset = srcClock_Hz / 10000000 * 7; /* 0.7us */
+        base->interval    = srcClock_Hz * 3 / 1000000;  /* 3us */
         break;
 
     case kFLEXIO_A_FORMAT_16MHZ: /* Deviation = 4.17% */
@@ -421,7 +421,7 @@ status_t FLEXIO_A_Format_Init(FLEXIO_A_FORMAT_Type *base, flexio_a_format_config
      * the default DR signal length is for one byte transmitting.
      */
 
-    timerCmp = ((uint16_t)( A_FORMAT_BITS_PER_FRAME_WHOLE * base->timerDiv)) / 2 - 1;
+    timerCmp = (uint16_t)(A_FORMAT_BITS_PER_FRAME_WHOLE * base->timerDiv) - 1;
     timerConfig.timerCompare = timerCmp;
 
     FLEXIO_SetTimerConfig(base->flexioBase, base->timerIndex[TIMER_DR_INDEX], &timerConfig);
@@ -1334,6 +1334,43 @@ status_t FLEXIO_A_Format_SendSyncReq(FLEXIO_A_FORMAT_Type *base, uint8_t enc_add
     return kStatus_Success;
 }
 
+void A_Format_PrintfES(logFunc logES, uint8_t es)
+{
+    if (es == A_Format_ES_NoErr)
+    {
+        logES("No error in the ES field\r\n");
+    }
+    else
+    {
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            switch (es & (0x1 << i))
+            {
+            case A_Format_ES_Busy_MemBusy:
+                logES("Encoder or memory is busy!\r\n");
+                break;
+            case A_Format_ES_Batt:
+                logES("The battery is error!\r\n");
+                break;
+            case A_Format_ES_OvSpd_MemErr_OvTemp_OvFlow:
+                logES("Over speed or memory error or emperature warning or Over Flow!\r\n");
+                break;
+            case A_Format_ES_STErr_PSErr_MTErr_INCErr:
+                logES("ST error or PS error or MT error or incremental signal Error\r\n");
+                break;
+            case A_Format_ES_FrameErr:
+                logES("Encoder frame is error!\r\n");
+                break;
+            case A_Format_ES_Anyone:
+                logES("One or more of all errors!\r\n");
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
 status_t A_Format_ABS_Readout_Multi_Single_Parse(encoder_A_format *enc, encoder_res3_t *res,
                                                  encoder_abs_multi_single_t *abs_data)
 {
@@ -1463,7 +1500,7 @@ status_t A_Format_ABS_Readout_Single(encoder_A_format *enc, uint8_t enc_addr, en
         if (singleData[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
-            continue;
+//            continue;
         }
 
         singleData[i].singleTurn = *(uint32_t *)res[i].DF & enc->single_turn_sign_mask;
@@ -1509,7 +1546,7 @@ status_t A_Format_ABS_Readout_Multi(encoder_A_format *enc, uint8_t enc_addr, enc
         if (multiData[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
-            continue;
+//            continue;
         }
 
         multiData[i].multiTurn = (uint16_t)((*(uint32_t *)res[i].DF >> (enc->singleTurnRevolution - 16)) & enc->multi_turn_sign_mask);;
@@ -1555,7 +1592,7 @@ status_t A_Format_Readout_Encoder_status(encoder_A_format *enc, uint8_t enc_addr
         if (statusData[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
-            continue;
+//            continue;
         }
 
         statusData[i].status = res[i].DF[0];
@@ -1656,7 +1693,7 @@ status_t A_Format_Memory_Read(encoder_A_format *enc, uint8_t enc_addr, encoder_e
     crc8_para.message     = (uint8_t const *)&res;
 
     FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    SDK_DelayAtLeastUs(17, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//10us
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//10us(17)
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf, 1);
     FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)&res, HALFWORD_NUM(encoder_res2_t));
 
@@ -1698,11 +1735,11 @@ status_t A_Format_Memory_Write(encoder_A_format *enc, uint8_t enc_addr, encoder_
     crc8_para.message     = (uint8_t const *)&res;
 
     FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    SDK_DelayAtLeastUs(17, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//10us
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//10us(17)
     FLEXIO_A_Format_WriteBlocking(enc->controller, mdf, 1);
-    SDK_DelayAtLeastUs(17, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf[1], 1);
-    SDK_DelayAtLeastUs(17, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf[2], 1);
     FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)&res, HALFWORD_NUM(encoder_res2_t));
 
@@ -1824,11 +1861,11 @@ status_t A_Format_Set_ID(encoder_A_format *enc, uint8_t enc_addr, uint32_t id)
     crc8_para.message     = (uint8_t const *)&res;
 
     FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//8.8us
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//2.7us
     FLEXIO_A_Format_WriteBlocking(enc->controller, mdf, 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf[1], 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf[2], 1);
     FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)&res, HALFWORD_NUM(encoder_res2_t));
 
@@ -1869,11 +1906,11 @@ status_t A_Format_Set_ID_1to1(encoder_A_format *enc, uint32_t id)
     crc8_para.message     = (uint8_t const *)&res;
 
     FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//8.8us
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//2.7us
     FLEXIO_A_Format_WriteBlocking(enc->controller, mdf, 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf[1], 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf[2], 1);
     FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)&res, HALFWORD_NUM(encoder_res2_t));
 
@@ -1914,11 +1951,11 @@ status_t A_Format_Set_Encoder_Address_MATCH_ID(encoder_A_format *enc, uint32_t i
     crc8_para.message     = (uint8_t const *)&res;
 
     FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//8.8us
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);//2.7us
     FLEXIO_A_Format_WriteBlocking(enc->controller, mdf, 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf[1], 1);
-    SDK_DelayAtLeastUs(15, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
+    SDK_DelayAtLeastUs(7, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     FLEXIO_A_Format_WriteBlocking(enc->controller, &mdf[2], 1);
     FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)&res, HALFWORD_NUM(encoder_res2_t));
 
@@ -1968,7 +2005,7 @@ status_t A_Format_ABS_Readout_Single_17bit(encoder_A_format *enc, uint8_t enc_ad
         {
             cmdErr++;
             singleData[i].es = A_Format_ES_Anyone;
-            continue;
+//            continue;
         }
 
         singleData[i].singleTurn = (((uint32_t)res[i].DF << 9) | (res[i].IF >> 7)) & enc->single_turn_sign_mask;
@@ -2014,7 +2051,7 @@ status_t A_Format_ABS_Readout_Single_with_status(encoder_A_format *enc, uint8_t 
         if (singleStat[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
-            continue;
+//            continue;
         }
 
         singleStat[i].singleTurn = *(uint32_t *)res[i].DF & enc->single_turn_sign_mask;
@@ -2062,7 +2099,7 @@ status_t A_Format_ABS_Readout_Single_with_temperature(encoder_A_format *enc, uin
         if (singleTemp[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
-            continue;
+//            continue;
         }
 
         singleTemp[i].singleTurn = *(uint32_t *)res[i].DF & enc->single_turn_sign_mask;
