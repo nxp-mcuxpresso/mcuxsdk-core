@@ -140,10 +140,26 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         break;
 
     case kFLEXIO_A_FORMAT_16MHZ: /* Deviation = 4.17% */
-        timerCmp = A_FORMAT_BITS_PER_FRAME_DATA * 2 - 1; // (CMP[15:0] + 1) / 2 = 16 for 16-bit timer
-        base->timerDiv = 3;
-        base->TxDR_Offset = 34;  /* 0.7us */
-        base->interval    = 480; /* 10us */
+	if((base->timerIndex[TIMER_TX_CLOCK_INDEX] < 8) | (base->timerIndex[TIMER_RX_CLOCK_INDEX] < 8))
+        {
+            timerCmp = A_FORMAT_BITS_PER_FRAME_DATA * 2 - 1; // (CMP[15:0] + 1) / 2 = 16 for 16-bit timer
+            base->timerDiv = 3;
+            base->TxDR_Offset = 34;  /* 0.7us */
+            base->interval    = 480; /* 10us */
+        }
+        else
+        {
+            base->timerDiv = srcClock_Hz / 16000000;
+            timerCmp = base->timerDiv / 2U - 1U;
+            if ((timerCmp > 0xFFU) || (FLEXIO_A_Format_CheckBaudRate(16000000, srcClock_Hz, timerCmp) != kStatus_Success))
+            {
+                return 0xFFFFU;
+            }
+
+            timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
+            base->TxDR_Offset = srcClock_Hz * 7 / 10000000; /* 0.7us */
+            base->interval    = srcClock_Hz * 3 / 1000000;  /* 3us */
+        }
         break;
 
     default:
@@ -319,7 +335,7 @@ status_t FLEXIO_A_Format_Init(FLEXIO_A_FORMAT_Type *base, flexio_a_format_config
     }
     timerConfig.timerCompare = timerCmp;
 
-    if (userConfig->baudRate_bps == kFLEXIO_A_FORMAT_16MHZ) {
+    if ((userConfig->baudRate_bps == kFLEXIO_A_FORMAT_16MHZ) && (base->timerIndex[TIMER_TX_CLOCK_INDEX] < 8)) {
         timerConfig.triggerSelect   = FLEXIO_TIMER_TRIGGER_SEL_TIMn(base->timerIndex[TIMER_TX_CLOCK_INDEX]);
         timerConfig.timerMode       = kFLEXIO_TimerModeSingle16Bit;  // The compare register is used to set the number of bits in each word = (CMP[15:0] + 1) / 2
         timerConfig.timerDecrement  = kFLEXIO_TimerRisSrcOnTriggerInputShiftTriggerInput;  // Decrement counter on trigger input (rising edge). Shift clock equals trigger input.
@@ -328,7 +344,7 @@ status_t FLEXIO_A_Format_Init(FLEXIO_A_FORMAT_Type *base, flexio_a_format_config
     FLEXIO_SetTimerConfig(base->flexioBase, base->timerIndex[TIMER_TX_INDEX], &timerConfig);
 
     /* Configure the timer 1 for tx clock (PWM mode). */
-    if (userConfig->baudRate_bps == kFLEXIO_A_FORMAT_16MHZ) {
+    if ((userConfig->baudRate_bps == kFLEXIO_A_FORMAT_16MHZ) && (base->timerIndex[TIMER_TX_CLOCK_INDEX] < 8)) {
         timerConfig.triggerSelect   = FLEXIO_TIMER_TRIGGER_SEL_SHIFTnSTAT(base->shifterIndex[0]);  // Tx Shifter(0) status flag triggers this timer
         timerConfig.triggerPolarity = kFLEXIO_TimerTriggerPolarityActiveHigh;  // High level activates trigger, Timer starts immediately after enable
         timerConfig.triggerSource   = kFLEXIO_TimerTriggerSourceInternal;     // Internal trigger selected
@@ -377,7 +393,7 @@ status_t FLEXIO_A_Format_Init(FLEXIO_A_FORMAT_Type *base, flexio_a_format_config
     timerConfig.timerStart      = kFLEXIO_TimerStartBitEnabled;
     timerConfig.timerCompare    = timerCmp;
 
-    if (userConfig->baudRate_bps == kFLEXIO_A_FORMAT_16MHZ) {
+    if ((userConfig->baudRate_bps == kFLEXIO_A_FORMAT_16MHZ) && (base->timerIndex[TIMER_RX_CLOCK_INDEX] < 8)) {
         timerConfig.triggerSelect   = FLEXIO_TIMER_TRIGGER_SEL_TIMn(base->timerIndex[TIMER_RX_CLOCK_INDEX]);
         timerConfig.timerMode       = kFLEXIO_TimerModeSingle16Bit;
         timerConfig.timerDecrement  = kFLEXIO_TimerRisSrcOnTriggerInputShiftTriggerInput;
@@ -386,7 +402,7 @@ status_t FLEXIO_A_Format_Init(FLEXIO_A_FORMAT_Type *base, flexio_a_format_config
     FLEXIO_SetTimerConfig(base->flexioBase, base->timerIndex[TIMER_RX_INDEX], &timerConfig);
 
     /* Configure the timer 3 for rx clock (PWM mode). */
-    if (userConfig->baudRate_bps == kFLEXIO_A_FORMAT_16MHZ) {
+    if ((userConfig->baudRate_bps == kFLEXIO_A_FORMAT_16MHZ) && (base->timerIndex[TIMER_RX_CLOCK_INDEX] < 8)) {
         timerConfig.triggerSelect   = FLEXIO_TIMER_TRIGGER_SEL_PININPUT(base->RxPinIndex);
         timerConfig.triggerPolarity = kFLEXIO_TimerTriggerPolarityActiveHigh;
         timerConfig.triggerSource   = kFLEXIO_TimerTriggerSourceExternal;
@@ -1132,12 +1148,7 @@ void FLEXIO_A_Format_TransferHandleIRQ(void *uartType, void *uartHandle)
                     if (cmd_status != kStatus_Success)
                     {
                         cmd = 0xFF;
-                    //    handle->userData = (void *)cmd;
                     }
-                    //else
-                    //{
-                    //    handle->userData = (void *)0xFF;
-                    //}
 
                     handle->userData = (void *)&cmd;
                     handle->callback(base, handle, kStatus_FLEXIO_A_FORMAT_RxIdle, handle->userData);
