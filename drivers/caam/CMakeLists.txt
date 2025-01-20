@@ -9,6 +9,6 @@ if(CONFIG_MCUX_COMPONENT_driver.caam)
 
     mcux_add_include(INCLUDES .)
 
-    mcux_add_configuration(CC "-DCRYPTO_USE_DRIVER_CAAM -DCACHE_MODE_WRITE_THROUGH=1")
+    mcux_add_macro("-DCRYPTO_USE_DRIVER_CAAM -DCACHE_MODE_WRITE_THROUGH=1")
 
 endif()
