@@ -1,0 +1,27 @@
+/*!
+@defgroup stm STM: STM Driver
+@details The MCUXpresso SDK provides a peripheral driver for the STM module of MCUXpresso SDK devices.
+STM driver is created to help user to operate the STM module. The STM supports commonly required system
+and application software timing functions. The APIs can be used to enable the STM module, initialize it,
+start the count-up timer, set and update the match value for each channel and trigger match interrupt.
+
+# Function groups {#STMFunc}
+The STM driver supports operating the module as a time counter.
+
+## Initialization and deinitialization {#STMInit}
+The STM_GetDefaultConfig() generates the default config.
+The STM_Init() function initializes the STM with specified configurations.
+The STM_Deinit() function stops the timer and turns off the module clock.
+
+## STM match value configuration {#STMMatchOperation}
+The function STM_SetCompare() set compare value for specific channel of the STM module.
+The function STM_GetTimerCount() return current counter value.
+
+## STM channel enable disable configuration {#STMChannelOperation}
+The function STM_EnableCompareChannel() enable specific channel of the STM module.
+The function STM_DisableCompareChannel() disable specific channel of the STM module.
+
+# Typical use case {#STMUseCase}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/stm/
+
+*/

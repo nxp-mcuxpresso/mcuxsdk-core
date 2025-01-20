@@ -1,0 +1,11 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+config MCUX_HAS_COMPONENT_driver.stm
+    bool
+    default y if MCUX_HW_IP_DriverType_STM
+
+config MCUX_COMPONENT_driver.stm
+    bool "System timer module driver"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.stm
