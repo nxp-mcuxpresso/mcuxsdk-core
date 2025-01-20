@@ -710,8 +710,6 @@ status_t SWT_SendFrame(swt_handle_t *handle,
                        void *context,
                        swt_tx_opt *opt)
 {
-    assert(opt != NULL);
-    //netc_tx_bdr_t *txBdRing = &handle->epHandle->txBdRing[opt->ring];
     netc_tx_bdr_t *txBdRing = &handle->mgmtTxBdRing;
     netc_tx_bd_t txDesc[2] = {0};
 
@@ -739,7 +737,7 @@ status_t SWT_SendFrame(swt_handle_t *handle,
         }
     }
 
-    return EP_SendFrameCommon(handle->epHandle, txBdRing, opt->ring, frame, context, &txDesc[0],
+    return EP_SendFrameCommon(handle->epHandle, txBdRing, opt == NULL ? 0U : opt->ring, frame, context, &txDesc[0],
                               handle->cfg.txCacheMaintain);
 }
 
@@ -749,14 +747,12 @@ void SWT_ReclaimTxDescriptor(swt_handle_t *handle, uint8_t ring)
 
     do
     {
-        frameInfo = EP_ReclaimTxDescCommon(handle->epHandle, &handle->epHandle->txBdRing[ring], ring,
-                                           (handle->epHandle->cfg.reclaimCallback != NULL));
-
+        frameInfo = EP_ReclaimTxDescCommon(handle->epHandle, &handle->mgmtTxBdRing, 0,
+                                           (handle->cfg.reclaimCallback != NULL));
         if (frameInfo != NULL)
         {
             /* If reclaim callback is enabled, it must be called for each full frame. */
-            (void)handle->epHandle->cfg.reclaimCallback(handle->epHandle, ring, frameInfo,
-                                                        handle->epHandle->cfg.userData);
+            (void)handle->cfg.reclaimCallback(handle, frameInfo, handle->cfg.userData);
             (void)memset(frameInfo, 0, sizeof(netc_tx_frame_info_t));
         }
     } while (frameInfo != NULL);
