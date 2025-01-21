@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section ctimer CTIMER
-  The current CTimer driver version is 2.3.2.
+  The current CTimer driver version is 2.3.3.
+
+  - 2.3.3
+    - Bug Fixes
+      - Fix CERT INT30-C INT31-C issue.
+      - Make API CTIMER_SetupPwm and CTIMER_UpdatePwmDutycycle return fail if pulse width register overflow.
 
   - 2.3.2
     - Bug Fixes

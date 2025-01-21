@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022, 2024 NXP
+ * Copyright 2016-2022, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -191,7 +191,8 @@ void CTIMER_GetDefaultConfig(ctimer_config_t *config)
  *                         if it is 0 then no interrupt will be generated.
  *
  * return kStatus_Success on success
- *         kStatus_Fail If matchChannel is equal to pwmPeriodChannel; this channel is reserved to set the PWM cycle
+ *        kStatus_Fail If matchChannel is equal to pwmPeriodChannel; this channel is reserved to set the PWM cycle
+ *                     If PWM pulse width register value is larger than 0xFFFFFFFF.
  */
 status_t CTIMER_SetupPwm(CTIMER_Type *base,
                          const ctimer_match_t pwmPeriodChannel,
@@ -202,11 +203,21 @@ status_t CTIMER_SetupPwm(CTIMER_Type *base,
                          bool enableInt)
 {
     assert(pwmFreq_Hz > 0U);
+    assert(dutyCyclePercent <= 100U);
 
     uint32_t reg;
-    uint32_t period, pulsePeriod = 0;
-    uint32_t timerClock = srcClock_Hz / (base->PR + 1U);
+    uint32_t period;
+    uint64_t pulsePeriod;
+    uint64_t prescaleValue;
+    uint64_t timerClock;
     uint32_t index      = CTIMER_GetInstance(base);
+
+    prescaleValue = (uint64_t)base->PR + 1U;
+    timerClock = (uint64_t)srcClock_Hz / prescaleValue;
+    if (timerClock < pwmFreq_Hz)
+    {
+        return kStatus_Fail;
+    }
 
     if (matchChannel == pwmPeriodChannel)
     {
@@ -234,23 +245,32 @@ status_t CTIMER_SetupPwm(CTIMER_Type *base,
     base->MCR = reg;
 
     /* Calculate PWM period match value */
-    period = (timerClock / pwmFreq_Hz) - 1U;
+    period = ((uint32_t)timerClock / pwmFreq_Hz) - 1U;
 
     /* Calculate pulse width match value */
     if (dutyCyclePercent == 0U)
     {
-        pulsePeriod = period + 1U;
+        pulsePeriod = (uint64_t)period + 1U;
     }
     else
     {
-        pulsePeriod = (period * (100U - (uint32_t)dutyCyclePercent)) / 100U;
+        pulsePeriod = ((uint64_t)period * (100U - (uint32_t)dutyCyclePercent)) / 100U;
     }
 
     /* Specified channel pwmPeriodChannel will define the PWM period */
     base->MR[pwmPeriodChannel] = period;
 
+    /* 
+     * Only occurs when duty cyle is 0 and PWM period is 0xFFFFFFFF.
+     * CTimer cannot output 0% duty cyle PWM in this case.
+     */
+    if (pulsePeriod > 0xFFFFFFFFU)
+    {
+        return kStatus_Fail;
+    }
+
     /* This will define the PWM pulse period */
-    base->MR[matchChannel] = pulsePeriod;
+    base->MR[matchChannel] = (uint32_t)pulsePeriod;
     /* Clear status flags */
     CTIMER_ClearStatusFlags(base, ((uint32_t)CTIMER_IR_MR0INT_MASK) << (uint32_t)matchChannel);
     /* If call back function is valid then enable interrupt and update the call back function */
@@ -349,13 +369,17 @@ status_t CTIMER_SetupPwmPeriod(CTIMER_Type *base,
  * param pwmPeriodChannel Specify the channel to control the PWM period
  * param matchChannel     Match pin to be used to output the PWM signal
  * param dutyCyclePercent New PWM pulse width; the value should be between 0 to 100
+ * return kStatus_Success on success
+ *        kStatus_Fail If PWM pulse width register value is larger than 0xFFFFFFFF.
  */
-void CTIMER_UpdatePwmDutycycle(CTIMER_Type *base,
-                               const ctimer_match_t pwmPeriodChannel,
-                               ctimer_match_t matchChannel,
-                               uint8_t dutyCyclePercent)
+status_t CTIMER_UpdatePwmDutycycle(CTIMER_Type *base,
+                                   const ctimer_match_t pwmPeriodChannel,
+                                   ctimer_match_t matchChannel,
+                                   uint8_t dutyCyclePercent)
 {
-    uint32_t pulsePeriod = 0, period;
+    uint32_t period;
+    uint64_t pulsePeriod;
+    assert(dutyCyclePercent <= 100U);
 
     /* Specified channel pwmPeriodChannel  defines the PWM period */
     period = base->MR[pwmPeriodChannel];
@@ -363,15 +387,26 @@ void CTIMER_UpdatePwmDutycycle(CTIMER_Type *base,
     /* For 0% dutycyle, make pulse period greater than period so the event will never occur */
     if (dutyCyclePercent == 0U)
     {
-        pulsePeriod = period + 1U;
+        pulsePeriod = (uint64_t)period + 1U;
     }
     else
     {
-        pulsePeriod = (period * (100U - (uint32_t)dutyCyclePercent)) / 100U;
+        pulsePeriod = ((uint64_t)period * (100U - (uint32_t)dutyCyclePercent)) / 100U;
+    }
+
+    /* 
+     * Only occurs when duty cyle is 0 and PWM period is 0xFFFFFFFF.
+     * CTimer cannot output 0% duty cyle PWM in this case.
+     */
+    if (pulsePeriod > 0xFFFFFFFFU)
+    {
+        return kStatus_Fail;
     }
 
     /* Update dutycycle */
-    base->MR[matchChannel] = pulsePeriod;
+    base->MR[matchChannel] = (uint32_t)pulsePeriod;
+
+    return kStatus_Success;
 }
 
 /*!
@@ -397,9 +432,22 @@ void CTIMER_SetupMatch(CTIMER_Type *base, ctimer_match_t matchChannel, const cti
     reg &=
         ~((uint32_t)((uint32_t)CTIMER_MCR_MR0R_MASK | (uint32_t)CTIMER_MCR_MR0S_MASK | (uint32_t)CTIMER_MCR_MR0I_MASK)
           << ((uint32_t)matchChannel * 3U));
-    reg |= ((uint32_t)(config->enableCounterReset) << (CTIMER_MCR_MR0R_SHIFT + ((uint32_t)matchChannel * 3U)));
-    reg |= ((uint32_t)(config->enableCounterStop) << (CTIMER_MCR_MR0S_SHIFT + ((uint32_t)matchChannel * 3U)));
-    reg |= ((uint32_t)(config->enableInterrupt) << (CTIMER_MCR_MR0I_SHIFT + ((uint32_t)matchChannel * 3U)));
+
+    if (config->enableCounterReset)
+    {
+        reg |= (CTIMER_MCR_MR0R_MASK << ((uint32_t)matchChannel * 3U));
+    }
+
+    if (config->enableCounterStop)
+    {
+        reg |= (CTIMER_MCR_MR0S_MASK << ((uint32_t)matchChannel * 3U));
+    }
+
+    if (config->enableInterrupt)
+    {
+        reg |= (CTIMER_MCR_MR0I_MASK << ((uint32_t)matchChannel * 3U));
+    }
+
     base->MCR = reg;
 
     reg = base->EMR;
@@ -409,7 +457,12 @@ void CTIMER_SetupMatch(CTIMER_Type *base, ctimer_match_t matchChannel, const cti
 
     /* Set the initial state of the EM bit/output */
     reg &= ~(((uint32_t)CTIMER_EMR_EM0_MASK) << (uint32_t)matchChannel);
-    reg |= ((uint32_t)config->outPinInitState) << (uint32_t)matchChannel;
+
+    if (config->outPinInitState)
+    {
+        reg |= (CTIMER_EMR_EM0_MASK << (uint32_t)matchChannel);
+    }
+
     base->EMR = reg;
 
     /* Set the match value */
