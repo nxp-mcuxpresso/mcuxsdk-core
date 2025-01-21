@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022, 2024 NXP
+ * Copyright 2016-2022, 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -22,7 +22,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_CTIMER_DRIVER_VERSION (MAKE_VERSION(2, 3, 2)) /*!< Version 2.3.2 */
+#define FSL_CTIMER_DRIVER_VERSION (MAKE_VERSION(2, 3, 3)) /*!< Version 2.3.3 */
 /*! @} */
 
 /*! @brief List of Timer capture channels */
@@ -237,6 +237,10 @@ void CTIMER_GetDefaultConfig(ctimer_config_t *config);
  * @param pulsePeriod      Pulse width match value
  * @param enableInt        Enable interrupt when the timer value reaches the match value of the PWM pulse,
  *                         if it is 0 then no interrupt will be generated.
+ *
+ * @return kStatus_Success on success
+ *         kStatus_Fail If matchChannel is equal to pwmPeriodChannel; this channel is reserved to set the PWM cycle
+ *                      If PWM pulse width register value is larger than 0xFFFFFFFF.
  */
 status_t CTIMER_SetupPwmPeriod(CTIMER_Type *base,
                                const ctimer_match_t pwmPeriodChannel,
@@ -295,11 +299,13 @@ static inline void CTIMER_UpdatePwmPulsePeriod(CTIMER_Type *base, ctimer_match_t
  * @param pwmPeriodChannel Specify the channel to control the PWM period
  * @param matchChannel     Match pin to be used to output the PWM signal
  * @param dutyCyclePercent New PWM pulse width; the value should be between 0 to 100
+ * @return kStatus_Success on success
+ *         kStatus_Fail If PWM pulse width register value is larger than 0xFFFFFFFF.
  */
-void CTIMER_UpdatePwmDutycycle(CTIMER_Type *base,
-                               const ctimer_match_t pwmPeriodChannel,
-                               ctimer_match_t matchChannel,
-                               uint8_t dutyCyclePercent);
+status_t CTIMER_UpdatePwmDutycycle(CTIMER_Type *base,
+                                   const ctimer_match_t pwmPeriodChannel,
+                                   ctimer_match_t matchChannel,
+                                   uint8_t dutyCyclePercent);
 
 /*! @}*/
 
