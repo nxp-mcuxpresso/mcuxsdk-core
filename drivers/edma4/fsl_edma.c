@@ -2419,7 +2419,6 @@ void EDMA_StartTransfer(edma_handle_t *handle)
         if (handle->tcdPool == NULL)
     {
         handle->channelBase->CH_CSR |= DMA_CH_CSR_ERQ_MASK;
-        EDMA_TCD_SADDR(tcdRegs, EDMA_TCD_TYPE(handle->base)) = 0x1;
     }
     else
     {
