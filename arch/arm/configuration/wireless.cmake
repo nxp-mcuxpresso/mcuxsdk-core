@@ -19,7 +19,7 @@ if (CONFIG_MCUX_PRJSEG_config.wireless.shared)
             AS "-mthumb"
             CC "--specs=nano.specs -Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -std=gnu99"
             CX "--specs=nano.specs -Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -fno-rtti -fno-exceptions"
-            LD "--specs=nosys.specs -Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -Wl,--gc-sections -Wl,-static -Wl,-z -Wl,muldefs -Wl,-Map=output.map -Wl,--print-memory-usage"
+            LD "--specs=nosys.specs -Wall -fno-common -ffunction-sections -fdata-sections -fno-builtin -mthumb -mapcs -Wl,--gc-sections -Wl,-static -Wl,--print-memory-usage"
             LIB "-lm -lc -lgcc -lnosys"
     )
 
