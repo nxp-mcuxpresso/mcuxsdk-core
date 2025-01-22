@@ -2408,8 +2408,18 @@ function(reset_app_link_order)
     target_link_libraries(app PRIVATE -Wl,--end-group)
   endif()
 
-  # Workaround: there will a an extra "-Wl,--start-group" without the statement below
-  target_link_libraries(app PRIVATE McuxSDK)
+  # Workaround:
+  # Without the statement below, there are two errors:
+  # missing --end-group
+  # undefined reference to `_exit'
+  if(${CONFIG_TOOLCHAIN} STREQUAL "armgcc")
+    target_link_libraries(app PRIVATE -Wl,--start-group)
+    target_link_libraries(app PRIVATE "-lm")
+    target_link_libraries(app PRIVATE "-lc")
+    target_link_libraries(app PRIVATE "-lgcc")
+    target_link_libraries(app PRIVATE "-lnosys")
+    target_link_libraries(app PRIVATE -Wl,--end-group)
+  endif()
 endfunction()
 
 # Usage
