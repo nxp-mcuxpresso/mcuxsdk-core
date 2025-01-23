@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
- * All rights reserved.
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -128,6 +127,46 @@ void PIT_Deinit(PIT_Type *base)
     CLOCK_DisableClock(s_pitClocks[PIT_GetInstance(base)]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
+
+#if defined(FSL_FEATURE_PIT_HAS_RTI) && (FSL_FEATURE_PIT_HAS_RTI)
+/*!
+ * brief Enables the PIT RTI module, and configures the peripheral for basic operations.
+ *
+ * note This API should be called at the beginning of the application using the PIT driver.
+ *
+ * param base   PIT peripheral base address
+ * param config Pointer to the user's PIT config structure
+ */
+void PIT_RTI_Init(PIT_Type *base, const pit_config_t *config)
+{
+    assert(NULL != config);
+    /* Enable PIT RTI timer */
+    base->MCR &= ~PIT_MCR_MDIS_RTI_MASK;
+    /* Clear all status bits for RTI to make sure the status of TCTRL registers is clean. */
+    base->RTI_TCTRL &= ~(PIT_RTI_TCTRL_TEN_MASK | PIT_RTI_TCTRL_TIE_MASK | PIT_RTI_TCTRL_CHN_MASK);
+
+    /* Config timer operation when in debug mode */
+    if (true == config->enableRunInDebug)
+    {
+        base->MCR &= ~PIT_MCR_FRZ_MASK;
+    }
+    else
+    {
+        base->MCR |= PIT_MCR_FRZ_MASK;
+    }
+}
+
+/*!
+ * brief Disables the PIT RTI module.
+ *
+ * param base PIT peripheral base address
+ */
+void PIT_RTI_Deinit(PIT_Type *base)
+{
+    base->MCR |= PIT_MCR_MDIS_RTI_MASK;
+}
+
+#endif /* FSL_FEATURE_PIT_HAS_RTI */
 
 #if defined(FSL_FEATURE_PIT_HAS_LIFETIME_TIMER) && FSL_FEATURE_PIT_HAS_LIFETIME_TIMER
 

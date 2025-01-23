@@ -16,7 +16,7 @@ The function PIT_SetTimerChainMode() configures the chain mode operation of each
 The function PIT_Deinit() disables the PIT timers and disables the module clock.
 
 ## Timer period Operations {#PITTimerPeriodOperation}
-The function PITR_SetTimerPeriod()  sets the timer period in units of count. Timers begin
+The function PIT_SetTimerPeriod() sets the timer period in units of count. Timers begin
 counting down from the value set by this function until it reaches 0.
 
 The function PIT_GetCurrentTimerCount() reads the current timer counting value.
@@ -38,10 +38,16 @@ Provides functions to get and clear the PIT status.
 ## Interrupt {#PITInterrupt}
 Provides functions to enable/disable PIT interrupts and get current enabled interrupts.
 
+# Real Time Interrupt (#RTI)
+Some chips provide a independent RTI timer to allow wake up CPU from standby mode. The usage of its
+operation APIs is similar with normal PIT channel. Users can use PIT_RTI_Init()/PIT_RTI_Deinit() to
+enable/disable the RTI timer or PIT_SetRtiTimerPeriod() to set the time period.
 
 # Typical use case {#PITUseCase}
 
 ## PIT tick example {#PITTick}
 Updates the PIT period and toggles an LED periodically.
-Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/pit
+Refer to the driver examples codes located at \<SDK_ROOT\>/examples/driver_examples/pit
+For RTI timer usage,
+refer to \<SDK_ROOT\>/examples/driver_examples/pit_rti
 */

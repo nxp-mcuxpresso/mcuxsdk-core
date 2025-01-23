@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section pit PIT
-  The current PIT driver version is 2.0.5.
+  The current PIT driver version is 2.1.0.
+
+  - 2.1.0
+    - New Features
+      - Support RTI (Real Time Interrupt) timer.
 
   - 2.0.5
     - Improvements 
