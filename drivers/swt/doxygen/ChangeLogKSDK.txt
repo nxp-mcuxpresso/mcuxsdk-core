@@ -1,0 +1,10 @@
+/*!
+@page driver_log Driver Change Log
+
+@section wdog SWT
+  The current SWT driver version is 2.0.0.
+
+  - 2.0.0
+    - Initial version.
+
+*/

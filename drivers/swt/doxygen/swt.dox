@@ -1,0 +1,45 @@
+/*!
+@defgroup swt SWT: Software Watchdog Timer
+@details The MCUXpresso SDK provides a peripheral driver for the SWT module of MCUXpresso SDK devices.
+
+# Function groups {#SWTFunc}
+The SWT driver supports operating the module as a window watchdog timer that enables the system to recover from
+situations such as:
+  Software trapped in a loop
+  A bus transaction failing to terminate
+
+## Initialization and deinitialization {#SWTInit}
+The function SWT_Init() initializes the SWT with specified configurations. The function
+SWT_GetDefaultConfig() gets the default configurations. The initialization function
+configures the SWT operating mode.
+
+The function SWT_Deinit() stops the SWT and disables the module clock.
+
+The function SWT_Enable() and SWT_Disable() can enable and disable the SWT.
+
+## Lock and Unlock SWT {#SWTLock}
+The function SWT_HardLock() can hard lock the SWT registers, which can only be unlocked by a reset.
+
+The function SWT_SoftLock() can soft lock the SWT registers, which can be unlocked by SWT_SoftUnlock().
+
+## SWT Refresh {#SWTRefresh}
+The function SWT_RefreshWithFixedServiceSequence() refreshes the SWT counter with the fixed service sequence.
+The function SWT_RefreshWithKeyedServiceSequence() refreshes the SWT counter with the keyed service sequence. You can use
+SWT_SetServiceKey() to set the initial service key.
+
+## SWT Operations {#SWTOperation}
+The function SWT_SetTimeout() sets the SWT timeout period in clock cycles.
+The function SWT_SetWindowValue() sets the SWT window start value fro window mode. You can write the service sequence
+only when the internal timer is less than this window value.
+The function SWT_GetCurrentCounter() gets SWT internal counter value when the module is disabled by SWT_Disable().
+The function SWT_ClearTimeoutInterruptFlag() will clear the timeout interrupt flag and then SWT will send interrupt
+request due to an initial timeout.
+The function SWT_ClearTimeoutResetFlag() can only reset the SWT module instead of the whole system. See the
+chip-specific information for the specific event associated with this flag.
+
+# Typical use case {#SWTCase}
+## SWT Refresh example {#SWTRefreshExample}
+Show how to refresh the SWT counter by different service sequences in regular mode and window mode.
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/swt
+
+*/
