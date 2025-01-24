@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section rtwdog RTWDOG
-  The current RTWDOG driver version is 2.1.2.
+  The current RTWDOG driver version is 2.1.3.
+
+  - 2.1.3
+    - Improvements
+      - Waited the over status after CS register operation in case next CS operation causes problem.
 
   - 2.1.2
     - Bug Fixes

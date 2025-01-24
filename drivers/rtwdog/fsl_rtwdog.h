@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
- * All rights reserved.
+ * Copyright 2016-2020, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -31,8 +30,8 @@
 /*! @} */
 /*! @name Driver version */
 /*! @{ */
-/*! @brief RTWDOG driver version 2.1.2. */
-#define FSL_RTWDOG_DRIVER_VERSION (MAKE_VERSION(2, 1, 2))
+/*! @brief RTWDOG driver version. */
+#define FSL_RTWDOG_DRIVER_VERSION (MAKE_VERSION(2, 1, 3))
 /*! @} */
 
 /*! @brief Describes RTWDOG clock source. */
