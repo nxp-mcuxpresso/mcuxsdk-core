@@ -1,5 +1,12 @@
 # PINT
 
+## [2.2.0]
+
+  - Fixed
+    - Fixed the issue that clear interrupt flag when it's not handled. This causes events to be lost.
+  - Changed
+    - Used one callback for one PINT instance. It's unnecessary to provide different callbacks for all PINT events.
+
 ## [2.1.13]
 
 - Improvements
