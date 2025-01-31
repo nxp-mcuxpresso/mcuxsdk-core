@@ -2,8 +2,13 @@
 @page driver_log Driver Change Log
 
 @section cmc CMC
-  The current CMC driver version is 2.4.1.
+  The current CMC driver version is 2.4.2.
 
+  -2.4.2
+    - Improvements
+      - Add support for specific KW4x device variants
+        - Let kCMC_SecurityViolationReset depend on whether CMC_SRS_SECVIO_MASK definition exists or not.
+        - CMC_LockWriteOperationToBootRomStatusReg and CMC_CheckBootRomStatusRegWriteLocked exist only if FSL_FEATURE_CMC_HAS_NO_BOOTROM_LOCK_REGISTER is not defined
   - 2.4.1
     - Improvements
       - Clear SCB SCR[SLEEPDEEP] bitfield after wakeup.

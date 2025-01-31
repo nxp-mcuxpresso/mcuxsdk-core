@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 NXP
+ * Copyright 2019-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -16,8 +16,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief CMC driver version 2.4.1. */
-#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 4, 1))
+/*! @brief CMC driver version 2.4.2. */
+#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 4, 2))
 /*! @} */
 
 #if defined(CMC_BLR_LOCK_MASK)
@@ -150,7 +150,9 @@ enum _cmc_system_reset_sources
 #if (defined(FSL_FEATURE_CMC_SRS_HAS_JTAG) && FSL_FEATURE_CMC_SRS_HAS_JTAG)
     kCMC_JTAGSystemReset = CMC_SRS_JTAG_MASK, /*!< The reset caused by a JTAG system reset request. */
 #endif /* (defined(FSL_FEATURE_CMC_SRS_HAS_JTAG) && FSL_FEATURE_CMC_SRS_HAS_JTAG) */
+#if defined CMC_SRS_SECVIO_MASK
     kCMC_SecurityViolationReset = CMC_SRS_SECVIO_MASK, /*!< The reset caused by a Security Violation logic. */
+#endif
 };
 
 /*!
@@ -686,6 +688,7 @@ static inline void CMC_ForceBootConfiguration(CMC_Type *base, bool assert)
  * @{
  */
 
+#if !(defined FSL_FEATURE_CMC_HAS_NO_BOOTROM_LOCK_REGISTER && (FSL_FEATURE_CMC_HAS_NO_BOOTROM_LOCK_REGISTER > 0))
 /*!
  * @brief Lock write operation to BootROM status register and BootROM Lock register.
  *
@@ -699,6 +702,7 @@ static inline void CMC_LockWriteOperationToBootRomStatusReg(CMC_Type *base, uint
 {
     assert((uint32_t)index < CMC_BSR_COUNT);
     base->BLR = ((base->BLR & ~CMC_BLR_LOCK_IDX_MASK(index)) | CMC_BLR_LOCK_IDX(index, 0x5UL));
+
 }
 
 /*!
@@ -715,6 +719,7 @@ static inline bool CMC_CheckBootRomStatusRegWriteLocked(CMC_Type *base, uint8_t 
     assert((uint32_t)index < CMC_BSR_COUNT);
     return ((base->BLR & CMC_BLR_LOCK_IDX_MASK(index)) == CMC_BLR_LOCK_IDX(index, 0x5UL));
 }
+#endif
 
 /*!
  * @brief Gets the information written by the BootROM.
