@@ -3641,7 +3641,22 @@ typedef union _netc_tx_bd
         uint32_t written : 1; /*!< Write-back flag. */
         uint32_t : 5;
     } writeback;
+
+    uint64_t dword[2];
 } netc_tx_bd_t;
+
+
+static inline void NETC_ClearTxDescriptor(netc_tx_bd_t *txDesc)
+{
+    txDesc->dword[0] = 0;
+    txDesc->dword[1] = 0;
+}
+
+static inline void NETC_CopyTxDescriptor(netc_tx_bd_t *txDescDst, netc_tx_bd_t *txDescSrc)
+{
+    txDescDst->dword[0] = txDescSrc->dword[0];
+    txDescDst->dword[1] = txDescSrc->dword[1];
+}
 
 /*!
  * @brief Receive Buffer Descriptor format.

@@ -823,7 +823,7 @@ status_t EP_SendFrameCommon(ep_handle_t *handle,
             }
             /* Get latest Tx BD address and clean it content. */
             txDesTemp = &txBdRing->bdBase[txBdRing->producerIndex];
-            (void)memset(txDesTemp, 0, sizeof(netc_tx_bd_t));
+            NETC_ClearTxDescriptor(txDesTemp);
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
             address =
                 (uintptr_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)(uint8_t *)txBuff->buffer, kMEMORY_Local2DMA);
@@ -870,7 +870,7 @@ status_t EP_SendFrameCommon(ep_handle_t *handle,
                     /* Increase producer index when first BD is extension BD. */
                     txBdRing->producerIndex = EP_IncreaseIndex(txBdRing->producerIndex, txBdRing->len);
                     txDesTemp               = &txBdRing->bdBase[txBdRing->producerIndex];
-                    txDesTemp->ext          = txDesc[1].ext;
+                    NETC_CopyTxDescriptor(txDesTemp, &txDesc[1]);
                     bdIndex++;
                 }
             }
@@ -904,8 +904,11 @@ status_t EP_SendFrameCommon(ep_handle_t *handle,
 status_t EP_SendFrame(ep_handle_t *handle, uint8_t ring, netc_frame_struct_t *frame, void *context, ep_tx_opt *opt)
 {
     assert(handle != NULL);
-    netc_tx_bd_t txDesc[2] = {0};
+    netc_tx_bd_t txDesc[2];
     uint8_t hwRing         = ring + handle->ringShift;
+
+    NETC_ClearTxDescriptor(&txDesc[0]);
+    NETC_ClearTxDescriptor(&txDesc[1]);
 
     if (ring >= handle->cfg.txRingUse)
     {
@@ -1007,11 +1010,15 @@ netc_tx_frame_info_t *EP_ReclaimTxDescCommon(ep_handle_t *handle,
                 if (frameInfo->isTsAvail)
                 {
                     frameInfo->timestamp = txDesc->writeback.timestamp;
+                } else {
+                    frameInfo->timestamp = 0;
                 }
 #if !(defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG)
                 if (frameInfo->isTxTsIdAvail)
                 {
                     frameInfo->txtsid = (uint16_t)txDesc->writeback.txtsid;
+                } else {
+                    frameInfo->txtsid = 0;
                 }
 #endif
                 frameInfo->status = (netc_ep_tx_status_t)txDesc->writeback.status;
@@ -1067,7 +1074,6 @@ void EP_ReclaimTxDescriptor(ep_handle_t *handle, uint8_t ring)
         if (frameInfo != NULL)
         {
             (void)handle->cfg.reclaimCallback(handle, ring, frameInfo, handle->cfg.userData);
-            (void)memset(frameInfo, 0, sizeof(netc_tx_frame_info_t));
         }
     } while (frameInfo != NULL);
 }
