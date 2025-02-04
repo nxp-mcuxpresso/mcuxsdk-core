@@ -66,8 +66,13 @@ function(mcux_add_source)
     if (match)
       file(GLOB files "${directory}/${file}")
     else ()
-      # add source_abs_path to list file
-      list(APPEND files "${source_abs_path}")
+      string(REGEX MATCH "\\*\\*" match "${file}")
+      if (match)
+        file(GLOB_RECURSE files "${directory}/*")
+      else ()
+        # add source_abs_path to list file
+        list(APPEND files "${source_abs_path}")
+      endif ()
     endif ()
     foreach(source_abs_path ${files})
         # process config files, project customized config files have higher priority
