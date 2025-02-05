@@ -480,7 +480,12 @@ class NinjaParser
           pattern = /--image_input=(\S+),(\S+),(\S+),(\d+)/
           res = flag.strip.match(pattern)
           if res && res[1]
-            path = File.join('$PROJ_DIR$', translate_project_relative_path(res[1]))
+            # If using relative path in cmake setting, need to transfer it to absolute path first, then get path relative to project path
+            if res[1].start_with?('../') || res[1].start_with?('./')
+              path = File.join('$PROJ_DIR$', translate_project_relative_path(File.join(ENV['build_dir'], res[1])))
+            else
+              path = File.join('$PROJ_DIR$', translate_project_relative_path(res[1]))
+            end
             result.push flag.gsub(res[1], path)
           end
         elsif flag.strip.match(/-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/)
