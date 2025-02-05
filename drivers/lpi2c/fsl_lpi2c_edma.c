@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2021, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -145,7 +145,12 @@ void LPI2C_MasterCreateEDMAHandle(LPI2C_Type *base,
     s_lpi2cMasterIsr = LPI2C_MasterTransferEdmaHandleIRQ;
 
     /* Enable interrupt in NVIC. */
+#ifdef LPI2C_IRQS
     (void)EnableIRQ(kLpi2cIrqs[instance]);
+#endif
+#ifdef LPI2C_MASTER_IRQS
+    (void)EnableIRQ(kLpi2cMasterIrqs[instance]);
+#endif
 
     /* Set DMA channel completion callbacks. */
     EDMA_SetCallback(handle->rx, LPI2C_MasterEDMACallback, handle);

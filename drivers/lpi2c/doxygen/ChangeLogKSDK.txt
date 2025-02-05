@@ -207,7 +207,11 @@
 @if dox_section_lpi2c_edma_driver
 
 @section lpi2c_edma LPI2C_EDMA
-  The current LPI2C_EDMA driver version is 2.4.2.
+  The current LPI2C_EDMA driver version is 2.4.3.
+
+  - 2.4.3
+    - Improvements
+      - Added support for separated IRQ handlers.
 
   - 2.4.2
     - Improvements
