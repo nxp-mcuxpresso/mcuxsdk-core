@@ -4420,11 +4420,11 @@ static bool FLEXCAN_CheckUnhandleInterruptEvents(CAN_Type *base)
     bool fgRet = false;
 
     if (0U == (FLEXCAN_GetStatusFlags(base) &
-               (FLEXCAN_ERROR_AND_STATUS_INIT_FLAG
+               (FLEXCAN_ERROR_AND_STATUS_INT_FLAG
 #if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
                | FLEXCAN_WAKE_UP_FLAG
 #endif
-               | FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INIT_FLAG)))
+               | FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG)))
     {
         /* If no error, wake_up or enhanced RX FIFO status, Checking whether exist MB interrupt status and legacy RX
          * FIFO interrupt status */
@@ -4449,7 +4449,7 @@ static bool FLEXCAN_CheckUnhandleInterruptEvents(CAN_Type *base)
 #endif
     }
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-    else if (0U != (FLEXCAN_GetStatusFlags(base) & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INIT_FLAG))
+    else if (0U != (FLEXCAN_GetStatusFlags(base) & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG))
     {
         /* Checking whether exist enhanced RX FIFO interrupt status. */
         tempmask = (uint64_t)base->ERFIER;
@@ -4911,11 +4911,11 @@ void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
         result = FLEXCAN_GetStatusFlags(base);
 
         /* To handle FlexCAN Error and Status Interrupt first. */
-        if (0U != (result & FLEXCAN_ERROR_AND_STATUS_INIT_FLAG))
+        if (0U != (result & FLEXCAN_ERROR_AND_STATUS_INT_FLAG))
         {
             status = kStatus_FLEXCAN_ErrorStatus;
             /* Clear FlexCAN Error and Status Interrupt. */
-            FLEXCAN_ClearStatusFlags(base, FLEXCAN_ERROR_AND_STATUS_INIT_FLAG);
+            FLEXCAN_ClearStatusFlags(base, FLEXCAN_ERROR_AND_STATUS_INT_FLAG);
         }
 #if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
         else if (0U != (result & FLEXCAN_WAKE_UP_FLAG))
@@ -4925,7 +4925,7 @@ void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
         }
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-        else if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INIT_FLAG) & base->ERFIER))
+        else if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG) & base->ERFIER))
         {
             status = FLEXCAN_SubHandlerForEhancedRxFifo(base, handle, result);
         }

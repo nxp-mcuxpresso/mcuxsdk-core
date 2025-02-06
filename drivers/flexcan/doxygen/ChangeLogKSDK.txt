@@ -8,6 +8,9 @@
     - Improvements
       - Enter Freeze Mode first when enter Disable Mode on some platform.
       - Add feature macro for Pretended Networking because some FlexCAN instance do not have this feature.
+    - Bug Fixes
+      - Fixed wrong interrupt and status flag helper macro in enumeration _flexcan_flags and API FLEXCAN_DisableInterrupts.
+      - Fixed interrupt flag helper macro typo issue.
 
   - 2.13.1
     - Improvements

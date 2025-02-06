@@ -202,14 +202,14 @@
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
-#define FLEXCAN_ERROR_AND_STATUS_INIT_FLAG                                                                            \
+#define FLEXCAN_ERROR_AND_STATUS_INT_FLAG                                                                            \
     ((uint32_t)kFLEXCAN_ErrorOverrunFlag | (uint32_t)kFLEXCAN_FDErrorIntFlag | (uint32_t)kFLEXCAN_BusoffDoneIntFlag | \
      (uint32_t)kFLEXCAN_TxWarningIntFlag | (uint32_t)kFLEXCAN_RxWarningIntFlag | (uint32_t)kFLEXCAN_BusOffIntFlag |   \
-     (uint32_t)kFLEXCAN_ErrorIntFlag | FLEXCAN_MEMORY_ERROR_INIT_FLAG)
+     (uint32_t)kFLEXCAN_ErrorIntFlag | FLEXCAN_MEMORY_ERROR_INT_FLAG)
 #else
-#define FLEXCAN_ERROR_AND_STATUS_INIT_FLAG                                                                          \
+#define FLEXCAN_ERROR_AND_STATUS_INT_FLAG                                                                          \
     ((uint32_t)kFLEXCAN_TxWarningIntFlag | (uint32_t)kFLEXCAN_RxWarningIntFlag | (uint32_t)kFLEXCAN_BusOffIntFlag | \
-     (uint32_t)kFLEXCAN_ErrorIntFlag | FLEXCAN_MEMORY_ERROR_INIT_FLAG)
+     (uint32_t)kFLEXCAN_ErrorIntFlag | FLEXCAN_MEMORY_ERROR_INT_FLAG)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
@@ -224,13 +224,13 @@
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
-#define FLEXCAN_MEMORY_ERROR_INIT_FLAG ((uint64_t)kFLEXCAN_AllMemoryErrorFlag)
+#define FLEXCAN_MEMORY_ERROR_INT_FLAG ((uint64_t)kFLEXCAN_AllMemoryErrorFlag)
 #else
-#define FLEXCAN_MEMORY_ERROR_INIT_FLAG (0U)
+#define FLEXCAN_MEMORY_ERROR_INT_FLAG (0U)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-#define FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INIT_FLAG                                             \
+#define FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG                                             \
     ((uint64_t)kFLEXCAN_ERxFifoUnderflowIntFlag | (uint64_t)kFLEXCAN_ERxFifoOverflowIntFlag | \
      (uint64_t)kFLEXCAN_ERxFifoWatermarkIntFlag | (uint64_t)kFLEXCAN_ERxFifoDataAvlIntFlag)
 #endif
@@ -239,7 +239,7 @@
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
 #define E_RX_FIFO(base) ((uintptr_t)(base) + 0x2000U)
 #else
-#define FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INIT_FLAG (0U)
+#define FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG (0U)
 #endif
 
 /*! @brief FlexCAN transfer status. */
@@ -505,17 +505,17 @@ enum _flexcan_flags
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
     /*! Host Access With Non-Correctable Error Interrupt Flag. */
-    kFLEXCAN_HostAccessNonCorrectableErrorIntFlag = FLEXCAN_MECR_INT_MASK(CAN_ERRSR_HANCEIF_MASK),
+    kFLEXCAN_HostAccessNonCorrectableErrorIntFlag = FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_HANCEIF_MASK),
     /*! FlexCAN Access With Non-Correctable Error Interrupt Flag. */
-    kFLEXCAN_FlexCanAccessNonCorrectableErrorIntFlag = FLEXCAN_MECR_INT_MASK(CAN_ERRSR_FANCEIF_MASK),
+    kFLEXCAN_FlexCanAccessNonCorrectableErrorIntFlag = FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_FANCEIF_MASK),
     /*! Correctable Error Interrupt Flag. */
-    kFLEXCAN_CorrectableErrorIntFlag = FLEXCAN_MECR_INT_MASK(CAN_ERRSR_CEIF_MASK),
+    kFLEXCAN_CorrectableErrorIntFlag = FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_CEIF_MASK),
     /*! Host Access With Non-Correctable Error Interrupt Overrun Flag. */
-    kFLEXCAN_HostAccessNonCorrectableErrorOverrunFlag = FLEXCAN_MECR_INT_MASK(CAN_ERRSR_HANCEIOF_MASK),
+    kFLEXCAN_HostAccessNonCorrectableErrorOverrunFlag = FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_HANCEIOF_MASK),
     /*! FlexCAN Access With Non-Correctable Error Interrupt Overrun Flag. */
-    kFLEXCAN_FlexCanAccessNonCorrectableErrorOverrunFlag = FLEXCAN_MECR_INT_MASK(CAN_ERRSR_FANCEIOF_MASK),
+    kFLEXCAN_FlexCanAccessNonCorrectableErrorOverrunFlag = FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_FANCEIOF_MASK),
     /*! Correctable Error Interrupt Overrun Flag. */
-    kFLEXCAN_CorrectableErrorOverrunFlag = FLEXCAN_MECR_INT_MASK(CAN_ERRSR_CEIOF_MASK),
+    kFLEXCAN_CorrectableErrorOverrunFlag = FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_CEIOF_MASK),
     /*! All Memory Error Flags. */
     kFLEXCAN_AllMemoryErrorFlag =
         (kFLEXCAN_HostAccessNonCorrectableErrorIntFlag | kFLEXCAN_FlexCanAccessNonCorrectableErrorIntFlag |
@@ -1824,10 +1824,10 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t mask)
     if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn(base))
     {
         /* Solve PN Wake Up Interrupt. */
-        base->CTRL1_PN &= ~FLEXCAN_PN_STATUS_UNMASK(mask);
+        base->CTRL1_PN &= ~FLEXCAN_PN_INT_UNMASK(mask);
     }
 #else
-    base->CTRL1_PN &= ~FLEXCAN_PN_STATUS_UNMASK(mask);
+    base->CTRL1_PN &= ~FLEXCAN_PN_INT_UNMASK(mask);
 #endif
 #endif
 
@@ -1838,7 +1838,7 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t mask)
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
     /* Solve Memory Error Interrupt. */
-    base->MECR &= ~FLEXCAN_MECR_STATUS_UNMASK(mask);
+    base->MECR &= ~FLEXCAN_MECR_INT_UNMASK(mask);
 #endif
 
     /* Solve interrupt enable bits in CTRL1 register. */
