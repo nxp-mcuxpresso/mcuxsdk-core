@@ -4,6 +4,7 @@
 
 import os
 import pkg_resources
+import glob
 from pathlib import Path
 from west.commands import WestCommand
 try:
@@ -83,7 +84,7 @@ class Format(WestCommand):
         #                     help='''Pass in configuration file if the formatter
         #                     need, use pre-commit config template''')
         parser.add_argument(
-            "source", metavar="SOURCE", nargs="*", help="source file path to format"
+            "source", metavar="SOURCE", nargs="*", help="source file or dir path to format"
         )
 
         return parser
@@ -100,8 +101,13 @@ class Format(WestCommand):
 
     def format_source(self, sources: list[str]) -> None:
         for source in sources:
-            if os.path.exists(source):
+            if os.path.isfile(source):
                 self.format_file(os.path.abspath(source))
+            elif os.path.isdir(source):
+                folderContent=glob.glob(source+"**/**",recursive=True)
+                for path in folderContent:
+                    if os.path.isfile(path):
+                        self.format_file(os.path.abspath(path))
             else:
                 self.err(f"Skip '{source}': not a valid path.")
 
