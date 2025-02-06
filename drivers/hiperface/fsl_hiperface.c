@@ -88,7 +88,7 @@ status_t DSL_CheckLinkStatus(HIPERFACE_Type *base, uint32_t timeout_ms)
 
 uint64_t DSL_GetFastPosition(HIPERFACE_Type *base, dsl_encoder_t *enc)
 {
-	volatile uint8_t *pos = &base->POS_PRIM[0];
+	volatile const uint8_t *pos = &base->POS_PRIM[0];
 	uint64_t pos_u64 = ((uint64_t)pos[4]  << 32) + (pos[3] << 24) + (pos[2] << 16) + (pos[1] << 8) + pos[0];
 	if (enc->sign && (pos_u64 | enc->signMask)) {
 		return pos_u64 | enc->signExtend;
@@ -1298,7 +1298,7 @@ status_t DSL_RDB_GetCurrentAccessLevel(HIPERFACE_Type *base, uint8_t *accessLeve
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, 2)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, 2)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1617,7 +1617,7 @@ status_t DSL_RDB_GetReadCounter(HIPERFACE_Type *base, uint32_t *counter)
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1769,7 +1769,7 @@ status_t DSL_RDB_GetFileStatus(HIPERFACE_Type *base, uint8_t *ReadAccessRight, u
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, 4)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, 4)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1994,7 +1994,7 @@ uint8_t Slave_Ping_register_reading(HIPERFACE_Type *base)
 uint8_t Slave_SRSSI_register_reading(HIPERFACE_Type *base)
 {
 	uint8_t dummy;
-	volatile uint8_t *enc_st_addr = &(base->SRSSI_SAFE) + 0x200;
+	volatile const uint8_t *enc_st_addr = &(base->SRSSI_SAFE) + 0x200;
 	base->EVENT_S &= 0xFE;
 	dummy = *enc_st_addr;
 	while(!(base->EVENT_S & 0x01));
