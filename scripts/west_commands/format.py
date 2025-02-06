@@ -135,9 +135,19 @@ class Format(WestCommand):
             find_formatter = True
             cmd_list = [formatter["entry"]] + formatter.get("args", []) + [path]
             try:
+                unformated=secondRun=open(path,'rb').read()
                 completed_process = self.run_subprocess(
                     cmd_list, capture_output=True, text=True
                 )
+                firstRun=open(path,'rb').read()
+                completed_process = self.run_subprocess(
+                    cmd_list, capture_output=True, text=True
+                )
+                secondRun=open(path,'rb').read()
+                if secondRun != firstRun:
+                    open(path,'wb').write(unformated)
+                    self.skip_banner(f"Cannot format file {path}. Second format is diferent than first format")
+
             except PermissionError as e:
                 self.err(f"Please check whether {path} is opened with another program.")
                 break
