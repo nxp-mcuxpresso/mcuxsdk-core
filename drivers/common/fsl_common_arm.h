@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022, 2024 NXP
+ * Copyright 2016-2022, 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -219,14 +219,14 @@ static inline void _SDK_AtomicLocalClearAndSet1Byte(volatile uint8_t *addr, uint
 {
     uint8_t s_val;
 
-    _SDK_ATOMIC_LOCAL_OPS_1BYTE(addr, s_val, s_val = (s_val & ~clearBits) | setBits);
+    _SDK_ATOMIC_LOCAL_OPS_1BYTE(addr, s_val, s_val = (s_val & (uint8_t)~clearBits) | setBits);
 }
 
 static inline void _SDK_AtomicLocalClearAndSet2Byte(volatile uint16_t *addr, uint16_t clearBits, uint16_t setBits)
 {
     uint16_t s_val;
 
-    _SDK_ATOMIC_LOCAL_OPS_2BYTE(addr, s_val, s_val = (s_val & ~clearBits) | setBits);
+    _SDK_ATOMIC_LOCAL_OPS_2BYTE(addr, s_val, s_val = (s_val & (uint16_t)~clearBits) | setBits);
 }
 
 static inline void _SDK_AtomicLocalClearAndSet4Byte(volatile uint32_t *addr, uint32_t clearBits, uint32_t setBits)
@@ -1053,7 +1053,7 @@ static inline bool _SDK_AtomicLocalCompareAndSet1Byte(volatile uint8_t *addr, ui
             __CLREX();
             return false;
         }
-    } while (__STREXB((newValue), (addr)));
+    } while (0U != __STREXB((newValue), (addr)));
 
     return true;
     
@@ -1071,7 +1071,7 @@ static inline bool _SDK_AtomicLocalCompareAndSet2Byte(volatile uint16_t *addr, u
             __CLREX();
             return false;
         }
-    } while (__STREXH((newValue), (addr)));
+    } while (0U != __STREXH((newValue), (addr)));
 
     return true;
 }
@@ -1088,7 +1088,7 @@ static inline bool _SDK_AtomicLocalCompareAndSet4Byte(volatile uint32_t *addr, u
             __CLREX();
             return false;
         }
-    } while (__STREXW((newValue), (addr)));
+    } while (0UL != __STREXW((newValue), (addr)));
 
     return true;
 }
@@ -1100,7 +1100,7 @@ static inline uint8_t _SDK_AtomicLocalTestAndSet1Byte(volatile uint8_t *addr, ui
     do
     {
         s_old = __LDREXB(addr);
-    } while (__STREXB((newValue), (addr)));
+    } while (0U != __STREXB((newValue), (addr)));
 
     return s_old;
 }
@@ -1112,7 +1112,7 @@ static inline uint16_t _SDK_AtomicLocalTestAndSet2Byte(volatile uint16_t *addr, 
     do
     {
         s_old = __LDREXH(addr);
-    } while (__STREXH((newValue), (addr)));
+    } while (0U != __STREXH((newValue), (addr)));
 
     return s_old;
 }
@@ -1124,7 +1124,7 @@ static inline uint32_t _SDK_AtomicLocalTestAndSet4Byte(volatile uint32_t *addr, 
     do
     {
         s_old = __LDREXW(addr);
-    } while (__STREXW((newValue), (addr)));
+    } while (0UL != __STREXW((newValue), (addr)));
 
     return s_old;
 }

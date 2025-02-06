@@ -3,7 +3,11 @@
 
 @section common COMMON
 
-  The current COMMON driver version is 2.5.0.
+  The current COMMON driver version is 2.5.1.
+
+  - 2.3.1
+    - Bug Fixes
+      - Fixed CERT INT30-C, CERT INT31-C issues.
 
   - 2.5.0
     - New Features

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2021, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -9,6 +9,7 @@
 #include "fsl_common.h"
 
 #define SDK_MEM_MAGIC_NUMBER 12345U
+#define SDK_MALLOC_ALIGN_MAX 0x10000U /* 16-bit align at most. */
 
 typedef struct _mem_align_control_block
 {
@@ -26,6 +27,11 @@ void *SDK_Malloc(size_t size, size_t alignbytes)
 {
     mem_align_cb_t *p_cb = NULL;
     uint32_t alignedsize;
+
+    if ((alignbytes <= (size_t)0) || (alignbytes > SDK_MALLOC_ALIGN_MAX))
+    {
+        return NULL;
+    }
 
     /* Check overflow. */
     alignedsize = (uint32_t)(unsigned int)SDK_SIZEALIGN(size, alignbytes);
