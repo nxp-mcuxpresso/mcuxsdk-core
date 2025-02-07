@@ -369,14 +369,7 @@ status_t SWT_Init(swt_handle_t *handle, const swt_config_t *config)
 #if defined(NETC_PORT_PLANIDCR_LANID)
             port->PLANIDCR  = NETC_PORT_PLANIDCR_LANID(config->ports[i].lanID);
 #endif
-            port->PIPV2QMR0 = NETC_PORT_PIPV2QMR0_IPV7_Q(config->ports[i].ipvToTC[7]) |
-                              NETC_PORT_PIPV2QMR0_IPV6_Q(config->ports[i].ipvToTC[6]) |
-                              NETC_PORT_PIPV2QMR0_IPV5_Q(config->ports[i].ipvToTC[5]) |
-                              NETC_PORT_PIPV2QMR0_IPV4_Q(config->ports[i].ipvToTC[4]) |
-                              NETC_PORT_PIPV2QMR0_IPV3_Q(config->ports[i].ipvToTC[3]) |
-                              NETC_PORT_PIPV2QMR0_IPV2_Q(config->ports[i].ipvToTC[2]) |
-                              NETC_PORT_PIPV2QMR0_IPV1_Q(config->ports[i].ipvToTC[1]) |
-                              NETC_PORT_PIPV2QMR0_IPV0_Q(config->ports[i].ipvToTC[0]);
+            (void)SWT_SetPortIPV2QMR(handle, i, config->ports[i].ipvToTC);
             port->PBPMCR0 = NETC_PORT_PBPMCR0_IPV3_INDEX(config->ports[i].ipvToBP[3]) |
                             NETC_PORT_PBPMCR0_IPV2_INDEX(config->ports[i].ipvToBP[2]) |
                             NETC_PORT_PBPMCR0_IPV1_INDEX(config->ports[i].ipvToBP[1]) |

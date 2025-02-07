@@ -2344,6 +2344,28 @@ static inline uint32_t SWT_GetPortTGSListStatus(swt_handle_t *handle, netc_hw_po
 {
     return NETC_PortGetTGSListStatus(handle->hw.ports[portIdx].port);
 }
+
+/*!
+ * @brief Set IPV to queue mapping on Switch port
+ *
+ * @param handle
+ * @param portIdx port index
+ * @param ipvToTC[] queue number of each ipv value
+ * @return kStatus_Success
+ */
+static inline status_t SWT_SetPortIPV2QMR(swt_handle_t *handle, netc_hw_port_idx_t portIdx, const uint8_t *ipvToTC)
+{
+    handle->hw.ports[portIdx].port->PIPV2QMR0 = NETC_PORT_PIPV2QMR0_IPV7_Q(ipvToTC[7]) |
+        NETC_PORT_PIPV2QMR0_IPV6_Q(ipvToTC[6]) |
+        NETC_PORT_PIPV2QMR0_IPV5_Q(ipvToTC[5]) |
+        NETC_PORT_PIPV2QMR0_IPV4_Q(ipvToTC[4]) |
+        NETC_PORT_PIPV2QMR0_IPV3_Q(ipvToTC[3]) |
+        NETC_PORT_PIPV2QMR0_IPV2_Q(ipvToTC[2]) |
+        NETC_PORT_PIPV2QMR0_IPV1_Q(ipvToTC[1]) |
+        NETC_PORT_PIPV2QMR0_IPV0_Q(ipvToTC[0]);
+    return kStatus_Success;
+}
+
 /*! @} */ // end of netc_swt_stat
 #if !(defined(__GNUC__) || defined(__ICCARM__))
 #pragma endregion netc_swt_stat
