@@ -2516,6 +2516,35 @@ status_t SWT_FMDelTableEntry(swt_handle_t *handle, uint32_t entryID)
     }
 }
 
+status_t SWT_FMQueryTableEntry(swt_handle_t *handle, uint32_t entryID, netc_tb_fm_config_t *config)
+{
+    netc_cmd_bd_t cmdBd = {0};
+    netc_cbdr_handle_t cdbrHandle;
+    status_t status = kStatus_NETC_LackOfResource;
+
+    if (SWT_GetIdleCmdBDRing(handle, &cdbrHandle) == kStatus_Success)
+    {
+        (void)memset(cdbrHandle.buffer, 0, sizeof(netc_tb_fm_config_t));
+        cdbrHandle.buffer->fm.request.entryID                    = entryID;
+        cdbrHandle.buffer->fm.request.commonHeader.updateActions = 0U;
+        cdbrHandle.buffer->fm.request.commonHeader.queryActions  = 0U;
+        cmdBd.req.addr                                            = (uintptr_t)cdbrHandle.buffer;
+        cmdBd.req.reqLength                                       = 8U;
+        cmdBd.req.resLength                                       = sizeof(netc_tb_fm_config_t);
+        cmdBd.req.tableId                                         = kNETC_FMTable;
+        cmdBd.req.cmd                                             = kNETC_QueryEntry;
+        /* Only support Entry ID Match */
+        cmdBd.req.accessType = kNETC_EntryIDMatch;
+        status               = NETC_CmdBDSendCommand(cdbrHandle.base, cdbrHandle.cmdr, &cmdBd, kNETC_NtmpV2_0);
+        if (kStatus_Success == status)
+        {
+            (void)memcpy(&config->cfge, &cdbrHandle.buffer->fm.response.cfge, sizeof(netc_tb_fm_config_t));
+        }
+    }
+
+    return status;
+}
+
 status_t SWT_FMDUpdateTableEntry(swt_handle_t *handle, netc_tb_fmd_update_config_t *config, uint32_t length)
 {
     netc_cmd_bd_t cmdBd = {0};

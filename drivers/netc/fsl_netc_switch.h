@@ -1546,6 +1546,17 @@ static inline uint32_t SWT_FMGetTableRemainEntryNum(swt_handle_t *handle)
 }
 
 /*!
+ * @brief Get maximum entry number of Frame Modification table
+ *
+ * @param handle
+ * @return uint32_t
+ */
+static inline uint32_t SWT_FMGetTableMaxEntryNum(swt_handle_t *handle)
+{
+    return (handle->hw.common->FMITCAPR & NETC_SW_ENETC_FMITCAPR_NUM_ENTRIES_MASK);
+}
+
+/*!
  * @brief Add entry into the Frame Modification table
  *
  * Add entry of the frame modification table. Frame modification can be encoded into the table id directly or provided
