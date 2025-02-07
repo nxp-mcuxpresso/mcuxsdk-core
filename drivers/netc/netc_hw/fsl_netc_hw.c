@@ -804,7 +804,7 @@ status_t NETC_GetSGIState(netc_cbdr_handle_t *handle, uint32_t entryID, netc_tb_
     return status;
 }
 
-status_t NETC_QuerySGITableEntry(netc_cbdr_handle_t *handle, uint32_t entryID, netc_tb_sgi_rsp_data_t *rsp)
+status_t NETC_QuerySGITableEntry(netc_cbdr_handle_t *handle, uint32_t entryID, netc_tb_sgi_config_t *cfg)
 {
     netc_cmd_bd_t cmdBd = {0};
     status_t status     = kStatus_Success;
@@ -823,7 +823,9 @@ status_t NETC_QuerySGITableEntry(netc_cbdr_handle_t *handle, uint32_t entryID, n
     {
         if (cmdBd.resp.numMatched != 0U)
         {
-            *rsp = handle->buffer->sgi.response;
+            cfg->cfge = handle->buffer->sgi.response.cfge;
+            cfg->icfge = handle->buffer->sgi.response.icfge;
+            cfg->acfge = handle->buffer->sgi.response.acfge;
         }
         else
         {

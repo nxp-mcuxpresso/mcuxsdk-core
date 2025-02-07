@@ -533,11 +533,11 @@ status_t NETC_GetSGIState(netc_cbdr_handle_t *handle, uint32_t entryID, netc_tb_
  *
  * @param handle
  * @param entryID
- * @param rsp
+ * @param config
  * @return status_t
  * @return See @ref netc_cmd_error_t
  */
-status_t NETC_QuerySGITableEntry(netc_cbdr_handle_t *handle, uint32_t entryID, netc_tb_sgi_rsp_data_t *rsp);
+status_t NETC_QuerySGITableEntry(netc_cbdr_handle_t *handle, uint32_t entryID, netc_tb_sgi_config_t *config);
 
 /*!
  * @brief Add entry into Stream Gate Control List Table

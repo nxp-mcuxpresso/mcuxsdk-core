@@ -2118,14 +2118,14 @@ status_t SWT_RxPSFPGetSGIState(swt_handle_t *handle, uint32_t entryID, netc_tb_s
     }
 }
 
-status_t SWT_RxPSFPQuerySGITableEntry(swt_handle_t *handle, uint32_t entryID, netc_tb_sgi_rsp_data_t *rsp)
+status_t SWT_RxPSFPQuerySGITableEntry(swt_handle_t *handle, uint32_t entryID, netc_tb_sgi_config_t *config)
 {
-    assert((handle != NULL) && (rsp != NULL));
+    assert((handle != NULL) && (config != NULL));
     netc_cbdr_handle_t cdbrHandle;
 
     if (SWT_GetIdleCmdBDRing(handle, &cdbrHandle) == kStatus_Success)
     {
-        return NETC_QuerySGITableEntry(&cdbrHandle, entryID, rsp);
+        return NETC_QuerySGITableEntry(&cdbrHandle, entryID, config);
     }
     else
     {

@@ -1152,10 +1152,10 @@ status_t SWT_RxPSFPGetSGIState(swt_handle_t *handle, uint32_t entryID, netc_tb_s
  *
  * @param handle
  * @param entryID
- * @param rsp
+ * @param config
  * @return See @ref netc_cmd_error_t
  */
-status_t SWT_RxPSFPQuerySGITableEntry(swt_handle_t *handle, uint32_t entryID, netc_tb_sgi_rsp_data_t *rsp);
+status_t SWT_RxPSFPQuerySGITableEntry(swt_handle_t *handle, uint32_t entryID, netc_tb_sgi_config_t *config);
 
 /*!
  * @brief Get remaining available words number of Stream Gate Control List table
