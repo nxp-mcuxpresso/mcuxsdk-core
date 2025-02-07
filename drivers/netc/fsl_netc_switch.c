@@ -2385,7 +2385,7 @@ status_t SWT_TxTGSConfigAdminGcl(swt_handle_t *handle, netc_tb_tgs_gcl_t *config
             uint64_t time, minBaseTime;
 
             /* Read the previous active Operationa gate control list cycle time*/
-            (void)memset(cdbrHandle.buffer, 0, sizeof(netc_tb_tgs_data_t));
+            (void)memset(cdbrHandle.buffer, 0, sizeof(netc_tb_tgs_req_data_t));
             cdbrHandle.buffer->tgs.request.entryID                    = config->entryID;
             cdbrHandle.buffer->tgs.request.commonHeader.updateActions = 0U;
             cdbrHandle.buffer->tgs.request.commonHeader.queryActions  = 0U;

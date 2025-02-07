@@ -786,7 +786,7 @@ status_t NETC_GetSGIState(netc_cbdr_handle_t *handle, uint32_t entryID, netc_tb_
 {
     netc_cmd_bd_t cmdBd = {0};
     status_t status     = kStatus_Success;
-    (void)memset(handle->buffer, 0, sizeof(netc_tb_sgi_rsp_data_t));
+    (void)memset(handle->buffer, 0, sizeof(netc_tb_sgi_req_data_t));
     handle->buffer->sgi.request.entryID                    = entryID;
     handle->buffer->sgi.request.commonHeader.updateActions = 0U;
     handle->buffer->sgi.request.commonHeader.queryActions  = 0U;
