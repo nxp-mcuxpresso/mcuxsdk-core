@@ -1108,6 +1108,15 @@ static inline uint32_t SWT_RxPSFPGetSGITableMaxEntryNum(swt_handle_t *handle)
 status_t SWT_RxPSFPAddSGITableEntry(swt_handle_t *handle, netc_tb_sgi_config_t *config);
 
 /*!
+ * @brief Reset IRX and OEX flag in stream gate instance entry
+ *
+ * @param handle
+ * @return status_t
+ * @return See @ref netc_cmd_error_t
+ */
+status_t SWT_RxPSFPResetIRXOEXSGITableEntry(swt_handle_t *handle, uint32_t entryID);
+
+/*!
  * @brief Update entry in stream gate instance table
  *
  * @param handle

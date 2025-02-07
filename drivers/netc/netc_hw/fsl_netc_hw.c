@@ -734,6 +734,37 @@ status_t NETC_AddOrUpdateSGITableEntry(netc_cbdr_handle_t *handle, netc_tb_sgi_c
     return NETC_CmdBDSendCommand(handle->base, handle->cmdr, &cmdBd, kNETC_NtmpV2_0);
 }
 
+status_t NETC_ResetIRXOEXSGITableEntry(netc_cbdr_handle_t *handle, uint32_t entryID)
+{
+    status_t status;
+    netc_cmd_bd_t cmdBd = {0};
+    (void)memset(handle->buffer, 0, sizeof(netc_tb_sgi_req_data_t));
+    handle->buffer->sgi.request.entryID = entryID;
+    handle->buffer->sgi.request.commonHeader.updateActions = (uint16_t)kNETC_SGISgisEUpdate;
+    handle->buffer->sgi.request.commonHeader.queryActions = 0U;
+    cmdBd.req.addr                                        = (uintptr_t)handle->buffer;
+    cmdBd.req.reqLength                                   = sizeof(netc_tb_sgi_req_data_t);
+    cmdBd.req.resLength                                   = 0U;
+    cmdBd.req.tableId                                     = kNETC_SGITable;
+    cmdBd.req.cmd = kNETC_UpdateEntry;
+
+    cmdBd.req.accessType = kNETC_EntryIDMatch;
+    status = NETC_CmdBDSendCommand(handle->base, handle->cmdr, &cmdBd, kNETC_NtmpV2_0);
+    if (kStatus_Success == status)
+    {
+        if (cmdBd.resp.numMatched == 0U)
+        {
+            status = kStatus_NETC_NotFound;
+        }
+        else
+        {
+            /* Intentional empty */
+        }
+    }
+
+    return status;
+}
+
 status_t NETC_DelSGITableEntry(netc_cbdr_handle_t *handle, uint32_t entryID)
 {
     netc_cmd_bd_t cmdBd = {0};

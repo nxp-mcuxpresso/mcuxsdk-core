@@ -2073,6 +2073,20 @@ status_t SWT_RxPSFPUpdateSGITableEntry(swt_handle_t *handle, netc_tb_sgi_config_
         return kStatus_NETC_LackOfResource;
     }
 }
+status_t SWT_RxPSFPResetIRXOEXSGITableEntry(swt_handle_t *handle, uint32_t entryID)
+{
+    assert(handle != NULL);
+    netc_cbdr_handle_t cdbrHandle;
+
+    if (SWT_GetIdleCmdBDRing(handle, &cdbrHandle) == kStatus_Success)
+    {
+        return NETC_ResetIRXOEXSGITableEntry(&cdbrHandle, entryID);
+    }
+    else
+    {
+        return kStatus_NETC_LackOfResource;
+    }
+}
 
 status_t SWT_RxPSFPDelSGITableEntry(swt_handle_t *handle, uint32_t entryID)
 {
@@ -2091,7 +2105,7 @@ status_t SWT_RxPSFPDelSGITableEntry(swt_handle_t *handle, uint32_t entryID)
 
 status_t SWT_RxPSFPGetSGIState(swt_handle_t *handle, uint32_t entryID, netc_tb_sgi_sgise_t *state)
 {
-    assert(handle != NULL);
+    assert((handle != NULL) && (state != NULL));
     netc_cbdr_handle_t cdbrHandle;
 
     if (SWT_GetIdleCmdBDRing(handle, &cdbrHandle) == kStatus_Success)

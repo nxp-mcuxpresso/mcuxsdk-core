@@ -498,6 +498,16 @@ status_t NETC_ResetISCStatistic(netc_cbdr_handle_t *handle, uint32_t entryID);
 status_t NETC_AddOrUpdateSGITableEntry(netc_cbdr_handle_t *handle, netc_tb_sgi_config_t *config, bool isAdd);
 
 /*!
+ * @brief Reset IRX and OEX flags in stream gate instance entry
+ *
+ * @param handle
+ * @param entryID
+ * @return status_t
+ * @return See @ref netc_cmd_error_t
+ */
+status_t NETC_ResetIRXOEXSGITableEntry(netc_cbdr_handle_t *handle, uint32_t entryID);
+
+/*!
  * @brief Delete entry in the stream gate instance table
  *
  * @param handle
