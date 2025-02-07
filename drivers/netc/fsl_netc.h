@@ -1929,7 +1929,7 @@ typedef struct _netc_tb_sgi_rsp_data
         netc_tb_sgi_sgise_t sgise;
         struct
         {
-            uint8_t res0[24];
+            uint8_t res0[25];
             netc_tb_sgi_cfge_t cfge;
             netc_tb_sgi_icfge_t icfge;
             uint8_t res1;
