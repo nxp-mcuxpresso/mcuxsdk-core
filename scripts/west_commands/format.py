@@ -5,6 +5,9 @@
 import os
 import pkg_resources
 import glob
+import yaml
+import subprocess
+import re
 from pathlib import Path
 from west.commands import WestCommand
 try:
@@ -27,6 +30,7 @@ DEFAULT_CONFIG = [
         "dep": "clang-format",
         "args": ["-i"],
         "types": ["c", "c++", "cuda"],
+        "getVersion":["clang","--version"]
     },
     {
         "id": "py_format",
@@ -161,7 +165,14 @@ class Format(WestCommand):
     def _setup_environment(self) -> None:
         installed_packs = {p.project_name for p in pkg_resources.working_set}
         self.missing_packs = []
-
+        configPath=Path(__file__).parent.absolute().parent.absolute()
+        configPath=configPath / "formatter_config.yml"
+        if configPath.exists():
+            with open(configPath,'r') as file:
+                self.config=yaml.safe_load(file)
+        else:
+            self.err(f"Config file in {str(configPath)} does not exist")
+            exit(1)
         for c in self.formatter_config:
             if not c.get("dep"):
                 continue
@@ -172,6 +183,18 @@ class Format(WestCommand):
                     f"{c['dep']} is not installed, will skip file with type: '{skip_types}', please "
                     f"run 'pip install -U {c['dep']}'"
                 )
+            if "getVersion" in c.keys() and f"{c["id"]}-version"in self.config:
+                versionCmdOutput=subprocess.check_output(c["getVersion"],text=True)
+                versionObject=re.match(r'clang version ((\d|\.)*).*$',versionCmdOutput,re.MULTILINE)
+                if versionObject is not None:
+                    version=versionObject.group(1)
+                    if not version==self.config[f"{c["id"]}-version"]:
+                        self.err(f"{c["id"]} version ({version}) doesnt match the expected version ({self.config[f"{c["id"]}-version"]}), will skip file with type: '{skip_types}")
+
+                else:
+                    self.err(f"Couldnt check version of {c["id"]}, will skip file with type: '{skip_types}")
+                    skip_types = " ".join(list(c["types"]))
+                
         # if not os.path.exists(os.path.join(self.main_repo_dir, '.pre-commit-config.yaml')):
         #     self.die(f"Missing mandatory .pre-commit-config.yaml under {self.main_repo_dir}")
 
