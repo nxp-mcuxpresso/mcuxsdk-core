@@ -1,5 +1,7 @@
 # ELEMU
 
+- 2.1.2 Fix macro `BIT` redefined issue when compiling with Zephyr.
+
 - 2.1.1 Fix MISRA issues.
 
 - 2.1.0 Cleanup of unused legacy FW. Updated ELEMU_loadFw function.
