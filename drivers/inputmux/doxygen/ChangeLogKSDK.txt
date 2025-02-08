@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section inputmux INPUTMUX
-  The current INPUTMUX driver version is 2.0.8.
+  The current INPUTMUX driver version is 2.0.9.
+
+  - 2.0.9
+    - Bug Fixes
+      - Fixed CERT INT30-C issues.
 
   - 2.0.8
     - Improvements
