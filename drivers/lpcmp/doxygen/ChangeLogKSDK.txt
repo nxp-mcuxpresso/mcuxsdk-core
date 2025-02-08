@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section lpcmp LPCMP
-  The current LPCMP driver version is 2.3.0.
+  The current LPCMP driver version is 2.3.1.
+
+  - 2.3.1
+    - Improvements
+      - Update LPCMP driver to be compatible with platforms 
+        that do not support LPCMP nano power mode selection.
 
   - 2.3.0
     - New Feature

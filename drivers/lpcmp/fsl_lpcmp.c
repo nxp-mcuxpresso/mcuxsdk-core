@@ -167,7 +167,11 @@ void LPCMP_Init(LPCMP_Type *base, const lpcmp_config_t *config)
 #endif /* FSL_FEATURE_LPCMP_HAS_CCR1_FUNC_CLK_SEL */
     base->CCR1 = tmp32;
     /* CCR2 register. */
-    tmp32 = base->CCR2 & ~(LPCMP_CCR2_HYSTCTR_MASK | LPCMP_CCR2_CMP_NPMD_MASK | LPCMP_CCR2_CMP_HPMD_MASK
+    tmp32 = base->CCR2 & ~(LPCMP_CCR2_HYSTCTR_MASK
+#if !(defined(FSL_FEATURE_LPCMP_HAS_CCR2_CMP_NPMD) && (FSL_FEATURE_LPCMP_HAS_CCR2_CMP_NPMD==0U))
+                         | LPCMP_CCR2_CMP_NPMD_MASK
+#endif /* FSL_FEATURE_LPCMP_HAS_CCR2_CMP_NPMD */
+                         | LPCMP_CCR2_CMP_HPMD_MASK
 #if defined(FSL_FEATURE_LPCMP_HAS_CCR2_INPSEL) && FSL_FEATURE_LPCMP_HAS_CCR2_INPSEL
                          | LPCMP_CCR2_INPSEL_MASK
 #endif /* FSL_FEATURE_LPCMP_HAS_CCR2_INPSEL */

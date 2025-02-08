@@ -20,8 +20,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief LPCMP driver version 2.3.0. */
-#define FSL_LPCMP_DRIVER_VERSION (MAKE_VERSION(2, 3, 0))
+/*! @brief LPCMP driver version 2.3.1. */
+#define FSL_LPCMP_DRIVER_VERSION (MAKE_VERSION(2, 3, 1))
 /*! @} */
 
 #define LPCMP_CCR1_COUTA_CFG_MASK  (LPCMP_CCR1_COUTA_OWEN_MASK | LPCMP_CCR1_COUTA_OW_MASK)
