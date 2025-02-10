@@ -47,6 +47,9 @@ macro(project project_name)
         PARENT_SCOPE)
   endfunction()
 
+  # valiate compiler version
+  # The reason to validate compiler version here is that cmake engine code will get CMAKE_C_COMPILER_VERSION and CMAKE_CXX_COMPILER_VERSION just in "project" macro invocation.
+  _validate_compiler_version()
   clear_default_added_compiler_flags()
   # parse arguments
   set(options NO_DEFAULT_CONFIG)
@@ -278,8 +281,8 @@ macro(log_and_validate_generator)
     if (ret EQUAL 0)
       string(STRIP ${NINJA_VERSION} NINJA_VERSION)
       log_status("Ninja version: ${NINJA_VERSION}")
-      if (NINJA_VERSION VERSION_LESS ${RECOMMENDED_NINJA_VERSION})
-        message("warning: The system Ninja version ${NINJA_VERSION} is lower than the recommended version ${RECOMMENDED_NINJA_VERSION} which may cause unexpected build failure especially for complicated project. Please upgrade Ninja to version ${RECOMMENDED_NINJA_VERSION} or above.")
+      if (NINJA_VERSION VERSION_LESS ${NINJA_MINIMUM_VERSION})
+        message("warning: The system Ninja version ${NINJA_VERSION} is lower than the recommended version ${NINJA_MINIMUM_VERSION} which may cause unexpected build failure especially for complicated project. Please upgrade Ninja to version ${NINJA_MINIMUM_VERSION} or above.")
       endif()
     else ()
       log_fatal("Failed to get Ninja version with '${NINJA} ${NINJA_FLAG}'")

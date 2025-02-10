@@ -1,0 +1,119 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+toolchains:
+  armgcc:
+    name: GCC ARM Embedded 10-2021.10
+    toolchain: armgcc
+    version: 13.2.1
+    compiler: gcc
+    compiler_version: 13.2.1
+    vendor: GCC ARM Embedded
+    vendor_url: http://launchpad.net/gcc-arm-embedded
+    os:
+    - windows
+    - linux
+    - mac
+  mdk:
+    name: Keil MDK
+    toolchain: mdk
+    compiler: armclang
+    compiler_version: '6.22'
+    vendor: ARM
+    vendor_url: http://www.arm.com
+    version: '5.41'
+    os:
+    - windows
+  iar:
+    name: IAR Embedded Workbench for ARM
+    user_name: IAR Toolchain for ARM - 7.x
+    toolchain: iar
+    version: 9.60.3
+    compiler: iar
+    compiler_version: 9.60.3
+    vendor: IAR Systems
+    vendor_url: http://www.iar.com
+    os:
+    - windows
+  xcc:
+    name: Xtensa C Compiler
+    toolchain: xcc
+    version: 10.0.1
+    compiler: xcc
+    compiler_version: 10.0.1
+    vendor: Cadence
+    vendor_url: https://www.cadence.com/
+    included: always
+    os:
+    - windows
+  xtensa:
+    name: Xtensa Xplorer
+    toolchain: xtensa
+    version: '14.11'
+    compiler: xcc
+    compiler_version: 10.0.1
+    vendor: Cadence
+    vendor_url: https://www.cadence.com/
+    included: always
+    os:
+    - windows
+  codewarrior:
+    name: CodeWarrior Development Studio
+    version: '11.2'
+    toolchain: cwmcu
+    compiler: mwcc56800e
+    compiler_version: 8.3.1
+    vendor: NXP Semiconductors
+    vendor_url: http://www.nxp.com
+    os:
+    - windows
+  riscvllvm:
+    name: RISCV LLVM
+    toolchain: riscvllvm
+    version: 19.1.7
+    compiler: llvm
+    compiler_version: 19.1.7
+    vendor: NXP Semiconductors
+    vendor_url: http://www.nxp.com
+    os:
+    - windows
+    - linux
+    - mac
+build_tools:
+  cmake:
+    name: CMake
+    version: 3.30.0
+    vendor: Kitware
+    vendor_url: https://cmake.org/
+    os:
+    - windows
+    - linux
+    - mac
+  ninja:
+    name: Ninja
+    version: 1.12.0
+    vendor: Ninja
+    vendor_url: https://ninja-build.org/
+    os:
+    - windows
+    - linux
+    - mac
+  python:
+    name: Python
+    version: '3.8'
+    vendor: Python Software Foundation
+    vendor_url: https://www.python.org/
+    os:
+    - windows
+    - linux
+    - mac
+  ruby:
+    name: Ruby
+    version: 3.1.2
+    vendor: Ruby
+    vendor_url: https://www.ruby-lang.org/
+    os:
+    - windows
+    - linux
+    - mac

@@ -22,13 +22,15 @@
 
 include_guard(GLOBAL)
 
-set(RECOMMENDED_CMAKE_VERSION "3.30.0")
-set(RECOMMENDED_NINJA_VERSION "1.12.0")
+include(${SdkRootDirPath}/cmake/extension/misc_function.cmake)
+set(READ_TOOL_VERSION_PY "${SdkRootDirPath}/scripts/misc/read_tool_versions.py")
 set(INTERNAL_EXAMPLE_FOLDER "examples_int")
 
+_read_tool_versions(${READ_TOOL_VERSION_PY})
+
 log_status("CMake version: ${CMAKE_VERSION}")
-if (CMAKE_VERSION VERSION_LESS ${RECOMMENDED_CMAKE_VERSION})
-  message("warning: The system CMake version ${CMAKE_VERSION} is lower than the recommended version ${RECOMMENDED_CMAKE_VERSION} which may cause unexpected build failure especially for complicated project. Please upgrade CMake to version ${RECOMMENDED_CMAKE_VERSION} or above.")
+if (CMAKE_VERSION VERSION_LESS ${CMAKE_MINIMUM_VERSION})
+  message("warning: The system CMake version ${CMAKE_VERSION} is lower than the recommended version ${CMAKE_MINIMUM_VERSION} which may cause unexpected build failure especially for complicated project. Please upgrade CMake to version ${CMAKE_MINIMUM_VERSION} or above.")
 endif()
 
 include(${SdkRootDirPath}/cmake/extension/python.cmake)
@@ -192,5 +194,3 @@ list(
     iar_CX_IGNORE_LIST
     --use_cmsis_dsp
 )
-
-

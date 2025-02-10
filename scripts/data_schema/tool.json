@@ -1,0 +1,120 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "tool.json",
+    "title": "NXP MCUXpresso SDK yml data record component section schema",
+    "description": "NXP MCUXpresso SDK yml data record component section schema",
+    "version": "1.0.0",
+    "properties": {
+        "toolchains": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^.*$": {
+                    "$ref": "#/definitions/toolDescriptionType"
+                }
+            }
+        },
+        "build_tools": {
+            "type": "object",
+            "additionalProperties": false,
+            "patternProperties": {
+                "^.*$": {
+                    "$ref": "#/definitions/buildToolDescriptionType"
+                }
+            }
+        }
+    },
+    "required": [
+        "toolchains",
+        "build_tools"
+    ],
+    "definitions": {
+        "toolDescriptionType": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "toolchain": {
+                    "type": "string"
+                },
+                "version": {
+                    "$ref": "#/definitions/versionType"
+                },
+                "compiler": {
+                    "type": "string"
+                },
+                "compiler_version": {
+                    "$ref": "#/definitions/versionType"
+                },
+                "vendor": {
+                    "type": "string"
+                },
+                "vendor_url": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "os": {
+                    "type": "array",
+                    "minimum": 1,
+                    "uniqueItems": true,
+                    "additionalItems": false,
+                    "items": {
+                        "type": "string",
+                        "pattern": "^(windows|linux|mac)$"
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "toolchain",
+                "version",
+                "compiler",
+                "compiler_version",
+                "vendor",
+                "vendor_url",
+                "os"
+            ]
+        },
+        "buildToolDescriptionType": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "version": {
+                    "$ref": "#/definitions/versionType"
+                },
+                "vendor": {
+                    "type": "string"
+                },
+                "vendor_url": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "os": {
+                    "type": "array",
+                    "minimum": 1,
+                    "uniqueItems": true,
+                    "additionalItems": false,
+                    "items": {
+                        "type": "string",
+                        "pattern": "^(windows|linux|mac)$"
+                    }
+                }
+            },
+            "required": [
+                "name",
+                "version",
+                "vendor",
+                "vendor_url",
+                "os"
+            ]
+        },
+        "versionType": {
+            "type": "string",
+            "pattern": "^[0-9]+(\\.[0-9]+|(\\.[0-9]+(\\.[0-9]+|\\.[0-9]+_rev[0-9]+))|\\.[0-9]+_rev[0-9]+)$",
+            "description": "Component version number. Note that if version number has only a decimal like 1.2, please add quotation marks for version in case it is identifed as number type. "
+        }
+    }
+}

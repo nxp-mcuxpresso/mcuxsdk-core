@@ -37,7 +37,7 @@
                             "belong_to": "set.device.${device}"
                         }
                     ]
-                },  
+                },
                 "contents": {
                     "type": "object",
                     "description": "The project configuration.",
@@ -90,8 +90,18 @@
                 }
             },
             "anyOf": [
-                { "required": ["contents", "boards"] },
-                { "required": ["contents", "devices"] }
+                {
+                    "required": [
+                        "contents",
+                        "boards"
+                    ]
+                },
+                {
+                    "required": [
+                        "contents",
+                        "devices"
+                    ]
+                }
             ]
         },
         "configurationDocumentType": {
@@ -154,9 +164,9 @@
                     "minItems": 0,
                     "uniqueItems": true,
                     "additionalItems": false,
-                    "items": { 
+                    "items": {
                         "$ref": "#/definitions/toolchainTargetSupportType"
-                    }                   
+                    }
                 }
             }
         },
@@ -186,7 +196,7 @@
                 },
                 "overview": {
                     "type": "string",
-                    "description": "The board overview" 
+                    "description": "The board overview"
                 },
                 "href": {
                     "type": "string",

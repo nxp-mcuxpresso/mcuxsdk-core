@@ -13,8 +13,6 @@ if (WIN32)
     set(ENV{PYTHONIOENCODING} "utf-8")
 endif()
 
-set(PYTHON_MINIMUM_REQUIRED 3.8)
-
 #find_package(Deprecated COMPONENTS PYTHON_PREFER)
 
 if(NOT DEFINED Python3_EXECUTABLE AND DEFINED WEST_PYTHON)
@@ -35,14 +33,14 @@ if(NOT Python3_EXECUTABLE)
                     OUTPUT_VARIABLE version
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-            if(version VERSION_LESS PYTHON_MINIMUM_REQUIRED)
+            if(version VERSION_LESS PYTHON_MINIMUM_VERSION)
                 set(Python3_EXECUTABLE "Python3_EXECUTABLE-NOTFOUND" CACHE INTERNAL "Path to a program")
             endif()
         endif()
     endforeach()
 endif()
 
-find_package(Python3 ${PYTHON_MINIMUM_REQUIRED} REQUIRED)
+find_package(Python3 ${PYTHON_MINIMUM_VERSION} REQUIRED)
 
 # Zephyr internally used Python variable.
 set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
