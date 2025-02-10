@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2019, 2024 NXP
+ * Copyright 2016-2019, 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -207,9 +207,10 @@ void GPIO_PinInit(GPIO_Type *base, uint32_t pin, const gpio_pin_config_t *config
 #if defined(FSL_FEATURE_GPIO_HAS_VERSION_INFO_REGISTER) && FSL_FEATURE_GPIO_HAS_VERSION_INFO_REGISTER
 void GPIO_GetVersionInfo(GPIO_Type *base, gpio_version_info_t *info)
 {
-    info->feature = (uint16_t)base->VERID;
-    info->minor   = (uint8_t)(base->VERID >> GPIO_VERID_MINOR_SHIFT);
-    info->major   = (uint8_t)(base->VERID >> GPIO_VERID_MAJOR_SHIFT);
+    uint32_t verid = base->VERID;
+    info->feature  = (uint16_t)((verid & GPIO_VERID_FEATURE_MASK) >> GPIO_VERID_FEATURE_SHIFT);
+    info->minor    = (uint8_t)((verid & GPIO_VERID_MINOR_MASK) >> GPIO_VERID_MINOR_SHIFT);
+    info->major    = (uint8_t)((verid & GPIO_VERID_MAJOR_MASK) >> GPIO_VERID_MAJOR_SHIFT);
 }
 #endif /* FSL_FEATURE_GPIO_HAS_VERSION_INFO_REGISTER */
 

@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section  GPIO
-  The current driver version is 2.8.0.
+  The current driver version is 2.8.1.
+
+  - 2.8.1
+    - Bug Fixes
+      - Fixed CERT INT31-C issues.
 
   - 2.8.0
     - Improvements
