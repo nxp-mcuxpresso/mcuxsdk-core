@@ -22,14 +22,14 @@
 /* The default when a main power supply is turned on is page 0 */
 static uint8_t eeprom_page = 0;
 /* Description of Status Flag */
-//static char *T_FORMAT_ALMC_OS_String = "The rotate speed is over 6000r/min in the Power-off mode";
-//static char *T_FORMAT_ALMC_FS_String = "While the rotate speed is 100r/min or more, main power supply is turned on";
-//static char *T_FORMAT_ALMC_CE_String = "One revolution data is deviated by any malfunction or defect at main power-on";
-//static char *T_FORMAT_ALMC_OF_String = "The multi-turn counter is overflowed";
-//static char *T_FORMAT_ALMC_OH_String = "The temperature of the encoder substrate exceeds overheating detection temperature";
-//static char *T_FORMAT_ALMC_ME_String = "Any bit-jump occurs in the multi-turn signal";
-//static char *T_FORMAT_ALMC_BE_String = "The external battery voltage is 3.1±0.1 V or less during main power-on";
-//static char *T_FORMAT_ALMC_BA_String = "The external battery voltage is 2.75±0.25V or less during main power-off";
+static char *T_FORMAT_ALMC_OS_String = "The rotate speed is over 6000r/min in the Power-off mode";
+static char *T_FORMAT_ALMC_FS_String = "While the rotate speed is 100r/min or more, main power supply is turned on";
+static char *T_FORMAT_ALMC_CE_String = "One revolution data is deviated by any malfunction or defect at main power-on";
+static char *T_FORMAT_ALMC_OF_String = "The multi-turn counter is overflowed";
+static char *T_FORMAT_ALMC_OH_String = "The temperature of the encoder substrate exceeds overheating detection temperature";
+static char *T_FORMAT_ALMC_ME_String = "Any bit-jump occurs in the multi-turn signal";
+static char *T_FORMAT_ALMC_BE_String = "The external battery voltage is 3.1±0.1 V or less during main power-on";
+static char *T_FORMAT_ALMC_BA_String = "The external battery voltage is 2.75±0.25V or less during main power-off";
 /* Description of Status Flag */
 static char *T_FORMAT_SF_EA0_String   = "One revolution data is deviated by any malfunction or defect at main power-on";
 static char *T_FORMAT_SF_EA1_String   = "Logic-OR of Over-heat, Multi-turn error, Battery error and Battery alarm";
@@ -64,6 +64,7 @@ static status_t FLEXIO_T_Format_CheckBaudRate(uint32_t baudRate_Bps, uint32_t sr
  */
 static uint16_t FLEXIO_T_FORMAT_GetTimerCompare(FLEXIO_T_FORMAT_Type *base, uint32_t srcClock_Hz)
 {
+//    clock_root_config_t rootCfg = {0};
     uint16_t timerCmp = 0;
 
     base->timerDiv    = srcClock_Hz / 2500000;
@@ -76,6 +77,9 @@ static uint16_t FLEXIO_T_FORMAT_GetTimerCompare(FLEXIO_T_FORMAT_Type *base, uint
     base->TxDR_Offset = srcClock_Hz / 2000000;  /* 0.5us */
 //    base->interval    = 240; /* 3us */
 
+//    rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxOscRc400M;
+//    rootCfg.div = 5;
+//    CLOCK_SetRootClock(s_flexioRootClocks[FLEXIO_T_FORMAT_GetInstance(base)], &rootCfg);
     return timerCmp;
 }
 
@@ -86,8 +90,8 @@ void FLEXIO_T_Format_Config_DR_length(FLEXIO_T_FORMAT_Type *base, uint32_t nFram
 {
     uint16_t timerCmp = 0;
 
-    timerCmp = (uint16_t)(T_FORMAT_BITS_PER_FRAME_WHOLE * nFrames * base->timerDiv +
-                           base->TxDR_Offset) - 1;
+    timerCmp = ((uint16_t)(T_FORMAT_BITS_PER_FRAME_WHOLE * nFrames * base->timerDiv +
+                           base->TxDR_Offset)) / 2 - 1; //+ base->interval * (nFrames - 1)
     base->flexioBase->TIMCMP[base->timerIndex[T_FORMAT_TIMER_DR_INDEX]] = FLEXIO_TIMCMP_CMP(timerCmp);
 }
 
@@ -211,7 +215,7 @@ status_t FLEXIO_T_Format_Init(FLEXIO_T_FORMAT_Type *base, flexio_t_format_config
 
     FLEXIO_SetShifterConfig(base->flexioBase, base->shifterIndex[1], &shifterConfig);
 
-    /* 4. Configure the timer 1 for rx. */
+    /* 4. Configure the timer 2 for rx. */
     timerConfig.triggerSelect   = FLEXIO_TIMER_TRIGGER_SEL_PININPUT(base->RxPinIndex);
     timerConfig.triggerPolarity = kFLEXIO_TimerTriggerPolarityActiveHigh;
     timerConfig.triggerSource   = kFLEXIO_TimerTriggerSourceExternal;
@@ -251,7 +255,7 @@ status_t FLEXIO_T_Format_Init(FLEXIO_T_FORMAT_Type *base, flexio_t_format_config
      * the default DR signal length is for one byte transmitting.
      */
 
-    timerCmp = (uint16_t)(T_FORMAT_BITS_PER_FRAME_WHOLE * base->timerDiv) - 1;
+    timerCmp = ((uint16_t)( T_FORMAT_BITS_PER_FRAME_WHOLE * base->timerDiv)) / 2 - 1;
     timerConfig.timerCompare = timerCmp;
 
     FLEXIO_SetTimerConfig(base->flexioBase, base->timerIndex[T_FORMAT_TIMER_DR_INDEX], &timerConfig);
@@ -523,23 +527,6 @@ status_t FLEXIO_T_Format_SendSyncReq(FLEXIO_T_FORMAT_Type *base, const uint8_t c
     return kStatus_Success;
 }
 
-char *T_Format_GetStatusFlag(status_t status)
-{
-    switch (status)
-    {
-    case kStatus_FLEXIO_T_FORMAT_EncErr0_CountingErr:
-        return T_FORMAT_SF_EA0_String;
-    case kStatus_FLEXIO_T_FORMAT_EncErr1_LogicOR:
-        return T_FORMAT_SF_EA1_String;
-    case kStatus_FLEXIO_T_FORMAT_ComAlr0_ParityErr:
-        return T_FORMAT_SF_CA0_String;
-    case kStatus_FLEXIO_T_FORMAT_ComAlr1_DelimiterErr:
-        return T_FORMAT_SF_CA1_String;
-    default:
-        return T_FORMAT_NO_ERROR_String;
-    }
-}
-
 status_t T_Format_Check_SF(uint8_t sf)
 {
     uint8_t temp;
@@ -578,6 +565,7 @@ status_t T_Format_Readout_ABS_ABM(encoder_T_format *enc, encoder_all_info_t *all
 {
     encoder_res_all_info_t res;
     uint8_t cf = T_FORMAT_CF_GET_ALL;
+    status_t status = kStatus_Success;
 
     FLEXIO_T_Format_Config_DR_length(enc->controller, 1);
     FLEXIO_T_Format_WriteBlocking(enc->controller, &cf, 1);
@@ -588,14 +576,20 @@ status_t T_Format_Readout_ABS_ABM(encoder_T_format *enc, encoder_all_info_t *all
         return kStatus_FLEXIO_T_FORMAT_FrameErr;
     }
 
-    all_info->ALMC  = res.ALMC;
+    all_info->ALMC = res.ALMC;
+    status = T_Format_Check_SF(res.SF);
+    if (status != kStatus_Success)
+    {
+        return status;
+    }
+
     all_info->encID = res.ENCID;
     memcpy(&all_info->singleTurn, &res.ABS, 3);
     all_info->singleTurn &= enc->single_turn_sign_mask;
     memcpy(&all_info->multiTurn, &res.ABM, 3);
     all_info->multiTurn &= enc->multi_turn_sign_mask;
 
-    return T_Format_Check_SF(res.SF);
+    return kStatus_Success;
 }
 
 status_t T_Format_Readout_ABS_ABM_Sync(encoder_T_format *enc, encoder_res_all_info_t *res,
@@ -750,6 +744,7 @@ status_t T_Format_Get_Encoder_ID(encoder_T_format *enc, uint8_t *encID)
 {
     encoder_res_id_t res;
     uint8_t cf = T_FORMAT_CF_GET_ENCID;
+    status_t status = kStatus_Success;
 
     FLEXIO_T_Format_Config_DR_length(enc->controller, 1);
     FLEXIO_T_Format_WriteBlocking(enc->controller, &cf, 1);
@@ -760,9 +755,15 @@ status_t T_Format_Get_Encoder_ID(encoder_T_format *enc, uint8_t *encID)
         return kStatus_FLEXIO_T_FORMAT_FrameErr;
     }
 
+    status = T_Format_Check_SF(res.SF);
+    if (status != kStatus_Success)
+    {
+        return status;
+    }
+
     *encID = res.ENCID;
 
-    return T_Format_Check_SF(res.SF);
+    return kStatus_Success;
 }
 
 status_t T_Format_Memory_Set_Page(encoder_T_format *enc, uint8_t page)
@@ -776,7 +777,7 @@ status_t T_Format_Memory_Set_Page(encoder_T_format *enc, uint8_t page)
 
     req.crc = CRC_Calc((uint8_t *)&req, 3);
     FLEXIO_T_Format_Config_DR_length(enc->controller, 4);
-    FLEXIO_T_Format_WriteBlocking(enc->controller, (uint8_t *)&req, 4);
+    FLEXIO_T_Format_WriteBlocking(enc->controller, (uint8_t)&req, 4);
     FLEXIO_T_Format_ReadBlocking(enc->controller, (uint8_t *)&res, T_FORMAT_EEPROM_BYTE);
 
     if (CRC_Calc((uint8_t *)&res, T_FORMAT_EEPROM_BYTE) != 0)
@@ -817,7 +818,7 @@ status_t T_Format_Memory_Write(encoder_T_format *enc, encoder_access_eeprom_t ee
 
     req.crc = CRC_Calc((uint8_t *)&req, 3);
     FLEXIO_T_Format_Config_DR_length(enc->controller, 4);
-    FLEXIO_T_Format_WriteBlocking(enc->controller, (uint8_t*)&req, 4);
+    FLEXIO_T_Format_WriteBlocking(enc->controller, (uint8_t)&req, 4);
     FLEXIO_T_Format_ReadBlocking(enc->controller, (uint8_t *)&res, T_FORMAT_EEPROM_BYTE);
 
     if (CRC_Calc((uint8_t *)&res, T_FORMAT_EEPROM_BYTE) != 0)
@@ -856,7 +857,7 @@ status_t T_Format_Memory_Read(encoder_T_format *enc, encoder_access_eeprom_t *ee
 
     req.crc = CRC_Calc((uint8_t *)&req, 2);
     FLEXIO_T_Format_Config_DR_length(enc->controller, 3);
-    FLEXIO_T_Format_WriteBlocking(enc->controller, (uint8_t *)&req, 3);
+    FLEXIO_T_Format_WriteBlocking(enc->controller, (uint8_t)&req, 3);
     FLEXIO_T_Format_ReadBlocking(enc->controller, (uint8_t *)&res, T_FORMAT_EEPROM_BYTE);
 
     if (CRC_Calc((uint8_t *)&res, T_FORMAT_EEPROM_BYTE) != 0)

@@ -327,7 +327,6 @@ status_t FLEXIO_T_Format_TransferReceiveEDMA(FLEXIO_T_FORMAT_Type *base, void *r
 status_t FLEXIO_T_Format_ReceiveEDMA_isCompleted(FLEXIO_T_FORMAT_Type *base);
 status_t FLEXIO_T_Format_SendSyncReq(FLEXIO_T_FORMAT_Type *base, const uint8_t cf);
 
-char *T_Format_GetStatusFlag(status_t status);
 status_t T_Format_Check_SF(uint8_t sf);
 status_t T_Format_Readout_ABS_ABM(encoder_T_format *enc, encoder_all_info_t *all_info);
 status_t T_Format_Readout_ABS_ABM_Sync(encoder_T_format *enc, encoder_res_all_info_t *res, encoder_all_info_t *all_info);
