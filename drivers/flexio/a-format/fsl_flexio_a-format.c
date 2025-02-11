@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+//#include "fsl_clock.h"
 #include "fsl_flexio_a-format.h"
 
 /*******************************************************************************
@@ -27,6 +28,7 @@ enum _flexio_a_format_transfer_states
  * Variables
  ******************************************************************************/
 /*! @brief Pointers to flexio root clocks for each instance. */
+//const clock_root_t s_flexioRootClocks[] = {(clock_root_t)-1, kCLOCK_Root_Flexio1, kCLOCK_Root_Flexio2};
 static bool is_MultiTrans;
 static uint8_t cmd, cmdErr, crc, nEncoder;
 static uint16_t crc_data, cdf;
@@ -47,6 +49,8 @@ static CRC_Para_t crc8_para = {
 static encoder_res1_t res1[8];
 static encoder_res2_t res2[8];
 static encoder_res3_t res3[8];
+//status_t status[8];
+
 
 static encoder_abs_multi_single_t *abs_data_g;
 static encoder_A_format *enc_g;
@@ -78,7 +82,11 @@ static status_t FLEXIO_A_Format_CheckBaudRate(uint32_t baudRate_Bps, uint32_t sr
  */
 static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flexio_a_format_baud_rate_bps_t baudrate, uint32_t srcClock_Hz)
 {
+//    clock_root_config_t rootCfg = {0};
     uint16_t timerCmp = 0;
+
+//    rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxOscRc400M;
+//    rootCfg.div = 5;
 
     switch (baudrate)
     {
@@ -91,6 +99,7 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         }
 
         timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
+        //base->timerDiv    = 32;
         base->TxDR_Offset = srcClock_Hz * 3 / 2000000;//120; /* 1.5us */
         base->interval    = srcClock_Hz / 100000;//800; /* 10us */
         break;
@@ -104,6 +113,7 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         }
 
         timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
+//        base->timerDiv = 20;
         base->TxDR_Offset = srcClock_Hz / 1000000;//80;  /* 1us */
         base->interval    = srcClock_Hz / 100000;//800; /* 10us */
         break;
@@ -117,6 +127,7 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         }
 
         timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
+//        base->timerDiv = 12;
         base->TxDR_Offset = srcClock_Hz / 1000000;//80;  /* 1us */
         base->interval    = srcClock_Hz / 100000;//800; /* 10us */
         break;
@@ -130,11 +141,13 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         }
 
         timerCmp = A_FORMAT_TIMER_COMPARE_VALUE(timerCmp);
+//        base->timerDiv = 10;
         base->TxDR_Offset = srcClock_Hz / 10000000 * 7;//56;  /* 0.7us */
         base->interval    = srcClock_Hz / 100000;//800; /* 10us */
         break;
 
     case kFLEXIO_A_FORMAT_16MHZ: /* Deviation = 4.17% */
+//        rootCfg.mux = kCLOCK_FLEXIO2_ClockRoot_MuxSysPll3Div2; // 240MHz/5=48MHz for PWM timer root clock
         timerCmp = A_FORMAT_BITS_PER_FRAME_DATA * 2 - 1; // (CMP[15:0] + 1) / 2 = 16 for 16-bit timer
         base->timerDiv = 3;
         base->TxDR_Offset = 34;  /* 0.7us */
@@ -145,6 +158,7 @@ static uint16_t FLEXIO_A_Format_GetTimerCompare(FLEXIO_A_FORMAT_Type *base, flex
         return 0xFFFFU;
     }
 
+//    CLOCK_SetRootClock(s_flexioRootClocks[FLEXIO_A_Format_GetInstance(base)], &rootCfg);
     return timerCmp;
 }
 
@@ -155,8 +169,8 @@ void FLEXIO_A_Format_Config_DR_length(FLEXIO_A_FORMAT_Type *base, uint32_t nFram
 {
     uint16_t timerCmp = 0;
 
-    timerCmp = (uint16_t)(A_FORMAT_BITS_PER_FRAME_WHOLE * nFrames * base->timerDiv +
-                          base->interval * (nFrames - 1) + base->TxDR_Offset) - 1;
+    timerCmp = ((uint16_t)(A_FORMAT_BITS_PER_FRAME_WHOLE * nFrames * base->timerDiv +
+                           base->interval * (nFrames - 1))) / 2 - 1;//base->TxDR_Offset + 
     base->flexioBase->TIMCMP[base->timerIndex[TIMER_DR_INDEX]] = FLEXIO_TIMCMP_CMP(timerCmp);
 }
 
@@ -446,6 +460,12 @@ void FLEXIO_A_Format_Deinit(FLEXIO_A_FORMAT_Type *base)
         base->flexioBase->TIMCFG[base->timerIndex[i]]     = 0;
         base->flexioBase->TIMCMP[base->timerIndex[i]]     = 0;
         base->flexioBase->TIMCTL[base->timerIndex[i]]     = 0;
+//        base->flexioBase->TIMCFG[base->timerIndex[1]]     = 0;
+//        base->flexioBase->TIMCMP[base->timerIndex[1]]     = 0;
+//        base->flexioBase->TIMCTL[base->timerIndex[1]]     = 0;
+//        base->flexioBase->TIMCFG[base->timerIndex[2]]     = 0;
+//        base->flexioBase->TIMCMP[base->timerIndex[2]]     = 0;
+//        base->flexioBase->TIMCTL[base->timerIndex[2]]     = 0;
     }
     /* Clear the shifter flag. */
     base->flexioBase->SHIFTSTAT = (1UL << base->shifterIndex[0]);
@@ -453,6 +473,8 @@ void FLEXIO_A_Format_Deinit(FLEXIO_A_FORMAT_Type *base)
     /* Clear the timer flag. */
     for (int i = 0; i <= TIMER_DR_INDEX; i++)
         base->flexioBase->TIMSTAT = (1UL << base->timerIndex[i]);
+    //    base->flexioBase->TIMSTAT = (1UL << base->timerIndex[1]);
+    //    base->flexioBase->TIMSTAT = (1UL << base->timerIndex[2]);
 }
 
 /*!
@@ -1384,12 +1406,33 @@ status_t A_Format_ABS_Readout_Multi_Single_CMD(uint8_t enc_addr)
     nEncoder = is_MultiTrans ? (enc_addr + 1) : 1;
     memset(res3, 0, sizeof(encoder_res3_t) * nEncoder);
 
+//    FLEXIO_A_Format_Config_DR_length(controller, 1);
+//    FLEXIO_A_Format_WriteBlocking(controller, &cdf, 1);
+
     return kStatus_Success;
 }
 
 status_t A_Format_ABS_Readout_Multi_Single(encoder_A_format *enc, uint8_t enc_addr,
                                            encoder_abs_multi_single_t *abs_data)
 {
+//    encoder_res3_t *res = res3;
+
+//    if (ENCODER_ADDRESS(enc_addr) >= A_FORMAT_ENCODER_MAX_NUM)
+//    {
+//        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
+//    }
+
+//    is_MultiTrans = ENCODER_ADDRESS_IS_MT(enc_addr);
+//    enc_addr &= 0x7;
+
+//    cmd = is_MultiTrans ? A_FORMAT_REQ_MT_ABS_FULL_40BIT : A_FORMAT_REQ_IT_ABS_FULL_40BIT;
+//    cdf = A_FORMAT_PACK_CDF(enc_addr, cmd, 0);
+//    crc_data = A_FORMAT_GET_CRC_DATA_CDF(cdf);
+//    crc = CRC_Calc(&crc3_para);
+//    cdf = A_FORMAT_SET_CRC_CODE_CDF(cdf, crc);
+
+//    nEncoder = is_MultiTrans ? (enc_addr + 1) : 1;
+//    memset(res, 0, sizeof(encoder_res3_t) * nEncoder);
     if (A_Format_ABS_Readout_Multi_Single_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
     {
         return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
