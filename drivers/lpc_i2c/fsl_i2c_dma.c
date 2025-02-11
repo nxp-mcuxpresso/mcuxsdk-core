@@ -38,8 +38,6 @@ static IRQn_Type const s_i2cIRQ[] = I2C_IRQS;
 /*! @brief Pointer to master IRQ handler for each instance. */
 static i2c_isr_t s_i2cMasterIsr;
 
-/*! @brief Pointer to slave IRQ handler for each instance. */
-static i2c_isr_t s_i2cSlaveIsr;
 #endif /* FSL_SDK_ENABLE_I2C_DRIVER_TRANSACTIONAL_APIS */
 
 /*******************************************************************************
