@@ -559,47 +559,21 @@ status_t FLEXIO_A_Format_ReceiveEDMA_isCompleted(FLEXIO_A_FORMAT_Type *base);
 status_t FLEXIO_A_Format_SendSyncReq(FLEXIO_A_FORMAT_Type *base, uint8_t enc_addr, uint8_t cmd);
 
 void A_Format_PrintfES(logFunc logES, uint8_t es);
-/* Getting the single-turn data and the multi-turn data */
 status_t A_Format_ABS_Readout_Multi_Single_Parse(encoder_A_format *enc, encoder_res3_t *res,
                                                  encoder_abs_multi_single_t *abs_data);
 status_t A_Format_ABS_Readout_Multi_Single(encoder_A_format *enc, uint8_t enc_addr,
                                            encoder_abs_multi_single_t *abs_data);
 status_t A_Format_ABS_Readout_Multi_Single_IRQ(encoder_A_format *enc, uint8_t enc_addr,
                                                encoder_abs_multi_single_t *abs_data);
-/* Getting the single-turn data */
-status_t A_Format_ABS_Readout_Single_Parse(encoder_A_format *enc, encoder_res2_t *res,
-                                           encoder_abs_single_t *single_data);
-status_t A_Format_ABS_Readout_Single(encoder_A_format *enc, uint8_t enc_addr,
-                                     encoder_abs_single_t *singleData);
-status_t A_Format_ABS_Readout_Single_IRQ(encoder_A_format *enc, uint8_t enc_addr,
-                                         encoder_abs_single_t *single_data);
-/* Getting the multi-turn data */
-status_t A_Format_ABS_Readout_Multi_Parse(encoder_A_format *enc, encoder_res2_t *res,
-                                          encoder_abs_multi_t *multiData);
-status_t A_Format_ABS_Readout_Multi(encoder_A_format *enc, uint8_t enc_addr,
-                                    encoder_abs_multi_t *multiData);
-status_t A_Format_ABS_Readout_Multi_IRQ(encoder_A_format *enc, uint8_t enc_addr,
-                                        encoder_abs_multi_t *multiData);
-/* Reading the status of the encoder */
-status_t A_Format_Readout_Encoder_status_Parse(encoder_A_format *enc, encoder_res2_t *res,
-                                               encoder_status_t *statusData);
-status_t A_Format_Readout_Encoder_status(encoder_A_format *enc, uint8_t enc_addr,
-                                         encoder_status_t *statusData);
-status_t A_Format_Readout_Encoder_status_IRQ(encoder_A_format *enc, uint8_t enc_addr,
-                                             encoder_status_t *statusData);
+status_t A_Format_ABS_Readout_Single(encoder_A_format *enc, uint8_t enc_addr, encoder_abs_single_t *singleData);
+status_t A_Format_ABS_Readout_Multi(encoder_A_format *enc, uint8_t enc_addr, encoder_abs_multi_t *multiData);
+status_t A_Format_Readout_Encoder_status(encoder_A_format *enc, uint8_t enc_addr, encoder_status_t *statusData);
 status_t A_Format_Clear_Request(encoder_A_format *enc, uint8_t enc_addr, Clear_Type_e clear);
-/* Setting the encoder address */
 status_t A_Format_Set_Encoder_Address_1to1(encoder_A_format *enc, uint8_t enc_addr);
 status_t A_Format_Memory_Read(encoder_A_format *enc, uint8_t enc_addr, encoder_eeprom_t *eeprom);
 status_t A_Format_Memory_Write(encoder_A_format *enc, uint8_t enc_addr, encoder_eeprom_t *eeprom);
-/* Getting the temperature */
-status_t A_Format_Get_Temperature_Parse(encoder_A_format *enc, encoder_res2_t *res, float *temp);
 status_t A_Format_Get_Temperature(encoder_A_format *enc, uint8_t enc_addr, float *temp);
-status_t A_Format_Get_Temperature_IRQ(encoder_A_format *enc, uint8_t enc_addr, float *temp);
-/* The encoder ID is get by matching the encoder address */
-status_t A_Format_Get_ID_Parse(encoder_A_format *enc, encoder_res2_t *res, uint32_t *id);
 status_t A_Format_Get_ID(encoder_A_format *enc, uint8_t enc_addr, uint32_t *id);
-status_t A_Format_Get_ID_IRQ(encoder_A_format *enc, uint8_t enc_addr, uint32_t *id);
 status_t A_Format_Get_ID_1to1(encoder_A_format *enc, uint32_t *id);
 status_t A_Format_Set_ID(encoder_A_format *enc, uint8_t enc_addr, uint32_t id);
 status_t A_Format_Set_ID_1to1(encoder_A_format *enc, uint32_t id);

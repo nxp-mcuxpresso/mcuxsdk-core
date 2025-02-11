@@ -48,13 +48,8 @@ static encoder_res1_t res1[8];
 static encoder_res2_t res2[8];
 static encoder_res3_t res3[8];
 
-static encoder_A_format *enc_g;
 static encoder_abs_multi_single_t *abs_data_g;
-static encoder_abs_single_t *single_data_g;
-static encoder_abs_multi_t *multiData_g;
-static encoder_status_t *statusData_g;
-static float *temp_g;
-static uint32_t *id_g;
+static encoder_A_format *enc_g;
 
 /*******************************************************************************
  * Codes
@@ -1052,27 +1047,9 @@ status_t A_Format_CMD_Parse(void)
     case A_FORMAT_REQ_IT_ABS_FULL_40BIT:
     case A_FORMAT_REQ_MT_ABS_FULL_40BIT:
         return A_Format_ABS_Readout_Multi_Single_Parse(enc_g, res3, abs_data_g);
-
-    case A_FORMAT_REQ_IT_ABS_LOWER_24BIT:
-    case A_FORMAT_REQ_MT_ABS_LOWER_24BIT:
-        return A_Format_ABS_Readout_Single_Parse(enc_g, res2, single_data_g);
-
-    case A_FORMAT_REQ_IT_ABS_UPPER_24BIT:
-    case A_FORMAT_REQ_MT_ABS_UPPER_24BIT:
-        return A_Format_ABS_Readout_Multi_Parse(enc_g, res2, multiData_g);
     
-    case A_FORMAT_REQ_IT_ENCODER_STAT:
-    case A_FORMAT_REQ_MT_ENCODER_STAT:
-        return A_Format_Readout_Encoder_status_Parse(enc_g, res2, statusData_g);
-
-    case A_FORMAT_REQ_IT_TEMPERATURE_10BIT:
-	return A_Format_Get_Temperature_Parse(enc_g, res2, temp_g);
-
-    case A_FORMAT_REQ_IT_ID_CODE_READ1:
-        return A_Format_Get_ID_Parse(enc_g, res2, id_g);
-
     default:
-        return kStatus_Fail;
+        break;
     }
 }
 
@@ -1129,17 +1106,15 @@ void FLEXIO_A_Format_TransferHandleIRQ(void *uartType, void *uartHandle)
 
                 if (handle->callback != NULL)
                 {
-                    if (cmd_status != kStatus_Success)
+                    if (cmd_status == kStatus_Success)
                     {
-                        cmd = 0xFF;
-                    //    handle->userData = (void *)cmd;
+                        handle->userData = (void *)cmd;
                     }
-                    //else
-                    //{
-                    //    handle->userData = (void *)0xFF;
-                    //}
+                    else
+                    {
+                        handle->userData = (void *)0xFF;
+                    }
 
-                    handle->userData = (void *)&cmd;
                     handle->callback(base, handle, kStatus_FLEXIO_A_FORMAT_RxIdle, handle->userData);
                 }
             }
@@ -1417,6 +1392,7 @@ status_t A_Format_ABS_Readout_Multi_Single_Parse(encoder_A_format *enc, encoder_
         if (abs_data[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
+//            continue;
         }
 
         abs_data[i].singleTurn = *(uint32_t *)res[i].DF & enc->single_turn_sign_mask;
@@ -1487,141 +1463,47 @@ status_t A_Format_ABS_Readout_Multi_Single_IRQ(encoder_A_format *enc, uint8_t en
     return kStatus_Success;
 }
 
-status_t A_Format_ABS_Readout_Single_CMD(uint8_t enc_addr)
-{
-    if (ENCODER_ADDRESS(enc_addr) >= A_FORMAT_ENCODER_MAX_NUM)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
-    is_MultiTrans = ENCODER_ADDRESS_IS_MT(enc_addr);
-    enc_addr &= 0x7;
-
-    cmd = is_MultiTrans ? A_FORMAT_REQ_MT_ABS_LOWER_24BIT : A_FORMAT_REQ_IT_ABS_LOWER_24BIT;
-    cdf = A_FORMAT_PACK_CDF(enc_addr, cmd, 0);
-    crc_data = A_FORMAT_GET_CRC_DATA_CDF(cdf);
-    crc = CRC_Calc(&crc3_para);
-    cdf = A_FORMAT_SET_CRC_CODE_CDF(cdf, crc);
-
-    nEncoder = is_MultiTrans ? (enc_addr + 1) : 1;
-    memset(res2, 0, sizeof(encoder_res2_t) * nEncoder);
-
-    return kStatus_Success;
-}
-
-status_t A_Format_ABS_Readout_Single_Parse(encoder_A_format *enc, encoder_res2_t *res,
-                                           encoder_abs_single_t *single_data)
-{
-    cmdErr = 0;
-
-    crc8_para.message_len = 6;
-    for (uint8_t i = 0; i < nEncoder; i++)
-    {
-        crc8_para.message = (uint8_t const *)&res[i];
-        if ((A_FORMAT_GET_CMD_CODE_IF(res[i].IF) != cmd) || (CRC_Calc(&crc8_para) != 0))
-        {
-            cmdErr++;
-            single_data[i].es = A_Format_ES_FrameErr;
-            continue;
-        }
-
-        single_data[i].encID = A_FORMAT_GET_ENC_ADDR_IF(res[i].IF);
-        single_data[i].es    = A_FORMAT_GET_ENC_STAT_IF(res[i].IF);
-        if (single_data[i].es != A_Format_ES_NoErr)
-        {
-            cmdErr++;
-        }
-
-        single_data[i].singleTurn = *(uint32_t *)res[i].DF & enc->single_turn_sign_mask;
-    }
-
-    return cmdErr ? kStatus_Fail : kStatus_Success;
-}
-
 status_t A_Format_ABS_Readout_Single(encoder_A_format *enc, uint8_t enc_addr, encoder_abs_single_t *singleData)
 {
-    if (A_Format_ABS_Readout_Single_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
+    encoder_res2_t *res = res2;
 
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)res2,
-                                 HALFWORD_NUM(encoder_res2_t) * nEncoder);
-
-    return A_Format_ABS_Readout_Single_Parse(enc, res2, singleData);
-}
-
-status_t A_Format_ABS_Readout_Single_IRQ(encoder_A_format *enc, uint8_t enc_addr,
-                                         encoder_abs_single_t *single_data)
-{
-    if (A_Format_ABS_Readout_Single_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
-    flexio_a_format_transfer_t xfer = {
-        .rxData   = (uint16_t *)res2,
-        .dataSize = HALFWORD_NUM(encoder_res2_t) * nEncoder
-    };
-
-    enc_g         = enc;
-    single_data_g = single_data;
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
-    FLEXIO_A_Format_TransferReceiveNonBlocking(enc->controller, ((FLEXIO_A_FORMAT_Type *)enc->controller)->hanlde,
-                                               &xfer, NULL);
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-
-    return kStatus_Success;
-}
-
-status_t A_Format_ABS_Readout_Multi_CMD(uint8_t enc_addr)
-{
-    if (ENCODER_ADDRESS(enc_addr) >= A_FORMAT_ENCODER_MAX_NUM)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
+    cmdErr = 0;
     is_MultiTrans = ENCODER_ADDRESS_IS_MT(enc_addr);
-    enc_addr &= 0x7;
 
-    cmd = is_MultiTrans ? A_FORMAT_REQ_MT_ABS_UPPER_24BIT : A_FORMAT_REQ_IT_ABS_UPPER_24BIT;
-    cdf = A_FORMAT_PACK_CDF(enc_addr, cmd, 0);
+    cmd = is_MultiTrans ? A_FORMAT_REQ_MT_ABS_LOWER_24BIT : A_FORMAT_REQ_IT_ABS_LOWER_24BIT;
+    cdf = A_FORMAT_PACK_CDF((enc_addr & 0x7), cmd, 0);
     crc_data = A_FORMAT_GET_CRC_DATA_CDF(cdf);
     crc = CRC_Calc(&crc3_para);
     cdf = A_FORMAT_SET_CRC_CODE_CDF(cdf, crc);
 
-    nEncoder = is_MultiTrans ? (enc_addr + 1) : 1;
-    memset(res2, 0, sizeof(encoder_res2_t) * nEncoder);
+    nEncoder = is_MultiTrans ? ((enc_addr & 0x7) + 1) : 1;
+    memset(res, 0, sizeof(encoder_res2_t) * nEncoder);
 
-    return kStatus_Success;
-}
-
-status_t A_Format_ABS_Readout_Multi_Parse(encoder_A_format *enc, encoder_res2_t *res,
-                                          encoder_abs_multi_t *multiData)
-{
-    cmdErr = 0;
+    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
+    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
+    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)res,
+                                 HALFWORD_NUM(encoder_res2_t) * nEncoder);
 
     crc8_para.message_len = 6;
     for (uint8_t i = 0; i < nEncoder; i++)
     {
         crc8_para.message = (uint8_t const *)&res[i];
         if ((A_FORMAT_GET_CMD_CODE_IF(res[i].IF) != cmd) || (CRC_Calc(&crc8_para) != 0))
-        {
+       	{
             cmdErr++;
-            multiData[i].es = A_Format_ES_FrameErr;
+            singleData[i].es = A_Format_ES_FrameErr;
             continue;
         }
 
-        multiData[i].encID = A_FORMAT_GET_ENC_ADDR_IF(res[i].IF);
-        multiData[i].es    = A_FORMAT_GET_ENC_STAT_IF(res[i].IF);
-        if (multiData[i].es != A_Format_ES_NoErr)
+        singleData[i].encID = A_FORMAT_GET_ENC_ADDR_IF(res[i].IF);
+       	singleData[i].es    = A_FORMAT_GET_ENC_STAT_IF(res[i].IF);
+        if (singleData[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
+//            continue;
         }
 
-        multiData[i].multiTurn = (uint16_t)((*(uint32_t *)res[i].DF >> (enc->singleTurnRevolution - 16)) & enc->multi_turn_sign_mask);
+        singleData[i].singleTurn = *(uint32_t *)res[i].DF & enc->single_turn_sign_mask;
     }
 
     return cmdErr ? kStatus_Fail : kStatus_Success;
@@ -1629,130 +1511,94 @@ status_t A_Format_ABS_Readout_Multi_Parse(encoder_A_format *enc, encoder_res2_t 
 
 status_t A_Format_ABS_Readout_Multi(encoder_A_format *enc, uint8_t enc_addr, encoder_abs_multi_t *multiData)
 {
-    if (A_Format_ABS_Readout_Multi_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
+    encoder_res2_t *res = res2;
 
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)res2,
-                                 HALFWORD_NUM(encoder_res2_t) * nEncoder);
-
-    return A_Format_ABS_Readout_Multi_Parse(enc, res2, multiData);
-}
-
-status_t A_Format_ABS_Readout_Multi_IRQ(encoder_A_format *enc, uint8_t enc_addr,
-                                        encoder_abs_multi_t *multiData)
-{
-    if (A_Format_ABS_Readout_Multi_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
-    flexio_a_format_transfer_t xfer = {
-        .rxData   = (uint16_t *)res2,
-        .dataSize = HALFWORD_NUM(encoder_res2_t) * nEncoder
-    };
-
-    enc_g       = enc;
-    multiData_g = multiData;
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
-    FLEXIO_A_Format_TransferReceiveNonBlocking(enc->controller, ((FLEXIO_A_FORMAT_Type *)enc->controller)->hanlde,
-                                               &xfer, NULL);
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-
-    return kStatus_Success;
-}
-
-status_t A_Format_Readout_Encoder_status_CMD(uint8_t enc_addr)
-{
-    if (ENCODER_ADDRESS(enc_addr) >= A_FORMAT_ENCODER_MAX_NUM)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
+    cmdErr = 0;
     is_MultiTrans = ENCODER_ADDRESS_IS_MT(enc_addr);
-    enc_addr &= 0x7;
 
-    cmd = is_MultiTrans ? A_FORMAT_REQ_MT_ENCODER_STAT : A_FORMAT_REQ_IT_ENCODER_STAT;
-    cdf = A_FORMAT_PACK_CDF(enc_addr, cmd, 0);
+    cmd = is_MultiTrans ? A_FORMAT_REQ_MT_ABS_UPPER_24BIT : A_FORMAT_REQ_IT_ABS_UPPER_24BIT;
+    cdf = A_FORMAT_PACK_CDF((enc_addr & 0x7), cmd, 0);
     crc_data = A_FORMAT_GET_CRC_DATA_CDF(cdf);
     crc = CRC_Calc(&crc3_para);
     cdf = A_FORMAT_SET_CRC_CODE_CDF(cdf, crc);
 
-    nEncoder = is_MultiTrans ? (enc_addr + 1) : 1;
-    memset(res2, 0, sizeof(encoder_res2_t) * nEncoder);
+    nEncoder = is_MultiTrans ? ((enc_addr & 0x7) + 1) : 1;
+    memset(res, 0, sizeof(encoder_res2_t) * nEncoder);
 
-    return kStatus_Success;
-}
-
-status_t A_Format_Readout_Encoder_status_Parse(encoder_A_format *enc, encoder_res2_t *res,
-                                               encoder_status_t *statusData)
-{
-    cmdErr = 0;
+    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
+    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
+    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)res,
+                                 HALFWORD_NUM(encoder_res2_t) * nEncoder);
 
     crc8_para.message_len = 6;
     for (uint8_t i = 0; i < nEncoder; i++)
     {
         crc8_para.message = (uint8_t const *)&res[i];
         if ((A_FORMAT_GET_CMD_CODE_IF(res[i].IF) != cmd) || (CRC_Calc(&crc8_para) != 0))
+       	{
+            cmdErr++;
+            multiData[i].es = A_Format_ES_FrameErr;
+            continue;
+        }
+
+        multiData[i].encID = A_FORMAT_GET_ENC_ADDR_IF(res[i].IF);
+        multiData[i].es = A_FORMAT_GET_ENC_STAT_IF(res[i].IF);
+        if (multiData[i].es != A_Format_ES_NoErr)
         {
+            cmdErr++;
+//            continue;
+        }
+
+        multiData[i].multiTurn = (uint16_t)((*(uint32_t *)res[i].DF >> (enc->singleTurnRevolution - 16)) & enc->multi_turn_sign_mask);;
+    }
+
+    return cmdErr ? kStatus_Fail : kStatus_Success;
+}
+
+status_t A_Format_Readout_Encoder_status(encoder_A_format *enc, uint8_t enc_addr, encoder_status_t *statusData)
+{
+    encoder_res2_t *res = res2;
+
+    cmdErr = 0;
+    is_MultiTrans = ENCODER_ADDRESS_IS_MT(enc_addr);
+
+    cmd = is_MultiTrans ? A_FORMAT_REQ_MT_ENCODER_STAT : A_FORMAT_REQ_IT_ENCODER_STAT;
+    cdf = A_FORMAT_PACK_CDF((enc_addr & 0x7), cmd, 0);
+    crc_data = A_FORMAT_GET_CRC_DATA_CDF(cdf);
+    crc = CRC_Calc(&crc3_para);
+    cdf = A_FORMAT_SET_CRC_CODE_CDF(cdf, crc);
+
+    nEncoder = is_MultiTrans ? ((enc_addr & 0x7) + 1) : 1;
+    memset(res, 0, sizeof(encoder_res3_t) * nEncoder);
+
+    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
+    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
+    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)res,
+                                 HALFWORD_NUM(encoder_res2_t) * nEncoder);
+
+    crc8_para.message_len = 6;
+    for (uint8_t i = 0; i < nEncoder; i++)
+    {
+        crc8_para.message = (uint8_t const *)&res[i];
+        if ((A_FORMAT_GET_CMD_CODE_IF(res[i].IF) != cmd) || (CRC_Calc(&crc8_para) != 0))
+       	{
             cmdErr++;
             statusData[i].es = A_Format_ES_FrameErr;
             continue;
         }
 
         statusData[i].encID = A_FORMAT_GET_ENC_ADDR_IF(res[i].IF);
-        statusData[i].es    = A_FORMAT_GET_ENC_STAT_IF(res[i].IF);
+        statusData[i].es = A_FORMAT_GET_ENC_STAT_IF(res[i].IF);
         if (statusData[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
+//            continue;
         }
 
         statusData[i].status = res[i].DF[0];
     }
 
     return cmdErr ? kStatus_Fail : kStatus_Success;
-}
-
-status_t A_Format_Readout_Encoder_status(encoder_A_format *enc, uint8_t enc_addr,
-                                         encoder_status_t *statusData)
-{
-    if (A_Format_Readout_Encoder_status_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)res2,
-                                 HALFWORD_NUM(encoder_res2_t) * nEncoder);
-
-    return A_Format_Readout_Encoder_status_Parse(enc, res2, statusData);
-}
-
-status_t A_Format_Readout_Encoder_status_IRQ(encoder_A_format *enc, uint8_t enc_addr,
-                                             encoder_status_t *statusData)
-{
-    if (A_Format_Readout_Encoder_status_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
-    flexio_a_format_transfer_t xfer = {
-        .rxData   = (uint16_t *)res2,
-        .dataSize = HALFWORD_NUM(encoder_res2_t) * nEncoder
-    };
-
-    enc_g        = enc;
-    statusData_g = statusData;
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
-    FLEXIO_A_Format_TransferReceiveNonBlocking(enc->controller, ((FLEXIO_A_FORMAT_Type *)enc->controller)->hanlde,
-                                               &xfer, NULL);
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-
-    return kStatus_Success;
 }
 
 status_t A_Format_Clear_Request(encoder_A_format *enc, uint8_t enc_addr, Clear_Type_e clear)
@@ -1780,6 +1626,12 @@ status_t A_Format_Clear_Request(encoder_A_format *enc, uint8_t enc_addr, Clear_T
         {
             return kStatus_FLEXIO_A_FORMAT_FrameErr;
         }
+
+//        status = A_FORMAT_GET_ENC_STAT_IF(res.IF);
+//        if (status != kStatus_Success)
+//        {
+//            break;
+//        }
     }
     return status;
 }
@@ -1810,6 +1662,12 @@ status_t A_Format_Set_Encoder_Address_1to1(encoder_A_format *enc, uint8_t enc_ad
         {
             return kStatus_FLEXIO_A_FORMAT_FrameErr;
         }
+
+//        status = A_FORMAT_GET_ENC_STAT_IF(res.IF);
+//        if (status != kStatus_Success)
+//        {
+//            break;
+//        }
     }
     return status;
 }
@@ -1894,142 +1752,57 @@ status_t A_Format_Memory_Write(encoder_A_format *enc, uint8_t enc_addr, encoder_
     return kStatus_Success;
 }
 
-status_t A_Format_Get_Temperature_CMD(uint8_t enc_addr)
-{
-    if (ENCODER_ADDRESS(enc_addr) >= A_FORMAT_ENCODER_MAX_NUM)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
-    nEncoder = 1;
-    enc_addr &= 0x7;
-    cmd = A_FORMAT_REQ_IT_TEMPERATURE_10BIT;
-    cdf = A_FORMAT_PACK_CDF(enc_addr, A_FORMAT_REQ_IT_TEMPERATURE_10BIT, 0);
-    crc_data = A_FORMAT_GET_CRC_DATA_CDF(cdf);
-    crc = CRC_Calc(&crc3_para);
-    cdf = A_FORMAT_SET_CRC_CODE_CDF(cdf, crc);
-
-    memset(res2, 0, sizeof(encoder_res2_t));
-
-    return kStatus_Success;
-}
-
-status_t A_Format_Get_Temperature_Parse(encoder_A_format *enc, encoder_res2_t *res, float *temp)
-{
-    crc8_para.message_len = 6;
-    crc8_para.message     = (uint8_t const *)res;
-    if ((A_FORMAT_GET_CMD_CODE_IF(res->IF) != cmd) || (CRC_Calc(&crc8_para) != 0))
-    {
-        return kStatus_FLEXIO_A_FORMAT_FrameErr;
-    }
-
-    *temp = GET_TEMPERATURE_VALUE(res->DF[0]);
-    return kStatus_Success;
-}
-
 status_t A_Format_Get_Temperature(encoder_A_format *enc, uint8_t enc_addr, float *temp)
 {
-    if (A_Format_Get_Temperature_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
+    encoder_res2_t res;
 
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)res2, HALFWORD_NUM(encoder_res2_t));
-
-    return A_Format_Get_Temperature_Parse(enc, res2, temp);
-}
-
-status_t A_Format_Get_Temperature_IRQ(encoder_A_format *enc, uint8_t enc_addr, float *temp)
-{
-    if (A_Format_Get_Temperature_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
-    flexio_a_format_transfer_t xfer = {
-        .rxData   = (uint16_t *)res2,
-        .dataSize = HALFWORD_NUM(encoder_res2_t)
-    };
-
-    enc_g  = enc;
-    temp_g = temp;
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
-    FLEXIO_A_Format_TransferReceiveNonBlocking(enc->controller, ((FLEXIO_A_FORMAT_Type *)enc->controller)->hanlde,
-                                               &xfer, NULL);
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-
-    return kStatus_Success;
-}
-
-status_t A_Format_Get_ID_CMD(uint8_t enc_addr)
-{
-    if (ENCODER_ADDRESS(enc_addr) >= A_FORMAT_ENCODER_MAX_NUM)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
-
-    nEncoder = 1;
-    enc_addr &= 0x7;
-    cmd = A_FORMAT_REQ_IT_ID_CODE_READ1;
-    cdf = A_FORMAT_PACK_CDF(enc_addr, A_FORMAT_REQ_IT_ID_CODE_READ1, 0);
+    cmd = A_FORMAT_REQ_IT_TEMPERATURE_10BIT;
+    cdf = A_FORMAT_PACK_CDF((enc_addr & 0x7), A_FORMAT_REQ_IT_TEMPERATURE_10BIT, 0);
     crc_data = A_FORMAT_GET_CRC_DATA_CDF(cdf);
     crc = CRC_Calc(&crc3_para);
     cdf = A_FORMAT_SET_CRC_CODE_CDF(cdf, crc);
 
-    memset(res2, 0, sizeof(encoder_res2_t));
+    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
 
-    return kStatus_Success;
-}
-
-status_t A_Format_Get_ID_Parse(encoder_A_format *enc, encoder_res2_t *res, uint32_t *id)
-{
     crc8_para.message_len = 6;
-    crc8_para.message     = (uint8_t const *)res;
-    if ((A_FORMAT_GET_CMD_CODE_IF(res->IF) != cmd) || (CRC_Calc(&crc8_para) != 0))
+    crc8_para.message     = (uint8_t const *)&res;
+
+    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
+    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)&res, HALFWORD_NUM(encoder_res2_t));
+
+    if ((A_FORMAT_GET_CMD_CODE_IF(res.IF) != cmd) || (CRC_Calc(&crc8_para) != 0))
     {
         return kStatus_FLEXIO_A_FORMAT_FrameErr;
     }
 
-    *id = GET_ENCODER_ID(*(uint32_t *)res->DF);
+    *temp = GET_TEMPERATURE_VALUE(res.DF[0]);
     return kStatus_Success;
 }
 
 status_t A_Format_Get_ID(encoder_A_format *enc, uint8_t enc_addr, uint32_t *id)
 {
-    if (A_Format_Get_ID_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
-    {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
-    }
+    encoder_res2_t res;
+
+    cmd = A_FORMAT_REQ_IT_ID_CODE_READ1;
+    cdf = A_FORMAT_PACK_CDF((enc_addr & 0x7), A_FORMAT_REQ_IT_ID_CODE_READ1, 0);
+    crc_data = A_FORMAT_GET_CRC_DATA_CDF(cdf);
+    crc = CRC_Calc(&crc3_para);
+    cdf = A_FORMAT_SET_CRC_CODE_CDF(cdf, crc);
 
     FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
 
+    crc8_para.message_len = 6;
+    crc8_para.message     = (uint8_t const *)&res;
+
     FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)res2, HALFWORD_NUM(encoder_res2_t));
+    FLEXIO_A_Format_ReadBlocking(enc->controller, (uint16_t *)&res, HALFWORD_NUM(encoder_res2_t));
 
-    return A_Format_Get_ID_Parse(enc, res2, id);
-}
-
-status_t A_Format_Get_ID_IRQ(encoder_A_format *enc, uint8_t enc_addr, uint32_t *id)
-{
-    if (A_Format_Get_ID_CMD(enc_addr) == kStatus_FLEXIO_A_FORMAT_OutOfIDRange)
+    if ((A_FORMAT_GET_CMD_CODE_IF(res.IF) != cmd) || (CRC_Calc(&crc8_para) != 0))
     {
-        return kStatus_FLEXIO_A_FORMAT_OutOfIDRange;
+        return kStatus_FLEXIO_A_FORMAT_FrameErr;
     }
 
-    flexio_a_format_transfer_t xfer = {
-        .rxData   = (uint16_t *)res2,
-        .dataSize = HALFWORD_NUM(encoder_res2_t)
-    };
-
-    enc_g = enc;
-    id_g  = id;
-    FLEXIO_A_Format_Config_DR_length(enc->controller, 1);
-    FLEXIO_A_Format_TransferReceiveNonBlocking(enc->controller, ((FLEXIO_A_FORMAT_Type *)enc->controller)->hanlde,
-                                               &xfer, NULL);
-    FLEXIO_A_Format_WriteBlocking(enc->controller, &cdf, 1);
-
+    *id = GET_ENCODER_ID(*(uint32_t *)res.DF);
     return kStatus_Success;
 }
 
@@ -2232,6 +2005,7 @@ status_t A_Format_ABS_Readout_Single_17bit(encoder_A_format *enc, uint8_t enc_ad
         {
             cmdErr++;
             singleData[i].es = A_Format_ES_Anyone;
+//            continue;
         }
 
         singleData[i].singleTurn = (((uint32_t)res[i].DF << 9) | (res[i].IF >> 7)) & enc->single_turn_sign_mask;
@@ -2277,6 +2051,7 @@ status_t A_Format_ABS_Readout_Single_with_status(encoder_A_format *enc, uint8_t 
         if (singleStat[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
+//            continue;
         }
 
         singleStat[i].singleTurn = *(uint32_t *)res[i].DF & enc->single_turn_sign_mask;
@@ -2324,6 +2099,7 @@ status_t A_Format_ABS_Readout_Single_with_temperature(encoder_A_format *enc, uin
         if (singleTemp[i].es != A_Format_ES_NoErr)
         {
             cmdErr++;
+//            continue;
         }
 
         singleTemp[i].singleTurn = *(uint32_t *)res[i].DF & enc->single_turn_sign_mask;
