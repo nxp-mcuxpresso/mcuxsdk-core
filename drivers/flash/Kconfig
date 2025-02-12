@@ -4,7 +4,7 @@
 
 config MCUX_HAS_COMPONENT_driver.flash
     bool
-    default y if MCUX_HW_IP_DriverType_FTFE || MCUX_HW_IP_DriverType_FTFA || MCUX_HW_IP_DriverType_FTFL
+    default y if MCUX_HW_IP_DriverType_FTFE || MCUX_HW_IP_DriverType_FTFA || MCUX_HW_IP_DriverType_FTFL || MCUX_HW_IP_DriverType_FTFC
 
 config MCUX_COMPONENT_driver.flash
     bool "flash"
