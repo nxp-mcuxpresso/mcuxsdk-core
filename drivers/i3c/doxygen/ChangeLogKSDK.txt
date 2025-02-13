@@ -188,7 +188,13 @@
 @page driver_log Driver Change Log
 
 @section i3c_dma I3C_DMA
-  The current I3C DMA driver version is 2.1.7.
+  The current I3C DMA driver version is 2.1.8.
+
+  - 2.1.8
+    - Bug Fixes
+      - Updated the logic to handle Rx termination and complete event to adapt different situation.
+    - Improvements
+      - Added the MCTRLDONE flag check after STOP request to ensure the completion of whole transfer operation.
 
   - 2.1.7
     - Bug Fixes
