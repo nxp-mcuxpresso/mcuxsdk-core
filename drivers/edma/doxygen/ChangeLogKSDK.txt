@@ -4,6 +4,10 @@
 @section eDMA EDMA
   The current eDMA driver version is 2.4.4.
 
+  - 2.4.5
+    - Bug Fixes
+      - Fixed memory convert would convert NULL as zero address issue.
+
   - 2.4.4
     - Bug Fixes
       - Fixed comments by replacing STCD with TCD

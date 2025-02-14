@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section eDMA EDMA
-  The current eDMA driver version is 2.10.4.
+  The current eDMA driver version is 2.10.5.
+
+  - 2.10.5
+    - Bug Fixes
+      - Fixed memory convert would convert NULL as zero address issue.
 
   - 2.10.4
     - Improvements

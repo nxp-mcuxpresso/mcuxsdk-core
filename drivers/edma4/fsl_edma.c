@@ -368,8 +368,12 @@ void EDMA_SetTransferConfig(EDMA_Type *base,
     assert(channel < (uint32_t)FSL_FEATURE_EDMA_INSTANCE_CHANNELn(base));
     assert(config != NULL);
 
-    EDMA_TcdSetTransferConfigExt(base, EDMA_TCD_BASE(base, channel), config,
-                                 (edma_tcd_t *)CONVERT_TO_DMA_ADDRESS(nextTcd));
+    if(nextTcd != NULL)
+    {
+        nextTcd = (edma_tcd_t *)(CONVERT_TO_DMA_ADDRESS(nextTcd));
+    }
+
+    EDMA_TcdSetTransferConfigExt(base, EDMA_TCD_BASE(base, channel), config, nextTcd);
 }
 
 /*!
