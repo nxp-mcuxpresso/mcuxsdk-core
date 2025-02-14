@@ -1,5 +1,5 @@
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -398,14 +398,15 @@ module Internal
             content += "md \"#{@build_dir[target]}\"\n"
             content += "cmake  -G \"Ninja\" -S . -B \"#{@build_dir[target]}\" -DCMAKE_BUILD_TYPE=#{target.downcase} \"#{@build_dir[target]}\"\n"
             content += "cd %batch_dir%/#{@build_dir[target]}\n"
-            content += "ninja -j8 2> build_log.txt \n"
+            content += "ninja 2> build_log.txt \n"
           else
             content = "if exist CMakeFiles (RD /s /Q CMakeFiles)\n"
             content += "if exist Makefile (DEL /s /Q /F Makefile)\n"
+            content += "if exist build.ninja (DEL /s /Q /F build.ninja)\n"
             content += "if exist cmake_install.cmake (DEL /s /Q /F cmake_install.cmake)\n"
             content += "if exist CMakeCache.txt (DEL /s /Q /F CMakeCache.txt)\n"
             content += "cmake  -G \"Ninja\" -DCMAKE_BUILD_TYPE=#{target.downcase}  .\n"
-            content += "ninja -j8 2> build_log.txt \n"
+            content += "ninja 2> build_log.txt \n"
           end
           File.force_write("#{directory_path}/build_#{target}.bat", content)
           @generated_files.push_uniq "build_#{target}.bat"
@@ -419,14 +420,15 @@ module Internal
             aFile.write("mkdir -p \"$script_dir/#{@build_dir[target]}\"\n")
             aFile.write("cmake  -G \"Ninja\" -S $script_dir -B \"$script_dir/#{@build_dir[target]}\" -DCMAKE_BUILD_TYPE=#{target.downcase}  \"$script_dir/#{@build_dir[target]}\"\n")
             aFile.write("cd $script_dir/#{@build_dir[target]}\n")
-            aFile.write("ninja -j 2>&1 | tee build_log.txt\n")
+            aFile.write("ninja 2>&1 | tee build_log.txt\n")
           else
             aFile.write("if [ -d \"CMakeFiles\" ];then rm -rf CMakeFiles; fi\n")
             aFile.write("if [ -f \"Makefile\" ];then rm -f Makefile; fi\n")
+            aFile.write("if [ -f \"build.ninja\" ];then rm -f build.ninja; fi\n")
             aFile.write("if [ -f \"cmake_install.cmake\" ];then rm -f cmake_install.cmake; fi\n")
             aFile.write("if [ -f \"CMakeCache.txt\" ];then rm -f CMakeCache.txt; fi\n")
             aFile.write("cmake  -G \"Ninja\" -DCMAKE_BUILD_TYPE=#{target.downcase}  .\n")
-            aFile.write("ninja -j 2>&1 | tee build_log.txt\n")
+            aFile.write("ninja 2>&1 | tee build_log.txt\n")
           end
           @generated_files.push_uniq "build_#{target}.sh"
           aFile.close()
@@ -444,15 +446,16 @@ module Internal
             content += "md \"#{@build_dir[target]}\"\n"
             content += "cmake  -G \"Ninja\" -S . -B \"#{@build_dir[target]}\" -DCMAKE_BUILD_TYPE=#{target.downcase}  \"#{@build_dir[target]}\"\n"
             content += "cd %batch_dir%/#{@build_dir[target]}\n"
-            content += "ninja -j8\n"
+            content += "ninja \n"
             content += "\n"
           else
             content += "if exist CMakeFiles (RD /s /Q CMakeFiles)\n"
             content += "if exist Makefile (DEL /s /Q /F Makefile)\n"
+            content += "if exist build.ninja (DEL /s /Q /F build.ninja)\n"
             content += "if exist cmake_install.cmake (DEL /s /Q /F cmake_install.cmake)\n"
             content += "if exist CMakeCache.txt (DEL /s /Q /F CMakeCache.txt)\n"
             content += "cmake  -G \"Ninja\" -DCMAKE_BUILD_TYPE=#{target.downcase}  .\n"
-            content += "ninja -j8\n"
+            content += "ninja \n"
             content += "\n"
           end
         end
@@ -470,15 +473,16 @@ module Internal
             aFile.write("mkdir -p \"$script_dir/#{@build_dir[target]}\"\n")
             aFile.write("cmake  -G \"Ninja\" -S $script_dir -B \"$script_dir/#{@build_dir[target]}\" -DCMAKE_BUILD_TYPE=#{target.downcase}  \"$script_dir/#{@build_dir[target]}\"\n")
             aFile.write("cd $script_dir/#{@build_dir[target]}\n")
-            aFile.write("ninja -j\n")
+            aFile.write("ninja \n")
             aFile.write("\n")
           else
             aFile.write("if [ -d \"CMakeFiles\" ];then rm -rf CMakeFiles; fi\n")
             aFile.write("if [ -f \"Makefile\" ];then rm -f Makefile; fi\n")
+            aFile.write("if [ -f \"build.ninja\" ];then rm -f build.ninja; fi\n")
             aFile.write("if [ -f \"cmake_install.cmake\" ];then rm -f cmake_install.cmake; fi\n")
             aFile.write("if [ -f \"CMakeCache.txt\" ];then rm -f CMakeCache.txt; fi\n")
             aFile.write("cmake  -G \"Ninja\" -DCMAKE_BUILD_TYPE=#{target.downcase}  .\n")
-            aFile.write("ninja -j\n")
+            aFile.write("ninja \n")
             aFile.write("\n")
           end
         end
@@ -497,7 +501,7 @@ module Internal
             content += "cd %batch_dir%\n"
           end
         else
-          content = "RD \/s \/Q #{all_target} CMakeFiles\nDEL \/s \/Q \/F Makefile cmake_install.cmake CMakeCache.txt\npause\n"
+          content = "RD \/s \/Q #{all_target} CMakeFiles\nDEL \/s \/Q \/F Makefile cmake_install.cmake CMakeCache.txt build.ninja\npause\n"
         end
         File.force_write("#{directory_path}/clean.bat", content)
         @generated_files.push_uniq "clean.bat"
@@ -507,7 +511,7 @@ module Internal
         unless @build_dir.empty?
           aFile.write("#!/bin/sh\nrm -rf #{all_target} #{@build_dir.values.uniq.join(' ')}\n")
         else
-          aFile.write("#!/bin/sh\nrm -rf #{all_target} CMakeFiles\nrm -rf Makefile cmake_install.cmake CMakeCache.txt\n")
+          aFile.write("#!/bin/sh\nrm -rf #{all_target} CMakeFiles\nrm -rf Makefile cmake_install.cmake CMakeCache.txt build.ninja\n")
         end
         aFile.close()
         @generated_files.push_uniq "clean.sh"
