@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section ostimer OSTIMER
-  The current OSTIMER driver version is 2.2.2.
+  The current OSTIMER driver version is 2.2.3.
+
+  - 2.2.3
+    - Improvements
+      - Disable and clear pending interrupts before disabling the OSTIMER clock to avoid interrupts being
+        executed when the clock is already disabled.
 
   - 2.2.2
     - Improvements

@@ -1,6 +1,5 @@
 /*
- * Copyright 2018-2021 NXP
- * All rights reserved.
+ * Copyright 2018-2021, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -23,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief OSTIMER driver version. */
-#define FSL_OSTIMER_DRIVER_VERSION (MAKE_VERSION(2, 2, 2))
+#define FSL_OSTIMER_DRIVER_VERSION (MAKE_VERSION(2, 2, 3))
 /*! @} */
 
 /*!
