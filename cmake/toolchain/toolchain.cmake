@@ -89,3 +89,12 @@ endif()
 if(DEFINED FPU_TYPE AND DEFINED FPU_ABI)
     set_floating_point(${FPU_TYPE} ${FPU_ABI})
 endif()
+
+set(CMAKE_UNRECOGNIZED_TOOLCHAIN codewarrior xtensa)
+# For CMake unknown toolchains, only warnings, errors, and fatal errors are displayed by default to avoid 
+# invalid message about toolchain recognization
+if(${CONFIG_TOOLCHAIN} IN_LIST CMAKE_UNRECOGNIZED_TOOLCHAIN)
+    if(NOT DEFINED CMAKE_MESSAGE_LOG_LEVEL)
+        set(CMAKE_MESSAGE_LOG_LEVEL WARNING)
+    endif()
+endif()
