@@ -1,0 +1,10 @@
+/*!
+@defgroup flexio_a-format FlexIO A-format Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Digital
+Encoder A-format module of MCUXpresso SDK devices.
+The A-format interface is a digital interface for sensors and actuators.
+
+This section describes the programming interface of the A-format driver.
+The A-format driver provides functional interfaces for the user to configure
+A-format encoder and get the data from it.
+*/
