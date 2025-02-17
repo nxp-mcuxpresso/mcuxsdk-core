@@ -1,0 +1,10 @@
+/*!
+@defgroup flexio_t-format FlexIO T-format Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Digital
+Encoder T-format module of MCUXpresso SDK devices.
+The T-format interface is a digital interface for sensors and actuators.
+
+This section describes the programming interface of the T-format driver.
+The T-format driver provides functional interfaces for the user to configure
+T-format encoder and get the data from it.
+*/
