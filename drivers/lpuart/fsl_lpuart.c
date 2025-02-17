@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2022, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -486,6 +486,17 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
             }
         }
 
+#if defined(FSL_FEATURE_LPUART_HAS_CTRL_SWAP) && FSL_FEATURE_LPUART_HAS_CTRL_SWAP
+        if (config->swapTxdRxd == true)
+        {
+            temp |= LPUART_CTRL_SWAP_MASK;
+        }
+        else
+        {
+            temp &= ~LPUART_CTRL_SWAP_MASK;
+        }
+#endif
+
         base->CTRL = temp;
 
 #if defined(FSL_FEATURE_LPUART_HAS_STOP_BIT_CONFIG_SUPPORT) && FSL_FEATURE_LPUART_HAS_STOP_BIT_CONFIG_SUPPORT
@@ -668,6 +679,9 @@ void LPUART_GetDefaultConfig(lpuart_config_t *config)
     config->rxIdleConfig = kLPUART_IdleCharacter1;
     config->enableTx     = false;
     config->enableRx     = false;
+#if defined(FSL_FEATURE_LPUART_HAS_CTRL_SWAP) && FSL_FEATURE_LPUART_HAS_CTRL_SWAP
+    config->swapTxdRxd   = false;
+#endif
 }
 
 /*!

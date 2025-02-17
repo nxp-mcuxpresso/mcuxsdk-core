@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPUART driver version. */
-#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 8, 3))
+#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 9, 0))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
@@ -260,6 +260,9 @@ typedef struct _lpuart_config
     lpuart_idle_config_t rxIdleConfig;        /*!< RX IDLE configuration. */
     bool enableTx;                            /*!< Enable TX */
     bool enableRx;                            /*!< Enable RX */
+#if defined(FSL_FEATURE_LPUART_HAS_CTRL_SWAP) && FSL_FEATURE_LPUART_HAS_CTRL_SWAP
+    bool swapTxdRxd;                          /*!< Swap TXD and RXD pins */
+#endif
 } lpuart_config_t;
 
 /*! @brief LPUART transfer structure. */

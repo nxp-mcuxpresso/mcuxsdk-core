@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section lpuart LPUART
-  The current LPUART driver version is 2.8.3.
+  The current LPUART driver version is 2.9.0.
+
+  - 2.9.0
+    - New Feature
+      - Added support for swap TXD and RXD pins.
 
   - 2.8.3
     - Improvements
