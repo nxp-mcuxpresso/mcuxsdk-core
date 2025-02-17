@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024, 2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 require 'logger'
@@ -508,6 +508,9 @@ class NinjaParser
             for i in 1..3
               all_flags[index+i] = nil
             end
+          elsif flag.strip == "-opt"
+              result.push "#{flag} #{all_flags[index+1]}"
+              all_flags[index+1] = nil
           else
             pattern = /-l\"(\S+)MCU\/(DSP56800x_EABI_Tools\/lib\S+)\"/
             res = flag.strip.match(pattern)

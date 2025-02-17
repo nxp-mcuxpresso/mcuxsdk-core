@@ -70,6 +70,7 @@ module CodeWarrior
 
         class OptimizationTab < OptimizationTab
           def optimization_level(*args, **kargs) super end
+          def optimization_mode(*args, **kargs) super end
         end
 
 

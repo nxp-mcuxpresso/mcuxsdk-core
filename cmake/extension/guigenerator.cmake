@@ -1,9 +1,9 @@
-# Copyright 2024 NXP
+# Copyright 2024, 2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 include_guard(GLOBAL)
 set(GUI_PROJECT_SUPPORTED_TOOLCHAIN "iar" "mdk" "xtensa" "codewarrior")
-set(STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN "armgcc" "iar" "mdk" "xtensa")
+set(STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN "armgcc" "iar" "mdk" "xtensa" "codewarrior")
 
 mcux_get_property(IDE_YML_LIST INTERFACE_IDE_YML_LIST)
 string(REPLACE ";" " " IDE_YML_LIST "${IDE_YML_LIST}")

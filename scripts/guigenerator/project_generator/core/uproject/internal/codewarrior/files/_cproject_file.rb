@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -435,6 +435,13 @@ module Internal
             value = "com.freescale.dsc.cdt.toolchain.compiler.optimization.level.level#{value}"
             @operations.set_state_node(
                 target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.optimization.level\"]", value, "enumerated", used: used
+            )
+          end
+
+          def optimization_mode(target, value, *args, used: true, **kargs)
+            value = "com.freescale.dsc.cdt.toolchain.compiler.optimization.mode.#{value}"
+            @operations.set_state_node(
+                target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.optimization.mode\"]", value, "enumerated", used: used
             )
           end
         end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -16,7 +16,7 @@ module Internal
       def compiler_optimization(target, line)
         Core.assert(line.is_a?(String), 'not a string')
         #-opt level=4
-        pattern = /\s-opt\slevel=(1|2|3|4)\s/
+        pattern = /\s-opt\s+level=(1|2|3|4)\s/
         result  = line.match(pattern)
         if result
           flag = result[1]
@@ -24,6 +24,14 @@ module Internal
           line.sub!(result[0], '')
         else
           @logger.debug('no optimization set!')
+        end
+        #-opt speed/size
+        pattern = /\s-opt\s+(speed|space)\s/
+        result  = line.match(pattern)
+        if result
+          flag = result[1]
+          @file.dscCompilerTab.optimizationTab.optimization_mode(target, flag)
+          line.sub!(result[0], '')
         end
         return line
       end
@@ -105,7 +113,7 @@ module Internal
 
       def compiler_language_c99(target,line)
         Core.assert(line.is_a?(String), 'not a string')
-        pattern = /\s-lang c99\s/
+        pattern = /\s-lang\s+c99\s/
         result = line.match(pattern)
         if result
           @file.dscCompilerTab.languageTab.set_language_c99(target, true)
@@ -124,7 +132,7 @@ module Internal
 
       def assembler_data_memory_model(target,line)
         Core.assert(line.is_a?(String), 'not a string')
-        pattern = /\s-data\s(\d+)\s/
+        pattern = /\s-data\s+(\d+)\s/
         result = line.match(pattern)
         if result
           @file.dscAssemblerTab.generalTab.set_data_mem_model(target, result[1])
@@ -137,7 +145,7 @@ module Internal
 
       def assembler_program_memory_model(target,line)
         Core.assert(line.is_a?(String), 'not a string')
-        pattern = /\s-prog\s(\d+)\s/
+        pattern = /\s-prog\s+(\d+)\s/
         result = line.match(pattern)
         if result
           @file.dscAssemblerTab.generalTab.set_program_mem_model(target, result[1])

@@ -1,13 +1,18 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
 module CodeWarrior
   module Project
     def add_source(path, vdir, rootdir: nil, source_target: nil)
+      # For Standalone project, the root path is added automatically.
+      # It will report error if added by scripts.
+      if ENV['standalone'] == 'true'
+          return if File.basename(path) == path
+      end
       path = path_mod(path, @output_dir)
       super(@project_file.project_parent_path(path), vdir)
     end
