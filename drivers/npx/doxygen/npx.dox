@@ -1,0 +1,6 @@
+/*!
+@defgroup npx NPX: NPX On-The-Fly PRINCE Encryption and Decryption submodule
+@details The MCUXpresso SDK provides a peripheral driver for the NPX On-The-Fly PRINCE Encryption and Decryption submodule.
+
+## NPX example {#NPXEx}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/npx*/

@@ -210,6 +210,7 @@ enum _status_groups
     kStatusGroup_AON_COMMON     = 170, /*!< Group number for AON_COMMON status codes. */
     kStatusGroup_ENDAT3     	= 171, /*!< Group number for ENDAT3 status codes. */
     kStatusGroup_HIPERFACE      = 172, /*!< Group number for HIPERFACE status codes. */
+    kStatusGroup_NPX            = 173, /*!< Group number for NPX status codes. */
 };
 
 /*! \public
