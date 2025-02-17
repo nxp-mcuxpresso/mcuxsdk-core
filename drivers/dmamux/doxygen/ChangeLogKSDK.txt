@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section dmamux DMAMUX
-  The current DMAMUX driver version is 2.1.0.
+  The current DMAMUX driver version is 2.1.1.
+
+  - 2.1.1
+    - Improvements
+      - Add macro FSL_FEATURE_DMAMUX_CHANNEL_NEEDS_ENDIAN_CONVERT and DMAMUX_CHANNEL_ENDIAN_CONVERTn do channel endian convert.
 
   - 2.1.0
     - Improvements
