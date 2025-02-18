@@ -224,7 +224,7 @@
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
-#define FLEXCAN_MEMORY_ERROR_INT_FLAG ((uint64_t)kFLEXCAN_AllMemoryErrorFlag)
+#define FLEXCAN_MEMORY_ERROR_INT_FLAG ((uint64_t)kFLEXCAN_AllMemoryErrorIntFlag)
 #else
 #define FLEXCAN_MEMORY_ERROR_INT_FLAG (0U)
 #endif
@@ -516,6 +516,10 @@ enum _flexcan_flags
     kFLEXCAN_FlexCanAccessNonCorrectableErrorOverrunFlag = FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_FANCEIOF_MASK),
     /*! Correctable Error Interrupt Overrun Flag. */
     kFLEXCAN_CorrectableErrorOverrunFlag = FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_CEIOF_MASK),
+    /*! All Memory Error Interrupt Flags. */
+    kFLEXCAN_AllMemoryErrorIntFlag =
+        (kFLEXCAN_HostAccessNonCorrectableErrorIntFlag | kFLEXCAN_FlexCanAccessNonCorrectableErrorIntFlag |
+         kFLEXCAN_CorrectableErrorIntFlag),
     /*! All Memory Error Flags. */
     kFLEXCAN_AllMemoryErrorFlag =
         (kFLEXCAN_HostAccessNonCorrectableErrorIntFlag | kFLEXCAN_FlexCanAccessNonCorrectableErrorIntFlag |

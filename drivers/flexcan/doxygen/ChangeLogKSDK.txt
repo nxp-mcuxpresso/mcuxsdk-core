@@ -11,6 +11,7 @@
     - Bug Fixes
       - Fixed wrong interrupt and status flag helper macro in enumeration _flexcan_flags and API FLEXCAN_DisableInterrupts.
       - Fixed interrupt flag helper macro typo issue.
+      - Remove flags which will are unassociated with interrupt in macro FLEXCAN_MEMORY_ERROR_INT_FLAG.
 
   - 2.13.1
     - Improvements
