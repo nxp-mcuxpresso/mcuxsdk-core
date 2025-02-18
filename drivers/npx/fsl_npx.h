@@ -54,19 +54,19 @@ typedef uint32_t npx_region_t;
 /*! @brief NPX lock. */
 typedef enum _npx_lock
 {
-    kNPX_GlobalLockEnable = 0U, /*!< NPX global lock */
-    kNPX_MaskLockEnable = 1U,   /*!< NPX mask lock */
-    kNPX_Region0Lock = 2U,      /*!< NPX region 0 lock */
-    kNPX_Region1Lock = 3U ,     /*!< NPX region 1 lock */
-    kNPX_Region2Lock = 3U ,     /*!< NPX region 2 lock */
-    kNPX_Region3Lock = 3U ,     /*!< NPX region 3 lock */
+    kNPX_GlobalLockEnable = 0x10U,    /*!< NPX global lock */
+    kNPX_MaskLockEnable   = 0x40U,    /*!< NPX mask lock */
+    kNPX_Region0Lock      = 0x100U,   /*!< NPX region 0 lock */
+    kNPX_Region1Lock      = 0x400U ,  /*!< NPX region 1 lock */
+    kNPX_Region2Lock      = 0x1000U , /*!< NPX region 2 lock */
+    kNPX_Region3Lock      = 0x4000U , /*!< NPX region 3 lock */
 } npx_lock_t;
 
 /*! @brief NPX region configuration structure. */
 typedef struct _npx_region_config
 {
-    uint32_t startAddress;        /*!< NPX region start address */
-    uint32_t endAddress;        /*!< NPX region end address */
+    uint32_t startAddress;    /*!< NPX region start address */
+    uint32_t endAddress;      /*!< NPX region end address */
     uint64_t subRegionEnable; /*!< NPX sub-region enable. Each bit coresponds to 8K block */
     uint64_t regionLock;      /*!< NPX sub-region enable. Each bit coresponds to 8K block */
 } npx_region_config_t;
