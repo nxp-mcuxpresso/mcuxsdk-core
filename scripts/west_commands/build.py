@@ -19,7 +19,6 @@ from build_helpers import is_mcux_build, find_build_dir, load_domains, \
 from zephyr_ext_common import Forceable
 
 script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-# sys.path.insert(0, os.path.join(script_dir, "mcuxpresso"))
 
 _ARG_SEPARATOR = '--'
 
@@ -61,8 +60,9 @@ _CMAKE_FALSE = "FALSE"
 
 NO_GUI_TOOLCHAIN = ['armgcc']
 
+# log module is deprecated
 def _banner(msg):
-    log.inf('-- west build: ' + msg, colorize=True)
+    log.inf('=== west build: ' + msg, colorize=True)
 
 def config_get(option, fallback):
     return config.get('build', option, fallback=fallback)
@@ -161,7 +161,7 @@ class Build(Forceable):
                            default='armgcc', help='Specify toolchain')
         group.add_argument('--compiler', dest='compiler', action='store', help='Specify compiler. Compiler must follow toolchain.')        
         group.add_argument('--config', dest='config', action='store', 
-                           default='debug', help='SDK build config type')
+                           default=None, help='SDK build config type')
         group.add_argument('-k', '--kit', action='store', help='Kit id')
         group.add_argument('--shield', action='store', help='')
         group.add_argument('--hint', action='store_true', default=False, help='Execute external assistant command like'
@@ -309,6 +309,8 @@ class Build(Forceable):
                 remainder = remainder[1:]
             # Only the first argument separator is consumed, the rest are
             # passed on to CMake
+            if not remainder:
+                return
             if remainder[0] == _ARG_SEPARATOR:
                 remainder = remainder[1:]
             if remainder:
@@ -622,7 +624,7 @@ class Build(Forceable):
         if not self.run_cmake:
             return
 
-        _banner('generating a build system')
+        self.banner('generating a build system')
 
         if board is not None and origin != 'CMakeCache.txt':
             cmake_opts = ['-Dboard={}'.format(board)]
@@ -660,7 +662,6 @@ class Build(Forceable):
 
         extra_args = {
             'SdkRootDirPath': pathlib.Path(__file__).resolve().parent.parent.parent,
-            "CMAKE_BUILD_TYPE": self.args.config,
             "HINT": self.args.hint
             }
         if self.args.toolchain == 'zephyr':
@@ -695,6 +696,11 @@ class Build(Forceable):
 
         for k,v in extra_args.items():
             cmake_opts.extend([f'-D{k}={v}'])
+        build_type = self.args.config
+        if not build_type:
+            build_type = self._get_default_build_type(cmake_opts)
+            self.small_banner(f'Build the default target {build_type}')
+        cmake_opts.append(f'-DCMAKE_BUILD_TYPE={build_type}')
         # Invoke CMake from the current working directory using the
         # -S and -B options (officially introduced in CMake 3.13.0).
         # This is important because users expect invocations like this
@@ -710,7 +716,7 @@ class Build(Forceable):
         run_cmake(final_cmake_args, dry_run=self.args.dry_run)
 
     def _run_pristine(self):
-        _banner('making build dir {} pristine'.format(self.build_dir))
+        self.banner('making build dir {} pristine'.format(self.build_dir))
         if not is_mcux_build(self.build_dir):
             log.die('Refusing to run pristine on a folder that is not a '
                     'Zephyr build system')
@@ -733,9 +739,9 @@ class Build(Forceable):
                 toolchain = self.args.toolchain
             if target == 'guiproject' and toolchain in NO_GUI_TOOLCHAIN:
                 self.die(f'{self.args.toolchain} does not support target guiproject')
-            _banner('running target {}'.format(target))
+            self.banner('running target {}'.format(target))
         elif self.run_cmake:
-            _banner('building application')
+            self.banner('building application')
         extra_args = ['--target', target] if target else []
         if self.args.build_opt:
             extra_args.append('--')
@@ -752,7 +758,7 @@ class Build(Forceable):
             # will build all domains.
             build_dir_list = [domains.get_top_build_dir()]
         else:
-            _banner('building domain(s): {}'.format(' '.join(domain)))
+            self.banner('building domain(s): {}'.format(' '.join(domain)))
             domain_list = domains.get_domains(domain)
             for d in domain_list:
                 build_dir_list.append(d.build_dir)
@@ -780,3 +786,41 @@ class Build(Forceable):
             if add_dashes:
                 extra_args.append('--')
             extra_args.append('VERBOSE=1')
+
+    def _get_default_build_type(self, cmake_opts):
+        build_type = 'debug'
+        try:
+            sys.path.insert(0, script_dir)
+            from misc import sdk_project_target
+
+            cmake_opt_dict = {}
+            for opt in cmake_opts:
+                opt = opt[2:]
+                if '=' not in opt:
+                    continue
+                k, v = opt.split('=')
+                cmake_opt_dict[k.lower()] = v
+            board_core = cmake_opt_dict.get('board', '')
+            if cmake_opt_dict.get('core_id'):
+                board_core = board_core + '@' + cmake_opt_dict['core_id']
+            op = sdk_project_target.MCUXRepoProjects()
+            matched_cases = op.search_app_targets(
+                app_path=self.source_dir,
+                board_cores_filter=[board_core],
+                shields_filter=[cmake_opt_dict['shield']] if cmake_opt_dict.get('shield') else [],
+                devices_filter=[cmake_opt_dict['device']] if cmake_opt_dict.get('device') else [],
+                toolchains_filter=[cmake_opt_dict['config_toolchain']] if cmake_opt_dict.get('config_toolchain') else [],
+                targets_filter=[],
+                is_pick_one_target_for_app=False,
+                validate=False
+            )
+            if not matched_cases:
+                raise Exception
+            matched_types = [case.target for case in matched_cases]
+            matched_types.sort()
+            # 'debug' takes the highest priority
+            build_type = 'debug' if 'debug' in matched_types else matched_types[0]
+        except Exception as _:
+            pass
+        finally:
+            return build_type
