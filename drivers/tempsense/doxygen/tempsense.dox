@@ -1,0 +1,11 @@
+/*!
+@defgroup tempsense TEMPSENSE: Temperature Sensor Module
+@details The MCUXpresso SDK provides a peripheral driver for the Temperature Sensor Module (TEMPSENSE)
+         module of MCUXpresso SDK devices.
+
+Based on features of the Temperature Sensor module, the tempsense driver provides these functions group:
+
+# Tempsense configuration.
+Functions in this group are used to initialize, de-initialize and configure the tempsense module.\n
+
+*/
