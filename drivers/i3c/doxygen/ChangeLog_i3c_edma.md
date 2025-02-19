@@ -4,6 +4,12 @@
 
 - Bug Fixes
   - Fixed the issue that slave start event is cleared when it has not been handled.
+- Added
+  - Supported I3C HDR-DDR transfer with EDMA.
+- Changed
+  - Used linked EDMA to transfer all I3C subaddress and data without handling of intermediate states, simplifying code logic.
+  - Prepare DMA before I3C START to ensure there's no time delay between START and transmitting data.
+  - Added the MCTRLDONE flag check after START and STOP request to ensure all states are handled properly.
 
 ## [2.2.9]
 
