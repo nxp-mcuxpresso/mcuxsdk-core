@@ -2785,3 +2785,12 @@ void ADMA_I2C4_INT_DriverIRQHandler(void)
     LPI2C_CommonIRQHandler(ADMA__LPI2C4, LPI2C_GetInstance(ADMA__LPI2C4));
 }
 #endif
+
+#if defined(AON__LPI2C0)
+/* Implementation of LPI2C0_AON handler named in startup code. */
+void LPI2C0_AON_DriverIRQHandler(void);
+void LPI2C0_AON_DriverIRQHandler(void)
+{
+    LPI2C_CommonIRQHandler(AON__LPI2C0, LPI2C_GetInstance(AON__LPI2C0));
+}
+#endif
