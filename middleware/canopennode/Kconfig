@@ -1,0 +1,29 @@
+menuconfig MCUX_COMPONENT_middleware.canopennode
+    bool "CANopenNode"
+    select MCUX_COMPONENT_driver.flexcan
+    depends on MCUX_HAS_COMPONENT_driver.flexcan
+
+if MCUX_COMPONENT_middleware.canopennode
+
+config MCUX_COMPONENT_middleware.canopennode.301
+    bool "CiA 301"
+
+config MCUX_COMPONENT_middleware.canopennode.303
+    bool "CiA 303"
+
+config MCUX_COMPONENT_middleware.canopennode.304
+    bool "CiA 304"
+
+config MCUX_COMPONENT_middleware.canopennode.305
+    bool "CiA 305"
+
+config MCUX_COMPONENT_middleware.canopennode.309
+    bool "CiA 309"
+
+config MCUX_COMPONENT_middleware.canopennode.extra
+    bool "CANopen trace"
+
+config MCUX_COMPONENT_middleware.canopennode.storage
+    bool "Storage"
+
+endif
