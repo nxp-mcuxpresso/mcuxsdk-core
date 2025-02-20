@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2017, 2023 NXP
- * All rights reserved.
+ * Copyright 2016-2017, 2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -52,7 +51,7 @@ typedef union
  ******************************************************************************/
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /* Clock name of XRDC. */
-#if (FSL_CLOCK_XRDC_GATE_COUNT > 1)
+#if defined(XRDC_CLOCKS)
 static const clock_ip_name_t s_xrdcClock[] = XRDC_CLOCKS;
 #endif
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
@@ -98,17 +97,13 @@ void XRDC_Init(XRDC_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 
-#if (FSL_CLOCK_XRDC_GATE_COUNT > 0)
-#if (FSL_CLOCK_XRDC_GATE_COUNT == 1)
-    CLOCK_EnableClock(kCLOCK_Xrdc0);
-#else
+#if defined(XRDC_CLOCKS)
     uint8_t i;
 
     for (i = 0; i < ARRAY_SIZE(s_xrdcClock); i++)
     {
         CLOCK_EnableClock(s_xrdcClock[i]);
     }
-#endif
 #endif
 
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
@@ -125,17 +120,13 @@ void XRDC_Deinit(XRDC_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 
-#if (FSL_CLOCK_XRDC_GATE_COUNT > 0)
-#if (FSL_CLOCK_XRDC_GATE_COUNT == 1)
-    CLOCK_EnableClock(kCLOCK_Xrdc0);
-#else
+#if defined(XRDC_CLOCKS)
     uint8_t i;
 
     for (i = 0; i < ARRAY_SIZE(s_xrdcClock); i++)
     {
         CLOCK_DisableClock(s_xrdcClock[i]);
     }
-#endif
 #endif
 
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
