@@ -97,11 +97,13 @@ class Format(WestCommand):
         self.args = args
         self.formatter_config = DEFAULT_CONFIG
         self._setup_environment()
-
+        self.fileStatus={"Files":0,"Formated":0,"Skipped":0,"Error":0}
         if self.args.source:
             self.format_source(self.args.source)
         else:
             self.format_git()
+        for key,value in self.fileStatus.items():
+            print(f"{key}: {value}")
 
     def format_source(self, sources: list[str]) -> None:
         for source in sources:
@@ -123,8 +125,10 @@ class Format(WestCommand):
             self.format_file(os.path.join(mancur_repo_abspath, path))
 
     def format_file(self, path: str) -> bool:
+        self.fileStatus["Files"]+=1
         if not os.path.exists(path):
             self.err(f"Invalid file path '{path}'")
+            self.fileStatus["Skipped"]+=1
             return False
 
         tags = tags_from_path(path)
@@ -151,15 +155,21 @@ class Format(WestCommand):
                 if secondRun != firstRun:
                     open(path,'wb').write(unformated)
                     self.skip_banner(f"Cannot format file {path}. Second format is diferent than first format")
+                    self.fileStatus["Skipped"]+=1
+                else:
+                    self.fileStatus["Formated"]+=1
 
             except PermissionError as e:
                 self.err(f"Please check whether {path} is opened with another program.")
+                self.fileStatus["Errror"]+=1
                 break
             if completed_process.returncode != 0:
                 self.err(f"{formatter['id']}: {completed_process.stderr}")
+                self.fileStatus["Error"]+=1
             break
         if not find_formatter:
             self.skip_banner(f"Skip {path}")
+            self.fileStatus["Skipped"]+=1
         return True
 
     def _setup_environment(self) -> None:
@@ -169,7 +179,7 @@ class Format(WestCommand):
         configPath=configPath / "formatter_config.yml"
         if configPath.exists():
             with open(configPath,'r') as file:
-                self.config=yaml.safe_load(file)
+                self.formatconfig=yaml.safe_load(file)
         else:
             self.err(f"Config file in {str(configPath)} does not exist")
             exit(1)
@@ -183,13 +193,13 @@ class Format(WestCommand):
                     f"{c['dep']} is not installed, will skip file with type: '{skip_types}', please "
                     f"run 'pip install -U {c['dep']}'"
                 )
-            if "getVersion" in c.keys() and f"{c["id"]}-version"in self.config:
+            if "getVersion" in c.keys() and f"{c["id"]}-version"in self.formatconfig:
                 versionCmdOutput=subprocess.check_output(c["getVersion"],text=True)
                 versionObject=re.match(r'clang version ((\d|\.)*).*$',versionCmdOutput,re.MULTILINE)
                 if versionObject is not None:
                     version=versionObject.group(1)
-                    if not version==self.config[f"{c["id"]}-version"]:
-                        self.err(f"{c["id"]} version ({version}) doesnt match the expected version ({self.config[f"{c["id"]}-version"]}), will skip file with type: '{skip_types}")
+                    if not version==self.formatconfig[f"{c["id"]}-version"]:
+                        self.err(f"{c["id"]} version ({version}) doesnt match the expected version ({self.formatconfig[f"{c["id"]}-version"]}), will skip file with type: '{skip_types}")
 
                 else:
                     self.err(f"Couldnt check version of {c["id"]}, will skip file with type: '{skip_types}")
