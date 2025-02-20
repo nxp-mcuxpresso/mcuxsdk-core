@@ -83,7 +83,7 @@ void STM_GetDefaultConfig(stm_config_t *config)
 {
     /* Initializes the configure structure to zero. */
     (void)memset(config, 0, sizeof(*config));
-    /*  Timer stops in Debug mode */
+    /*  Timer runs in Debug mode */
     config->enableRunInDebug = true;
     /* Enable interrupt */
     config->enableIRQ = true;
@@ -103,15 +103,15 @@ void STM_Init(STM_Type *base, const stm_config_t *config)
 {
     assert(NULL != config);
     uint32_t instance = STM_GetInstance(base);
-    uint32_t reg = 0;
+    uint32_t reg = 0U;
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Enable the STM clock */
     CLOCK_EnableClock(s_stmClocks[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-    /* Configure debug mode*/
-    if(config->enableRunInDebug)
+    /* Freeze timer in Debug mode*/
+    if(!config->enableRunInDebug)
     {
         reg |= STM_CR_FRZ_MASK;
     }
