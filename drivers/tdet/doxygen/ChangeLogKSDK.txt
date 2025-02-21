@@ -2,7 +2,10 @@
 @page driver_log Driver Change Log
 
 @section tdet TDET
-  The current TDET driver version is 2.1.1.
+  The current TDET driver version is 2.1.2.
+
+  - 2.1.2
+    - Added support for chips without active tamper pins.
 
   - 2.1.1
     - Added clearing SR_TAF and SR_DTF into TDET_Init().
