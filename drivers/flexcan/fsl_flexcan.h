@@ -212,14 +212,15 @@
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
-#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
-#define FLEXCAN_WAKE_UP_FLAG \
-    ((uint32_t)kFLEXCAN_WakeUpIntFlag | (uint64_t)kFLEXCAN_PNMatchIntFlag | (uint64_t)kFLEXCAN_PNTimeoutIntFlag)
-#endif
+#define FLEXCAN_PNWAKE_UP_FLAG ((uint64_t)kFLEXCAN_PNMatchIntFlag | (uint64_t)kFLEXCAN_PNTimeoutIntFlag)
 #else
-#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
-#define FLEXCAN_WAKE_UP_FLAG ((uint32_t)kFLEXCAN_WakeUpIntFlag)
+#define FLEXCAN_PNWAKE_UP_FLAG (0U)
 #endif
+
+#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
+#define FLEXCAN_WAKE_UP_FLAG ((uint32_t)kFLEXCAN_WakeUpIntFlag | FLEXCAN_PNWAKE_UP_FLAG)
+#else
+#define FLEXCAN_WAKE_UP_FLAG (FLEXCAN_PNWAKE_UP_FLAG)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
@@ -265,6 +266,9 @@ enum
     kStatus_FLEXCAN_RxFifoUnderflow =
         MAKE_STATUS(kStatusGroup_FLEXCAN, 15), /*!< Enhanced Rx Message FIFO is underflow. */
 #endif
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
+    kStatus_FLEXCAN_MemoryError = MAKE_STATUS(kStatusGroup_FLEXCAN, 16), /*!< FlexCAN Memory Error. */
+#endif
 };
 
 /*! @brief FlexCAN frame format. */
@@ -293,7 +297,7 @@ typedef enum _flexcan_clock_source
     kFLEXCAN_ClkSrc1    = 0x1U, /*!< FlexCAN Protocol Engine clock selected by user as SRC == 1. */
 } flexcan_clock_source_t;
 
-#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_WAKSRC_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_WAKSRC_SUPPORT)
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_GLITCH_FILTER) && FSL_FEATURE_FLEXCAN_HAS_GLITCH_FILTER)
 /*! @brief FlexCAN wake up source. */
 typedef enum _flexcan_wake_up_source
 {
@@ -414,7 +418,7 @@ enum _flexcan_interrupt_enable
     kFLEXCAN_ErrorInterruptEnable     = CAN_CTRL1_ERRMSK_MASK,  /*!< CAN Error interrupt, use bit 14. */
     kFLEXCAN_TxWarningInterruptEnable = CAN_CTRL1_TWRNMSK_MASK, /*!< Tx Warning interrupt, use bit 11. */
     kFLEXCAN_RxWarningInterruptEnable = CAN_CTRL1_RWRNMSK_MASK, /*!< Rx Warning interrupt, use bit 10. */
-#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_WAKMSK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_WAKMSK_SUPPORT)
+#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
     kFLEXCAN_WakeUpInterruptEnable    = CAN_MCR_WAKMSK_MASK,    /*!< Self Wake Up interrupt, use bit 26. */
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
@@ -776,7 +780,7 @@ typedef struct _flexcan_config
         };
     };
     flexcan_clock_source_t clkSrc;      /*!< Clock source for FlexCAN Protocol Engine. */
-#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_WAKSRC_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_WAKSRC_SUPPORT)
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_GLITCH_FILTER) && FSL_FEATURE_FLEXCAN_HAS_GLITCH_FILTER)
     flexcan_wake_up_source_t wakeupSrc; /*!< Wake up source selection. */
 #endif
     uint8_t maxMbNum;                   /*!< The maximum number of Message Buffers used by user. */
@@ -1748,7 +1752,7 @@ static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t mask)
 #endif
 {
     uint32_t primask = DisableGlobalIRQ();
-#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_WAKMSK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_WAKMSK_SUPPORT)
+#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
     /* Solve Self Wake Up interrupt. */
     base->MCR |= (uint32_t)(mask & (uint32_t)kFLEXCAN_WakeUpInterruptEnable);
 #endif
@@ -1809,7 +1813,7 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t mask)
 {
     uint32_t primask = DisableGlobalIRQ();
 
-#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_WAKMSK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_WAKMSK_SUPPORT)
+#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
     /* Solve Wake Up Interrupt. */
     base->MCR &= ~(uint32_t)(mask & (uint32_t)kFLEXCAN_WakeUpInterruptEnable);
 #endif
@@ -2447,6 +2451,54 @@ void FLEXCAN_TransferAbortReceiveEnhancedFifo(CAN_Type *base, flexcan_handle_t *
  * @param handle FlexCAN handle pointer.
  */
 void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle);
+
+/*!
+ * @brief FlexCAN Message Buffer IRQ handle function.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param handle FlexCAN handle pointer.
+ * @param startMbIdx First Message Buffer to handle.
+ * @param endMbIdx Last Message Buffer to handle.
+ */
+void FLEXCAN_MbHandleIRQ(CAN_Type *base, flexcan_handle_t *handle, uint32_t startMbIdx, uint32_t endMbIdx);
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+/*!
+ * @brief FlexCAN Ehanced Rx FIFO IRQ handle function.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param handle FlexCAN handle pointer.
+ */
+void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle);
+#endif
+
+/*!
+ * @brief FlexCAN Bus Off, Error and Warning IRQ handle function.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param handle FlexCAN handle pointer.
+ */
+void FLEXCAN_BusoffErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle);
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
+/*!
+ * @brief FlexCAN Pretended Networking Wake-up IRQ handle function.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param handle FlexCAN handle pointer.
+ */
+void FLEXCAN_PNWakeUpHandleIRQ(CAN_Type *base, flexcan_handle_t *handle);
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
+/*!
+ * @brief FlexCAN Memory Error IRQ handle function.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param handle FlexCAN handle pointer.
+ */
+void FLEXCAN_MemoryErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle);
+#endif
 
 /*! @} */
 

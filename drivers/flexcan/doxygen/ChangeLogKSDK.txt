@@ -8,6 +8,11 @@
     - Improvements
       - Enter Freeze Mode first when enter Disable Mode on some platform.
       - Add feature macro for Pretended Networking because some FlexCAN instance do not have this feature.
+      - Add new FlexCAN IRQ Handler FLEXCAN_DriverDataIRQHandler and FLEXCAN_DriverEventIRQHandler. Thses IRQ Handlers are
+        used on soc which FlexCAN interrupts are grouped by specific function and assigned to different vector.
+      - Update macro FLEXCAN_WAKE_UP_FLAG and FLEXCAN_PNWAKE_UP_FLAG to simplify code.
+      - Replace macro FSL_FEATURE_FLEXCAN_HAS_NO_WAKMSK_SUPPORT with FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT.
+      - Replace macro FSL_FEATURE_FLEXCAN_HAS_NO_WAKSRC_SUPPORT with FSL_FEATURE_FLEXCAN_HAS_GLITCH_FILTER.
     - Bug Fixes
       - Fixed wrong interrupt and status flag helper macro in enumeration _flexcan_flags and API FLEXCAN_DisableInterrupts.
       - Fixed interrupt flag helper macro typo issue.
