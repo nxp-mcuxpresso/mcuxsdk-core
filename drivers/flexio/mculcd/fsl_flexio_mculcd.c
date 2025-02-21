@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2023, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -59,8 +59,15 @@ status_t FLEXIO_MCULCD_Init(FLEXIO_MCULCD_Type *base, flexio_mculcd_config_t *co
     assert(NULL != config);
     status_t status;
 
-    flexio_config_t flexioConfig = {config->enable, config->enableInDoze, config->enableInDebug,
-                                    config->enableFastAccess};
+    flexio_config_t flexioConfig =
+    {
+        config->enable,
+#if !(defined(FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT) && (FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT == 0))
+        config->enableInDoze,
+#endif
+        config->enableInDebug,
+        config->enableFastAccess
+    };
 
     FLEXIO_Init(base->flexioBase, &flexioConfig);
 
@@ -107,7 +114,9 @@ void FLEXIO_MCULCD_GetDefaultConfig(flexio_mculcd_config_t *config)
     (void)memset(config, 0, sizeof(*config));
 
     config->enable           = true;
+#if !(defined(FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT) && (FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT == 0))
     config->enableInDoze     = false;
+#endif
     config->enableInDebug    = true;
     config->enableFastAccess = true;
     config->baudRate_Bps     = 96000000U;

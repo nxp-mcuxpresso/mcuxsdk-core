@@ -4,7 +4,11 @@
 @if dox_section_flexio_spi
 
 @section flexio_spi FLEXIO_SPI
-  The current FLEXIO_SPI driver version is 2.3.5.
+  The current FLEXIO_SPI driver version is 2.4.0.
+
+  - 2.4.0
+    - Improvements
+      - Supported platforms which don't have DOZE mode control.
 
   - 2.3.5
     - Improvements

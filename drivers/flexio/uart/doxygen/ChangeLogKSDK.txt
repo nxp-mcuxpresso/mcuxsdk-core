@@ -4,7 +4,11 @@
 @if dox_section_flexio_uart
 
 @section flexio_uart FLEXIO_UART
-  The current FLEXIO_UART driver version is 2.5.1.
+  The current FLEXIO_UART driver version is 2.6.0.
+
+  - 2.6.0
+    - Improvements
+      - Supported platforms which don't have DOZE mode control.
 
   - 2.5.1
     - Improvements

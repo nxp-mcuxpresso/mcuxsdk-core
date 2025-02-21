@@ -4,8 +4,11 @@
 @if dox_section_flexio_mculcd
 
 @section flexio_mculcd FLEXIO_MCU_LCD
-  The current FLEXIO_MCU_LCD driver version is 2.1.0.
+  The current FLEXIO_MCU_LCD driver version is 2.2.0.
 
+  - 2.2.0
+    - Improvements
+      - Supported platforms which don't have DOZE mode control.
   - 2.1.0
     - New Features
       - Supported transmit only data without command.

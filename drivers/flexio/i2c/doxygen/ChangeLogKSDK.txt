@@ -4,7 +4,10 @@
 @if dox_section_flexio_i2c_master
 
 @section flexio_i2c FLEXIO_I2C
-  The current FLEXIO_I2C driver version is 2.5.1.
+  The current FLEXIO_I2C driver version is 2.6.0.
+  - 2.6.0
+    - Improvements
+      - Supported platforms which don't have DOZE mode control.
 
   - 2.5.1
     - Improvements
