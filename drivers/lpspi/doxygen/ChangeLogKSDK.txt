@@ -173,7 +173,11 @@
     - Initial version.
 
 @section lpspi_EDMA LPSPI_EDMA
-  The current LPSPI_EDMA driver version is 2.4.5.
+  The current LPSPI_EDMA driver version is 2.4.6.
+
+  - 2.4.6
+    - Improvements
+      - Increased transmit FIFO watermark to ensure whole transmit FIFO will be used during data transfer.
 
   - 2.4.5
     - Bug Fixes
