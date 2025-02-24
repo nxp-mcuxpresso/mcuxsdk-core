@@ -3,7 +3,12 @@
 
 @section semc SEMC
 
-  The current SEMC driver version is 2.7.0.
+  The current SEMC driver version is 2.7.1.
+
+  - 2.7.1
+    - Bug Fixes 
+      -  Fixed the wrong write operation to INTR register. The INTR register is a W1C register, so the right write 
+      operation is write directly to it to clear.
 
   - 2.7.0
     - Improvements
