@@ -1,0 +1,27 @@
+/*!
+@defgroup lcu LCU: Logic Control Unit Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Logic Control Unit  (LCU)
+         of MCUXpresso SDK devices.
+
+# Function groups {#LUTFunc}
+The LUT driver supports operating the module as a logic control unit.
+
+## Initialization and deinitialization {#LCUInit}
+
+The function LCU_Init() enables the module clock.
+The function LCU_Deinit() disables the module clock.
+
+## Output initialization {#OutputInit}
+The function LCU_OutputInit() initializes the LUT output with specified configurations. 
+
+## Fprce iutput initialization {#ForceInputInit}
+The function LCU_ForceInit() initializes the force input with specified configurations.
+
+
+# Typical use case {#LUTCase}
+
+## LCU Operation{#LCUOper}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/lcu
+
+*/
