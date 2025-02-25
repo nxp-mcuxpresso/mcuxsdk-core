@@ -1,5 +1,12 @@
 # PXP
 
+## [2.7.0]
+
+- New Features
+  - Added the PS_LRC setting for V4.
+  - Added the PXP_SetPath setting for V4.
+  - Fixed the code logic, V4 do not support DATA_PATH_CTRL1.
+
 ## [2.6.1]
 
 - Improvements
