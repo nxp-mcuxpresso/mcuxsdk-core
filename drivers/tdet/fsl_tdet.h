@@ -22,10 +22,10 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief Defines TDET driver version 2.1.2.
+/*! @brief Defines TDET driver version 2.2.0.
  *
  * Change log:
- * - Version 2.1.2
+ * - Version 2.2.0
  *   - Added support for chips without active tamper pins.
  * - Version 2.1.1
  *   - Added clearing SR_TAF and SR_DTF into TDET_Init().
@@ -35,7 +35,7 @@
  * - Version 2.0.0
  *   - Initial version
  */
-#define FSL_TDET_DRIVER_VERSION (MAKE_VERSION(2, 1, 2))
+#define FSL_TDET_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*! @} */
 
 /*!
