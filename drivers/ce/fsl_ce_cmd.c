@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -172,8 +172,9 @@ int CE_CmdLaunchNonBlocking()
     {
         return -2; /* no commands to send */
     }
-    /* write number of commands via TX2 reg */
-    MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, s_ce_cmdbuffer->n_cmd);
+    /* Write number of commands via TX2 reg,
+     * set MSb to indicate non-blocking mode to ZENV: ZENV will send interrupt back in this case. */
+    MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, 0x80000000 | s_ce_cmdbuffer->n_cmd);
     CE_CmdDelay();
 
     /* launch CE by sending MU interrupt */

@@ -1,8 +1,13 @@
 /*!
 @page driver_log Driver Change Log
 
-@section ce Compute Engine
-  The current CE driver version is 2.0.1.
+@section ce CE
+  The current CE driver version is 2.1.0.
+
+  - 2.1.0
+    - New Features
+      - Added ZV->CM33 interrupt for non-blocking mode and updated matrix multiply
+        function to handle small matrices.
 
   - 2.0.1
     - Bug Fixes

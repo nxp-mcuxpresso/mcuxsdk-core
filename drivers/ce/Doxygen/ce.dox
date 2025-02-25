@@ -1,0 +1,22 @@
+/*!
+@defgroup ce CE: Compute Engine Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Compute Engine (CE) module of MCUXpresso SDK devices.
+ @n
+CE is a platform that provides the digital signal processing unit (LPU ZV2117).
+The low-level driver interface utilizes the messaging unit to send an interrupt from CM33 to
+DSP. It is assumed that DSP has been launched with the latest released image.
+The latest version of the DSP image is under the directory: drivers\ce\firmware\ce_kw47_mcxw72.txt
+The driver functionality allows for a single command or a queue of commands to be sent from
+CM33 to the DSP either in a "blocking" mode or in a "non-blocking" mode.
+In the blocking mode, the driver on CM33 will wait for the command queue to complete executing
+on the DSP before returning control to the CM33 user.
+In the non-blocking mode, the driver on CM33 will launch the command queue on DSP and
+return right away. The CM33 user can continue to execute other tasks (not involving DSP). In
+this case, the user is responsible to poll for the status of task completion on DSP before
+attempting to use the results from the previously issued commands or before sending further
+commands to DSP. The user can poll the status of DSP by calling the CE_CmdCheckStatus().
+The function returns status indicating DSP is Idle or not. If Idle, that would imply completion
+of the previously assigned tasks.
+The driver relies on a command buffer and command status buffer allocated in the DSP data
+memory section.
+ @n

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -24,7 +24,7 @@ Functional API definitions for ARM drivers for CE
 /*! @name Driver version */
 /*! @{ */
 /*! @brief CE driver version. */
-#define FSL_CE_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
+#define FSL_CE_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
 /*! @} */
 
 /* Component ID definition, used by tools. */
