@@ -3,7 +3,7 @@ NXP Software Content Register
 Package: mcuxsdk-core
 Version: 2.0.0
 Outgoing License: BSD-3-Clause
-License File: LICENSE
+License File: COPYING-BSD-3
 Type of content: source code, header file, script
 Description and comments: MCUXpresso SDK core drivers, build scripts and cmake, kconfig build files.
 Release Location: https://github.com/nxp-mcuxpresso/mcuxsdk-core
