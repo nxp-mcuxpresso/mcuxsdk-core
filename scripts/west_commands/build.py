@@ -661,7 +661,7 @@ class Build(Forceable):
             cmake_opts.append('-DENABLE_ALL_DRIVERS=False')
 
         extra_args = {
-            'SdkRootDirPath': pathlib.Path(__file__).resolve().parent.parent.parent,
+            'SdkRootDirPath': pathlib.Path(__file__).resolve().parent.parent.parent.as_posix(),
             "HINT": self.args.hint
             }
         if self.args.toolchain == 'zephyr':
@@ -804,8 +804,9 @@ class Build(Forceable):
             if cmake_opt_dict.get('core_id'):
                 board_core = board_core + '@' + cmake_opt_dict['core_id']
             op = sdk_project_target.MCUXRepoProjects()
+            app_path = (pathlib.Path(self.source_dir) / 'example.yml').relative_to(pathlib.Path(cmake_opt_dict.get('sdkrootdirpath', ''))).as_posix()
             matched_cases = op.search_app_targets(
-                app_path=self.source_dir,
+                app_path=app_path,
                 board_cores_filter=[board_core],
                 shields_filter=[cmake_opt_dict['shield']] if cmake_opt_dict.get('shield') else [],
                 devices_filter=[cmake_opt_dict['device']] if cmake_opt_dict.get('device') else [],

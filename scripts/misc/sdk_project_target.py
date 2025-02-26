@@ -478,10 +478,15 @@ class MCUXRepoProjects(object):
             devices_filter=devices_filter,
             targets_filter=targets_filter,
         )
-
-        # Search for app targets
-        example_file_pattern = os.path.join(sdk_root_dir, app_path , '**/example.yml')
-        expanded_example_files = glob.glob(example_file_pattern, recursive=True)
+        # Explicit example.yml
+        if app_path.endswith('example.yml'):
+            if not os.path.exists(example_yml := os.path.join(sdk_root_dir, app_path)):
+                return matched_apps
+            expanded_example_files = [example_yml]
+        else:
+            # Search for app targets
+            example_file_pattern = os.path.join(sdk_root_dir, app_path , '**/example.yml')
+            expanded_example_files = glob.glob(example_file_pattern, recursive=True)
         #print(expanded_example_files)
         expanded_example_files_filtered = []
         for example_file in expanded_example_files:
