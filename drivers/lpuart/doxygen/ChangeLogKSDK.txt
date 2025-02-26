@@ -7,6 +7,7 @@
   - 2.9.0
     - New Feature
       - Added support for swap TXD and RXD pins.
+      - Added common IRQ handler entry LPUART_DriverIRQHandler.
 
   - 2.8.3
     - Improvements

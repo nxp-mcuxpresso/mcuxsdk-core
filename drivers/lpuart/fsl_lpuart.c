@@ -2281,6 +2281,16 @@ void LPUART_TransferHandleErrorIRQ(LPUART_Type *base, void *irqHandle)
 {
     /* To be implemented by User. */
 }
+
+void LPUART_DriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_lpuartBases))
+    {
+        s_lpuartIsr[instance](s_lpuartBases[instance], s_lpuartHandle[instance]);
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+
 #if defined(FSL_FEATURE_LPUART_HAS_SHARED_IRQ0_IRQ1) && FSL_FEATURE_LPUART_HAS_SHARED_IRQ0_IRQ1
 #if defined(FSL_FEATURE_LPUART_HAS_SEPARATE_RX_TX_IRQ) && FSL_FEATURE_LPUART_HAS_SEPARATE_RX_TX_IRQ
 void LPUART0_LPUART1_RX_DriverIRQHandler(void);

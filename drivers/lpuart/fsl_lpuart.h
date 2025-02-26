@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2025 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -1119,6 +1118,15 @@ void LPUART_TransferHandleIRQ(LPUART_Type *base, void *irqHandle);
  * @param irqHandle LPUART handle pointer.
  */
 void LPUART_TransferHandleErrorIRQ(LPUART_Type *base, void *irqHandle);
+
+/*!
+ * @brief LPUART driver IRQ handler common entry.
+ *
+ * This function provides the common IRQ request entry for LPUART.
+ *
+ * @param instance LPUART instance.
+ */
+void LPUART_DriverIRQHandler(uint32_t instance);
 
 /*! @} */
 
