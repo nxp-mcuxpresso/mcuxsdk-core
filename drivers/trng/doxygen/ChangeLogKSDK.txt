@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section trng TRNG
-  The current TRNG driver version is 2.0.17.
+  The current TRNG driver version is 2.0.18.
+
+  - 2.0.18
+    - Bug fix:
+      - TRNG health checks now done in software on RT5xx and RT6xx.
 
   - 2.0.17
     - New features:
