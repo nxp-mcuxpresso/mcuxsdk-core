@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section wdog WDOG
-  The current WDOG driver version is 2.0.1.
+  The current WDOG driver version is 2.0.2.
+
+  - 2.0.2
+    - Improvements
+      - WDG_Init() adds a 256 bus clock delay for WCT window finish.
 
   - 2.0.1
     - Bug Fixes
