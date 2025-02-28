@@ -19,8 +19,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SAR ADC driver version 2.2.0. */
-#define FSL_SAR_ADC_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+/*! @brief SAR ADC driver version 2.3.0. */
+#define FSL_SAR_ADC_DRIVER_VERSION (MAKE_VERSION(2, 3, 0))
 /*! @} */
 
 #define ADC_GROUP_COUNTS               FSL_FEATURE_ADC_CHANNEL_GROUPS_COUNT

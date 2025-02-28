@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section sar_adc SAR_ADC
-  The current SAR_ADC driver version is 2.2.0.
+  The current SAR_ADC driver version is 2.3.0.
+
+  - 2.3.0
+    - New Feature
+      - Added new feature macro a for compatibility with ADCs on some platforms
+        where some instances do not support group3.
 
   - 2.2.0
     - New Feature

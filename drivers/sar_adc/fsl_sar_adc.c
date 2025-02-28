@@ -155,7 +155,7 @@ void ADC_Init(ADC_Type *base, const adc_config_t *config)
                  | ADC_MCR_XSTRTEN(config->enableAuxiliaryTrig)
 #endif /* FSL_FEATURE_ADC_HAS_MCR_XSTARTEN */
 #if defined(FSL_FEATURE_ADC_HAS_BCTUMODE) && (FSL_FEATURE_ADC_HAS_BCTUMODE==1U)
-                 | ADC_MCR_BCTUEN((uint32_t)config->bctuMode & 0x2U) | ADC_MCR_BCTU_MODE((uint32_t)config->bctuMode & 0x1U)
+                 | ADC_MCR_BCTUEN((bool)((uint32_t)config->bctuMode & 0x2U)) | ADC_MCR_BCTU_MODE((bool)((uint32_t)config->bctuMode & 0x1U))
 #endif /* FSL_FEATURE_ADC_HAS_BCTUMODE */
 #if defined(FSL_FEATURE_ADC_HAS_MCR_AVGS) && (FSL_FEATURE_ADC_HAS_MCR_AVGS==1U)
                  | ADC_MCR_AVGEN(((uint32_t)config->convAvg & 0x4U) >> 2U) | ADC_MCR_AVGS((uint32_t)config->convAvg & 0x3U)
@@ -187,21 +187,24 @@ void ADC_Init(ADC_Type *base, const adc_config_t *config)
     /* Set GROUPn sample phase duration. */
     base->CTR0 = ((base->CTR0 & (~ADC_CTR0_INPSAMP_MASK)) | ADC_CTR0_INPSAMP(config->samplePhaseDuration[0U]));
     base->CTR1 = ((base->CTR1 & (~ADC_CTR1_INPSAMP_MASK)) | ADC_CTR1_INPSAMP(config->samplePhaseDuration[1U]));
-#if(ADC_GROUP_COUNTS==3U)
-    base->CTR2 = ((base->CTR2 & (~ADC_CTR2_INPSAMP_MASK)) | ADC_CTR2_INPSAMP(config->samplePhaseDuration[2U]));
-#endif /* ADC_GROUP_COUNTS */
-    
+#if defined (FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3)
+    if(1U == FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3(base))
+    {
+        base->CTR2 = ((base->CTR2 & (~ADC_CTR2_INPSAMP_MASK)) | ADC_CTR2_INPSAMP(config->samplePhaseDuration[2U]));
+    }
+#endif /* FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3 */
+
     /* Set GROUPn pre-sample voltage sources and decide whether to convert the pre-sample value. */
-    base->PSCR = ((base->PSCR & (~(ADC_PSCR_PREVAL0_MASK | ADC_PSCR_PREVAL1_MASK | ADC_PSCR_PRECONV_MASK
-#if(ADC_GROUP_COUNTS==3U)
-                          | ADC_PSCR_PREVAL2_MASK
-#endif /* ADC_GROUP_COUNTS */
-                          ))) | (ADC_PSCR_PREVAL0(config->presampleVoltageSrc[0U]) |
-                                 ADC_PSCR_PREVAL1(config->presampleVoltageSrc[1U])
-#if(ADC_GROUP_COUNTS==3U)
-          | ADC_PSCR_PREVAL1(config->presampleVoltageSrc[2U])
-#endif /* ADC_GROUP_COUNTS */
-          | ADC_PSCR_PRECONV(config->enableConvertPresampleVal ? 1U : 0U)));
+    base->PSCR = ((base->PSCR & (~(ADC_PSCR_PREVAL0_MASK | ADC_PSCR_PREVAL1_MASK | ADC_PSCR_PRECONV_MASK)))
+                  | (ADC_PSCR_PREVAL0(config->presampleVoltageSrc[0U]) | ADC_PSCR_PREVAL1(config->presampleVoltageSrc[1U])
+                  | ADC_PSCR_PRECONV(config->enableConvertPresampleVal ? 1U : 0U)));
+
+#if defined (FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3)
+    if(1U == FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3(base))
+    {
+        base->PSCR = ((base->PSCR & (~ADC_PSCR_PREVAL2_MASK)) | ADC_PSCR_PREVAL1(config->presampleVoltageSrc[2U]));
+    }
+#endif /* FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3 */
 }
 
 /*!
@@ -262,6 +265,13 @@ void ADC_SetConvChainConfig(ADC_Type *base, const adc_chain_config_t *config)
 
     for (uint8_t index = 0U; index < (uint8_t)ADC_GROUP_COUNTS; ++index)
     {
+#if defined (FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3)
+        if(1U != FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3(base))
+        {
+            break;
+        }
+#endif /* FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3 */
+            
         /* 1. Set conversion channel's interrupt.*/
         *(((volatile uint32_t *)(&(base->CIMR0))) + index) = convChannelIntMask[index];
         /* 2. Set the conversion channel's pre-sample feature.*/
@@ -281,6 +291,12 @@ void ADC_SetConvChainConfig(ADC_Type *base, const adc_chain_config_t *config)
     {
         for (uint8_t index = 0U; index < (uint8_t)ADC_GROUP_COUNTS; ++index)
         {
+#if defined (FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3)
+            if(1U != FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3(base))
+            {
+                break;
+            }
+#endif /* FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3 */
             *(((volatile uint32_t *)(&(base->JCMR0))) + index) = convChannelMask[index];
         }
 
@@ -297,6 +313,12 @@ void ADC_SetConvChainConfig(ADC_Type *base, const adc_chain_config_t *config)
     {
         for (uint8_t index = 0U; index < (uint8_t)ADC_GROUP_COUNTS; ++index)
         {
+#if defined (FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3)
+            if(1U != FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3(base))
+            {
+                break;
+            }
+#endif /* FSL_FEATURE_ADC_INSTANCE_SUPPORT_GROUP3 */
             *(((volatile uint32_t *)(&(base->NCMR0))) + index) = convChannelMask[index];
         }
 
@@ -379,9 +401,9 @@ bool ADC_DoCalibration(ADC_Type *base, const adc_calibration_config_t *config)
 
 #if (defined(FSL_FEATURE_ADC_HAS_CALBISTREG) && (FSL_FEATURE_ADC_HAS_CALBISTREG==1U))
     /* Clear the bits and set to calibration values */
-    base->CALBISTREG = (base->CALBISTREG & (~(ADC_CALBISTREG_AVG_EN_MASK | 
+    base->CALBISTREG = ((base->CALBISTREG & (~(ADC_CALBISTREG_AVG_EN_MASK |
                                               ADC_CALBISTREG_TSAMP_MASK |
-                                              ADC_CALBISTREG_NR_SMPL_MASK)) | 
+                                              ADC_CALBISTREG_NR_SMPL_MASK))) |
                                              (ADC_CALBISTREG_TSAMP(config->sampleTime) |
                                               ADC_CALBISTREG_NR_SMPL(config->averageSampleNumbers) | 
                                               ADC_CALBISTREG_AVG_EN(config->enableAverage ? 1U : 0U)));
