@@ -3372,11 +3372,14 @@ status_t FLEXCAN_ReadEnhancedRxFifo(CAN_Type *base, flexcan_fd_frame_t *pRxFrame
         /* Copy CAN FD Message from Enhanced Rx FIFO, should use the DLC value to identify the bytes that belong to the
          * message which is being read. */
         (void)memcpy((void *)pRxFrame, (void *)(uint32_t *)E_RX_FIFO(base), sizeof(uint32_t) * idHitOff);
-        pRxFrame->idhit = pRxFrame->dataWord[idHitOff - 3U];
-        /* Clear the unused frame data. */
-        for (uint32_t i = (idHitOff - 3U); i < 16U; i++)
+        if (idHitOff < 19U)
         {
-            pRxFrame->dataWord[i] = 0x0;
+            pRxFrame->idhit = pRxFrame->dataWord[idHitOff - 3U];
+            /* Clear the unused frame data. */
+            for (uint32_t i = (idHitOff - 3U); i < 16U; i++)
+            {
+                pRxFrame->dataWord[i] = 0x0;
+            }
         }
 
         /* Clear data available flag to let FlexCAN know one frame has been read from the Enhanced Rx FIFO. */
