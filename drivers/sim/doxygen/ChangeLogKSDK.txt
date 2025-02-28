@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section sim SIM
-  The current SIM driver version is 2.1.3.
+  The current SIM driver version is 2.2.0.
+
+  - 2.2.0
+    - Improvements
+      - Added API to trigger TRGMUX.
 
   - 2.1.3
     - Improvements
