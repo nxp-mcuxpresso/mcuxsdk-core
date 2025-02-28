@@ -4,7 +4,11 @@
 @if dox_section_usart_driver
 
 @section usart USART
-  The current USART driver version is 2.8.4.
+  The current USART driver version is 2.8.5.
+
+  - 2.8.5
+    - Bug Fixes
+      - Fixed race condition during call of USART_EnableTxDMA and USART_EnableRxDMA.
 
   - 2.8.4
     - Bug Fixes
