@@ -138,6 +138,7 @@ class ExportApp(WestCommand):
         self.cmparser = None
         self.sysbuild = False
         self.current_list_dir = None
+        self.core_id = None
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(
@@ -510,7 +511,7 @@ class ExportApp(WestCommand):
         board_core = self.board
         if self.core_id:
             board_core = board_core + '@' + self.core_id
-        matched_app = op.search_app_targets(app_path=self.source_dir, board_cores_filter=[board_core])
+        matched_app = op.search_app_targets(app_path=self.source_dir.as_posix(), board_cores_filter=[board_core])
         self.check_force(matched_app,
                          f'Cannot find any app match your input, please ensure following command can get a valid output\
                           {os.linesep}west list_project -p {self.source_dir} -b {board_core}')
