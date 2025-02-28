@@ -1,0 +1,42 @@
+/*!
+@defgroup bctu BCTU: BCTU Module
+@details The MCUXpresso SDK provides a peripheral driver for the BCTU module of MCUXpresso SDK devices. 
+
+Based on features of the BCTU module, this driver is divided into the following function groups:
+
+# BCTU Initialization, De-Initialization, and Configuration.
+    Functions in this group are used to:
+    1. Initialize and de-Initialize the BCTU.
+    2. Configure the conversion list.
+    3. Enable and disable the module.
+    4. Assert and deassert the module software reset.
+    5. Enable and disable the DMA transfer.
+
+# BCTU Interrupts Enable/Disable and Status Flags Get/Clear.
+    Functions in this group are used to:
+    1. Enable and disable the module interrupt.
+    2. Get and clear BCTU status flags.
+    3. Enable and disable the DMA transfer.
+
+# BCTU Trigger Configuration.
+    Functions in this group are used to:
+    1. Configure BCTU trigger.
+    2. Enable and disable the global trigger.
+    3. Enable and disable the hardware trigger.
+    4. Enable and disable the software trigger.
+
+# BCTU FIFO Operation.
+    Functions in this group are used to:
+    1. Get BCTU FIFO result data.
+    2. Set BCTU FIFO watermark.
+    3. Enable and Disable FIFO DMA transfer.
+    4. Enable and Disable FIFO interrupt.
+    5. Get and clear BCTU FIFO status flag.
+    6. Get BCTU FIFO full flag.
+    7. Get BCTU FIFO counter.
+
+# BCTU trigger result.
+    Functions in this group are used to:
+    1. Get ADC conversion result.
+
+*/
