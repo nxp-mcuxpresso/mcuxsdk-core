@@ -107,6 +107,8 @@ class Format(WestCommand):
 
     def format_source(self, sources: list[str]) -> None:
         for source in sources:
+            if source==".":
+                source=os.getcwd()
             if os.path.isfile(source):
                 self.format_file(os.path.abspath(source))
             elif os.path.isdir(source):
