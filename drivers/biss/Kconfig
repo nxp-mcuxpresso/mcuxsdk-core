@@ -5,6 +5,6 @@ config MCUX_HAS_COMPONENT_driver.biss
     default y if MCUX_HW_IP_DriverType_BISS
 
 config MCUX_COMPONENT_driver.biss
-    bool "Use driver BiSS"
+    bool "BiSS"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.biss
