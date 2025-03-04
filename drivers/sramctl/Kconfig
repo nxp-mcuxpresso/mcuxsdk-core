@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.sramctl
     default y if MCUX_HW_IP_DriverType_SRAMCTL
 
 config MCUX_COMPONENT_driver.sramctl
-    bool "Use driver sramctl"
+    bool "sramctl"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.sramctl

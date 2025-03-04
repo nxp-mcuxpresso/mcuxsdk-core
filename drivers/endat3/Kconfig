@@ -7,6 +7,6 @@ config MCUX_HAS_COMPONENT_driver.endat3
 	default y if MCUX_HW_IP_DriverType_ENDAT3
 
 config MCUX_COMPONENT_driver.endat3
-    bool "Use driver Endat3"
+    bool "Endat3"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.endat3
