@@ -2,7 +2,13 @@
 @page driver_log Driver Change Log
 
 @section tempmon TEMPMON
-  The current TEMPMON driver version is 2.2.0.
+  The current TEMPMON driver version is 2.2.1.
+
+  - 2.2.1
+    - Improvements
+      - Move TEMPMON calibration data mask definitions from the driver
+        source file to the header file, as the driver examples also need
+        to use these definitions.
 
   - 2.2.0
     - Bug Fixes
