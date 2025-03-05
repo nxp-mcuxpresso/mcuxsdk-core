@@ -1550,8 +1550,15 @@ static inline uint64_t FLEXCAN_GetStatusFlags(CAN_Type *base)
 #endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base))
+    {
+        tempflag |= FLEXCAN_EFIFO_STATUS_MASK(base->ERFSR);
+    }
+#else
     /* Get Enhanced Rx FIFO status. */
     tempflag |= FLEXCAN_EFIFO_STATUS_MASK(base->ERFSR);
+#endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
     /* Get Memory Error status. */
@@ -1591,8 +1598,15 @@ static inline void FLEXCAN_ClearStatusFlags(CAN_Type *base, uint64_t mask)
 #endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base))
+    {
+        base->ERFSR = FLEXCAN_EFIFO_STATUS_UNMASK(mask);
+    }
+#else
     /* Clear Enhanced Rx FIFO status. */
     base->ERFSR = FLEXCAN_EFIFO_STATUS_UNMASK(mask);
+#endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
     /* Clear Memory Error status. */
@@ -1760,6 +1774,9 @@ static inline uint8_t FLEXCAN_GetPNMatchCount(CAN_Type *base)
  */
 static inline uint32_t FLEXCAN_GetEnhancedFifoDataCount(CAN_Type *base)
 {
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1);
+#endif
     return (base->ERFSR & CAN_ERFSR_ERFEL_MASK);
 }
 #endif
@@ -1814,8 +1831,15 @@ static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t mask)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base))
+    {
+        base->ERFIER |= FLEXCAN_EFIFO_INT_UNMASK(mask);
+    }
+#else
     /* Solve Enhanced Rx FIFO interrupt. */
     base->ERFIER |= FLEXCAN_EFIFO_INT_UNMASK(mask);
+#endif
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
@@ -1875,8 +1899,15 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t mask)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base))
+    {
+        base->ERFIER &= ~FLEXCAN_EFIFO_INT_UNMASK(mask);
+    }
+#else
     /* Solve Enhanced Rx FIFO interrupt. */
     base->ERFIER &= ~FLEXCAN_EFIFO_INT_UNMASK(mask);
+#endif
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)

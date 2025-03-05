@@ -2623,8 +2623,15 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *pRx
     {
         assert(pRxFifoConfig->idFilterNum <= 128U);
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+        if (FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1)
+        {
+            assert((base->ERFCR & CAN_ERFCR_ERFEN_MASK) == 0U);
+        }
+#else
         /* Legacy Rx FIFO and Enhanced Rx FIFO cannot be enabled at the same time. */
         assert((base->ERFCR & CAN_ERFCR_ERFEN_MASK) == 0U);
+#endif
 #endif
 
         /* Get the setup_mb value. */
@@ -2740,6 +2747,9 @@ void FLEXCAN_SetEnhancedRxFifoConfig(CAN_Type *base, const flexcan_enhanced_rx_f
     /* Assertion. */
     assert((NULL != pConfig) || (false == enable));
     uint32_t i;
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1);
+#endif
     /* Enter Freeze Mode. */
     FLEXCAN_EnterFreezeMode(base);
 
@@ -3394,6 +3404,9 @@ status_t FLEXCAN_ReadEnhancedRxFifo(CAN_Type *base, flexcan_fd_frame_t *pRxFrame
 {
     /* Assertion. */
     assert(NULL != pRxFrame);
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1);
+#endif
 
     status_t status;
     uint32_t idHitOff;
@@ -3703,6 +3716,9 @@ status_t FLEXCAN_TransferReceiveFifoBlocking(CAN_Type *base, flexcan_frame_t *pR
 status_t FLEXCAN_TransferReceiveEnhancedFifoBlocking(CAN_Type *base, flexcan_fd_frame_t *pRxFrame)
 {
     status_t rxFifoStatus;
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1);
+#endif
 
     /* Wait until Enhanced Rx FIFO non-empty. */
     while (0U == (FLEXCAN_GetStatusFlags(base) & (uint64_t)kFLEXCAN_ERxFifoDataAvlIntFlag))
@@ -4209,6 +4225,9 @@ status_t FLEXCAN_TransferReceiveEnhancedFifoNonBlocking(CAN_Type *base,
     /* Assertion. */
     assert(NULL != handle);
     assert(NULL != pFifoXfer);
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1);
+#endif
 
     status_t status;
     uint32_t watermark = ((base->ERFCR & CAN_ERFCR_ERFWM_MASK) >> CAN_ERFCR_ERFWM_SHIFT) + 1U;
@@ -4467,6 +4486,9 @@ void FLEXCAN_TransferAbortReceiveEnhancedFifo(CAN_Type *base, flexcan_handle_t *
 {
     /* Assertion. */
     assert(NULL != handle);
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1);
+#endif
 
     /* Check if Enhanced Rx FIFO is enabled. */
     if (0U != (base->ERFCR & CAN_ERFCR_ERFEN_MASK))

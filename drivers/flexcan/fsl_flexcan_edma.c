@@ -328,6 +328,9 @@ status_t FLEXCAN_TransferReceiveEnhancedFifoEDMA(CAN_Type *base,
 {
     assert(NULL != handle->rxFifoEdmaHandle);
     assert(NULL != pFifoXfer->framefd);
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1);
+#endif
 
     edma_transfer_config_t dmaXferConfig;
     edma_minor_offset_config_t dmaMinorOffsetConfig;
