@@ -315,6 +315,26 @@ typedef enum _flexcan_endianness
 } flexcan_endianness_t;
 #endif
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+/*! @brief FlexCAN timebase used for capturing 16-bit TIME_STAMP field of message buffer. */
+typedef enum _flexcan_MB_timestamp_base
+{
+    kFLEXCAN_CANTimer           = 0x0U, /*!< FlexCAN free-running timer. */
+    kFLEXCAN_Lower16bitsHRTimer = 0x1U, /*!< Lower 16 bits of high-resolution on-chip timer. */
+    kFLEXCAN_Upper16bitsHRTimer = 0x2U, /*!< Upper 16 bits of high-resolution on-chip timer. */
+} flexcan_MB_timestamp_base_t;
+
+/*! @brief FlexCAN capture point of 32-bit high resolution timebase during a CAN frame. */
+typedef enum _flexcan_capture_point
+{
+    kFLEXCAN_CANFrameID2ndBit = 0x0U,   /*!< Second bit of identifier field of any frame is on the CAN bus.
+                                             HR_TIME_STAMPn register will not capture 32-bit counter value. */
+    kFLEXCAN_CANFrameEnd      = 0x1U,   /*!< End of the CAN frame. */
+    kFLEXCAN_CANFrameStart    = 0x2U,   /*!< Start of the CAN frame. */
+    kFLEXCAN_CANFDFrameRes    = 0x3U,   /*!< Start of frame for classical CAN frames; res bit for CAN FD frames. */
+} flexcan_capture_point_t;
+#endif
+
 /*! @brief FlexCAN Rx Fifo Filter type. */
 typedef enum _flexcan_rx_fifo_filter_type
 {
@@ -389,7 +409,10 @@ typedef enum _flexcan_efifo_dma_per_read_length
     kFLEXCAN_16WordPerRead,       /*!< Transfer 16 32-bit words (CS + ID + 53~56 bytes data).*/
     kFLEXCAN_17WordPerRead,       /*!< Transfer 17 32-bit words (CS + ID + 57~60 bytes data).*/
     kFLEXCAN_18WordPerRead,       /*!< Transfer 18 32-bit words (CS + ID + 61~64 bytes data).*/
-    kFLEXCAN_19WordPerRead        /*!< Transfer 19 32-bit words (CS + ID + 64 bytes data + ID HIT).*/
+    kFLEXCAN_19WordPerRead,       /*!< Transfer 19 32-bit words (CS + ID + 64 bytes data + ID HIT).*/
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+    kFLEXCAN_20WordPerRead,       /*!< Transfer 20 32-bit words (CS + ID + 64 bytes data + ID HIT + HR timestamp).*/
+#endif
 } flexcan_efifo_dma_per_read_length_t;
 #endif
 
@@ -736,6 +759,10 @@ typedef struct _flexcan_fd_frame
     uint32_t idhit; /*!< CAN Enhanced Rx FIFO filter hit id (This value is only used in Enhanced Rx FIFO receive
                        mode). */
 #endif
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+    /*! @note HR timestamp offset is changed dynamically according to data length code (DLC). */
+    uint32_t hrtimestamp;   /*!< External 32-bit on-chip timer high-resolution timestamp. */
+#endif
 } flexcan_fd_frame_t;
 #endif
 
@@ -820,6 +847,15 @@ typedef struct _flexcan_config
                                                  receive frames, see @ref flexcan_endianness_t. */
 #endif
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTERNAL_TIME_TICK) && FSL_FEATURE_FLEXCAN_HAS_EXTERNAL_TIME_TICK)
+    bool enableExternalTimeTick;    /*!< true: External time tick clocks the free-running timer.
+                                         false: FlexCAN bit clock clocks the free-running timer. */
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+    flexcan_MB_timestamp_base_t captureTimeBase;    /*!< Timebase of message buffer 16-bit TIME_STAMP field. */
+    flexcan_capture_point_t capturePoint;   /*!< Point in time when 32-bit timebase is captured during CAN frame. */
+#endif
     flexcan_timing_config_t timingConfig; /* Protocol timing . */
 } flexcan_config_t;
 
@@ -2397,6 +2433,14 @@ static inline status_t FLEXCAN_TransferGetReceiveEnhancedFifoCount(CAN_Type *bas
  *
  */
 uint32_t FLEXCAN_GetTimeStamp(flexcan_handle_t *handle, uint8_t mbIdx);
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+static inline uint32_t FLEXCAN_GetHighResolutionTimeStamp(CAN_Type *base, uint8_t mbIdx)
+{
+    assert(mbIdx < CAN_HR_TIME_STAMP_COUNT);
+    return base->HR_TIME_STAMP[mbIdx];
+}
+#endif
 
 /*!
  * @brief Aborts the interrupt driven message send process.

@@ -6,6 +6,8 @@
 
   - 2.14.0
     - Improvements
+      - Support external time tick feature.
+      - Support high resolution timestamp feature.
       - Enter Freeze Mode first when enter Disable Mode on some platform.
       - Add feature macro for Pretended Networking because some FlexCAN instance do not have this feature.
       - Add new FlexCAN IRQ Handler FLEXCAN_DriverDataIRQHandler and FLEXCAN_DriverEventIRQHandler. Thses IRQ Handlers are
@@ -319,6 +321,8 @@
   The current FLEXCAN_EDMA driver version is 2.12.0.
 
   - 2.12.0
+    - Improvements
+      - Support high resolution timestamp feature in enhanced Rx FIFO EDMA.
     - Bug Fixes
       - Fixed array out-of-bounds access when read enhanced Rx FIFO in EDMA.
 

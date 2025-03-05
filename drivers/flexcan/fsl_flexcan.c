@@ -823,6 +823,13 @@ static void FLEXCAN_Reset(CAN_Type *base)
     flexcan_memset((void *)&base->MB[0], 0, sizeof(base->MB));
 #endif
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+    /* Clean High Resolution Timestamp registers. */
+    for (i = 0; i < CAN_HR_TIME_STAMP_COUNT; i++)
+    {
+        base->HR_TIME_STAMP[i] = 0;
+    }
+#endif
     /* Clean all individual Rx Mask of Message Buffers. */
     for (i = 0; i < (uint32_t)FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base); i++)
     {
@@ -964,12 +971,6 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
     maxDivider                       = MAX_PRESDIV;
 #endif
 
-#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn)
-    if (pConfig->enablePretendedeNetworking == true)
-    {
-        assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn(base) == 1);
-    }
-#endif
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     instance = FLEXCAN_GetInstance(base);
     /* Enable FlexCAN clock. */
@@ -1061,6 +1062,26 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
                                                ctrl2Temp & ~CAN_CTRL2_PES_MASK;
 #endif
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTERNAL_TIME_TICK) && FSL_FEATURE_FLEXCAN_HAS_EXTERNAL_TIME_TICK)
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_EXTERNAL_TIME_TICKn)
+    if (pConfig->enableExternalTimeTick == true)
+    {
+        assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_EXTERNAL_TIME_TICKn(base) == 1);
+    }
+#endif
+    /* Select the time tick source used for incrementing the free-running timer counter. */
+    ctrl2Temp = (pConfig->enableExternalTimeTick) ? ctrl2Temp | CAN_CTRL2_TIMER_SRC_MASK :
+                                                    ctrl2Temp & ~CAN_CTRL2_TIMER_SRC_MASK;
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+    /* Select the timebase used for capturing the 16-bit TIME_STAMP field of the message buffer register. */
+    ctrl2Temp = (ctrl2Temp & ~CAN_CTRL2_MBTSBASE_MASK) | CAN_CTRL2_MBTSBASE((uint32_t)pConfig->captureTimeBase);
+
+    /* Configure the point in time when a 32-bit timebase is captured during a CAN frame. */
+    ctrl2Temp = (ctrl2Temp & ~CAN_CTRL2_TSTAMPCAP_MASK) | CAN_CTRL2_TSTAMPCAP((uint32_t)pConfig->capturePoint);
+#endif
+
 #if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SUPV_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SUPV_SUPPORT)
     /* Enable Supervisor Mode? */
     mcrTemp = (pConfig->enableSupervisorMode) ? mcrTemp | CAN_MCR_SUPV_MASK : mcrTemp & ~CAN_MCR_SUPV_MASK;
@@ -1077,14 +1098,18 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
     mcrTemp = (kFLEXCAN_WakeupSrcFiltered == pConfig->wakeupSrc) ? (mcrTemp | CAN_MCR_WAKSRC_MASK) :
                                                                    (mcrTemp & ~CAN_MCR_WAKSRC_MASK);
 #endif
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
-#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
     if (pConfig->enablePretendedeNetworking == true)
     {
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn)
+        assert(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_PN_MODEn(base) == 1);
+#endif
+#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
         /* When Pretended Networking mode is set, Self Wake Up feature must be disabled. */
         mcrTemp &= ~CAN_MCR_SLFWAK_MASK;
-    }
 #endif
+    }
     mcrTemp = (pConfig->enablePretendedeNetworking) ? (mcrTemp | CAN_MCR_PNET_EN_MASK) :
                                                       (mcrTemp & ~CAN_MCR_PNET_EN_MASK);
 #endif
@@ -1387,6 +1412,15 @@ void FLEXCAN_GetDefaultConfig(flexcan_config_t *pConfig)
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
     pConfig->payloadEndianness = kFLEXCAN_bigEndian;
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTERNAL_TIME_TICK) && FSL_FEATURE_FLEXCAN_HAS_EXTERNAL_TIME_TICK)
+    pConfig->enableExternalTimeTick = false;
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+    pConfig->captureTimeBase = kFLEXCAN_CANTimer;
+    pConfig->capturePoint = kFLEXCAN_CANFrameID2ndBit;
 #endif
 
     /* Default protocol timing configuration, nominal bit time quantum is 10 (80% SP), data bit time quantum is 5
@@ -3369,9 +3403,27 @@ status_t FLEXCAN_ReadEnhancedRxFifo(CAN_Type *base, flexcan_fd_frame_t *pRxFrame
     {
         /* Enhanced Rx FIFO ID HIT offset is changed dynamically according to data length code (DLC) . */
         idHitOff = (DLC_LENGTH_DECODE(((flexcan_fd_frame_t *)E_RX_FIFO(base))->length) + 3U) / 4U + 3U;
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+        /* idHitOff should add 1 to get high resolution timestamp offset. */
+        idHitOff += 1U;
+#endif
         /* Copy CAN FD Message from Enhanced Rx FIFO, should use the DLC value to identify the bytes that belong to the
          * message which is being read. */
         (void)memcpy((void *)pRxFrame, (void *)(uint32_t *)E_RX_FIFO(base), sizeof(uint32_t) * idHitOff);
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP) && FSL_FEATURE_FLEXCAN_HAS_HIGH_RESOLUTION_TIMESTAMP)
+        /* If idHitOff is 20 or DLC is 15, no need to get idhit and hrtimestamp individually. */
+        if (idHitOff < 20U)
+        {
+            pRxFrame->idhit = pRxFrame->dataWord[idHitOff - 4U];
+            pRxFrame->hrtimestamp = pRxFrame->dataWord[idHitOff - 3U];
+            /* Clear the unused frame data. */
+            for (uint32_t i = (idHitOff - 4U); i < 16U; i++)
+            {
+                pRxFrame->dataWord[i] = 0x0;
+            }
+        }
+#else
+        /* If idHitOff is 19 or DLC is 15, no need to get idhit individually. */
         if (idHitOff < 19U)
         {
             pRxFrame->idhit = pRxFrame->dataWord[idHitOff - 3U];
@@ -3381,6 +3433,7 @@ status_t FLEXCAN_ReadEnhancedRxFifo(CAN_Type *base, flexcan_fd_frame_t *pRxFrame
                 pRxFrame->dataWord[i] = 0x0;
             }
         }
+#endif
 
         /* Clear data available flag to let FlexCAN know one frame has been read from the Enhanced Rx FIFO. */
         base->ERFSR = CAN_ERFSR_ERFDA_MASK;
