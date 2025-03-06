@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * All rights reserved.
+ * Copyright 2016-2021, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -269,8 +268,10 @@ typedef struct QspiFlashTiming
 /*! @brief QSPI configuration structure*/
 typedef struct QspiConfig
 {
+#if !defined(FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL) || (!FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL)
     uint32_t clockSource;                                       /*!< Clock source for QSPI module */
     uint32_t baudRate;                                          /*!< Serial flash clock baud rate */
+#endif
     uint8_t txWatermark;                                        /*!< QSPI transmit watermark value */
     uint8_t rxWatermark;                                        /*!< QSPI receive watermark value. */
     uint32_t AHBbufferSize[FSL_FEATURE_QSPI_AHB_BUFFER_COUNT];  /*!< AHB buffer size. */
@@ -285,7 +286,8 @@ typedef struct _qspi_flash_config
 {
     uint32_t flashA1Size; /*!< Flash A1 size */
     uint32_t flashA2Size; /*!< Flash A2 size */
-#if defined(FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE) && (FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE)
+#if (defined(FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE) && (FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE)) || \
+    (defined(FSL_FEATURE_QSPI_SUPPORT_INDIVIDUAL_MODE) && (FSL_FEATURE_QSPI_SUPPORT_INDIVIDUAL_MODE))
     uint32_t flashB1Size;                             /*!< Flash B1 size */
     uint32_t flashB2Size;                             /*!< Flash B2 size */
 #endif                                                /* FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE */

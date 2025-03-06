@@ -2,8 +2,13 @@
 @page driver_log Driver Change Log
 
 @section qspi QSPI
-  The current QSPI driver version is 2.2.5.
-  
+  The current QSPI driver version is 2.3.0.
+
+  - 2.3.0
+    - New Features
+      - Applied the QSPI IP update with register field changes.
+      - Added Soc specific driver to integrate Soc configuration.
+
   - 2.2.5
     - Bug Fixes
       - Fixed the txData from void * to const void * in transmit API.

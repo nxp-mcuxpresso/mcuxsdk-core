@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * All rights reserved.
+ * Copyright 2016-2021, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -182,8 +181,10 @@ void QSPI_GetDefaultQspiConfig(qspi_config_t *config)
     /* Initializes the configure structure to zero. */
     (void)memset(config, 0, sizeof(*config));
 
+#if !defined(FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL) || (!FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL)
     config->clockSource               = 2U;
     config->baudRate                  = 24000000U;
+#endif
     config->AHBbufferMaster[0]        = 0xE;
     config->AHBbufferMaster[1]        = 0xE;
     config->AHBbufferMaster[2]        = 0xE;
@@ -235,12 +236,13 @@ void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config)
     base->SFB1AD = address;
     base->SFB2AD = address;
 #endif /* FSL_FEATURE_QSPI_SUPPORT_SINGLE_MODE */
-#if defined(FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE) && (FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE)
+#if (defined(FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE) && (FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE)) || \
+    (defined(FSL_FEATURE_QSPI_SUPPORT_INDIVIDUAL_MODE) && (FSL_FEATURE_QSPI_SUPPORT_INDIVIDUAL_MODE))
     address += config->flashB1Size;
     base->SFB1AD = address;
     address += config->flashB2Size;
     base->SFB2AD = address;
-#endif /* FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE */
+#endif /* FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE || FSL_FEATURE_QSPI_SUPPORT_INDIVIDUAL_MODE */
 
 #if !defined(FSL_FEATURE_QSPI_HAS_NO_SFACR) || (!FSL_FEATURE_QSPI_HAS_NO_SFACR)
     /* Set Word Addressable feature */
