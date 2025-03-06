@@ -1,0 +1,23 @@
+/*!
+@defgroup xbic XBIC: Crossbar Integrity Checker
+@details The MCUXpresso SDK provides a peripheral driver for the Crossbar Integrity Checker (XBIC)
+         of MCUXpresso SDK devices.
+
+# Function groups {#XBICFunc}
+The XBIC driver supports operating the module as a crossbar integrity checker.
+
+## master/slave port initialization {#XBICPortInit}
+
+The function XBIC_EnableMasterPortEDC() enables individual XBIC master port error detection.
+The function XBIC_EnableSlavePortEDC() enables individual XBIC slave port error detection.
+
+## Error inject initialization {#ErrorInjectInit}
+The function XBIC_ErrorInjectionConfig() sets error injection configuration for selected XBIC master and slave port.
+
+# Typical use case {#XBICCase}
+
+## XBIC Operation{#XBICOper}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/xbic
+
+*/
