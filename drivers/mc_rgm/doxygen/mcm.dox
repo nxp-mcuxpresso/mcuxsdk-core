@@ -1,0 +1,27 @@
+/*!
+@defgroup mc_rgm MC_RGM: Reset Generation Module
+@details The MCUXpresso SDK provides a driver for the Reset Generation Module (MC_RGM)
+         of MCUXpresso SDK devices.
+
+# Function groups {#MCRGMFunc}
+The MC_RGM driver supports control the reset source and get reset status of the chip.
+
+## MC_RGM reset status control {#MCRGMResetStatusControl}
+The function MC_RGM_GetDestuctiveResetSourcesStatus() gets the status of the destructive reset sources and
+the function MC_RGM_ClearDestuctiveResetSourcesStatus() clears the status of the destructive reset sources.
+
+The function MC_RGM_GetFunctionalResetSourcesStatus() gets the status of the functional reset sources and
+the function MC_RGM_ClearFunctionalResetSourcesStatus() clears the status of the functional reset sources.
+
+The function MC_RGM_GetResetDuringStandbyStatus() gets the status of the reset during standby and
+the function MC_RGM_ClearResetDuringStandbyStatus() clears the status of the reset during standby.
+
+## MC_RGM reset demotion and escalation (#MCRGMResetDemotionEscalation)
+The function MC_RGM_DemoteFunctionalResetToInterrupt() can demote some functional reset sources to interrupt.
+
+The function MC_RGM_SetDestructiveResetEscalationThreshold() can set the destructive reset escalation threshold.
+
+The function MC_RGM_SetFunctionalResetEscalationThreshold() can set the functional reset escalation threshold and
+the function MC_RGM_GetFunctionalResetEscalationCount() can get the current functional reset counter value.
+
+*/
