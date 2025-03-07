@@ -370,6 +370,11 @@ class NinjaParser
       'package_path' => File.dirname(file_path)
     }
     source_hash['attribute'] = attribute if attribute
+    
+    # Codewarrior use "build" as build folder, can not set source file to this folder
+    if @toolchain == 'codewarrior' && source_hash['project_path'] == 'build'
+      source_hash['project_path'] = 'build_dir'
+    end
     @data[@name]['contents']['modules']['demo']['files'].push(source_hash)
   end
 
