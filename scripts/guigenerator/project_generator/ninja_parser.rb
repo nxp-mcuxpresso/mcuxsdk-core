@@ -620,9 +620,12 @@ class NinjaParser
           if content == 'cd .' || content == ':'
             break
           elsif @toolchain == 'iar'
-            pattern = /--bin\s\S+#{@name}\.elf/
+            pattern = /\s\S+#{@name}\.elf/
             result = content.match(pattern)
-            content.sub!(result[ 0 ], '--bin $TARGET_DIR$/$TARGET_FNAME$') if result
+            while(result)
+              content.sub!(result[ 0 ], ' $TARGET_PATH$')
+              result = content.match(pattern)
+            end
           elsif @toolchain == 'mdk'
             pattern = /--bincombined\s\S+#{@name}\.elf/
             result = content.match(pattern)

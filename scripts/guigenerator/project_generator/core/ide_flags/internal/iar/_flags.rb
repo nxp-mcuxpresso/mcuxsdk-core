@@ -752,11 +752,11 @@ module Iar
             Core.assert(target.is_a?(String), "not a string")
             Core.assert(line.is_a?(String), "not a string")
             # put entry symbol
-            pattern = /\s--entry\s+(\S+)\s/
+            pattern = /\s--entry(\s+|=)(\S+)\s/
             result  = line.match(pattern)
             if (result)
                 @logger.debug("recognize: #{result[ 0 ]}")
-                @file.linkerTab.libraryTab.entry_symbol(target, result[ 1 ]);
+                @file.linkerTab.libraryTab.entry_symbol(target, result[ 2 ]);
                 line.sub!(result[ 0 ], '')
             end
             return line
