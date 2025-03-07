@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 NXP
+ * Copyright 2019-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -28,8 +28,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.5.0. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 5, 0))
+/*! @brief SPC driver version 2.6.0. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 6, 0))
 /*! @} */
 
 /*!
@@ -464,6 +464,7 @@ static inline bool SPC_GetBusyStatusFlag(SPC_Type *base)
 #endif
 }
 
+#if !(defined(FSL_FEATURE_SPC_HAS_SC_SPC_LP_REQ_BIT) && (FSL_FEATURE_SPC_HAS_SC_SPC_LP_REQ_BIT==0U))
 /*!
  * @brief Checks system low power request.
  *
@@ -490,6 +491,7 @@ static inline void SPC_ClearLowPowerRequest(SPC_Type *base)
 {
     base->SC |= SPC_SC_SPC_LP_REQ_MASK;
 }
+#endif /* FSL_FEATURE_SPC_HAS_SC_SPC_LP_REQ_BIT */
 
 /*!
  * @brief Checks power switch state.
