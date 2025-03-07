@@ -126,7 +126,7 @@ typedef enum _adc_clock_mode
 typedef enum _adc_resolution
 {
     kADC_Resolution6bit = 3U,
-    /*!< 6-bit resolution. */  /* This is a HW issue that the ADC resolution enum configure not align with HW implement,
+    /*!< 6-bit resolution. NOTE: This is a HW issue that the ADC resolution enum configure not align with HW implement,
                                   ES2 chip already fixed the issue, Currently, update ADC enum define as a workaround */
     kADC_Resolution8bit  = 2U, /*!< 8-bit resolution. */
     kADC_Resolution10bit = 1U, /*!< 10-bit resolution. */
