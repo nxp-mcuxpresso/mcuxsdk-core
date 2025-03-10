@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section lpspi LPSPI
-  The current LPSPI driver version is 2.6.10.
+  The current LPSPI driver version is 2.7.0.
+
+  - 2.7.0
+    - New Feature
+      - Added common IRQ handler entry LPSPI_DriverIRQHandler.
 
   - 2.6.10
     - Improvements
