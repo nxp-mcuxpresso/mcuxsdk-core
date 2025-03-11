@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section mipi_dsi MIPI_DSI
-  The current MIPI_DSI driver version is 2.0.1.
+  The current MIPI_DSI driver version is 2.0.2.
+
+  - 2.0.2
+    - Improvements
+      - More precise calculation of the values of m & n.
+      - Lookup table method to obtain DPHY-related parameters based on bandwidth.
 
   - 2.0.1
     - Bug Fixes.
