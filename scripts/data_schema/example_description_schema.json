@@ -5,8 +5,12 @@
     "description": "MCUXpresso SDK example description data schema.",
     "version": "1.0.0",
     "patternProperties": {
-        "^.*$": {
-          "$ref": "./definitions_schema.json#/definitions/exampleDescriptionType"
+        "^[^@]*$": {
+            "$ref": "./definitions_schema.json#/definitions/exampleDescriptionType"
+        },
+        "^.*@.*$": {
+            "$ref": "./definitions_schema.json#/definitions/customExampleDescriptionType"
         }
-    }
+    },
+    "additionalProperties": false
 }

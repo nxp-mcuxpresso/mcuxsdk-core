@@ -104,6 +104,55 @@
                 }
             ]
         },
+        "customExampleDescriptionType": {
+            "type": "object",
+            "description": "The example with custom configuration data type.",
+            "additionalProperties": false,
+            "properties": {
+                "section-type": {
+                    "description": "Identify project type, it could be custom_application.",
+                    "const": "custom_application"
+                },
+                "contents": {
+                    "type": "object",
+                    "description": "The project configuration.",
+                    "additionalProperties": false,
+                    "properties": {
+                        "document": {
+                            "type": "object",
+                            "properties": {
+                                "extra_build_args": {
+                                    "$ref": "#/definitions/extraBuildArgsType"
+                                }
+                            }
+                        }
+                    }
+                },
+                "boards": {
+                    "$ref": "#/definitions/BoardDeviceToolchainTargetSupportType"
+                },
+                "devices": {
+                    "$ref": "#/definitions/BoardDeviceToolchainTargetSupportType"
+                },
+                "shields": {
+                    "$ref": "#/definitions/shieldsType"
+                }
+            },
+            "anyOf": [
+                {
+                    "required": [
+                        "contents",
+                        "boards"
+                    ]
+                },
+                {
+                    "required": [
+                        "contents",
+                        "devices"
+                    ]
+                }
+            ]
+        },
         "configurationDocumentType": {
             "type": "object",
             "$comment": "configuration document object",
@@ -139,14 +188,7 @@
                     "description": "Specify it is a device example, not board example"
                 },
                 "extra_build_args": {
-                    "type": "array",
-                    "description": "The extra arguments to west build command",
-                    "minItems": 0,
-                    "uniqueItems": true,
-                    "items": {
-                        "type": "string",
-                        "description": "The extra cmake arguments"
-                    }
+                    "$ref": "#/definitions/extraBuildArgsType"
                 }
             },
             "required": [
@@ -168,6 +210,16 @@
                         "$ref": "#/definitions/toolchainTargetSupportType"
                     }
                 }
+            }
+        },
+        "extraBuildArgsType": {
+            "type": "array",
+            "description": "The extra arguments to west build command",
+            "minItems": 0,
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "description": "The extra cmake arguments"
             }
         },
         "toolchainTargetSupportType": {
