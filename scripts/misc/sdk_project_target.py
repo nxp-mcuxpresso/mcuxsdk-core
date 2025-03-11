@@ -361,7 +361,7 @@ class MCUXAppTargets(object):
 
     def filter_board_core(self, board_core):
         return self.do_filter(board_core, self.BOARDS_FILTER, self.BOARDS_EXCLUDE_FILTER)
-    
+
     def filter_device_core(self, device_core):
         return self.do_filter(device_core, self.DEVICES_FILTER, self.DEVICES_EXCLUDE_FILTER)
 
@@ -487,7 +487,7 @@ class MCUXRepoProjects(object):
             # Search for app targets
             example_file_pattern = os.path.join(sdk_root_dir, app_path , '**/example.yml')
             expanded_example_files = glob.glob(example_file_pattern, recursive=True)
-        #print(expanded_example_files)
+        expanded_example_files = list(set(expanded_example_files))
         expanded_example_files_filtered = []
         for example_file in expanded_example_files:
             example_category = Path(example_file).relative_to(Path(sdk_root_dir)).parts[1]
