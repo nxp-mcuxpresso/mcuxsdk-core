@@ -26,7 +26,7 @@
  * @{
  */
 /*! @brief LPI2C driver version. */
-#define FSL_LPI2C_DRIVER_VERSION (MAKE_VERSION(2, 5, 7))
+#define FSL_LPI2C_DRIVER_VERSION (MAKE_VERSION(2, 6, 0))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
@@ -1384,6 +1384,22 @@ void LPI2C_SlaveTransferAbort(LPI2C_Type *base, lpi2c_slave_handle_t *handle);
 void LPI2C_SlaveTransferHandleIRQ(LPI2C_Type *base, lpi2c_slave_handle_t *handle);
 
 /*! @}*/
+
+/*! @} */
+
+/*!
+ * @name Common IRQ Handler
+ * @{
+ */
+
+/*!
+ * @brief LPI2C driver IRQ handler common entry.
+ *
+ * This function provides the common IRQ request entry for LPI2C.
+ *
+ * @param instance LPI2C instance.
+ */
+void LPI2C_DriverIRQHandler(uint32_t instance);
 
 /*! @} */
 

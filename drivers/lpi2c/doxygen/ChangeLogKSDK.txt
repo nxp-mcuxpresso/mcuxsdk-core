@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section lpi2c LPI2C
-  The current LPI2C driver version is 2.5.7.
+  The current LPI2C driver version is 2.6.0.
+
+  - 2.6.0
+    - New Feature
+      - Added common IRQ handler entry LPI2C_DriverIRQHandler.
 
   - 2.5.7
     - Improvements

@@ -2555,6 +2555,18 @@ static void LPI2C_CommonIRQHandler(LPI2C_Type *base, uint32_t instance)
     }
     SDK_ISR_EXIT_BARRIER;
 }
+
+void LPI2C_DriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(kLpi2cBases))
+    {
+        LPI2C_CommonIRQHandler(kLpi2cBases[instance], instance);
+    }
+    else
+    {
+        SDK_ISR_EXIT_BARRIER;
+    }
+}
 #endif
 #endif
 
