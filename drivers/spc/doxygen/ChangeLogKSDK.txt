@@ -7,7 +7,7 @@
   - 2.6.0
     - New Features
       - Added new feature FSL_FEATURE_SPC_HAS_SC_SPC_LP_REQ_BIT for compatibility with
-        new platforms that do not support the SPC SC[SPC_LP_MODE] bitfield.
+        new platforms that do not support the SPC SC[SPC_LP_REQ] bitfield.
 
   - 2.5.0
     - New Features
