@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021,2023,2024 NXP
+ * Copyright (c) 2019-2021,2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,7 +24,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_LCDIF_DRIVER_VERSION (MAKE_VERSION(2, 3, 0))
+#define FSL_LCDIF_DRIVER_VERSION (MAKE_VERSION(2, 3, 1))
 /*! @} */
 
 /*! @brief Construct the cursor color, every element should be in the range of 0 ~ 255. */
@@ -1029,7 +1029,7 @@ static inline void LCDIF_SetEndianMode(LCDIF_Type *base, uint8_t displayIndex, l
  */
 static inline void LCDIF_EnableUpdate(LCDIF_Type *base, bool enable)
 {
-    base->PANELCONTROL = (uint32_t)enable;
+    base->PANELCONTROL = (enable ? 1U : 0U);
 }
 
 /*!

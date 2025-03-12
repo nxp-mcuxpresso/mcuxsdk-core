@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section lcdif LCDIF
-  The current LCDIF driver version is 2.3.0.
+  The current LCDIF driver version is 2.3.1.
+
+  - 2.3.1
+    - Bug Fixes
+      - Fixed CERT-C violations.
 
   - 2.3.0
     - New Features

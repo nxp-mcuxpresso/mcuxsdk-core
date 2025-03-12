@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021,2023,2024 NXP
+ * Copyright (c) 2019-2021,2023-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -290,11 +290,11 @@ void LCDIF_FrameBufferGetDefaultConfig(lcdif_fb_config_t *config)
 static uint32_t LCDIF_GetLayerConfig(const lcdif_fb_config_t *config)
 {
     return LCDIF_FRAMEBUFFERCONFIG0_ROT_ANGLE(config->rotateFlipMode) |
-           LCDIF_FRAMEBUFFERCONFIG0_UV_SWIZZLE(config->enableUVSwizzle) |
+           LCDIF_FRAMEBUFFERCONFIG0_UV_SWIZZLE((config->enableUVSwizzle ? 1U : 0U)) |
            LCDIF_FRAMEBUFFERCONFIG0_DEC_MODE(config->decompress) |
            LCDIF_FRAMEBUFFERCONFIG0_SWIZZLE(config->inOrder) |
-           LCDIF_FRAMEBUFFERCONFIG0_COLOR_KEY_EN(config->colorkey.enable) |
-           LCDIF_FRAMEBUFFERCONFIG0_ENABLE((uint32_t)config->enable) | ((uint32_t)config->format & 0x7UL);
+           LCDIF_FRAMEBUFFERCONFIG0_COLOR_KEY_EN((config->colorkey.enable ? 1U : 0U)) |
+           LCDIF_FRAMEBUFFERCONFIG0_ENABLE((config->enable ? 1U : 0U)) | ((uint32_t)config->format & 0x7UL);
 }
 
 /*!
@@ -652,8 +652,8 @@ void LCDIF_SetPanelConfig(LCDIF_Type *base, uint8_t displayIndex, const lcdif_pa
     base->BLENDSTACKORDER = (uint32_t)config->order;
     base->SRCCONFIGENDIAN = (uint32_t)config->endian;
     base->PANELFUNCTION = (base->PANELFUNCTION & ~(LCDIF_PANELFUNCTION_OUTPUT_MASK | LCDIF_PANELFUNCTION_GAMMA_MASK)) |
-                          LCDIF_PANELFUNCTION_OUTPUT((uint32_t)config->enable) |
-                          LCDIF_PANELFUNCTION_GAMMA((uint32_t)config->enableGamma);
+                          LCDIF_PANELFUNCTION_OUTPUT(config->enable ? 1U : 0U) |
+                          LCDIF_PANELFUNCTION_GAMMA(config->enableGamma ? 1U : 0U);
 }
 
 #else
@@ -890,6 +890,9 @@ void LCDIF_DbiSelectArea(LCDIF_Type *base,
                          uint16_t endY,
                          bool isTiled)
 {
+    assert((endX - startX) >= 0U);
+    assert((endY - startY) >= 0U);
+
     uint16_t width  = endX - startX + 1U;
     uint16_t height = endY - startY + 1U;
 
