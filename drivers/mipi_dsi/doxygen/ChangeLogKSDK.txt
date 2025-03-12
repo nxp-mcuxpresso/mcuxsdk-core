@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section mipi_dsi MIPI_DSI
-  The current MIPI_DSI driver version is 2.2.1.
+  The current MIPI_DSI driver version is 2.2.2.
+
+  - 2.2.2
+    - Bug Fixes
+      - Fixed CERT-C violations.
 
   - 2.2.1
     - Bug Fixes
