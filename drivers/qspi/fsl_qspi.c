@@ -230,6 +230,11 @@ void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config)
     base->SFA1AD = address;
     address += config->flashA2Size;
     base->SFA2AD = address;
+#if defined(FSL_FEATURE_QSPI_SUPPORT_SINGLE_MODE) && (FSL_FEATURE_QSPI_SUPPORT_SINGLE_MODE)
+    /* For single mode configuration, you must write the same value to SFB1AD and SFB2AD registers that you write to the SFA2AD register. */
+    base->SFB1AD = address;
+    base->SFB2AD = address;
+#endif /* FSL_FEATURE_QSPI_SUPPORT_SINGLE_MODE */
 #if defined(FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE) && (FSL_FEATURE_QSPI_SUPPORT_PARALLEL_MODE)
     address += config->flashB1Size;
     base->SFB1AD = address;
@@ -245,13 +250,13 @@ void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config)
 
     /* Config look up table */
     base->LUTKEY = 0x5AF05AF0U;
-    base->LCKCR  = 0x2U;
+    base->LCKCR  = QuadSPI_LCKCR_UNLOCK_MASK;
     for (i = 0; i < (uint32_t)FSL_FEATURE_QSPI_LUT_DEPTH; i++)
     {
         base->LUT[i] = config->lookuptable[i];
     }
     base->LUTKEY = 0x5AF05AF0U;
-    base->LCKCR  = 0x1U;
+    base->LCKCR  = QuadSPI_LCKCR_LOCK_MASK;
 
 #if !defined(FSL_FEATURE_QSPI_HAS_NO_TDH) || (!FSL_FEATURE_QSPI_HAS_NO_TDH)
     /* Config flash timing */
@@ -262,9 +267,11 @@ void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config)
 #endif /* FSL_FEATURE_QSPI_HAS_NO_TDH */
     base->FLSHCR = val;
 
+#if !defined(FSL_FEATURE_QSPI_HAS_NO_MCR_END) || (!FSL_FEATURE_QSPI_HAS_NO_MCR_END)
     /* Set flash endianness */
     base->MCR &= ~QuadSPI_MCR_END_CFG_MASK;
     base->MCR |= QuadSPI_MCR_END_CFG(config->endian);
+#endif
 
     /* Enable QSPI again */
     QSPI_Enable(base, true);
@@ -336,6 +343,27 @@ void QSPI_SetDqsConfig(QuadSPI_Type *base, qspi_dqs_config_t *config)
 }
 #endif /* FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG */
 
+#if defined(FSL_FEATURE_QSPI_HAS_DLLCRA) && (FSL_FEATURE_QSPI_HAS_DLLCRA)
+/*!
+ * brief Configures the delay chain parameter.
+ *
+ * This function configures the slave delay chain.
+ *
+ * param base Pointer to QuadSPI Type.
+ * param config Delay chain configuration parameters.
+ */
+void QSPI_SetDelayChainConfig(QuadSPI_Type *base, qspi_delay_chain_config_t *config)
+{
+    QUADSPI->DLLCRA &= ~(QuadSPI_DLLCRA_SLV_UPD_MASK | QuadSPI_DLLCRA_SLV_DLL_BYPASS_MASK | QuadSPI_DLLCRA_SLV_EN_MASK |
+                         QuadSPI_DLLCRA_SLV_DLY_COARSE_MASK | QuadSPI_DLLCRA_SLV_DLY_OFFSET_MASK | QuadSPI_DLLCRA_SLV_FINE_OFFSET_MASK |
+                         QuadSPI_DLLCRA_FREQEN_MASK);
+
+    QUADSPI->DLLCRA |= QuadSPI_DLLCRA_FREQEN(config->highFreqDelay) | QuadSPI_DLLCRA_SLV_FINE_OFFSET(config->fineDelay) | QuadSPI_DLLCRA_SLV_DLY_OFFSET(config->div16Delay) |
+                       QuadSPI_DLLCRA_SLV_DLY_COARSE(config->coarseDelay) | QuadSPI_DLLCRA_SLV_EN(config->dqsDelayEnable) | QuadSPI_DLLCRA_SLV_DLL_BYPASS(config->coarseDelayEnable) |
+                       QuadSPI_DLLCRA_SLV_UPD_MASK;
+}
+#endif
+
 /*!
  * brief Software reset for the QSPI logic.
  *
@@ -405,7 +433,7 @@ void QSPI_ExecuteIPCommand(QuadSPI_Type *base, uint32_t index)
     QSPI_ClearCommandSequence(base, kQSPI_IPSeq);
 
     /* Write the seqid bit */
-    base->IPCR = ((base->IPCR & (~QuadSPI_IPCR_SEQID_MASK)) | QuadSPI_IPCR_SEQID(index / 4U));
+    base->IPCR = ((base->IPCR & (~QuadSPI_IPCR_SEQID_MASK)) | QuadSPI_IPCR_SEQID(index / FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
 }
 
 /*! brief Executes AHB commands located in LUT table.
