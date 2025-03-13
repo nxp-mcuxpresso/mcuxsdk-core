@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2021, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -167,7 +167,7 @@ void ADC_ETC_GetDefaultConfig(adc_etc_config_t *config)
 #endif /* FSL_FEATURE_ADC_ETC_HAS_NO_TSC0_TRIG */
 
 #if defined(FSL_FEATURE_ADC_ETC_HAS_CTRL_DMA_MODE_SEL) && FSL_FEATURE_ADC_ETC_HAS_CTRL_DMA_MODE_SEL
-    config->dmaMode = kADC_ETC_TrigDMAWithLatchedSignal;
+    config->dmaMode = kADC_ETC_TrigDMAWithPulsedSignal;
 #endif /*FSL_FEATURE_ADC_ETC_HAS_CTRL_DMA_MODE_SEL*/
 
 #if !(defined(FSL_FEATURE_ADC_ETC_HAS_NO_TSC0_TRIG) && FSL_FEATURE_ADC_ETC_HAS_NO_TSC0_TRIG)

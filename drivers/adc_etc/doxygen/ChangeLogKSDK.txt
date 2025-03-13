@@ -2,7 +2,15 @@
 @page driver_log Driver Change Log
 
 @section adc_etc ADC_ETC
-  The current ADC_ETC driver version is 2.3.0.
+  The current ADC_ETC driver version is 2.3.1.
+
+  - 2.3.1
+    - Improvements
+      - Change ADC_ETC default DMA Mode to kADC_ETC_TrigDMAWithPulsedSignal.
+        Generally speaking, DMA transfer requests should only be cleared by DMA ACK,
+        and the CPU should not clear the request source.
+        If some users use option kADC_ETC_TrigDMAWithLatchedSignal, changing the mode to
+        kADC_ETC_TrigDMAWithPulsedSignal also meet their requirements.
 
   - 2.3.0
     - Improvements
