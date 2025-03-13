@@ -4,7 +4,11 @@
 @if dox_section_flexio_uart
 
 @section flexio_uart FLEXIO_UART
-  The current FLEXIO_UART driver version is 2.6.0.
+  The current FLEXIO_UART driver version is 2.6.1.
+
+  - 2.6.1
+    - Improvements
+      - Improve baudrate calculation method, to support higher frequency FlexIO clock source.
 
   - 2.6.0
     - Improvements

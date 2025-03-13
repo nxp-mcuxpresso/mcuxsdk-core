@@ -24,7 +24,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexIO UART driver version. */
-#define FSL_FLEXIO_UART_DRIVER_VERSION (MAKE_VERSION(2, 6, 0))
+#define FSL_FLEXIO_UART_DRIVER_VERSION (MAKE_VERSION(2, 6, 1))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */

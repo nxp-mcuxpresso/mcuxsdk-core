@@ -47,6 +47,17 @@ static size_t FLEXIO_UART_TransferGetRxRingBufferLength(flexio_uart_handle_t *ha
  */
 static bool FLEXIO_UART_TransferIsRxRingBufferFull(flexio_uart_handle_t *handle);
 
+/*!
+ * @brief Calculate the configuration for required baud rate.
+ *
+ * @param baudRate_Bps Required baud rate.
+ * @param srcClock_Hz Source clock frequency.
+ * @param pTimerDiv Pointer to timer divider.
+ * @param timerSource Pointer to timer decrement source.
+ * @return Status code.
+ */
+static status_t FLEXIO_UART_CalculateBaudRate(uint32_t baudRate_Bps, uint32_t srcClock_Hz, uint16_t *pTimerDiv, flexio_timer_decrement_source_t *timerSource);
+
 /*******************************************************************************
  * Codes
  ******************************************************************************/
@@ -90,6 +101,67 @@ static bool FLEXIO_UART_TransferIsRxRingBufferFull(flexio_uart_handle_t *handle)
     return full;
 }
 
+static status_t FLEXIO_UART_CalculateBaudRate(uint32_t baudRate_Bps, uint32_t srcClock_Hz, uint16_t *pTimerDiv, flexio_timer_decrement_source_t *timerSource)
+{
+    uint32_t calculatedBaud;
+    uint32_t diff;
+    uint32_t timerDiv;
+    uint32_t i;
+    status_t status = kStatus_FLEXIO_UART_BaudrateNotSupport;
+
+    static const flexio_timer_decrement_source_t timerSources[] =
+    {
+        kFLEXIO_TimerDecSrcOnFlexIOClockShiftTimerOutput,
+#if (defined(FSL_FEATURE_FLEXIO_TIMCFG_TIMDCE_FIELD_WIDTH) && (FSL_FEATURE_FLEXIO_TIMCFG_TIMDCE_FIELD_WIDTH == 3))
+        kFLEXIO_TimerDecSrcDiv16OnFlexIOClockShiftTimerOutput,
+        kFLEXIO_TimerDecSrcDiv256OnFlexIOClockShiftTimerOutput,
+#endif /* FSL_FEATURE_FLEXIO_TIMCFG_TIMDCE_FIELD_WIDTH */
+    };
+
+    static const uint16_t timerSourceDividers[] =
+    {
+        1U,
+#if (defined(FSL_FEATURE_FLEXIO_TIMCFG_TIMDCE_FIELD_WIDTH) && (FSL_FEATURE_FLEXIO_TIMCFG_TIMDCE_FIELD_WIDTH == 3))
+        16U,
+        256U
+#endif /* FSL_FEATURE_FLEXIO_TIMCFG_TIMDCE_FIELD_WIDTH */
+    };
+
+    for (i=0; i<ARRAY_SIZE(timerSourceDividers); i++)
+    {
+        timerDiv = srcClock_Hz / (baudRate_Bps * timerSourceDividers[i]);
+        timerDiv = timerDiv / 2U - 1U;
+
+        if (timerDiv > 0xFFU)
+        {
+            /* Check whether the calculated timerDiv is within allowed range. */
+            continue;
+        }
+        else
+        {
+            /* Check to see if actual baud rate is within 3% of desired baud rate
+             * based on the best calculated timerDiv value */
+            calculatedBaud = srcClock_Hz / (((timerDiv + 1U) * 2U) * timerSourceDividers[i]);
+            /* timerDiv cannot be larger than the ideal divider, so calculatedBaud is definitely larger
+               than configured baud */
+            diff = calculatedBaud - baudRate_Bps;
+            if (diff > ((baudRate_Bps / 100U) * 3U))
+            {
+                continue;
+            }
+            else
+            {
+                status       = kStatus_Success;
+                *pTimerDiv   = (uint16_t)timerDiv;
+                *timerSource = timerSources[i];
+                break;
+            }
+        }
+    }
+
+    return status;
+}
+
 /*!
  * brief Ungates the FlexIO clock, resets the FlexIO module, configures FlexIO UART
  * hardware, and configures the FlexIO UART with FlexIO UART configuration.
@@ -130,9 +202,14 @@ status_t FLEXIO_UART_Init(FLEXIO_UART_Type *base, const flexio_uart_config_t *us
     uint32_t ctrlReg  = 0;
     uint16_t timerDiv = 0;
     uint16_t timerCmp = 0;
-    uint32_t calculatedBaud;
-    uint32_t diff;
     status_t result = kStatus_Success;
+    flexio_timer_decrement_source_t timerDecrementSource;
+
+    result = FLEXIO_UART_CalculateBaudRate(userConfig->baudRate_Bps, srcClock_Hz, &timerDiv, &timerDecrementSource);
+    if (result != kStatus_Success)
+    {
+        return result;
+    }
 
     /* Clear the shifterConfig & timerConfig struct. */
     (void)memset(&shifterConfig, 0, sizeof(shifterConfig));
@@ -184,34 +261,12 @@ status_t FLEXIO_UART_Init(FLEXIO_UART_Type *base, const flexio_uart_config_t *us
     timerConfig.pinPolarity     = kFLEXIO_PinActiveHigh;
     timerConfig.timerMode       = kFLEXIO_TimerModeDual8BitBaudBit;
     timerConfig.timerOutput     = kFLEXIO_TimerOutputOneNotAffectedByReset;
-    timerConfig.timerDecrement  = kFLEXIO_TimerDecSrcOnFlexIOClockShiftTimerOutput;
+    timerConfig.timerDecrement  = timerDecrementSource;
     timerConfig.timerReset      = kFLEXIO_TimerResetNever;
     timerConfig.timerDisable    = kFLEXIO_TimerDisableOnTimerCompare;
     timerConfig.timerEnable     = kFLEXIO_TimerEnableOnTriggerHigh;
     timerConfig.timerStop       = kFLEXIO_TimerStopBitEnableOnTimerDisable;
     timerConfig.timerStart      = kFLEXIO_TimerStartBitEnabled;
-
-    timerDiv = (uint16_t)(srcClock_Hz / userConfig->baudRate_Bps);
-    timerDiv = timerDiv / 2U - 1U;
-
-    if (timerDiv > 0xFFU)
-    {
-        /* Check whether the calculated timerDiv is within allowed range. */
-        return kStatus_FLEXIO_UART_BaudrateNotSupport;
-    }
-    else
-    {
-        /* Check to see if actual baud rate is within 3% of desired baud rate
-         * based on the best calculated timerDiv value */
-        calculatedBaud = srcClock_Hz / (((uint32_t)timerDiv + 1U) * 2U);
-        /* timerDiv cannot be larger than the ideal divider, so calculatedBaud is definitely larger
-           than configured baud */
-        diff = calculatedBaud - userConfig->baudRate_Bps;
-        if (diff > ((userConfig->baudRate_Bps / 100U) * 3U))
-        {
-            return kStatus_FLEXIO_UART_BaudrateNotSupport;
-        }
-    }
 
     timerCmp = ((uint16_t)userConfig->bitCountPerChar * 2U - 1U) << 8U;
     timerCmp |= timerDiv;
@@ -242,7 +297,7 @@ status_t FLEXIO_UART_Init(FLEXIO_UART_Type *base, const flexio_uart_config_t *us
     timerConfig.pinPolarity     = kFLEXIO_PinActiveLow;
     timerConfig.timerMode       = kFLEXIO_TimerModeDual8BitBaudBit;
     timerConfig.timerOutput     = kFLEXIO_TimerOutputOneAffectedByReset;
-    timerConfig.timerDecrement  = kFLEXIO_TimerDecSrcOnFlexIOClockShiftTimerOutput;
+    timerConfig.timerDecrement  = timerDecrementSource;
     timerConfig.timerReset      = kFLEXIO_TimerResetOnTimerPinRisingEdge;
     timerConfig.timerDisable    = kFLEXIO_TimerDisableOnTimerCompare;
     timerConfig.timerEnable     = kFLEXIO_TimerEnableOnPinRisingEdge;
