@@ -1,9 +1,0 @@
-/*!
-@page driver_log Driver Change Log
-
-@section mc_rgm MC_RGM
-
-  - 2.0.0
-    - Initial version.
-
-*/
