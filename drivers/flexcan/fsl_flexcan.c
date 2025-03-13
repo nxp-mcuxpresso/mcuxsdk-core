@@ -1231,7 +1231,7 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
     }
     else
     {
-        timingCfg.preDivider = (uint16_t)(sourceClock_Hz / tqFre) - 1U;
+        timingCfg.preDivider = (sourceClock_Hz / tqFre) - 1U;
     }
 
     /* Update actual timing characteristic. */
@@ -1304,7 +1304,7 @@ void FLEXCAN_FDInit(
     }
     else
     {
-        timingCfg.fpreDivider = (uint16_t)(sourceClock_Hz / tqFre) - 1U;
+        timingCfg.fpreDivider = (sourceClock_Hz / tqFre) - 1U;
     }
 
     /* Update actual timing characteristic. */
@@ -1863,6 +1863,8 @@ static void FLEXCAN_GetSegments(CAN_Type *base,
     uint32_t ideal_sp;
     uint32_t seg1Max, proSegMax;
     uint32_t seg1Temp;
+    assert(tqNum > 0U);
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
     if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
     {
@@ -1902,7 +1904,8 @@ static void FLEXCAN_GetSegments(CAN_Type *base,
         ideal_sp = IDEAL_SP_HIGH;
     }
     /* Calculates phaseSeg2. */
-    pTimingConfig->phaseSeg2 = (uint8_t)(tqNum - (tqNum * ideal_sp) / (uint32_t)IDEAL_SP_FACTOR);
+    assert(tqNum < 0xFFFFFFFFU / ideal_sp);
+    pTimingConfig->phaseSeg2 = tqNum - (tqNum * ideal_sp) / (uint32_t)IDEAL_SP_FACTOR;
     if (pTimingConfig->phaseSeg2 < MIN_TIME_SEGMENT2)
     {
         pTimingConfig->phaseSeg2 = MIN_TIME_SEGMENT2;
@@ -1912,9 +1915,9 @@ static void FLEXCAN_GetSegments(CAN_Type *base,
     if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
     {
 #if !(defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_BIT_TIMING_REG) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_BIT_TIMING_REG)
-        if (pTimingConfig->phaseSeg2 > (uint8_t)(MAX_EPSEG2 + 1U))
+        if (pTimingConfig->phaseSeg2 > (MAX_EPSEG2 + 1U))
         {
-            pTimingConfig->phaseSeg2 = (uint8_t)(MAX_EPSEG2 + 1U);
+            pTimingConfig->phaseSeg2 = MAX_EPSEG2 + 1U;
         }
 #endif
     }
@@ -1924,7 +1927,7 @@ static void FLEXCAN_GetSegments(CAN_Type *base,
     if ((tqNum - pTimingConfig->phaseSeg2 - 1U) > (seg1Max + proSegMax))
     {
         seg1Temp                 = seg1Max + proSegMax;
-        pTimingConfig->phaseSeg2 = (uint8_t)(tqNum - 1U - seg1Temp);
+        pTimingConfig->phaseSeg2 = tqNum - 1U - seg1Temp;
     }
     else
     {
@@ -1932,12 +1935,12 @@ static void FLEXCAN_GetSegments(CAN_Type *base,
     }
     if (seg1Temp > (pTimingConfig->phaseSeg2 + proSegMax))
     {
-        pTimingConfig->propSeg   = (uint8_t)proSegMax;
-        pTimingConfig->phaseSeg1 = (uint8_t)(seg1Temp - proSegMax);
+        pTimingConfig->propSeg   = proSegMax;
+        pTimingConfig->phaseSeg1 = seg1Temp - proSegMax;
     }
     else
     {
-        pTimingConfig->propSeg   = (uint8_t)(seg1Temp - pTimingConfig->phaseSeg2);
+        pTimingConfig->propSeg   = seg1Temp - pTimingConfig->phaseSeg2;
         pTimingConfig->phaseSeg1 = pTimingConfig->phaseSeg2;
     }
 
@@ -1947,14 +1950,14 @@ static void FLEXCAN_GetSegments(CAN_Type *base,
 #if !(defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
     if (pTimingConfig->rJumpwidth > (MAX_RJW + 1U))
     {
-        pTimingConfig->rJumpwidth = (uint8_t)(MAX_RJW + 1U);
+        pTimingConfig->rJumpwidth = MAX_RJW + 1U;
     }
 #else
     if (0 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
     {
         if (pTimingConfig->rJumpwidth > (MAX_RJW + 1U))
         {
-            pTimingConfig->rJumpwidth = (uint8_t)(MAX_RJW + 1U);
+            pTimingConfig->rJumpwidth = MAX_RJW + 1U;
         }
     }
 #endif
@@ -2034,7 +2037,7 @@ bool FLEXCAN_CalculateImprovedTimingValues(CAN_Type *base,
                       should change a divisible bit rate. */
         }
 
-        configTemp.preDivider = (uint16_t)(sourceClock_Hz / clk) - 1U;
+        configTemp.preDivider = (sourceClock_Hz / clk) - 1U;
         if (configTemp.preDivider > pdivMAX)
         {
             break; /* The frequency of source clock is too large or the bit rate is too small, the pre-divider could
@@ -2044,9 +2047,9 @@ bool FLEXCAN_CalculateImprovedTimingValues(CAN_Type *base,
         /* Calculates the best timing configuration under current tqNum. */
         FLEXCAN_GetSegments(base, bitRate, tqNum, &configTemp);
         /* Determine whether the calculated timing configuration can get the optimal sampling point. */
-        if (((((uint32_t)configTemp.phaseSeg2 + 1U) * 1000U) / tqNum) < spTemp)
+        if ((((configTemp.phaseSeg2 + 1U) * 1000U) / tqNum) < spTemp)
         {
-            spTemp                    = (((uint32_t)configTemp.phaseSeg2 + 1U) * 1000U) / tqNum;
+            spTemp                    = ((configTemp.phaseSeg2 + 1U) * 1000U) / tqNum;
             pTimingConfig->preDivider = configTemp.preDivider;
             pTimingConfig->rJumpwidth = configTemp.rJumpwidth;
             pTimingConfig->phaseSeg1  = configTemp.phaseSeg1;
@@ -2114,6 +2117,8 @@ static void FLEXCAN_FDGetSegments(uint32_t bitRateFD, uint32_t tqNum, flexcan_ti
     uint32_t ideal_sp;
     uint32_t seg1Max, proSegMax, seg2Max;
     uint32_t seg1Temp;
+    assert(tqNum > 0U);
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_BIT_TIMING_REG) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_BIT_TIMING_REG)
     /* Maximum value allowed in EDCBT register. */
     seg1Max   = MAX_DTSEG2 + 1U;
@@ -2145,14 +2150,15 @@ static void FLEXCAN_FDGetSegments(uint32_t bitRateFD, uint32_t tqNum, flexcan_ti
     }
 
     /* Calculates fphaseSeg2. */
-    pTimingConfig->fphaseSeg2 = (uint8_t)(tqNum - (tqNum * ideal_sp) / (uint32_t)IDEAL_SP_FACTOR);
+    assert(tqNum < 0xFFFFFFFFU / ideal_sp);
+    pTimingConfig->fphaseSeg2 = tqNum - (tqNum * ideal_sp) / (uint32_t)IDEAL_SP_FACTOR;
     if (pTimingConfig->fphaseSeg2 < MIN_TIME_SEGMENT2)
     {
         pTimingConfig->fphaseSeg2 = MIN_TIME_SEGMENT2;
     }
     else if (pTimingConfig->fphaseSeg2 > seg2Max)
     {
-        pTimingConfig->fphaseSeg2 = (uint8_t)seg2Max;
+        pTimingConfig->fphaseSeg2 = seg2Max;
     }
     else
     {
@@ -2163,7 +2169,7 @@ static void FLEXCAN_FDGetSegments(uint32_t bitRateFD, uint32_t tqNum, flexcan_ti
     if ((tqNum - pTimingConfig->fphaseSeg2 - 1U) > (seg1Max + proSegMax))
     {
         seg1Temp                  = seg1Max + proSegMax;
-        pTimingConfig->fphaseSeg2 = (uint8_t)(tqNum - 1U - seg1Temp);
+        pTimingConfig->fphaseSeg2 = tqNum - 1U - seg1Temp;
     }
     else
     {
@@ -2171,18 +2177,18 @@ static void FLEXCAN_FDGetSegments(uint32_t bitRateFD, uint32_t tqNum, flexcan_ti
     }
     if (seg1Temp > (pTimingConfig->fphaseSeg2 + proSegMax))
     {
-        pTimingConfig->fpropSeg   = (uint8_t)proSegMax;
-        pTimingConfig->fphaseSeg1 = (uint8_t)(seg1Temp - proSegMax);
+        pTimingConfig->fpropSeg   = proSegMax;
+        pTimingConfig->fphaseSeg1 = seg1Temp - proSegMax;
     }
     else if (seg1Temp > pTimingConfig->fphaseSeg2)
     {
-        pTimingConfig->fpropSeg   = (uint8_t)(seg1Temp - pTimingConfig->fphaseSeg2);
+        pTimingConfig->fpropSeg   = seg1Temp - pTimingConfig->fphaseSeg2;
         pTimingConfig->fphaseSeg1 = pTimingConfig->fphaseSeg2;
     }
     else
     {
         pTimingConfig->fpropSeg   = 0U;
-        pTimingConfig->fphaseSeg1 = (uint8_t)seg1Temp;
+        pTimingConfig->fphaseSeg1 = seg1Temp;
     }
 
     /* rJumpwidth (sjw) is the minimum value of phaseSeg1 and phaseSeg2. */
@@ -2250,7 +2256,7 @@ static bool FLEXCAN_CalculateImprovedNominalTimingValues(uint32_t bitRate,
                       should change a divisible bit rate. */
         }
 
-        configTemp.preDivider = (uint16_t)(sourceClock_Hz / clk) - 1U;
+        configTemp.preDivider = (sourceClock_Hz / clk) - 1U;
         if (configTemp.preDivider > pdivMAX)
         {
             break; /* The frequency of source clock is too large or the bit rate is too small, the pre-divider could
@@ -2258,13 +2264,13 @@ static bool FLEXCAN_CalculateImprovedNominalTimingValues(uint32_t bitRate,
         }
 
         /* Calculates the best timing configuration under current tqNum. */
-        configTemp.phaseSeg2 = (uint8_t)(tqNum - (tqNum * IDEAL_NOMINAL_SP) / (uint32_t)IDEAL_SP_FACTOR);
+        configTemp.phaseSeg2 = tqNum - (tqNum * IDEAL_NOMINAL_SP) / (uint32_t)IDEAL_SP_FACTOR;
 
         /* Calculates phaseSeg1 and propSeg and try to make phaseSeg1 equal to phaseSeg2. */
         if ((tqNum - configTemp.phaseSeg2 - 1U) > (seg1Max + proSegMax))
         {
             seg1Temp             = seg1Max + proSegMax;
-            configTemp.phaseSeg2 = (uint8_t)(tqNum - 1U - seg1Temp);
+            configTemp.phaseSeg2 = tqNum - 1U - seg1Temp;
         }
         else
         {
@@ -2272,12 +2278,12 @@ static bool FLEXCAN_CalculateImprovedNominalTimingValues(uint32_t bitRate,
         }
         if (seg1Temp > (configTemp.phaseSeg2 + proSegMax))
         {
-            configTemp.propSeg   = (uint8_t)proSegMax;
-            configTemp.phaseSeg1 = (uint8_t)(seg1Temp - proSegMax);
+            configTemp.propSeg   = proSegMax;
+            configTemp.phaseSeg1 = seg1Temp - proSegMax;
         }
         else
         {
-            configTemp.propSeg   = (uint8_t)(seg1Temp - configTemp.phaseSeg2);
+            configTemp.propSeg   = seg1Temp - configTemp.phaseSeg2;
             configTemp.phaseSeg1 = configTemp.phaseSeg2;
         }
 
@@ -2289,9 +2295,9 @@ static bool FLEXCAN_CalculateImprovedNominalTimingValues(uint32_t bitRate,
         configTemp.propSeg -= 1U;
         configTemp.rJumpwidth -= 1U;
 
-        if (((((uint32_t)configTemp.phaseSeg2 + 1U) * 1000U) / tqNum) < spTemp)
+        if ((((configTemp.phaseSeg2 + 1U) * 1000U) / tqNum) < spTemp)
         {
-            spTemp                    = (((uint32_t)configTemp.phaseSeg2 + 1U) * 1000U) / tqNum;
+            spTemp                    = ((configTemp.phaseSeg2 + 1U) * 1000U) / tqNum;
             pTimingConfig->preDivider = configTemp.preDivider;
             pTimingConfig->rJumpwidth = configTemp.rJumpwidth;
             pTimingConfig->phaseSeg1  = configTemp.phaseSeg1;
@@ -2362,7 +2368,7 @@ bool FLEXCAN_FDCalculateImprovedTimingValues(CAN_Type *base,
                 continue; /*  the frequency of clock source is not divisible by target bit rate. */
             }
 
-            pTimingConfig->fpreDivider = (uint16_t)(sourceClock_Hz / clk) - 1U;
+            pTimingConfig->fpreDivider = (sourceClock_Hz / clk) - 1U;
 
             if (pTimingConfig->fpreDivider > pdivMAX)
             {
@@ -2374,7 +2380,7 @@ bool FLEXCAN_FDCalculateImprovedTimingValues(CAN_Type *base,
             FLEXCAN_FDGetSegments(bitRateFD, tqTemp, pTimingConfig);
 
             if (FLEXCAN_CalculateImprovedNominalTimingValues(
-                    bitRate, sourceClock_Hz / ((uint32_t)pTimingConfig->fpreDivider + 1U), pTimingConfig))
+                    bitRate, sourceClock_Hz / (pTimingConfig->fpreDivider + 1U), pTimingConfig))
             {
                 fgRet = true;
                 if (pTimingConfig->preDivider == 0U)
@@ -2527,7 +2533,7 @@ void FLEXCAN_SetFDTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable)
 #endif
 
     uint8_t cnt           = 0;
-    uint8_t payload_dword = 1;
+    uint32_t payload_dword;
     uint32_t dataSize;
     dataSize                  = (base->FDCTRL & CAN_FDCTRL_MBDSR0_MASK) >> CAN_FDCTRL_MBDSR0_SHIFT;
     volatile uint32_t *mbAddr = &(base->MB[0].CS);
@@ -2550,10 +2556,7 @@ void FLEXCAN_SetFDTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable)
 
     /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64
        Bytes payload. */
-    for (cnt = 0; cnt < (dataSize + 1U); cnt++)
-    {
-        payload_dword *= 2U;
-    }
+    payload_dword = 1UL << (dataSize + 1U);
 
     /* Clean ID. */
     mbAddr[offset + 1U] = 0x0U;
@@ -2595,7 +2598,7 @@ void FLEXCAN_SetFDRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_
     uint8_t cnt               = 0;
     volatile uint32_t *mbAddr = &(base->MB[0].CS);
     uint32_t offset           = FLEXCAN_GetFDMailboxOffset(base, mbIdx);
-    uint8_t payload_dword;
+    uint32_t payload_dword;
     uint32_t dataSize = (base->FDCTRL & CAN_FDCTRL_MBDSR0_MASK) >> CAN_FDCTRL_MBDSR0_SHIFT;
 
     /* Inactivate Message Buffer. */
@@ -2605,7 +2608,7 @@ void FLEXCAN_SetFDRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_
     mbAddr[offset + 1U] = 0U;
     /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64
        Bytes payload. */
-    payload_dword = (2U << dataSize);
+    payload_dword = 1UL << (dataSize + 1U);
     for (cnt = 0; cnt < payload_dword; cnt++)
     {
         mbAddr[offset + 2U + cnt] = 0x0;
@@ -3258,7 +3261,7 @@ status_t FLEXCAN_WriteFDTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_fd_fra
     uint32_t cs_temp      = 0;
     uint8_t cnt           = 0;
     uint32_t can_cs       = 0;
-    uint8_t payload_dword = 1;
+    uint32_t payload_dword;
     uint32_t dataSize     = (base->FDCTRL & CAN_FDCTRL_MBDSR0_MASK) >> CAN_FDCTRL_MBDSR0_SHIFT;
 #if ((defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_5641) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_5641) || \
      (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_5829) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_5829))
@@ -3289,10 +3292,7 @@ status_t FLEXCAN_WriteFDTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_fd_fra
 
         /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64
            Bytes payload. */
-        for (cnt = 0; cnt < (dataSize + 1U); cnt++)
-        {
-            payload_dword *= 2U;
-        }
+        payload_dword = 1UL << (dataSize + 1U);
 
         /* Load Message Payload and Activate Tx Message Buffer. */
         for (cnt = 0; cnt < payload_dword; cnt++)
@@ -3354,7 +3354,7 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
     uint32_t offset           = FLEXCAN_GetFDMailboxOffset(base, mbIdx);
 
     /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64 Bytes payload. */
-    payload_dword = 1U << (dataSize + 1U);
+    payload_dword = 1UL << (dataSize + 1U);
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_052403) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_052403)
     uint32_t primask;
@@ -4815,6 +4815,7 @@ static status_t FLEXCAN_SubHandlerForLegacyRxFIFO(CAN_Type *base, flexcan_handle
 static status_t FLEXCAN_SubHandlerForMB(CAN_Type *base, flexcan_handle_t *handle, uint32_t result)
 {
     status_t status = kStatus_FLEXCAN_UnHandled;
+    assert(result < CAN_WORD1_COUNT);
 
     /* Get current State of Message Buffer. */
     switch (handle->mbState[result])

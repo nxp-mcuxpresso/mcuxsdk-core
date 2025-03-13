@@ -1,5 +1,10 @@
 # FLEXCAN
 
+## [2.14.5]
+
+- Bug Fixes
+  - Fixed violations of the CERT INT30-C INT31-C.
+
 ## [2.14.4]
 
 - Bug Fixes

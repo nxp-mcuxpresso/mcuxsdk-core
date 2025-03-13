@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexCAN driver version. */
-#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 14, 4))
+#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 14, 5))
 /*! @} */
 
 #if !(defined(FLEXCAN_WAIT_TIMEOUT) && FLEXCAN_WAIT_TIMEOUT)
@@ -791,17 +791,17 @@ typedef struct _flexcan_fd_frame
 /*! @brief FlexCAN protocol timing characteristic configuration structure. */
 typedef struct _flexcan_timing_config
 {
-    uint16_t preDivider; /*!< Classic CAN or CAN FD nominal phase bit rate prescaler. */
-    uint8_t rJumpwidth;  /*!< Classic CAN or CAN FD nominal phase Re-sync Jump Width. */
-    uint8_t phaseSeg1;   /*!< Classic CAN or CAN FD nominal phase Segment 1. */
-    uint8_t phaseSeg2;   /*!< Classic CAN or CAN FD nominal phase Segment 2. */
-    uint8_t propSeg;     /*!< Classic CAN or CAN FD nominal phase Propagation Segment. */
+    uint32_t preDivider;  /*!< Classic CAN or CAN FD nominal phase bit rate prescaler. */
+    uint32_t rJumpwidth;  /*!< Classic CAN or CAN FD nominal phase Re-sync Jump Width. */
+    uint32_t phaseSeg1;   /*!< Classic CAN or CAN FD nominal phase Segment 1. */
+    uint32_t phaseSeg2;   /*!< Classic CAN or CAN FD nominal phase Segment 2. */
+    uint32_t propSeg;     /*!< Classic CAN or CAN FD nominal phase Propagation Segment. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
-    uint16_t fpreDivider; /*!< CAN FD data phase bit rate prescaler. */
-    uint8_t frJumpwidth;  /*!< CAN FD data phase Re-sync Jump Width. */
-    uint8_t fphaseSeg1;   /*!< CAN FD data phase Phase Segment 1. */
-    uint8_t fphaseSeg2;   /*!< CAN FD data phase Phase Segment 2. */
-    uint8_t fpropSeg;     /*!< CAN FD data phase Propagation Segment. */
+    uint32_t fpreDivider;  /*!< CAN FD data phase bit rate prescaler. */
+    uint32_t frJumpwidth;  /*!< CAN FD data phase Re-sync Jump Width. */
+    uint32_t fphaseSeg1;   /*!< CAN FD data phase Phase Segment 1. */
+    uint32_t fphaseSeg2;   /*!< CAN FD data phase Phase Segment 2. */
+    uint32_t fpropSeg;     /*!< CAN FD data phase Propagation Segment. */
 #endif
 } flexcan_timing_config_t;
 
