@@ -1,9 +1,0 @@
-/*!
-@page driver_log Driver Change Log
-
-@section sdu SDU
-  The current SDUdriver version is 1.0.0.
-
-  - 1.0.0
-    - Initial version.
-*/

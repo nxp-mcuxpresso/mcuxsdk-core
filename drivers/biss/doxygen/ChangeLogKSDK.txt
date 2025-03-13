@@ -1,9 +1,0 @@
-/*!
-@page driver_log Driver Change Log
-
-@section biss BiSS
-  The current BiSS driver version is 1.0.0.
-
-  - 1.0.0
-    - Initial version.
-*/

@@ -1,9 +1,0 @@
-/*!
-@page driver_log Driver Change Log
-@section evtg EVTG
- The current EVTG driver version is 2.0.0
-
- - 2.0.0
-   - Initial version.
-
-*/

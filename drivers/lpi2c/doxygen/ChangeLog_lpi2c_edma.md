@@ -1,0 +1,15 @@
+# LPI2C_EDMA
+
+## [2.4.3]
+
+- Improvements
+  - Added support for separated IRQ handlers.
+
+## [2.4.2]
+
+- Improvements
+  - Add EDMA ext API to accommodate more types of EDMA.
+
+## [2.4.1]
+
+- Refer LPI2C driver change log 2.0.0 to 2.4.1

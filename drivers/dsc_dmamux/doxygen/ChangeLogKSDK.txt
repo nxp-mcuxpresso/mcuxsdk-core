@@ -1,9 +1,0 @@
-/*!
-@page driver_log Driver Change Log
-@section dmamux DMAMUX
- The current dmamux driver version is 2.0.0.
-
- - 2.0.0
-   - Initial version.
-
-*/

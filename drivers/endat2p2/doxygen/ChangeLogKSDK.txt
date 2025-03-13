@@ -1,9 +1,0 @@
-/*!
-@page driver_log Driver Change Log
-
-@section endat2p2 EnDat2.2
-  The current EnDat2p2 driver version is 1.0.0.
-
-  - 1.0.0
-    - Initial version.
-*/

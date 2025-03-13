@@ -1,0 +1,20 @@
+# FLASH
+
+## [2.1.2]
+
+- Improvement
+  - Add the support for KW47/MCXW72 phantoms.
+
+## [2.1.1]
+
+- Improvement
+  - Add the conditional compiling flag '#if defined(RF_FMU)' to make the driver be compatible with the non-radio phantoms.
+
+## [2.1.0]
+
+- Bug Fixes
+  - Fix flash driver run error in flash memory
+
+## [2.0.0]
+
+- Initial version.
