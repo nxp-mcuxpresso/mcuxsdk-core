@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed violations of the CERT INT30-C INT31-C.
+  - Fixed violations of the CERT ARR30-C.
 
 ## [2.14.4]
 
