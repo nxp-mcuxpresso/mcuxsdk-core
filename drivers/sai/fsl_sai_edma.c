@@ -503,8 +503,10 @@ status_t SAI_TransferSendEDMA(I2S_Type *base, sai_edma_handle_t *handle, sai_tra
     /* Enable DMA enable bit */
     SAI_TxEnableDMA(base, kSAI_FIFORequestDMAEnable, true);
 
+#if (defined(MCUX_SDK_SAI_EDMA_TX_ENABLE_INTERNAL) && MCUX_SDK_SAI_EDMA_TX_ENABLE_INTERNAL)
     /* Enable SAI Tx clock */
     SAI_TxEnable(base, true);
+#endif
 
     /* Enable the channel FIFO */
     base->TCR3 |= I2S_TCR3_TCE(handle->channelMask);
@@ -639,8 +641,10 @@ status_t SAI_TransferReceiveEDMA(I2S_Type *base, sai_edma_handle_t *handle, sai_
     /* Enable the channel FIFO */
     base->RCR3 |= I2S_RCR3_RCE(handle->channelMask);
 
+#if (defined(MCUX_SDK_SAI_EDMA_RX_ENABLE_INTERNAL) && MCUX_SDK_SAI_EDMA_RX_ENABLE_INTERNAL)
     /* Enable SAI Rx clock */
     SAI_RxEnable(base, true);
+#endif
 
     return kStatus_Success;
 }

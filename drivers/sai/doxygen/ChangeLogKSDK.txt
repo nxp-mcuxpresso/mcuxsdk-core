@@ -209,7 +209,11 @@
 @if dox_section_sai_edma_driver
 
 @section sai_edma SAI_EDMA
-  The current SAI_EDMA driver version is 2.7.1.
+  The current SAI_EDMA driver version is 2.7.2.
+
+  - 2.7.2
+    - Improvements
+      - Add macros MCUX_SDK_SAI_EDMA_TX_ENABLE_INTERNAL and MCUX_SDK_SAI_EDMA_RX_ENABLE_INTERNAL to let the user decide whether to enable SAI when calling SAI_TransferSendEDMA/SAI_TransferReceiveEDMA.
 
   - 2.7.1
     - Improvements

@@ -23,8 +23,18 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_SAI_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 7, 1)) /*!< Version 2.7.1 */
+#define FSL_SAI_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 7, 2)) /*!< Version 2.7.2 */
 /*! @} */
+
+/*! @brief the SAI enable position When calling SAI_TransferReceiveEDMA */
+#ifndef MCUX_SDK_SAI_EDMA_RX_ENABLE_INTERNAL
+#define MCUX_SDK_SAI_EDMA_RX_ENABLE_INTERNAL 1U
+#endif
+
+/*! @brief the SAI enable position When calling SAI_TransferSendEDMA */
+#ifndef MCUX_SDK_SAI_EDMA_TX_ENABLE_INTERNAL
+#define MCUX_SDK_SAI_EDMA_TX_ENABLE_INTERNAL 1U
+#endif
 
 typedef struct sai_edma_handle sai_edma_handle_t;
 
