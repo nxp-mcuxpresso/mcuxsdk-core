@@ -118,7 +118,8 @@ void PIT_Deinit(PIT_Type *base);
 /*!
  * @brief Enables the PIT RTI module, and configures the peripheral for basic operations.
  *
- * @note This API should be called at the beginning of the application using the PIT driver.
+ * @note The RTI might take several RTI clock cycles to get enabled or updated. Hence, you must wait for at least four
+ *       RTI clock cycles after RTI configuration.
  *
  * @param base   PIT peripheral base address
  * @param config Pointer to the user's PIT config structure

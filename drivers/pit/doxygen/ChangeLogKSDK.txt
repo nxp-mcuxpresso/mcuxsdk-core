@@ -8,7 +8,8 @@
     - Bug Fixes
       - Enable PIT when using RTI to ensure RTI can work properly in debug mode.
     - Improvements
-      - Add status check in PIT_SetRtiTimerPeriod to ensure the load value is synchronized into the RTI clock domain.
+      - Added status check in PIT_SetRtiTimerPeriod to ensure the load value is synchronized into the RTI clock domain.
+      - Added note for PIT_RTI_Init to remind users wait RTI sync.
 
   - 2.1.0
     - New Features
