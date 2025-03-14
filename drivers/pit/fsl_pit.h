@@ -20,8 +20,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief PIT Driver Version 2.1.0 */
-#define FSL_PIT_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
+/*! @brief PIT Driver Version 2.1.1 */
+#define FSL_PIT_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
 /*! @} */
 
 /*!
@@ -380,6 +380,21 @@ static inline uint32_t PIT_GetCurrentTimerCount(PIT_Type *base, pit_chnl_t chann
 }
 
 #if defined(FSL_FEATURE_PIT_HAS_RTI) && (FSL_FEATURE_PIT_HAS_RTI)
+/*!
+ * @brief Reads the RTI timer load synchronization status.
+ * 
+ * In the case of the RTI timer load, it will take several cycles
+ * until this value is synchronized into the RTI clock domain.
+ *
+ * @param base    PIT peripheral base address
+ *
+ * @return The status flags. This is the logical OR of members of the
+ *         enumeration ::pit_rti_ldval_status_flags_t
+ */
+static inline uint32_t PIT_GetRtiSyncStatus(PIT_Type *base)
+{
+    return (base->RTI_LDVAL_STAT & PIT_RTI_LDVAL_STAT_RT_STAT_MASK);
+}
 
 /*!
  * @brief Sets the RTI timer period in units of count.
@@ -397,24 +412,17 @@ static inline uint32_t PIT_GetCurrentTimerCount(PIT_Type *base, pit_chnl_t chann
 static inline void PIT_SetRtiTimerPeriod(PIT_Type *base, uint32_t count)
 {
     assert(count != 0U);
+    /* Clear the load status register */
+    base->RTI_LDVAL_STAT = kPIT_RtiLoadValueSyncFlag;
     /* According to RM, the LDVAL trigger = clock ticks -1 */
     base->RTI_LDVAL = count - 1U;
-}
-
-/*!
- * @brief Reads the RTI timer load synchronization status.
- * 
- * In the case of the RTI timer load, it will take several cycles
- * until this value is synchronized into the RTI clock domain.
- *
- * @param base    PIT peripheral base address
- *
- * @return The status flags. This is the logical OR of members of the
- *         enumeration ::pit_rti_ldval_status_flags_t
- */
-static inline uint32_t PIT_GetRtiSyncStatus(PIT_Type *base)
-{
-    return (base->RTI_LDVAL_STAT & PIT_RTI_LDVAL_STAT_RT_STAT_MASK);
+    /* 
+     * In the case of the RTI timer load, it will take several cycles until this value is synchronized into the RTI
+     * clock domain.
+     */
+    while(kPIT_RtiLoadValueSyncFlag != (PIT_GetRtiSyncStatus(base)))
+    {
+    }
 }
 
 /*!

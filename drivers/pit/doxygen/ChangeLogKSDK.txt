@@ -2,7 +2,13 @@
 @page driver_log Driver Change Log
 
 @section pit PIT
-  The current PIT driver version is 2.1.0.
+  The current PIT driver version is 2.1.1.
+
+  - 2.1.1
+    - Bug Fixes
+      - Enable PIT when using RTI to ensure RTI can work properly in debug mode.
+    - Improvements
+      - Add status check in PIT_SetRtiTimerPeriod to ensure the load value is synchronized into the RTI clock domain.
 
   - 2.1.0
     - New Features
