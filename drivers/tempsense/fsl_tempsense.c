@@ -5,7 +5,6 @@
  */
 
 #include "fsl_tempsense.h"
-#include "fsl_debug_console.h"
 
 /*******************************************************************************
  * Definitions
