@@ -22,7 +22,6 @@
 #define JPEG_SOF0_MARKER 0xC0UL
 #define JPEG_SOF1_MARKER 0xC1UL
 #define JPEG_GET_U16(p)  ((((uint16_t)(*(p))) << 8) + ((uint16_t)(*((p) + 1))))
-#define JPEG_ALIGN_SIZE(size, align) (((size) + (align)-1U) & ~((align)-1U))
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/

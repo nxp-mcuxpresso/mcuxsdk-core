@@ -17,6 +17,8 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+#define JPEG_ALIGN_SIZE(size, align) (((size) + (align)-1U) & ~((align)-1U))
+
 /*! @name Driver version */
 /*@{*/
 /*! @brief JPEG decoder driver version. */
