@@ -1,0 +1,21 @@
+/*!
+@defgroup wkpu WKPU: Wakeup Unit driver
+@details The MCUXpresso SDK provides a peripheral driver for the Wakeup Unit (WKPU) module of
+MCUXpresso SDK devices. The WKPU module provides a configurable, low-power wake-up capability 
+to the chip from multiple configurable asynchronous wake-up events. It supports for four internal 
+and 60 external sources that can generate interrupts or wake-up events. It also supports an NMI input.
+
+# Function groups (#WKPUFunc)
+The WKPU driver supports to designate external wakeup sources, configure wakeup settings.
+
+## Configure and clear external wake up sources {#WKPUEConfig}
+Configures the external wakeup sources, the pins' edge detection, wake up event and filter enable. External
+wakeup sources are accessed by the 'mask' which means multiple wakeup sources can be configured at the same time. 
+
+## Wakeup status and interrupt status {#WKPUStatus}
+Gets, clears, and checks the wakeup sources flags.
+
+## NMI sources configuration {#WKPUNmi}
+Configures the NMI sources'destination source, edge detection, filter configuration for wakeup function.
+
+*/
