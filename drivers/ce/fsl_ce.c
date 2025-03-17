@@ -13,6 +13,11 @@ Implementation file for CE wrapper/driver functions on ARM
 #include "fsl_mu.h"
 #include "fsl_ce.h"
 
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.ce"
+#endif
+
 void CE_Init(ce_copy_image_t *ceCopyImage)
 {
 #if (defined(KW47_core0_SERIES) || defined(MCXW72_core0_SERIES))
