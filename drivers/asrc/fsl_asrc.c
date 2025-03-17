@@ -691,11 +691,11 @@ status_t ASRC_TransferBlocking(ASRC_Type *base, asrc_channel_pair_t channelPair,
             ASRC_WriteNonBlocking(base, channelPair, (uint32_t *)(uint32_t)inAddr, onceWriteSamples, inSampleMask,
                                   inWidth);
             /* Cert-compliant overflow check */
-            if (onceWriteSamples > (UINT32_MAX - inAddr) / inWidth)
+            if (onceWriteSamples > (UINT32_MAX - (uint32_t)inAddr) / inWidth)
             {
                 return kStatus_OutOfRange;
             }
-            inAddr = (uint8_t *)((uint32_t)inAddr + onceWriteSamples * inWidth;
+            inAddr = (uint8_t *)((uint32_t)inAddr + onceWriteSamples * inWidth);
             inSamples -= onceWriteSamples;
         }
 
@@ -705,7 +705,7 @@ status_t ASRC_TransferBlocking(ASRC_Type *base, asrc_channel_pair_t channelPair,
             {
                 ASRC_ReadNonBlocking(base, channelPair, (uint32_t *)(uint32_t)outAddr, outWaterMark, outWidth);
                 /* Cert-compliant overflow check */
-                if (outWaterMark > (UINT32_MAX - outAddr) / outWidth)
+                if (outWaterMark > (UINT32_MAX - (uint32_t)outAddr) / outWidth)
                 {
                   return kStatus_OutOfRange;
                 }
@@ -1005,11 +1005,11 @@ void ASRC_TransferHandleIRQ(ASRC_Type *base, asrc_handle_t *handle)
                               handle->in.sampleMask, handle->in.sampleWidth);
         handle->in.transferSamples[handle->in.queueDriver] -= size;
         /* Cert-compliant overflow check */
-        if (size > (UINT32_MAX - handle->in.asrcQueue[handle->in.queueDriver]) / handle->in.sampleWidth) {
-            return kStatus_OutOfRange;
+        if (size < (UINT32_MAX - (uint32_t)handle->in.asrcQueue[handle->in.queueDriver]) / handle->in.sampleWidth)
+        {
+            handle->in.asrcQueue[handle->in.queueDriver] =
+                (uint8_t *)((uint32_t)handle->in.asrcQueue[handle->in.queueDriver] + size * handle->in.sampleWidth);
         }
-        handle->in.asrcQueue[handle->in.queueDriver] =
-            (uint8_t *)((uint32_t)handle->in.asrcQueue[handle->in.queueDriver] + size * handle->in.sampleWidth);
     }
 
     /* If finished a block, call the callback function */
