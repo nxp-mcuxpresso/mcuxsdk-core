@@ -615,10 +615,10 @@ void DSI_SetDpiConfig(MIPI_DSI_HOST_Type *base,
 uint32_t DSI_InitDphy(MIPI_DSI_HOST_Type *base, const dsi_dphy_config_t *config, uint32_t refClkFreq_Hz)
 {
     assert(config);
-    assert((uint32_t)config->tHsPrepare_HalfEscClk - DSI_THS_PREPARE_HALF_ESC_CLK_BASE);
-    assert((uint32_t)config->tClkPrepare_HalfEscClk - DSI_TCLK_PREPARE_HALF_ESC_CLK_BASE);
-    assert((uint32_t)config->tHsZero_ByteClk - DSI_THS_ZERO_BYTE_CLK_BASE);
-    assert((uint32_t)config->tClkZero_ByteClk - DSI_TCLK_ZERO_BYTE_CLK_BASE);
+    assert((uint32_t)config->tHsPrepare_HalfEscClk >= DSI_THS_PREPARE_HALF_ESC_CLK_BASE);
+    assert((uint32_t)config->tClkPrepare_HalfEscClk >= DSI_TCLK_PREPARE_HALF_ESC_CLK_BASE);
+    assert((uint32_t)config->tHsZero_ByteClk >= DSI_THS_ZERO_BYTE_CLK_BASE);
+    assert((uint32_t)config->tClkZero_ByteClk >= DSI_TCLK_ZERO_BYTE_CLK_BASE);
 
 
 #if !((defined(FSL_FEATURE_MIPI_DSI_HOST_NO_DPHY_PLL) && (FSL_FEATURE_MIPI_DSI_HOST_NO_DPHY_PLL)))
