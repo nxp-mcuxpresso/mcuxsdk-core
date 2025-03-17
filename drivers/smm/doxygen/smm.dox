@@ -1,0 +1,8 @@
+/*!
+@defgroup smm SMM: Sleep Mode Manager Driver
+@details The MCUXpresso SDK provides a peripheral driver for the sleep mode manager(SMM) of MCUXpresso SDK devices.
+The SMM module controls all the different low power modes, wake-up, generates the correct power down and power up
+sequences including controlling different clock activity, isolation signals, and voltage power down and up.
+
+
+*/

@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section mcx_cmc MCX_CMC
-  The current MCX_CMC driver version is 2.2.3.
+  The current MCX_CMC driver version is 2.3.0.
+
+  - 2.3.0
+    - Improvements
+      - Added macros to support some device have BSR_SCR bit field.
 
   - 2.2.3
     - Improvements
