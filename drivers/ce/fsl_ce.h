@@ -27,11 +27,6 @@ Functional API definitions for ARM drivers for CE
 #define FSL_CE_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
 /*! @} */
 
-/* Component ID definition, used by tools. */
-#ifndef FSL_COMPONENT_ID
-#define FSL_COMPONENT_ID "platform.drivers.ce"
-#endif
-
 /*!
  * @brief Structure for CE copy image to destination address
  *
