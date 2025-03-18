@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021 NXP
+ * Copyright 2018-2021,2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -93,6 +93,9 @@ status_t FLASH_Init(flash_config_t *config)
      defined(CPU_MCXW727AMFTA_cm33_core1) || defined(CPU_MCXW727CMFTA_cm33_core1))
         config->msf1Config[0].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
+#elif (defined(CPU_KW43B43ZC7MFTA) || defined(CPU_MCXW70ADMFTA))
+        config->msf1Config[0].flashDesc.totalSize =
+            FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
 #else
 #error "No valid CPU defined!"
 #endif
@@ -155,6 +158,9 @@ status_t FLASH_Init(flash_config_t *config)
 
         config->msf1Config[1].ifrDesc.pflashIfr0Start   = FLASH_FEATURE_PFLASH1_IFR0_START_ADDRESS;
         config->msf1Config[1].ifrDesc.pflashIfr0MemSize = FLASH_FEATURE_PFLASH1_IFR0_SIZE;
+#elif (defined(CPU_KW43B43ZC7MFTA) || defined(CPU_MCXW70ADMFTA))
+        config->msf1Config[1].flashDesc.totalSize =
+            FLASH_FEATURE_PFLASH1_BLOCK_COUNT * FLASH_FEATURE_PFLASH1_BLOCK_SIZE;
 #else
 #error "No valid CPU defined!"
 #endif

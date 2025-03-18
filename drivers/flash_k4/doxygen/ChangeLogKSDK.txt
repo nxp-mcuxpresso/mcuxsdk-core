@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section flash FLASH
-  The current FLASH driver version is 2.1.2.
+  The current FLASH driver version is 2.2.0.
+
+  - 2.2.0
+    - New Features
+      - Add the support for MW30.
 
   - 2.1.2
     - Improvement
