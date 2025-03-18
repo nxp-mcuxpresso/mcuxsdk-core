@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section lcdic LCDIC
-  The current LCDIC driver version is 2.1.0.
+  The current LCDIC driver version is 2.2.0.
+
+  - 2.2.0
+    - New Features
+      - Add software timeout when waiting for CMD done.
 
   - 2.1.0
     - New Features

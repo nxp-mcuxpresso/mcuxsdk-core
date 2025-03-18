@@ -20,3 +20,21 @@ config MCUX_COMPONENT_driver.lcdic
     bool "lcdic"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lcdic
+
+if MCUX_COMPONENT_driver.lcdic
+
+    config LCDIC_RESET_STATE_DELAY
+        int "LCDIC reset delay loop"
+        default 130
+        help
+          Loop count to control the delay time to perform reliable LCDIC reset.
+          It should make LCDIC_ResetStateDelay longer than 4 LCDIC functional clock.
+
+    config LCDIC_WAIT_CMD_DONE_TIMEOUT
+        int "LCDIC CMD done wait loop"
+        default 0
+        help
+          How many loops will driver check hardware status while waiting for command done.
+          Use 0 to wait infinitely.
+
+endif
