@@ -17,9 +17,9 @@ __WEAK uint32_t getTimestampMS()
 
 void DSL_GetDefaultConfig(hiperface_config_t *config)
 {
-    config->pos_ready_mode = POS_READY_MODE_SHOWS_TIME_ALL_TRANSMISSIONS;
-    config->sync_signal_Polarity = SYNC_SIGNAL_POLARITY_LEADING_EDGE;
-    config->es = 0;
+	config->pos_ready_mode = POS_READY_MODE_SHOWS_TIME_ALL_TRANSMISSIONS;
+	config->sync_signal_Polarity = SYNC_SIGNAL_POLARITY_LEADING_EDGE;
+	config->es = 0;
 };
 
 void DSL_MasterInit(HIPERFACE_Type *base, hiperface_config_t *config)
@@ -37,18 +37,39 @@ void DSL_MasterInit(HIPERFACE_Type *base, hiperface_config_t *config)
 	DSL_SetOutputActivate(base, 0x01);
 }
 
-int DSL_SyncModeEnable(HIPERFACE_Type *base, uint32_t syncFreqHz, uint8_t ES)
+uint8_t DSL_getMaxES(uint32_t syncFreqHz)
+{
+	uint32_t maximum = (uint32_t) (1000000 / (syncFreqHz * 11.95));
+	return maximum > 0xFF ? 0xFF : (maximum & 0xFF);
+}
+
+int DSL_SyncModeEnable(HIPERFACE_Type *base, uint32_t syncFreqHz, hiperface_config_t *config)
 {
 	uint32_t minimum, maximum;
+	uint8_t ES = config->es;
 
 	minimum = (uint32_t) (1000000 / (syncFreqHz * 27.0));
 	maximum = (uint32_t) (1000000 / (syncFreqHz * 11.95));
+	if (maximum > 0xFF) {
+		maximum = 0xFF;
+	}
 
 	if (ES > maximum || ES < minimum) {
 		return kStatus_DSL_Invalid_ES;
 	}
+	DSL_SetOutputActivate(base, 0x00);
+	DSL_SetProtocolRst(base);
+	DSL_SetMessagesRst(base);
+	DSL_SetPipelineRst(base);
 
+	DSL_ClrProtocolRst(base);
+	DSL_ClrMessagesRst(base);
+	DSL_ClrPipelineRst(base);
+
+	DSL_SetPolaritySyncPulse(base, config->sync_signal_Polarity);
+	DSL_SetPosReadyMode(base, config->pos_ready_mode);
 	base->SYNC_CTRL = ES;
+	DSL_SetOutputActivate(base, 0x01);
 	return kStatus_Success;
 }
 
@@ -79,7 +100,7 @@ status_t DSL_CheckLinkStatus(HIPERFACE_Type *base, uint32_t timeout_ms)
 {
 	uint32_t target = getTimestampMS() + timeout_ms;
 	do {
-		if (HIPERFACE_MASTER_QM_LINK(base->MASTER_QM)) {
+		if (DSL_GetQualityMonitoringLink(base)) {
 			return kStatus_Success;
 		}
 	} while (getTimestampMS() < target);
@@ -88,8 +109,10 @@ status_t DSL_CheckLinkStatus(HIPERFACE_Type *base, uint32_t timeout_ms)
 
 uint64_t DSL_GetFastPosition(HIPERFACE_Type *base, dsl_encoder_t *enc)
 {
-	volatile const uint8_t *pos = &base->POS_PRIM[0];
-	uint64_t pos_u64 = ((uint64_t)pos[4]  << 32) + (pos[3] << 24) + (pos[2] << 16) + (pos[1] << 8) + pos[0];
+	volatile uint32_t pos_h = *(uint32_t *)&base->POS_PRIM[0];
+	volatile uint32_t pos_l = *(uint32_t *)&base->POS_PRIM[4];
+	pos_h = BSWAP32(pos_h);
+	uint64_t pos_u64 = (((uint64_t)pos_h) << 8) + (pos_l & 0xFF);
 	if (enc->sign && (pos_u64 | enc->signMask)) {
 		return pos_u64 | enc->signExtend;
 	}
@@ -151,6 +174,7 @@ status_t DSL_RDB_Wrire(HIPERFACE_Type *base, uint16_t addr, uint16_t offset, voi
 								uint32_t datLen, uint32_t flag, uint32_t timeout_ms, uint16_t *errno)
 {
 	uint32_t endTime;
+	uint8_t  var = 0;
 	assert(datLen <= 8);
 	uint8_t len;
 	if (datLen == 8)
@@ -167,20 +191,20 @@ status_t DSL_RDB_Wrire(HIPERFACE_Type *base, uint16_t addr, uint16_t offset, voi
 	}
 
 	if (flag & LMSG_F_DIRECT)
-		DSL_SetLmsgAddrDirect(base);
+		DSL_SetLmsgAddrDirect(var);
 	else
-		DSL_SetLmsgAddrIndirect(base);
+		DSL_SetLmsgAddrIndirect(var);
 
 	if (flag & LMSG_F_OFFSET) {
 		DSL_SetLmsgAddrOffset(base, offset);
-		DSL_SetLmsgAddrWithOffset(base);
+		DSL_SetLmsgAddrWithOffset(var);
 	} else
-		DSL_SetLmsgAddrWithoutOffset(base);
+		DSL_SetLmsgAddrWithoutOffset(var);
 
-	DSL_SetLmsgDataLen(base, len);
+	DSL_SetLmsgDataLen(var, len);
 	DSL_SetLmsgBuf(base, data, datLen);
-	DSL_SetLmsgWrite(base);
-	DSL_SetLmsgAddr(base, addr);
+	DSL_SetLmsgWrite(var);
+	DSL_SetLmsgAddr(base, var, addr);
 	DSL_SetLmsgStart(base);
 
 	endTime = getTimestampMS() + timeout_ms;
@@ -209,6 +233,7 @@ status_t DSL_RDB_Read(HIPERFACE_Type *base, uint16_t addr, uint16_t offset, void
 							uint32_t datLen, uint32_t flag, uint32_t timeout_ms, uint16_t *errno)
 {
 	uint32_t endTime;
+	uint8_t  var = 0;
 	assert(datLen <= 8);
 	uint8_t len;
 	if (datLen > 4)
@@ -223,19 +248,19 @@ status_t DSL_RDB_Read(HIPERFACE_Type *base, uint16_t addr, uint16_t offset, void
 	}
 
 	if (flag & LMSG_F_DIRECT)
-		DSL_SetLmsgAddrDirect(base);
+		DSL_SetLmsgAddrDirect(var);
 	else
-		DSL_SetLmsgAddrIndirect(base);
+		DSL_SetLmsgAddrIndirect(var);
 
 	if (flag & LMSG_F_OFFSET) {
 		DSL_SetLmsgAddrOffset(base, offset);
-		DSL_SetLmsgAddrWithOffset(base);
+		DSL_SetLmsgAddrWithOffset(var);
 	} else
-		DSL_SetLmsgAddrWithoutOffset(base);
+		DSL_SetLmsgAddrWithoutOffset(var);
 
-	DSL_SetLmsgRead(base);
-	DSL_SetLmsgDataLen(base, len);
-	DSL_SetLmsgAddr(base, addr);
+	DSL_SetLmsgRead(var);
+	DSL_SetLmsgDataLen(var, len);
+	DSL_SetLmsgAddr(base, var, addr);
 	DSl_ClrEventLongMsgChannelfree(base);
 	DSL_SetLmsgStart(base);
 
@@ -243,14 +268,14 @@ status_t DSL_RDB_Read(HIPERFACE_Type *base, uint16_t addr, uint16_t offset, void
 	while (getTimestampMS() < endTime) {
 		if (DSl_GetEventLongMsgChannelfree(base)) {
 
-             if (DSL_GetLmsgLastCauseError(base) && errno != NULL) {
-                 *errno = (base->PRIM[1] << 8) + base->PRIM[0];
-                 return kStatus_DSL_Lmsg_Err_CausedByLmsg;
-             }
+	if (DSL_GetLmsgLastCauseError(base) && errno != NULL) {
+		*errno = (base->PRIM[1] << 8) + base->PRIM[0];
+		return kStatus_DSL_Lmsg_Err_CausedByLmsg;
+	}
 
-             if (DSl_GetEventLongMsgAnswerErr(base)) {
-                 return kStatus_DSL_Lmsg_Erroneous_Answer;
-             }
+	if (DSl_GetEventLongMsgAnswerErr(base)) {
+		return kStatus_DSL_Lmsg_Erroneous_Answer;
+	}
 			 DSL_GetLmsgBuf(base, data, datLen);
 			return kStatus_Success;
 		}
@@ -261,7 +286,6 @@ status_t DSL_RDB_Read(HIPERFACE_Type *base, uint16_t addr, uint16_t offset, void
 	DSL_ClrMessagesRst(base);
 	return kStatus_Timeout;
 }
-
 
 status_t DSL_RDB_GetResourceName(HIPERFACE_Type *base, dsl_rdb_node_t *node, uint16_t rid)
 {
@@ -523,13 +547,13 @@ status_t DSL_RDB_GetNodeLinkedRID(HIPERFACE_Type *base, dsl_rdb_node_t *node, ui
 	uint16_t errno;
 	status_t status;
 	if ((status = _DSL_RDB_GetLinkedNodeRID(base, node, index, rid, &errno)) != kStatus_Success) {
-        if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-            DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
-            return status;
-        }
-    }
-    *rid = BSWAP16(*rid);
-    return kStatus_Success;
+		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
+			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
+			return status;
+		}
+	}
+	*rid = BSWAP16(*rid);
+	return kStatus_Success;
 }
 
 status_t DSL_RDB_TraverseNodeDefiningValue(HIPERFACE_Type *base, dsl_rdb_node_t *root, uint16_t rid)
@@ -1298,7 +1322,7 @@ status_t DSL_RDB_GetCurrentAccessLevel(HIPERFACE_Type *base, uint8_t *accessLeve
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, 2)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, 2)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1308,18 +1332,18 @@ status_t DSL_RDB_GetCurrentAccessLevel(HIPERFACE_Type *base, uint8_t *accessLeve
 
 status_t DSL_RDB_SetAccessLevel(HIPERFACE_Type *base, uint8_t accessLevel, uint32_t password)
 {
-    uint8_t buf[8];
-    status_t status;
+	uint8_t buf[8];
+	status_t status;
 	dsl_rdb_node_t node = {0};
 
 	buf[0] = accessLevel & 0x3;
-    buf[1] = 0;
-    buf[2] = 0;
-    buf[3] = 0;
-    buf[4] = (password >> 24) & 0xFF;
-    buf[5] = (password >> 16) & 0xFF;
-    buf[6] = (password >> 8) & 0xFF;
-    buf[7] = (password >> 0) & 0xFF;
+	buf[1] = 0;
+	buf[2] = 0;
+	buf[3] = 0;
+	buf[4] = (password >> 24) & 0xFF;
+	buf[5] = (password >> 16) & 0xFF;
+	buf[6] = (password >> 8) & 0xFF;
+	buf[7] = (password >> 0) & 0xFF;
 
 	if ((status = DSL_RDB_GetNodeDefiningValue(base, &node, DSL_RID_SetPosition)) != kStatus_Success) {
 		return status;
@@ -1334,18 +1358,18 @@ status_t DSL_RDB_SetAccessLevel(HIPERFACE_Type *base, uint8_t accessLevel, uint3
 
 status_t DSL_RDB_ChangeAccessKey(HIPERFACE_Type *base, uint8_t accessLevel, uint32_t newPassword, uint32_t oldPassword)
 {
-    uint8_t buf[8];
-    status_t status;
+	uint8_t buf[8];
+	status_t status;
 	dsl_rdb_node_t node = {0};
 
-    buf[0] = (newPassword >> 24) & 0xFF;
-    buf[1] = (newPassword >> 16) & 0xFF;
-    buf[2] = (newPassword >> 8) & 0xFF;
-    buf[3] = (newPassword >> 0) & 0xFF;
-    buf[4] = (oldPassword >> 24) & 0xFF;
-    buf[5] = (oldPassword >> 16) & 0xFF;
-    buf[6] = (oldPassword >> 8) & 0xFF;
-    buf[7] = (oldPassword >> 0) & 0xFF;
+	buf[0] = (newPassword >> 24) & 0xFF;
+	buf[1] = (newPassword >> 16) & 0xFF;
+	buf[2] = (newPassword >> 8) & 0xFF;
+	buf[3] = (newPassword >> 0) & 0xFF;
+	buf[4] = (oldPassword >> 24) & 0xFF;
+	buf[5] = (oldPassword >> 16) & 0xFF;
+	buf[6] = (oldPassword >> 8) & 0xFF;
+	buf[7] = (oldPassword >> 0) & 0xFF;
 
 	if ((status = DSL_RDB_GetNodeDefiningValue(base, &node, DSL_RID_ChangeAccessKey)) != kStatus_Success) {
 		return status;
@@ -1354,7 +1378,7 @@ status_t DSL_RDB_ChangeAccessKey(HIPERFACE_Type *base, uint8_t accessLevel, uint
 	if ((status = DSL_RDB_WriteIndirectWithOffset(base, &node, buf, node.resourceDataLen, accessLevel)) != kStatus_Success) {
 		return status;
 	}
-    return kStatus_Success;
+	return kStatus_Success;
 }
 
 status_t DSL_RDB_GetUserDefinedWarnings(HIPERFACE_Type *base, uint8_t warningIndex, user_defined_warning_t *warning)
@@ -1617,7 +1641,7 @@ status_t DSL_RDB_GetReadCounter(HIPERFACE_Type *base, uint32_t *counter)
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1769,7 +1793,7 @@ status_t DSL_RDB_GetFileStatus(HIPERFACE_Type *base, uint8_t *ReadAccessRight, u
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, 4)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, 4)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1994,7 +2018,7 @@ uint8_t Slave_Ping_register_reading(HIPERFACE_Type *base)
 uint8_t Slave_SRSSI_register_reading(HIPERFACE_Type *base)
 {
 	uint8_t dummy;
-	volatile const uint8_t *enc_st_addr = &(base->SRSSI_SAFE) + 0x200;
+	volatile uint8_t *enc_st_addr = &(base->SRSSI_SAFE) + 0x200;
 	base->EVENT_S &= 0xFE;
 	dummy = *enc_st_addr;
 	while(!(base->EVENT_S & 0x01));
