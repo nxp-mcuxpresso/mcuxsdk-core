@@ -890,8 +890,8 @@ void LCDIF_DbiSelectArea(LCDIF_Type *base,
                          uint16_t endY,
                          bool isTiled)
 {
-    assert((endX - startX) >= 0U);
-    assert((endY - startY) >= 0U);
+    assert(endX >= startX);
+    assert(endY >= startY);
 
     uint16_t width  = endX - startX + 1U;
     uint16_t height = endY - startY + 1U;
