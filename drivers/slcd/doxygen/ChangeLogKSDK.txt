@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section slcd SLCD
-  The current SLCD driver version is 2.0.4.
+  The current SLCD driver version is 2.1.0.
+
+  - 2.1.0
+    - New Features
+      - Added new enumerations, updated SLCD_Init and SLCD_GetDefaultConfig to support
+        new low power IP on new SoCs.
 
   - 2.0.4
     - Bug Fixes
