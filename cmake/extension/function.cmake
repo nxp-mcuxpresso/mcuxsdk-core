@@ -1158,6 +1158,7 @@ function(mcux_add_cmakelists path)
       log_debug("Include CMakeLists.txt from ${path}"
                 ${CMAKE_CURRENT_LIST_FILE})
       get_property(ADDED_SUBDIRS GLOBAL PROPERTY ADDED_SUBDIRS)
+      get_filename_component(path "${path}" REALPATH)
       list(FIND ADDED_SUBDIRS ${path} SUBDIR_FOUND)
       if(SUBDIR_FOUND EQUAL -1)
         add_subdirectory(${path} ${APPLICATION_BINARY_DIR}/${relative_path})
