@@ -31,6 +31,9 @@ endfunction()
 
 function(runners_yaml_append_config)
   # Append the common configuration values to the relevant property target.
+  if(NOT DEFINED APPLICATION_BINARY_NAME)
+    set(APPLICATION_BINARY_NAME ${MCUX_SDK_PROJECT_NAME})
+  endif()
 
   runners_yaml_append("\n# Common runner configuration values.")
   runners_yaml_append("config:")
@@ -39,9 +42,9 @@ function(runners_yaml_append_config)
   runners_yaml_append("  # Build outputs:")
   # runners_yaml_append("  elf_file: ${elf}")
   # hardcode for mcuxsdk, currently we do not allow user to configure output type in kconfig
-  runners_yaml_append("  bin_file: ${MCUX_SDK_PROJECT_NAME}.bin")
-  runners_yaml_append("  elf_file: ${MCUX_SDK_PROJECT_NAME}.elf")
-  runners_yaml_append("  hex_file: ${MCUX_SDK_PROJECT_NAME}.hex")
+  runners_yaml_append("  bin_file: ${APPLICATION_BINARY_NAME}.bin")
+  runners_yaml_append("  elf_file: ${APPLICATION_BINARY_NAME}.elf")
+  runners_yaml_append("  hex_file: ${APPLICATION_BINARY_NAME}.hex")
   # if(CONFIG_BUILD_OUTPUT_EXE)
   #   get_runners_prop(exe_file exe "${KERNEL_EXE_NAME}")
   # else()

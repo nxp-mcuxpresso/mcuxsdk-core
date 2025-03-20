@@ -121,6 +121,7 @@ macro(project project_name)
     endif ()
 
     target_link_libraries(app PRIVATE McuxSDK)
+    set(APPLICATION_BINARY_NAME app)
 
     reset_app_link_order()
 
