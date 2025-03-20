@@ -1,5 +1,10 @@
 # USDHC
 
+## [2.8.5]
+
+- Improvements
+  - Enable the driver to be AARCH64 compatible.
+
 ## [2.8.4]
 
 - Improvements
