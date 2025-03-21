@@ -353,6 +353,7 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
     assert(NULL != config);
     assert(0U < config->baudRate_Bps);
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
+    assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) > 0);
     assert((uint8_t)FSL_FEATURE_LPUART_FIFO_SIZEn(base) > config->txFifoWatermark);
     assert((uint8_t)FSL_FEATURE_LPUART_FIFO_SIZEn(base) > config->rxFifoWatermark);
 #endif
@@ -2061,8 +2062,9 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
     /* If use RX ring buffer, receive data to ring buffer. */
     if (NULL != handle->rxRingBuffer)
     {
-        while (0U != count--)
+        while (0U != count)
         {
+            count--;
             /* If RX ring buffer is full, trigger callback to notify over run. */
             if (LPUART_TransferIsRxRingBufferFull(base, handle))
             {
@@ -2150,6 +2152,7 @@ static void LPUART_TransferHandleSendDataEmpty(LPUART_Type *base, lpuart_handle_
     uint32_t irqMask;
 /* Get the bytes that available at this moment. */
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
+    assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) > 0);
     count = (uint8_t)FSL_FEATURE_LPUART_FIFO_SIZEn(base) -
             (uint8_t)((base->WATER & LPUART_WATER_TXCOUNT_MASK) >> LPUART_WATER_TXCOUNT_SHIFT);
 #else

@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPUART driver version. */
-#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 9, 0))
+#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 9, 1))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
@@ -532,6 +532,7 @@ static inline void LPUART_EnableMatchAddress(LPUART_Type *base, bool match1, boo
  */
 static inline void LPUART_SetRxFifoWatermark(LPUART_Type *base, uint8_t water)
 {
+    assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) > 0);
     assert((uint8_t)FSL_FEATURE_LPUART_FIFO_SIZEn(base) > water);
     base->WATER = (base->WATER & ~LPUART_WATER_RXWATER_MASK) | LPUART_WATER_RXWATER(water);
 }
@@ -544,6 +545,7 @@ static inline void LPUART_SetRxFifoWatermark(LPUART_Type *base, uint8_t water)
  */
 static inline void LPUART_SetTxFifoWatermark(LPUART_Type *base, uint8_t water)
 {
+    assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) > 0);
     assert((uint8_t)FSL_FEATURE_LPUART_FIFO_SIZEn(base) > water);
     base->WATER = (base->WATER & ~LPUART_WATER_TXWATER_MASK) | LPUART_WATER_TXWATER(water);
 }
