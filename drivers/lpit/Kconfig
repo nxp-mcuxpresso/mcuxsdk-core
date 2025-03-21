@@ -10,3 +10,13 @@ config MCUX_COMPONENT_driver.lpit
     bool "lpit"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lpit
+
+if MCUX_COMPONENT_driver.lpit
+
+    config LPIT_RESET_STATE_DELAY
+        int "LPIT reset delay loop count"
+        default 120
+        help
+          Type unsigned. Loop count to control the delay time to perform reliable LPIT reset.
+          Its value shall be at least 4 * core clock / LPIT peripheral clock.
+endif
