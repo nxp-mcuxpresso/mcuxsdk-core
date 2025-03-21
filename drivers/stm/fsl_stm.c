@@ -174,16 +174,17 @@ void STM_RegisterCallBack(STM_Type *base, stm_callback_t cb_func)
     s_stmCallback[index]   = cb_func;
 }
 
-/*!
- * brief STM generic IRQ handle function.
- *
- * param index STM peripheral instance index.
- */
-static void STM_GenericIRQHandler(uint32_t index)
+/* IRQ handler functions overloading weak symbols in the startup */
+void STM_DriverIRQHandler(uint32_t index)
 {
     uint32_t int_stat = 0U;
     uint32_t i;
 
+    if (index > ARRAY_SIZE(s_stmBases))
+    {
+        return;
+    }
+    
     for (i = 0U; i < STM_CHANNEL_COUNT; i++)
     {
         /* Collect interrupt flag from all channels */
@@ -199,23 +200,3 @@ static void STM_GenericIRQHandler(uint32_t index)
 
     SDK_ISR_EXIT_BARRIER;
 }
-
-
-/* IRQ handler functions overloading weak symbols in the startup */
-#if defined(STM_0)
-void STM0_DriverIRQHandler(void);
-void STM0_DriverIRQHandler(void)
-{
-    STM_GenericIRQHandler(0);
-    SDK_ISR_EXIT_BARRIER;
-}
-#endif
-
-#if defined(STM_1)
-void STM1_DriverIRQHandler(void);
-void STM1_DriverIRQHandler(void)
-{
-    STM_GenericIRQHandler(1);
-    SDK_ISR_EXIT_BARRIER;
-}
-#endif

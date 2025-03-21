@@ -59,6 +59,7 @@ typedef void (*stm_callback_t)(uint32_t flags);
 /*******************************************************************************
  * API
  *******************************************************************************/
+extern void STM_DriverIRQHandler(uint32_t index);
 
 #if defined(__cplusplus)
 extern "C" {
@@ -211,7 +212,7 @@ static inline void STM_StopTimer(STM_Type *base)
 /*! @}*/
 
 /*!
- * @brief Get the timer count value from CTC register.
+ * @brief Get the timer count value from CNT register.
  *
  * @param base STM peripheral base address
  */
