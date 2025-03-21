@@ -1,0 +1,13 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+config MCUX_HAS_COMPONENT_driver.cmu_fm
+    bool
+    default y if MCUX_HW_IP_DriverType_CMU_FM
+
+config MCUX_COMPONENT_driver.cmu_fm
+    bool "cmu_fm"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.cmu_fm
+    help
+      This driver provides APIs to configure the Clock Monitoring Unit Frequency Meter module.

@@ -1,0 +1,32 @@
+/*!
+@defgroup cmu_fm CMU_FM: CMU_FM Driver
+@details The MCUXpresso SDK provides a peripheral driver for the CMU_FM module of MCUXpresso SDK devices.
+CMU_FM driver is created to help user to operate the CMU_FM module. The CMU_FM supports commonly required system
+and application software timing functions. The APIs can be used to enable the CMU_FM module, initialize it,
+set duration of one frequency metering window, enable the frequency meter, and trigger meter complete interrupt.
+
+# Function groups {#CMU_FMFunc}
+The CMU_FM driver supports operating the module to monitor the frequency of specific colck, for example, FIRC_CLK and SIRC_CLK on some devices.
+
+## Initialization and deinitialization {#CMU_FMInit}
+The CMU_FM_GetDefaultConfig() generates the default config.
+The CMU_FM_Init() function initializes the CMU_FM with specified configurations.
+The CMU_FM_Deinit() function stops the metering and turns off the module clock.
+
+## CMU_FM status interface {#CMU_FMStatusOperation}
+The function CMU_FM_ClearStatusFlags() clear status in SR register.
+The function CMU_FM_GetStatusFlags() get status in SR register.
+
+## CMU_FM clock configuration {#CMU_FMClockConfiguration}
+The function CMU_FM_CalcMinRefClkCnt() calculate minimum reference clock count cycle.
+The function CMU_FM_SetRefClkCnt() set reference clock count cycle value
+The function CMU_FM_GetMeteredClkCnt() get the metered clock count cycles.
+
+## CMU_FM enable disable metering {#CMU_FMMeteringOperation}
+The function CMU_FM_StartFreqMetering() start the frequency metering.
+The function CMU_FM_StopFreqMetering() stop frequency metering.
+
+# Typical use case {#CMU_FMUseCase}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/cmu_fm/
+
+*/
