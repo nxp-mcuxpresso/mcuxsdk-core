@@ -1214,6 +1214,7 @@ static void LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
                                                   lpi2c_master_handle_t *handle,
                                                   lpi2c_state_machine_param_t *stateParams)
 {
+    assert(handle->remainingBytes > 0U);
     assert(stateParams != NULL);
     uint16_t sendval;
 
@@ -1225,7 +1226,8 @@ static void LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
     }
 
     /* Issue command. buf is a uint8_t* pointing at the uint16 command array. */
-    sendval    = ((uint16_t)handle->buf[0]) | (((uint16_t)handle->buf[1]) << 8U);
+    sendval  = (uint16_t)handle->buf[0];
+    sendval |= (((uint16_t)handle->buf[1]) << 8U);
     base->MTDR = sendval;
     handle->buf++;
     handle->buf++;
@@ -1285,6 +1287,7 @@ static void LPI2C_TransferStateMachineReadCommand(LPI2C_Type *base,
                                                   lpi2c_master_handle_t *handle,
                                                   lpi2c_state_machine_param_t *stateParams)
 {
+    assert(handle->transfer.dataSize >= 1U);
     assert(stateParams != NULL);
 
     /* Make sure there is room in the tx fifo for the read command. */
