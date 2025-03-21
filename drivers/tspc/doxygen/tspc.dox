@@ -1,0 +1,23 @@
+/*!
+@defgroup tspc TSPC: Touch Sensing Pin Coupling
+@details The MCUXpresso SDK provides a peripheral driver for the Touch Sensing Pin Coupling (TSPC)
+         of MCUXpresso SDK devices.
+
+# Function groups {#TSPCFunc}
+The TSPC driver supports operating the module as a touch sensing pin coupling.
+
+## Initialization and deinitialization {#TSPCInit}
+
+The function TSPC_Init() enables the module clock.
+The function TSPC_Deinit() disables the module clock.
+
+## TSPC group initialization {#GroupInit}
+The function TSPC_InitGroup() configures which pads will participate in the grouping and enables grouping.
+
+# Typical use case {#TSPCCase}
+
+## TSPC Operation{#TSPCOper}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/tspc
+
+*/
