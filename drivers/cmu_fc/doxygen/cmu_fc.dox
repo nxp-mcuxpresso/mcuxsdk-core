@@ -1,0 +1,30 @@
+/*!
+@defgroup CMU_FC CMU_FC: CMU_FC Driver
+@details The MCUXpresso SDK provides a peripheral driver for the CMU_FC module of MCUXpresso SDK devices.
+CMU_FC driver is created to help user to operate the CMU_FC module. The APIs can be used to enable the CMU_FC module, initialize it, set duration of one frequency checking window and the allowed target clock frequency scope, enable the frequency check, and trigger interrupt or reset if out of scope event occurred.
+
+# Function groups {#CMU_FCFunc}
+The CMU_FC driver supports operating the module to monitor the frequency of specific clock, such as CORE_CLK.
+
+## Initialization and deinitialization {#CMU_FCInit}
+The CMU_FC_GetDefaultConfig() generates the default config.
+The CMU_FC_Init() function initializes the CMU_FC with specified configurations.
+The CMU_FC_Deinit() function stops the checking and turns off the module clock.
+
+## CMU_FC status interface {#CMU_FCStatusOperation}
+The function CMU_FC_ClearStatusFlags() clear status in SR register.
+The function CMU_FC_GetStatusFlags() get status in SR register.
+
+## CMU_FC clock configuration {#CMU_FCClockConfiguration}
+The function CMU_FC_CalcMinRefClkCnt() calculate minmum reference clock count cycle.
+The function CMU_FC_CalcOptimumThreshold() calculate optimum high frequency reference threshold and low frequency reference threshold
+The function CMU_FC_SetRefClkCnt() set reference clock count cycle value
+
+## CMU_FC enable disable checking {#CMU_FCCheckingOperation}
+The function CMU_FC_StartFreqChecking() start the frequency checking.
+The function CMU_FC_StopFreqChecking() stop frequency checking.
+
+# Typical use case {#CMU_FCUseCase}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/CMU_FC/
+
+*/

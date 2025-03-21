@@ -1,0 +1,9 @@
+/*!
+@page driver_log Driver Change Log
+
+@section cmu_fm CMU_FC
+  The current CMU_FC driver version is 2.0.0.
+
+  - 2.0.0
+    - Initial version.
+*/
