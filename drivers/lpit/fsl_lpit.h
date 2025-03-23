@@ -28,11 +28,11 @@
  * The macro value should be larger than 4 * core clock / LPIT peripheral clock.
  */
 #ifndef LPIT_RESET_STATE_DELAY
-    #ifdef CONFIG_LPIT_RESET_STATE_DELAY
-        #define LPIT_RESET_STATE_DELAY CONFIG_LPIT_RESET_STATE_DELAY
-    #else
-        #define LPIT_RESET_STATE_DELAY 120u
-    #endif
+#ifdef CONFIG_LPIT_RESET_STATE_DELAY
+#define LPIT_RESET_STATE_DELAY CONFIG_LPIT_RESET_STATE_DELAY
+#else
+#define LPIT_RESET_STATE_DELAY 120u
+#endif
 #endif
 
 /*!
@@ -391,12 +391,13 @@ static inline void LPIT_StopTimer(LPIT_Type *base, lpit_chnl_t channel)
  *
  * After clear or set LPIT_EN, there should be delay longer than 4 LPIT
  * functional clock.
+ * @param count Delay count.
  */
-static void LPIT_ResetStateDelay(void)
+static void LPIT_ResetStateDelay(uint32_t count)
 {
     /* clang-format off */
     __asm volatile(
-        "    MOV    r0, %0              \n"
+        "    MOV R0, %0                 \n"
         "loop%=:                        \n"
 #if defined(__GNUC__) && !defined(__ARMCC_VERSION)
         "    SUB    R0, R0, #1          \n"
@@ -405,8 +406,9 @@ static void LPIT_ResetStateDelay(void)
 #endif
         "    CMP    R0, #0              \n"
         "    BNE    loop%=              \n"
-        ::"i" ( LPIT_RESET_STATE_DELAY / 4U )
-        : "r0");
+        :
+        : "r" (count)
+    );
     /* clang-format on */
 }
 
@@ -420,7 +422,7 @@ static void LPIT_ResetStateDelay(void)
 static inline void LPIT_Reset(LPIT_Type *base)
 {
     base->MCR |= LPIT_MCR_SW_RST_MASK;
-    LPIT_ResetStateDelay();
+    LPIT_ResetStateDelay(LPIT_RESET_STATE_DELAY / 4U);
     base->MCR &= ~LPIT_MCR_SW_RST_MASK;
 }
 
