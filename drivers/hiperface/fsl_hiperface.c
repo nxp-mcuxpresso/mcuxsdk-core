@@ -1968,9 +1968,9 @@ status_t DSL_RDB_DigitalInputWithNumber(HIPERFACE_Type *base, uint8_t IO_index, 
 
 uint8_t ENC_ST_register_reading(HIPERFACE_Type *base, uint8_t offset)
 {
-	uint8_t dummy;
+	volatile uint8_t dummy;
+	volatile uint8_t const *enc_st_addr = &(base->ENC_ST[offset]) + 0x200 + (offset % 4) * 0x80;
 	offset -= 0x40;
-	volatile uint8_t *enc_st_addr = &(base->ENC_ST[offset]) + 0x200 + (offset % 4) * 0x80;
 	base->EVENT_S &= 0xFE;
 	dummy = *enc_st_addr;
 	while(!(base->EVENT_S & 0x01));
@@ -2007,8 +2007,8 @@ void Slave_Ping_register_writing(HIPERFACE_Type *base, uint8_t value)
 
 uint8_t Slave_Ping_register_reading(HIPERFACE_Type *base)
 {
-	uint8_t dummy;
-	volatile uint8_t *enc_st_addr = &(base->PING) + 0x380;
+	volatile uint8_t dummy;
+	volatile uint8_t const *enc_st_addr = &(base->PING) + 0x380;
 	base->EVENT_S &= 0xFE;
 	dummy = *enc_st_addr;
 	while(!(base->EVENT_S & 0x01));
@@ -2017,8 +2017,8 @@ uint8_t Slave_Ping_register_reading(HIPERFACE_Type *base)
 
 uint8_t Slave_SRSSI_register_reading(HIPERFACE_Type *base)
 {
-	uint8_t dummy;
-	volatile uint8_t *enc_st_addr = &(base->SRSSI_SAFE) + 0x200;
+	volatile uint8_t dummy;
+	volatile uint8_t const *enc_st_addr = &(base->SRSSI_SAFE) + 0x200;
 	base->EVENT_S &= 0xFE;
 	dummy = *enc_st_addr;
 	while(!(base->EVENT_S & 0x01));
