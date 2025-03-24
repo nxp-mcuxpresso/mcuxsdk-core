@@ -20,6 +20,8 @@
 #define NETC_ENETC_PCIE_FUNC_OFFSET       (3U)       /*!< The ENETC PCIE function index. */
 #define NETC_ENETC_PORT_GROUP_BASE_OFFSET (0x4000U)  /*!< The ENETC port group register base address offset. */
 #define NETC_ENETC_GLOBAL_BASE_OFFSET     (0x10000U) /*!< The ENETC global register base address offset. */
+#define NETC_SWT_COMMON_BASE_OFFSET       (0x0U)     /*!< The ENETC common register base address offset. */
+#define NETC_SWT_GLOBAL_BASE_OFFSET       (0x80000U) /*!< The Switch global register base address offset. */
 /*@}*/
 
 /*! @brief Switch port numbers(Port0 ~ 4 in Switch Core). */
@@ -27,6 +29,7 @@
 
 /*! @brief The Switch function register base address offset.(NETC_F1_PCI_HDR_TYPE0) */
 #define NETC_SOC_SWT_PCIE_FUNC_OFFSET       (2U)
+#define NETC_SOC_SWT_MSI_FUNC_OFFSET        (2U)
 
 /*
  *                port4 port3  port2  port1  port0

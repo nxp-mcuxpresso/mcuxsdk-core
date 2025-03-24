@@ -14,7 +14,6 @@
 /*! @name NETC register map. */
 /*@{*/
 #define NETC_SWT_PORT_GROUP_BASE_OFFSET (0x4000U)  /*!< The Switch port group register base address offset. */
-#define NETC_SWT_GLOBAL_BASE_OFFSET     (0x80000U) /*!< The Switch global register base address offset. */
 
 /*! @brief Pointers to netc bases for each instance. */
 static ENETC_PCI_TYPE0_Type *const s_netcPciBases[] = ENETC_PCI_TYPE0_BASE_PTRS;
@@ -34,7 +33,7 @@ static void SWT_GetBaseResource(swt_handle_t *handle, netc_hw_switch_idx_t sw)
 {
     handle->hw.func   = s_netcPciBases[NETC_SOC_SWT_PCIE_FUNC_OFFSET + (uint32_t)sw];
     handle->hw.base   = s_netcSWBases[sw];
-    handle->hw.common = (NETC_SW_ENETC_Type *)((uintptr_t)handle->hw.base);
+    handle->hw.common = (NETC_SW_ENETC_Type *)((uintptr_t)handle->hw.base + NETC_SWT_COMMON_BASE_OFFSET);
     handle->hw.global = (ENETC_GLOBAL_Type *)((uintptr_t)handle->hw.base + NETC_SWT_GLOBAL_BASE_OFFSET);
     for (uint32_t i = 0U; i < (uint32_t)FSL_FEATURE_NETC_SWITCH_MAX_PORT_NUMBER; i++)
     {
@@ -43,7 +42,7 @@ static void SWT_GetBaseResource(swt_handle_t *handle, netc_hw_switch_idx_t sw)
         handle->hw.ports[i].eth = (NETC_ETH_LINK_Type *)((uintptr_t)handle->hw.ports[i].port + 0x1000U);
     }
     handle->hw.msixTable = (netc_msix_entry_t *)((uint32_t)FSL_FEATURE_NETC_MSIX_TABLE_BASE +
-                                                 NETC_MSIX_TABLE_OFFSET * (NETC_SOC_SWT_PCIE_FUNC_OFFSET + (uint32_t)sw));
+                                                 NETC_MSIX_TABLE_OFFSET * (NETC_SOC_SWT_MSI_FUNC_OFFSET + (uint32_t)sw));
 }
 
 /*!
