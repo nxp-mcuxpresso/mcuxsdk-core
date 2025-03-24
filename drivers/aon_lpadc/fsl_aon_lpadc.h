@@ -19,8 +19,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief AON_LPADC driver version 2.0.0. */
-#define FSL_AON_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+/*! @brief AON_LPADC driver version 2.0.1. */
+#define FSL_AON_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*! @} */
 
 /*! 
@@ -223,10 +223,10 @@ typedef enum _adc_fifo_index
 /*! @brief ADC trigger enumeration. */
 typedef enum _adc_trig_index
 {
-    kADC_Trig0 = 1U << 0U, /*!< Trigger 0. */
-    kADC_Trig1 = 1U << 1U, /*!< Trigger 1. */
-    kADC_Trig2 = 1U << 2U, /*!< Trigger 2. */
-    kADC_Trig3 = 1U << 3U, /*!< Trigger 3. */
+    kADC_Trig0 = 0U, /*!< Trigger 0. */
+    kADC_Trig1 = 1U, /*!< Trigger 1. */
+    kADC_Trig2 = 2U, /*!< Trigger 2. */
+    kADC_Trig3 = 3U, /*!< Trigger 3. */
 } adc_trig_index_t;
 
 /*! @brief ADC trigger command enumeration. */
@@ -414,7 +414,7 @@ typedef struct _adc_cmd_config
 {
     bool waitTrigEn;    /*!< Controls whether commands are automatically executed
                              or a trigger must be received before execution. */
-    bool autoChaIncEn;  /*!< Controls whether enable automatic channel incrementing. */
+    bool autoChanIncEn;  /*!< Controls whether enable automatic channel incrementing. */
     uint8_t loopCnt;    /*!< Sets how many times this command executes (and stores 
                              conversion result to RESFIFO) before finish and  transition
                              to the next command or Idle state. */
@@ -684,7 +684,7 @@ void ADC_SetTrigConfig(LPADC_Type *base, adc_trig_index_t index, const adc_trig_
  */
 static inline void ADC_DoSoftwareTrig(LPADC_Type *base, adc_trig_index_t index)
 {
-    base->SWTRIG = index;
+    base->SWTRIG |= 1U << index;
 }
 
 /*!

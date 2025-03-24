@@ -2,7 +2,14 @@
 @page driver_log Driver Change Log
 
 @section AON_LPADC
-  The current AON_LPADC driver version is 2.0.0.
+  The current AON_LPADC driver version is 2.0.1.
+
+  - 2.0.1
+    - Improvements
+      - Splite the ADC_Enable from the ADC_Init function.
+      - Rename autoChaIncEn to autoChanIncEn.
+    - Bug Fixes
+      - Fix ADC_SetCmdConfig function cannot correctly configure command.
 
   - 2.0.0
     - Initial version.

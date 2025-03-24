@@ -116,8 +116,6 @@ void ADC_Init(LPADC_Type *base, const adc_config_t *config)
     ADC_DoFifoRst(base, kADC_Fifo0);
     ADC_DoFifoRst(base, kADC_Fifo1);
 
-    ADC_Enable(base, false);
-
     /* Doze */
     if (config->dozeModeEn)
     {
@@ -170,8 +168,6 @@ void ADC_Init(LPADC_Type *base, const adc_config_t *config)
                                 LPADC_CFG_TCMDRES_MASK | LPADC_CFG_HPT_EXDI_MASK)) |
                                 (LPADC_CFG_TPRICTRL(tprictrl) | LPADC_CFG_TRES(tres) |
                                 LPADC_CFG_TCMDRES(tcmdres) | LPADC_CFG_HPT_EXDI(hpted)));
-
-    ADC_Enable(base, true);
 }
 
 /*!
@@ -223,9 +219,9 @@ void ADC_SetTrigConfig(LPADC_Type *base, adc_trig_index_t index, const adc_trig_
     assert(config != NULL);
 
     base->TCTRL[index] = ((base->TCTRL[index] & ~(LPADC_TCTRL_TCMD_MASK | LPADC_TCTRL_TDLY_MASK |
-                        LPADC_TCTRL_TPRI_MASK | LPADC_TCTRL_FIFO_SEL_MASK)) |
-                        (LPADC_TCTRL_TCMD(config->cmdIndex) | LPADC_TCTRL_TDLY(config->trigDelay) |
-                        LPADC_TCTRL_TPRI(config->trigPriority) | LPADC_TCTRL_FIFO_SEL(config->resFifo)));
+                          LPADC_TCTRL_TPRI_MASK | LPADC_TCTRL_FIFO_SEL_MASK)) |
+                          (LPADC_TCTRL_TCMD(config->cmdIndex) | LPADC_TCTRL_TDLY(config->trigDelay) |
+                          LPADC_TCTRL_TPRI(config->trigPriority) | LPADC_TCTRL_FIFO_SEL(config->resFifo)));
 
     if (config->trigEn)
     {
@@ -249,7 +245,7 @@ void ADC_GetDefaultCmdConfig(adc_cmd_config_t *config)
     (void)memset(config, 0U, sizeof(*config));
 
     config->waitTrigEn          = false;
-    config->autoChaIncEn        = false;
+    config->autoChanIncEn        = false;
     config->loopCnt             = 0U;
     config->chanIndex           = 0U;
     config->compValLow          = 0U;
@@ -272,11 +268,11 @@ void ADC_SetCmdConfig(LPADC_Type *base, adc_cmd_index_t index, const adc_cmd_con
     assert(((uint8_t)index != kADC_CmdNone) && ((uint8_t)index <= kADC_Cmd7));
     assert(config != NULL);
 
-    uint32_t tmpCmdLReg = *(((volatile uint32_t *)(&(base->CMDL1))) + (uint8_t)index);
-    uint32_t tmpCmdHReg = *(((volatile uint32_t *)(&(base->CMDH1))) + (uint8_t)index);
+    uint32_t tmpCmdLReg = *(((volatile uint32_t *)(&(base->CMDL1))) + (((uint8_t)index - 1U) * 2U));
+    uint32_t tmpCmdHReg = *(((volatile uint32_t *)(&(base->CMDH1))) + (((uint8_t)index - 1U) * 2U));
 
     tmpCmdLReg = ((tmpCmdLReg & ~LPADC_CMDL1_ADCH_MASK) | LPADC_CMDL1_ADCH(config->chanIndex));
-    *(&(base->CMDL1) + (uint8_t)index) = tmpCmdLReg;
+    *(&(base->CMDL1) + (((uint8_t)index - 1U) * 2U)) = tmpCmdLReg;
         
     if (config->waitTrigEn)
     {
@@ -287,7 +283,7 @@ void ADC_SetCmdConfig(LPADC_Type *base, adc_cmd_index_t index, const adc_cmd_con
         tmpCmdHReg &= ~LPADC_CMDH1_WAIT_TRIG_MASK;
     }
 
-    if (config->autoChaIncEn)
+    if (config->autoChanIncEn)
     {
         tmpCmdHReg |= LPADC_CMDH1_LWI_MASK;
     }
@@ -306,6 +302,8 @@ void ADC_SetCmdConfig(LPADC_Type *base, adc_cmd_index_t index, const adc_cmd_con
         tmpCmdHReg = ((tmpCmdHReg & ~LPADC_CMDH1_CMPEN_MASK) | LPADC_CMDH1_CMPEN(config->compMode));
         base->CV[index] = (LPADC_CV_CVH(config->compValHigh) | LPADC_CV_CVL(config->compValLow));
     }
+    
+    *(&(base->CMDH1) + (((uint8_t)index - 1U) * 2U)) = tmpCmdHReg;
 }
 
 /*!
@@ -315,11 +313,15 @@ void ADC_SetCmdConfig(LPADC_Type *base, adc_cmd_index_t index, const adc_cmd_con
  */
 void ADC_DoOffsetCal(LPADC_Type *base)
 {
+    ADC_Enable(base, true);
+  
     base->CTRL |= LPADC_CTRL_CALOFS_MASK;
 
     while ((base->STAT & LPADC_STAT_CAL_RDY_MASK) != LPADC_STAT_CAL_RDY_MASK)
     {
     }
+    
+    ADC_Enable(base, false);
 }
 
 /*!
