@@ -10,3 +10,15 @@ config MCUX_COMPONENT_driver.cmc
     bool "cmc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.cmc
+
+if MCUX_COMPONENT_driver.cmc
+
+    config CMC_SRAM_BUSY_TIMEOUT
+        int "Max loops to wait for CMC SRAM operation complete (0 means wait forever)"
+        default 0
+        help
+          When configuring the SRAM, driver will wait for the completion of new settings.
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+endif

@@ -16,8 +16,27 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief CMC driver version 2.4.2. */
-#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 4, 2))
+/*! @brief CMC driver version 2.4.3. */
+#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 4, 3))
+/*! @} */
+
+/*! @name Configuration */
+
+/*!
+ * @brief Max loops to wait for CMC SRAM operation complete
+ *
+ * When configuring the SRAM, driver will wait for the completion of new settings.
+ * This parameter defines how many loops to check completion before return timeout.
+ * If defined as 0, driver will wait forever until completion.
+ */
+#ifndef CMC_SRAM_BUSY_TIMEOUT
+    #ifdef CONFIG_CMC_SRAM_BUSY_TIMEOUT
+        #define CMC_SRAM_BUSY_TIMEOUT CONFIG_CMC_SRAM_BUSY_TIMEOUT
+    #else
+        #define CMC_SRAM_BUSY_TIMEOUT 0U
+    #endif
+#endif
+
 /*! @} */
 
 #if defined(CMC_BLR_LOCK_MASK)
@@ -824,8 +843,10 @@ static inline void CMC_PowerOnSRAMLowPowerOnly(CMC_Type *base, uint32_t mask)
  *
  * @param base CMC peripheral base address.
  * @param config Pointer to cmc_sram_voltage_config structure.
+ * @retval kStatus_Success Successfully configured.
+ * @retval kStatus_Timeout Timeout occurs while waiting completion.
  */
-void CMC_ConfigSRAMVoltage(CMC_Type *base, const cmc_sram_voltage_config *config);
+status_t CMC_ConfigSRAMVoltage(CMC_Type *base, const cmc_sram_voltage_config *config);
 #endif /* FSL_FEATURE_CMC_HAS_NO_SRAMCTL_REGISTER */
 
 /*! @} */

@@ -1,5 +1,10 @@
 # CMC
 
+## [2.4.3]
+
+- Improvements
+  - Add timeout for while loop code.
+
 ## [2.4.2]
 
 - Improvements
