@@ -267,7 +267,7 @@ void ENDAT3_BG_WaitReqEmpty(ENDAT3_Type *base, uint8_t bus_addr, uint8_t fg_stro
 status_t ENDAT3_BG_WaitReqFinished(ENDAT3_Type *base, uint8_t bus_addr, uint8_t fg_strobes, uint32_t timeout_ms)
 {
 	uint32_t timeout = getTimestampMS() + timeout_ms;
-	while (!(base->BG_RSP_1 & ENDAT3_BG_RSP_1_BG_HANDLER_IDLE_MASK)) {
+	while (!(base->BG_RSP_1 & (ENDAT3_BG_RSP_1_BG_HANDLER_IDLE_MASK | ENDAT3_BG_RSP_1_BG_HANDLER_ERROR_MASK))) {
 		if (fg_strobes) {
 #if (ENDAT3_PARTICIPANTS_NUM > 1)
 				ENDAT3_FG_Bus_P2P_Data(base, bus_addr, ENDAT3_FG_REQ_DATA0, NULL);
@@ -275,6 +275,11 @@ status_t ENDAT3_BG_WaitReqFinished(ENDAT3_Type *base, uint8_t bus_addr, uint8_t 
 				ENDAT3_FG_Data(base, ENDAT3_FG_REQ_DATA0, NULL);
 #endif
 		}
+
+		if (base->BG_RSP_1 & ENDAT3_BG_RSP_1_BG_HANDLER_ERROR_MASK) {
+			return kStatus_Endat3_BG_Handler_Error;
+		}
+
 		if (timeout_ms && getTimestampMS() > timeout) {
 			return kStatus_Timeout;
 		}
