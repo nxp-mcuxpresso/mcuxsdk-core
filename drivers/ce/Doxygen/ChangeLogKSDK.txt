@@ -2,7 +2,13 @@
 @page driver_log Driver Change Log
 
 @section ce CE
-  The current CE driver version is 2.1.0.
+  The current CE driver version is 2.1.1.
+
+  - 2.1.1
+    - Improvements
+      - Add checking its value before casting N from unsigned int to int.
+      - Update the types of the buffer_base_ptr, next_buffer_ptr and status_buffer_ptr
+        variables in the ce_cmdbuffer_t structure.
 
   - 2.1.0
     - New Features

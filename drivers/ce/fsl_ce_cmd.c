@@ -36,7 +36,7 @@ int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
     s_ce_cmdbuffer = psCmdBuffer;
 
     s_ce_cmdbuffer->cmdmode           = cmdmode;
-    s_ce_cmdbuffer->buffer_base_ptr   = (int *)cmdbuffer;
+    s_ce_cmdbuffer->buffer_base_ptr   = (unsigned int *)cmdbuffer;
     s_ce_cmdbuffer->status_buffer_ptr = (int *)statusbuffer;
     CE_CmdReset();
 
@@ -45,7 +45,7 @@ int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
 
 int CE_CmdReset()
 {
-    int *cmd_base                   = s_ce_cmdbuffer->buffer_base_ptr;
+    unsigned int *cmd_base          = s_ce_cmdbuffer->buffer_base_ptr;
     *cmd_base                       = 0xCCCC;
     s_ce_cmdbuffer->next_buffer_ptr = cmd_base + 1;
     s_ce_cmdbuffer->n_cmd           = 0;
@@ -56,8 +56,8 @@ int CE_CmdReset()
 int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
 {
     int i, size, addstatus;
-    short *nargsbase;
-    int *cmdbase;
+    unsigned short *nargsbase;
+    unsigned int *cmdbase;
     void **ptrargbase;
     int *ptrparambase;
 
@@ -68,7 +68,7 @@ int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
 
         *cmdbase = (unsigned int)cmd;
 
-        nargsbase  = (short *)(cmdbase + 1);
+        nargsbase  = (unsigned short *)(cmdbase + 1);
         *nargsbase = cmdargs->n_ptr_args;
         nargsbase += 1;
         *nargsbase = cmdargs->n_param_args;
