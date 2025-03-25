@@ -106,9 +106,11 @@ static flexspi_handle_t *s_flexspiHandle[ARRAY_SIZE(s_flexspiBases)];
 #endif
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_RESET_CONTROL) && FSL_SDK_DISABLE_DRIVER_RESET_CONTROL)
+#if (defined(FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL) && FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL)
 #if defined(FLEXSPI_RESETS_ARRAY)
 static const reset_ip_name_t s_flexspiResets[] = FLEXSPI_RESETS_ARRAY;
 #endif /* defined(FLEXSPI_RESETS_ARRAY) */
+#endif /* FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL */
 #endif /* FSL_SDK_DISABLE_DRIVER_RESET_CONTROL */
 
 #if defined(FSL_DRIVER_TRANSFER_DOUBLE_WEAK_IRQ) && FSL_DRIVER_TRANSFER_DOUBLE_WEAK_IRQ
@@ -297,10 +299,16 @@ void FLEXSPI_Init(FLEXSPI_Type *base, const flexspi_config_t *config)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_RESET_CONTROL) && FSL_SDK_DISABLE_DRIVER_RESET_CONTROL)
+/* once global reset control is enabled (FSL_SDK_DISABLE_DRIVER_RESET_CONTROL = 0), the default FLEXSPI module will not 
+ * be reset. However, it is possible to enable flexspi reset control independently by setting 
+ * "FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL" to 1. Please note that reset flexspi may also reset corresponding cache in
+ * some platforms. */
+#if (defined(FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL) && FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL)
 #if defined(FLEXSPI_RESETS_ARRAY)
     /* Reset the FLEXSPI module */
     RESET_PeripheralReset(s_flexspiResets[FLEXSPI_GetInstance(base)]);
 #endif /* defined(FLEXSPI_RESETS_ARRAY) */
+#endif /* FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL */
 #endif /* FSL_SDK_DISABLE_DRIVER_RESET_CONTROL */
 
     /* Reset peripheral before configuring it. */

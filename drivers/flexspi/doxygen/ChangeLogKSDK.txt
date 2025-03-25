@@ -2,7 +2,11 @@
 @page driver_log Driver Change Log
 
 @section flexspi FLEXSPI
-  The current FLEXSPI driver version is 2.6.3.
+  The current FLEXSPI driver version is 2.6.4.
+
+  - 2.6.4
+    - Improvements
+      - Added new macro "FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL" to support driver level reset control.
 
   - 2.6.3
     - Bug Fixes
