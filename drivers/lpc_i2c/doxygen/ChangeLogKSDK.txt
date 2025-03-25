@@ -2,7 +2,10 @@
 @page driver_log Driver Change Log
 
 @section i2c I2C
-  The current I2C driver version is 2.1.0.
+  The current I2C driver version is 2.2.0.
+
+  - 2.2.0
+    - Removed lpc_i2c_dma driver.
 
   - 2.1.0
     - Bug Fixes

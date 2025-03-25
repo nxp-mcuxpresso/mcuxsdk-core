@@ -33,7 +33,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief I2C driver version. */
-#define FSL_I2C_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
+#define FSL_I2C_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
