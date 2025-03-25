@@ -99,7 +99,11 @@
 @if dox_section_pdm_edma_driver
 
 @section pdm_edma PDM_EDMA
-  The current PDM_EDMA driver version is 2.6.3.
+  The current PDM_EDMA driver version is 2.6.4.
+
+  - 2.6.4
+    - Improvements
+      - Add handling for runtime change of number of linked transfers
 
   - 2.6.3
     - Improvements
