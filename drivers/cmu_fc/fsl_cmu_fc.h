@@ -236,7 +236,7 @@ static inline void CMU_FC_StartFreqChecking(CMU_FC_Type *base)
 static inline void CMU_FC_StopFreqChecking(CMU_FC_Type *base)
 {
     base->GCR &= ~CMU_FC_GCR_FCE_MASK;
-    while(1U == (base->SR & CMU_FC_SR_RS_MASK))
+    while (CMU_FC_SR_RS_MASK == (base->SR & CMU_FC_SR_RS_MASK))
     {
         /* Safety critical applications must poll SR[RS] to determine when checking operation stops */
     }

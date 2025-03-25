@@ -196,7 +196,7 @@ static inline void CMU_FM_StartFreqMetering(CMU_FM_Type *base)
 static inline void CMU_FM_StopFreqMetering(CMU_FM_Type *base)
 {
     base->GCR &= ~CMU_FM_GCR_FME_MASK;
-    while (1U == (base->SR & CMU_FM_SR_RS_MASK))
+    while (CMU_FM_SR_RS_MASK == (base->SR & CMU_FM_SR_RS_MASK))
     {
         /* Safety critical applications must poll SR[RS] to determine when metering operation stops */
     }
