@@ -4,7 +4,11 @@
 @if dox_section_lpspi_driver
 
 @section lpspi LPSPI
-  The current LPSPI driver version is 2.2.7
+  The current LPSPI driver version is 2.2.8
+
+  - 2.2.8
+    - Bug Fixes
+      - Fixed coverity issues.
 
   - 2.2.7
     - Bug Fixes

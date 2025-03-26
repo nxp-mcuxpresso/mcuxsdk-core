@@ -4,7 +4,11 @@
 @if dox_section_lpi2c_driver
 
 @section lpi2c LPI2C
-  The current LPI2C driver version is 2.2.5.
+  The current LPI2C driver version is 2.2.6.
+
+  - 2.2.6
+    - Bug Fixes
+      - Fixed coverity issues.
 
   - 2.2.5
     - Improvements

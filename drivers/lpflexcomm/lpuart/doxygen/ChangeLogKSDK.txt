@@ -4,7 +4,11 @@
 @if dox_section_lpuart_driver
 
 @section lpuart LPUART
-  The current LPUART driver version is 2.3.2.
+  The current LPUART driver version is 2.3.3.
+
+  - 2.3.3
+    - Bug Fixes
+      - Fixed coverity issues.
 
   - 2.3.2
     - Bug Fix
