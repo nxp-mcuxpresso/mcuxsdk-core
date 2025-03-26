@@ -15,6 +15,7 @@
       - Added APIs to configure Frame preemption.
     - Improvements
       - keep netc_tb_sgi_rsp_data_t local to the low level driver functions for SGI table entry query.
+      - Converted to use preinitVsi callback for VSI pre-init.
 
   - 2.8.2
     - Bug Fixes
