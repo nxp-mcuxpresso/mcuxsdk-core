@@ -583,6 +583,12 @@ function(mcux_convert_binary)
     endif()
     target_link_options(${MCUX_SDK_PROJECT_NAME} PRIVATE ${OBJDUMP_BIN_CMD} ${__EXTRA_ARGS})
     return()
+  else()
+    if(__EXTRA_ARGS)
+      string(REPLACE " " ";" extra_args "${__EXTRA_ARGS}")
+    else()
+      set(extra_args)
+    endif()
   endif()
 
   get_target_property(IMAGE_FILE_NAME ${MCUX_SDK_PROJECT_NAME} OUTPUT_NAME)
@@ -593,7 +599,7 @@ function(mcux_convert_binary)
     TARGET ${MCUX_SDK_PROJECT_NAME}
     POST_BUILD
     COMMAND
-      ${CMAKE_OBJCOPY} ${OBJDUMP_BIN_CMD}
+      ${CMAKE_OBJCOPY} ${OBJDUMP_BIN_CMD} ${extra_args}
       ${CMAKE_CURRENT_BINARY_DIR}/${IMAGE_FILE_NAME}${CMAKE_EXECUTABLE_SUFFIX}
       ${OBJDUMP_OUT_CMD} ${binary_name})
 
