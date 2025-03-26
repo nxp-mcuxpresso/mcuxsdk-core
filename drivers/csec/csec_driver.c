@@ -7,7 +7,6 @@
 
 #include "csec_driver.h"
 #include "csec_hw_access.h"
-//#include "osif.h"
 
 /**
  * @page misra_violations MISRA-C:2012 violations
