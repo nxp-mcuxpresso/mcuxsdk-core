@@ -211,6 +211,7 @@ enum _status_groups
     kStatusGroup_ENDAT3     	= 171, /*!< Group number for ENDAT3 status codes. */
     kStatusGroup_HIPERFACE      = 172, /*!< Group number for HIPERFACE status codes. */
     kStatusGroup_NPX            = 173, /*!< Group number for NPX status codes. */
+    kStatusGroup_CSEC           = 174, /*!< Group number for CSEC status codes. */
 };
 
 /*! \public
