@@ -1969,8 +1969,8 @@ status_t DSL_RDB_DigitalInputWithNumber(HIPERFACE_Type *base, uint8_t IO_index, 
 uint8_t ENC_ST_register_reading(HIPERFACE_Type *base, uint8_t offset)
 {
 	volatile uint8_t dummy;
-	volatile uint8_t const *enc_st_addr = &(base->ENC_ST[offset]) + 0x200 + (offset % 4) * 0x80;
 	offset -= 0x40;
+	volatile uint8_t const *enc_st_addr = &(base->ENC_ST[offset]) + 0x200 + (offset % 4) * 0x80;
 	base->EVENT_S &= 0xFE;
 	dummy = *enc_st_addr;
 	while(!(base->EVENT_S & 0x01));
