@@ -2,7 +2,12 @@
 @page driver_log Driver Change Log
 
 @section flash FLASH
-  The current FLASH driver version is 2.2.0.
+  The current FLASH driver version is 2.2.1.
+
+  - 2.2.1
+    - Improvement
+      - To fix the potential unsigned integer overflow in the operation, added a check to ensure that the
+        addition does not exceed the maximum value.
 
   - 2.2.0
     - New Features

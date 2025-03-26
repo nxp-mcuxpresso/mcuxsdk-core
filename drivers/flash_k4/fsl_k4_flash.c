@@ -241,12 +241,26 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
     {
         // Align length to whole phrase.
         uint32_t alignedLength = ALIGN_DOWN(lengthInBytes, sizeof(uint8_t) * FLASH_FEATURE_PHRASE_SIZE);
-        uint32_t extraBytes    = lengthInBytes - alignedLength;
+        uint32_t extraBytes    = 0;
         uint32_t *srcWord      = (uint32_t *)(uintptr_t)src;
+
+        if (lengthInBytes >= alignedLength)
+        {
+            extraBytes = lengthInBytes - alignedLength;
+        }
+        else
+        {
+            return kStatus_FLASH_AddressError; // Handle underflow error
+        }
 
         if (alignedLength > 0U)
         {
-            uint32_t endAddress = start + alignedLength - 1U;
+            uint32_t endAddress;
+            if (start > UINT32_MAX - alignedLength)
+            {
+                return kStatus_FLASH_AddressError; // Handle overflow error
+            }
+            endAddress = start + alignedLength - 1U;
             while (start <= endAddress)
             {
                 status = FLASH_CMD_ProgramPhrase(base, start, srcWord);
@@ -308,12 +322,26 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
     {
         // Align length to whole phrase.
         uint32_t alignedLength = ALIGN_DOWN(lengthInBytes, sizeof(uint8_t) * FLASH_FEATURE_PAGE_SIZE);
-        uint32_t extraBytes    = lengthInBytes - alignedLength;
+        uint32_t extraBytes    = 0;
         uint32_t *srcWord      = (uint32_t *)(uintptr_t)src;
+
+        if (lengthInBytes >= alignedLength)
+        {
+            extraBytes = lengthInBytes - alignedLength;
+        }
+        else
+        {
+            return kStatus_FLASH_AddressError; // Handle underflow error
+        }
 
         if (alignedLength > 0U)
         {
-            uint32_t endAddress = start + alignedLength - 1U;
+            uint32_t endAddress;
+            if (start > UINT32_MAX - alignedLength)
+            {
+                return kStatus_FLASH_AddressError; // Handle overflow error
+            }
+            endAddress = start + alignedLength - 1U;
             while (start <= endAddress)
             {
                 status = FLASH_CMD_ProgramPage(base, start, srcWord);
@@ -378,7 +406,12 @@ status_t FLASH_VerifyErasePhrase(flash_config_t *config, FMU_Type *base, uint32_
     status = pflash_check_param(config, base, &startaddr, lengthInBytes, FLASH_FEATURE_PHRASE_SIZE);
     if (status == kStatus_FLASH_Success)
     {
-        uint32_t endAddress = startaddr + lengthInBytes - 1U;
+        uint32_t endAddress;
+        if (lengthInBytes > UINT32_MAX - startaddr)
+        {
+            return kStatus_FLASH_AddressError; // Handle overflow error
+        }
+        endAddress = startaddr + lengthInBytes - 1U;
         while (startaddr <= endAddress)
         {
             status = FLASH_CMD_VerifyErasePhrase(base, startaddr);
@@ -409,7 +442,12 @@ status_t FLASH_VerifyErasePage(flash_config_t *config, FMU_Type *base, uint32_t 
     status = pflash_check_param(config, base, &startaddr, lengthInBytes, FLASH_FEATURE_PAGE_SIZE);
     if (status == kStatus_FLASH_Success)
     {
-        uint32_t endAddress = startaddr + lengthInBytes - 1U;
+        uint32_t endAddress;
+        if (startaddr > UINT32_MAX - lengthInBytes)
+        {
+            return kStatus_FLASH_AddressError; // Handle overflow error
+        }
+        endAddress = startaddr + lengthInBytes - 1U;
         while (startaddr <= endAddress)
         {
             status = FLASH_CMD_VerifyErasePage(base, startaddr);
@@ -440,7 +478,12 @@ status_t FLASH_VerifyEraseSector(flash_config_t *config, FMU_Type *base, uint32_
     status = pflash_check_param(config, base, &startaddr, lengthInBytes, FLASH_FEATURE_SECTOR_SIZE);
     if (status == kStatus_FLASH_Success)
     {
-        uint32_t endAddress = startaddr + lengthInBytes - 1U;
+        uint32_t endAddress;
+        if (startaddr > UINT32_MAX - lengthInBytes)
+        {
+            return kStatus_FLASH_AddressError; // Handle overflow error
+        }
+        endAddress = startaddr + lengthInBytes - 1U;
         while (startaddr <= endAddress)
         {
             status = FLASH_CMD_VerifyEraseSector(base, startaddr);
@@ -471,7 +514,12 @@ status_t FLASH_VerifyEraseIFRPhrase(flash_config_t *config, FMU_Type *base, uint
     status = ifr_check_param(config, base, &startaddr, lengthInBytes, FLASH_FEATURE_PHRASE_SIZE);
     if (status == kStatus_FLASH_Success)
     {
-        uint32_t endAddress = startaddr + lengthInBytes - 1U;
+        uint32_t endAddress;
+        if (startaddr > UINT32_MAX - lengthInBytes)
+        {
+            return kStatus_FLASH_AddressError; // Handle overflow error
+        }
+        endAddress = startaddr + lengthInBytes - 1U;
         while (startaddr <= endAddress)
         {
             status = FLASH_CMD_VerifyEraseIFRPhrase(base, startaddr);
@@ -502,7 +550,12 @@ status_t FLASH_VerifyEraseIFRPage(flash_config_t *config, FMU_Type *base, uint32
     status = ifr_check_param(config, base, &startaddr, lengthInBytes, FLASH_FEATURE_PAGE_SIZE);
     if (status == kStatus_FLASH_Success)
     {
-        uint32_t endAddress = startaddr + lengthInBytes - 1U;
+        uint32_t endAddress;
+        if (startaddr > UINT32_MAX - lengthInBytes)
+        {
+            return kStatus_FLASH_AddressError; // Handle overflow error
+        }
+        endAddress = startaddr + lengthInBytes - 1U;
         while (startaddr <= endAddress)
         {
             status = FLASH_CMD_VerifyEraseIFRPage(base, startaddr);
@@ -533,7 +586,12 @@ status_t FLASH_VerifyEraseIFRSector(flash_config_t *config, FMU_Type *base, uint
     status = ifr_check_param(config, base, &startaddr, lengthInBytes, FLASH_FEATURE_SECTOR_SIZE);
     if (status == kStatus_FLASH_Success)
     {
-        uint32_t endAddress = startaddr + lengthInBytes - 1U;
+        uint32_t endAddress;
+        if (startaddr > UINT32_MAX - lengthInBytes)
+        {
+            return kStatus_FLASH_AddressError; // Handle overflow error
+        }
+        endAddress = startaddr + lengthInBytes - 1U;
         while (startaddr <= endAddress)
         {
             status = FLASH_CMD_VerifyEraseIFRSector(base, startaddr);
@@ -624,7 +682,12 @@ status_t Read_Into_MISR(
         status = pflash_check_param(config, base, &startAddr, (ending - start), FLASH_FEATURE_PAGE_SIZE);
         if (status == kStatus_FLASH_Success)
         {
-            uint32_t endAddr = startAddr + ending - start;
+            uint32_t endAddr;
+            if (startAddr > UINT32_MAX - (ending - start))
+            {
+                return kStatus_FLASH_AddressError; // Handle overflow error
+            }
+            endAddr = startAddr + ending - start;
             status           = FLASH_CMD_ReadIntoMISR(base, startAddr, endAddr, seed, signature);
         }
         else
@@ -656,7 +719,12 @@ status_t Read_IFR_Into_MISR(
         status = ifr_check_param(config, base, &startAddr, (ending - start), FLASH_FEATURE_PAGE_SIZE);
         if (status == kStatus_FLASH_Success)
         {
-            uint32_t endAddr = startAddr + ending - start;
+            uint32_t endAddr;
+            if (startAddr > UINT32_MAX - (ending - start))
+            {
+                return kStatus_FLASH_AddressError; // Handle overflow error
+            }
+            endAddr = startAddr + ending - start;
             status           = FLASH_CMD_ReadIFRIntoMISR(base, startAddr, endAddr, seed, signature);
         }
         else
@@ -792,7 +860,7 @@ static status_t flash_check_param(
     {
         status = kStatus_FLASH_InvalidArgument;
     }
-    else if ((start & (alignmentBaseline - 1U)) != 0u)
+    else if ((alignmentBaseline > 0U) && ((start & (alignmentBaseline - 1U)) != 0u))
     {
         /* Verify the start is alignmentBaseline aligned. */
         status = kStatus_FLASH_AlignmentError;
@@ -868,7 +936,7 @@ static status_t pflash_check_param(
     {
         status = kStatus_FLASH_InvalidArgument;
     }
-    else if ((*start & (alignmentBaseline - 1U)) != 0u)
+    else if ((alignmentBaseline > 0U) && ((*start & (alignmentBaseline - 1U)) != 0u))
     {
         /* Verify the start is alignmentBaseline aligned. */
         status = kStatus_FLASH_AlignmentError;
@@ -930,11 +998,9 @@ static status_t ifr_check_param(
     {
         status = kStatus_FLASH_InvalidArgument;
     }
-    else
-
-        /* Verify the start is alignmentBaseline aligned. */
-        if ((*start & (alignmentBaseline - 1U)) != 0u)
+    else if ((alignmentBaseline > 0U) && ((*start & (alignmentBaseline - 1U)) != 0u))
     {
+        /* Verify the start is alignmentBaseline aligned. */
         status = kStatus_FLASH_AlignmentError;
     }
     else
