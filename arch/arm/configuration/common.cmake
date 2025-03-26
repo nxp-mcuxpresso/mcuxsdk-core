@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-mcux_add_cmakelists(${SdkRootDirPath}/arch/arm/CMSIS)
+mcux_add_cmakelists(${SdkRootDirPath}/arch/arm/CMSIS OPTIONAL)
 
 if (CONFIG_MCUX_PRJSEG_config.arm.shared)
         # Create map file

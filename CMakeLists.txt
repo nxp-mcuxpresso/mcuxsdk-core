@@ -6,13 +6,13 @@
 mcux_add_cmakelists(${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device})
 
 # Load board CMakeLists.txt
-mcux_add_cmakelists(${SdkRootDirPath}/examples/)
+mcux_add_cmakelists(${SdkRootDirPath}/examples/ OPTIONAL)
 
 # Load all drivers
 mcux_load_all_cmakelists_in_directory(${SdkRootDirPath}/drivers)
 
 # all components
-mcux_add_cmakelists(${SdkRootDirPath}/components)
+mcux_add_cmakelists(${SdkRootDirPath}/components OPTIONAL)
 
 # middlewares
 mcux_add_cmakelists(${SdkRootDirPath}/rtos/freertos/backoffalgorithm OPTIONAL)
