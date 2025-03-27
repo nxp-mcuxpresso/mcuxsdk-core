@@ -46,3 +46,8 @@ west-commands:
       - name: export_app
         class: ExportApp
         help: Create a freestanding application
+  - file: scripts/west_commands/explore.py
+    commands:
+      - name: explore
+        class: McuxsdkExplore
+        help: Graphical interactive build command selection.
