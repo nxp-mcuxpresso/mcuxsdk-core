@@ -367,7 +367,7 @@ status_t FLEXIO_I2S_WriteBlocking(FLEXIO_I2S_Type *base, uint8_t bitWidth, uint8
  */
 static inline void FLEXIO_I2S_WriteData(FLEXIO_I2S_Type *base, uint8_t bitWidth, uint32_t data)
 {
-    base->flexioBase->SHIFTBUFBIS[base->txShifterIndex] = (data << (32U - bitWidth));
+    base->flexioBase->SHIFTBUFBIS[base->txShifterIndex] = (bitWidth <= 32U) ? (data << (32U - bitWidth)) : data;
 }
 
 /*!
