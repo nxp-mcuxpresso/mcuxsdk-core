@@ -1,5 +1,10 @@
 # DMAMUX
 
+## [2.1.2]
+
+- Bug Fixes
+  - Add macro FSL_DMAMUX_CHANNEL_NUM  to calculat correct DMAMUX channel number when input EDAM channel number.
+
 ## [2.1.1]
 
 - Improvements
