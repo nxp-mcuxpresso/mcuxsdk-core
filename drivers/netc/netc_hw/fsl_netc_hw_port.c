@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -60,6 +60,14 @@ status_t NETC_PortSetMII(NETC_ETH_LINK_Type *base,
                          netc_hw_mii_speed_t speed,
                          netc_hw_mii_duplex_t duplex)
 {
+#if (defined(FSL_FEATURE_NETC_HAS_ERRATA_052167) && FSL_FEATURE_NETC_HAS_ERRATA_052167)
+    /* ERR052167: Actual MAC Tx IPG is longer than configured when transmitting back-to-back packets in MII half duplex
+    mode by approximately 15 extra bytes. For example, when configured for IPG=12, the actual IPG will be approximately 27.
+    The net result is that maximum throughput will be reduced also in the absence of half-duplex collision/retry events.
+    When using MII protocol, using full-duplex mode is recommended instead of half-duplex. If using MII half-duplex mode,
+    additional bandwidth loss should be expected and accounted for due to extended IPG. */
+#endif
+
     uint32_t reg = base->PM0_IF_MODE;
 
     /* Set MAC interface mode */

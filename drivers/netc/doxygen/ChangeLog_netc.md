@@ -14,6 +14,10 @@
 - Improvements
   - keep netc_tb_sgi_rsp_data_t local to the low level driver functions for SGI table entry query.
   - Converted to use preinitVsi callback for VSI pre-init.
+  - Added note for ERRATA 052167 to remind that actual MAC Tx IPG is longer than configured when
+    transmitting back-to-back packets in MII half duplex. When using MII protocol, using full-duplex
+    mode is recommended instead of half-duplex. If using MII half-duplex mode, additional bandwidth
+    loss should be expected and accounted for due to extended IPG.
 
 ## [2.8.2]
 
