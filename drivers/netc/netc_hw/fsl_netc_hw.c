@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -679,10 +679,11 @@ status_t NETC_GetISCStatistic(netc_cbdr_handle_t *handle, uint32_t entryID, netc
     if (kStatus_Success == status)
     {
         *statistic = handle->buffer->isc.response.stse;
-#if (defined(FSL_FEATURE_NETC_HAS_ERRATA_052134) && FSL_FEATURE_NETC_HAS_ERRATA_052134)
-        /* ERR052134: The actual offset of the SG_DROP_COUNT in the Ingress Stream Count Table STSE_DATA element is bit 200 or the offset within
-           the entire Ingress Stream Count Table Response Data Buffer format is bit 232. Starting offset is 8-bits. */
-        statistic->sgDropCount >>= 8U;
+#if (defined(FSL_FEATURE_NETC_HAS_ERRATA_052206) && FSL_FEATURE_NETC_HAS_ERRATA_052206)
+        /* ERR052206: The actual offset of the SG_DROP_COUNT in the Ingress Stream Count Table STSE_DATA element is bit 199 or the offset within
+           the entire Ingress Stream Count Table Response Data Buffer format is bit 231. Starting offset from defined is 7-bits. */
+        statistic->sgDropCount >>= 7U;
+        statistic->sgDropCount += ((statistic->res3 & 0x7FU) << 25U);
 #endif
     }
     return status;

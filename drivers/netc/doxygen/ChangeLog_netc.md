@@ -5,6 +5,7 @@
 - Bug Fixes
   - Fixed padding in netc_tb_sgi_rsp_data_t union structure for query operations on OEXEN and IRXEN parameters.
   - Fixed structure use for rate policer and stream gate request commands memset.
+  - Updated ERRATA 052134 to 052206.
 - New Features
   - Added API to Reset IRX and OEX flags in stream gate instance entry.
   - Added API to configure the priority to traffic class map.
