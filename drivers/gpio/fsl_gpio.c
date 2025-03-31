@@ -118,13 +118,25 @@ static void GPIO_PortClockEnable(GPIO_Type *base, bool enable)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)&& \
     defined(GPIO_CLOCKS_ARRAY)
-    if(enable)
+    uint32_t instance = GPIO_GetInstance(base);
+
+    /* Ensure the instance index is within bounds of the s_gpioClockName array */
+    if (instance < ARRAY_SIZE(s_gpioClockName))
     {
-        CLOCK_EnableClock(s_gpioClockName[GPIO_GetInstance(base)]);
+        /* Enable or disable the clock for the specified GPIO instance */
+        if (enable)
+        {
+            CLOCK_EnableClock(s_gpioClockName[instance]);
+        }
+        else
+        {
+            CLOCK_DisableClock(s_gpioClockName[instance]);
+        }
     }
     else
     {
-        CLOCK_DisableClock(s_gpioClockName[GPIO_GetInstance(base)]);
+        /* Handle error: instance index is out of bounds */
+        assert(false);
     }
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }

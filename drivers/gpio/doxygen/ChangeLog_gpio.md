@@ -1,5 +1,9 @@
 # GPIO
 
+## [2.8.2]
+- Bug Fixes
+  - Fixed COVERITY issues.
+
 ## [2.8.1]
 
 - Bug Fixes
