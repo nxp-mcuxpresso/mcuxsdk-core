@@ -212,8 +212,6 @@ enum _status_groups
     kStatusGroup_HIPERFACE      = 172, /*!< Group number for HIPERFACE status codes. */
     kStatusGroup_NPX            = 173, /*!< Group number for NPX status codes. */
     kStatusGroup_CSEC           = 174, /*!< Group number for CSEC status codes. */
-    kStatusGroup_FLEXIO_T_FORMAT= 175, /*!< Group number for T-format status codes. */
-    kStatusGroup_FLEXIO_A_FORMAT= 176, /*!< Group number for A-format status codes. */
 };
 
 /*! \public
