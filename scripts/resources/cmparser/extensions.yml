@@ -15,7 +15,7 @@ mcux_load_all_dotcmakes_in_directory: {}
 mcux_load_all_cmakelists_in_directory: {}
 mcux_add_source:
   single_value: BASE_PATH CONFIG PREINCLUDE EXCLUDE HIDDEN
-  multi_value: SOURCES ${MCUX_SOURCE_CONDITION}
+  multi_value: SOURCES PREINCLUDE_TYPE ${MCUX_SOURCE_CONDITION}
 mcux_add_include:
   single_value: BASE_PATH CONFIG
   multi_value: INCLUDES TARGET_FILES ${MCUX_SOURCE_CONDITION}

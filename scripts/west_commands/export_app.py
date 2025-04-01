@@ -1,3 +1,7 @@
+# Copyright 2024-2025 NXP
+#
+# SPDX-License-Identifier: Apache-2.0
+
 import os, sys
 import argparse
 import platform
@@ -5,6 +9,8 @@ import yaml
 import logging
 import shutil
 import re
+from copy import deepcopy
+from datetime import datetime
 from subprocess import CalledProcessError, DEVNULL
 from copy import deepcopy
 from pathlib import Path
@@ -18,14 +24,22 @@ _ARG_SEPARATOR = '--'
 SDK_ROOT_DIR = SCRIPT_DIR.parent
 BOARD_DIR_NAME = '_boards'
 DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#freestanding-example'
-# VARIABLES_MAP = {
-#     '${SdkRootDirPath}': '${PrjRootDirPath}'
-#     }
+
+# TODO need add case by case
+BYPASS_KEY_LIST_IN_PATH = ['${board_root}', 'examples/_boards', 'examples_int/boards', '${multicore_folder_name}']
+
 USAGE = f'''\
 west export_app [-h] [source_dir] [-b board_id] [-DCMAKE_VAR=VAL] [-o OUTPUT_DIR] [--build]
 You can use -Dcore_id=xxx to export multi-core example.
 To know what is freestanding example and how it works, see
 {DOC_URL}
+'''
+
+LICENSE_HEAD = f'''
+# Copyright {datetime.now().year} NXP
+#
+# SPDX-License-Identifier: Apache-2.0
+
 '''
 
 logger = logging.getLogger('export_app.misc')
@@ -46,8 +60,13 @@ def cmake_func(func):
 def cmake_statement(func):
     if isinstance(func, str):
         return func
-    args = ' '.join([arg.get('value') for arg in func.get('args', [])])
-    return f"{func['original_name']}({args})"
+    args = []
+    for arg in func.get('args', []):
+        if ' ' in arg.get('value'):
+            args.append('"' + arg.get('value') + '"')
+        else:
+            args.append(arg.get('value'))
+    return f"{func['original_name']}({' '.join(args)})"
 
 def current_list_dir_context(func):
     def wrapper(self, source_dir: Path):
@@ -139,6 +158,7 @@ class ExportApp(WestCommand):
         self.sysbuild = False
         self.current_list_dir = None
         self.core_id = None
+        self.general_export = False
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(
@@ -147,7 +167,7 @@ class ExportApp(WestCommand):
             formatter_class=argparse.RawDescriptionHelpFormatter,
             description=self.description,
             usage=USAGE)
-        parser.add_argument('-b', '--board', nargs=None, default=None, help="board id like mimxrt700evk", required=True)
+        parser.add_argument('-b', '--board', nargs=None, default=None, help="board id like mimxrt700evk")
         parser.add_argument('--toolchain', dest='toolchain', action='store',
                            default='armgcc', help='Specify toolchain')
         parser.add_argument('-o', '--output-dir', required=True,
@@ -162,7 +182,7 @@ class ExportApp(WestCommand):
         self._sanity_precheck()
         self._app_precheck()
         self._find_parser()
-        self.output_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         self.dest_list_file = self.parse_app(self.source_dir)
         self.dest_prj_conf = self.dest_list_file.parent  / 'prj.conf'
         self.banner(f'Successfully create the freestanding project, see {self.dest_list_file}.')
@@ -176,13 +196,15 @@ class ExportApp(WestCommand):
     @current_list_dir_context
     def parse_app(self, source_dir):
         dest_list_file = self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'CMakeLists.txt'
-        shutil.copytree(source_dir, dest_list_file.parent)
+        shutil.copytree(source_dir, dest_list_file.parent, dirs_exist_ok=True)
         example_yml = yaml.load(open(source_dir / 'example.yml'), yaml.BaseLoader)
         _, example_info = next(iter(example_yml.items()))
 
         list_file = source_dir / 'CMakeLists.txt'
         list_content = self._parse_list_file(list_file)
+        raw_content = [line.strip(os.linesep) for line in open(list_file, 'r').readlines()]
         new_list_content = []
+        new_list_content.extend(LICENSE_HEAD.split(os.linesep))
         for func in list_content:
             try:
                 func_name = func['original_name'].lower()
@@ -194,7 +216,7 @@ class ExportApp(WestCommand):
                         new_list_content.append(result)
                 else:
                     self.dbg(f'No special process for {func_name}')
-                    new_list_content.append(cmake_statement(func))
+                    new_list_content.extend(raw_content[int(func["line"])-1:int(func["line_end"])])
             except KeyError as exec:
                 print(str(exec))
                 self.die(f'The cmparser cannot handle the given CMakeLists.txt.')
@@ -202,7 +224,7 @@ class ExportApp(WestCommand):
                 print(str(exec))
                 self.die(f'Script error, please contact us.')
         open(dest_list_file, 'w').write(os.linesep.join(new_list_content))
-        self.format_listfile(dest_list_file)
+        # self.format_listfile(dest_list_file)
         self.combine_prj_conf(source_dir)
         self.update_kconfig_path(source_dir)
 
@@ -246,19 +268,21 @@ class ExportApp(WestCommand):
         while example_common.stem != example_root_stem:
             search_list.insert(0, example_common)
             example_common = example_common.parent
-        example_common_len = len(search_list)
-        example_specific = SDK_ROOT_DIR / example_root_stem / BOARD_DIR_NAME / self.board / source_dir.relative_to(self.examples_root)
-        if self.core_id:
-            example_specific = example_specific / self.core_id
-        while example_specific.stem != self.board:
-            search_list.insert(example_common_len, example_specific)
-            example_specific = example_specific.parent
+        if self.board:
+          example_common_len = len(search_list)
+          example_specific = SDK_ROOT_DIR / example_root_stem / BOARD_DIR_NAME / self.board / source_dir.relative_to(self.examples_root)
+          if self.core_id:
+              example_specific = example_specific / self.core_id
+          while example_specific.stem != self.board:
+              search_list.insert(example_common_len, example_specific)
+              example_specific = example_specific.parent
         for s_p in search_list:
             if not (e_conf := (s_p / 'prj.conf')).exists():
                 continue
             for k, v in ExportApp.parse_prj_conf(e_conf).items():
                 prj_conf[k] = v
         with open(self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'prj.conf', 'w') as f:
+            f.write(LICENSE_HEAD)
             for k, v in prj_conf.items():
                 f.write(f"{k}={v}\n")
 
@@ -292,7 +316,8 @@ class ExportApp(WestCommand):
 
     @property
     def build_cmd_list(self):
-        cmd_list = ['west', 'build', '-b', self.board, '--toolchain', self.args.toolchain,
+        board_var = self.board if self.board else "<board_id>"
+        cmd_list = ['west', 'build', '-b', board_var, '--toolchain', self.args.toolchain,
                     '-p', 'always', self.dest_list_file.parent.as_posix(),
                     f'-DPrjRootDirPath={self.output_dir.as_posix()}',
                     '-d', (self.output_dir/'build').as_posix(),
@@ -337,16 +362,16 @@ class ExportApp(WestCommand):
         for arg in func.get('args'):
             arg['value'] = arg['value'].replace('${CMAKE_CURRENT_LIST_DIR}', self.current_list_dir)
 
-    @cmake_func
-    def cm_project(self, func: dict, argv: dict) -> dict:
-        if 'PROJECT_BOARD_PORT_PATH' not in argv:
-            return
-        new_result = [func]
-        ExportApp.remove_arg(func, argv, 'PROJECT_BOARD_PORT_PATH')
-        project_board_port_path = argv['PROJECT_BOARD_PORT_PATH']
-        self.cmake_variables['project_board_port_path'] = project_board_port_path
-        new_result.append(f'mcux_set_variable(project_board_port_path {project_board_port_path})')
-        return new_result
+    # @cmake_func
+    # def cm_project(self, func: dict, argv: dict) -> dict:
+    #     if 'PROJECT_BOARD_PORT_PATH' not in argv:
+    #         return
+    #     new_result = [func]
+    #     ExportApp.remove_arg(func, argv, 'PROJECT_BOARD_PORT_PATH')
+    #     project_board_port_path = argv['PROJECT_BOARD_PORT_PATH']
+    #     self.cmake_variables['project_board_port_path'] = project_board_port_path
+    #     new_result.append(f'mcux_set_variable(project_board_port_path {project_board_port_path})')
+    #     return new_result
 
     @cmake_func
     def cm_mcux_add_source(self, func: dict, argv: dict) -> dict:
@@ -369,7 +394,22 @@ class ExportApp(WestCommand):
         else:
             new_result = [func]
         src_str = ' '.join(keep_in_repo_paths)
-        new_result.append(f'mcux_add_source(BASE_PATH ${{SdkRootDirPath}} {src_str})')
+        new_args = []
+        for k, v in new_argv.items():
+            if k in ['BASE_PATH', 'SOURCES']:
+                continue
+            if k == 'nargs':
+                new_args.extend(v)
+                continue
+            new_args.append(k)
+            if isinstance(v, str):
+                new_args.append(v)
+            elif isinstance(v, list):
+                new_args.extend(v)
+            else:
+                self.wrn(f"Cannot handle {k}")
+        new_args = ' '.join(new_args)
+        new_result.append(f'mcux_add_source(BASE_PATH ${{SdkRootDirPath}} SOURCES {src_str} {new_args})')
         return new_result
 
     @cmake_func
@@ -393,7 +433,22 @@ class ExportApp(WestCommand):
         else:
             new_result = [func]
         src_str = ' '.join(keep_in_repo_paths)
-        new_result.append(f'mcux_add_source(BASE_PATH ${{SdkRootDirPath}} INCLUDES {src_str})')
+        new_args = []
+        for k, v in new_argv.items():
+            if k in ['BASE_PATH', 'INCLUDES']:
+                continue
+            if k == 'nargs':
+                new_args.extend(v)
+                continue
+            new_args.append(k)
+            if isinstance(v, str):
+                new_args.append(v)
+            elif isinstance(v, list):
+                new_args.extend(v)
+            else:
+                self.wrn(f"Cannot handle {k}")
+        new_args = ' '.join(new_args)
+        new_result.append(f'mcux_add_include(BASE_PATH ${{SdkRootDirPath}} INCLUDES {src_str} {new_args})')
         return new_result
 
     def check_force(self, cond, msg):
@@ -432,7 +487,7 @@ class ExportApp(WestCommand):
     def _process_path(self, base_path=None, src='', type='file'):
         result = src
         if base_path:
-            s_src = SDK_ROOT_DIR / base_path.replace('${SdkRootDirPath}', '') / src
+            s_src = SDK_ROOT_DIR / re.sub(r'\$\{SdkRootDirPath\}/?', '', base_path) / src
         else:
             if '${SdkRootDirPath}/' in src:
                 s_src = SDK_ROOT_DIR / src.replace('${SdkRootDirPath}', '') 
@@ -440,8 +495,7 @@ class ExportApp(WestCommand):
             else:
                 s_src = self.source_dir / src
         if not s_src.exists():
-            # Need add special variables case by case
-            if '${board_root}' in s_src.as_posix():
+            if any(k in s_src.as_posix() for k in BYPASS_KEY_LIST_IN_PATH):
                 result = '${SdkRootDirPath}/' + s_src.relative_to(SDK_ROOT_DIR).as_posix()
         elif not (d_src := (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))).exists():
             if type == 'file':
@@ -506,6 +560,12 @@ class ExportApp(WestCommand):
         # NOTE do not support internal examples yet
         op = sdk_project_target.MCUXRepoProjects()
         self.board = self.args.board
+        if not self.board:
+            self.general_export = True
+            if self.args.build:
+                self.wrn("--build is only valid when you specify board")
+                self.args.build = False
+            return
         if 'core_id' in self.cmake_variables:
             self.core_id = self.cmake_variables['core_id']
         board_core = self.board
