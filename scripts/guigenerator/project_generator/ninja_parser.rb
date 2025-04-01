@@ -620,16 +620,28 @@ class NinjaParser
           if content == 'cd .' || content == ':'
             break
           elsif @toolchain == 'iar'
-            pattern = /\s\S+#{@name}\.elf/
+            if ENV['project_type']  == 'LIBRARY'
+              pattern = /\s\S+lib#{@name}\.a/
+            else
+              pattern = /\s\S+#{@name}\.elf/
+            end
             result = content.match(pattern)
             while(result)
               content.sub!(result[ 0 ], ' $TARGET_PATH$')
               result = content.match(pattern)
             end
           elsif @toolchain == 'mdk'
-            pattern = /--bincombined\s\S+#{@name}\.elf/
-            result = content.match(pattern)
-            content.sub!(result[ 0 ], '--bincombined $p/#L') if result
+            if ENV['project_type']  == 'LIBRARY'
+               pattern = /\s\S+lib#{@name}\.a/
+               while(result)
+                content.sub!(result[ 0 ], ' $p/#L')
+                result = content.match(pattern)
+              end
+            else
+              pattern = /--bincombined\s\S+#{@name}\.elf/
+              result = content.match(pattern)
+              content.sub!(result[ 0 ], '--bincombined $p/#L') if result
+            end
           end
           if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
             @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = [content]
