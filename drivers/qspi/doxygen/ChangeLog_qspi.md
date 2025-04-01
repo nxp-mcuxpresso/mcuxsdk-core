@@ -5,6 +5,8 @@
 - New Features
   - Applied the QSPI IP update with register field changes.
   - Added Soc specific driver to integrate Soc configuration.
+- Changed
+  - Updated the QSPI LUT update function to be compatible with different sequence unit.
 
 ## [2.2.5]
 

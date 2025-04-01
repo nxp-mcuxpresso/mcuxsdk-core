@@ -449,25 +449,28 @@ void QSPI_ExecuteAHBCommand(QuadSPI_Type *base, uint32_t index)
     {
     }
     QSPI_ClearCommandSequence(base, kQSPI_BufferSeq);
-    base->BFGENCR = ((base->BFGENCR & (~QuadSPI_BFGENCR_SEQID_MASK)) | QuadSPI_BFGENCR_SEQID(index / 4U));
+    base->BFGENCR = ((base->BFGENCR & (~QuadSPI_BFGENCR_SEQID_MASK)) | QuadSPI_BFGENCR_SEQID(index / FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
 }
 
 /*! brief Updates the LUT table.
  *
  * param base Pointer to QuadSPI Type.
- * param index Which LUT index needs to be located. It should be an integer divided by 4.
+ * param index Which LUT index needs to be located. It should be an integer divided by FSL_FEATURE_QSPI_LUT_SEQ_UNIT.
  * param cmd Command sequence array.
  */
 void QSPI_UpdateLUT(QuadSPI_Type *base, uint32_t index, uint32_t *cmd)
 {
+    assert(index <= (FSL_FEATURE_QSPI_LUT_DEPTH - FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
+    assert((index % FSL_FEATURE_QSPI_LUT_SEQ_UNIT) == 0U);
+
     uint8_t i = 0;
 
     /* Unlock the LUT */
     base->LUTKEY = 0x5AF05AF0U;
-    base->LCKCR  = 0x2U;
+    base->LCKCR  = QuadSPI_LCKCR_UNLOCK_MASK;
 
     /* Write data into LUT */
-    for (i = 0; i < 4U; i++)
+    for (i = 0; i < FSL_FEATURE_QSPI_LUT_SEQ_UNIT; i++)
     {
         base->LUT[index + i] = *cmd;
         cmd++;
@@ -475,7 +478,7 @@ void QSPI_UpdateLUT(QuadSPI_Type *base, uint32_t index, uint32_t *cmd)
 
     /* Lcok LUT again */
     base->LUTKEY = 0x5AF05AF0U;
-    base->LCKCR  = 0x1U;
+    base->LCKCR  = QuadSPI_LCKCR_LOCK_MASK;
 }
 
 #if defined(FSL_FEATURE_QSPI_SOCCR_HAS_CLR_LPCAC) && (FSL_FEATURE_QSPI_SOCCR_HAS_CLR_LPCAC)
