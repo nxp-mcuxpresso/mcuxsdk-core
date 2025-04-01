@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -10,3 +10,19 @@ config MCUX_COMPONENT_driver.mau
     bool "mau"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.mau
+
+if MCUX_COMPONENT_driver.mau
+
+    config MAU_ENABLE_CMSIS_DSP_API
+        bool "Enable MAU CMSIS DSP API"
+        select MCUX_COMPONENT_CMSIS_DSP_Include
+        help
+            Enable the MAU CMSIS DSP API
+
+    config MAU_ENABLE_CMSIS_DSP_ARM_SQRT_F32_API
+        bool "Enable MAU arm_sqrt_f32 function"
+        depends on MAU_ENABLE_CMSIS_DSP_API
+        help
+            Enable the MAU CMSIS DSP arm_sqrt_f32 API
+
+endif
