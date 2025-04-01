@@ -1,5 +1,10 @@
 # CAAM
 
+## [2.4.0]
+
+- Add new APIs for native asymmetric operations (RSA, ECC) instead of only accelerating mathematical primitives
+  and support for black keys and blobs for both symmetric and asymmetric operations.
+
 ## [2.3.2]
 
 - Fix MISRA-2012 issues.
