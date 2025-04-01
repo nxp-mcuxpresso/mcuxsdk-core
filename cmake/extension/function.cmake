@@ -564,6 +564,13 @@ function(mcux_convert_binary)
     set(target_name ${MCUX_SDK_PROJECT_NAME})
   endif()
 
+  # Library can not be converted to binary file, only convert executable
+  get_target_property(TARGET_TYPE ${target_name} TYPE)
+  if(NOT TARGET_TYPE STREQUAL "EXECUTABLE")
+    log_warn("${target_name} is library type, can't be converted to binary file by mcux_convert_binary" ${CMAKE_CURRENT_LIST_FILE})
+    return()
+  endif()
+
   # Get the absolute folder path
   get_filename_component(FILE_PATH ${binary_name} DIRECTORY)
   file(MAKE_DIRECTORY ${FILE_PATH})
