@@ -538,7 +538,7 @@ function(post_build_process)
 endfunction()
 
 function(mcux_convert_binary)
-  set(single_value BINARY)
+  set(single_value BINARY TARGET)
   set(multi_value TOOLCHAINS EXTRA_ARGS)
   cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}"
                         ${ARGN})
@@ -556,6 +556,12 @@ function(mcux_convert_binary)
 
   if(NOT binary_name)
     return()
+  endif()
+  
+  if(__TARGET)
+    set(target_name ${__TARGET})
+  else()
+    set(target_name ${MCUX_SDK_PROJECT_NAME})
   endif()
 
   # Get the absolute folder path
@@ -581,7 +587,7 @@ function(mcux_convert_binary)
     if(NOT __EXTRA_ARGS)
       set(__EXTRA_ARGS -gap-fill 0xff -flash-start-x 0x20000)
     endif()
-    target_link_options(${MCUX_SDK_PROJECT_NAME} PRIVATE ${OBJDUMP_BIN_CMD} ${__EXTRA_ARGS})
+    target_link_options(${target_name} PRIVATE ${OBJDUMP_BIN_CMD} ${__EXTRA_ARGS})
     return()
   else()
     if(__EXTRA_ARGS)
@@ -591,23 +597,23 @@ function(mcux_convert_binary)
     endif()
   endif()
 
-  get_target_property(IMAGE_FILE_NAME ${MCUX_SDK_PROJECT_NAME} OUTPUT_NAME)
+  get_target_property(IMAGE_FILE_NAME ${target_name} OUTPUT_NAME)
   if (${IMAGE_FILE_NAME} STREQUAL "IMAGE_FILE_NAME-NOTFOUND")
-     set(IMAGE_FILE_NAME ${MCUX_SDK_PROJECT_NAME})
+     set(IMAGE_FILE_NAME ${target_name})
   endif()
   add_custom_command(
-    TARGET ${MCUX_SDK_PROJECT_NAME}
+    TARGET ${target_name}
     POST_BUILD
     COMMAND
       ${CMAKE_OBJCOPY} ${OBJDUMP_BIN_CMD} ${extra_args}
       ${CMAKE_CURRENT_BINARY_DIR}/${IMAGE_FILE_NAME}${CMAKE_EXECUTABLE_SUFFIX}
       ${OBJDUMP_OUT_CMD} ${binary_name})
 
-  get_target_property(clean_files ${MCUX_SDK_PROJECT_NAME}
+  get_target_property(clean_files ${target_name}
                       ADDITIONAL_CLEAN_FILES)
   list(APPEND clean_files ${binary_name})
 
-  set_target_properties(${MCUX_SDK_PROJECT_NAME}
+  set_target_properties(${target_name}
                         PROPERTIES ADDITIONAL_CLEAN_FILES "${clean_files}")
 endfunction()
 
