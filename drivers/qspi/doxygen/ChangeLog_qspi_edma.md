@@ -1,5 +1,10 @@
 # QSPI_EDMA
 
+## [2.2.4]
+
+- Changed
+  - Compatible with new EDMA driver.
+
 ## [2.2.3]
 
 - Changed

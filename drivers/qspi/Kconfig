@@ -20,7 +20,7 @@ config MCUX_COMPONENT_driver.qspi_mcxe31b
 
 config MCUX_HAS_COMPONENT_driver.qspi_edma
     bool
-    default y if MCUX_HAS_COMPONENT_driver.qspi && MCUX_HAS_COMPONENT_driver.edma
+    default y if MCUX_HAS_COMPONENT_driver.qspi && (MCUX_HAS_COMPONENT_driver.edma || MCUX_HAS_COMPONENT_driver.edma4)
 
 config MCUX_HAS_COMPONENT_driver.qspi
     bool
@@ -31,7 +31,8 @@ config MCUX_HAS_COMPONENT_driver.qspi
 config MCUX_COMPONENT_driver.qspi_edma
     bool "qspi_edma"
     select MCUX_COMPONENT_driver.qspi
-    select MCUX_COMPONENT_driver.edma
+    select MCUX_COMPONENT_driver.edma if MCUX_HAS_COMPONENT_driver.edma
+    select MCUX_COMPONENT_driver.edma4 if MCUX_HAS_COMPONENT_driver.edma4
     depends on MCUX_HAS_COMPONENT_driver.qspi_edma
 
 config MCUX_COMPONENT_driver.qspi

@@ -284,7 +284,8 @@ status_t QSPI_TransferReceiveEDMA(QuadSPI_Type *base, qspi_edma_handle_t *handle
             status = EDMA_SubmitTransfer(handle->dmaHandle, &xferConfig);
         } while (status != kStatus_Success);
 
-        handle->dmaHandle->base->TCD[handle->dmaHandle->channel].ATTR |= DMA_ATTR_SMOD(0x5U);
+        EDMA_SetModulo(handle->dmaHandle->base, handle->dmaHandle->channel, kEDMA_Modulo32bytes, kEDMA_ModuloDisable);
+        
         EDMA_StartTransfer(handle->dmaHandle);
 
         /* Enable QSPI TX EDMA. */
