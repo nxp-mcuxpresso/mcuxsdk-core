@@ -7,6 +7,8 @@
   - Added Soc specific driver to integrate Soc configuration.
 - Changed
   - Updated the QSPI LUT update function to be compatible with different sequence unit.
+  - Added new feature macro FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG which represents there're Soc specific QSPI configurations.
+    Soc specific driver should cover these configurations. Previous Soc specific code in the common driver should be masked.
 
 ## [2.2.5]
 

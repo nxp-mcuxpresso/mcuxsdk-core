@@ -24,6 +24,7 @@ enum _qspi_transfer_state
 
 #define QSPI_AHB_BUFFER_REG(base, index) (((volatile uint32_t *)&((base)->BUF0CR))[(index)])
 
+#if (!defined(FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)) || (!FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)
 #if (!defined(FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG)) || !FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG
 #ifndef QuadSPI_SOCCR_DQS_LOOPBACK_EN_MASK
 #define QuadSPI_SOCCR_DQS_LOOPBACK_EN_MASK (0x100U)
@@ -55,6 +56,7 @@ enum _qspi_transfer_state
      QuadSPI_SOCCR_DQS_IFA_DELAY_CHAIN_SEL_MASK)
 #endif
 #endif /* FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG */
+#endif /* FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG */
 
 /*******************************************************************************
  * Prototypes
@@ -125,6 +127,7 @@ void QSPI_Init(QuadSPI_Type *base, qspi_config_t *config, uint32_t srcClock_Hz)
     /* Configure QSPI */
     QSPI_Enable(base, false);
 
+#if (!defined(FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)) || (!FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)
 #if !defined(FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL) || (!FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL)
     /* Set qspi clock source */
     base->SOCCR = config->clockSource;
@@ -139,6 +142,7 @@ void QSPI_Init(QuadSPI_Type *base, qspi_config_t *config, uint32_t srcClock_Hz)
     val |= QuadSPI_MCR_SCLKCFG((srcClock_Hz - 1U) / config->baudRate);
     base->MCR = val;
 #endif /* FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL */
+#endif /* FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG */
 
     /* Set AHB buffer size and buffer master */
     for (i = 0; i < (uint32_t)FSL_FEATURE_QSPI_AHB_BUFFER_COUNT; i++)
@@ -181,9 +185,11 @@ void QSPI_GetDefaultQspiConfig(qspi_config_t *config)
     /* Initializes the configure structure to zero. */
     (void)memset(config, 0, sizeof(*config));
 
+#if (!defined(FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)) || (!FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)
 #if !defined(FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL) || (!FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL)
     config->clockSource               = 2U;
     config->baudRate                  = 24000000U;
+#endif
 #endif
     config->AHBbufferMaster[0]        = 0xE;
     config->AHBbufferMaster[1]        = 0xE;
@@ -279,6 +285,7 @@ void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config)
     QSPI_Enable(base, true);
 }
 
+#if (!defined(FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)) || (!FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)
 #if (!defined(FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG)) || !FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG
 /*!
  * @brief Configures the serial flash DQS parameter.
@@ -344,6 +351,7 @@ void QSPI_SetDqsConfig(QuadSPI_Type *base, qspi_dqs_config_t *config)
     QSPI_Enable(base, true);
 }
 #endif /* FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG */
+#endif /* FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG */
 
 #if defined(FSL_FEATURE_QSPI_HAS_DLLCRA) && (FSL_FEATURE_QSPI_HAS_DLLCRA)
 /*!

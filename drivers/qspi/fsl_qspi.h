@@ -268,9 +268,11 @@ typedef struct QspiFlashTiming
 /*! @brief QSPI configuration structure*/
 typedef struct QspiConfig
 {
+#if (!defined(FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)) || (!FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)
 #if !defined(FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL) || (!FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL)
     uint32_t clockSource;                                       /*!< Clock source for QSPI module */
     uint32_t baudRate;                                          /*!< Serial flash clock baud rate */
+#endif
 #endif
     uint8_t txWatermark;                                        /*!< QSPI transmit watermark value */
     uint8_t rxWatermark;                                        /*!< QSPI receive watermark value. */
@@ -396,6 +398,7 @@ void QSPI_Deinit(QuadSPI_Type *base);
  */
 void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config);
 
+#if (!defined(FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)) || (!FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)
 #if (!defined(FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG)) || !FSL_FEATURE_QSPI_HAS_NO_SOCCR_REG
 /*!
  * @brief Configures the serial flash DQS parameter.
@@ -407,6 +410,7 @@ void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config);
  * @param config Dqs configuration parameters.
  */
 void QSPI_SetDqsConfig(QuadSPI_Type *base, qspi_dqs_config_t *config);
+#endif
 #endif
 
 #if defined(FSL_FEATURE_QSPI_HAS_DLLCRA) && (FSL_FEATURE_QSPI_HAS_DLLCRA)
