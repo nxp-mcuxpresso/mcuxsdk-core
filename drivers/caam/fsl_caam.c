@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2023 NXP
+ * Copyright 2016-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -56,7 +56,7 @@
 #define DESC_LC1_MASK          0x00020000u
 #define DESC_TAG_SIZE_MASK     0xFFu
 #define DESC_HALT              0xA0C00000u
-#define DESC_JUMP(x)           (0xA0000000u | (x & 0xFFu))
+#define DESC_JUMP(x)           (0xA0000000u | ((x) & 0xFFu))
 #define DESC_JUMP_2            DESC_JUMP(0x2u)
 #define DESC_JUMP_4            DESC_JUMP(0x4u)
 #define DESC_JUMP_6            DESC_JUMP(0x6u)
@@ -1012,7 +1012,7 @@ status_t caam_aes_gcm_non_blocking_extended(CAAM_Type *base,
 
     if (status == kStatus_Success)
     {
-        descriptor[1] |= blackKeyType;
+        descriptor[1] |= (uint32_t)blackKeyType;
 
         /* add operation specified by descriptor to CAAM Job Ring */
         return caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
@@ -1364,7 +1364,7 @@ status_t caam_aes_ccm_non_blocking_extended(CAAM_Type *base,
 
     if (status == kStatus_Success)
     {
-        descriptor[1] |= blackKeyType;
+        descriptor[1] |= (uint32_t)blackKeyType;
 
         /* add operation specified by descriptor to CAAM Job Ring */
         return caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
@@ -1597,7 +1597,7 @@ static const uint32_t templateAesCtr[] = {
  * are not used.
  * return Status from job descriptor push
  */
-status_t s_CAAM_AES_CryptCtrNonBlocking(CAAM_Type *base,
+static status_t s_CAAM_AES_CryptCtrNonBlocking(CAAM_Type *base,
                                         caam_handle_t *handle,
                                         caam_desc_aes_ctr_t descriptor,
                                         const uint8_t *input,
@@ -1782,7 +1782,7 @@ status_t CAAM_AES_CryptCtrNonBlockingExtended(CAAM_Type *base,
 
     if (status == kStatus_Success)
     {
-        descriptor[1] |= blackKeyType;
+        descriptor[1] |= (uint32_t)blackKeyType;
 
         /* add operation specified by descriptor to CAAM Job Ring */
         return caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
@@ -1820,7 +1820,7 @@ static const uint32_t templateAesEcb[] = {
  * param keySize Size of the input key, in bytes. Must be 16, 24, or 32.
  * return Status from job descriptor push
  */
-status_t s_CAAM_AES_EncryptEcbNonBlocking(CAAM_Type *base,
+static status_t s_CAAM_AES_EncryptEcbNonBlocking(CAAM_Type *base,
                                           caam_handle_t *handle,
                                           caam_desc_aes_ecb_t descriptor,
                                           const uint8_t *plaintext,
@@ -1910,7 +1910,7 @@ status_t CAAM_AES_EncryptEcbNonBlocking(CAAM_Type *base,
  * param keySize Size of the input key, in bytes. Must be 16, 24, or 32.
  * return Status from job descriptor push
  */
-status_t s_CAAM_AES_DecryptEcbNonBlocking(CAAM_Type *base,
+static status_t s_CAAM_AES_DecryptEcbNonBlocking(CAAM_Type *base,
                                           caam_handle_t *handle,
                                           caam_desc_aes_ecb_t descriptor,
                                           const uint8_t *ciphertext,
@@ -2014,7 +2014,7 @@ status_t CAAM_AES_EncryptEcbNonBlockingExtended(CAAM_Type *base,
 
     if (status == kStatus_Success)
     {
-        descriptor[1] |= blackKeyType;
+        descriptor[1] |= (uint32_t)blackKeyType;
 
         /* add operation specified by descriptor to CAAM Job Ring */
         return caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
@@ -2056,7 +2056,7 @@ status_t CAAM_AES_DecryptEcbNonBlockingExtended(CAAM_Type *base,
 
     if (status == kStatus_Success)
     {
-        descriptor[1] |= blackKeyType;
+        descriptor[1] |= (uint32_t)blackKeyType;
 
         /* add operation specified by descriptor to CAAM Job Ring */
         return caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
@@ -2318,7 +2318,7 @@ status_t CAAM_AES_EncryptCbcNonBlockingExtended(CAAM_Type *base,
 
     if (status == kStatus_Success)
     {
-        descriptor[1] |= blackKeyType;
+        descriptor[1] |= (uint32_t)blackKeyType;
 
         /* add operation specified by descriptor to CAAM Job Ring */
         return caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
@@ -2361,7 +2361,7 @@ status_t CAAM_AES_DecryptCbcNonBlockingExtended(CAAM_Type *base,
 
     if (status == kStatus_Success)
     {
-        descriptor[1] |= blackKeyType;
+        descriptor[1] |= (uint32_t)blackKeyType;
 
         /* add operation specified by descriptor to CAAM Job Ring */
         return caam_in_job_ring_add(base, handle->jobRing, &descriptor[0]);
@@ -10587,7 +10587,7 @@ status_t CAAM_PKHA_MontgomeryToNormal(CAAM_Type *base,
  */
 static inline uint8_t CAAM_ECC_DomainBit(caam_ecc_ecdsel_t ecdsel)
 {
-    return (ecdsel >= 0x40u) ? 1u : 0u;
+    return (((uint32_t)ecdsel) >= 0x40u) ? 1u : 0u;
 }
 
 size_t CAAM_ECC_PrivateKeySize(caam_ecc_encryption_type_t encryptKeyType, caam_ecc_ecdsel_t ecdsel)
@@ -10647,10 +10647,10 @@ status_t CAAM_ECC_KeyPair(CAAM_Type *base,
     (void)caam_memcpy(descriptor, templateEccKeyPair, sizeof(templateEccKeyPair));
 
     descriptor[0] |= (descriptorSize & DESC_SIZE_MASK);
-    descriptor[1] |= (ecdsel & 0x7F) << 7;
+    descriptor[1] |= (((uint32_t)ecdsel) & 0x7Fu) << 7;
     descriptor[2] |= ADD_OFFSET((uint32_t)privKey);
     descriptor[3] |= ADD_OFFSET((uint32_t)pubKey);
-    descriptor[4] |= (0x14 << 16) | encryptKeyType | CAAM_ECC_DomainBit(ecdsel);
+    descriptor[4] |= (0x14UL << 16) | ((uint32_t)encryptKeyType) | CAAM_ECC_DomainBit(ecdsel);
 
     status_t status = caam_in_job_ring_add_and_wait(base, handle, descriptor, kCAAM_Blocking);
 
@@ -10705,13 +10705,13 @@ status_t CAAM_ECC_Sign(CAAM_Type *base,
     (void)caam_memcpy(descriptor, templateEccSign, sizeof(templateEccSign));
 
     descriptor[0] |= (descriptorSize & DESC_SIZE_MASK);
-    descriptor[1] |= (ecdsel & 0x7F) << 7;
+    descriptor[1] |= (((uint32_t)ecdsel) & 0x7Fu) << 7;
     descriptor[2] |= ADD_OFFSET((uint32_t)privKey);
     descriptor[3] |= ADD_OFFSET((uint32_t)data);
     descriptor[4] |= ADD_OFFSET((uint32_t)signFirst);
     descriptor[5] |= ADD_OFFSET((uint32_t)signSecond);
     descriptor[6] = dataSize;
-    descriptor[7] |= (0x15 << 16) | encryptKeyType | CAAM_ECC_DomainBit(ecdsel);
+    descriptor[7] |= (0x15UL << 16) | ((uint32_t)encryptKeyType) | CAAM_ECC_DomainBit(ecdsel);
 
     status_t status = caam_in_job_ring_add_and_wait(base, handle, descriptor, kCAAM_Blocking);
 
@@ -10767,14 +10767,14 @@ status_t CAAM_ECC_VerifyPublicKey(CAAM_Type *base,
     (void)caam_memcpy(descriptor, templateEccVerifyPublic, sizeof(templateEccVerifyPublic));
 
     descriptor[0] |= (descriptorSize & DESC_SIZE_MASK);
-    descriptor[1] |= (ecdsel & 0x7F) << 7;
+    descriptor[1] |= (((uint32_t)ecdsel) & 0x7Fu) << 7;
     descriptor[2] |= ADD_OFFSET((uint32_t)pubKey);
     descriptor[3] |= ADD_OFFSET((uint32_t)data);
     descriptor[4] |= ADD_OFFSET((uint32_t)signFirst);
     descriptor[5] |= ADD_OFFSET((uint32_t)signSecond);
     descriptor[6] |= ADD_OFFSET((uint32_t)tmp);
     descriptor[7] = dataSize;
-    descriptor[8] |= (0x16 << 16) | CAAM_ECC_DomainBit(ecdsel);
+    descriptor[8] |= (0x16UL << 16) | CAAM_ECC_DomainBit(ecdsel);
 
     status_t status = caam_in_job_ring_add_and_wait(base, handle, descriptor, kCAAM_Blocking);
 
@@ -10830,13 +10830,13 @@ status_t CAAM_ECC_VerifyPrivateKey(CAAM_Type *base,
     (void)caam_memcpy(descriptor, templateEccVerifyPrivate, sizeof(templateEccVerifyPrivate));
 
     descriptor[0] |= (descriptorSize & DESC_SIZE_MASK);
-    descriptor[1] |= (ecdsel & 0x7F) << 7;
+    descriptor[1] |= (((uint32_t)ecdsel) & 0x7Fu) << 7;
     descriptor[2] |= ADD_OFFSET((uint32_t)privKey);
     descriptor[3] |= ADD_OFFSET((uint32_t)data);
     descriptor[4] |= ADD_OFFSET((uint32_t)signFirst);
     descriptor[5] |= ADD_OFFSET((uint32_t)signSecond);
     descriptor[6] = dataSize;
-    descriptor[7] |= (0x12 << 16) | encryptKeyType | CAAM_ECC_DomainBit(ecdsel);
+    descriptor[7] |= (0x12UL << 16) | ((uint32_t)encryptKeyType) | CAAM_ECC_DomainBit(ecdsel);
 
     status_t status = caam_in_job_ring_add_and_wait(base, handle, descriptor, kCAAM_Blocking);
 
@@ -10906,15 +10906,15 @@ status_t CAAM_RSA_KeyPair(CAAM_Type *base,
 
     descriptor[0] |= (descriptorSize & DESC_SIZE_MASK);
     // descriptor[1] |=; // reserved
-    descriptor[2] |= primesSize & 0x1FF;
-    descriptor[3] |= ((modulusSize & 0x3FF) << 16) | (pubExponentSize & 0x3FF);
+    descriptor[2] |= primesSize & 0x1FFu;
+    descriptor[3] |= ((modulusSize & 0x3FFu) << 16) | (pubExponentSize & 0x3FFu);
     descriptor[4] |= ADD_OFFSET((uint32_t)primeP);
     descriptor[5] |= ADD_OFFSET((uint32_t)primeQ);
     descriptor[6] |= ADD_OFFSET((uint32_t)pubExponent);
     descriptor[7] |= ADD_OFFSET((uint32_t)modulus);
     descriptor[8] |= ADD_OFFSET((uint32_t)privExponent);
     descriptor[9] |= ADD_OFFSET((uint32_t)&privExponentSize);
-    descriptor[10] |= prvKeyType;
+    descriptor[10] |= (uint32_t)prvKeyType;
 
     status_t status = caam_in_job_ring_add_and_wait(base, handle, descriptor, kCAAM_Blocking);
 
@@ -10957,13 +10957,13 @@ status_t CAAM_RSA_Encrypt(CAAM_Type *base,
     (void)caam_memcpy(descriptor, templateRsaEncrypt, sizeof(templateRsaEncrypt));
 
     descriptor[0] |= (descriptorSize & DESC_SIZE_MASK);
-    descriptor[1] |= ((pubExponentSize & 0xFFF) << 12) | (modulusSize & 0xFFF);
+    descriptor[1] |= ((pubExponentSize & 0xFFFu) << 12) | (modulusSize & 0xFFFu);
     descriptor[2] |= ADD_OFFSET((uint32_t)plainText);
     descriptor[3] |= ADD_OFFSET((uint32_t)cipherText);
     descriptor[4] |= ADD_OFFSET((uint32_t)modulus);
     descriptor[5] |= ADD_OFFSET((uint32_t)pubExponent);
-    descriptor[6] |= plainTextSize & 0xFFF;
-    descriptor[7] |= (dataOutType << 4) | (format << 12);
+    descriptor[6] |= plainTextSize & 0xFFFu;
+    descriptor[7] |= (((uint32_t)dataOutType) << 4) | (((uint32_t)format) << 12);
 
     status_t status = caam_in_job_ring_add_and_wait(base, handle, descriptor, kCAAM_Blocking);
 
@@ -11008,12 +11008,12 @@ status_t CAAM_RSA_Decrypt(CAAM_Type *base,
     (void)caam_memcpy(descriptor, templateRsaDecrypt, sizeof(templateRsaDecrypt));
 
     descriptor[0] |= (descriptorSize & DESC_SIZE_MASK);
-    descriptor[1] |= ((privExponentSize & 0xFFF) << 12) | (modulusSize & 0xFFF);
+    descriptor[1] |= ((privExponentSize & 0xFFFu) << 12) | (modulusSize & 0xFFFu);
     descriptor[2] |= ADD_OFFSET((uint32_t)cipherText);
     descriptor[3] |= ADD_OFFSET((uint32_t)plainText);
     descriptor[4] |= ADD_OFFSET((uint32_t)modulus);
     descriptor[5] |= ADD_OFFSET((uint32_t)privExponent);
-    descriptor[6] |= (prvKeyType << 8) | (dataOutType << 4) | (format << 12);
+    descriptor[6] |= (((uint32_t)prvKeyType) << 8) | (((uint32_t)dataOutType) << 4) | (((uint32_t)format) << 12);
     descriptor[8] = ADD_OFFSET((uint32_t)rsaDecSize); /* place: tag address */
 
     status_t status = caam_in_job_ring_add_and_wait(base, handle, descriptor, kCAAM_Blocking);

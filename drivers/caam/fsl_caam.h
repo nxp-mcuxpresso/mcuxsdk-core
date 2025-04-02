@@ -306,125 +306,125 @@ typedef enum _caam_ecc_ecdsel
 #define CAAM_DES_IV_SIZE 8
 
 /*! @brief CAAM blacken key size for ECB encryption */
-#define CAAM_BLACKEN_ECB_SIZE(x) ((x + 15u) & ~15)
+#define CAAM_BLACKEN_ECB_SIZE(x) (((x) + 15u) & ~15)
 
 /*! @brief CAAM blacken key size for CCM encryption */
-#define CAAM_BLACKEN_CCM_SIZE(x) (((x + 7u) & ~7) + 12u)
+#define CAAM_BLACKEN_CCM_SIZE(x) ((((x) + 7u) & ~7) + 12u)
 
 /*! @brief CAAM DSA public key length for EC domain */
 #define CAAM_DSA_PUBLIC_KEY_LENGTH(domain)         \
-    (domain == kCAAM_ECDSEL_P_192           ? 24 : \
-     domain == kCAAM_ECDSEL_P_224           ? 28 : \
-     domain == kCAAM_ECDSEL_P_256           ? 32 : \
-     domain == kCAAM_ECDSEL_P_384           ? 48 : \
-     domain == kCAAM_ECDSEL_P_521           ? 66 : \
-     domain == kCAAM_ECDSEL_brainpoolP160r1 ? 20 : \
-     domain == kCAAM_ECDSEL_brainpoolP160t1 ? 20 : \
-     domain == kCAAM_ECDSEL_brainpoolP192r1 ? 24 : \
-     domain == kCAAM_ECDSEL_brainpoolP192t1 ? 24 : \
-     domain == kCAAM_ECDSEL_brainpoolP224r1 ? 28 : \
-     domain == kCAAM_ECDSEL_brainpoolP224t1 ? 28 : \
-     domain == kCAAM_ECDSEL_brainpoolP256r1 ? 32 : \
-     domain == kCAAM_ECDSEL_brainpoolP256t1 ? 32 : \
-     domain == kCAAM_ECDSEL_brainpoolP320r1 ? 40 : \
-     domain == kCAAM_ECDSEL_brainpoolP320t1 ? 40 : \
-     domain == kCAAM_ECDSEL_brainpoolP384r1 ? 48 : \
-     domain == kCAAM_ECDSEL_brainpoolP384t1 ? 48 : \
-     domain == kCAAM_ECDSEL_brainpoolP512r1 ? 64 : \
-     domain == kCAAM_ECDSEL_brainpoolP512t1 ? 64 : \
-     domain == kCAAM_ECDSEL_prime192v2      ? 24 : \
-     domain == kCAAM_ECDSEL_prime192v3      ? 24 : \
-     domain == kCAAM_ECDSEL_prime239v1      ? 30 : \
-     domain == kCAAM_ECDSEL_prime239v2      ? 30 : \
-     domain == kCAAM_ECDSEL_prime239v3      ? 30 : \
-     domain == kCAAM_ECDSEL_secp112r1       ? 14 : \
-     domain == kCAAM_ECDSEL_wtls8           ? 14 : \
-     domain == kCAAM_ECDSEL_wtls9           ? 20 : \
-     domain == kCAAM_ECDSEL_secp160k1       ? 20 : \
-     domain == kCAAM_ECDSEL_secp160r1       ? 20 : \
-     domain == kCAAM_ECDSEL_secp160r2       ? 20 : \
-     domain == kCAAM_ECDSEL_secp192k1       ? 24 : \
-     domain == kCAAM_ECDSEL_secp224k1       ? 28 : \
-     domain == kCAAM_ECDSEL_secp256k1       ? 32 : \
-     domain == kCAAM_ECDSEL_B_163           ? 21 : \
-     domain == kCAAM_ECDSEL_B_233           ? 30 : \
-     domain == kCAAM_ECDSEL_B_283           ? 36 : \
-     domain == kCAAM_ECDSEL_B_409           ? 52 : \
-     domain == kCAAM_ECDSEL_B_571           ? 72 : \
-     domain == kCAAM_ECDSEL_K_163           ? 21 : \
-     domain == kCAAM_ECDSEL_K_233           ? 30 : \
-     domain == kCAAM_ECDSEL_K_283           ? 36 : \
-     domain == kCAAM_ECDSEL_K_409           ? 52 : \
-     domain == kCAAM_ECDSEL_K_571           ? 72 : \
-     domain == kCAAM_ECDSEL_wtls1           ? 15 : \
-     domain == kCAAM_ECDSEL_sect113r1       ? 15 : \
-     domain == kCAAM_ECDSEL_c2pnb163v1      ? 21 : \
-     domain == kCAAM_ECDSEL_c2pnb163v2      ? 21 : \
-     domain == kCAAM_ECDSEL_c2pnb163v3      ? 21 : \
-     domain == kCAAM_ECDSEL_sect163r1       ? 21 : \
-     domain == kCAAM_ECDSEL_sect193r1       ? 25 : \
-     domain == kCAAM_ECDSEL_sect193r2       ? 25 : \
-     domain == kCAAM_ECDSEL_sect239k1       ? 25 : \
-                                              0)
+    ((domain) == kCAAM_ECDSEL_P_192           ? 24u : \
+     (domain) == kCAAM_ECDSEL_P_224           ? 28u : \
+     (domain) == kCAAM_ECDSEL_P_256           ? 32u : \
+     (domain) == kCAAM_ECDSEL_P_384           ? 48u : \
+     (domain) == kCAAM_ECDSEL_P_521           ? 66u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP160r1 ? 20u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP160t1 ? 20u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP192r1 ? 24u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP192t1 ? 24u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP224r1 ? 28u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP224t1 ? 28u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP256r1 ? 32u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP256t1 ? 32u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP320r1 ? 40u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP320t1 ? 40u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP384r1 ? 48u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP384t1 ? 48u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP512r1 ? 64u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP512t1 ? 64u : \
+     (domain) == kCAAM_ECDSEL_prime192v2      ? 24u : \
+     (domain) == kCAAM_ECDSEL_prime192v3      ? 24u : \
+     (domain) == kCAAM_ECDSEL_prime239v1      ? 30u : \
+     (domain) == kCAAM_ECDSEL_prime239v2      ? 30u : \
+     (domain) == kCAAM_ECDSEL_prime239v3      ? 30u : \
+     (domain) == kCAAM_ECDSEL_secp112r1       ? 14u : \
+     (domain) == kCAAM_ECDSEL_wtls8           ? 14u : \
+     (domain) == kCAAM_ECDSEL_wtls9           ? 20u : \
+     (domain) == kCAAM_ECDSEL_secp160k1       ? 20u : \
+     (domain) == kCAAM_ECDSEL_secp160r1       ? 20u : \
+     (domain) == kCAAM_ECDSEL_secp160r2       ? 20u : \
+     (domain) == kCAAM_ECDSEL_secp192k1       ? 24u : \
+     (domain) == kCAAM_ECDSEL_secp224k1       ? 28u : \
+     (domain) == kCAAM_ECDSEL_secp256k1       ? 32u : \
+     (domain) == kCAAM_ECDSEL_B_163           ? 21u : \
+     (domain) == kCAAM_ECDSEL_B_233           ? 30u : \
+     (domain) == kCAAM_ECDSEL_B_283           ? 36u : \
+     (domain) == kCAAM_ECDSEL_B_409           ? 52u : \
+     (domain) == kCAAM_ECDSEL_B_571           ? 72u : \
+     (domain) == kCAAM_ECDSEL_K_163           ? 21u : \
+     (domain) == kCAAM_ECDSEL_K_233           ? 30u : \
+     (domain) == kCAAM_ECDSEL_K_283           ? 36u : \
+     (domain) == kCAAM_ECDSEL_K_409           ? 52u : \
+     (domain) == kCAAM_ECDSEL_K_571           ? 72u : \
+     (domain) == kCAAM_ECDSEL_wtls1           ? 15u : \
+     (domain) == kCAAM_ECDSEL_sect113r1       ? 15u : \
+     (domain) == kCAAM_ECDSEL_c2pnb163v1      ? 21u : \
+     (domain) == kCAAM_ECDSEL_c2pnb163v2      ? 21u : \
+     (domain) == kCAAM_ECDSEL_c2pnb163v3      ? 21u : \
+     (domain) == kCAAM_ECDSEL_sect163r1       ? 21u : \
+     (domain) == kCAAM_ECDSEL_sect193r1       ? 25u : \
+     (domain) == kCAAM_ECDSEL_sect193r2       ? 25u : \
+     (domain) == kCAAM_ECDSEL_sect239k1       ? 25u : \
+                                              0u)
 
 /*! @brief CAAM ECC public key length for EC domain */
 #define CAAM_ECC_PUBLIC_KEY_LENGTH(domain) (CAAM_DSA_PUBLIC_KEY_LENGTH(domain) * 2)
 
 /*! @brief CAAM ECC private key length for EC domain */
 #define CAAM_ECC_PRIVATE_KEY_LENGTH(domain)        \
-    (domain == kCAAM_ECDSEL_P_192           ? 24 : \
-     domain == kCAAM_ECDSEL_P_224           ? 28 : \
-     domain == kCAAM_ECDSEL_P_256           ? 32 : \
-     domain == kCAAM_ECDSEL_P_384           ? 48 : \
-     domain == kCAAM_ECDSEL_P_521           ? 66 : \
-     domain == kCAAM_ECDSEL_brainpoolP160r1 ? 20 : \
-     domain == kCAAM_ECDSEL_brainpoolP160t1 ? 20 : \
-     domain == kCAAM_ECDSEL_brainpoolP192r1 ? 24 : \
-     domain == kCAAM_ECDSEL_brainpoolP192t1 ? 24 : \
-     domain == kCAAM_ECDSEL_brainpoolP224r1 ? 28 : \
-     domain == kCAAM_ECDSEL_brainpoolP224t1 ? 28 : \
-     domain == kCAAM_ECDSEL_brainpoolP256r1 ? 32 : \
-     domain == kCAAM_ECDSEL_brainpoolP256t1 ? 32 : \
-     domain == kCAAM_ECDSEL_brainpoolP320r1 ? 40 : \
-     domain == kCAAM_ECDSEL_brainpoolP320t1 ? 40 : \
-     domain == kCAAM_ECDSEL_brainpoolP384r1 ? 48 : \
-     domain == kCAAM_ECDSEL_brainpoolP384t1 ? 48 : \
-     domain == kCAAM_ECDSEL_brainpoolP512r1 ? 64 : \
-     domain == kCAAM_ECDSEL_brainpoolP512t1 ? 64 : \
-     domain == kCAAM_ECDSEL_prime192v2      ? 24 : \
-     domain == kCAAM_ECDSEL_prime192v3      ? 24 : \
-     domain == kCAAM_ECDSEL_prime239v1      ? 30 : \
-     domain == kCAAM_ECDSEL_prime239v2      ? 30 : \
-     domain == kCAAM_ECDSEL_prime239v3      ? 30 : \
-     domain == kCAAM_ECDSEL_secp112r1       ? 14 : \
-     domain == kCAAM_ECDSEL_wtls8           ? 15 : \
-     domain == kCAAM_ECDSEL_wtls9           ? 21 : \
-     domain == kCAAM_ECDSEL_secp160k1       ? 21 : \
-     domain == kCAAM_ECDSEL_secp160r1       ? 21 : \
-     domain == kCAAM_ECDSEL_secp160r2       ? 21 : \
-     domain == kCAAM_ECDSEL_secp192k1       ? 24 : \
-     domain == kCAAM_ECDSEL_secp224k1       ? 29 : \
-     domain == kCAAM_ECDSEL_secp256k1       ? 32 : \
-     domain == kCAAM_ECDSEL_B_163           ? 21 : \
-     domain == kCAAM_ECDSEL_B_233           ? 30 : \
-     domain == kCAAM_ECDSEL_B_283           ? 36 : \
-     domain == kCAAM_ECDSEL_B_409           ? 52 : \
-     domain == kCAAM_ECDSEL_B_571           ? 72 : \
-     domain == kCAAM_ECDSEL_K_163           ? 21 : \
-     domain == kCAAM_ECDSEL_K_233           ? 29 : \
-     domain == kCAAM_ECDSEL_K_283           ? 36 : \
-     domain == kCAAM_ECDSEL_K_409           ? 51 : \
-     domain == kCAAM_ECDSEL_K_571           ? 72 : \
-     domain == kCAAM_ECDSEL_wtls1           ? 14 : \
-     domain == kCAAM_ECDSEL_sect113r1       ? 15 : \
-     domain == kCAAM_ECDSEL_c2pnb163v1      ? 21 : \
-     domain == kCAAM_ECDSEL_c2pnb163v2      ? 21 : \
-     domain == kCAAM_ECDSEL_c2pnb163v3      ? 21 : \
-     domain == kCAAM_ECDSEL_sect163r1       ? 21 : \
-     domain == kCAAM_ECDSEL_sect193r1       ? 25 : \
-     domain == kCAAM_ECDSEL_sect193r2       ? 25 : \
-     domain == kCAAM_ECDSEL_sect239k1       ? 25 : \
-                                              0)
+    ((domain) == kCAAM_ECDSEL_P_192           ? 24u : \
+     (domain) == kCAAM_ECDSEL_P_224           ? 28u : \
+     (domain) == kCAAM_ECDSEL_P_256           ? 32u : \
+     (domain) == kCAAM_ECDSEL_P_384           ? 48u : \
+     (domain) == kCAAM_ECDSEL_P_521           ? 66u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP160r1 ? 20u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP160t1 ? 20u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP192r1 ? 24u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP192t1 ? 24u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP224r1 ? 28u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP224t1 ? 28u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP256r1 ? 32u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP256t1 ? 32u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP320r1 ? 40u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP320t1 ? 40u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP384r1 ? 48u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP384t1 ? 48u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP512r1 ? 64u : \
+     (domain) == kCAAM_ECDSEL_brainpoolP512t1 ? 64u : \
+     (domain) == kCAAM_ECDSEL_prime192v2      ? 24u : \
+     (domain) == kCAAM_ECDSEL_prime192v3      ? 24u : \
+     (domain) == kCAAM_ECDSEL_prime239v1      ? 30u : \
+     (domain) == kCAAM_ECDSEL_prime239v2      ? 30u : \
+     (domain) == kCAAM_ECDSEL_prime239v3      ? 30u : \
+     (domain) == kCAAM_ECDSEL_secp112r1       ? 14u : \
+     (domain) == kCAAM_ECDSEL_wtls8           ? 15u : \
+     (domain) == kCAAM_ECDSEL_wtls9           ? 21u : \
+     (domain) == kCAAM_ECDSEL_secp160k1       ? 21u : \
+     (domain) == kCAAM_ECDSEL_secp160r1       ? 21u : \
+     (domain) == kCAAM_ECDSEL_secp160r2       ? 21u : \
+     (domain) == kCAAM_ECDSEL_secp192k1       ? 24u : \
+     (domain) == kCAAM_ECDSEL_secp224k1       ? 29u : \
+     (domain) == kCAAM_ECDSEL_secp256k1       ? 32u : \
+     (domain) == kCAAM_ECDSEL_B_163           ? 21u : \
+     (domain) == kCAAM_ECDSEL_B_233           ? 30u : \
+     (domain) == kCAAM_ECDSEL_B_283           ? 36u : \
+     (domain) == kCAAM_ECDSEL_B_409           ? 52u : \
+     (domain) == kCAAM_ECDSEL_B_571           ? 72u : \
+     (domain) == kCAAM_ECDSEL_K_163           ? 21u : \
+     (domain) == kCAAM_ECDSEL_K_233           ? 29u : \
+     (domain) == kCAAM_ECDSEL_K_283           ? 36u : \
+     (domain) == kCAAM_ECDSEL_K_409           ? 51u : \
+     (domain) == kCAAM_ECDSEL_K_571           ? 72u : \
+     (domain) == kCAAM_ECDSEL_wtls1           ? 14u : \
+     (domain) == kCAAM_ECDSEL_sect113r1       ? 15u : \
+     (domain) == kCAAM_ECDSEL_c2pnb163v1      ? 21u : \
+     (domain) == kCAAM_ECDSEL_c2pnb163v2      ? 21u : \
+     (domain) == kCAAM_ECDSEL_c2pnb163v3      ? 21u : \
+     (domain) == kCAAM_ECDSEL_sect163r1       ? 21u : \
+     (domain) == kCAAM_ECDSEL_sect193r1       ? 25u : \
+     (domain) == kCAAM_ECDSEL_sect193r2       ? 25u : \
+     (domain) == kCAAM_ECDSEL_sect239k1       ? 25u : \
+                                              0u)
 
 /*! @brief CAAM blacken key size for ECB encryption
  *
@@ -553,81 +553,81 @@ typedef struct _caam_rng_user_config
 /*! @brief CAAM FIFOST types. */
 typedef enum _caam_fifost_type
 {
-    kCAAM_FIFOST_Type_Ecb_Jkek = 0x24, /*!< Key Register, encrypted using AES-ECB with the job
+    kCAAM_FIFOST_Type_Ecb_Jkek = 0x24u, /*!< Key Register, encrypted using AES-ECB with the job
 descriptor key encryption key. */
-    kCAAM_FIFOST_Type_Ecb_Tkek = 0x25, /*!< Key Register, encrypted using AES-ECB with the
+    kCAAM_FIFOST_Type_Ecb_Tkek = 0x25u, /*!< Key Register, encrypted using AES-ECB with the
 trusted descriptor key encryption key. */
-    kCAAM_FIFOST_Type_Ccm_Jkek = 0x14, /*!< Key Register, encrypted using AES-CCM with the
+    kCAAM_FIFOST_Type_Ccm_Jkek = 0x14u, /*!< Key Register, encrypted using AES-CCM with the
 job descriptor key encryption key. */
-    kCAAM_FIFOST_Type_Ccm_Tkek = 0x15, /*!< Key register, encrypted using AES-CCM with the
+    kCAAM_FIFOST_Type_Ccm_Tkek = 0x15u, /*!< Key register, encrypted using AES-CCM with the
 trusted descriptor key encryption key. */
 } caam_fifost_type_t;
 
 /*! @brief CAAM descriptor types. */
 typedef enum _caam_desc_type
 {
-    kCAAM_Descriptor_Type_Ecb_Jkek = 0x0, /*!< Key Register, encrypted using AES-ECB with the job
+    kCAAM_Descriptor_Type_Ecb_Jkek = 0x0u, /*!< Key Register, encrypted using AES-ECB with the job
 descriptor key encryption key. */
-    kCAAM_Descriptor_Type_Ecb_Tkek = 0x2, /*!< Key Register, encrypted using AES-ECB with the
+    kCAAM_Descriptor_Type_Ecb_Tkek = 0x2u, /*!< Key Register, encrypted using AES-ECB with the
 trusted descriptor key encryption key. */
-    kCAAM_Descriptor_Type_Ccm_Jkek = 0x1, /*!< Key Register, encrypted using AES-CCM with the
+    kCAAM_Descriptor_Type_Ccm_Jkek = 0x1u, /*!< Key Register, encrypted using AES-CCM with the
 job descriptor key encryption key. */
-    kCAAM_Descriptor_Type_Ccm_Tkek = 0x3, /*!< Key register, encrypted using AES-CCM with the
+    kCAAM_Descriptor_Type_Ccm_Tkek = 0x3u, /*!< Key register, encrypted using AES-CCM with the
 trusted descriptor key encryption key. */
 } caam_desc_type_t;
 
 /*! @brief CAAM key types. */
 typedef enum _caam_key_type
 {
-    kCAAM_Key_Type_None     = 0x0,
-    kCAAM_Key_Type_Ecb_Jkek = 0x80 << 15, /*!< Key Register, encrypted using AES-ECB with the job
+    kCAAM_Key_Type_None     = 0x0ul,
+    kCAAM_Key_Type_Ecb_Jkek = 0x80ul << 15, /*!< Key Register, encrypted using AES-ECB with the job
   descriptor key encryption key. */
-    kCAAM_Key_Type_Ecb_Tkek = 0x81 << 15, /*!< Key Register, encrypted using AES-ECB with the
+    kCAAM_Key_Type_Ecb_Tkek = 0x81ul << 15, /*!< Key Register, encrypted using AES-ECB with the
   trusted descriptor key encryption key. */
-    kCAAM_Key_Type_Ccm_Jkek = 0xA0 << 15, /*!< Key Register, encrypted using AES-CCM with the
+    kCAAM_Key_Type_Ccm_Jkek = 0xA0ul << 15, /*!< Key Register, encrypted using AES-CCM with the
 job descriptor key encryption key. */
-    kCAAM_Key_Type_Ccm_Tkek = 0xA1 << 15, /*!< Key register, encrypted using AES-CCM with the
+    kCAAM_Key_Type_Ccm_Tkek = 0xA1ul << 15, /*!< Key register, encrypted using AES-CCM with the
 trusted descriptor key encryption key. */
 } caam_key_type_t;
 
 /*! @brief CAAM ecc encryption types. */
 typedef enum _caam_ecc_encryption_type
 {
-    kCAAM_Ecc_Encryption_Type_None     = 0x0,
-    kCAAM_Ecc_Encryption_Type_Ecb_Jkek = 0x1 << 2, /*!< Key Register, encrypted using AES-ECB with the job
+    kCAAM_Ecc_Encryption_Type_None     = 0x0u,
+    kCAAM_Ecc_Encryption_Type_Ecb_Jkek = 0x1u << 2, /*!< Key Register, encrypted using AES-ECB with the job
         descriptor key encryption key. */
-    kCAAM_Ecc_Encryption_Type_Ccm_Jkek = 0x5 << 2, /*!< Key Register, encrypted using AES-CCM with the
+    kCAAM_Ecc_Encryption_Type_Ccm_Jkek = 0x5u << 2, /*!< Key Register, encrypted using AES-CCM with the
     job descriptor key encryption key. */
 } caam_ecc_encryption_type_t;
 
 /*! @brief CAAM rsa key encryption types. */
 typedef enum _caam_rsa_key_type
 {
-    kCAAM_Rsa_Key_Type_None     = 0x0,
-    kCAAM_Rsa_Key_Type_Ecb_Jkek = 0x4 << 4, /*!< Key Register, encrypted using AES-ECB with the job
+    kCAAM_Rsa_Key_Type_None     = 0x0u,
+    kCAAM_Rsa_Key_Type_Ecb_Jkek = 0x4u << 4, /*!< Key Register, encrypted using AES-ECB with the job
         descriptor key encryption key. */
-    kCAAM_Rsa_Key_Type_Ccm_Jkek = 0x5 << 4, /*!< Key Register, encrypted using AES-CCM with the
+    kCAAM_Rsa_Key_Type_Ccm_Jkek = 0x5u << 4, /*!< Key Register, encrypted using AES-CCM with the
     job descriptor key encryption key. */
 } caam_rsa_key_type_t;
 
 /*! @brief CAAM rsa encryption types. */
 typedef enum _caam_rsa_encryption_type
 {
-    kCAAM_Rsa_Encryption_Type_None     = 0x00,
-    kCAAM_Rsa_Encryption_Type_Ecb_Jkek = 0x01, /*!< Key Register, encrypted using AES-ECB with the job
+    kCAAM_Rsa_Encryption_Type_None     = 0x00u,
+    kCAAM_Rsa_Encryption_Type_Ecb_Jkek = 0x01u, /*!< Key Register, encrypted using AES-ECB with the job
       descriptor key encryption key. */
-    kCAAM_Rsa_Encryption_Type_Ecb_Tkek = 0x05, /*!< Key Register, encrypted using AES-ECB with the
+    kCAAM_Rsa_Encryption_Type_Ecb_Tkek = 0x05u, /*!< Key Register, encrypted using AES-ECB with the
      trusted descriptor key encryption key. */
-    kCAAM_Rsa_Encryption_Type_Ccm_Jkek = 0x03, /*!< Key Register, encrypted using AES-CCM with the
+    kCAAM_Rsa_Encryption_Type_Ccm_Jkek = 0x03u, /*!< Key Register, encrypted using AES-CCM with the
   job descriptor key encryption key. */
-    kCAAM_Rsa_Encryption_Type_Ccm_Tkek = 0x07, /*!< Key register, encrypted using AES-CCM with the
+    kCAAM_Rsa_Encryption_Type_Ccm_Tkek = 0x07u, /*!< Key register, encrypted using AES-CCM with the
   trusted descriptor key encryption key. */
 } caam_rsa_encryption_type_t;
 
 typedef enum _caam_rsa_format_type
 {
-    kCAAM_Rsa_Format_Type_None  = 0x00, /*!< No formatting */
-    kCAAM_Rsa_Format_Type_PKCS1 = 0x01, /*!< EME-PKCS1-v1_5 encryption decoding function */
+    kCAAM_Rsa_Format_Type_None  = 0x00u, /*!< No formatting */
+    kCAAM_Rsa_Format_Type_PKCS1 = 0x01u, /*!< EME-PKCS1-v1_5 encryption decoding function */
 } caam_rsa_format_type_t;
 
 // #define KEYBLOB_USE_SECURE_MEMORY 1  // Define when secure memory mode is used
