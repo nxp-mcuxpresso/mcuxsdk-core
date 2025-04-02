@@ -11,6 +11,7 @@
   - Added API to configure the priority to traffic class map.
   - Added APIs to query table entry and get maximum entry number for Frame Modification Table.
   - Added APIs to configure Frame preemption.
+  - Added APIs to configure PSRCR and PGCR registers to implement HSR feature.
 - Improvements
   - keep netc_tb_sgi_rsp_data_t local to the low level driver functions for SGI table entry query.
   - Converted to use preinitVsi callback for VSI pre-init.

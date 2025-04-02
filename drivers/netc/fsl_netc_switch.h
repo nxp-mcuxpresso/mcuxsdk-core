@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -2458,6 +2458,65 @@ static inline status_t SWT_SetPortIPV2QMR(swt_handle_t *handle, netc_hw_port_idx
         NETC_PORT_PIPV2QMR0_IPV0_Q(ipvToTC[0]);
     return kStatus_Success;
 }
+
+/*!
+ * @brief Set MAC station move allowed on Switch port
+ *
+ * @param handle
+ * @param portIdx port index
+ * @param enMacStationMove enable MAC station to moved
+ * @return kStatus_Success
+ */
+static inline status_t SWT_SetPortSTAMVD(swt_handle_t *handle, netc_hw_port_idx_t portIdx, bool enMacStationMove)
+{
+    if (enMacStationMove)
+	handle->hw.ports[portIdx].port->BPCR &= (~NETC_PORT_BPCR_STAMVD_MASK);
+    else
+	handle->hw.ports[portIdx].port->BPCR |= NETC_PORT_BPCR_STAMVD(1);
+
+    return kStatus_Success;
+}
+
+#if defined(FSL_FEATURE_NETC_HAS_PORT_PSRCR)
+/*!
+ * @brief Set the port seamless redundancy configuration
+ *
+ * Set the port seamless redundancy configuration.
+ *
+ * @param handle
+ * @param portIdx port index
+ * @param sr netc_swt_port_sr_config
+ * @return kStatus_Success
+ */
+static inline status_t SWT_SetPortSR(swt_handle_t *handle, netc_hw_port_idx_t portIdx, netc_swt_port_sr_config *sr)
+{
+    handle->hw.ports[portIdx].port->PSRCR = NETC_PORT_PSRCR_ISQG_EID(sr->isqEID) |
+	NETC_PORT_PSRCR_PATHID(sr->pathId) |
+	NETC_PORT_PSRCR_TX_SQTA(sr->txSqta) |
+	NETC_PORT_PSRCR_SRC_PORT_FLT(sr->srcPortFlt) |
+	NETC_PORT_PSRCR_SDFA(sr->sdfa) |
+	NETC_PORT_PSRCR_SR_PORT(sr->srPort);
+    return kStatus_Success;
+}
+#endif
+
+#if defined(FSL_FEATURE_NETC_HAS_PORT_PGCR)
+/*!
+ * @brief Set the port group configuration
+ *
+ * Set the port group configuration.
+ *
+ * @param handle
+ * @param portIdx port index
+ * @param pgid Port Group ID
+ * @return kStatus_Success
+ */
+static inline status_t SWT_SetPortGroup(swt_handle_t *handle, netc_hw_port_idx_t portIdx, uint8_t pgid)
+{
+    handle->hw.ports[portIdx].port->PGCR = NETC_PORT_PGCR_PGID(pgid);
+    return kStatus_Success;
+}
+#endif
 
 /*! @} */ // end of netc_swt_stat
 #if !(defined(__GNUC__) || defined(__ICCARM__))

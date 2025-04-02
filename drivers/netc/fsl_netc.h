@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -4027,6 +4027,17 @@ typedef struct _netc_switch_inuse_fdb_statistic
     uint16_t dynamicEntries;    /*!< Number of dynamic FDB entries in-use (hash-based and CAM-based entries). */
     uint16_t dynamicEntriesHWM; /*!< High water mark of dynamic entries in-use in the FDB table. */
 } netc_switch_inuse_fdb_statistic_t;
+
+/*! @brief Port seamless redundancy configuration */
+typedef struct _netc_swt_port_sr_config
+{
+    uint16_t isqEID;
+    uint8_t pathId;
+    bool txSqta;
+    bool srcPortFlt;
+    bool sdfa;
+    bool srPort;
+} netc_swt_port_sr_config;
 
 /*! @} */ // end of netc_hw_switch
 #if !(defined(__GNUC__) || defined(__ICCARM__))
