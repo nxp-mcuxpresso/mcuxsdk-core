@@ -19,7 +19,7 @@
  * Definitions
  ******************************************************************************/
 /*! @brief ADC_ETC driver version */
-#define FSL_ADC_ETC_DRIVER_VERSION (MAKE_VERSION(2, 3, 1)) /*!< Version 2.3.1. */
+#define FSL_ADC_ETC_DRIVER_VERSION (MAKE_VERSION(2, 3, 2)) /*!< Version 2.3.2. */
 /*! @brief The mask of status flags cleared by writing 1. */
 #define ADC_ETC_DMA_CTRL_TRGn_REQ_MASK 0xFF0000U
 

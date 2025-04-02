@@ -1,5 +1,12 @@
 # ADC_ETC
 
+## [2.3.2]
+
+- Improvements
+  - Corrected that FSL_FEATURE_ADC_ETC_HAS_NO_TSC1_TRIG should be used instead
+    of FSL_FEATURE_ADC_ETC_HAS_NO_TSC0_TRIG in some places.
+  - For ADC_ETC without TSC trigger source, CTRL [bit 30] shall be cleared explicitly.
+
 ## [2.3.1]
 
 - Improvements
