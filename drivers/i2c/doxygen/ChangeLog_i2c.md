@@ -1,5 +1,10 @@
 # I2C
 
+## [2.0.10]
+
+- Bug Fixes
+  - Fixed coverity issues.
+
 ## [2.0.9]
 
 - Bug Fixes
