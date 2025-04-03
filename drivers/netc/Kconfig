@@ -5,7 +5,8 @@
 config MCUX_DEPENDENCY_COMPONENT_driver.netc_rt1180
     bool
     default y if MCUX_HW_DEVICE_ID_MIMXRT1189xxxxx || MCUX_HW_DEVICE_ID_MIMXRT1187xxxxx ||\
-                 MCUX_HW_DEVICE_ID_MIMXRT1182xxxxx || MCUX_HW_DEVICE_ID_MIMXRT1181xxxxx
+                 MCUX_HW_DEVICE_ID_MIMXRT1186xxxxx || MCUX_HW_DEVICE_ID_MIMXRT1182xxxxx ||\
+                 MCUX_HW_DEVICE_ID_MIMXRT1181xxxxx
 
 config MCUX_DEPENDENCY_COMPONENT_driver.netc_imx95
     bool
