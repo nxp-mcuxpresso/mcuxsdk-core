@@ -1,5 +1,9 @@
 # CACHE LMEM
 
+## [2.1.0]
+- Improvements
+  - Added new feature macro to support some device do not support PCCCR[ENWRBUF] bit field.
+
 ## [2.0.6]
 
 - Bug Fixes
