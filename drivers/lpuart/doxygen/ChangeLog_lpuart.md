@@ -1,5 +1,10 @@
 # LPUART
 
+## [2.10.0]
+
+- New Feature
+  - Added support to configure RTS watermark.
+
 ## [2.9.4]
 
 - Improvements

@@ -577,6 +577,10 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
             /* Enable the CTS(clear-to-send) function. */
             base->MODIR |= LPUART_MODIR_TXCTSE_MASK;
         }
+#if defined(FSL_FEATURE_LPUART_HAS_MODIR_RTSWATER) && FSL_FEATURE_LPUART_HAS_MODIR_RTSWATER
+        base->MODIR &= ~LPUART_MODIR_RTSWATER_MASK;
+        base->MODIR |= LPUART_MODIR_RTSWATER(config->rtsWatermark);
+#endif
 #endif
 
         /* Set data bits order. */
@@ -725,6 +729,9 @@ void LPUART_GetDefaultConfig(lpuart_config_t *config)
     config->enableTxCTS = false;
     config->txCtsConfig = kLPUART_CtsSampleAtStart;
     config->txCtsSource = kLPUART_CtsSourcePin;
+#if defined(FSL_FEATURE_LPUART_HAS_MODIR_RTSWATER) && FSL_FEATURE_LPUART_HAS_MODIR_RTSWATER
+    config->rtsWatermark = 0U;
+#endif
 #endif
     config->rxIdleType   = kLPUART_IdleTypeStartBit;
     config->rxIdleConfig = kLPUART_IdleCharacter1;

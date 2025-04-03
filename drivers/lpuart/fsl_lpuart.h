@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPUART driver version. */
-#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 9, 4))
+#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 10, 0))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
@@ -258,6 +258,9 @@ typedef struct _lpuart_config
     bool enableTxCTS;                         /*!< TX CTS enable */
     lpuart_transmit_cts_source_t txCtsSource; /*!< TX CTS source */
     lpuart_transmit_cts_config_t txCtsConfig; /*!< TX CTS configure */
+#if defined(FSL_FEATURE_LPUART_HAS_MODIR_RTSWATER) && FSL_FEATURE_LPUART_HAS_MODIR_RTSWATER
+    uint8_t rtsWatermark;                     /*!< RTS watermark */
+#endif
 #endif
     lpuart_idle_type_select_t rxIdleType;     /*!< RX IDLE type. */
     lpuart_idle_config_t rxIdleConfig;        /*!< RX IDLE configuration. */
