@@ -1,0 +1,28 @@
+/*!
+@defgroup lpacmp LPACMP: Low-Power Analog Comparator Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Low-Power Analog Comparator (LPACMP) 
+         module of MCUXpresso SDK devices. This driver is designed to facilitate the setup and management
+         of the LPACMP module, offering various functionalities for configuring channels, setting
+         operation modes, and handling interrupts.
+
+Based on features of the LPACMP module, this driver is divided into the following function groups:
+
+# LPACMP Initialization, De-Initialization, and Configuration
+    Functions in this group are used for:
+    - Initializing the LPACMP module.
+    - De-initializing the LPACMP module.
+    - Enabling/disabling the comparator module.
+    - Configuring comparator modes and intervals.
+
+# LPACMP Channel Configuration
+    Functions in this group are used for:
+    - Configuring individual comparator channels.
+    - Enabling/disabling the wakeup to SMM and trigger output for each channel.
+    - Setting delay values, comparison polarities, and trigger output widths.
+
+# LPACMP Interrupt Control
+    Functions in this group are used for:
+    - Enabling/disabling match interrupts for specific channels.
+    - Clearing comparison interrupt status flags.
+    - Retrieving the current interrupt status.
+*/
