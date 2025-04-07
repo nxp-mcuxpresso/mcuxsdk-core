@@ -172,6 +172,7 @@ class ExportApp(WestCommand):
                            default='armgcc', help='Specify toolchain')
         parser.add_argument('-o', '--output-dir', required=True,
                             help='output directory to hold the freestanding project')
+        parser.add_argument('--force', action='store_true', default=False, help="Force to overwrite the output directory if it exists.")
         parser.add_argument('--build', action="store_true", default=False, help="Build the project after creating.")
         return parser
     
@@ -223,7 +224,8 @@ class ExportApp(WestCommand):
             except InvalidCmakeMethod as exec:
                 print(str(exec))
                 self.die(f'Script error, please contact us.')
-        open(dest_list_file, 'w').write(os.linesep.join(new_list_content))
+        # Force use \n to avoid multiple line breaks in windows
+        open(dest_list_file, 'w').write("\n".join(new_list_content))
         # self.format_listfile(dest_list_file)
         self.combine_prj_conf(source_dir)
         self.update_kconfig_path(source_dir)
@@ -548,7 +550,10 @@ class ExportApp(WestCommand):
             'example.yml' in os.listdir(app),
             "{} doesn't contain a example.yml".format(app))
         out = self.args.output_dir
-        self.check_force(
+        if self.args.force and os.path.isdir(out):
+            shutil.rmtree(out)
+        else:
+            self.check_force(
             (not os.path.isdir(out)) or (len(os.listdir(out)) == 0),
             f'Output directory {out} is not empty, please remove it first')
 
