@@ -2,6 +2,7 @@
 __variables__:
   MCUX_SOURCE_CONDITION: COMPILERS TOOLCHAINS CORES CORE_IDS BOARDS DEVICE_IDS FPU
     DSP MPU TRUSTZONE COMPONENTS
+  SYSBUILD_SINGLE_VALUE: APPLICATION SOURCE_DIR BOARD CORE_ID CONFIG TOOLCHAIN
 if: {}
 endif: {}
 project:
@@ -128,3 +129,7 @@ mcux_add_linker_symbol:
 mcux_remove_linker_symbol:
   single_value: SYMBOLS
   multi_value: TARGETS
+externalmcuxproject_add:
+  single_value: ${SYSBUILD_SINGLE_VALUE}
+externalzephyrproject_add:
+  single_value: ${SYSBUILD_SINGLE_VALUE}

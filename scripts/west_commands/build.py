@@ -832,7 +832,7 @@ class Build(Forceable):
             if cmake_opt_dict.get('core_id'):
                 board_core = board_core + '@' + cmake_opt_dict['core_id']
             op = sdk_project_target.MCUXRepoProjects()
-            if 'prjrootdirpath' in cmake_opt_dict:
+            if cmake_opt_dict.get('sdkrootdirpath', '') not in self.source_dir:
                 # Freestanding example's example.yml is out of tree, need parse it to get the real example.yml location
                 source_example_yml = yaml.safe_load(open(os.path.join(self.source_dir, 'example.yml'), 'r'))
                 _, example_data = next(iter(source_example_yml.items()))
