@@ -71,7 +71,9 @@ middleware/vglite/
 middleware/vit/
 middleware/voice_seeker/
 middleware/voice_spot/
-
+middleware/mcu_bootloader/
+middleware/secure_storage/
+middleware/freemaster_internal/
 migrate/
 rtos/
 
