@@ -477,8 +477,11 @@ static inline void ASRC_EnableResamplerBypass(ASRC_Type *base, asrc_context_t co
  */
 static inline void ASRC_SetContextChannelNumber(ASRC_Type *base, asrc_context_t context, uint32_t channels)
 {
-    base->CTX_CTRL[context] &= ~ASRC_CTX_CTRL_NUM_CH_EN_MASK;
-    base->CTX_CTRL[context] |= ASRC_CTX_CTRL_NUM_CH_EN(channels - 1U);
+    if (channels > 0U && channels <= 32U)
+    {
+        base->CTX_CTRL[context] &= ~ASRC_CTX_CTRL_NUM_CH_EN_MASK;
+        base->CTX_CTRL[context] |= ASRC_CTX_CTRL_NUM_CH_EN(channels - 1U);
+    }
 }
 
 /*!
