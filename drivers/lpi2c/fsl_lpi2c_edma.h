@@ -57,7 +57,7 @@ struct _lpi2c_master_edma_handle
     LPI2C_Type *base;                 /*!< LPI2C base pointer. */
     bool isBusy;                      /*!< Transfer state machine current state. */
     uint8_t nbytes;                   /*!< eDMA minor byte transfer count initially configured. */
-    uint16_t commandBuffer[10];       /*!< LPI2C command sequence. When all 10 command words are used:
+    uint16_t commandBuffer[20];       /*!< LPI2C command sequence. When all 10 command words are used:
          Start&addr&write[1 word] + subaddr[4 words] + restart&addr&read[1 word] + receive&Size[4 words] */
     lpi2c_master_transfer_t transfer; /*!< Copy of the current transfer info. */
     lpi2c_master_edma_transfer_callback_t completionCallback; /*!< Callback function pointer. */
@@ -65,6 +65,9 @@ struct _lpi2c_master_edma_handle
     edma_handle_t *rx;                                        /*!< Handle for receive DMA channel. */
     edma_handle_t *tx;                                        /*!< Handle for transmit DMA channel. */
     edma_tcd_t tcds[3]; /*!< Software TCD. Three are allocated to provide enough room to align to 32-bytes. */
+    uint32_t remainingCommand;        /* Number of the remaining commands to be copied by the interrupt. */
+    uint32_t commandIndex;            /* Head of the remaing commands. */
+    bool enableTxReadyFlag;           /* Flag to enable interrupt for copying remainig commands. */
 };
 
 /*! @} */
