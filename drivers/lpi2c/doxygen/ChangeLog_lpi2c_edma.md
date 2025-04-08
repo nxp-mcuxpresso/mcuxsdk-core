@@ -1,5 +1,10 @@
 # LPI2C_EDMA
 
+## [2.4.4]
+
+- Improvements
+  - Added support for 2KB data transfer
+
 ## [2.4.3]
 
 - Improvements
