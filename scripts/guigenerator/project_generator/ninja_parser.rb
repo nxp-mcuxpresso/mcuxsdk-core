@@ -455,7 +455,7 @@ class NinjaParser
   end
   #for preifx like --preinclude/--include/--config_def may have several configs, must keep the prefix for each config
   def preprocess_flags_with_prefix(all_flags)
-    keep_prefix = ["--preinclude", "-include", "--config_def",  "-P", "--diag_suppress"]
+    keep_prefix = ["--preinclude", "-include", "--config_def",  "-P", "--diag_suppress", "-Xlinker"]
     result = []
 
     all_flags.each_with_index do |flag, index|
@@ -545,7 +545,7 @@ class NinjaParser
       # For gui project, project file is in toolchain/.. folder
       path = File.join('..', relative_path)
     end
-    path
+    Pathname.new(File.join('.', path)).cleanpath.to_s
   end
 
   def parse_prebuild

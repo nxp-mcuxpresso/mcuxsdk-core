@@ -888,6 +888,12 @@ module SDKGenerator
         # Add assembler macros
         if content.key?('as-define')
           content['as-define']&.each do |define_name, define_value|
+            if %w[armgcc mdk mcux armds xcc codewarrior].include?(tool_key)
+              if define_value && define_value.class == String && define_value.match(/\"(.*)\"/)
+                define_value = '\\"' + Regexp.last_match(1) + '\\"' unless tool_key == 'mcux'
+                define_value = '\'' + define_value + '\''
+              end
+            end
             project_instance.add_assembler_macro(identifier, define_name, define_value)
           end
         end

@@ -410,7 +410,14 @@ module CMake
             if value.nil?
               @as_marco[target].push("-D#{name}")
             else
-              @as_marco[target].push("-D#{name}=#{value}")
+              result = value.to_s.match(/\\"(\S+)\\"/)
+              if result && result[1]
+                # use target_compile_definitions for as and cc
+                @cc_marco_str[target] = [] unless @cc_marco_str[target]
+                @cc_marco_str[target].push_uniq "#{name}=\"#{result[1]}\""
+              else
+                @as_marco[target].push("-D#{name}=#{value}")
+              end
             end
             # @uvproj_file.assemblerTab.add_define(target, "#{name}=#{value}")
         end
