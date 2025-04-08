@@ -130,7 +130,22 @@ void PDM_ReadNonBlocking(PDM_Type *base, uint32_t startChannel, uint32_t channel
     {
         for (j = 0; j < channelNums; j++)
         {
-            *buffer++ = (int16_t)base->DATACH[startChannel + j];
+            uint32_t dataValue = base->DATACH[startChannel + j];
+
+            if (dataValue > INT16_MAX)
+            {
+                // Handle overflow: saturate to INT16_MAX or use an error handling mechanism
+                *buffer++ = INT16_MAX;
+            }
+            else if (dataValue < INT16_MIN)
+            {
+                // Handle underflow: saturate to INT16_MIN
+                *buffer++ = INT16_MIN;
+            }
+            else
+            {
+                *buffer++ = (int16_t)dataValue;
+            }
         }
     }
 }
@@ -148,7 +163,15 @@ static status_t PDM_ValidateSrcClockRate(uint32_t channelMask,
     {
         if (((channelMask >> i) & 0x01U) != 0U)
         {
-            enabledChannel++;
+            if (enabledChannel < (uint32_t)FSL_FEATURE_PDM_CHANNEL_NUM)
+            {
+                enabledChannel++;
+            }
+            else
+            {
+                // Handle error: too many channels enabled
+                return kStatus_Fail;
+            }
         }
     }
 
@@ -191,7 +214,10 @@ static status_t PDM_ValidateSrcClockRate(uint32_t channelMask,
 
     /* validate the minimum clock divider */
     /* 2U is for canculating k, 100U is for determing the specific float number of clock divider */
-    if (((regDiv * k) / 2U * 100U) < (((10U + factor * enabledChannel) * 100U / (8U * osr)) * k / 2U))
+    uint32_t leftSide = (regDiv * k) / 2U * 100U;
+    uint32_t rightSide = ((10U + factor * enabledChannel) * 100U / (8U * osr)) * k / 2U;
+
+    if (leftSide < rightSide)
     {
         return kStatus_Fail;
     }
@@ -820,8 +846,10 @@ void PDM_SetHwvadConfig(PDM_Type *base, const pdm_hwvad_config_t *config)
     /* Configure VAD0_CTRL_2 register */
     base->VAD0_CTRL_2 =
         (PDM_VAD0_CTRL_2_VADFRENDIS((config->enableFrameEnergy == true) ? 0U : 1U) |
-         PDM_VAD0_CTRL_2_VADPREFEN(config->enablePreFilter) | PDM_VAD0_CTRL_2_VADFRAMET(config->frameTime) |
-         PDM_VAD0_CTRL_2_VADINPGAIN(config->inputGain) | PDM_VAD0_CTRL_2_VADHPF(config->cutOffFreq));
+         PDM_VAD0_CTRL_2_VADPREFEN((config->enablePreFilter) ? 1UL : 0UL) |
+         PDM_VAD0_CTRL_2_VADFRAMET(config->frameTime) |
+         PDM_VAD0_CTRL_2_VADINPGAIN(config->inputGain) |
+         PDM_VAD0_CTRL_2_VADHPF(config->cutOffFreq));
 }
 
 /*!
@@ -852,10 +880,12 @@ void PDM_SetHwvadNoiseFilterConfig(PDM_Type *base, const pdm_hwvad_noise_filter_
     assert(config != NULL);
 
     base->VAD0_NCONFIG =
-        (PDM_VAD0_NCONFIG_VADNFILAUTO(config->enableAutoNoiseFilter) |
-         PDM_VAD0_NCONFIG_VADNOREN(config->enableNoiseDetectOR) | PDM_VAD0_NCONFIG_VADNMINEN(config->enableNoiseMin) |
+        (PDM_VAD0_NCONFIG_VADNFILAUTO((uint32_t)(config->enableAutoNoiseFilter ? 1UL : 0UL)) |
+         PDM_VAD0_NCONFIG_VADNOREN((uint32_t)(config->enableNoiseDetectOR ? 1UL : 0UL)) |
+         PDM_VAD0_NCONFIG_VADNMINEN((uint32_t)(config->enableNoiseMin ? 1UL : 0UL)) |
          PDM_VAD0_NCONFIG_VADNDECEN(config->enableNoiseDecimation) |
-         PDM_VAD0_NCONFIG_VADNFILADJ(config->noiseFilterAdjustment) | PDM_VAD0_NCONFIG_VADNGAIN(config->noiseGain));
+         PDM_VAD0_NCONFIG_VADNFILADJ(config->noiseFilterAdjustment) |
+         PDM_VAD0_NCONFIG_VADNGAIN(config->noiseGain));
 }
 
 /*!
@@ -871,8 +901,10 @@ void PDM_SetHwvadZeroCrossDetectorConfig(PDM_Type *base, const pdm_hwvad_zero_cr
     uint32_t zcd = (base->VAD0_ZCD & (~(PDM_VAD0_ZCD_VADZCDTH_MASK | PDM_VAD0_ZCD_VADZCDADJ_MASK |
                                         PDM_VAD0_ZCD_VADZCDAUTO_MASK | PDM_VAD0_ZCD_VADZCDAND_MASK)));
 
-    zcd |= (PDM_VAD0_ZCD_VADZCDTH(config->threshold) | PDM_VAD0_ZCD_VADZCDADJ(config->adjustmentThreshold) |
-            PDM_VAD0_ZCD_VADZCDAUTO(config->enableAutoThreshold) | PDM_VAD0_ZCD_VADZCDAND(config->zcdAnd)) |
+    zcd |= (PDM_VAD0_ZCD_VADZCDTH(config->threshold) |
+            PDM_VAD0_ZCD_VADZCDADJ(config->adjustmentThreshold) |
+            PDM_VAD0_ZCD_VADZCDAUTO((uint32_t)(config->enableAutoThreshold ? 1UL : 0UL)) |
+            PDM_VAD0_ZCD_VADZCDAND(config->zcdAnd)) |
            PDM_VAD0_ZCD_VADZCDEN_MASK;
 
     base->VAD0_ZCD = zcd;
