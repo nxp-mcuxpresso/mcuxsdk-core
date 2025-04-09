@@ -393,7 +393,7 @@ static inline void LPIT_StopTimer(LPIT_Type *base, lpit_chnl_t channel)
  * functional clock.
  * @param count Delay count.
  */
-static void LPIT_ResetStateDelay(uint32_t count)
+static void LPIT_ResetStateDelay(void)
 {
     /* clang-format off */
     __asm volatile(
@@ -407,7 +407,8 @@ static void LPIT_ResetStateDelay(uint32_t count)
         "    CMP    R0, #0              \n"
         "    BNE    loop%=              \n"
         :
-        : "r" (count)
+        : "r" (LPIT_RESET_STATE_DELAY / 4U)
+        : "r0"
     );
     /* clang-format on */
 }
@@ -422,7 +423,7 @@ static void LPIT_ResetStateDelay(uint32_t count)
 static inline void LPIT_Reset(LPIT_Type *base)
 {
     base->MCR |= LPIT_MCR_SW_RST_MASK;
-    LPIT_ResetStateDelay(LPIT_RESET_STATE_DELAY / 4U);
+    LPIT_ResetStateDelay();
     base->MCR &= ~LPIT_MCR_SW_RST_MASK;
 }
 
