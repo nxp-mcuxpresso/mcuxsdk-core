@@ -1,5 +1,10 @@
 # USART
 
+## [2.5.2]
+
+- Improvements
+  - Fixed coverity issues.
+
 ## [2.5.1]
 
 - Improvements
