@@ -128,8 +128,20 @@ if $PROGRAM_NAME == __FILE__
     end
 
     @generator = SDKGenerator::ProjectGenerator::Generator.new(build_data, logger, generate_options: build_option)
-    @generator.copy_files(build_data) if ENV['standalone'] == 'true'
     @generator.generate_project_for_tool
+
+    if ENV['standalone'] == 'true'
+      @generator.copy_files(build_data)
+      # copy project to final build dir
+      if ENV['FINAL_BUILD_DIR'] && ENV['TEMP_BUILD_DIR']
+        if Dir.exist?(ENV['FINAL_BUILD_DIR'])
+          FileUtils.rm_rf(ENV['FINAL_BUILD_DIR'])
+        else
+          FileUtils.mkdir_p(ENV['FINAL_BUILD_DIR'])
+        end
+        FileUtils.cp_r(File.join(ENV['TEMP_BUILD_DIR'], toolchain), ENV['FINAL_BUILD_DIR'])
+      end
+    end
   rescue StandardError => e
     puts e.message
     puts e.backtrace if logger.level == Logger::DEBUG

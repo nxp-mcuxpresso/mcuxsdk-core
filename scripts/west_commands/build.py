@@ -9,6 +9,7 @@ import pathlib
 import shlex
 import sys
 import yaml
+import hashlib
 
 from west import log
 from west.configuration import config
@@ -439,7 +440,11 @@ class Build(Forceable):
         board, _ = self._find_board()
         source_dir = self._find_source_dir()
         app = os.path.split(source_dir)[1]
-        build_dir = find_build_dir(self.args.build_dir, board=board,
+        # for standalone project, use a temporary build directory if using the directory from different disk on Windows
+        if self.args.target == 'standalone_project' and os.name == 'nt' and self.args.build_dir and not self._build_dir_from_same_disk(self.args.build_dir):
+            build_dir = self._prepare_standalone_project_dir(self.args.build_dir, board, source_dir, app)
+        else:
+            build_dir = find_build_dir(self.args.build_dir, board=board,
                                    source_dir=source_dir, app=app)
         if not build_dir:
             log.die('Unable to determine a default build folder. Check '
@@ -832,3 +837,39 @@ class Build(Forceable):
             pass
         finally:
             return build_type
+        
+    def _build_dir_from_same_disk(self, build_dir):
+        if not os.path.isabs(build_dir):
+            build_dir = os.path.abspath(os.path.join(os.getcwd(), build_dir))
+        default_disk =  os.path.splitdrive(os.getcwd())[0].lower()
+        target_disk = os.path.splitdrive(build_dir)[0].lower()
+        return default_disk == target_disk
+        
+
+    def _prepare_standalone_project_dir(self, build_dir, board, source_dir, app):
+        # TODO : Improve generator script to remove this workaround
+        # For windows OS, standalone_project can't be created on different disk drive because there is no way to
+        # calculate relative path for paths from different disk drive. But this is a must-have step for current generator scripts.
+        # So if you specifiy a build folder from different disk drive, we will first create prjoject in a temporary folder which 
+        # is in the same disk drive as the repo folder, and finally copy the project to user specify folder.
+
+        user_build_drive = os.path.splitdrive(build_dir)[0].lower()
+        # make sure the disk drive exists
+        if not os.path.exists(user_build_drive):
+            self.die(f"Disk {user_build_drive} does not exist.")
+
+        if not board or not source_dir:
+            self.die("Please do pristine build for standalone project")
+
+        temp_build_dir = find_build_dir(None, board=board, source_dir=source_dir, app=app)
+        # Add md5 to the temporary build folder name to avoid collision with other build folders
+        temp_build_dir = os.path.join(temp_build_dir, str(hashlib.md5((source_dir + board).encode('utf-8')).hexdigest())[0:7])
+
+        self.args.build_dir = temp_build_dir
+        args = ['-DTEMP_BUILD_DIR:PATH={}'.format(temp_build_dir), '-DFINAL_BUILD_DIR:PATH={}'.format(build_dir)]
+        if self.args.cmake_opts:
+            self.args.cmake_opts.extend(args)
+        else:
+            self.args.cmake_opts = args
+
+        return self.args.build_dir

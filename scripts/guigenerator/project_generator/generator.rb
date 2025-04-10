@@ -1238,7 +1238,11 @@ module SDKGenerator
         if tool_key == 'armgcc'
           generated_files[tool_key].push_uniq("devices/#{project_info[:platform_devices_soc_name]}/all_lib_device.cmake")
         end
-        puts "generate #{project_type} project: #{project_info[:internal] ? 'internal' : ''} [#{project_info[:all_targets].join(' ')}] [#{project_name}]" + ' [' + File.join(@output_rootdir, project_info[:outdir], project_info[:project_file_name]) + ']'
+        if ENV['FINAL_BUILD_DIR']
+          puts "generate #{project_type} project: #{project_info[:internal] ? 'internal' : ''} [#{project_info[:all_targets].join(' ')}] [#{project_name}]" + ' [' + File.join(ENV['FINAL_BUILD_DIR'], project_info[:outdir], project_info[:project_file_name]) + ']'
+        else
+          puts "generate #{project_type} project: #{project_info[:internal] ? 'internal' : ''} [#{project_info[:all_targets].join(' ')}] [#{project_name}]" + ' [' + File.join(@output_rootdir, project_info[:outdir], project_info[:project_file_name]) + ']'
+        end
       end
 
       def add_generated_files(project_tag, generated_files)
