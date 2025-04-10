@@ -1,5 +1,10 @@
 # SPI
 
+## [2.1.4]
+
+- Bug Fixes
+  - Fixed coverity issues.
+
 ## [2.1.3]
 
 - Bug Fixes
