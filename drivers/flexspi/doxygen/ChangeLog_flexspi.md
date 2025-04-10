@@ -1,5 +1,10 @@
 # FLEXSPI
 
+## [2.7.0]
+
+- New Features
+  - Added new API to support address remapping.
+
 ## [2.6.4]
 
 - Improvements

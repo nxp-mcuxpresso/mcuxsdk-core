@@ -70,7 +70,7 @@ typedef void (*flexspi_isr_t)(FLEXSPI_Type *base, flexspi_handle_t *handle);
 #if !(defined(FSL_SDK_DISABLE_DRIVER_RESET_CONTROL) && FSL_SDK_DISABLE_DRIVER_RESET_CONTROL)
 #if defined(FLEXSPI_RSTS)
 #define FLEXSPI_RESETS_ARRAY FLEXSPI_RSTS
-#endif 
+#endif
 #endif /* FSL_SDK_DISABLE_DRIVER_RESET_CONTROL */
 
 /*******************************************************************************
@@ -138,10 +138,10 @@ static void FLEXSPI_Memset(void *src, uint8_t value, size_t length)
 
 /*!
  * brief Check if input lut address is not in FLEXSPI AHB region.
- * 
+ *
  * param base Flexspi peripheral base address.
  * param lutAddr The address if input lut.
- * 
+ *
  * retval false Input LUT address is not allowed.
  * retval true Input LUT address is allowed.
  */
@@ -299,8 +299,8 @@ void FLEXSPI_Init(FLEXSPI_Type *base, const flexspi_config_t *config)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_RESET_CONTROL) && FSL_SDK_DISABLE_DRIVER_RESET_CONTROL)
-/* once global reset control is enabled (FSL_SDK_DISABLE_DRIVER_RESET_CONTROL = 0), the default FLEXSPI module will not 
- * be reset. However, it is possible to enable flexspi reset control independently by setting 
+/* once global reset control is enabled (FSL_SDK_DISABLE_DRIVER_RESET_CONTROL = 0), the default FLEXSPI module will not
+ * be reset. However, it is possible to enable flexspi reset control independently by setting
  * "FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL" to 1. Please note that reset flexspi may also reset corresponding cache in
  * some platforms. */
 #if (defined(FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL) && FSL_SDK_ENABLE_FLEXSPI_RESET_CONTROL)
@@ -643,6 +643,29 @@ void FLEXSPI_SoftwareReset(FLEXSPI_Type *base)
     {
     }
 }
+
+#if (defined(FSL_FEATURE_FLEXSPI_HAS_ADDR_REMAP)) && (FSL_FEATURE_FLEXSPI_HAS_ADDR_REMAP)
+/*!
+ * brief Configure FLEXSPI address mapping
+ *
+ * param base FLEXSPI peripheral base address
+ * param config Pointer to address mapping configuration structure
+ */
+void FLEXSPI_SetAddressMapping(FLEXSPI_Type *base, const flexspi_addr_map_config_t *config)
+{
+    assert(config != NULL);
+    assert(((config->addrStart & (~FLEXSPI_HADDRSTART_ADDRSTART_MASK)) == 0U) &&
+           ((config->addrEnd & (~FLEXSPI_HADDREND_ENDSTART_MASK)) == 0U) &&
+           ((config->addrOffset & (~FLEXSPI_HADDROFFSET_ADDROFFSET_MASK)) == 0U) &&
+           (config->addrStart < config->addrEnd));
+
+    base->HADDRSTART  = config->addrStart;
+    base->HADDREND    = config->addrEnd;
+    base->HADDROFFSET = config->addrOffset;
+
+    FLEXSPI_EnableRemap(base, config->remapEnable);
+}
+#endif
 
 /*! brief Updates the LUT table.
  *
