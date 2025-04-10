@@ -1,0 +1,12 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.dsc_driver_wrap
+    bool
+    default y if MCUX_COMPONENT_driver.platformlib && MCUX_HW_SOC_SERIES_DSC
+
+config MCUX_COMPONENT_driver.dsc_driver_wrap
+    bool "dsc_driver_wrap"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.dsc_driver_wrap

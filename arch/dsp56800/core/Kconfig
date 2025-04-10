@@ -1,8 +1,8 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-config MCUX_PRJSEG_config.codewarrior.core.dsp56800
+config MCUX_PRJSEG_config.device_core.define
     bool
     default y if MCUX_HW_CORE_DSP56800EX || MCUX_HW_CORE_DSP56800EF
 
