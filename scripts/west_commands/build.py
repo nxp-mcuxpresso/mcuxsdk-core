@@ -1,5 +1,5 @@
 # Copyright (c) 2018 Foundries.io
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -14,8 +14,8 @@ import hashlib
 from west import log
 from west.configuration import config
 from zcmake import DEFAULT_CMAKE_GENERATOR, run_cmake, run_build, CMakeCache
-from build_helpers import is_mcux_build, find_build_dir, load_domains, \
-    FIND_BUILD_DIR_DESCRIPTION
+from build_helpers import is_mcux_build, find_build_dir, load_domains, is_from_same_disk, \
+                          FIND_BUILD_DIR_DESCRIPTION
 
 from zephyr_ext_common import Forceable
 
@@ -441,7 +441,7 @@ class Build(Forceable):
         source_dir = self._find_source_dir()
         app = os.path.split(source_dir)[1]
         # for standalone project, use a temporary build directory if using the directory from different disk on Windows
-        if self.args.target == 'standalone_project' and os.name == 'nt' and self.args.build_dir and not self._build_dir_from_same_disk(self.args.build_dir):
+        if self.args.target == 'standalone_project' and os.name == 'nt' and self.args.build_dir and not is_from_same_disk(self.args.build_dir):
             build_dir = self._prepare_standalone_project_dir(self.args.build_dir, board, source_dir, app)
         else:
             build_dir = find_build_dir(self.args.build_dir, board=board,
@@ -494,7 +494,10 @@ class Build(Forceable):
                     'use --build-dir {} to specify a build directory'.
                     format(self.source_dir, self.build_dir))
 
-        srcrel = os.path.relpath(self.source_dir)
+        if is_from_same_disk(self.source_dir):
+            srcrel = os.path.relpath(self.source_dir)
+        else:
+            srcrel = os.path.abspath(self.source_dir)
         self.check_force(
             not is_mcux_build(self.source_dir),
             'it looks like {srcrel} is a build directory: '
@@ -837,14 +840,6 @@ class Build(Forceable):
             pass
         finally:
             return build_type
-        
-    def _build_dir_from_same_disk(self, build_dir):
-        if not os.path.isabs(build_dir):
-            build_dir = os.path.abspath(os.path.join(os.getcwd(), build_dir))
-        default_disk =  os.path.splitdrive(os.getcwd())[0].lower()
-        target_disk = os.path.splitdrive(build_dir)[0].lower()
-        return default_disk == target_disk
-        
 
     def _prepare_standalone_project_dir(self, build_dir, board, source_dir, app):
         # TODO : Improve generator script to remove this workaround

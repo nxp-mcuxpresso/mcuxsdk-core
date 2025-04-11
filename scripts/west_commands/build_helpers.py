@@ -1,5 +1,5 @@
 # Copyright 2018 (c) Foundries.io.
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -42,7 +42,7 @@ def _resolve_build_dir(fmt, guess, cwd, **kwargs):
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
     # Check if source_dir is below cwd first
     source_dir = kwargs.get('source_dir')
-    if source_dir:
+    if source_dir and is_from_same_disk(source_dir):
         if escapes_directory(cwd, source_dir):
             kwargs['source_dir'] = os.path.relpath(source_dir, cwd)
         else:
@@ -145,6 +145,20 @@ def is_mcux_build(path):
             level=log.VERBOSE_EXTREME)
     return False
 
+def is_from_same_disk(path):
+    '''
+    Check if the given path is on the same disk as the current
+
+    Args:
+        path (str): The path to check.
+    '''
+    if os.name != 'nt':
+        return True
+    if not os.path.isabs(path):
+        build_dir = os.path.abspath(os.path.join(os.getcwd(), path))
+    default_disk = os.path.splitdrive(os.getcwd())[0].lower()
+    target_disk = os.path.splitdrive(path)[0].lower()
+    return default_disk == target_disk
 
 def load_domains(path):
     '''Load domains from a domains.yaml.
