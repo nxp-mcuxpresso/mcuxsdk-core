@@ -26,7 +26,7 @@ BOARD_DIR_NAME = '_boards'
 DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#freestanding-example'
 
 # TODO need add case by case
-BYPASS_KEY_LIST_IN_PATH = ['${board_root}', 'examples/_boards', 'examples_int/boards', '${multicore_folder_name}']
+BYPASS_KEY_LIST_IN_PATH = ['${board_root}', 'examples/_boards', 'examples_int/boards', '${multicore_folder_name}', 'project_board_port_path']
 
 USAGE = f'''\
 west export_app [-h] [source_dir] [-b board_id] [-DCMAKE_VAR=VAL] [-o OUTPUT_DIR] [--build]
@@ -189,10 +189,13 @@ class ExportApp(WestCommand):
         self.banner(f'Successfully create the freestanding project, see {self.dest_list_file}.')
         if self.args.build:
             self.banner('Start building the project')
-            self.run_subprocess(self.build_cmd_list, cwd=SDK_ROOT_DIR.as_posix())
+            ret = self.run_subprocess(self.build_cmd_list, cwd=SDK_ROOT_DIR.as_posix())
+            print(self.build_cmd)
+            if ret.returncode != 0:
+                self.die("Build Failed!", exit_code=ret.returncode)
         else:
             self.banner('you can use following command to build it.')
-        print(self.build_cmd)
+            print(self.build_cmd)
 
     @current_list_dir_context
     def parse_app(self, source_dir):
@@ -237,10 +240,10 @@ class ExportApp(WestCommand):
         return dest_list_file
 
     def parse_linked_app(self, source_dir):
-        self.check_force(
-            'sysbuild.cmake' in os.listdir(source_dir),
-            "{} doesn't contain a sysbuild.cmake".format(source_dir))
-        
+        if 'sysbuild.cmake' not in os.listdir(source_dir):
+            self.wrn("The sysbuild example does not contain a sysbuild.cmake")
+            return
+
         sysbuild_content = self._parse_list_file(source_dir / 'sysbuild.cmake')
         for func in sysbuild_content:
             if func['original_name'].lower() not in ['externalzephyrproject_add', 'externalmcuxproject_add']:
@@ -363,6 +366,8 @@ class ExportApp(WestCommand):
     def cm_include(self, func: dict, argv: dict) -> dict:
         for arg in func.get('args'):
             arg['value'] = arg['value'].replace('${CMAKE_CURRENT_LIST_DIR}', self.current_list_dir)
+            if arg['value'].startswith('..'):
+                arg['value'] = os.path.join(self.current_list_dir, arg['value'])
 
     # @cmake_func
     # def cm_project(self, func: dict, argv: dict) -> dict:
@@ -380,7 +385,11 @@ class ExportApp(WestCommand):
         base_path = argv.get('BASE_PATH')
         keep_in_repo_paths = []
         for src in argv.get('SOURCES'):
-            processed_path = self._process_path(base_path, src)
+            try:
+                processed_path = self._process_path(base_path, src)
+            except Exception:
+                self.wrn(f"mcux_add_source {func['line']}: Cannot handle source path {src}")
+                continue
             if processed_path.startswith('${SdkRootDirPath}/'):
                 keep_in_repo_paths.append(processed_path.replace('${SdkRootDirPath}/', ''))
                 ExportApp.remove_func_val(func, src)
@@ -419,7 +428,11 @@ class ExportApp(WestCommand):
         base_path = argv.get('BASE_PATH')
         keep_in_repo_paths = []
         for inc in argv.get('INCLUDES'):
-            processed_path = self._process_path(base_path, inc, 'inc')
+            try:
+                processed_path = self._process_path(base_path, inc, 'inc')
+            except Exception:
+                self.wrn(f"mcux_add_include {func['line']}: Cannot handle inlude path {inc}")
+                continue
             if processed_path.startswith('${SdkRootDirPath}/'):
                 keep_in_repo_paths.append(processed_path.replace('${SdkRootDirPath}/', ''))
                 ExportApp.remove_func_val(func, inc)
@@ -497,16 +510,17 @@ class ExportApp(WestCommand):
             else:
                 s_src = self.source_dir / src
         if not s_src.exists():
-            if any(k in s_src.as_posix() for k in BYPASS_KEY_LIST_IN_PATH):
+            if any(k in s_src.as_posix().lower() for k in BYPASS_KEY_LIST_IN_PATH):
                 result = '${SdkRootDirPath}/' + s_src.relative_to(SDK_ROOT_DIR).as_posix()
-        elif not (d_src := (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))).exists():
+        else:
+            d_src = (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))
             if type == 'file':
                 os.makedirs(d_src.parent, exist_ok=True)
                 shutil.copy(s_src, d_src)
             elif type == 'inc':
                 os.makedirs(d_src, exist_ok=True)
                 for f in s_src.iterdir():
-                    if f.is_file():
+                    if f.is_file() and not (d_src / f.name).exists():
                         shutil.copy(f, d_src / f.name)
         return result
 
