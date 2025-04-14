@@ -1,5 +1,10 @@
 # COMMON
 
+## [2.6.0]
+
+- Bug Fixes
+  - Fix CERT-C violations.
+
 ## [2.5.0]
 
 - New Features
