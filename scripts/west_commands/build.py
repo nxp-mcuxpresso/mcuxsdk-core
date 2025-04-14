@@ -10,6 +10,7 @@ import shlex
 import sys
 import yaml
 import hashlib
+import shutil
 
 from west import log
 from west.configuration import config
@@ -104,6 +105,9 @@ class Build(Forceable):
 
         self.cmake_cache = None
         '''Final parsed CMake cache for the build, or None on error.'''
+
+        self.cmake_temp_dir = None
+        '''The temporary build directory for standalone project generation.'''
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(
@@ -774,6 +778,9 @@ class Build(Forceable):
         for b in build_dir_list:
             run_build(b, extra_args=extra_args,
                       dry_run=self.args.dry_run)
+        # remove the temporary build directory if it was created
+        if self.cmake_temp_dir and os.path.exists(self.cmake_temp_dir):
+            shutil.rmtree(self.cmake_temp_dir)
 
     def _append_verbose_args(self, extra_args, add_dashes):
         # These hacks are only needed for CMake versions earlier than
@@ -859,6 +866,7 @@ class Build(Forceable):
         temp_build_dir = find_build_dir(None, board=board, source_dir=source_dir, app=app)
         # Add md5 to the temporary build folder name to avoid collision with other build folders
         temp_build_dir = os.path.join(temp_build_dir, str(hashlib.md5((source_dir + board).encode('utf-8')).hexdigest())[0:7])
+        self.cmake_temp_dir = temp_build_dir
 
         self.args.build_dir = temp_build_dir
         args = ['-DTEMP_BUILD_DIR:PATH={}'.format(temp_build_dir), '-DFINAL_BUILD_DIR:PATH={}'.format(build_dir)]
