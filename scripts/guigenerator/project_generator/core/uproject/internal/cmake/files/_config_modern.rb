@@ -120,6 +120,8 @@ module Internal
           @config_cmakelists.puts "set(MCUX_SDK_PROJECT_NAME #{@project_name})"
         else
           @config_cmakelists.puts "set(MCUX_SDK_PROJECT_NAME #{File.basename(@project_name, '.elf')}.a)"
+          @config_cmakelists.puts "set(CMAKE_STATIC_LIBRARY_PREFIX)"
+          @config_cmakelists.puts "set(CMAKE_STATIC_LIBRARY_SUFFIX)"
         end
         @config_cmakelists.puts ""
 

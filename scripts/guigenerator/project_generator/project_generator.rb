@@ -128,10 +128,12 @@ if $PROGRAM_NAME == __FILE__
     end
 
     @generator = SDKGenerator::ProjectGenerator::Generator.new(build_data, logger, generate_options: build_option)
+    # For armgcc project, build/mcux_config.h is forbidden because it will be removed by clean script,
+    # so we need to copy it to project root dir and then update build data before generating project
+    @generator.copy_files(build_data) if ENV['standalone'] == 'true'
     @generator.generate_project_for_tool
 
     if ENV['standalone'] == 'true'
-      @generator.copy_files(build_data)
       # copy project to final build dir
       if ENV['FINAL_BUILD_DIR'] && ENV['TEMP_BUILD_DIR']
         if Dir.exist?(ENV['FINAL_BUILD_DIR'])
