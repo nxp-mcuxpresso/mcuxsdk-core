@@ -6,6 +6,7 @@
 
 #include "fsl_netc_phy_wrapper.h"
 
+#if !(defined(FSL_FEATURE_NETC_HAS_NO_XGMII) && FSL_FEATURE_NETC_HAS_NO_XGMII)
 static void NETC_PHYWriteRegBits(
     netc_mdio_handle_t *handle, bool pcs, volatile uint16_t *reg, uint16_t mask, uint16_t val)
 {
@@ -44,12 +45,13 @@ static void NETC_PHYReadReg(netc_mdio_handle_t *handle, bool pcs, const volatile
         assert(false);
     }
 }
+#endif
 
 status_t NETC_PHYInit(netc_mdio_handle_t *handle, phy_mode_t mode)
 {
-    uint16_t regValue;
 
 #if !(defined(FSL_FEATURE_NETC_HAS_NO_XGMII) && FSL_FEATURE_NETC_HAS_NO_XGMII)
+    uint16_t regValue;
     if ((mode == kNETC_XGMII10G) || (mode == kNETC_XGMII10GAuto))
     {
         NETC_PHYWriteRegBits(handle, false, &ENET_PHY_MAC_ADAPTER->MAC_ADAPTER_LOCK_PHY,

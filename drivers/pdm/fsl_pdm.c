@@ -405,7 +405,10 @@ void PDM_SetChannelConfig(PDM_Type *base, uint32_t channel, const pdm_channel_co
     assert(config != NULL);
     assert(channel <= (uint32_t)FSL_FEATURE_PDM_CHANNEL_NUM);
 
+#if (defined(FSL_FEATURE_PDM_HAS_DC_OUT_CTRL) && FSL_FEATURE_PDM_HAS_DC_OUT_CTRL) || \
+    !(defined(FSL_FEATURE_PDM_DC_CTRL_VALUE_FIXED) && FSL_FEATURE_PDM_DC_CTRL_VALUE_FIXED)
     uint32_t dcCtrl = 0U;
+#endif
 
 #if (defined(FSL_FEATURE_PDM_HAS_DC_OUT_CTRL) && (FSL_FEATURE_PDM_HAS_DC_OUT_CTRL))
     dcCtrl = base->DC_OUT_CTRL;

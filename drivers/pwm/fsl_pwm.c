@@ -22,7 +22,11 @@
  *
  * @return The PWM module instance
  */
+
+#if defined(PWM_RESETS_ARRAY) || \
+    !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 static uint32_t PWM_GetInstance(PWM_Type *base);
+#endif
 
 #if defined(PWM_RSTS)
 #define PWM_RESETS_ARRAY PWM_RSTS
