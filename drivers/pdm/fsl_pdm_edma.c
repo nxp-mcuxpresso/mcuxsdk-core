@@ -346,6 +346,10 @@ status_t PDM_TransferReceiveEDMA(PDM_Type *base, pdm_edma_handle_t *handle, pdm_
         }
         else
         {
+            if (destOffset > INT16_MAX)
+            {
+                return kStatus_InvalidArgument;
+            }
             EDMA_PrepareTransferConfig(&config, (void *)(uint32_t *)startAddr, FSL_FEATURE_PDM_FIFO_WIDTH,
                                        FSL_FEATURE_PDM_FIFO_OFFSET, (uint8_t *)(uint32_t)currentTransfer->data,
                                        FSL_FEATURE_PDM_FIFO_WIDTH, (int16_t)destOffset,
