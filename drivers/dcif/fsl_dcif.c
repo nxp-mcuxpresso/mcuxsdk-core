@@ -262,6 +262,6 @@ void DCIF_SetLayerBufferConfig(DCIF_Type *base, uint8_t layerIndex, const dcif_b
     base->CTRLDESC3_L1 = config->strideBytes;
     reg = base->CTRLDESC0_L1;
     reg = (reg & ~(DCIF_CTRLDESC0_L1_FORMAT_MASK | DCIF_CTRLDESC0_L1_YUV_FORMAT_MASK | DCIF_CTRLDESC0_L1_GLOBAL_ALPHA_MASK | DCIF_CTRLDESC0_L1_AB_MODE_MASK))
-	    | (uint32_t)config->pixelFormat | DCIF_CTRLDESC0_L1_GLOBAL_ALPHA(config->globleAlpha) | DCIF_CTRLDESC0_L1_AB_MODE(1U);
+	    | (uint32_t)config->pixelFormat | DCIF_CTRLDESC0_L1_GLOBAL_ALPHA(config->globalAlpha) | DCIF_CTRLDESC0_L1_AB_MODE(1U);
     base->CTRLDESC0_L1 = reg;
 }

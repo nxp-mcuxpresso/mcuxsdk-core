@@ -151,7 +151,7 @@ typedef struct _dcif_buffer_config
 {
     uint16_t strideBytes;
     dcif_pixel_format_t pixelFormat; /*!< Source buffer pixel format. */
-    uint32_t globleAlpha;
+    uint32_t globalAlpha;
 } dcif_buffer_config_t;
 
 #if 0
