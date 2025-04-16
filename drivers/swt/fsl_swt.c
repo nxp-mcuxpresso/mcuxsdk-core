@@ -84,9 +84,9 @@ void SWT_Init(SWT_Type *base, const swt_config_t *config)
     CLOCK_EnableClock(s_swtClocks[SWT_GetInstance(base)]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-    controlValue = SWT_CR_SMD(config->serviceMode) | SWT_CR_RIA((uint32_t)config->resetOnInvalidAccess) |
-                SWT_CR_WND((uint32_t)config->enableWindowMode) | SWT_CR_STP((uint32_t)!config->enableRunInStop) |
-                SWT_CR_FRZ((uint32_t)!config->enableRunInDebug) | SWT_CR_ITR((uint32_t)config->interruptThenReset);
+    controlValue = SWT_CR_SMD(config->serviceMode) | SWT_CR_RIA(config->resetOnInvalidAccess ? 1U : 0U) |
+                SWT_CR_WND(config->enableWindowMode ? 1U : 0U) | SWT_CR_STP(config->enableRunInStop ? 0U : 1U) |
+                SWT_CR_FRZ(config->enableRunInDebug ? 0U : 1U) | SWT_CR_ITR(config->interruptThenReset ? 1U : 0U);
 
     SWT_SoftUnlock(base);
     SWT_ClearTimeoutInterruptFlag(base);
@@ -196,9 +196,32 @@ void SWT_RefreshWithKeyedServiceSequence(SWT_Type *base)
 
     /* Disable the global interrupt to protect refresh sequence */
     primaskValue  = DisableGlobalIRQ();
-    base->SR = (17U * base->SK + 3U) & SWT_SR_WSC_MASK;
-    base->SR = (17U * base->SK + 3U) & SWT_SR_WSC_MASK;
+    base->SR = (17U * (base->SK & SWT_SR_WSC_MASK) + 3U) & SWT_SR_WSC_MASK;
+    base->SR = (17U * (base->SK & SWT_SR_WSC_MASK) + 3U) & SWT_SR_WSC_MASK;
     EnableGlobalIRQ(primaskValue);
+}
+
+/*!
+ * brief SWT Refresh with automatic service sequence
+ *
+ * This function will automatically select the service sequence to refresh the SWT.
+ *
+ * param base SWT peripheral base address
+ */
+void SWT_Refresh(SWT_Type *base)
+{
+    if (SWT_CR_SMD(kSWT_KeyedServiceSequence) == (base->CR & SWT_CR_SMD_MASK))
+    {
+        SWT_RefreshWithKeyedServiceSequence(base);
+    }
+    else if (SWT_CR_SMD(kSWT_FixedServiceSequence) == (base->CR & SWT_CR_SMD_MASK))
+    {
+        SWT_RefreshWithFixedServiceSequence(base);
+    }
+    else
+    {
+        assert(false);
+    }
 }
 
 /*!

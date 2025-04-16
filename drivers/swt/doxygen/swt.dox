@@ -26,6 +26,7 @@ The function SWT_SoftLock() can soft lock the SWT registers, which can be unlock
 The function SWT_RefreshWithFixedServiceSequence() refreshes the SWT counter with the fixed service sequence.
 The function SWT_RefreshWithKeyedServiceSequence() refreshes the SWT counter with the keyed service sequence. You can use
 SWT_SetServiceKey() to set the initial service key.
+The function SWT_Refresh() refreshes the SWT counter with automatic service sequence.
 
 ## SWT Operations {#SWTOperation}
 The function SWT_SetTimeout() sets the SWT timeout period in clock cycles.

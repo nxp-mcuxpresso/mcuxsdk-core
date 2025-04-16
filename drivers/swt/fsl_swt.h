@@ -20,8 +20,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SWT Driver Version 2.0.0 */
-#define FSL_SWT_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+/*! @brief SWT Driver Version 2.1.0 */
+#define FSL_SWT_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
 /*! @} */
 
 /*! @name Soft unlock sequence */
@@ -229,6 +229,15 @@ static inline void SWT_SetServiceKey(SWT_Type *base, uint16_t serviceKey)
  * @param base SWT peripheral base address
  */
 void SWT_RefreshWithKeyedServiceSequence(SWT_Type *base);
+
+/*!
+ * @brief SWT Refresh with automatic service sequence
+ *
+ * This function will automatically select the service sequence to refresh the SWT.
+ *
+ * @param base SWT peripheral base address
+ */
+void SWT_Refresh(SWT_Type *base);
 
 /*! @} */
 
