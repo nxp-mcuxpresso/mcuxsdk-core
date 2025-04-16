@@ -1,5 +1,10 @@
 # I2C
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fixed coverity issues.
+
 ## [2.2.0]
 
 - Removed lpc_i2c_dma driver.
