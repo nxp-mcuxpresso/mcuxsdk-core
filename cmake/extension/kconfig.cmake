@@ -160,6 +160,7 @@ set(COMMON_KCONFIG_ENV_SETTINGS
     PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
     CONFIG_=${KCONFIG_NAMESPACE}_
     KCONFIG_CONFIG=${DOTCONFIG}
+    CUSTOM_BOARD_ROOT=${CUSTOM_BOARD_ROOT}
     board_root=${board_root}
     shield=${shield}
     device=${device}
@@ -248,15 +249,26 @@ elseif (NOT NO_DEFAULT_CONFIG)
     endforeach()
     
     if (DEFINED board)
-      foreach(
-        f
-        ${SdkRootDirPath}/examples/prj.conf
-        ${SdkRootDirPath}/examples/_boards/prj.conf
-        ${SdkRootDirPath}/${board_root}/${board}/prj.conf)
-        if(EXISTS ${f})
-          list(APPEND merge_config_files ${f})
-        endif()
-      endforeach()
+      if (DEFINED CUSTOM_BOARD_ROOT)
+        # for external board with CUSTOM_BOARD_ROOT
+        foreach(
+          f
+          ${CUSTOM_BOARD_ROOT}/${board}/prj.conf)
+          if(EXISTS ${f})
+            list(APPEND merge_config_files ${f})
+          endif()
+        endforeach()
+      else()
+        foreach(
+          f
+          ${SdkRootDirPath}/examples/prj.conf
+          ${SdkRootDirPath}/examples/_boards/prj.conf
+          ${SdkRootDirPath}/${board_root}/${board}/prj.conf)
+          if(EXISTS ${f})
+            list(APPEND merge_config_files ${f})
+          endif()
+        endforeach()
+      endif()
     endif()
   else()
     foreach(
@@ -272,16 +284,28 @@ elseif (NOT NO_DEFAULT_CONFIG)
     endforeach()
       
     if (DEFINED board)
-      foreach(
-        f
-        ${SdkRootDirPath}/examples/prj.conf
-        ${SdkRootDirPath}/examples/_boards/prj.conf
-        ${SdkRootDirPath}/${board_root}/${board}/prj.conf
-        ${SdkRootDirPath}/${board_root}/${board}/${core_id}/prj.conf)
-        if(EXISTS ${f})
-          list(APPEND merge_config_files ${f})
-        endif()
-      endforeach()
+      if (DEFINED CUSTOM_BOARD_ROOT)
+        # for external board with CUSTOM_BOARD_ROOT
+        foreach(
+          f
+          ${CUSTOM_BOARD_ROOT}/${board}/prj.conf
+          ${CUSTOM_BOARD_ROOT}/${board}/${core_id}/prj.conf)
+          if(EXISTS ${f})
+            list(APPEND merge_config_files ${f})
+          endif()
+        endforeach()
+      else()
+        foreach(
+          f
+          ${SdkRootDirPath}/examples/prj.conf
+          ${SdkRootDirPath}/examples/_boards/prj.conf
+          ${SdkRootDirPath}/${board_root}/${board}/prj.conf
+          ${SdkRootDirPath}/${board_root}/${board}/${core_id}/prj.conf)
+          if(EXISTS ${f})
+            list(APPEND merge_config_files ${f})
+          endif()
+        endforeach()
+      endif()
     endif()
   endif()
   
@@ -289,8 +313,10 @@ elseif (NOT NO_DEFAULT_CONFIG)
     get_target_source_in_sub_folders(${APPLICATION_SOURCE_DIR} ${EXAMPLE_FOLDER} "prj.conf")
     list(APPEND merge_config_files ${GET_TARGET_SOURCE_IN_SUB_FOLDERS_OUTPUT})
 
-    get_target_source_in_sub_folders(${full_project_port_path} "${board_device_folder}" "prj.conf")
-    list(APPEND merge_config_files ${GET_TARGET_SOURCE_IN_SUB_FOLDERS_OUTPUT})
+    if (NOT DEFINED CUSTOM_BOARD_ROOT)
+      get_target_source_in_sub_folders(${full_project_port_path} "${board_device_folder}" "prj.conf")
+      list(APPEND merge_config_files ${GET_TARGET_SOURCE_IN_SUB_FOLDERS_OUTPUT})
+    endif()
   else()
     if (EXISTS ${APPLICATION_SOURCE_DIR}/prj.conf)
       list(APPEND merge_config_files ${APPLICATION_SOURCE_DIR}/prj.conf)

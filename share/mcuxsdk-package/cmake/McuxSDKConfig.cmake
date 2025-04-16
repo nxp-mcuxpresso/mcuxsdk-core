@@ -25,6 +25,8 @@ if(DEFINED EXTRA_MCUX_MODULES)
     include(${SdkRootDirPath}/cmake/extension/mcux_module.cmake)
 endif ()
 
+set(APPLICATION_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+
 if(DEFINED SYSBUILD)
     # Since SYSBUILD has already defined these variables, we should reset them for each project
     unset(APPLICATION_SOURCE_DIR)

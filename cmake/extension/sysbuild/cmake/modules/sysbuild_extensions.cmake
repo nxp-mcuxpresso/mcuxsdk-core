@@ -588,6 +588,7 @@ function(ExternalZephyrProject_Cmake)
         ${CMAKE_ARGS}
       -DFORCED_CONF_FILE:FILEPATH=${dotconfigsysbuild}
       ${cmake_extra_args}
+      -DCUSTOM_BOARD_ROOT=${CUSTOM_BOARD_ROOT}
       -B${BINARY_DIR}
       -S${SOURCE_DIR}
       --log-level=${cur_log_level}

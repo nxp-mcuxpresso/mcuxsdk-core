@@ -120,19 +120,29 @@ endif ()
 
 # if defined board, load board variables
 if(DEFINED board)
-  get_filename_component(
-    board_variable_path "${SdkRootDirPath}/examples/_boards/${board}/variable.cmake"
-    ABSOLUTE)
-  # check the existense of board_variable_path
-  if(NOT EXISTS ${board_variable_path})
-    log_debug("Board variable file ${board_variable_path} does not exist, build system will search the internal repo to get board variable.cmake")
+  if (DEFINED CUSTOM_BOARD_ROOT)
     get_filename_component(
-      board_variable_path "${SdkRootDirPath}/examples_int/_boards/${board}/variable.cmake" ABSOLUTE
-    )
-    if (NOT EXISTS ${board_variable_path})
-      log_fatal("There is no board variable.cmake file in either ${SdkRootDirPath}/examples/_boards/${board} or ${SdkRootDirPath}/examples_int/_boards/${board}, please provide the board variable cmake file or check whether board ${board} has been supported or not, make sure it is not a typo" ${CMAKE_CURRENT_LIST_FILE} ${CMAKE_CURRENT_LIST_LINE})
+      board_variable_path "${CUSTOM_BOARD_ROOT}/${board}/variable.cmake"
+      ABSOLUTE)
+    if(NOT EXISTS ${board_variable_path})
+      log_fatal("Board variable file ${board_variable_path} does not exist, please prepare it or check the correctness of board name and CUSTOM_BOARD_ROOT")
+    endif ()
+  else ()
+    get_filename_component(
+      board_variable_path "${SdkRootDirPath}/examples/_boards/${board}/variable.cmake"
+      ABSOLUTE)
+    if(NOT EXISTS ${board_variable_path})
+      log_debug("Board variable file ${board_variable_path} does not exist, build system will search the internal repo to get board variable.cmake")
+      get_filename_component(
+        board_variable_path "${SdkRootDirPath}/examples_int/_boards/${board}/variable.cmake" ABSOLUTE
+      )
+      if (NOT EXISTS ${board_variable_path})
+        log_fatal("There is no board variable.cmake file in either ${SdkRootDirPath}/examples/_boards/${board} or ${SdkRootDirPath}/examples_int/_boards/${board}, please provide the board variable cmake file or check whether board ${board} has been supported or not, make sure it is not a typo" ${CMAKE_CURRENT_LIST_FILE} ${CMAKE_CURRENT_LIST_LINE})
+      endif()
     endif()
   endif()
+
+  # check the existense of board_variable_path
   log_debug("Include ${board_variable_path}" ${CMAKE_CURRENT_LIST_FILE}
             ${CMAKE_CURRENT_LIST_LINE})
   include(${board_variable_path} OPTIONAL)
