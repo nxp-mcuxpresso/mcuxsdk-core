@@ -44,7 +44,10 @@ void NETC_SocGetBaseResource(netc_enetc_hw_t *hw, netc_hw_si_idx_t si)
 
 uint32_t NETC_SocGetFuncInstance(netc_hw_eth_port_idx_t port)
 {
-    uint32_t instance = (uint32_t)port + 1U;
+    if (port >= kNETC_SWITCH0EthPort0)
+    {
+        return 5U;
+    }
 
-    return instance;
+    return ((uint32_t)port + 1U);
 }
