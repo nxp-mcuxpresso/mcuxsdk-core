@@ -16,6 +16,9 @@
     defined(MCXN946_cm33_core1_SERIES) || defined(MCXN947_cm33_core0_SERIES) || defined(MCXN947_cm33_core1_SERIES) || \
     defined(MCXN236_SERIES) || defined(MCXN235_SERIES)
 #include "fsl_smartdma_mcxn.h"
+#elif defined(MCXA276_SERIES) || defined(MCXA275_SERIES) || defined(MCXA176_SERIES) || defined(MCXA175_SERIES) || \
+      defined(MCXA166_SERIES) || defined(MCXA165_SERIES)
+#include "fsl_smartdma_mcxa.h"
 #else
 #error "Device not supported"
 #endif
@@ -32,7 +35,7 @@
 /*! @name Driver version */
 /*@{*/
 /*! @brief SMARTDMA driver version */
-#define FSL_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 11, 0))
+#define FSL_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 12, 0))
 /*@}*/
 
 /*! @brief Callback function prototype for the smartdma driver. */

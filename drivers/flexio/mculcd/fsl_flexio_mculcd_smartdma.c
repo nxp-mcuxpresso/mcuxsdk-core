@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021,2023 NXP
+ * Copyright 2019-2021,2023,2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -17,7 +17,12 @@
 #endif
 
 #define FLEXIO_MCULCD_SMARTDMA_TX_START_SHIFTER 0U
+#if defined(MCXA276_SERIES) || defined(MCXA275_SERIES) || defined(MCXA176_SERIES) || defined(MCXA175_SERIES)|| \
+    defined(MCXA166_SERIES) || defined(MCXA165_SERIES)
+#define FLEXIO_MCULCD_SMARTDMA_TX_END_SHIFTER   3U
+#else
 #define FLEXIO_MCULCD_SMARTDMA_TX_END_SHIFTER   7U
+#endif
 #define FLEXIO_MCULCD_SMARTDMA_TX_SHIFTER_NUM \
     (FLEXIO_MCULCD_SMARTDMA_TX_END_SHIFTER - FLEXIO_MCULCD_SMARTDMA_TX_START_SHIFTER + 1)
 
@@ -166,6 +171,8 @@ status_t FLEXIO_MCULCD_TransferCreateHandleSMARTDMA(FLEXIO_MCULCD_Type *base,
         {
             handle->smartdmaApi = (uint8_t)kSMARTDMA_FlexIO_DMA;
         }
+#if !(defined(MCXA276_SERIES) || defined(MCXA275_SERIES) || defined(MCXA176_SERIES) || defined(MCXA175_SERIES)|| \
+    defined(MCXA166_SERIES) || defined(MCXA165_SERIES))
         else if (((config->inputPixelFormat == kFLEXIO_MCULCD_RGB565) &&
                   (config->outputPixelFormat == kFLEXIO_MCULCD_RGB888)) ||
                  ((config->inputPixelFormat == kFLEXIO_MCULCD_BGR565) &&
@@ -174,6 +181,7 @@ status_t FLEXIO_MCULCD_TransferCreateHandleSMARTDMA(FLEXIO_MCULCD_Type *base,
             handle->smartdmaApi      = (uint8_t)kSMARTDMA_FlexIO_DMA_RGB565To888;
             handle->needColorConvert = true;
         }
+#endif
         else
         {
             return kStatus_InvalidArgument;

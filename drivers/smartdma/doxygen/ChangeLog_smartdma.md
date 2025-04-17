@@ -1,5 +1,10 @@
 # SMARTDMA
 
+## [2.12.0]
+
+- New Features
+  - Supported MCXA mculcd and camera functions.
+
 ## [2.11.0]
 
 - Improvements

@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024,2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -10,3 +10,19 @@ config MCUX_COMPONENT_driver.smartdma
     bool "smartdma"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.smartdma
+
+config MCUX_COMPONENT_driver.smartdma_rt500
+    bool
+    default y if MCUX_COMPONENT_driver.smartdma && (MCUX_HW_DEVICE_ID_MIMXRT533S || \
+				MCUX_HW_DEVICE_ID_MIMXRT555S || MCUX_HW_DEVICE_ID_MIMXRT595S)
+
+config MCUX_COMPONENT_driver.smartdma_mcxn
+    bool
+    default y if MCUX_COMPONENT_driver.smartdma && (MCUX_HW_DEVICE_ID_MCXN235 || \
+    			MCUX_HW_DEVICE_ID_MCXN236 || MCUX_HW_DEVICE_ID_MCXN546 || \
+    			MCUX_HW_DEVICE_ID_MCXN547 || MCUX_HW_DEVICE_ID_MCXN946 || \
+    			MCUX_HW_DEVICE_ID_MCXN947)
+
+config MCUX_COMPONENT_driver.smartdma_mcxa
+    bool
+    default y if MCUX_COMPONENT_driver.smartdma && MCUX_HW_DEVICE_ID_MCXA276
