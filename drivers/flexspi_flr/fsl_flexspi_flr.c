@@ -1,6 +1,5 @@
 /*
- * Copyright 2023 NXP
- * All rights reserved.
+ * Copyright 2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -30,7 +29,7 @@ static void FLEXSPI_SLV_Memset(void *src, uint8_t value, size_t length);
 static FLEXSPI_SLV_Type *const s_flexspiSlvBases[] = FLEXSPI_SLV_BASE_PTRS;
 
 /*! @brief Pointers to Flexspi Follower IRQ number for each instance. */
-static const IRQn_Type s_flexspiSlvIrqs[] = { FLEXSPI_SLV_IRQn };
+static const IRQn_Type s_flexspiSlvIrqs[] = {FLEXSPI_SLV_IRQn};
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /* Clock name array */
@@ -95,7 +94,7 @@ uint32_t FLEXSPI_SLV_GetInstance(FLEXSPI_SLV_Type *base)
  */
 uint32_t FLEXSPI_SLV_CheckAndClearInterrupt(FLEXSPI_SLV_Type *base)
 {
-    uint32_t status = FLEXSPI_SLV_GetInterruptStatusFlags(base);
+    uint32_t status          = FLEXSPI_SLV_GetInterruptStatusFlags(base);
     uint32_t intEnableStatus = FLEXSPI_SLV_GetEnabledInterrupts(base);
 
     /* Check for interrupt. */
@@ -150,7 +149,8 @@ void FLEXSPI_SLV_ClkRootFrq(int clock_freq)
 {
     clock_root_config_t rootCfg = {0};
 
-    switch (clock_freq) {
+    switch (clock_freq)
+    {
         case RootClock_50M:
             /* Configure FLEXSPI_SLV using OSC_RC_400M */
             rootCfg.mux = kCLOCK_FLEXSPI_SLV_ClockRoot_MuxOscRc400M;
@@ -193,7 +193,7 @@ void FLEXSPI_SLV_ClkRootFrq(int clock_freq)
             rootCfg.div = 1;
             break;
 
-	default:
+        default:
             /* RootClock_133M: Configure FLEXSPI_SLV using SYS_PLL2_CLK */
             rootCfg.mux = kCLOCK_FLEXSPI_SLV_ClockRoot_MuxSysPll2Out;
             rootCfg.div = 4;
@@ -259,15 +259,15 @@ void FLEXSPI_SLV_GetDefaultConfig(flexspi_slv_config_t *config)
     /* Initializes the configure structure to zero. */
     FLEXSPI_SLV_Memset(config, 0, sizeof(*config));
 
-    config->clock_freq     = RootClock_133M;
-    config->baseAddr1      = 0;
-    config->baseAddr2      = 0x1000;
-    config->addrRange1     = 0;
-    config->addrRange2     = 0;
-    config->io_mode        = kFLEXSPI_SLV_IOMODE_SDRx4;
-    config->rxFetch_size   = Read_Fetch_256Bytes;
-    config->rxWatermark    = 0;
-    config->txWatermark    = Write_Watermark_128Bytes;
+    config->clock_freq   = RootClock_133M;
+    config->baseAddr1    = 0;
+    config->baseAddr2    = 0x1000;
+    config->addrRange1   = 0;
+    config->addrRange2   = 0;
+    config->io_mode      = kFLEXSPI_SLV_IOMODE_SDRx4;
+    config->rxFetch_size = Read_Fetch_256Bytes;
+    config->rxWatermark  = 0;
+    config->txWatermark  = Write_Watermark_128Bytes;
 }
 
 /*!
@@ -280,7 +280,8 @@ void FLEXSPI_SLV_GetDefaultConfig(flexspi_slv_config_t *config)
 void FLEXSPI_SLV_Deinit(FLEXSPI_SLV_Type *base)
 {
     /* Reset peripheral. */
-    while (FLEXSPI_SLV_GetModuleBusyStatus(base));
+    while (FLEXSPI_SLV_GetModuleBusyStatus(base))
+        ;
     FLEXSPI_SLV_SoftwareReset_SetVal(base, 1);
 }
 
@@ -331,12 +332,10 @@ void FLEXSPI_SLV_InterruptCreateHandle(FLEXSPI_SLV_Type *base,
  */
 void FLEXSPI_SLV_HandleIRQ(FLEXSPI_SLV_Type *base, flexspi_slv_handle_t *handle)
 {
-
     handle->state = FLEXSPI_SLV_CheckAndClearInterrupt(base);
 
     /* Check if interrupt is enabled and status is alerted. */
-    if ((handle->state != kFLEXSPI_SLV_InvalidInterruptFlag) &&
-        (handle->callback != NULL))
+    if ((handle->state != kFLEXSPI_SLV_InvalidInterruptFlag) && (handle->callback != NULL))
     {
         handle->callback(base, handle);
     }
@@ -352,4 +351,3 @@ void FLEXSPI_SLV_DriverIRQHandler(void)
 }
 #endif
 #endif
-
