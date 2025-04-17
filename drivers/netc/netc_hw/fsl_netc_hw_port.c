@@ -107,12 +107,16 @@ status_t NETC_PortSetMII(NETC_ETH_LINK_Type *base,
             reg |= NETC_ETH_LINK_PM0_IF_MODE_HD(duplex != kNETC_MiiFullDuplex);
         }
     }
-    else /* kNETC_GmiiMode, force 1Gbps and full speed */
+    else if (miiMode == kNETC_GmiiMode) /* kNETC_GmiiMode, force 1Gbps and full speed */
     {
         if ((speed < kNETC_MiiSpeed1000M) || (duplex != kNETC_MiiFullDuplex))
         {
             return kStatus_InvalidArgument;
         }
+    }
+    else
+    {
+        /* Avoid MISRA 2012 rule 15.7 */
     }
     base->PM0_IF_MODE = reg;
     base->PM1_IF_MODE = reg;
