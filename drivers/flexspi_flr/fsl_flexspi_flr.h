@@ -1,6 +1,5 @@
 /*
- * Copyright 2023 NXP
- * All rights reserved.
+ * Copyright 2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -24,7 +23,7 @@
 /*! @name Driver version */
 /*@{*/
 /*! @brief FLEXSPI FOLLOWER driver version. */
-#define FSL_FLEXSPI_SLV_DRIVER_VERSION (MAKE_VERSION(1, 0, 0))
+#define FSL_FLEXSPI_SLV_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
 /*@}*/
 
 #define FSL_FEATURE_FLEXSPI_SLV_AXI_RX_BUFFER_SIZE (2 * 1024)
@@ -42,19 +41,6 @@ enum
     kFLEXSPI_SLV_IOMODE_SDRx8 = 1,
     kFLEXSPI_SLV_IOMODE_DDRx4 = 2,
     kFLEXSPI_SLV_IOMODE_DDRx8 = 3
-};
-
-/*! @brief Clock frequency enumeration of FLEXSPI FOLLOWER.*/
-enum
-{
-    RootClock_50M  = 50,
-    RootClock_66M  = 66,
-    RootClock_80M  = 80,
-    RootClock_100M = 100,
-    RootClock_133M = 133,
-    RootClock_166M = 166,
-    RootClock_200M = 200,
-    RootClock_400M = 400,
 };
 
 /*! @brief The read fetch size enumeration of FLEXSPI FOLLOWER.*/
@@ -99,7 +85,6 @@ enum
 /*! @brief FLEXSPI FOLLOWER configuration structure. */
 typedef struct _flexspi_slv_config
 {
-    int clock_freq;
     uint32_t baseAddr1;   /*!< Read/Write CMD1 Base Address. */
     uint32_t baseAddr2;   /*!< Read/Write CMD2 Base Address. */
     uint32_t addrRange1;  /*!< Read/Write CMD1 Addr Range. */
@@ -122,7 +107,6 @@ struct _flexspi_slv_handle
 {
     uint32_t state;                            /*!< Interrupt state for FLEXSPI FOLLOWER */
     flexspi_slv_interrupt_callback_t callback; /*!< Callback for users while mailbox received or error occurred */
-    void *userData;                            /*!< FLEXSPI FOLLOWER callback function parameter.*/
 };
 
 /*******************************************************************************
@@ -681,12 +665,12 @@ static inline void FLEXSPI_SLV_Write_Register_CommandSet(FLEXSPI_SLV_Type *base,
  * @param base FLEXSPI FOLLOWER peripheral base address.
  * @param handle Pointer to flexspi_slv_handle_t structure to store the interrupt state.
  * @param callback Pointer to user callback function.
- * @param userData User parameter passed to the callback function.
+ * @param interruptMask Interrupt mask to enable during handle creation. Use enumeration values ORed.
  */
 void FLEXSPI_SLV_InterruptCreateHandle(FLEXSPI_SLV_Type *base,
                                        flexspi_slv_handle_t *handle,
                                        flexspi_slv_interrupt_callback_t callback,
-                                       void *userData);
+                                       uint32_t interruptMask);
 
 /*!
  * @brief Master interrupt handler.
