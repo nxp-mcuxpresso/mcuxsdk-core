@@ -199,7 +199,8 @@ class ExportApp(WestCommand):
     @current_list_dir_context
     def parse_app(self, source_dir):
         dest_list_file = self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'CMakeLists.txt'
-        shutil.copytree(source_dir, dest_list_file.parent, dirs_exist_ok=True)
+        dest_list_file.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(source_dir / 'example.yml', dest_list_file.parent / 'example.yml')
         example_yml = yaml.load(open(source_dir / 'example.yml'), yaml.BaseLoader)
         _, example_info = next(iter(example_yml.items()))
 
@@ -262,7 +263,10 @@ class ExportApp(WestCommand):
             self.check_force(
                 linked_source.exists(),
                 f"Cannot find the sysbuild app dir {linked_source.as_posix()}")
+            backup = self.source_dir
+            self.source_dir = linked_source
             self.parse_app(linked_source)
+            self.source_dir = backup
 
     def combine_prj_conf(self, source_dir):
         example_root_stem = self.examples_root.stem
