@@ -20,8 +20,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief XBIC driver version 2.0.0. */
-#define FSL_XBIC_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+/*! @brief XBIC driver version 2.0.1. */
+#define FSL_XBIC_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*! @} */
  
 /*! @brief _xbic_error_syndromes XBIC error syndromes. */
@@ -182,12 +182,13 @@ static inline void XBIC_EnableErrorInjection(XBIC_Type *base, bool enable)
 {
     if(enable)
     {
-        base->EIR |= XBIC_EIR_EIE(enable);
+        base->EIR |= XBIC_EIR_EIE_MASK;
     }
     else
     {
-        base->EIR &= ~XBIC_EIR_EIE(enable);
+        base->EIR &= ~XBIC_EIR_EIE_MASK;
     }
+    __DSB();
 }
 
 /*!
