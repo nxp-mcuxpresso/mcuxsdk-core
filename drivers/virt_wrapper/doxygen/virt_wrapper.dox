@@ -1,0 +1,7 @@
+/*!
+@defgroup virt_wrapper VIRT_WRAPPER: Virtualization Wrapper
+
+VIRT_WRAPPER maps SIUL2 registers to specified PDAC slot. This driver supports
+mapping pins pad registers, pins input mux control registers, pins interrupt
+registers, and so on.
+*/

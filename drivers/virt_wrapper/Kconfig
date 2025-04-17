@@ -1,0 +1,12 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.virt_wrapper
+    bool
+    default y if MCUX_HW_IP_DriverType_VIRT_WRAPPER
+
+config MCUX_COMPONENT_driver.virt_wrapper
+    bool "virt_wrapper"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.virt_wrapper
