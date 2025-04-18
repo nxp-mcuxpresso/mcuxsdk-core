@@ -406,6 +406,10 @@ class NinjaParser
                 all_flags << flag
               end
             end
+          elsif @toolchain == 'codewarrior'
+            # Codewarrior IDE will add these flags automatically, not need to add them from CMake setting
+            all_flags = result[1].gsub('-bin -gap-fill 0xff -flash-start-x 0x20000', '')
+            all_flags = parse_ld_script(all_flags).split(/\s+/)
           else
             all_flags = parse_ld_script(result[1]).split(/\s+/)
           end
