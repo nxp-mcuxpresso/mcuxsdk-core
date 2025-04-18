@@ -6,12 +6,15 @@
   - Fixed padding in netc_tb_sgi_rsp_data_t union structure for query operations on OEXEN and IRXEN parameters.
   - Fixed structure use for rate policer and stream gate request commands memset.
   - Updated ERRATA 052134 to 052206.
+  - Fixed MII mode setting.
+  - Fixed i.MX943 getting function instance.
 - New Features
   - Added API to Reset IRX and OEX flags in stream gate instance entry.
   - Added API to configure the priority to traffic class map.
   - Added APIs to query table entry and get maximum entry number for Frame Modification Table.
   - Added APIs to configure Frame preemption.
   - Added APIs to configure PSRCR and PGCR registers to implement HSR feature.
+  - Moved PHY WRAPPER init sequence (NETC_PHYInit) implementation to SoC. And Added i.MX943 support.
 - Improvements
   - keep netc_tb_sgi_rsp_data_t local to the low level driver functions for SGI table entry query.
   - Converted to use preinitVsi callback for VSI pre-init.
