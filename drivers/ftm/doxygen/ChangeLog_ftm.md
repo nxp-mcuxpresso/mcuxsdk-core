@@ -1,5 +1,12 @@
 # FTM
 
+## [2.7.1]
+
+- Bug Fixes
+  - Added function macro when accsee FLTCTRL register FSTATE bit to prevent access nonexistent register.
+  - Added function macro to prevent access nonexistent FTM channel for API FTM_ConfigSinglePWM()
+    and FTM_ConfigCombinePWM().
+
 ## [2.7.0]
 
 - Improvements

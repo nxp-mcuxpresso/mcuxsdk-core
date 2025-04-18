@@ -326,6 +326,10 @@ status_t FTM_Init(FTM_Type *base, const ftm_config_t *config)
         reg = base->FLTCTRL;
         reg &= ~FTM_FLTCTRL_FFVAL_MASK;
         reg |= FTM_FLTCTRL_FFVAL(config->faultFilterValue);
+#if (defined(FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE) && FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE)
+        reg &= ~FTM_FLTCTRL_FSTATE_MASK;
+        reg |= FTM_FLTCTRL_FSTATE(config->faultOutputState);
+#endif  /* FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE */
         base->FLTCTRL = reg;
     }
 #else
@@ -333,13 +337,13 @@ status_t FTM_Init(FTM_Type *base, const ftm_config_t *config)
     reg = base->FLTCTRL;
     reg &= ~FTM_FLTCTRL_FFVAL_MASK;
     reg |= FTM_FLTCTRL_FFVAL(config->faultFilterValue);
-    base->FLTCTRL = reg;
-#endif
-
 #if (defined(FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE) && FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE)
     /* Set fault output state */
-    base->FLTCTRL |= FTM_FLTCTRL_FSTATE(config->faultOutputState);
+    reg &= ~FTM_FLTCTRL_FSTATE_MASK;
+    reg |= FTM_FLTCTRL_FSTATE(config->faultOutputState);
 #endif  /* FSL_FEATURE_FTM_HAS_FAULT_OUTPUT_STATE */
+    base->FLTCTRL = reg;
+#endif
 
     return kStatus_Success;
 }
@@ -862,6 +866,8 @@ void FTM_ConfigSinglePWM(FTM_Type *base,
     uint32_t reg;
 
     assert((chnlParams->mode == kFTM_EdgeAlignedPwm) || (chnlParams->mode == kFTM_CenterAlignedPwm));
+    assert(FSL_FEATURE_FTM_CHANNEL_COUNTn(base) != -1);
+    assert(chnlNumber < FSL_FEATURE_FTM_CHANNEL_COUNTn(base));
 
     if (chnlParams->mode == kFTM_CenterAlignedPwm)
     {
@@ -925,6 +931,8 @@ void FTM_ConfigCombinePWM(FTM_Type *base,
     uint32_t reg;
 
     assert((chnlParams->mode != kFTM_EdgeAlignedPwm) && (chnlParams->mode != kFTM_CenterAlignedPwm));
+    assert(FSL_FEATURE_FTM_CHANNEL_COUNTn(base) != -1);
+    assert(chnlPairNumber < FSL_FEATURE_FTM_CHANNEL_COUNTn(base) / 2);
 
     /* Clear Center-Aligned PWM Select for FTM */
     base->SC &= ~FTM_SC_CPWMS_MASK;
