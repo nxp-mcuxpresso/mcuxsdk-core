@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed CERT-C violations.
+  - Fixed wrong frame buffer configuration for overlay layers.
 
 ## [2.3.0]
 
