@@ -370,7 +370,7 @@ class ExportApp(WestCommand):
         for arg in func.get('args'):
             arg['value'] = arg['value'].replace('${CMAKE_CURRENT_LIST_DIR}', self.current_list_dir)
             if arg['value'].startswith('..'):
-                arg['value'] = os.path.join(self.current_list_dir, arg['value'])
+                arg['value'] = (Path(self.current_list_dir) / arg['value']).as_posix()
 
     # @cmake_func
     # def cm_project(self, func: dict, argv: dict) -> dict:
@@ -503,6 +503,7 @@ class ExportApp(WestCommand):
         return var
 
     def _process_path(self, base_path=None, src='', type='file'):
+        src = self.replace_var(src, ['SdkRootDirPath'])
         result = src
         if base_path:
             s_src = SDK_ROOT_DIR / re.sub(r'\$\{SdkRootDirPath\}/?', '', base_path) / src
@@ -513,8 +514,9 @@ class ExportApp(WestCommand):
             else:
                 s_src = self.source_dir / src
         if not s_src.exists():
-            if any(k in s_src.as_posix().lower() for k in BYPASS_KEY_LIST_IN_PATH):
+            if bool(re.search(r'\${(?!board$|core_id$)[^}]+}', s_src.as_posix().lower())):
                 result = '${SdkRootDirPath}/' + s_src.relative_to(SDK_ROOT_DIR).as_posix()
+
         else:
             d_src = (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))
             if type == 'file':
@@ -531,6 +533,8 @@ class ExportApp(WestCommand):
         self.args.source_dir = None
         self.args.cmake_opts = None
         self.cmake_variables = {'CONFIG_TOOLCHAIN': self.args.toolchain}
+        if self.args.board:
+            self.cmake_variables['board'] = self.args.board
 
         try:
             # Only one source_dir is allowed, as the first positional arg
