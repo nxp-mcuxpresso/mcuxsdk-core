@@ -26,6 +26,13 @@ typedef enum _qspi_dqs_clk_src
     kQSPI_DQSLoopbackClock,        /*!< Loopback clock from PAD SCKB selected as DQS. */
 } qspi_dqs_clk_src_t;
 
+/*! @brief Reference clock selection for DQS for Flash-B. */
+typedef enum _qspi_dqs_clk_type
+{
+    kQSPI_InvertClock = 0x0U, /*!< Inverted clock from qspi_dqs_clk_src_t selected as DQS. */
+    kQSPI_NormalClock,        /*!< Clock from qspi_dqs_clk_src_t selected as DQS. */
+} qspi_dqs_clk_type_t;
+
 /*! @brief Internal reference clock (async clock domain) source selection for Quadspi. */
 typedef enum _qspi_internal_clk_src
 {
@@ -60,9 +67,9 @@ typedef struct _qspi_soc_config
     bool divEnable : 1;                  /*!< Enable the divider. */
     uint8_t clkDiv : 4;                  /*!< Divider for SCK. */
     qspi_dqs_clk_src_t clkDqsFlashA : 1; /*!< Reference clock selection for DQS for Flash-A. */
-    bool invertClkDqsFlashA : 1;         /*!< DQS clock type. */
-    qspi_dqs_clk_src_t clkDqsFlashB : 1; /*!< Reference clock selection for DQS for Flash-B. */
-    bool invertClkDqsFlashB : 1;         /*!< DQS clock type. */
+    qspi_dqs_clk_type_t invertClkDqsFlashA : 1; /*!< DQS clock type. */
+    qspi_dqs_clk_src_t clkDqsFlashB : 1;        /*!< Reference clock selection for DQS for Flash-B. */
+    qspi_dqs_clk_type_t invertClkDqsFlashB : 1; /*!< DQS clock type. */
     qspi_internal_clk_src_t
         internalClk : 1; /*!< Internal reference clock (async clock domain) source selection for QuadSPI. */
     qspi_hyperram_dqs_clk_src_t hyperramDqsClkFlashB : 1; /*!< HyperRAM selection for Flash B - Reference clock
