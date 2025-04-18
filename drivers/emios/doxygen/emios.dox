@@ -1,0 +1,53 @@
+/*!
+@defgroup emios eMIOS: Timer PWM Module
+@details The MCUXpresso SDK provides a driver for the Enhanced Modular IO Subsystem (eMIOS)
+         of MCUXpresso SDK devices.
+
+The eMIOS driver supports the Modulus Counter, PWM signals, output compare, input capture and GPIO modes.
+
+# Introduction of eMIOS {#eMIOSIntroduction}
+
+## Initialization and deinitialization {#eMIOSInit}
+
+The function EMIOS_Init() initializes the eMIOS with a specified configurations.
+The function EMIOS_GetDefaultConfig() gets the default configurations.
+
+The function EMIOS_Deinit() disables the eMIOS and turns off the module clock.
+
+## Modulus Counter Operations {#EMIOSMCOperation}
+
+The function EMIOS_ConfigModulusCounter() configures a channel for MC MCB modes.
+
+
+## PWM Operations {#EMIOSPwmOperation}
+
+The function EMIOS_ConfigPWM() configures a channel for OPWFMB OPWMCB OPWMB OPWMT modes.
+
+The function EMIOS_UpdatePWM() updates the PWM parameters (duty cycle, period, etc.) for already configured PWM channel.
+
+
+## Input capture operations {#eMIOSICOperation}
+The function EMIOS_ConfigInputCapture() sets up a eMIOS channel for input capture.
+The user can specify the capture edge.
+
+
+## Output compare operations {#eMIOSOCOperation}
+The function EMIOS_ConfigOutputCompare() sets up a eMIOS channel for output comparison.
+The user can specify the channel output on a successful comparison and a comparison value.
+
+
+## Status {#eMIOSStatus}
+Provides functions to get and clear the eMIOS status.
+
+
+## Interrupt {#eMIOSInterrupt}
+Provides functions to enable/disable eMIOS interrupts and DMA.
+
+
+# Typical use case {#eMIOSCase}
+
+## PWM output {#eMIOSPWMOutput}
+Output the PWM signal on 1 eMIOS Unified Channel (UC) with different duty cycles. Periodically update the
+PWM signal duty cycle and frequency.
+Refer to the driver examples codes located at \<SDK_ROOT\>/examples/driver_examples/emios
+*/
