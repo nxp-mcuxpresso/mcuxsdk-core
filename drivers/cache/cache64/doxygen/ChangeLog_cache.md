@@ -1,5 +1,11 @@
 # CACHE64
 
+## [2.0.10]
+
+- Improvements
+  - Updated CACHE64_InvalidateCacheByRange(), CACHE64_CleanCacheByRange() and CACHE64_CleanInvalidateCacheByRange() to
+    support some platforms that multiple regions in the memory map are remapped to create a continuous address space.
+
 ## [2.0.9]
 
 - Improvements

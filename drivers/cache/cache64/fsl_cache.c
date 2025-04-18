@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, 2023-2024 NXP
+ * Copyright 2016-2021, 2023-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -259,6 +259,18 @@ void CACHE64_InvalidateCacheByRange(uint32_t address, uint32_t size_byte)
         endLim  = MSDK_REG_SECURE_ADDR(phyMemBase[instance][g_cache64MemPhyAliasId] + phyMemSize[instance][g_cache64MemPhyAliasId] - 0x01U);
         endAddr = endAddr > endLim ? endLim : endAddr;
 
+        /* In some platforms, multiple regions in the memory map are remapped to create
+         * continuous address space. So both startAddr and endAddr need to be remapped.
+        */
+#if defined(CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR)
+        uint32_t startOff = 0U;
+        uint32_t regionOff = endAddr - startAddr;
+        uint32_t cache64RemappBase[CACHE64_PHYMEM_COLUM_COUNT] = CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR;
+        startOff = startAddr - phyMemBase[instance][g_cache64MemPhyAliasId];
+        startAddr = cache64RemappBase[g_cache64MemPhyAliasId] + startOff;
+        endAddr = startAddr + regionOff;
+#endif /* defined(CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR) */
+
         /* Set the invalidate by line command and use the physical address. */
         pccReg = (base->CLCR & ~CACHE64_CTRL_CLCR_LCMD_MASK) | CACHE64_CTRL_CLCR_LCMD(1) | CACHE64_CTRL_CLCR_LADSEL_MASK;
         base->CLCR = pccReg;
@@ -328,6 +340,18 @@ void CACHE64_CleanCacheByRange(uint32_t address, uint32_t size_byte)
         base    = s_cache64ctrlBases[instance];
         endLim  = MSDK_REG_SECURE_ADDR(phyMemBase[instance][g_cache64MemPhyAliasId] + phyMemSize[instance][g_cache64MemPhyAliasId] - 0x01U);
         endAddr = endAddr > endLim ? endLim : endAddr;
+
+        /* In some platforms, multiple regions in the memory map are remapped to create
+         * continuous address space. So both startAddr and endAddr need to be remapped.
+        */
+#if defined(CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR)
+        uint32_t startOff = 0U;
+        uint32_t regionOff = endAddr - startAddr;
+        uint32_t cache64RemappBase[CACHE64_PHYMEM_COLUM_COUNT] = CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR;
+        startOff = startAddr - phyMemBase[instance][g_cache64MemPhyAliasId];
+        startAddr = cache64RemappBase[g_cache64MemPhyAliasId] + startOff;
+        endAddr = startAddr + regionOff;
+#endif /* defined(CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR) */
 
         /* Set the push by line command. */
         pccReg = (base->CLCR & ~CACHE64_CTRL_CLCR_LCMD_MASK) | CACHE64_CTRL_CLCR_LCMD(2) | CACHE64_CTRL_CLCR_LADSEL_MASK;
@@ -400,6 +424,18 @@ void CACHE64_CleanInvalidateCacheByRange(uint32_t address, uint32_t size_byte)
         base    = s_cache64ctrlBases[instance];
         endLim  = MSDK_REG_SECURE_ADDR(phyMemBase[instance][g_cache64MemPhyAliasId] + phyMemSize[instance][g_cache64MemPhyAliasId] - 0x01U);
         endAddr = endAddr > endLim ? endLim : endAddr;
+
+        /* In some platforms, multiple regions in the memory map are remapped to create
+         * continuous address space. So both startAddr and endAddr need to be remapped.
+        */
+#if defined(CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR)
+        uint32_t startOff = 0U;
+        uint32_t regionOff = endAddr - startAddr;
+        uint32_t cache64RemappBase[CACHE64_PHYMEM_COLUM_COUNT] = CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR;
+        startOff = startAddr - phyMemBase[instance][g_cache64MemPhyAliasId];
+        startAddr = cache64RemappBase[g_cache64MemPhyAliasId] + startOff;
+        endAddr = startAddr + regionOff;
+#endif /* defined(CACHE64_CTRL_ALIAS_REMAPPED_BASE_ADDR) */
 
         /* Set the push by line command. */
         pccReg = (base->CLCR & ~CACHE64_CTRL_CLCR_LCMD_MASK) | CACHE64_CTRL_CLCR_LCMD(3) | CACHE64_CTRL_CLCR_LADSEL_MASK;
