@@ -1,0 +1,5 @@
+/*!
+@defgroup flash_c40 FLASH-C40: Flash driver for C40 FLASH IP
+@details This driver implements means for flash erase and write on devices with C40 Flash IP.
+
+*/

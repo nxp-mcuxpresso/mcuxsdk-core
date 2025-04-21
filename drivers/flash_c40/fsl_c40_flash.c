@@ -649,7 +649,7 @@ static status_t C40_Write(uint32_t address, uint32_t length, const uint8_t *sour
         return ret;
     }
 
-    if (length == 0)
+    if (length == 0 || length > C40_QUAD_PAGE_SIZE)
     {
         return kStatus_FLASH_InvalidArgument;
     }
@@ -806,17 +806,30 @@ status_t FLASH_Program(flash_config_t *config, uint32_t start, uint32_t *src, ui
 
     /* allow for multiple quad-page writes */
 
+    /* if start address isn't quad-page aligned, program this chunk first */
+
+    if ((addr % C40_WRITE_SIZE_MAX) > 0)
+    {
+        uint32_t bytesToAlignedPage = C40_WRITE_SIZE_MAX - (addr % C40_WRITE_SIZE_MAX);
+
+        chunkSize = (sizeLeft > bytesToAlignedPage) ? bytesToAlignedPage : sizeLeft;
+
+        ret = C40_Write(start, lengthInBytes, src8, C40_DEFAULT_CORE_DOMAIN_ID);
+        if (ret != kStatus_FLASH_Success)
+        {
+            return ret;
+        }
+
+        sizeLeft -= chunkSize;
+        src8     += chunkSize;
+    }
+
+    /* continue with aligned writes */
+
     while (sizeLeft > 0)
     {
-        if (((void *)src8 == (void *)src) && (start % C40_WRITE_SIZE_MAX) > 0)
-        {
-            /* if start address isn't quad-page aligned, program this chunk first */
-            chunkSize = addr % C40_WRITE_SIZE_MAX;
-        }
-        else
-        {   /* continue with aligned writes */
-            chunkSize = (sizeLeft > C40_WRITE_SIZE_MAX) ? C40_WRITE_SIZE_MAX : sizeLeft;
-        }
+
+        chunkSize = (sizeLeft > C40_WRITE_SIZE_MAX) ? C40_WRITE_SIZE_MAX : sizeLeft;
 
         ret = C40_Write(start, lengthInBytes, src8, C40_DEFAULT_CORE_DOMAIN_ID);
         if (ret != kStatus_FLASH_Success)

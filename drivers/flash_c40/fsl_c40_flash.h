@@ -15,6 +15,13 @@
  * Definitions
  ******************************************************************************/
 
+/*! @name Driver version */
+/*! @{ */
+/*! @brief eDMA driver version */
+#define FSL_FLASH_C40_DRIVER_VERSION (MAKE_VERSION(1, 0, 1))
+/*! @} */
+
+
 /*! @brief Flash driver status group. */
 #if defined(kStatusGroup_FlashDriver)
 #define kStatusGroupGeneric     kStatusGroup_Generic
