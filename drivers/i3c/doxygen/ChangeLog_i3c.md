@@ -4,6 +4,7 @@
 
 - Improvements
   - Added the choice to set fast start header with push-pull speed when all targets addresses have MSB 0 instead of forcing to set it.
+  - Deleted duplicated busy check in I3C_MasterStart function.
 
 ## [2.13.1]
 

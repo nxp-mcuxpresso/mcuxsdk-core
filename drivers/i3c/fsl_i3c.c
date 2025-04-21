@@ -1232,13 +1232,6 @@ status_t I3C_MasterStartWithRxSize(
  */
 status_t I3C_MasterStart(I3C_Type *base, i3c_bus_type_t type, uint8_t address, i3c_direction_t dir)
 {
-    i3c_master_state_t masterState = I3C_MasterGetState(base);
-    bool checkDdrState             = (type == kI3C_TypeI3CDdr) ? (masterState != kI3C_MasterStateDdr) : true;
-    if ((masterState != kI3C_MasterStateIdle) && (masterState != kI3C_MasterStateNormAct) && checkDdrState)
-    {
-        return kStatus_I3C_Busy;
-    }
-
     return I3C_MasterStartWithRxSize(base, type, address, dir, 0);
 }
 
