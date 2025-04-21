@@ -231,9 +231,11 @@ module Internal
         pattern = /-l(\S+)/
         result = line.match(pattern)
         while result
-          lib = result[1].gsub!("\\\"", "")
-          if lib.match(/^\$\{\S+\}\S+/)
+          lib = result[1].gsub("\\\"", "")
+          if lib && lib.match(/^\$\{\S+\}\S+/)
             lib = '"' + lib + '"'
+          else
+            lib = result[1]
           end
           @file.dscLinkerTab.inputTab.add_addl_lib(target, lib)
           line.sub!(result[0], '')
