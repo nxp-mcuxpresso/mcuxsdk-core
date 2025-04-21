@@ -100,10 +100,14 @@ module Internal
 
       def compiler_hawk_elf(target,line)
         Core.assert(line.is_a?(String), 'not a string')
-        pattern = /\s-v4\s/
+        pattern = /\s(-v4|-v3)\s/
         result = line.match(pattern)
         if result
-          @file.dscCompilerTab.processorTab.set_hawk_elf(target, true)
+          if result[1] == "-v4"
+            @file.dscCompilerTab.processorTab.set_hawk_elf(target, true)
+          else
+            @file.dscCompilerTab.processorTab.set_hawk_elf(target, false)
+          end
           line.sub!(result[0], '')
         else
           @file.dscCompilerTab.processorTab.set_hawk_elf(target, false)
@@ -171,10 +175,14 @@ module Internal
 
       def assembler_hawk_elf(target,line)
         Core.assert(line.is_a?(String), 'not a string')
-        pattern = /\s-v4\s/
+        pattern = /\s(-v4|-v3)\s/
         result = line.match(pattern)
         if result
-          @file.dscAssemblerTab.generalTab.set_hawk_elf(target, true)
+          if result[1] == "-v4"
+            @file.dscAssemblerTab.generalTab.set_hawk_elf(target, true)
+          else
+            @file.dscAssemblerTab.generalTab.set_hawk_elf(target, false )
+          end
           line.sub!(result[0], '')
         else
           @file.dscAssemblerTab.generalTab.set_hawk_elf(target, false )
@@ -203,10 +211,14 @@ module Internal
 
       def linker_hawk_elf(target,line)
         Core.assert(line.is_a?(String), 'not a string')
-        pattern = /\s-v4\s/
+        pattern = /\s(-v4|-v3)\s/
         result = line.match(pattern)
         if result
-          @file.dscLinkerTab.generalTab.set_hawk_elf(target, true)
+          if result[1] == "-v4"
+            @file.dscLinkerTab.generalTab.set_hawk_elf(target, true)
+          else
+            @file.dscLinkerTab.generalTab.set_hawk_elf(target, false)
+          end
           line.sub!(result[0], '')
         else
           @file.dscLinkerTab.generalTab.set_hawk_elf(target, false)
