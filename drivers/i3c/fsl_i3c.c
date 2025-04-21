@@ -771,10 +771,10 @@ void I3C_GetDefaultConfig(i3c_config_t *config)
     config->baudRate_Hz.i3cOpenDrainBaud = 2500000U;
     config->masterDynamicAddress         = 0x0AU; /* Default master dynamic address. */
 #if !(defined(FSL_FEATURE_I3C_HAS_NO_SCONFIG_BAMATCH) && FSL_FEATURE_I3C_HAS_NO_SCONFIG_BAMATCH)
-    config->slowClock_Hz                 = 0; /* Not update the Soc default setting. */
+    config->slowClock_Hz = 0;                     /* Not update the Soc default setting. */
 #endif
-    config->enableSlave                  = true;
-    config->vendorID                     = 0x11BU;
+    config->enableSlave = true;
+    config->vendorID    = 0x11BU;
 #if !(defined(FSL_FEATURE_I3C_HAS_NO_SCONFIG_IDRAND) && FSL_FEATURE_I3C_HAS_NO_SCONFIG_IDRAND)
     config->enableRandomPart = false;
 #endif
@@ -826,7 +826,8 @@ void I3C_Init(I3C_Type *base, const i3c_config_t *config, uint32_t sourceClock_H
                     I3C_MCONFIG_ODHPP(config->enableOpenDrainHigh);
 
 #if defined(FSL_FEATURE_I3C_HAS_START_SCL_DELAY) && FSL_FEATURE_I3C_HAS_START_SCL_DELAY
-    base->MCONFIG_EXT = I3C_MCONFIG_EXT_I3C_CAS_DEL(config->startSclDelay) | I3C_MCONFIG_EXT_I3C_CASR_DEL(config->restartSclDelay);
+    base->MCONFIG_EXT =
+        I3C_MCONFIG_EXT_I3C_CAS_DEL(config->startSclDelay) | I3C_MCONFIG_EXT_I3C_CASR_DEL(config->restartSclDelay);
 #endif
 
     I3C_MasterSetWatermarks(base, kI3C_TxTriggerUntilOneLessThanFull, kI3C_RxTriggerOnNotEmpty, true, true);
@@ -837,8 +838,9 @@ void I3C_Init(I3C_Type *base, const i3c_config_t *config, uint32_t sourceClock_H
     assert((config->slowClock_Hz >= 1000000U) || (config->slowClock_Hz == 0U));
 
     uint8_t matchCount;
-    /* Set as (slowClk(MHz) - 1) to generate 1us clock cycle. Controller uses it to count 100us timeout. Target uses it as IBI request to drive SDA low.
-       Note: Use BAMATCH = 1 to generate 1us clock cycle if slow clock is 1MHz. The value of 0 would not give a correct match indication. */
+    /* Set as (slowClk(MHz) - 1) to generate 1us clock cycle. Controller uses it to count 100us timeout. Target uses it
+       as IBI request to drive SDA low. Note: Use BAMATCH = 1 to generate 1us clock cycle if slow clock is 1MHz. The
+       value of 0 would not give a correct match indication. */
     if (config->slowClock_Hz != 0U)
     {
         matchCount = (uint8_t)(config->slowClock_Hz / 1000000UL) - 1U;
@@ -846,7 +848,8 @@ void I3C_Init(I3C_Type *base, const i3c_config_t *config, uint32_t sourceClock_H
     }
     else
     {
-        /* BAMATCH has default value based on Soc default slow clock after reset, using this default value when slowClock_Hz is 0. */
+        /* BAMATCH has default value based on Soc default slow clock after reset, using this default value when
+         * slowClock_Hz is 0. */
         matchCount = (uint8_t)((base->SCONFIG & I3C_SCONFIG_BAMATCH_MASK) >> I3C_SCONFIG_BAMATCH_SHIFT);
     }
 #endif
@@ -979,7 +982,8 @@ void I3C_MasterInit(I3C_Type *base, const i3c_master_config_t *masterConfig, uin
                     I3C_MCONFIG_ODHPP(masterConfig->enableOpenDrainHigh);
 
 #if defined(FSL_FEATURE_I3C_HAS_START_SCL_DELAY) && FSL_FEATURE_I3C_HAS_START_SCL_DELAY
-    base->MCONFIG_EXT = I3C_MCONFIG_EXT_I3C_CAS_DEL(masterConfig->startSclDelay) | I3C_MCONFIG_EXT_I3C_CASR_DEL(masterConfig->restartSclDelay);
+    base->MCONFIG_EXT = I3C_MCONFIG_EXT_I3C_CAS_DEL(masterConfig->startSclDelay) |
+                        I3C_MCONFIG_EXT_I3C_CASR_DEL(masterConfig->restartSclDelay);
 #endif
 
     I3C_MasterSetWatermarks(base, kI3C_TxTriggerUntilOneLessThanFull, kI3C_RxTriggerOnNotEmpty, true, true);
@@ -992,11 +996,12 @@ void I3C_MasterInit(I3C_Type *base, const i3c_master_config_t *masterConfig, uin
     uint32_t configValue;
     uint8_t matchCount;
 
-    /* BAMATCH has default value based on Soc default slow clock after reset, using this default value when slowClock_Hz is 0. */
+    /* BAMATCH has default value based on Soc default slow clock after reset, using this default value when slowClock_Hz
+     * is 0. */
     if (masterConfig->slowClock_Hz != 0U)
     {
-        /* Set as (slowClk(MHz) - 1) to generate 1us clock cycle for 100us timeout. Note: Use BAMATCH = 1 to generate 1us clock cycle
-           if slow clock is 1MHz. The value of 0 would not give a correct match indication. */
+        /* Set as (slowClk(MHz) - 1) to generate 1us clock cycle for 100us timeout. Note: Use BAMATCH = 1 to generate
+           1us clock cycle if slow clock is 1MHz. The value of 0 would not give a correct match indication. */
         matchCount = (uint8_t)(masterConfig->slowClock_Hz / 1000000UL) - 1U;
         matchCount = (matchCount == 0U) ? 1U : matchCount;
 
@@ -1267,8 +1272,8 @@ status_t I3C_MasterRepeatedStartWithRxSize(
 #if defined(FSL_FEATURE_I3C_HAS_ERRATA_051617) && (FSL_FEATURE_I3C_HAS_ERRATA_051617)
     /* ERRATA051617: When used as I2C controller generates repeated START randomly before the STOP under PVT condition.
     This issue is caused by a glitch at the output of an internal clock MUX. The glitch when generates acts as a clock
-    pulse which causes the SDA line to fall early during SCL high period and creates the unintended Repeated START before
-    actual STOP. */
+    pulse which causes the SDA line to fall early during SCL high period and creates the unintended Repeated START
+    before actual STOP. */
     if (type == kI3C_TypeI2C)
     {
         base->MCONFIG |= I3C_MCONFIG_SKEW(1);
@@ -1671,14 +1676,15 @@ status_t I3C_MasterProcessDAASpecifiedBaudrate(I3C_Type *base,
 
             /* Assign the dynamic address from address list. */
             devList[instance][devCount].dynamicAddr = *addressList++;
-            base->MWDATAB                 = devList[instance][devCount].dynamicAddr;
+            base->MWDATAB                           = devList[instance][devCount].dynamicAddr;
 
             /* Emit process DAA again. */
             I3C_MasterEmitRequest(base, kI3C_RequestProcessDAA);
 
-            devList[instance][devCount].vendorID   = (((uint16_t)rxBuffer[0] << 8U | (uint16_t)rxBuffer[1]) & 0xFFFEU) >> 1U;
+            devList[instance][devCount].vendorID =
+                (((uint16_t)rxBuffer[0] << 8U | (uint16_t)rxBuffer[1]) & 0xFFFEU) >> 1U;
             devList[instance][devCount].partNumber = ((uint32_t)rxBuffer[2] << 24U | (uint32_t)rxBuffer[3] << 16U |
-                                            (uint32_t)rxBuffer[4] << 8U | (uint32_t)rxBuffer[5]);
+                                                      (uint32_t)rxBuffer[4] << 8U | (uint32_t)rxBuffer[5]);
             devList[instance][devCount].bcr        = rxBuffer[6];
             devList[instance][devCount].dcr        = rxBuffer[7];
             devCount++;
@@ -2472,7 +2478,8 @@ static status_t I3C_InitTransferStateMachine(I3C_Type *base, i3c_master_handle_t
     {
         if ((handle->remainingBytes < 256U) && (direction == kI3C_Read))
         {
-            result = I3C_MasterRepeatedStartWithRxSize(base, xfer->busType, xfer->slaveAddress, direction, (uint8_t)handle->remainingBytes);
+            result = I3C_MasterRepeatedStartWithRxSize(base, xfer->busType, xfer->slaveAddress, direction,
+                                                       (uint8_t)handle->remainingBytes);
         }
         else
         {
@@ -2483,7 +2490,8 @@ static status_t I3C_InitTransferStateMachine(I3C_Type *base, i3c_master_handle_t
     {
         if ((handle->remainingBytes < 256U) && (direction == kI3C_Read))
         {
-            result = I3C_MasterStartWithRxSize(base, xfer->busType, xfer->slaveAddress, direction, (uint8_t)handle->remainingBytes);
+            result = I3C_MasterStartWithRxSize(base, xfer->busType, xfer->slaveAddress, direction,
+                                               (uint8_t)handle->remainingBytes);
         }
         else
         {
@@ -2749,9 +2757,9 @@ void I3C_SlaveGetDefaultConfig(i3c_slave_config_t *slaveConfig)
 
     slaveConfig->enableSlave = true;
 #if !(defined(FSL_FEATURE_I3C_HAS_NO_SLAVE_IBI_MR_HJ) && FSL_FEATURE_I3C_HAS_NO_SLAVE_IBI_MR_HJ)
-    slaveConfig->isHotJoin   = false;
+    slaveConfig->isHotJoin = false;
 #endif
-    slaveConfig->vendorID    = 0x11BU;
+    slaveConfig->vendorID = 0x11BU;
 #if !(defined(FSL_FEATURE_I3C_HAS_NO_SCONFIG_IDRAND) && FSL_FEATURE_I3C_HAS_NO_SCONFIG_IDRAND)
     slaveConfig->enableRandomPart = false;
 #endif
@@ -2815,7 +2823,8 @@ void I3C_SlaveInit(I3C_Type *base, const i3c_slave_config_t *slaveConfig, uint32
     }
     else
     {
-        /* BAMATCH has default value based on Soc default slow clock after reset, using this default value when slowClock_Hz is 0. */
+        /* BAMATCH has default value based on Soc default slow clock after reset, using this default value when
+         * slowClock_Hz is 0. */
         matchCount = (uint8_t)((base->SCONFIG & I3C_SCONFIG_BAMATCH_MASK) >> I3C_SCONFIG_BAMATCH_SHIFT);
     }
 #endif
