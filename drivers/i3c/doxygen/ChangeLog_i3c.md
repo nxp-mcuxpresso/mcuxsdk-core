@@ -1,5 +1,10 @@
 # I3C
 
+## [2.14.0]
+
+- Improvements
+  - Added the choice to set fast start header with push-pull speed when all targets addresses have MSB 0 instead of forcing to set it.
+
 ## [2.13.1]
 
 - Bug Fixes

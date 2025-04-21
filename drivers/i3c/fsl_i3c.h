@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024 NXP
+ * Copyright 2018-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,7 +20,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief I3C driver version */
-#define FSL_I3C_DRIVER_VERSION (MAKE_VERSION(2, 13, 1))
+#define FSL_I3C_DRIVER_VERSION (MAKE_VERSION(2, 14, 0))
 /*! @} */
 
 /*! @brief Timeout times for waiting flag. */
@@ -277,6 +277,7 @@ typedef enum _i3c_start_scl_delay
 typedef struct _i3c_register_ibi_addr
 {
     uint8_t address[5]; /*!< Address array for registry. */
+    bool i3cFastStart;  /*!< Allow the START header to run as push-pull speed if all dynamic addresses take MSB 0. */
     bool ibiHasPayload; /*!< Whether the address array has mandatory IBI byte. */
 } i3c_register_ibi_addr_t;
 

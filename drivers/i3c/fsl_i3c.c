@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024 NXP
+ * Copyright 2018-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -1346,19 +1346,15 @@ void I3C_MasterEmitRequest(I3C_Type *base, i3c_bus_request_t masterReq)
 void I3C_MasterRegisterIBI(I3C_Type *base, i3c_register_ibi_addr_t *ibiRule)
 {
     assert(NULL != ibiRule);
-    uint32_t ruleValue = I3C_MIBIRULES_MSB0_MASK;
+
+    uint32_t ruleValue = 0;
 
     for (uint32_t count = 0; count < ARRAY_SIZE(ibiRule->address); count++)
     {
         ruleValue |= ((uint32_t)ibiRule->address[count]) << (count * I3C_MIBIRULES_ADDR1_SHIFT);
     }
-
-    ruleValue &= ~I3C_MIBIRULES_NOBYTE_MASK;
-
-    if (!ibiRule->ibiHasPayload)
-    {
-        ruleValue |= I3C_MIBIRULES_NOBYTE_MASK;
-    }
+    ruleValue |= (ibiRule->ibiHasPayload ? 0U : I3C_MIBIRULES_NOBYTE_MASK);
+    ruleValue |= (ibiRule->i3cFastStart ? I3C_MIBIRULES_MSB0_MASK : 0U);
 
     base->MIBIRULES = ruleValue;
 }
@@ -1382,6 +1378,7 @@ void I3C_MasterGetIBIRules(I3C_Type *base, i3c_register_ibi_addr_t *ibiRule)
     }
 
     ibiRule->ibiHasPayload = (0U == (ruleValue & I3C_MIBIRULES_NOBYTE_MASK));
+    ibiRule->i3cFastStart  = (0U != (ruleValue & I3C_MIBIRULES_MSB0_MASK));
 }
 
 /*!
