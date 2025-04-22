@@ -11,6 +11,7 @@ import sys
 import yaml
 import hashlib
 import shutil
+import re
 
 from west import log
 from west.configuration import config
@@ -725,6 +726,9 @@ class Build(Forceable):
                                                      DEFAULT_CMAKE_GENERATOR))]
         if cmake_opts:
             final_cmake_args.extend(cmake_opts)
+
+        # Translate CONF_FILE to absolute path
+        final_cmake_args = self._translate_conf_file_path(final_cmake_args)
         run_cmake(final_cmake_args, dry_run=self.args.dry_run)
 
     def _run_pristine(self):
@@ -876,3 +880,29 @@ class Build(Forceable):
             self.args.cmake_opts = args
 
         return self.args.build_dir
+
+    def _translate_conf_file_path(self, cmake_args):
+        '''
+        Translate CONF_FILE to absolute path.
+        If developer give a file relative to the path which invoking west command, it will translate it to absolute path.
+        This way can prevent the error when using CONF_FILE with relative path, developer invoke west command out of SdkRootDirPath, or use sysbuild.
+        '''
+        pattern = re.compile(r'-D.*CONF_FILE=(.*)')
+        final_cmake_opts = []
+        for item in cmake_args:
+            match = pattern.match(item)
+            if not match:
+                final_cmake_opts.append(item)
+                continue
+            temp = []
+            conf_file_array = match.group(1)
+            for conf_file in conf_file_array.split(';'):
+                # translate user folder if it contains "~"
+                file_path = os.path.expanduser(conf_file)
+                # if the path is relative, translate it to absolute path
+                if not os.path.isabs(file_path):
+                    temp.append(os.path.abspath(os.path.join(os.getcwd(), file_path)))
+                else:
+                    temp.append(file_path)
+            final_cmake_opts.append(item.split('=')[0] + '=' + ';'.join(temp))
+        return final_cmake_opts
