@@ -2453,16 +2453,16 @@ static inline status_t SWT_SetPortIPV2QMR(swt_handle_t *handle, netc_hw_port_idx
 }
 
 /*!
- * @brief Set MAC station move allowed on Switch port
+ * @brief Enable MAC station move on Switch port
  *
  * @param handle
- * @param portIdx port index
- * @param enMacStationMove enable MAC station to moved
+ * @param portIdx  port index
+ * @param enable  Allow MAC station move
  * @return kStatus_Success
  */
-static inline status_t SWT_SetPortSTAMVD(swt_handle_t *handle, netc_hw_port_idx_t portIdx, bool enMacStationMove)
+static inline status_t SWT_EnablePortMacStationMove(swt_handle_t *handle, netc_hw_port_idx_t portIdx, bool enable)
 {
-    if (enMacStationMove)
+    if (enable)
     {
         handle->hw.ports[portIdx].port->BPCR &= (~NETC_PORT_BPCR_STAMVD_MASK);
     }
@@ -2482,10 +2482,10 @@ static inline status_t SWT_SetPortSTAMVD(swt_handle_t *handle, netc_hw_port_idx_
  *
  * @param handle
  * @param portIdx port index
- * @param sr netc_swt_port_sr_config
+ * @param sr netc_swt_port_sr_config_t
  * @return kStatus_Success
  */
-static inline status_t SWT_SetPortSR(swt_handle_t *handle, netc_hw_port_idx_t portIdx, netc_swt_port_sr_config *sr)
+static inline status_t SWT_SetPortSR(swt_handle_t *handle, netc_hw_port_idx_t portIdx, netc_swt_port_sr_config_t *sr)
 {
     handle->hw.ports[portIdx].port->PSRCR = NETC_PORT_PSRCR_ISQG_EID(sr->isqEID) | NETC_PORT_PSRCR_PATHID(sr->pathId) |
                                             NETC_PORT_PSRCR_TX_SQTA(sr->txSqta) |

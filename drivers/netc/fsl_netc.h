@@ -4046,7 +4046,7 @@ typedef struct _netc_swt_port_sr_config
     bool srcPortFlt;
     bool sdfa;
     bool srPort;
-} netc_swt_port_sr_config;
+} netc_swt_port_sr_config_t;
 
 /*! @} */ // end of netc_hw_switch
 #if !(defined(__GNUC__) || defined(__ICCARM__))
