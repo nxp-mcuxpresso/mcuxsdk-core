@@ -2551,6 +2551,24 @@ void LPSPI6_DriverIRQHandler(void)
 }
 #endif
 
+#if defined(LPSPI7)
+void LPSPI7_DriverIRQHandler(void);
+void LPSPI7_DriverIRQHandler(void)
+{
+    assert(s_lpspiHandle[7] != NULL);
+    LPSPI_CommonIRQHandler(LPSPI7, s_lpspiHandle[7]);
+}
+#endif
+
+#if defined(LPSPI8)
+void LPSPI8_DriverIRQHandler(void);
+void LPSPI8_DriverIRQHandler(void)
+{
+    assert(s_lpspiHandle[8] != NULL);
+    LPSPI_CommonIRQHandler(LPSPI8, s_lpspiHandle[8]);
+}
+#endif
+
 #if defined(DMA__LPSPI0)
 void DMA_SPI0_INT_DriverIRQHandler(void);
 void DMA_SPI0_INT_DriverIRQHandler(void)
