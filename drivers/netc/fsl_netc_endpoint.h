@@ -179,9 +179,9 @@ typedef enum _ep_rx_flags
 
 typedef enum _ep_tx_opt_flags
 {
-    kEP_TX_OPT_REQ_TS      = 0x1U, /*!< Request timestamp (IEEE 1588 PTP two-step timestamp). */
-    kEP_TX_OPT_VLAN_INSERT = 0x2U, /*!< Enable VLAN insert. */
-    kEP_TX_OPT_START_TIME  = 0x4U, /*!< Specifiy frame departure time. */
+    kEP_TX_OPT_REQ_TS      = 0x1U,     /*!< Request timestamp (IEEE 1588 PTP two-step timestamp). */
+    kEP_TX_OPT_VLAN_INSERT = 0x2U,     /*!< Enable VLAN insert. */
+    kEP_TX_OPT_START_TIME  = 0x4U,     /*!< Specifiy frame departure time. */
 #if !(defined(FSL_FEATURE_NETC_HAS_ERRATA_051255) && FSL_FEATURE_NETC_HAS_ERRATA_051255)
     kEP_TX_OPT_REQ_ONE_STEP_TS = 0x8U, /*!< Request IEEE 1588 PTP one-step timestamp offload. */
 #endif
@@ -197,9 +197,9 @@ typedef struct _ep_tx_opt
 #else
 typedef struct _ep_tx_offload
 {
-    bool lso;               /*!< Large send offload. */
-    bool l4Checksum;        /*!< L4 checksum offload. */
-    bool ipv4Checksum;      /*!< IPv4 checksum offload. */
+    bool lso;                    /*!< Large send offload. */
+    bool l4Checksum;             /*!< L4 checksum offload. */
+    bool ipv4Checksum;           /*!< IPv4 checksum offload. */
     uint32_t lsoMaxSegSize : 14; /*!< Large send offload maximum segment size. */
     uint32_t l4Type : 3;         /*!< L4 type. 1-UDP, 2-TCP. */
     uint32_t l3Type : 1;         /*!< L3 type. 0-IPv4, 1-IPv6. */
@@ -269,7 +269,9 @@ typedef void (*ep_rx_free_cb_t)(ep_handle_t *handle, uint8_t ring, void *address
 typedef status_t (*ep_get_link_status_cb_t)(ep_handle_t *handle, uint8_t *link);
 
 /*! @brief Callback for getting link speed */
-typedef status_t (*ep_get_link_speed_cb_t)(ep_handle_t *handle, netc_hw_mii_speed_t *speed, netc_hw_mii_duplex_t *duplex);
+typedef status_t (*ep_get_link_speed_cb_t)(ep_handle_t *handle,
+                                           netc_hw_mii_speed_t *speed,
+                                           netc_hw_mii_duplex_t *duplex);
 
 /*! @brief Callback for vsi pre-init */
 typedef status_t (*ep_preinit_vsi_cb_t)(netc_enetc_hw_t *hw, netc_hw_si_idx_t si);
@@ -1278,8 +1280,8 @@ static inline void EP_TxPortEthMacConfigPreemption(ep_handle_t *handle, const ne
  * @param status
  */
 static inline void EP_TxPortGetEthMacPreemption(ep_handle_t *handle,
-                                                    netc_port_preemption_config *config,
-                                                    netc_port_phy_mac_preemption_status_t *status)
+                                                netc_port_preemption_config *config,
+                                                netc_port_phy_mac_preemption_status_t *status)
 {
     NETC_ETH_LINK_Type *base;
 

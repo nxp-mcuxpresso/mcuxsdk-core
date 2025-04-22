@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -22,14 +22,14 @@ typedef enum _netc_swt_tag_type
 /*! @brief Switch tag subtype */
 typedef enum _netc_swt_tag_subtype
 {
-    kNETC_TagToPortNoTs = 0, /*!< Normal frame process. */
-    kNETC_TagToPortOneStepTs,  /*!< The frame must be transmitted out a specific switch port. */
-    kNETC_TagToPortTwoStepTs,  /*!< Frames that are redirected or copied to the switch management port. */
-    kNETC_TagToPortAllTs,  /*!< Frames that are redirected or copied to the switch management port. */
+    kNETC_TagToPortNoTs = 0,  /*!< Normal frame process. */
+    kNETC_TagToPortOneStepTs, /*!< The frame must be transmitted out a specific switch port. */
+    kNETC_TagToPortTwoStepTs, /*!< Frames that are redirected or copied to the switch management port. */
+    kNETC_TagToPortAllTs,     /*!< Frames that are redirected or copied to the switch management port. */
 
     kNETC_TagToHostNoTs = 0,  /*!< Frames that are redirected or copied to the switch management port. */
-    kNETC_TagToHostRxTs,  /*!< Frames that are redirected or copied to the switch management port. */
-    kNETC_TagToHostTxTs,  /*!< Frames that are redirected or copied to the switch management port. */
+    kNETC_TagToHostRxTs,      /*!< Frames that are redirected or copied to the switch management port. */
+    kNETC_TagToHostTxTs,      /*!< Frames that are redirected or copied to the switch management port. */
 } netc_swt_tag_subtype_t;
 
 #pragma pack(1)
@@ -92,8 +92,8 @@ typedef struct _netc_swt_tag_port_all_ts
 typedef struct _netc_swt_tag_host
 {
     netc_swt_tag_common_t comTag; /*!< Tag Protocol Identifier to identify the tag as an NXP switch tag. */
-    uint16_t : 4;             /*!< Reserved. */
-    uint16_t hostReason : 4;  /*!< Host reason. */
+    uint16_t : 4;                 /*!< Reserved. */
+    uint16_t hostReason : 4;      /*!< Host reason. */
 } netc_swt_tag_host_t;
 
 /*! @brief Switch tag for to_host with timestamp */

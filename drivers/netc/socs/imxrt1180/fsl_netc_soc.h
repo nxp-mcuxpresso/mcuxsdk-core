@@ -28,8 +28,8 @@
 #define NETC_SOC_SWT_PORT_NUM (5U)
 
 /*! @brief The Switch function register base address offset.(NETC_F1_PCI_HDR_TYPE0) */
-#define NETC_SOC_SWT_PCIE_FUNC_OFFSET       (2U)
-#define NETC_SOC_SWT_MSI_FUNC_OFFSET        (2U)
+#define NETC_SOC_SWT_PCIE_FUNC_OFFSET (2U)
+#define NETC_SOC_SWT_MSI_FUNC_OFFSET  (2U)
 
 /*
  *                port4 port3  port2  port1  port0
@@ -54,21 +54,21 @@ typedef enum _netc_soc_link
 typedef enum _netc_soc_revmii_mii_speed
 {
     kNETC_SocRevMiiSpeed100M = 0U, /*!< RevMII MII mode speed 100 Mbps. */
-    kNETC_SocRevMiiSpeed10M, /*!< RevMII MII mode speed 10 Mbps. */
+    kNETC_SocRevMiiSpeed10M,       /*!< RevMII MII mode speed 10 Mbps. */
 } netc_soc_revmii_mii_speed_t;
 
 /*! @brief Defines clock source for NETC timer. */
 typedef enum _netc_soc_timer_clk_sel
 {
     kNETC_SocTimerCcmClk = 0U, /*!< PTP timer clock source is from CCM tmr_1588_clk_root. */
-    kNETC_SocTimerExtPinClk, /*!< PTP timer clock source is from chip pin. */
+    kNETC_SocTimerExtPinClk,   /*!< PTP timer clock source is from chip pin. */
 } netc_soc_timer_clk_sel_t;
 
 /*! @brief Defines the timer trigger input source. */
 typedef enum _netc_soc_timer_trig_input
 {
     kNETC_SocTimerTrigIomuxInput = 0U, /*!< Input from IOMUX. */
-    kNETC_SocTimerTrigXbarInput, /*!< Input from XBAR. */
+    kNETC_SocTimerTrigXbarInput,       /*!< Input from XBAR. */
 } netc_soc_timer_trig_input_t;
 
 /*! @brief Station interface index enumerator */

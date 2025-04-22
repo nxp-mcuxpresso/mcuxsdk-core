@@ -16,13 +16,13 @@
 #define NETC_SOC_SWT_PORT_NUM (4U)
 
 /*! @brief The Switch function register base address offset.(SW0_PCI_HDR_TYPE0) */
-#define NETC_SOC_SWT_PCIE_FUNC_OFFSET       (5U)
-#define NETC_SOC_SWT_MSI_FUNC_OFFSET        (0U)
+#define NETC_SOC_SWT_PCIE_FUNC_OFFSET (5U)
+#define NETC_SOC_SWT_MSI_FUNC_OFFSET  (0U)
 
 /*! @name NETC register map. */
 /*@{*/
-#define NETC_SWT_COMMON_BASE_OFFSET       (0x1000U)     /*!< The ENETC common register base address offset. */
-#define NETC_SWT_GLOBAL_BASE_OFFSET       (0x70000U) /*!< The Switch global register base address offset. */
+#define NETC_SWT_COMMON_BASE_OFFSET (0x1000U)  /*!< The ENETC common register base address offset. */
+#define NETC_SWT_GLOBAL_BASE_OFFSET (0x70000U) /*!< The Switch global register base address offset. */
 /*@}*/
 
 /*

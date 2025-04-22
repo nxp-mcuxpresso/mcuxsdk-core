@@ -31,9 +31,9 @@ typedef enum _netc_hw_si_idx
 /*! @brief Ethernet MAC port resource for the NETC module */
 typedef enum _netc_hw_eth_port_idx
 {
-    kNETC_ENETC0EthPort   = 0U, /*!< Ethernet MAC port for ENETC0 */
-    kNETC_ENETC1EthPort   = 1U, /*!< Ethernet MAC port for ENETC1 */
-    kNETC_ENETC2EthPort   = 2U, /*!< Ethernet MAC port for ENETC2 */
+    kNETC_ENETC0EthPort = 0U, /*!< Ethernet MAC port for ENETC0 */
+    kNETC_ENETC1EthPort = 1U, /*!< Ethernet MAC port for ENETC1 */
+    kNETC_ENETC2EthPort = 2U, /*!< Ethernet MAC port for ENETC2 */
 } netc_hw_eth_port_idx_t;
 
 /*!

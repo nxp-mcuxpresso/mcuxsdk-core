@@ -33,12 +33,12 @@ void NETC_SocGetBaseResource(netc_enetc_hw_t *hw, netc_hw_si_idx_t si)
     hw->global         = (ENETC_GLOBAL_Type *)((uintptr_t)hw->base + 0x10000U);
     if (siNum == 0U)
     {
-        hw->func.pf = s_netcBases[1 + siIdx];
+        hw->func.pf   = s_netcBases[1 + siIdx];
         hw->msixTable = (netc_msix_entry_t *)((uintptr_t)hw->si + 0x30000U);
     }
     else
     {
-        hw->func.vf = s_netcVfBases[siIdx - 3];
+        hw->func.vf   = s_netcVfBases[siIdx - 3];
         hw->msixTable = (netc_msix_entry_t *)((uintptr_t)hw->si + 0x60000U);
     }
 }
@@ -53,25 +53,27 @@ uint32_t NETC_SocGetFuncInstance(netc_hw_eth_port_idx_t port)
     return ((uint32_t)port + 1U);
 }
 
-static uint32_t NETC_PHYRead(netc_mdio_handle_t *handle, uint8_t portAddr,
-                             uint8_t devAddr, uint16_t regAddr) {
+static uint32_t NETC_PHYRead(netc_mdio_handle_t *handle, uint8_t portAddr, uint8_t devAddr, uint16_t regAddr)
+{
     uint16_t val = 0U;
     status_t status;
 
     status = NETC_MDIOC45Read(handle, portAddr, devAddr, regAddr, &val);
-    if (status != kStatus_Success) {
+    if (status != kStatus_Success)
+    {
         assert(false);
     }
 
     return val;
 }
 
-static void NETC_PHYWrite(netc_mdio_handle_t *handle, uint8_t portAddr,
-                          uint8_t devAddr, uint16_t regAddr, uint16_t val) {
+static void NETC_PHYWrite(netc_mdio_handle_t *handle, uint8_t portAddr, uint8_t devAddr, uint16_t regAddr, uint16_t val)
+{
     status_t status;
 
     status = NETC_MDIOC45Write(handle, portAddr, devAddr, regAddr, val);
-    if (status != kStatus_Success) {
+    if (status != kStatus_Success)
+    {
         assert(false);
     }
 }

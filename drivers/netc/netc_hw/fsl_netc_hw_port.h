@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 NXP
+ * Copyright 2021-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -25,23 +25,25 @@
 
 typedef enum _netc_port_intr_flags
 {
-    kNETC_TxEmptyFlag             = NETC_ETH_LINK_PM0_IEVENT_TX_EMPTY_MASK, /*!< Tx FIFO empty flag. */
-    kNETC_RxEmptyFlag             = NETC_ETH_LINK_PM0_IEVENT_RX_EMPTY_MASK, /*!< Rx FIFO empty flag. */
-    kNETC_TxOverflowFlag          = NETC_ETH_LINK_PM0_IEVENT_TX_OVFL_MASK, /*!< Tx overflow flag. */
-    kNETC_TxUnderflowFlag         = NETC_ETH_LINK_PM0_IEVENT_TX_UNFL_MASK, /*!< Tx underflow flag. */
-    kNETC_RxOverflowFlag          = NETC_ETH_LINK_PM0_IEVENT_RX_OVFL_MASK, /*!< Rx overflow flag. */
-    kNETC_MagicPacketFlag         = NETC_ETH_LINK_PM0_IEVENT_MGI_MASK, /*!< Magic packet detection indication flag. */
-    kNETC_TxClkStopFlag           = NETC_ETH_LINK_PM0_IEVENT_TX_CSD_MASK, /*!< Tx clock stop detection flag. */
-    kNETC_RxClkStopFlag           = NETC_ETH_LINK_PM0_IEVENT_RX_CSD_MASK, /*!< Rx clock stop detection flag. */
-    kNETC_SpeedDuplexChangeFlag   = NETC_ETH_LINK_PM0_IEVENT_SPD_DUP_MASK, /*!< Speed/Duplex Change flag */
-    kNETC_MacMergeSMDErrFlag      = NETC_ETH_LINK_PM0_IEVENT_MRG_SERR_MASK, /*!< MAC merge frame SMD error received event flag */
-    kNETC_MacMergeAssemblyErrFlag = NETC_ETH_LINK_PM0_IEVENT_MRG_AERR_MASK, /*!< MAC merge frame assembly error event flag */
+    kNETC_TxEmptyFlag           = NETC_ETH_LINK_PM0_IEVENT_TX_EMPTY_MASK, /*!< Tx FIFO empty flag. */
+    kNETC_RxEmptyFlag           = NETC_ETH_LINK_PM0_IEVENT_RX_EMPTY_MASK, /*!< Rx FIFO empty flag. */
+    kNETC_TxOverflowFlag        = NETC_ETH_LINK_PM0_IEVENT_TX_OVFL_MASK,  /*!< Tx overflow flag. */
+    kNETC_TxUnderflowFlag       = NETC_ETH_LINK_PM0_IEVENT_TX_UNFL_MASK,  /*!< Tx underflow flag. */
+    kNETC_RxOverflowFlag        = NETC_ETH_LINK_PM0_IEVENT_RX_OVFL_MASK,  /*!< Rx overflow flag. */
+    kNETC_MagicPacketFlag       = NETC_ETH_LINK_PM0_IEVENT_MGI_MASK,     /*!< Magic packet detection indication flag. */
+    kNETC_TxClkStopFlag         = NETC_ETH_LINK_PM0_IEVENT_TX_CSD_MASK,  /*!< Tx clock stop detection flag. */
+    kNETC_RxClkStopFlag         = NETC_ETH_LINK_PM0_IEVENT_RX_CSD_MASK,  /*!< Rx clock stop detection flag. */
+    kNETC_SpeedDuplexChangeFlag = NETC_ETH_LINK_PM0_IEVENT_SPD_DUP_MASK, /*!< Speed/Duplex Change flag */
+    kNETC_MacMergeSMDErrFlag =
+        NETC_ETH_LINK_PM0_IEVENT_MRG_SERR_MASK, /*!< MAC merge frame SMD error received event flag */
+    kNETC_MacMergeAssemblyErrFlag =
+        NETC_ETH_LINK_PM0_IEVENT_MRG_AERR_MASK, /*!< MAC merge frame assembly error event flag */
 } netc_port_intr_flags_t;
 
 /*! @brief Defines the port MAC frame loopback mode. */
 typedef enum _netc_port_loopback_mode_t
 {
-    kNETC_PortLpbWithExtTxClk, /*!< Port MAC frame loopback with external Tx clock. */
+    kNETC_PortLpbWithExtTxClk,      /*!< Port MAC frame loopback with external Tx clock. */
     kNETC_PortLpbWithIntTxClk = 2U, /*!< Port MAC frame loopback with internal Tx clock. */
 } netc_port_loopback_mode_t;
 
@@ -246,9 +248,13 @@ static inline status_t NETC_PortGetTcMaxSDU(NETC_PORT_Type *base,
                                             netc_hw_tc_idx_t tcIdx,
                                             netc_port_tc_sdu_config_t *config)
 {
-    config->maxSduSized = (uint16_t)(base->TCT_NUM[tcIdx].PTCTMSDUR & NETC_PORT_PTCTMSDUR_MAXSDU_MASK) >> NETC_PORT_PTCTMSDUR_MAXSDU_SHIFT; 
-    config->enTxMaxSduCheck = (bool)((base->TCT_NUM[tcIdx].PTCTMSDUR & NETC_PORT_PTCTMSDUR_SF_MAXSDU_DIS_MASK) >> NETC_PORT_PTCTMSDUR_SF_MAXSDU_DIS_SHIFT);
-    config->sduType = (netc_tc_sdu_type_t)(uint32_t)((base->TCT_NUM[tcIdx].PTCTMSDUR & NETC_PORT_PTCTMSDUR_SDU_TYPE_MASK) >> NETC_PORT_PTCTMSDUR_SDU_TYPE_SHIFT);
+    config->maxSduSized = (uint16_t)(base->TCT_NUM[tcIdx].PTCTMSDUR & NETC_PORT_PTCTMSDUR_MAXSDU_MASK) >>
+                          NETC_PORT_PTCTMSDUR_MAXSDU_SHIFT;
+    config->enTxMaxSduCheck = (bool)((base->TCT_NUM[tcIdx].PTCTMSDUR & NETC_PORT_PTCTMSDUR_SF_MAXSDU_DIS_MASK) >>
+                                     NETC_PORT_PTCTMSDUR_SF_MAXSDU_DIS_SHIFT);
+    config->sduType =
+        (netc_tc_sdu_type_t)(uint32_t)((base->TCT_NUM[tcIdx].PTCTMSDUR & NETC_PORT_PTCTMSDUR_SDU_TYPE_MASK) >>
+                                       NETC_PORT_PTCTMSDUR_SDU_TYPE_SHIFT);
 
     return kStatus_Success;
 }
@@ -260,9 +266,7 @@ static inline status_t NETC_PortGetTcMaxSDU(NETC_PORT_Type *base,
  * @param tcIdx traffic class index
  * @param enable enable/disable feature on traffic class
  */
-static inline void NETC_PortConfigTcPreemption(NETC_PORT_Type *base,
-                                                   netc_hw_tc_idx_t tcIdx,
-                                                   const bool enable)
+static inline void NETC_PortConfigTcPreemption(NETC_PORT_Type *base, netc_hw_tc_idx_t tcIdx, const bool enable)
 {
     uint32_t temp = base->PFPCR;
 
@@ -278,9 +282,7 @@ static inline void NETC_PortConfigTcPreemption(NETC_PORT_Type *base,
  * @param tcIdx traffic class index
  * @param enabled port tx traffic class enabled flag
  */
-static inline void NETC_PortGetTcPreemption(NETC_PORT_Type *base,
-                                                netc_hw_tc_idx_t tcIdx,
-                                                bool *enabled)
+static inline void NETC_PortGetTcPreemption(NETC_PORT_Type *base, netc_hw_tc_idx_t tcIdx, bool *enabled)
 {
     *enabled = (base->PFPCR & ((uint32_t)1U << (uint8_t)tcIdx)) ? true : false;
 }
@@ -295,7 +297,8 @@ static inline void NETC_PortGetTcPreemption(NETC_PORT_Type *base,
 static inline void NETC_PortGetTGSFPConfig(NETC_PORT_Type *base, netc_port_tg_preemption_config *config)
 {
     config->holdAdvance = (base->PTGSHAR & NETC_PORT_PTGSHAR_HOLDADVANCE_MASK) >> NETC_PORT_PTGSHAR_HOLDADVANCE_SHIFT;
-    config->releaseAdvance = (base->PTGSRAR & NETC_PORT_PTGSRAR_RELEASEADVANCE_MASK) >> NETC_PORT_PTGSRAR_RELEASEADVANCE_SHIFT;
+    config->releaseAdvance =
+        (base->PTGSRAR & NETC_PORT_PTGSRAR_RELEASEADVANCE_MASK) >> NETC_PORT_PTGSRAR_RELEASEADVANCE_SHIFT;
 }
 
 /*! @} */ // end of netc_hw_port_tx
@@ -344,9 +347,9 @@ static inline void NETC_PortSetVlanClassify(NETC_PORT_Type *base, const netc_por
 static inline status_t NETC_PortSetQosClassify(NETC_PORT_Type *base, const netc_port_qos_classify_config_t *config)
 {
 #if defined(FSL_FEATURE_NETC_HAS_ERRATA_051649) && FSL_FEATURE_NETC_HAS_ERRATA_051649
-    /* ERRATA051649: Only mapping profile instance 0 can be used. Mapping profile instance 1 cannot be used due the decoding of the selected
-       profile is not correct. Therefore, if any switch port is configured to use the second mapping profile (1), all switch ports will not
-       assign the default QoS correctly. */
+    /* ERRATA051649: Only mapping profile instance 0 can be used. Mapping profile instance 1 cannot be used due the
+       decoding of the selected profile is not correct. Therefore, if any switch port is configured to use the second
+       mapping profile (1), all switch ports will not assign the default QoS correctly. */
     if (config->vlanQosMap != 0U)
     {
         return kStatus_InvalidArgument;
@@ -424,7 +427,10 @@ void NETC_ClearPortMacInterruptFlags(NETC_ETH_LINK_Type *base, netc_port_phy_mac
  *              of constants that should be OR'd together to form the bit mask.
  * @param enable  Enable/Disable interrupts.
  */
-void NETC_EnablePortMacInterrupts(NETC_ETH_LINK_Type *base, netc_port_phy_mac_type_t macType, uint32_t mask, bool enable);
+void NETC_EnablePortMacInterrupts(NETC_ETH_LINK_Type *base,
+                                  netc_port_phy_mac_type_t macType,
+                                  uint32_t mask,
+                                  bool enable);
 
 /*!
  * @brief Enable/Disable Loopback for specified MAC
@@ -525,9 +531,10 @@ static inline void NETC_PortSoftwareResetEthMac(NETC_ETH_LINK_Type *base)
 static inline void NETC_PortGetPhyMacPreemptionStatus(NETC_ETH_LINK_Type *base,
                                                       netc_port_phy_mac_preemption_status_t *status)
 {
-    status->verifyStatus = (netc_port_preemption_verify_status_t)(uint32_t)(
-        (base->MAC_MERGE_MMCSR & NETC_ETH_LINK_MAC_MERGE_MMCSR_VSTS_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_VSTS_SHIFT);
-    status->mergeActive = ((base->MAC_MERGE_MMCSR & NETC_ETH_LINK_MAC_MERGE_MMCSR_TXSTS_MASK) != 0U) ? true : false;
+    status->verifyStatus = (netc_port_preemption_verify_status_t)(uint32_t)((base->MAC_MERGE_MMCSR &
+                                                                             NETC_ETH_LINK_MAC_MERGE_MMCSR_VSTS_MASK) >>
+                                                                            NETC_ETH_LINK_MAC_MERGE_MMCSR_VSTS_SHIFT);
+    status->mergeActive  = ((base->MAC_MERGE_MMCSR & NETC_ETH_LINK_MAC_MERGE_MMCSR_TXSTS_MASK) != 0U) ? true : false;
 }
 
 /*!
@@ -541,20 +548,20 @@ static inline void NETC_PortGetPhyMacPreemptionControl(NETC_ETH_LINK_Type *base,
     uint32_t mmcsr;
 
     mmcsr = base->MAC_MERGE_MMCSR;
-    config->enMergeVerify = (
-        (mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_VDIS_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_VDIS_SHIFT) ? false : true;
+    config->enMergeVerify =
+        ((mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_VDIS_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_VDIS_SHIFT) ? false : true;
 
-    config->mergeVerifyTime = (uint8_t)(
-        (mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_VT_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_VT_SHIFT);
+    config->mergeVerifyTime =
+        (uint8_t)((mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_VT_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_VT_SHIFT);
 
-    config->preemptMode = (netc_hw_preemption_mode_t)(
-        (mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_ME_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_ME_SHIFT);
+    config->preemptMode = (netc_hw_preemption_mode_t)((mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_ME_MASK) >>
+                                                      NETC_ETH_LINK_MAC_MERGE_MMCSR_ME_SHIFT);
 
-    config->raf_size = (netc_hw_raf_size_t)(
-        (mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_RAFS_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_RAFS_SHIFT);
+    config->raf_size = (netc_hw_raf_size_t)((mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_RAFS_MASK) >>
+                                            NETC_ETH_LINK_MAC_MERGE_MMCSR_RAFS_SHIFT);
 
-    config->PreemptionActive = (
-        (mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_LPA_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_LPA_SHIFT) ? true : false;
+    config->PreemptionActive =
+        ((mmcsr & NETC_ETH_LINK_MAC_MERGE_MMCSR_LPA_MASK) >> NETC_ETH_LINK_MAC_MERGE_MMCSR_LPA_SHIFT) ? true : false;
 }
 
 /*!

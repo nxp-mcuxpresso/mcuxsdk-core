@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 NXP
+ * Copyright 2021-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -77,13 +77,13 @@ typedef enum _netc_timer_irq_flags
         ENETC_PF_TMR_TMR_TEVENT_ETS2_THREN_MASK, /*!< External trigger 2 timestamp FIFO threshold hit interrupt.
                                                   */
     kNETC_TimerExtTrig1TsAvailIrqFlag =
-        ENETC_PF_TMR_TMR_TEVENT_ETS1EN_MASK, /*!< External trigger 1 new timestamp available interrupt. */
+        ENETC_PF_TMR_TMR_TEVENT_ETS1EN_MASK,     /*!< External trigger 1 new timestamp available interrupt. */
     kNETC_TimerExtTrig2TsAvailIrqFlag =
-        ENETC_PF_TMR_TMR_TEVENT_ETS2EN_MASK, /*!< External trigger 2 new timestamp available interrupt. */
+        ENETC_PF_TMR_TMR_TEVENT_ETS2EN_MASK,     /*!< External trigger 2 new timestamp available interrupt. */
     kNETC_TimerExtTrig1OverflowIrqFlag =
-        ENETC_PF_TMR_TMR_TEVENT_ETS1_OVEN_MASK, /*!< External trigger 1 timestamp FIFO overflow interrupt. */
+        ENETC_PF_TMR_TMR_TEVENT_ETS1_OVEN_MASK,  /*!< External trigger 1 timestamp FIFO overflow interrupt. */
     kNETC_TimerExtTrig2OverflowIrqFlag =
-        ENETC_PF_TMR_TMR_TEVENT_ETS2_OVEN_MASK, /*!< External trigger 2 timestamp FIFO overflow interrupt. */
+        ENETC_PF_TMR_TMR_TEVENT_ETS2_OVEN_MASK,  /*!< External trigger 2 timestamp FIFO overflow interrupt. */
 } netc_timer_irq_flags_t;
 
 typedef struct _netc_timer_handle netc_timer_handle_t;
@@ -116,7 +116,7 @@ typedef struct _netc_timer_config
     bool clkInputPhase; /*!< True: Inverted frequency tuned timer input clock, False: Non-inverted frequency tuned timer
                            input clock. */
     bool enableTimer;   /*!< True: Enable 1588 timer, False: Disable 1588 timer, use default counter. */
-    bool atomicMode;   /*!< True: Allow atomic updates to TMR_PERIOD and TMR_ADD, False: Disable it. */
+    bool atomicMode;    /*!< True: Allow atomic updates to TMR_PERIOD and TMR_ADD, False: Disable it. */
     netc_timer_ref_clk_t clockSelect; /*!< Timer reference clock. */
     uint32_t refClkHz;                /*!< Timer reference clock frequency in Hz. */
     int32_t defaultPpb;               /*!< Default ppb. */

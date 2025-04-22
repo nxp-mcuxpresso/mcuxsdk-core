@@ -16,8 +16,8 @@
 /*! @name Defines some Ethernet parameters. */
 /*@{*/
 #define NETC_ENETC_LSO_TXFRAME_LEN_MAX (0x4FFFFFFFFU) /*!< The Maximum length of LSO frame length. */
-#define NETC_ENETC_TXFRAME_LEN_MAX     (9600U) /*!< The Maximum length of frame length. */
-#define NETC_ENETC_TXFRAME_LEN_MIN     (16U)   /*!< The Minimum length of frame length. */
+#define NETC_ENETC_TXFRAME_LEN_MAX     (9600U)        /*!< The Maximum length of frame length. */
+#define NETC_ENETC_TXFRAME_LEN_MIN     (16U)          /*!< The Minimum length of frame length. */
 /*@}*/
 
 /*! @brief Mask the cache management code if cache control is disabled. */
@@ -333,8 +333,9 @@ static status_t EP_MSIXSetEntryTable(ep_handle_t *handle, const ep_config_t *con
         return result;
     }
 
-    msixNum = (uint8_t)(
-        ((handle->hw.si->SIPCAPR1 & ENETC_SI_SIPCAPR1_NUM_MSIX_MASK) >> ENETC_SI_SIPCAPR1_NUM_MSIX_SHIFT) + 1U);
+    msixNum =
+        (uint8_t)(((handle->hw.si->SIPCAPR1 & ENETC_SI_SIPCAPR1_NUM_MSIX_MASK) >> ENETC_SI_SIPCAPR1_NUM_MSIX_SHIFT) +
+                  1U);
 
     /* Entry > 0, enable MSIX. */
     if (config->entryNum != 0U)
@@ -424,28 +425,28 @@ status_t EP_GetDefaultConfig(ep_config_t *config)
 #if (defined(FSL_FEATURE_NETC_HAS_PORT_FCSEA) && FSL_FEATURE_NETC_HAS_PORT_FCSEA)
     config->port.common.stompFcs = true;
 #endif
-    config->port.common.rxPpduBco              = 20U;
-    config->port.common.txPpduBco              = 20U;
-    config->port.common.timeGate.holdSkew      = 64;
-    config->port.common.parser.l2PloadCount    = 24;
-    config->port.common.parser.l3PayloadCount  = 24;
-    config->port.common.parser.enableL3Parser  = true;
-    config->port.common.parser.l4PayloadCount  = 24;
-    config->port.common.parser.enableL4Parser  = true;
-    config->port.ethMac.enableRevMii           = false;
-    config->port.ethMac.txTsSelect             = kNETC_SyncTime;
-    config->port.ethMac.enTxPad                = true;
-    config->port.ethMac.rxMinFrameSize         = 64U;
-    config->port.ethMac.rxMaxFrameSize         = 0x600U;
-    config->port.ethMac.maxBackPressOn         = 3036U;
-    config->port.ethMac.minBackPressOff        = 20U;
-    config->port.ethMac.PreemptionConfig.preemptMode            = kNETC_PreemptDisable;
-    config->port.ethMac.PreemptionConfig.enMergeVerify          = false;
-    config->port.ethMac.PreemptionConfig.mergeVerifyTime        = 10U;
-    config->port.ethMac.PreemptionConfig.raf_size               = kNETC_RafSize64;
-    config->port.enPseudoMacTxPad              = true;
-    config->psfpCfg.isiPortConfig.defaultISEID = 0xFFFFU;
-    config->siConfig.ringPerBdrGroup           = 0x1U;
+    config->port.common.rxPpduBco                        = 20U;
+    config->port.common.txPpduBco                        = 20U;
+    config->port.common.timeGate.holdSkew                = 64;
+    config->port.common.parser.l2PloadCount              = 24;
+    config->port.common.parser.l3PayloadCount            = 24;
+    config->port.common.parser.enableL3Parser            = true;
+    config->port.common.parser.l4PayloadCount            = 24;
+    config->port.common.parser.enableL4Parser            = true;
+    config->port.ethMac.enableRevMii                     = false;
+    config->port.ethMac.txTsSelect                       = kNETC_SyncTime;
+    config->port.ethMac.enTxPad                          = true;
+    config->port.ethMac.rxMinFrameSize                   = 64U;
+    config->port.ethMac.rxMaxFrameSize                   = 0x600U;
+    config->port.ethMac.maxBackPressOn                   = 3036U;
+    config->port.ethMac.minBackPressOff                  = 20U;
+    config->port.ethMac.PreemptionConfig.preemptMode     = kNETC_PreemptDisable;
+    config->port.ethMac.PreemptionConfig.enMergeVerify   = false;
+    config->port.ethMac.PreemptionConfig.mergeVerifyTime = 10U;
+    config->port.ethMac.PreemptionConfig.raf_size        = kNETC_RafSize64;
+    config->port.enPseudoMacTxPad                        = true;
+    config->psfpCfg.isiPortConfig.defaultISEID           = 0xFFFFU;
+    config->siConfig.ringPerBdrGroup                     = 0x1U;
     for (uint8_t i = 0U; i < 8U; i++)
     {
         config->txTcCfg[i].enTcGate           = true;
@@ -720,9 +721,10 @@ status_t EP_Down(ep_handle_t *handle)
     NETC_EnetcEnableSI(handle->hw.base, getSiNum(handle->cfg.si), false);
     NETC_SIEnable(handle->hw.si, false);
 #if defined(FSL_FEATURE_NETC_HAS_ERRATA_051936) && FSL_FEATURE_NETC_HAS_ERRATA_051936
-    /* ERRATA051936: MAC Tx FIFO status may not report empty after FLR when operating in RGMII half duplex mode. In some cases, the transmitter
-       may become inoperable and not be able to recover from FLR requiring a full reset instead. The issue can occur when FLR is triggered around
-       the time MAC Tx has started backing off due to a half duplex collision detection. */
+    /* ERRATA051936: MAC Tx FIFO status may not report empty after FLR when operating in RGMII half duplex mode. In some
+       cases, the transmitter may become inoperable and not be able to recover from FLR requiring a full reset instead.
+       The issue can occur when FLR is triggered around the time MAC Tx has started backing off due to a half duplex
+       collision detection. */
     handle->hw.portGroup.eth->PM0_IF_MODE &= ~NETC_ETH_LINK_PM0_IF_MODE_HD_MASK;
     handle->hw.portGroup.eth->PM1_IF_MODE &= ~NETC_ETH_LINK_PM0_IF_MODE_HD_MASK;
 #endif
@@ -764,9 +766,9 @@ status_t EP_SendFrameCommon(ep_handle_t *handle,
     uint32_t frameLen            = 0;
     bool isExtEnable             = (bool)txDesc[0].standard.isExtended;
 #if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
-    bool isLso                   = (bool)(txDesc[0].standard.flags & NETC_SI_TXDESCRIP_RD_LSO_MASK);
+    bool isLso = (bool)(txDesc[0].standard.flags & NETC_SI_TXDESCRIP_RD_LSO_MASK);
 #endif
-    netc_tx_bd_t *txDesTemp      = NULL;
+    netc_tx_bd_t *txDesTemp = NULL;
     uint32_t address;
 
     /* The first descriptor in a chain must not have a BUFF_LEN that is less than 16 bytes. */
@@ -857,14 +859,14 @@ status_t EP_SendFrameCommon(ep_handle_t *handle,
                     txBdRing->dirtyBase[txBdRing->producerIndex].isTsAvail = false;
                 }
                 /* Copy user Tx descriptors to hardware Tx BD. */
-                txDesTemp->standard.flags      = txDesc[0].standard.flags;
-                txDesTemp->standard.addr       = address;
-                txDesTemp->standard.bufLen     = txBuff->length;
+                txDesTemp->standard.flags  = txDesc[0].standard.flags;
+                txDesTemp->standard.addr   = address;
+                txDesTemp->standard.bufLen = txBuff->length;
 #if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
-                txDesc[1].ext.frameLenExt      = (frameLen >> 16U) & 0x7U;
-                txDesTemp->standard.frameLen   = frameLen & 0xFFFFU;
+                txDesc[1].ext.frameLenExt    = (frameLen >> 16U) & 0x7U;
+                txDesTemp->standard.frameLen = frameLen & 0xFFFFU;
 #else
-                txDesTemp->standard.frameLen   = frameLen;
+                txDesTemp->standard.frameLen = frameLen;
 #endif
                 txDesTemp->standard.isExtended = (uint32_t)isExtEnable;
                 txDesTemp->standard.enableInterrupt =
@@ -936,10 +938,12 @@ status_t EP_SendFrame(ep_handle_t *handle, uint8_t ring, netc_frame_struct_t *fr
 #if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
         else
         {
-            txDesc[0].standard.flags = NETC_SI_TXDESCRIP_RD_LSO(opt->offload.lso) | NETC_SI_TXDESCRIP_RD_L4CS(opt->offload.l4Checksum) |
-                                       NETC_SI_TXDESCRIP_RD_L4T(opt->offload.l4Type) | NETC_SI_TXDESCRIP_RD_L3T(opt->offload.l3Type) |
-                                       NETC_SI_TXDESCRIP_RD_L3HDRSIZE(opt->offload.l3HeaderSize) | NETC_SI_TXDESCRIP_RD_IPCS(opt->offload.ipv4Checksum) |
-                                       NETC_SI_TXDESCRIP_RD_L3START(opt->offload.l3Start);
+            txDesc[0].standard.flags =
+                NETC_SI_TXDESCRIP_RD_LSO(opt->offload.lso) | NETC_SI_TXDESCRIP_RD_L4CS(opt->offload.l4Checksum) |
+                NETC_SI_TXDESCRIP_RD_L4T(opt->offload.l4Type) | NETC_SI_TXDESCRIP_RD_L3T(opt->offload.l3Type) |
+                NETC_SI_TXDESCRIP_RD_L3HDRSIZE(opt->offload.l3HeaderSize) |
+                NETC_SI_TXDESCRIP_RD_IPCS(opt->offload.ipv4Checksum) |
+                NETC_SI_TXDESCRIP_RD_L3START(opt->offload.l3Start);
         }
 #endif
 
