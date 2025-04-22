@@ -22,7 +22,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_FLEXIO_I2C_MASTER_DRIVER_VERSION (MAKE_VERSION(2, 6, 0))
+#define FSL_FLEXIO_I2C_MASTER_DRIVER_VERSION (MAKE_VERSION(2, 6, 1))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
@@ -92,7 +92,7 @@ typedef struct _flexio_i2c_master_transfer
     uint8_t slaveAddress;             /*!< 7-bit slave address. */
     flexio_i2c_direction_t direction; /*!< Transfer direction, read or write. */
     uint32_t subaddress;              /*!< Sub address. Transferred MSB first. */
-    uint8_t subaddressSize;           /*!< Size of command buffer. */
+    uint8_t subaddressSize;           /*!< Size of sub address. */
     uint8_t volatile *data;           /*!< Transfer buffer. */
     volatile size_t dataSize;         /*!< Transfer size. */
 } flexio_i2c_master_transfer_t;

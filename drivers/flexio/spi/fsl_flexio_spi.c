@@ -82,12 +82,12 @@ static void FLEXIO_SPI_TransferSendTransaction(FLEXIO_SPI_Type *base, flexio_spi
             if (handle->direction == kFLEXIO_SPI_MsbFirst)
             {
                 tmpData = (uint32_t)(handle->txData[0]) << 8U;
-                tmpData += (uint32_t)handle->txData[1];
+                tmpData |= (uint32_t)handle->txData[1];
             }
             else
             {
                 tmpData = (uint32_t)(handle->txData[1]) << 8U;
-                tmpData += (uint32_t)handle->txData[0];
+                tmpData |= (uint32_t)handle->txData[0];
             }
             handle->txData += 2U;
         }
@@ -96,16 +96,16 @@ static void FLEXIO_SPI_TransferSendTransaction(FLEXIO_SPI_Type *base, flexio_spi
             if (handle->direction == kFLEXIO_SPI_MsbFirst)
             {
                 tmpData = (uint32_t)(handle->txData[0]) << 24U;
-                tmpData += (uint32_t)(handle->txData[1]) << 16U;
-                tmpData += (uint32_t)(handle->txData[2]) << 8U;
-                tmpData += (uint32_t)handle->txData[3];
+                tmpData |= (uint32_t)(handle->txData[1]) << 16U;
+                tmpData |= (uint32_t)(handle->txData[2]) << 8U;
+                tmpData |= (uint32_t)handle->txData[3];
             }
             else
             {
                 tmpData = (uint32_t)(handle->txData[3]) << 24U;
-                tmpData += (uint32_t)(handle->txData[2]) << 16U;
-                tmpData += (uint32_t)(handle->txData[1]) << 8U;
-                tmpData += (uint32_t)handle->txData[0];
+                tmpData |= (uint32_t)(handle->txData[2]) << 16U;
+                tmpData |= (uint32_t)(handle->txData[1]) << 8U;
+                tmpData |= (uint32_t)handle->txData[0];
             }
             handle->txData += 4U;
         }
@@ -228,7 +228,7 @@ void FLEXIO_SPI_MasterInit(FLEXIO_SPI_Type *base, flexio_spi_master_config_t *ma
     flexio_shifter_config_t shifterConfig;
     flexio_timer_config_t timerConfig;
     uint32_t ctrlReg  = 0;
-    uint16_t timerDiv = 0;
+    uint32_t timerDiv = 0;
     uint16_t timerCmp = 0;
 
     /* Clear the shifterConfig & timerConfig struct. */
@@ -247,10 +247,10 @@ void FLEXIO_SPI_MasterInit(FLEXIO_SPI_Type *base, flexio_spi_master_config_t *ma
 #else
     ctrlReg &= ~(FLEXIO_CTRL_DBGE_MASK | FLEXIO_CTRL_FASTACC_MASK | FLEXIO_CTRL_FLEXEN_MASK);
 #endif
-    ctrlReg |= (FLEXIO_CTRL_DBGE(masterConfig->enableInDebug) | FLEXIO_CTRL_FASTACC(masterConfig->enableFastAccess) |
-                FLEXIO_CTRL_FLEXEN(masterConfig->enableMaster));
+    ctrlReg |= (FLEXIO_CTRL_DBGE(masterConfig->enableInDebug ? 1U : 0U) | FLEXIO_CTRL_FASTACC(masterConfig->enableFastAccess ? 1U : 0U) |
+                FLEXIO_CTRL_FLEXEN(masterConfig->enableMaster ? 1U : 0U));
 #if !(defined(FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT) && (FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT == 0))
-    if (!masterConfig->enableInDoze)
+    if (!masterConfig->enableInDoze ? 1U : 0U)
     {
         ctrlReg |= FLEXIO_CTRL_DOZEN_MASK;
     }
@@ -317,11 +317,12 @@ void FLEXIO_SPI_MasterInit(FLEXIO_SPI_Type *base, flexio_spi_master_config_t *ma
     timerConfig.timerStop       = kFLEXIO_TimerStopBitEnableOnTimerDisable;
     timerConfig.timerStart      = kFLEXIO_TimerStartBitEnabled;
     /* Low 8-bits are used to configure baudrate. */
-    timerDiv = (uint16_t)(srcClock_Hz / masterConfig->baudRate_Bps);
+    timerDiv = (srcClock_Hz / masterConfig->baudRate_Bps);
     timerDiv = timerDiv / 2U - 1U;
+    assert(timerDiv <= UINT8_MAX);
     /* High 8-bits are used to configure shift clock edges(transfer width). */
     timerCmp = ((uint16_t)masterConfig->dataMode * 2U - 1U) << 8U;
-    timerCmp |= timerDiv;
+    timerCmp |= (uint16_t)timerDiv;
 
     timerConfig.timerCompare = timerCmp;
 
@@ -459,10 +460,10 @@ void FLEXIO_SPI_SlaveInit(FLEXIO_SPI_Type *base, flexio_spi_slave_config_t *slav
 #else
     ctrlReg &= ~(FLEXIO_CTRL_DBGE_MASK | FLEXIO_CTRL_FASTACC_MASK | FLEXIO_CTRL_FLEXEN_MASK);
 #endif
-    ctrlReg |= (FLEXIO_CTRL_DBGE(slaveConfig->enableInDebug) | FLEXIO_CTRL_FASTACC(slaveConfig->enableFastAccess) |
-                FLEXIO_CTRL_FLEXEN(slaveConfig->enableSlave));
+    ctrlReg |= (FLEXIO_CTRL_DBGE(slaveConfig->enableInDebug ? 1U : 0U) | FLEXIO_CTRL_FASTACC(slaveConfig->enableFastAccess ? 1U : 0U) |
+                FLEXIO_CTRL_FLEXEN(slaveConfig->enableSlave ? 1U : 0U));
 #if !(defined(FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT) && (FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT == 0))
-    if (!slaveConfig->enableInDoze)
+    if (!slaveConfig->enableInDoze ? 1U : 0U)
     {
         ctrlReg |= FLEXIO_CTRL_DOZEN_MASK;
     }
@@ -696,17 +697,18 @@ void FLEXIO_SPI_ClearStatusFlags(FLEXIO_SPI_Type *base, uint32_t mask)
  */
 void FLEXIO_SPI_MasterSetBaudRate(FLEXIO_SPI_Type *base, uint32_t baudRate_Bps, uint32_t srcClockHz)
 {
-    uint16_t timerDiv       = 0;
+    uint32_t timerDiv       = 0;
     uint16_t timerCmp       = 0;
     FLEXIO_Type *flexioBase = base->flexioBase;
 
     /* Set TIMCMP[7:0] = (baud rate divider / 2) - 1.*/
-    timerDiv = (uint16_t)(srcClockHz / baudRate_Bps);
+    timerDiv = (srcClockHz / baudRate_Bps);
     timerDiv = timerDiv / 2U - 1U;
 
+    assert(timerDiv <= UINT8_MAX);
     timerCmp = (uint16_t)(flexioBase->TIMCMP[base->timerIndex[0]]);
     timerCmp &= 0xFF00U;
-    timerCmp |= timerDiv;
+    timerCmp |= (uint16_t)timerDiv;
 
     flexioBase->TIMCMP[base->timerIndex[0]] = timerCmp;
 }
@@ -934,12 +936,12 @@ status_t FLEXIO_SPI_MasterTransferBlocking(FLEXIO_SPI_Type *base, flexio_spi_tra
                 if (direction == kFLEXIO_SPI_MsbFirst)
                 {
                     tmpData = (uint32_t)(xfer->txData[0]) << 8U;
-                    tmpData += (uint32_t)xfer->txData[1];
+                    tmpData |= (uint32_t)xfer->txData[1];
                 }
                 else
                 {
                     tmpData = (uint32_t)(xfer->txData[1]) << 8U;
-                    tmpData += (uint32_t)xfer->txData[0];
+                    tmpData |= (uint32_t)xfer->txData[0];
                 }
                 xfer->txData += 2U;
             }
@@ -948,16 +950,16 @@ status_t FLEXIO_SPI_MasterTransferBlocking(FLEXIO_SPI_Type *base, flexio_spi_tra
                 if (direction == kFLEXIO_SPI_MsbFirst)
                 {
                     tmpData = (uint32_t)(xfer->txData[0]) << 24U;
-                    tmpData += (uint32_t)(xfer->txData[1]) << 16U;
-                    tmpData += (uint32_t)(xfer->txData[2]) << 8U;
-                    tmpData += (uint32_t)xfer->txData[3];
+                    tmpData |= (uint32_t)(xfer->txData[1]) << 16U;
+                    tmpData |= (uint32_t)(xfer->txData[2]) << 8U;
+                    tmpData |= (uint32_t)xfer->txData[3];
                 }
                 else
                 {
                     tmpData = (uint32_t)(xfer->txData[3]) << 24U;
-                    tmpData += (uint32_t)(xfer->txData[2]) << 16U;
-                    tmpData += (uint32_t)(xfer->txData[1]) << 8U;
-                    tmpData += (uint32_t)xfer->txData[0];
+                    tmpData |= (uint32_t)(xfer->txData[2]) << 16U;
+                    tmpData |= (uint32_t)(xfer->txData[1]) << 8U;
+                    tmpData |= (uint32_t)xfer->txData[0];
                 }
                 xfer->txData += 4U;
             }
@@ -1210,12 +1212,12 @@ status_t FLEXIO_SPI_MasterTransferNonBlocking(FLEXIO_SPI_Type *base,
             if (handle->direction == kFLEXIO_SPI_MsbFirst)
             {
                 tmpData = (uint32_t)(handle->txData[0]) << 8U;
-                tmpData += (uint32_t)handle->txData[1];
+                tmpData |= (uint32_t)handle->txData[1];
             }
             else
             {
                 tmpData = (uint32_t)(handle->txData[1]) << 8U;
-                tmpData += (uint32_t)handle->txData[0];
+                tmpData |= (uint32_t)handle->txData[0];
             }
             handle->txData += 2U;
         }
@@ -1224,16 +1226,16 @@ status_t FLEXIO_SPI_MasterTransferNonBlocking(FLEXIO_SPI_Type *base,
             if (handle->direction == kFLEXIO_SPI_MsbFirst)
             {
                 tmpData = (uint32_t)(handle->txData[0]) << 24U;
-                tmpData += (uint32_t)(handle->txData[1]) << 16U;
-                tmpData += (uint32_t)(handle->txData[2]) << 8U;
-                tmpData += (uint32_t)handle->txData[3];
+                tmpData |= (uint32_t)(handle->txData[1]) << 16U;
+                tmpData |= (uint32_t)(handle->txData[2]) << 8U;
+                tmpData |= (uint32_t)handle->txData[3];
             }
             else
             {
                 tmpData = (uint32_t)(handle->txData[3]) << 24U;
-                tmpData += (uint32_t)(handle->txData[2]) << 16U;
-                tmpData += (uint32_t)(handle->txData[1]) << 8U;
-                tmpData += (uint32_t)handle->txData[0];
+                tmpData |= (uint32_t)(handle->txData[2]) << 16U;
+                tmpData |= (uint32_t)(handle->txData[1]) << 8U;
+                tmpData |= (uint32_t)handle->txData[0];
             }
             handle->txData += 4U;
         }

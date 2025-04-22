@@ -1,5 +1,10 @@
 # FLEXIO_SPI
 
+## [2.4.1]
+
+- Bug Fixes
+  - Fixed coverity issues
+
 ## [2.4.0]
 
 - Improvements

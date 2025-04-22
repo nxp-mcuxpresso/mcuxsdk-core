@@ -1,5 +1,10 @@
 # FLEXIO_I2C
 
+## [2.6.1]
+
+- Bug Fixes
+  - Fixed coverity issues
+
 ## [2.6.0]
 
 - Improvements

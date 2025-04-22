@@ -227,10 +227,10 @@ status_t FLEXIO_UART_Init(FLEXIO_UART_Type *base, const flexio_uart_config_t *us
 #else
     ctrlReg &= ~(FLEXIO_CTRL_DBGE_MASK | FLEXIO_CTRL_FASTACC_MASK | FLEXIO_CTRL_FLEXEN_MASK);
 #endif
-    ctrlReg |= (FLEXIO_CTRL_DBGE(userConfig->enableInDebug) | FLEXIO_CTRL_FASTACC(userConfig->enableFastAccess) |
-                FLEXIO_CTRL_FLEXEN(userConfig->enableUart));
+    ctrlReg |= (FLEXIO_CTRL_DBGE(userConfig->enableInDebug ? 1U : 0U) | FLEXIO_CTRL_FASTACC(userConfig->enableFastAccess ? 1U : 0U) |
+                FLEXIO_CTRL_FLEXEN(userConfig->enableUart ? 1U : 0U));
 #if !(defined(FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT) && (FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT == 0))
-    if (!userConfig->enableInDoze)
+    if (!userConfig->enableInDoze ? 1U : 0U)
     {
         ctrlReg |= FLEXIO_CTRL_DOZEN_MASK;
     }
@@ -621,6 +621,8 @@ void FLEXIO_UART_TransferStartRingBuffer(FLEXIO_UART_Type *base,
     /* Setup the ringbuffer address */
     if (ringBuffer != NULL)
     {
+        assert((ringBufferSize > 1U) && (ringBufferSize <= UINT16_MAX));
+
         handle->rxRingBuffer     = ringBuffer;
         handle->rxRingBufferSize = ringBufferSize;
         handle->rxRingBufferHead = 0U;
