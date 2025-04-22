@@ -132,17 +132,39 @@ void BISS_SetFREQR(biss_master_t *master, uint8_t FREQRDiv)
 
 void BISS_SetNOCRC(biss_master_t *master, bool NoCRC)
 {
+    uint32_t value;
+
+    if (NoCRC)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
+
     master->ctrlcomm2 = (master->ctrlcomm2 & ~(BISS_CTRLCOMM2_NOCRC_MASK)) |
-                        BISS_CTRLCOMM2_NOCRC(NoCRC);
+                        BISS_CTRLCOMM2_NOCRC(value);
 
     master->base->CTRLCOMM2 = master->ctrlcomm2;
 }
 
 void BISS_SetSingleRAMBank(biss_master_t *master, bool SingleBank)
 {
+    uint32_t value;
+
+    if (SingleBank)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
+
     master->ctrlcomm2 =
                 (master->ctrlcomm2 & ~(BISS_CTRLCOMM2_SINGLEBANK_MASK)) |
-                BISS_CTRLCOMM2_SINGLEBANK(SingleBank);
+                BISS_CTRLCOMM2_SINGLEBANK(value);
 
     master->base->CTRLCOMM2 = master->ctrlcomm2;
 }
@@ -159,9 +181,20 @@ void BISS_SetProtocol(biss_master_t *master, biss_prot_type_t protType)
 
 void BISS_SetHoldCDM(biss_master_t *master, bool holdcdm)
 {
+    uint32_t value;
+
+    if (holdcdm)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
+
     master->ctrlcomm2 =
                 (master->ctrlcomm2 & ~(BISS_CTRLCOMM2_HOLDCDM_MASK)) |
-                BISS_CTRLCOMM2_HOLDCDM(holdcdm);
+                BISS_CTRLCOMM2_HOLDCDM(value);
 
     master->base->CTRLCOMM2 = master->ctrlcomm2;
 }
@@ -183,16 +216,38 @@ void BISS_SetMOBusy(biss_master_t *master, uint8_t busy)
 
 void BISS_SetENMO(biss_master_t *master, bool enmo)
 {
+    uint32_t value;
+
+    if (enmo)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
+
     master->ctrlcomm2 = (master->ctrlcomm2 & ~(BISS_CTRLCOMM2_EN_MO_MASK)) |
-                        BISS_CTRLCOMM2_EN_MO(enmo);
+                        BISS_CTRLCOMM2_EN_MO(value);
 
     master->base->CTRLCOMM2 = master->ctrlcomm2;
 }
 
 void BISS_SetHoldBank(biss_master_t *master, bool holdbank)
 {
+    uint32_t value;
+
+    if (holdbank)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
+
     master->dacq = (master->dacq & (~BISS_DACQ_HOLDBANK_MASK)) |
-                    BISS_DACQ_HOLDBANK(holdbank);
+                    BISS_DACQ_HOLDBANK(value);
 }
 
 void BISS_InitBissStatus(biss_master_t *master)
@@ -356,8 +411,8 @@ biss_master_t *BISS_MasterInit(BISS_Type *base, uint32_t srcClock_Hz,
     BISS_MasterInfoReset(master);
 
     /* Configurate the clock div for BISS device */
-    master->freqMADiv = BISS_CalculateMADiv(master, srcClock_Hz, ma_Hz);
-    if (master->freqMADiv < 0)
+    master->freqMADiv = (uint8_t)BISS_CalculateMADiv(master, srcClock_Hz, ma_Hz);
+    if (master->freqMADiv == 0)
     {
         return NULL;
     }
@@ -366,8 +421,8 @@ biss_master_t *BISS_MasterInit(BISS_Type *base, uint32_t srcClock_Hz,
     BISS_SetFREQR(master, 0x05);
 
     /* Configurate the clock div for BISS device */
-    master->freqAGSDiv = BISS_CalculateAGSDiv(master, srcClock_Hz, ags_Hz);
-    if (master->freqAGSDiv < 0)
+    master->freqAGSDiv = (uint8_t)BISS_CalculateAGSDiv(master, srcClock_Hz, ags_Hz);
+    if (master->freqAGSDiv == 0)
     {
         return NULL;
     }
@@ -498,23 +553,23 @@ static status_t BISS_Wait14CDM0(biss_master_t *master)
 
 static void BISS_RDATAWrite(biss_master_t *master, uint8_t regNum, uint8_t *buf)
 {
-    volatile uint32_t *rdata = &master->base->RDATA1;
+    volatile uint32_t *rdata = (volatile uint32_t *) &master->base->RDATA1;
     uint32_t data;
     int idx, num_blks = regNum / 4;
     int remaining_bytes = regNum % 4;
 
     for (idx = 0; idx < num_blks; idx++)
     {
-        rdata[idx] = buf[idx * 4 + 0] |
-                     (buf[idx * 4 + 1] << 8) |
-                     (buf[idx * 4 + 2] << 16) |
-                     (buf[idx * 4 + 3] << 24);
+        rdata[idx] = (uint32_t)buf[idx * 4 + 0] |
+                     (buf[idx * 4 + 1] << 8U) |
+                     (buf[idx * 4 + 2] << 16U) |
+                     (buf[idx * 4 + 3] << 24U);
     }
 
     data = 0;
     for(idx = 0; idx < remaining_bytes; idx++)
     {
-        data |= buf[num_blks * 4 + idx] << (idx * 8);
+        data |= buf[num_blks * 4 + idx] << (idx * 8U);
     }
 
     rdata[num_blks] = data;
@@ -522,7 +577,7 @@ static void BISS_RDATAWrite(biss_master_t *master, uint8_t regNum, uint8_t *buf)
 
 static void BISS_RDATARead(biss_master_t *master, uint8_t regNum, uint8_t *buf)
 {
-    volatile uint32_t *rdata = &master->base->RDATA1;
+    volatile uint32_t *rdata = (volatile uint32_t *) &master->base->RDATA1;
     int idx;
 
     for (idx = 0; idx < regNum; idx++)
@@ -611,21 +666,31 @@ status_t BISS_SLVReadRegister(biss_master_t *master, uint8_t slvID,
 
 static volatile uint32_t *BISS_SLVGetSCDReg(biss_master_t *master, int slvID)
 {
-    return  (&master->base->CONFIGSL1) + (slvID);
+    return  ((volatile uint32_t *)(&master->base->CONFIGSL1)) + (slvID);
 }
 
-void BISS_SLVSetSCDEN(biss_master_t *master, int slvID, bool enable)
+void BISS_SLVSetSCDEN(biss_master_t *master, uint8_t slvID, bool enable)
 {
     volatile uint32_t *dataChlCfg;
+    uint32_t value;
+
+    if (enable)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
 
     dataChlCfg = BISS_SLVGetSCDReg(master, slvID);
 
     *dataChlCfg = ((*dataChlCfg) &
                   (~BISS_CONFIGSL1_ENSCD1_MASK)) |
-                  BISS_CONFIGSL1_ENSCD1(enable);
+                  BISS_CONFIGSL1_ENSCD1(value);
 }
 
-void BISS_SLVSetSCDLen(biss_master_t *master, int slvID, int SCDLen)
+void BISS_SLVSetSCDLen(biss_master_t *master, uint8_t slvID, int SCDLen)
 {
     volatile uint32_t *dataChlCfg;
 
@@ -636,7 +701,7 @@ void BISS_SLVSetSCDLen(biss_master_t *master, int slvID, int SCDLen)
                   BISS_CONFIGSL_SCDLEN1(SCDLen - 1);
 }
 
-void BISS_SLVSetCRCLen(biss_master_t *master, int slvID, int crcLen)
+void BISS_SLVSetCRCLen(biss_master_t *master, uint8_t slvID, int crcLen)
 {
     volatile uint32_t *dataChlCfg;
 
@@ -649,7 +714,7 @@ void BISS_SLVSetCRCLen(biss_master_t *master, int slvID, int crcLen)
                   BISS_CONFIGSL1_SCRCPOLY1(crcLen);
 }
 
-void BISS_SLVSetCRCPoly(biss_master_t *master, int slvID, int crcPoly)
+void BISS_SLVSetCRCPoly(biss_master_t *master, uint8_t slvID, int crcPoly)
 {
     volatile uint32_t *dataChlCfg;
 
@@ -662,7 +727,7 @@ void BISS_SLVSetCRCPoly(biss_master_t *master, int slvID, int crcPoly)
                   BISS_CONFIGSL1_SCRCPOLY1(crcPoly);
 }
 
-void BISS_SLVSetCRCStart(biss_master_t *master, int slvID, int crcStart)
+void BISS_SLVSetCRCStart(biss_master_t *master, uint8_t slvID, uint32_t crcStart)
 {
     volatile uint32_t *dataChlCfg;
 
@@ -673,31 +738,41 @@ void BISS_SLVSetCRCStart(biss_master_t *master, int slvID, int crcStart)
                   BISS_CONFIGSL1_SCRCSTART1(crcStart);
 }
 
-void BISS_SLVSetSCD(biss_master_t *master, int slvID, int dataLen, int crcLen)
+void BISS_SLVSetSCD(biss_master_t *master, uint8_t slvID, int dataLen, int crcLen)
 {
     BISS_SLVSetSCDLen(master, slvID, dataLen);
     BISS_SLVSetCRCLen(master, slvID, crcLen);
     BISS_SLVSetSCDEN(master, slvID, true);
 }
 
-void BISS_SLVSetLStop(biss_master_t *master, int slvID, bool enable)
+void BISS_SLVSetLStop(biss_master_t *master, uint8_t slvID, bool enable)
 {
     volatile uint32_t *dataChlCfg;
+    uint32_t value;
+
+    if (enable)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
 
     dataChlCfg = BISS_SLVGetSCDReg(master, slvID);
 
     *dataChlCfg = ((*dataChlCfg) &
                   (~BISS_CONFIGSL1_LSTOP1_MASK)) |
-                  BISS_CONFIGSL1_LSTOP1(enable);
+                  BISS_CONFIGSL1_LSTOP1(value);
 }
 
-void BISS_SLVSetDataType(biss_master_t *master, int slvID,
+void BISS_SLVSetDataType(biss_master_t *master, uint8_t slvID,
                          biss_data_type_t dataType)
 {
     uint32_t data = master->base->BISSINTDATACHCONFIG2;
-    int shift = slvID + BISS_BISSINTDATACHCONFIG2_ACTnSENS_SHIFT;
+    uint32_t shift = slvID + BISS_BISSINTDATACHCONFIG2_ACTnSENS_SHIFT;
 
-    data = (data & (~ (1 << shift))) | (dataType << shift);
+    data = (data & (~ (1U << shift))) | (dataType << shift);
 
     master->base->BISSINTDATACHCONFIG2 = data;
 }
@@ -888,8 +963,8 @@ status_t BISS_SLVUpdatewithCommonEDS(biss_master_t *master, uint8_t slvID)
     }
 
     /* Calculate the bus coupler's ID in this device */
-    bcSlvID = (bcOffset & BISS_BC_ENABLE_MASK) ? \
-              (startSlvID + (bcOffset & BISS_BC_OFFSET_MASK)) : 0xFF;
+    bcSlvID = (uint8_t)((bcOffset & BISS_BC_ENABLE_MASK) ? \
+              (startSlvID + (bcOffset & BISS_BC_OFFSET_MASK)) : 0xFF);
 
     /* Loop for getting profile EDS Bank, data length, data format and CRC poly. */
     for (index = startSlvID; index < (startSlvID + slvCnt); index++)
@@ -921,9 +996,9 @@ status_t BISS_SLVUpdatewithCommonEDS(biss_master_t *master, uint8_t slvID)
             return status;
         }
 
-        slv->dataType = BISS_EDS_FORMAT_GET_TYPE(format);
-        slv->stopBit = BISS_EDS_FORMAT_GET_STOPBIT(format);
-        slv->dataAlign = BISS_EDS_FORMAT_GET_ALIGN(format);
+        slv->dataType = (biss_data_type_t)BISS_EDS_FORMAT_GET_TYPE(format);
+        slv->stopBit = (bool)BISS_EDS_FORMAT_GET_STOPBIT(format);
+        slv->dataAlign = (biss_align_type_t)BISS_EDS_FORMAT_GET_ALIGN(format);
 
         status = BISS_SLVReadRegister(master, slvID,
                                 BISS_EDS_CPOLY_CHAN_ADDR(index - startSlvID),
@@ -992,8 +1067,8 @@ status_t BISS_SLVUpdatewithProfileEDS(biss_master_t *master, uint8_t slvID)
 
     slv->stLen = slv->dataLen - slv->mtLen - slv->errWarLen;
 
-    slv->stMask = ((uint64_t) 1 << slv->stLen) - 1;
-    slv->mtMask = ((uint64_t) 1 << slv->mtLen) - 1;
+    slv->stMask = ((uint64_t)1 << slv->stLen) - 1;
+    slv->mtMask = ((uint64_t)1 << slv->mtLen) - 1;
 
     status = BISS_SLVReadRegister(master, EDSSlvID,
                                   BISS_EDS_MTFMT_ADDR,
@@ -1032,13 +1107,13 @@ status_t BISS_SLVUpdatewithProfileEDS(biss_master_t *master, uint8_t slvID)
 
 status_t BISS_SLVDeactivate(biss_master_t *master, uint8_t slvID)
 {
-    return BISS_CMDProcess(master, (uint8_t) BISS_CMD_IDS_FRM_SLV(slvID),
+    return BISS_CMDProcess(master, (uint8_t)BISS_CMD_IDS_FRM_SLV(slvID),
                            BISS_CMD_ADDRESSED_DEACTIVATED);
 }
 
 status_t BISS_SLVActivate(biss_master_t *master, uint8_t slvID)
 {
-    return BISS_CMDProcess(master, (uint8_t) BISS_CMD_IDS_FRM_SLV(slvID),
+    return BISS_CMDProcess(master, (uint8_t)BISS_CMD_IDS_FRM_SLV(slvID),
                            BISS_CMD_ADDRESSED_ACTIVATED);
 }
 
@@ -1059,6 +1134,11 @@ uint8_t BISS_SLVGetCnt(biss_master_t *master)
     /* Update the slave count in the biss chain */
     slvCnt = (base->STATUS2 & BISS_STATUS2_IDL_MASK) >>
               BISS_STATUS2_IDL_SHIFT;
+
+    if (slvCnt > BISS_MAX_SLAVE_COUNT)
+    {
+        slvCnt = BISS_MAX_SLAVE_COUNT;
+    }
 
     return slvCnt;
 }
@@ -1196,7 +1276,7 @@ uint64_t BISS_SLVGetSCDRawData(biss_master_t *master, uint8_t slvID)
     volatile uint32_t *scdl = (&master->base->SCDATA1_LOW) + (slvID) * 2;
     volatile uint32_t *scdh = (&master->base->SCDATA1_HIGH) + (slvID) * 2;
 
-    return (*scdl) | ((uint64_t) (*scdh) << 32);
+    return (*scdl) | ((uint64_t)(*scdh) << 32);
 }
 
 status_t BISS_SLVCheckSVALID(biss_master_t *master, uint8_t slvID)
@@ -1265,21 +1345,21 @@ int BISS_SCDGetnWarning(biss_master_t *master, uint8_t slvID, uint64_t SCData)
 {
     biss_slave_info_t *slv = BISS_SLVGet(master, slvID);
 
-    return (SCData >> slv->dataLen) & 0x01;
+    return (SCData >> (slv->dataLen - 1)) & 0x01;
 }
 
 int BISS_SCDGetnERR(biss_master_t *master, uint8_t slvID, uint64_t SCData)
 {
     biss_slave_info_t *slv = BISS_SLVGet(master, slvID);
 
-    return (SCData >> (slv->dataLen + 1)) & 0x01;
+    return (SCData >> (slv->dataLen - 2)) & 0x01;
 }
 
 uint64_t BISS_SCDGetLinear(biss_master_t *master, uint8_t slvID, uint64_t SCData)
 {
     biss_slave_info_t *slv = BISS_SLVGet(master, slvID);
 
-    return SCData & ((1 << (slv->dataLen - 2)) - 1);
+    return SCData & ((1ULL << (slv->dataLen - 2)) - 1);
 }
 
 uint64_t BISS_SCDGetMtVal(biss_master_t *master,

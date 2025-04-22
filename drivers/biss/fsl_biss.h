@@ -20,7 +20,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_BISS_DRIVER_VERSION (MAKE_VERSION(1, 0, 0)) /*!< Version 1.0.0 */
+#define FSL_BISS_DRIVER_VERSION (MAKE_VERSION(1, 0, 1)) /*!< Version 1.0.1 */
 /*! @} */
 
 /*! @name BiSS Command and IDA test setting of CTRLCOMM2 register */
@@ -41,7 +41,7 @@
 #define BISS_MAX_CHAN_COUNT                 (8U)
 
 #define BISS_IDS_VALID_MASK                 (0b0)
-#define BISS_STATUS1_SVALID_MASK(slvID)     (1 << (9 + ((slvID) * 2)))
+#define BISS_STATUS1_SVALID_MASK(slvID)     ((uint32_t)1 << (9 + ((slvID) * 2)))
 /*! @} */
 
 /*! @name BiSS MA and SYS clock setting */
@@ -217,7 +217,7 @@
                                             BISS_BP0_PROFILE_ID_SHIFT)
 #define BISS_BP0_DATA_LEN_MASK              (0x1F)
 #define BISS_BP0_DATA_LEN_SHIFT             (0U)
-#define BISS_BP0_DATA_LEN_GET(x)            ((uint8_t)(((x) * BISS_BP0_DATA_LEN_MASK) >> \
+#define BISS_BP0_DATA_LEN_GET(x)            ((uint8_t)(((x) & BISS_BP0_DATA_LEN_MASK) >> \
                                             BISS_BP0_DATA_LEN_SHIFT))
 #define BISS_BP0_APL_ID_MASK                (0x7F00)
 #define BISS_BP0_APL_ID_SHIFT               (8U)
@@ -691,7 +691,7 @@ status_t BISS_SLVReadRegister(biss_master_t *master, uint8_t slvID, uint8_t regA
  * @param slvID slave device ID 0 - 7.
  * @param enable true - SCD is available, false - SCD not available.
  */
-void BISS_SLVSetSCDEN(biss_master_t *master, int slvID, bool enable);
+void BISS_SLVSetSCDEN(biss_master_t *master, uint8_t slvID, bool enable);
 
 /*!
  * @brief Set SCD length of the slave device.
@@ -700,7 +700,7 @@ void BISS_SLVSetSCDEN(biss_master_t *master, int slvID, bool enable);
  * @param slvID slave device ID 0 - 7.
  * @param SCDLen SCD length.
  */
-void BISS_SLVSetSCDLen(biss_master_t *master, int slvID, int SCDLen);
+void BISS_SLVSetSCDLen(biss_master_t *master, uint8_t slvID, int SCDLen);
 
 /*!
  * @brief Set CRC length of the slave device.
@@ -709,7 +709,7 @@ void BISS_SLVSetSCDLen(biss_master_t *master, int slvID, int SCDLen);
  * @param slvID slave device ID 0 - 7.
  * @param CRCLen CRC length.
  */
-void BISS_SLVSetCRCLen(biss_master_t *master, int slvID, int CRCLen);
+void BISS_SLVSetCRCLen(biss_master_t *master, uint8_t slvID, int CRCLen);
 
 /*!
  * @brief Set SCD length and CRC length of the slave device.
@@ -719,7 +719,7 @@ void BISS_SLVSetCRCLen(biss_master_t *master, int slvID, int CRCLen);
  * @param SCDLen SCD length.
  * @param CRCLen CRC length.
  */
-void BISS_SLVSetSCD(biss_master_t *master, int slvID, int SCDLen, int CRCLen);
+void BISS_SLVSetSCD(biss_master_t *master, uint8_t slvID, int SCDLen, int CRCLen);
 
 /*!
  * @brief Set CRC polynomial of the slave device.
@@ -728,7 +728,7 @@ void BISS_SLVSetSCD(biss_master_t *master, int slvID, int SCDLen, int CRCLen);
  * @param slvID slave device ID 0 - 7.
  * @param CRCPoly CRC polynomial.
  */
-void BISS_SLVSetCRCPoly(biss_master_t *master, int slvID, int CRCPoly);
+void BISS_SLVSetCRCPoly(biss_master_t *master, uint8_t slvID, int CRCPoly);
 
 /*!
  * @brief Set CRC start value of the slave device.
@@ -737,7 +737,7 @@ void BISS_SLVSetCRCPoly(biss_master_t *master, int slvID, int CRCPoly);
  * @param slvID slave device ID 0 - 7.
  * @param CRCStart CRC start value.
  */
-void BISS_SLVSetCRCStart(biss_master_t *master, int slvID, int CRCStart);
+void BISS_SLVSetCRCStart(biss_master_t *master, uint8_t slvID, uint32_t CRCStart);
 
 /*!
  * @brief Set leading stop bit of the slave device.
@@ -746,7 +746,7 @@ void BISS_SLVSetCRCStart(biss_master_t *master, int slvID, int CRCStart);
  * @param slvID slave device ID 0 - 7.
  * @param align with/without leading stop bit on actuator data.
  */
-void BISS_SLVSetLStop(biss_master_t *master, int slvID, bool enable);
+void BISS_SLVSetLStop(biss_master_t *master, uint8_t slvID, bool enable);
 
 /*!
  * @brief Set data type of the slave device.
@@ -755,7 +755,7 @@ void BISS_SLVSetLStop(biss_master_t *master, int slvID, bool enable);
  * @param slvID slave device ID 0 - 7.
  * @param dataType data type - sensor or actuator.
  */
-void BISS_SLVSetDataType(biss_master_t *master, int slvID,
+void BISS_SLVSetDataType(biss_master_t *master, uint8_t slvID,
                          biss_data_type_t dataType);
 
 /*!
