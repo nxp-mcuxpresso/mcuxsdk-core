@@ -450,9 +450,9 @@ status_t CSEC_DRV_GenerateMACAddrMode(csec_key_id_t keyId,
     g_csecStatePtr->cmdInProgress = true;
 
     /* Write the address of the message */
-    CSEC_WriteCommandWords(FEATURE_CSEC_FLASH_START_ADDRESS_OFFSET, (uint32_t *)&msg, 1U);
+    CSEC_WriteCommandWords(FSL_FEATURE_ELA_CSEC_FLASH_START_ADDRESS_OFFSET, (uint32_t *)&msg, 1U);
     /* Write the size of the message (in bits) */
-    CSEC_WriteCommandWords(FEATURE_CSEC_MESSAGE_LENGTH_OFFSET, &msgLen, 1U);
+    CSEC_WriteCommandWords(FSL_FEATURE_ELA_CSEC_MESSAGE_LENGTH_OFFSET, &msgLen, 1U);
     /* Write the command header. This will trigger the command execution. */
     CSEC_WriteCmdAndWait(CSEC_CMD_GENERATE_MAC, CSEC_FUNC_FORMAT_ADDR, CSEC_CALL_SEQ_FIRST, keyId);
 
@@ -461,7 +461,7 @@ status_t CSEC_DRV_GenerateMACAddrMode(csec_key_id_t keyId,
     /* Read the resulted MAC */
     if (stat == STATUS_SUCCESS)
     {
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_2_OFFSET, cmac, CSEC_PAGE_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_2_OFFSET, cmac, CSEC_PAGE_SIZE_IN_BYTES);
     }
 
     g_csecStatePtr->cmdInProgress = false;
@@ -561,13 +561,13 @@ status_t CSEC_DRV_VerifyMACAddrMode(csec_key_id_t keyId,
     g_csecStatePtr->cmdInProgress = true;
 
     /* Write the address of the message */
-    CSEC_WriteCommandWords(FEATURE_CSEC_FLASH_START_ADDRESS_OFFSET, (uint32_t *)&msg, 1U);
+    CSEC_WriteCommandWords(FSL_FEATURE_ELA_CSEC_FLASH_START_ADDRESS_OFFSET, (uint32_t *)&msg, 1U);
     /* Write the MAC to be verified */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_2_OFFSET, mac, CSEC_PAGE_SIZE_IN_BYTES);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_2_OFFSET, mac, CSEC_PAGE_SIZE_IN_BYTES);
     /* Write the size of the message (in bits) */
-    CSEC_WriteCommandWords(FEATURE_CSEC_MESSAGE_LENGTH_OFFSET, &msgLen, 1U);
+    CSEC_WriteCommandWords(FSL_FEATURE_ELA_CSEC_MESSAGE_LENGTH_OFFSET, &msgLen, 1U);
     /* Write the number of bits of the MAC to be compared */
-    CSEC_WriteCommandHalfWord(FEATURE_CSEC_MAC_LENGTH_OFFSET, macLen);
+    CSEC_WriteCommandHalfWord(FSL_FEATURE_ELA_CSEC_MAC_LENGTH_OFFSET, macLen);
     /* Write the command header. This will trigger the command execution. */
     CSEC_WriteCmdAndWait(CSEC_CMD_VERIFY_MAC, CSEC_FUNC_FORMAT_ADDR, CSEC_CALL_SEQ_FIRST, keyId);
 
@@ -577,7 +577,7 @@ status_t CSEC_DRV_VerifyMACAddrMode(csec_key_id_t keyId,
     /* Read the result of the MAC verification */
     if (stat == STATUS_SUCCESS)
     {
-    	uint32_t verifWord = CSEC_ReadCommandWord(FEATURE_CSEC_VERIFICATION_STATUS_OFFSET);
+        uint32_t verifWord = CSEC_ReadCommandWord(FSL_FEATURE_ELA_CSEC_VERIFICATION_STATUS_OFFSET);
 
         *verifStatus = ((verifWord & CSEC_UPPER_HALF_MASK) == 0UL);
     }
@@ -618,9 +618,9 @@ status_t CSEC_DRV_LoadKey(csec_key_id_t keyId,
     g_csecStatePtr->cmdInProgress = true;
 
     /* Write the values of M1-M3 */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, m1, CSEC_M1_SIZE_IN_BYTES);
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_2_OFFSET, m2, CSEC_M2_SIZE_IN_BYTES);
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_4_OFFSET, m3, CSEC_M3_SIZE_IN_BYTES);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, m1, CSEC_M1_SIZE_IN_BYTES);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_2_OFFSET, m2, CSEC_M2_SIZE_IN_BYTES);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_4_OFFSET, m3, CSEC_M3_SIZE_IN_BYTES);
     /* Write the command header. This will trigger the command execution. */
     CSEC_WriteCommandHeader(CSEC_CMD_LOAD_KEY, CSEC_FUNC_FORMAT_COPY, CSEC_CALL_SEQ_FIRST, keyId);
 
@@ -633,8 +633,8 @@ status_t CSEC_DRV_LoadKey(csec_key_id_t keyId,
     /* Read the obtained M4 and M5 */
     if (stat == STATUS_SUCCESS)
     {
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_5_OFFSET, m4, CSEC_M4_SIZE_IN_BYTES);
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_7_OFFSET, m5, CSEC_M5_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_5_OFFSET, m4, CSEC_M4_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_7_OFFSET, m5, CSEC_M5_SIZE_IN_BYTES);
     }
 
     g_csecStatePtr->cmdInProgress = false;
@@ -663,7 +663,7 @@ status_t CSEC_DRV_LoadPlainKey(const uint8_t * plainKey)
     g_csecStatePtr->cmdInProgress = true;
 
     /* Write the bytes of the key */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, plainKey, CSEC_PAGE_SIZE_IN_BYTES);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, plainKey, CSEC_PAGE_SIZE_IN_BYTES);
     /* Write the command header. This will trigger the command execution. */
     CSEC_WriteCommandHeader(CSEC_CMD_LOAD_PLAIN_KEY, CSEC_FUNC_FORMAT_COPY, CSEC_CALL_SEQ_FIRST, CSEC_RAM_KEY);
 
@@ -718,11 +718,11 @@ status_t CSEC_DRV_ExportRAMKey(uint8_t * m1,
     if (stat == STATUS_SUCCESS)
     {
         /* Read the M1-M5 values associated with the key */
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, m1, CSEC_M1_SIZE_IN_BYTES);
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_2_OFFSET, m2, CSEC_M2_SIZE_IN_BYTES);
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_4_OFFSET, m3, CSEC_M3_SIZE_IN_BYTES);
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_5_OFFSET, m4, CSEC_M4_SIZE_IN_BYTES);
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_7_OFFSET, m5, CSEC_M5_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, m1, CSEC_M1_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_2_OFFSET, m2, CSEC_M2_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_4_OFFSET, m3, CSEC_M3_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_5_OFFSET, m4, CSEC_M4_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_7_OFFSET, m5, CSEC_M5_SIZE_IN_BYTES);
     }
 
     g_csecStatePtr->cmdInProgress = false;
@@ -789,7 +789,7 @@ status_t CSEC_DRV_ExtendSeed(const uint8_t * entropy)
     g_csecStatePtr->cmdInProgress = true;
 
     /* Write the entropy parameter */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, entropy, CSEC_PAGE_SIZE_IN_BYTES);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, entropy, CSEC_PAGE_SIZE_IN_BYTES);
     /* Write the command header. This will trigger the command execution. */
     CSEC_WriteCommandHeader(CSEC_CMD_EXTEND_SEED, CSEC_FUNC_FORMAT_COPY, CSEC_CALL_SEQ_FIRST, CSEC_SECRET_KEY);
 
@@ -837,7 +837,7 @@ status_t CSEC_DRV_GenerateRND(uint8_t * rnd)
     /* Read the resulted random bytes */
     if (stat == STATUS_SUCCESS)
     {
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, rnd, CSEC_PAGE_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, rnd, CSEC_PAGE_SIZE_IN_BYTES);
     }
 
     g_csecStatePtr->cmdInProgress = false;
@@ -936,8 +936,8 @@ status_t CSEC_DRV_BootDefine(uint32_t bootSize,
     g_csecStatePtr->cmdInProgress = true;
 
     /* Write the boot size and the boot flavor parameters */
-    CSEC_WriteCommandWords(FEATURE_CSEC_BOOT_SIZE_OFFSET, &bootSize, 1U);
-    CSEC_WriteCommandByte(FEATURE_CSEC_BOOT_FLAVOR_OFFSET, flavor);
+    CSEC_WriteCommandWords(FSL_FEATURE_ELA_CSEC_BOOT_SIZE_OFFSET, &bootSize, 1U);
+    CSEC_WriteCommandByte(FSL_FEATURE_ELA_CSEC_BOOT_FLAVOR_OFFSET, flavor);
     /* Write the command header. This will trigger the command execution. */
     CSEC_WriteCommandHeader(CSEC_CMD_BOOT_DEFINE, CSEC_FUNC_FORMAT_COPY, CSEC_CALL_SEQ_FIRST, CSEC_SECRET_KEY);
 
@@ -980,7 +980,7 @@ status_t CSEC_DRV_GetID(const uint8_t * challenge,
     g_csecStatePtr->cmdInProgress = true;
 
     /* Write the challenge */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, challenge, CSEC_PAGE_SIZE_IN_BYTES);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, challenge, CSEC_PAGE_SIZE_IN_BYTES);
     /* Write the command header. This will trigger the command execution. */
     CSEC_WriteCommandHeader(CSEC_CMD_GET_ID, CSEC_FUNC_FORMAT_COPY, CSEC_CALL_SEQ_FIRST, CSEC_SECRET_KEY);
 
@@ -992,11 +992,11 @@ status_t CSEC_DRV_GetID(const uint8_t * challenge,
     if (stat == STATUS_SUCCESS)
     {
         /* Read the UID */
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_2_OFFSET, uid, (uint8_t)(CSEC_PAGE_SIZE_IN_BYTES - 1U));
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_2_OFFSET, uid, (uint8_t)(CSEC_PAGE_SIZE_IN_BYTES - 1U));
         /* Read the value of the SREG register */
-        *sreg = CSEC_ReadCommandByte(FEATURE_CSEC_SREG_OFFSET);
+        *sreg = CSEC_ReadCommandByte(FSL_FEATURE_ELA_CSEC_SREG_OFFSET);
         /* Read the MAC over the UID and the SREG */
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_3_OFFSET, mac, CSEC_PAGE_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_3_OFFSET, mac, CSEC_PAGE_SIZE_IN_BYTES);
     }
 
     g_csecStatePtr->cmdInProgress = false;
@@ -1036,7 +1036,7 @@ status_t CSEC_DRV_DbgChal(uint8_t * challenge)
     /* Read the challenge generated by the CSEc module */
     if (stat == STATUS_SUCCESS)
     {
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, challenge, CSEC_PAGE_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, challenge, CSEC_PAGE_SIZE_IN_BYTES);
     }
 
     g_csecStatePtr->cmdInProgress = false;
@@ -1066,7 +1066,7 @@ status_t CSEC_DRV_DbgAuth(const uint8_t * authorization)
     g_csecStatePtr->cmdInProgress = true;
 
     /* Write the authorization computed from the challenge */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, authorization, CSEC_PAGE_SIZE_IN_BYTES);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, authorization, CSEC_PAGE_SIZE_IN_BYTES);
     /* Write the command header. This will trigger the command execution. */
     CSEC_WriteCommandHeader(CSEC_CMD_DBG_AUTH, CSEC_FUNC_FORMAT_COPY, CSEC_CALL_SEQ_FIRST, CSEC_SECRET_KEY);
 
@@ -1107,8 +1107,8 @@ status_t CSEC_DRV_MPCompress(const uint8_t * msg,
     {
         return STATUS_BUSY;
     }
-	
-	/* Initialize the internal state of the driver */
+
+    /* Initialize the internal state of the driver */
     CSEC_DRV_InitState(CSEC_SECRET_KEY, CSEC_CMD_MP_COMPRESS, msg, mpCompress, (uint32_t)msgLen << CSEC_BYTES_TO_FROM_PAGES_SHIFT);
 
     startTime = OSIF_GetMilliseconds();
@@ -1121,9 +1121,9 @@ status_t CSEC_DRV_MPCompress(const uint8_t * msg,
         uint8_t numBytes = (uint8_t)(numPages << CSEC_BYTES_TO_FROM_PAGES_SHIFT);
 
         /* Write the message */
-        CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, &msg[g_csecStatePtr->index], numBytes);
+        CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, &msg[g_csecStatePtr->index], numBytes);
         /* Write the size of the message */
-        CSEC_WriteCommandHalfWord(FEATURE_CSEC_PAGE_LENGTH_OFFSET, msgLen);
+        CSEC_WriteCommandHalfWord(FSL_FEATURE_ELA_CSEC_PAGE_LENGTH_OFFSET, msgLen);
         /* Write the command header. This will trigger the command execution. */
         CSEC_WriteCommandHeader(CSEC_CMD_MP_COMPRESS, CSEC_FUNC_FORMAT_COPY, g_csecStatePtr->seq, CSEC_SECRET_KEY);
 
@@ -1160,9 +1160,9 @@ status_t CSEC_DRV_MPCompress(const uint8_t * msg,
     /* Read the result of the compression */
     if (stat == STATUS_SUCCESS)
     {
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, mpCompress, CSEC_PAGE_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, mpCompress, CSEC_PAGE_SIZE_IN_BYTES);
     }
-	
+
 	g_csecStatePtr->cmdInProgress = false;
 
     return stat;
@@ -1484,9 +1484,9 @@ static void CSEC_DRV_StartEncDecECBCmd(void)
     uint8_t numBytes = (uint8_t)(numPages << CSEC_BYTES_TO_FROM_PAGES_SHIFT);
 
     /* Write the plain/cipher text */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
     /* Write the size of the plain/cipher text (in pages) */
-    CSEC_WriteCommandHalfWord(FEATURE_CSEC_PAGE_LENGTH_OFFSET, numPages);
+    CSEC_WriteCommandHalfWord(FSL_FEATURE_ELA_CSEC_PAGE_LENGTH_OFFSET, numPages);
 
     g_csecStatePtr->partSize = numBytes;
 
@@ -1513,18 +1513,18 @@ static void CSEC_DRV_StartEncDecCBCCmd()
         numBytes = (uint8_t)(numPages << CSEC_BYTES_TO_FROM_PAGES_SHIFT);
 
         /* Write the initialization vector */
-        CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, g_csecStatePtr->iv, CSEC_PAGE_SIZE_IN_BYTES);
+        CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, g_csecStatePtr->iv, CSEC_PAGE_SIZE_IN_BYTES);
         /* Write the plain/cipher text */
-        CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_2_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
+        CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_2_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
     }
     else
     {
         /* Write the plain/cipher text */
-        CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
+        CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
     }
 
     /* Write the size of the plain/cipher text (in pages) */
-    CSEC_WriteCommandHalfWord(FEATURE_CSEC_PAGE_LENGTH_OFFSET, (uint16_t)(g_csecStatePtr->fullSize >> CSEC_BYTES_TO_FROM_PAGES_SHIFT));
+    CSEC_WriteCommandHalfWord(FSL_FEATURE_ELA_CSEC_PAGE_LENGTH_OFFSET, (uint16_t)(g_csecStatePtr->fullSize >> CSEC_BYTES_TO_FROM_PAGES_SHIFT));
 
     g_csecStatePtr->partSize = numBytes;
 
@@ -1545,9 +1545,9 @@ static void CSEC_DRV_StartGenMACCmd()
              CSEC_DATA_BYTES_AVAILABLE) ? CSEC_DATA_BYTES_AVAILABLE : (g_csecStatePtr->fullSize - g_csecStatePtr->index));
 
     /* Write the plain/cipher text */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
     /* Write the size of the message (in bits) */
-    CSEC_WriteCommandWords(FEATURE_CSEC_MESSAGE_LENGTH_OFFSET, &g_csecStatePtr->msgLen, 1U);
+    CSEC_WriteCommandWords(FSL_FEATURE_ELA_CSEC_MESSAGE_LENGTH_OFFSET, &g_csecStatePtr->msgLen, 1U);
 
     g_csecStatePtr->partSize = numBytes;
 
@@ -1569,17 +1569,17 @@ static void CSEC_DRV_StartVerifMACCmd()
     uint8_t macOffset = (uint8_t)CSEC_DRV_RoundTo(numBytes, 0x10);
 
     /* Write the plain/cipher text */
-    CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
+    CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->inputBuff[g_csecStatePtr->index], numBytes);
     /* Write the size of the message (in bits) */
-    CSEC_WriteCommandWords(FEATURE_CSEC_MESSAGE_LENGTH_OFFSET, &g_csecStatePtr->msgLen, 1U);
+    CSEC_WriteCommandWords(FSL_FEATURE_ELA_CSEC_MESSAGE_LENGTH_OFFSET, &g_csecStatePtr->msgLen, 1U);
 
     /* Write the number of bits of the MAC to be compared */
-    CSEC_WriteCommandHalfWord(FEATURE_CSEC_MAC_LENGTH_OFFSET, (uint16_t)g_csecStatePtr->macLen);
+    CSEC_WriteCommandHalfWord(FSL_FEATURE_ELA_CSEC_MAC_LENGTH_OFFSET, (uint16_t)g_csecStatePtr->macLen);
 
     /* If there is available space in CSE_PRAM, write the MAC to be verified */
     if ((macOffset + CSEC_PAGE_SIZE_IN_BYTES) < CSEC_DATA_BYTES_AVAILABLE)
     {
-        CSEC_WriteCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET + macOffset, g_csecStatePtr->mac, CSEC_PAGE_SIZE_IN_BYTES);
+        CSEC_WriteCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET + macOffset, g_csecStatePtr->mac, CSEC_PAGE_SIZE_IN_BYTES);
         g_csecStatePtr->macWritten = true;
     }
 
@@ -1609,7 +1609,7 @@ static void CSEC_DRV_ContinueEncDecECBCmd(void)
     }
 
     /* Get partial result */
-    CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->outputBuff[g_csecStatePtr->index], (uint8_t)g_csecStatePtr->partSize);
+    CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->outputBuff[g_csecStatePtr->index], (uint8_t)g_csecStatePtr->partSize);
 
     g_csecStatePtr->index += (uint8_t)g_csecStatePtr->partSize;
 
@@ -1647,13 +1647,13 @@ static void CSEC_DRV_ContinueEncDecCBCCmd(void)
     /* Get partial result */
     if (g_csecStatePtr->seq == CSEC_CALL_SEQ_FIRST)
     {
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_2_OFFSET, &g_csecStatePtr->outputBuff[g_csecStatePtr->index],
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_2_OFFSET, &g_csecStatePtr->outputBuff[g_csecStatePtr->index],
                                   (uint8_t)g_csecStatePtr->partSize);
         g_csecStatePtr->seq = CSEC_CALL_SEQ_SUBSEQUENT;
     }
     else
     {
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->outputBuff[g_csecStatePtr->index],
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_1_OFFSET, &g_csecStatePtr->outputBuff[g_csecStatePtr->index],
                                   (uint8_t)g_csecStatePtr->partSize);
     }
 
@@ -1702,7 +1702,7 @@ static void CSEC_DRV_ContinueGenMACCmd(void)
     if (g_csecStatePtr->index >= g_csecStatePtr->fullSize)
     {
         g_csecStatePtr->cmdInProgress = false;
-        CSEC_ReadCommandBytes(FEATURE_CSEC_PAGE_2_OFFSET, g_csecStatePtr->outputBuff, CSEC_PAGE_SIZE_IN_BYTES);
+        CSEC_ReadCommandBytes(FSL_FEATURE_ELA_CSEC_PAGE_2_OFFSET, g_csecStatePtr->outputBuff, CSEC_PAGE_SIZE_IN_BYTES);
     }
     else
     {
@@ -1743,7 +1743,7 @@ static void CSEC_DRV_ContinueVerifMACCmd(void)
 
     if (!g_csecStatePtr->cmdInProgress)
     {
-    	uint32_t verifWord = CSEC_ReadCommandWord(FEATURE_CSEC_VERIFICATION_STATUS_OFFSET);
+        uint32_t verifWord = CSEC_ReadCommandWord(FSL_FEATURE_ELA_CSEC_VERIFICATION_STATUS_OFFSET);
 
     	*(g_csecStatePtr->verifStatus) = ((verifWord & CSEC_UPPER_HALF_MASK) == 0UL);
     }

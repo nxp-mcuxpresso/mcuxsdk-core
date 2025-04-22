@@ -80,8 +80,8 @@ for each error code as per SHE specification. */
 
 
 /*!
- * CSE_PRAM_Register_Masks CSE_PRAM Register Masks
- * 
+ * CSE_PRAM_Register_Masks ELA_CSEC PRAM Register Masks
+ *
  */
 
 /* RAMn_DATA_32 Bit Fields */
@@ -121,56 +121,6 @@ for each error code as per SHE specification. */
 #define CSE_PRAM_RAMn_ACCESS8BIT_DATA_8HU_RAM_HU_SHIFT 0u
 #define CSE_PRAM_RAMn_ACCESS8BIT_DATA_8HU_RAM_HU_WIDTH 8u
 #define CSE_PRAM_RAMn_ACCESS8BIT_DATA_8HU_RAM_HU(x) (((uint8_t)(((uint8_t)(x))<<CSE_PRAM_RAMn_ACCESS8BIT_DATA_8HU_RAM_HU_SHIFT))&CSE_PRAM_RAMn_ACCESS8BIT_DATA_8HU_RAM_HU_MASK)
-
-
-/* CSEc module features */
-
-/*! @brief CSE_PRAM offset of the page length parameter used by the following
-commands: CMD_ENC_ECB, CMD_ENC_CBC, CMD_DEC_ECB, CMD_DEC_CBC, CMD_MP_COMPRESS */
-#define FEATURE_CSEC_PAGE_LENGTH_OFFSET                   (0xEU)
-/*! @brief CSE_PRAM offset of the message length parameter used by the following
-commands: CMD_GENERATE_MAC, CMD_VERIFY_MAC (both copy and pointer methods) */
-#define FEATURE_CSEC_MESSAGE_LENGTH_OFFSET                (0xCU)
-/*! @brief CSE_PRAM offset of the MAC length parameter used by the following
-commands: CMD_VERIFY_MAC (both copy and pointer methods) */
-#define FEATURE_CSEC_MAC_LENGTH_OFFSET                    (0x8U)
-/*! @brief CSE_PRAM offset of the boot size parameter used by the following
-commands: CMD_BOOT_DEFINE */
-#define FEATURE_CSEC_BOOT_SIZE_OFFSET                     (0x1CU)
-/*! @brief CSE_PRAM offset of the boot flavor parameter used by the following
-commands: CMD_BOOT_DEFINE */
-#define FEATURE_CSEC_BOOT_FLAVOR_OFFSET                   (0x1BU)
-/*! @brief CSE_PRAM offset of the Flash start address parameter used by the
-following commands: CMD_GENERATE_MAC, CMD_VERIFY_MAC (pointer method) */
-#define FEATURE_CSEC_FLASH_START_ADDRESS_OFFSET           (0x10U)
-/*! @brief CSE_PRAM offset of the verification status parameter used by the
-following commands: CMD_VERIFY_MAC (both copy and pointer methods) */
-#define FEATURE_CSEC_VERIFICATION_STATUS_OFFSET           (0x14U)
-/*! @brief CSE_PRAM offset of the error bits field contained by all commands */
-#define FEATURE_CSEC_ERROR_BITS_OFFSET                    (0x4U)
-/*! @brief CSE_PRAM offset of the SREG parameter used by the following commands:
-CMD_GET_ID */
-#define FEATURE_CSEC_SREG_OFFSET                          (0x2FU)
-
-/*! @brief Macro that enables the use of FTFM flash module on a platform */
-#define FEATURE_CSEC_HAS_FTFM_MODULE					  (0U)
-
-/*! @brief CSE_PRAM offset of page 0 */
-#define FEATURE_CSEC_PAGE_0_OFFSET                        (0x0U)
-/*! @brief CSE_PRAM offset of page 1 */
-#define FEATURE_CSEC_PAGE_1_OFFSET                        (0x10U)
-/*! @brief CSE_PRAM offset of page 2 */
-#define FEATURE_CSEC_PAGE_2_OFFSET                        (0x20U)
-/*! @brief CSE_PRAM offset of page 3 */
-#define FEATURE_CSEC_PAGE_3_OFFSET                        (0x30U)
-/*! @brief CSE_PRAM offset of page 4 */
-#define FEATURE_CSEC_PAGE_4_OFFSET                        (0x40U)
-/*! @brief CSE_PRAM offset of page 5 */
-#define FEATURE_CSEC_PAGE_5_OFFSET                        (0x50U)
-/*! @brief CSE_PRAM offset of page 6 */
-#define FEATURE_CSEC_PAGE_6_OFFSET                        (0x60U)
-/*! @brief CSE_PRAM offset of page 7 */
-#define FEATURE_CSEC_PAGE_7_OFFSET                        (0x70U)
 
 /*! \public
  * @brief Generic status return codes.
@@ -236,9 +186,9 @@ extern "C" {
 #endif
 
 /*!
- * @brief Writes the command header to CSE_PRAM.
+ * @brief Writes the command header to ELA_CSEC PRAM.
  *
- * This function writes the command header to CSE_PRAM, triggering the CSEc
+ * This function writes the command header to ELA_CSEC PRAM, triggering the CSEc
  * operation.
  *
  * @param[in] funcId The ID of the operation to be started.
@@ -253,7 +203,7 @@ static inline void CSEC_WriteCommandHeader(csec_cmd_t funcId,
                                        csec_call_sequence_t callSeq,
                                        csec_key_id_t keyId)
 {
-    CSE_PRAM->DATA_32[0u] =
+    ELA_CSEC->DATA_32[0u] =
         CSE_PRAM_RAMn_DATA_32_BYTE_0(funcId) |
         CSE_PRAM_RAMn_DATA_32_BYTE_1(funcFormat) |
         CSE_PRAM_RAMn_DATA_32_BYTE_2(callSeq) |
@@ -261,9 +211,9 @@ static inline void CSEC_WriteCommandHeader(csec_cmd_t funcId,
 }
 
 /*!
- * @brief Writes command bytes to CSE_PRAM.
+ * @brief Writes command bytes to ELA_CSEC PRAM.
  *
- * This function writes command bytes to CSE_PRAM, at a 32-bit aligned offset.
+ * This function writes command bytes to ELA_CSEC PRAM, at a 32-bit aligned offset.
  *
  * @param[in] offset The offset (in bytes) at which the bytes shall be written.
  * @param[in] bytes The buffer containing the bytes to be written.
@@ -272,9 +222,9 @@ static inline void CSEC_WriteCommandHeader(csec_cmd_t funcId,
 void CSEC_WriteCommandBytes(uint8_t offset, const uint8_t *bytes, uint8_t numBytes);
 
 /*!
- * @brief Writes a command half word to CSE_PRAM.
+ * @brief Writes a command half word to ELA_CSEC PRAM.
  *
- * This function writes a command half word to CSE_PRAM, at a 16-bit aligned
+ * This function writes a command half word to ELA_CSEC PRAM, at a 16-bit aligned
  * offset.
  *
  * @param[in] offset The offset (in bytes) at which the half word shall be
@@ -284,9 +234,9 @@ void CSEC_WriteCommandBytes(uint8_t offset, const uint8_t *bytes, uint8_t numByt
 void CSEC_WriteCommandHalfWord(uint8_t offset, uint16_t halfWord);
 
 /*!
- * @brief Writes a command byte to CSE_PRAM.
+ * @brief Writes a command byte to ELA_CSEC PRAM.
  *
- * This function writes a command byte to CSE_PRAM.
+ * This function writes a command byte to ELA_CSEC PRAM.
  *
  * @param[in] offset The offset (in bytes) at which the byte shall be written.
  * @param[in] byte The byte to be written.
@@ -294,9 +244,9 @@ void CSEC_WriteCommandHalfWord(uint8_t offset, uint16_t halfWord);
 void CSEC_WriteCommandByte(uint8_t offset, uint8_t byte);
 
 /*!
- * @brief Writes command words to CSE_PRAM.
+ * @brief Writes command words to ELA_CSEC PRAM.
  *
- * This function writes command words to CSE_PRAM, at a 32-bit aligned offset.
+ * This function writes command words to ELA_CSEC PRAM, at a 32-bit aligned offset.
  *
  * @param[in] offset The offset (in bytes) at which the words shall be written.
  * @param[in] words The buffer containing the words to be written.
@@ -305,9 +255,9 @@ void CSEC_WriteCommandByte(uint8_t offset, uint8_t byte);
 void CSEC_WriteCommandWords(uint8_t offset, const uint32_t *words, uint8_t numWords);
 
 /*!
- * @brief Reads command bytes from CSE_PRAM.
+ * @brief Reads command bytes from ELA_CSEC PRAM.
  *
- * This function reads command bytes from CSE_PRAM, from a 32-bit aligned offset.
+ * This function reads command bytes from ELA_CSEC PRAM, from a 32-bit aligned offset.
  *
  * @param[in] offset The offset (in bytes) from which the bytes shall be read.
  * @param[out] bytes The buffer containing the bytes read.
@@ -316,9 +266,9 @@ void CSEC_WriteCommandWords(uint8_t offset, const uint32_t *words, uint8_t numWo
 void CSEC_ReadCommandBytes(uint8_t offset, uint8_t *bytes, uint8_t numBytes);
 
 /*!
- * @brief Reads a command byte from CSE_PRAM.
+ * @brief Reads a command byte from ELA_CSEC PRAM.
  *
- * This function reads a command byte from CSE_PRAM.
+ * This function reads a command byte from ELA_CSEC PRAM.
  *
  * @param[in] offset The offset (in bytes) from which the byte shall be read.
  * @return The byte read.
@@ -326,16 +276,16 @@ void CSEC_ReadCommandBytes(uint8_t offset, uint8_t *bytes, uint8_t numBytes);
 uint8_t CSEC_ReadCommandByte(uint8_t offset);
 
 /*!
- * @brief Reads a command word from CSE_PRAM.
+ * @brief Reads a command word from ELA_CSEC PRAM.
  *
- * This function reads a command word from CSE_PRAM, from a 32-bit aligned offset.
+ * This function reads a command word from ELA_CSEC PRAM, from a 32-bit aligned offset.
  *
  * @param[in] offset The offset (in bytes) from which the word shall be read.
  * @return The word read.
  */
 static inline uint32_t CSEC_ReadCommandWord(uint8_t offset)
 {
-    return CSE_PRAM->DATA_32[offset >> 2U];
+    return ELA_CSEC->DATA_32[offset >> 2U];
 }
 
 /*!
@@ -364,7 +314,7 @@ static inline status_t CSEC_ReadErrorBits(void)
     uint16_t errBits;
     status_t stat;
 
-    errWord = CSEC_ReadCommandWord(FEATURE_CSEC_ERROR_BITS_OFFSET);
+    errWord = CSEC_ReadCommandWord(FSL_FEATURE_ELA_CSEC_ERROR_BITS_OFFSET);
     errBits = (uint16_t)((errWord & CSEC_UPPER_HALF_MASK) >> CSEC_UPPER_HALF_SHIFT);
 
     switch (errBits)
@@ -412,7 +362,7 @@ static inline status_t CSEC_ReadErrorBits(void)
 }
 
 /*!
- * @brief Writes the command header to CSE_PRAM and waits for completion.
+ * @brief Writes the command header to ELA_CSEC PRAM and waits for completion.
  *
  * This function writes the header of a command and waits for completion.
  * The function is always located in RAM, and is used for CSEc commands using

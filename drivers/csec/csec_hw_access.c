@@ -33,8 +33,8 @@
 /*FUNCTION**********************************************************************
  *
  * Function Name : CSEC_WriteCommandBytes
- * Description   : This function writes command bytes to CSE_PRAM at 32-bit
- * aligned addresses.
+ * Description   : This function writes command bytes to ELA_CSEC PRAM at
+ * 32-bit aligned addresses.
  *
  *END**************************************************************************/
 void CSEC_WriteCommandBytes(uint8_t offset, const uint8_t *bytes, uint8_t numBytes)
@@ -45,7 +45,7 @@ void CSEC_WriteCommandBytes(uint8_t offset, const uint8_t *bytes, uint8_t numByt
 
     while ((i + 3U) < numBytes)
     {
-        CSE_PRAM->DATA_32[(offset + i) >> 2U] =
+        ELA_CSEC->DATA_32[(offset + i) >> 2U] =
             CSE_PRAM_RAMn_DATA_32_BYTE_0(bytes[i]) |
             CSE_PRAM_RAMn_DATA_32_BYTE_1(bytes[i + 1U]) |
             CSE_PRAM_RAMn_DATA_32_BYTE_2(bytes[i + 2U]) |
@@ -62,15 +62,15 @@ void CSEC_WriteCommandBytes(uint8_t offset, const uint8_t *bytes, uint8_t numByt
 /*FUNCTION**********************************************************************
  *
  * Function Name : CSEC_WriteCommandHalfWord
- * Description   : This function writes a command half word to CSE_PRAM at a
- * 16-bit aligned offset.
+ * Description   : This function writes a command half word to ELA_CSEC PRAM at
+ * a 16-bit aligned offset.
  *
  *END**************************************************************************/
 void CSEC_WriteCommandHalfWord(uint8_t offset, uint16_t halfWord)
 {
     uint32_t tmp;
 
-    tmp = CSE_PRAM->DATA_32[(offset >> 2U)];
+    tmp = ELA_CSEC->DATA_32[(offset >> 2U)];
 
     if ((offset & 2U) != 0U)
     {
@@ -83,20 +83,20 @@ void CSEC_WriteCommandHalfWord(uint8_t offset, uint16_t halfWord)
         tmp = tmp | ((((uint32_t) halfWord) << CSEC_UPPER_HALF_SHIFT) & CSEC_UPPER_HALF_MASK);
     }
 
-    CSE_PRAM->DATA_32[(offset >> 2U)] = tmp;
+    ELA_CSEC->DATA_32[(offset >> 2U)] = tmp;
 }
 
 /*FUNCTION**********************************************************************
  *
  * Function Name : CSEC_WriteCommandByte
- * Description   : This function writes a single byte to CSE_PRAM.
+ * Description   : This function writes a single byte to ELA_CSEC PRAM.
  *
  *END**************************************************************************/
 void CSEC_WriteCommandByte(uint8_t offset, uint8_t byte)
 {
     uint32_t temp = 0U;
 
-    temp = CSE_PRAM->DATA_32[offset >> 2U];
+    temp = ELA_CSEC->DATA_32[offset >> 2U];
 
     switch (offset & 0x3U)
     {
@@ -120,14 +120,14 @@ void CSEC_WriteCommandByte(uint8_t offset, uint8_t byte)
         /* Impossible to get here */
         break;
     }
-    CSE_PRAM->DATA_32[offset >> 2U] = temp;
+    ELA_CSEC->DATA_32[offset >> 2U] = temp;
 }
 
 /*FUNCTION**********************************************************************
  *
  * Function Name : CSEC_WriteCommandWords
- * Description   : This function writes command words to CSE_PRAM at a 32-bit
- * aligned offset.
+ * Description   : This function writes command words to ELA_CSEC PRAM at a
+ * 32-bit aligned offset.
  *
  *END**************************************************************************/
 void CSEC_WriteCommandWords(uint8_t offset, const uint32_t *words, uint8_t numWords)
@@ -139,7 +139,7 @@ void CSEC_WriteCommandWords(uint8_t offset, const uint32_t *words, uint8_t numWo
 
     while (i < numWords)
     {
-        CSE_PRAM->DATA_32[alignedOffset + i] = words[i];
+        ELA_CSEC->DATA_32[alignedOffset + i] = words[i];
         i++;
     }
 }
@@ -147,8 +147,8 @@ void CSEC_WriteCommandWords(uint8_t offset, const uint32_t *words, uint8_t numWo
 /*FUNCTION**********************************************************************
  *
  * Function Name : CSEC_ReadCommandBytes
- * Description   : This function reads command bytes from CSE_PRAM from a 32-bit
- * aligned offset.
+ * Description   : This function reads command bytes from ELA_CSEC PRAM from a
+ * 32-bit aligned offset.
  *
  *END**************************************************************************/
 void CSEC_ReadCommandBytes(uint8_t offset, uint8_t *bytes, uint8_t numBytes)
@@ -159,7 +159,7 @@ void CSEC_ReadCommandBytes(uint8_t offset, uint8_t *bytes, uint8_t numBytes)
 
     while ((i + 3U) < numBytes)
     {
-        uint32_t tmp = CSE_PRAM->DATA_32[(offset + i) >> 2U];
+        uint32_t tmp = ELA_CSEC->DATA_32[(offset + i) >> 2U];
 
         bytes[i]      = (uint8_t)((tmp & CSE_PRAM_RAMn_DATA_32_BYTE_0_MASK) >> CSE_PRAM_RAMn_DATA_32_BYTE_0_SHIFT);
         bytes[i + 1U] = (uint8_t)((tmp & CSE_PRAM_RAMn_DATA_32_BYTE_1_MASK) >> CSE_PRAM_RAMn_DATA_32_BYTE_1_SHIFT);
@@ -177,7 +177,7 @@ void CSEC_ReadCommandBytes(uint8_t offset, uint8_t *bytes, uint8_t numBytes)
 /*FUNCTION**********************************************************************
  *
  * Function Name : CSEC_ReadCommandByte
- * Description   : This function reads a single byte from CSE_PRAM.
+ * Description   : This function reads a single byte from ELA_CSEC PRAM.
  *
  *END**************************************************************************/
 uint8_t CSEC_ReadCommandByte(uint8_t offset)
@@ -185,7 +185,7 @@ uint8_t CSEC_ReadCommandByte(uint8_t offset)
     uint8_t byte = 0;
     uint32_t temp = 0U;
 
-    temp = CSE_PRAM->DATA_32[offset >> 2U];
+    temp = ELA_CSEC->DATA_32[offset >> 2U];
 
     switch (offset & 0x3U)
     {
@@ -222,7 +222,7 @@ RAMFUNCTION_SECTION_CODE(void CSEC_WriteCmdAndWait(csec_cmd_t funcId,
         csec_call_sequence_t callSeq,
         csec_key_id_t keyId))
 {
-    CSE_PRAM->DATA_32[0] =
+    ELA_CSEC->DATA_32[0] =
         CSE_PRAM_RAMn_DATA_32_BYTE_0(funcId) |
         CSE_PRAM_RAMn_DATA_32_BYTE_1(funcFormat) |
         CSE_PRAM_RAMn_DATA_32_BYTE_2(callSeq) |
