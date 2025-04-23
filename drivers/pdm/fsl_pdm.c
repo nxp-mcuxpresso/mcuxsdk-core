@@ -163,15 +163,7 @@ static status_t PDM_ValidateSrcClockRate(uint32_t channelMask,
     {
         if (((channelMask >> i) & 0x01U) != 0U)
         {
-            if (enabledChannel < (uint32_t)FSL_FEATURE_PDM_CHANNEL_NUM)
-            {
-                enabledChannel++;
-            }
-            else
-            {
-                // Handle error: too many channels enabled
-                return kStatus_Fail;
-            }
+            enabledChannel++;
         }
     }
 

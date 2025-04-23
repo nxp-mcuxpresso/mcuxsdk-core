@@ -22,7 +22,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_PDM_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 6, 4)) /*!< Version 2.6.4 */
+#define FSL_PDM_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 6, 5)) /*!< Version 2.6.5 */
 /*! @} */
 
 /*! @brief the PDM enable position When calling PDM_TransferReceiveEDMA */
