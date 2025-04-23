@@ -60,7 +60,7 @@
                             "description": "[MCUXpresso SDK ecosystem data] The project root directory in SDK meta repo.",
                             "examples": [
                                 {
-                                    "meta_path": "examples/src/demo_apps/hello_world"
+                                    "meta_path": "examples/demo_apps/hello_world"
                                 }
                             ]
                         },

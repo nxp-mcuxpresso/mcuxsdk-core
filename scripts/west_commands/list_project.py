@@ -19,7 +19,7 @@ from misc import sdk_project_target
 
 LIST_PROJECT_USAGE = '''
 Example:
-    west list_project -p examples/src/driver_examples/lpuart/interrupt -o test.yml
+    west list_project -p examples/driver_examples/lpuart/interrupt -o test.yml
 
 Data Source
         # examples/_boards/evkbmimxrt1170, board default targets
@@ -46,7 +46,7 @@ Filter String format
 Output Format
 - Output the matched projects into json/yaml file if files ends with .json or .yml
 - Output the matched projects into robot framework file if files ends with .robot
-    - In visual studio code, install the plugin "Robot Framework Language Server" 
+    - In visual studio code, install the plugin "Robot Framework Language Server"
       to get the syntax highlight and interactive test case run feature
 
 '''.format(sdk_project_target.MCUXAppTargets.config_filter.__doc__)
@@ -71,7 +71,7 @@ class ListProject(WestCommand):
         )
 
         parser.add_argument('-p', '--app_path',     action="append", type=str, required=True, default=[],
-                                                    help= 'Path regex to match examples.yml in its dir or child-dirs. -p pathA -p pathB. Glob pattern match. -p example/src/driver_examples/** to match all driver_exmaples.  Note in shell, wrap them by ", otherwise it will be parsed shell itself.')
+                                                    help= 'Path regex to match examples.yml in its dir or child-dirs. -p pathA -p pathB. Glob pattern match. -p example/driver_examples/** to match all driver_exmaples.  Note in shell, wrap them by ", otherwise it will be parsed shell itself.')
         parser.add_argument('-b', '--board',        nargs='+', action="extend", type=str, default=[],
                                                     help='boards to build, default to include all boards. -b frdmk22f evkmimxrt1170@cm7')
         parser.add_argument('-d', '--device',       nargs='+', action="extend", type=str, default=[],
