@@ -80,7 +80,7 @@ void BCTU_Init(BCTU_Type *base, const bctu_config_t *config)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
     base->WRPROT = ((base->WRPROT & ~BCTU_WRPROT_PROTEC_CODE_MASK) | BCTU_WRPROT_PROTEC_CODE(config->writeProtect));
-    base->MCR = ((base->MCR & ~BCTU_MCR_FRZ_MASK) | BCTU_MCR_FRZ(config->debugFreezeEn));
+    base->MCR = ((base->MCR & ~BCTU_MCR_FRZ_MASK) | BCTU_MCR_FRZ(config->debugFreezeEn ? 1U : 0U));
 }
 
 /*!
@@ -109,7 +109,7 @@ void BCTU_SetTrigConfig(BCTU_Type *base, const bctu_trig_config_t *config)
         | BCTU_TRGCFG_DATA_DEST_MASK | BCTU_TRGCFG_TRS_MASK | BCTU_TRGCFG_ADC_SEL0_MASK
         | BCTU_TRGCFG_ADC_SEL1_MASK | BCTU_TRGCFG_ADC_SEL2_MASK
         | BCTU_TRGCFG_CHANNEL_VALUE_OR_LADDR_MASK))
-        | (BCTU_TRGCFG_LOOP(config->enableLoop) | BCTU_TRGCFG_DATA_DEST(config->dataDest)
+        | (BCTU_TRGCFG_LOOP(config->enableLoop ? 1U : 0U) | BCTU_TRGCFG_DATA_DEST(config->dataDest)
         | BCTU_TRGCFG_TRS(config->trigRes) | BCTU_TRGCFG_CHANNEL_VALUE_OR_LADDR(config->chanAddr)
         | ((uint32_t)config->targetAdc << BCTU_TRGCFG_ADC_SEL0_SHIFT)));
 }
@@ -129,6 +129,6 @@ void BCTU_SetConvListConfig(BCTU_Type *base, const bctu_convlist_config_t *confi
         | BCTU_LISTCHR_NEXT_CH_WAIT_ON_TRIG_y_plus_1_MASK | BCTU_LISTCHR_LAST_y_plus_1_MASK
         | BCTU_LISTCHR_ADC_CH_y_MASK | BCTU_LISTCHR_NEXT_CH_WAIT_ON_TRIG_y_MASK | BCTU_LISTCHR_LAST_y_MASK))
         | (BCTU_LISTCHR_ADC_CHL_y_plus_1(config->adcChanPlusOne) | BCTU_LISTCHR_ADC_CH_y(config->adcChan)
-        | BCTU_LISTCHR_NEXT_CH_WAIT_ON_TRIG_y_plus_1(config->waitTrigPlusOne) | BCTU_LISTCHR_LAST_y(config->lastChan)
-        | BCTU_LISTCHR_LAST_y_plus_1(config->lastChanPlusOne) | BCTU_LISTCHR_NEXT_CH_WAIT_ON_TRIG_y(config->waitTrig)));
+        | BCTU_LISTCHR_NEXT_CH_WAIT_ON_TRIG_y_plus_1(config->waitTrigPlusOne ? 1U : 0U) | BCTU_LISTCHR_LAST_y(config->lastChan ? 1U : 0U)
+        | BCTU_LISTCHR_LAST_y_plus_1(config->lastChanPlusOne ? 1U : 0U) | BCTU_LISTCHR_NEXT_CH_WAIT_ON_TRIG_y(config->waitTrig ? 1U : 0U)));
 }

@@ -19,8 +19,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief BCTU driver version 2.0.0. */
-#define FSL_BCTU_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+/*! @brief BCTU driver version 2.0.1. */
+#define FSL_BCTU_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*! @} */
 
 /*! @brief BCTU interrupt mask. */
@@ -408,7 +408,7 @@ static inline void BCTU_EnableHardwareTrig(BCTU_Type *base, enum _bctu_trig_sour
  */
 static inline void BCTU_EnableSoftwareTrig(BCTU_Type *base, bctu_trig_group_t trigGroup, uint32_t trigMask)
 {
-    (*((volatile uint32_t *)(&(base->SFTRGR1)) + trigGroup)) = trigMask;
+    (*((volatile uint32_t *)(&(base->SFTRGR1)) + (uint32_t)trigGroup)) = trigMask;
 }
 /*!
  * @}
@@ -429,7 +429,7 @@ static inline void BCTU_GetFifoResult(BCTU_Type *base, bctu_fifo_t fifoIndex, bc
 {
     assert(result != NULL);
     
-    uint32_t tmp = *((volatile uint32_t *)(&(base->FIFO1DR)) + fifoIndex);
+    uint32_t tmp = *((volatile const uint32_t *)(&(base->FIFO1DR)) + (uint8_t)fifoIndex);
 
     result->trigSrc = (uint8_t)((tmp & BCTU_FIFO1DR_TRG_SRC_MASK) >> BCTU_FIFO1DR_TRG_SRC_SHIFT);
     result->chanNum = (uint8_t)((tmp & BCTU_FIFO1DR_CH_MASK) >> BCTU_FIFO1DR_CH_SHIFT);
@@ -446,7 +446,8 @@ static inline void BCTU_GetFifoResult(BCTU_Type *base, bctu_fifo_t fifoIndex, bc
  */
 static inline void BCTU_SetFifoWaterMark(BCTU_Type *base, bctu_fifo_t fifoIndex, uint8_t watermark)
 {
-    base->FIFOWM = ((base->FIFOWM & ~(BCTU_FIFOWM_WM_FIFO1_MASK << (8U * fifoIndex))) | (watermark << (8U * fifoIndex)));
+    base->FIFOWM = ((base->FIFOWM & ~((uint32_t)BCTU_FIFOWM_WM_FIFO1_MASK << (8U * (uint8_t)fifoIndex))) |
+                                        ((uint32_t)watermark << (8U * (uint8_t)fifoIndex)));
 }
 
 /*!
@@ -462,11 +463,11 @@ static inline void BCTU_EnableFifoDma(BCTU_Type *base, bctu_fifo_t fifoIndex, bo
 {
     if (enable)
     {
-        base->FIFOCR |= (BCTU_FIFOCR_DMA_EN_FIFO1_MASK << fifoIndex);
+        base->FIFOCR |= (BCTU_FIFOCR_DMA_EN_FIFO1_MASK << (uint8_t)fifoIndex);
     }
     else
     {
-        base->FIFOCR &= ~(BCTU_FIFOCR_DMA_EN_FIFO1_MASK << fifoIndex);
+        base->FIFOCR &= ~(BCTU_FIFOCR_DMA_EN_FIFO1_MASK << (uint8_t)fifoIndex);
     }
 }
 
@@ -524,7 +525,7 @@ static inline void BCTU_ClearFifoStatusFlags(BCTU_Type *base, uint32_t mask)
  */
 static inline bool BCTU_GetFifoFullFlag(BCTU_Type *base, bctu_fifo_t fifoIndex)
 {
-    return (0U != (base->FIFOSR & (BCTU_FIFOSR_FULL_FIFO1_MASK << fifoIndex)));
+    return (0U != (base->FIFOSR & ((uint32_t)BCTU_FIFOSR_FULL_FIFO1_MASK << (uint8_t)fifoIndex)));
 }
 
 /*!
@@ -536,8 +537,8 @@ static inline bool BCTU_GetFifoFullFlag(BCTU_Type *base, bctu_fifo_t fifoIndex)
  */
 static inline uint8_t BCTU_GetFifoCounter(BCTU_Type *base, bctu_fifo_t fifoIndex)
 {
-    return (uint8_t)(uint32_t)((base->FIFOCNTR & (BCTU_FIFOCNTR_CNTR_FIFO1_MASK << (fifoIndex * 8U)))
-                                >> (BCTU_FIFOCNTR_CNTR_FIFO1_SHIFT + (fifoIndex * 8U)));
+    return (uint8_t)(uint32_t)((base->FIFOCNTR & (BCTU_FIFOCNTR_CNTR_FIFO1_MASK << ((uint32_t)fifoIndex * 8U)))
+                                >> (BCTU_FIFOCNTR_CNTR_FIFO1_SHIFT + ((uint32_t)fifoIndex * 8U)));
 }
 /*!
  * @}
@@ -560,11 +561,11 @@ static inline void BCTU_GetConvResult(BCTU_Type *base, enum _bctu_trig_adc insta
     
     uint32_t tmp = base->ADCDR[(uint32_t)instance / 2U];
 
-    result->trigConvType = ((tmp & BCTU_ADCDR_LIST_MASK) >> BCTU_ADCDR_LIST_SHIFT);
-    result->lastConv = ((tmp & BCTU_ADCDR_LAST_MASK) >> BCTU_ADCDR_LAST_SHIFT);
-    result->trigSrc  = ((tmp & BCTU_ADCDR_TRG_SRC_MASK) >> BCTU_ADCDR_TRG_SRC_SHIFT);
-    result->chanNum  = ((tmp & BCTU_ADCDR_CH_MASK) >> BCTU_ADCDR_CH_SHIFT);
-    result->data     = ((tmp & BCTU_ADCDR_ADC_DATA_MASK) >> BCTU_ADCDR_ADC_DATA_SHIFT);
+    result->trigConvType = (bool)(uint32_t)((tmp & BCTU_ADCDR_LIST_MASK) >> BCTU_ADCDR_LIST_SHIFT);
+    result->lastConv = (bool)(uint32_t)((tmp & BCTU_ADCDR_LAST_MASK) >> BCTU_ADCDR_LAST_SHIFT);
+    result->trigSrc  = (uint8_t)(uint32_t)((tmp & BCTU_ADCDR_TRG_SRC_MASK) >> BCTU_ADCDR_TRG_SRC_SHIFT);
+    result->chanNum  = (uint8_t)(uint32_t)((tmp & BCTU_ADCDR_CH_MASK) >> BCTU_ADCDR_CH_SHIFT);
+    result->data     = (uint16_t)(uint32_t)((tmp & BCTU_ADCDR_ADC_DATA_MASK) >> BCTU_ADCDR_ADC_DATA_SHIFT);
 }
 /*!
  * @}
