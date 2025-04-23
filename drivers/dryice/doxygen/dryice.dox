@@ -22,4 +22,6 @@ tamper flag is set. As a result, always clear the DryIce tamper flag before writ
 
 Initialization and configuration
 
-Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryiceRefer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryice
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/dryice
+
+*/

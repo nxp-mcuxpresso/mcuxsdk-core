@@ -20,3 +20,5 @@ of the previously assigned tasks.
 The driver relies on a command buffer and command status buffer allocated in the DSP data
 memory section.
  @n
+
+*/
