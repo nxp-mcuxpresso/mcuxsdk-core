@@ -1,5 +1,10 @@
 # CNS_ADC
 
+## [2.2.1]
+
+- Improvements
+  - Fixed CERT-C issues.
+
 ## [2.2.0]
 
 - Improvements
