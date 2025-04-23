@@ -1,5 +1,10 @@
 # CNS_DAC
 
+## [2.1.1]
+
+- Improvements
+  - Fixed CERT-C issues.
+
 ## [2.1.0]
 
 - Improvements
