@@ -27,3 +27,4 @@ The user should initialize the Smart Card driver, which consist of IP and PHY dr
 # SmartCard Call diagram {#SmarCardCallDiagram}
 Because the call diagram is complex, the detailed use of the Smart Card driver is not described in this section.
 For details about using the Smart Card driver, see the Smart Card driver example which describes a simple use case.
+*/

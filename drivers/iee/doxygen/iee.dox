@@ -14,3 +14,5 @@ information from external serial flash device accessed through FlexSPI1.
 # IEE Driver Examples {#IEEEx}
 
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/iee
+
+*/
