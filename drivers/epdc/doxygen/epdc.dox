@@ -13,3 +13,4 @@ To use the EPDC driver, call @ref EPDC_Init first to enable and initialize the
 peripheral. Generally, call the EPDC driver APIs the configure display parameters,
 FIFO configuration, timing controller engine, signal pigeon mode and initiate panel
 display update.
+*/

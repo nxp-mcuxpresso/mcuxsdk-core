@@ -11,3 +11,5 @@ Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driv
 
 ## SDIO V3.0 slave
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/sdioslv/sdioslv_3.0
+*/
+

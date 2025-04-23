@@ -13,3 +13,4 @@ IEE.
 # IEER Driver Examples {#IEEREx}
 
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/ieer
+*/
