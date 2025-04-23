@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 NXP
+ * Copyright 2018-2020,2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -375,7 +375,7 @@ void PDM_Init(PDM_Type *base, const pdm_config_t *config)
                    PDM_CTRL_2_CICOSR(config->cicOverSampleRate) | PDM_CTRL_2_QSEL(config->qualityMode);
 
 #if defined(FSL_FEATURE_PDM_HAS_DECIMATION_FILTER_BYPASS) && FSL_FEATURE_PDM_HAS_DECIMATION_FILTER_BYPASS
-    base->CTRL_2 = (base->CTRL_2 & ~PDM_CTRL_2_DEC_BYPASS_MASK) | 
+    base->CTRL_2 = (base->CTRL_2 & ~PDM_CTRL_2_DEC_BYPASS_MASK) |
                     PDM_CTRL_2_DEC_BYPASS((config->enableFilterBypass) ? 1UL : 0UL);
 #endif
     /* Set the watermark */
