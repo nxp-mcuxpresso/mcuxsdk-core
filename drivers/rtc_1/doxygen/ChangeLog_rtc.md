@@ -1,5 +1,10 @@
 # RTC
 
+## [2.0.5]
+
+- Bug Fixes
+  - Fixed CERT INT30-C, INT31-C violations.
+
 ## [2.0.4]
 
 - Improvements

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 NXP
+ * Copyright 2017-2020, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -113,11 +113,12 @@ static uint32_t RTC_ConvertDatetimeToSeconds(const rtc_datetime_t *datetime)
      * represented in the hours, minutes and seconds field*/
     seconds += ((uint32_t)datetime->day - 1U);
     /* For leap year if month less than or equal to Febraury, decrement day counter*/
-    if (((datetime->year & 3U) == 0x00U) && (datetime->month <= 2U))
+    if (((datetime->year & 3U) == 0x00U) && (datetime->month <= 2U) && 0U != seconds)
     {
         seconds--;
     }
 
+    assert(seconds < UINT32_MAX / SECONDS_IN_A_DAY);
     seconds = (seconds * SECONDS_IN_A_DAY) + (datetime->hour * SECONDS_IN_A_HOUR) +
               (datetime->minute * SECONDS_IN_A_MINUTE) + datetime->second;
 
@@ -339,8 +340,6 @@ uint32_t RTC_GetDivideValue(RTC_Type *base)
  */
 status_t RTC_SetDatetime(rtc_datetime_t *datetime)
 {
-    assert(datetime != NULL);
-
     status_t status = kStatus_Success;
 
     /* Return error if the time provided is not valid */
@@ -364,7 +363,7 @@ status_t RTC_SetDatetime(rtc_datetime_t *datetime)
  */
 void RTC_GetDatetime(rtc_datetime_t *datetime)
 {
-    assert(datetime);
+    assert(RTC_CheckDatetimeFormat(datetime));
 
     /* Get current data time */
     RTC_ConvertSecondsToDatetime(s_CurrentTimeSeconds, datetime);
@@ -378,6 +377,7 @@ void RTC_GetDatetime(rtc_datetime_t *datetime)
  */
 void RTC_SetAlarm(uint32_t second)
 {
+    assert(second < UINT32_MAX - s_CurrentTimeSeconds);
     /* Set alarm time seconds */
     s_AlarmTimeSeconds = second + s_CurrentTimeSeconds;
 }
@@ -389,7 +389,7 @@ void RTC_SetAlarm(uint32_t second)
  */
 void RTC_GetAlarm(rtc_datetime_t *datetime)
 {
-    assert(datetime);
+    assert(RTC_CheckDatetimeFormat(datetime));
 
     /* Get alarm data time */
     RTC_ConvertSecondsToDatetime(s_AlarmTimeSeconds, datetime);
@@ -412,6 +412,7 @@ void RTC_DriverIRQHandler(void)
 
     if ((RTC_GetInterruptFlags(RTC) & (uint32_t)kRTC_InterruptFlag) != 0U)
     {
+        assert(s_CurrentTimeSeconds < UINT32_MAX - 1U);
         s_CurrentTimeSeconds++;
         /* Clear second interrupt flag */
         RTC_ClearInterruptFlags(RTC, (uint32_t)kRTC_InterruptFlag);
