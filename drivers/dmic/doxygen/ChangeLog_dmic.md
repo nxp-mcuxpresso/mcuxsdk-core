@@ -1,5 +1,10 @@
 # DMIC
 
+## [2.3.3]
+
+- Bug Fixes
+  - Fixed violations of MISRA C-2012 rule 10.1, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8.
+
 ## [2.3.2]
 
 - New Features
