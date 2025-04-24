@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
+ * Copyright 2016-2021, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -23,7 +23,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_SAI_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 7, 2)) /*!< Version 2.7.2 */
+#define FSL_SAI_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 7, 3)) /*!< Version 2.7.3 */
 /*! @} */
 
 /*! @brief the SAI enable position When calling SAI_TransferReceiveEDMA */
