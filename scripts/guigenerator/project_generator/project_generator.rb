@@ -7,6 +7,7 @@ require 'logger'
 require_relative './generator'
 require_relative './ninja_parser'
 require_relative 'core/_fileutils'
+require_relative '../utils/utils'
 require 'rubygems'
 
 PACKAGE_YML_PATH = 'yml_data/shared/misc/package.yml'
@@ -109,7 +110,12 @@ if $PROGRAM_NAME == __FILE__
         return
     end
 
-    puts "Generate GUI project"
+    # Give message if the out dir is not in the same disk drive as SDK root path when making GUI project
+    if !Utils.same_disk_drive?(ENV['SdkRootDirPath'], outdir) && !ENV['standalone']
+        puts "\r\nGUI project use relative path, but the output directory #{outdir} is not in the same disk drive as SDK root path #{ENV['SdkRootDirPath']}, the relative path can not be cauculated, please change the output path to the same disk as the repo."
+        return
+    end
+
     logger = Logger.new(STDOUT)
     logger.level = CMAKE_LOG_LEVEL_MAP[ENV['log_level']]
 
@@ -136,12 +142,15 @@ if $PROGRAM_NAME == __FILE__
     if ENV['standalone'] == 'true'
       # copy project to final build dir
       if ENV['FINAL_BUILD_DIR'] && ENV['TEMP_BUILD_DIR']
-        if Dir.exist?(ENV['FINAL_BUILD_DIR'])
-          FileUtils.rm_rf(ENV['FINAL_BUILD_DIR'])
+        if ENV['SYSBUILD']
+          final_project_dir = File.join(ENV['FINAL_BUILD_DIR'], File.basename(outdir))
         else
-          FileUtils.mkdir_p(ENV['FINAL_BUILD_DIR'])
+          final_project_dir =ENV['FINAL_BUILD_DIR']
         end
-        FileUtils.cp_r(File.join(ENV['TEMP_BUILD_DIR'], toolchain), ENV['FINAL_BUILD_DIR'])
+        
+        FileUtils.rm_rf(final_project_dir) if Dir.exist?(final_project_dir)
+        FileUtils.mkdir_p(final_project_dir)
+        FileUtils.cp_r(File.join(outdir, toolchain), final_project_dir)
       end
     end
   rescue StandardError => e

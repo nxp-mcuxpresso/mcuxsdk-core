@@ -116,11 +116,14 @@ module Internal
         @config_cmakelists.puts "set(MCUX_BUILD_TYPES #{@target.join(' ')})"
         @config_cmakelists.puts ""
 
+        # Set output path to project root dir to simplify multicore project setting(No need target-specific linker setting)
+        @config_cmakelists.puts "set(EXECUTABLE_OUTPUT_PATH ${ProjDirPath})"
+        @config_cmakelists.puts "set(LIBRARY_OUTPUT_PATH ${ProjDirPath})"
+
         if @build_type == "app"
           @config_cmakelists.puts "set(MCUX_SDK_PROJECT_NAME #{@project_name})"
         else
           @config_cmakelists.puts "set(MCUX_SDK_PROJECT_NAME #{File.basename(@project_name, '.elf')}.a)"
-          @config_cmakelists.puts "set(CMAKE_STATIC_LIBRARY_PREFIX)"
           @config_cmakelists.puts "set(CMAKE_STATIC_LIBRARY_SUFFIX)"
         end
         @config_cmakelists.puts ""

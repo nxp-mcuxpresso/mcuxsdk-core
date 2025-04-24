@@ -1210,7 +1210,11 @@ module SDKGenerator
       end
 
       def save_project_definition_files(project_instance, tool_key, project_info, project_tag, project_name, generated_files)
-        project_type = 'SDK'
+        if ENV['standalone']
+          project_type = 'Standalone'
+        else
+          project_type = 'GUI'
+        end
         if %w[iar mdk].include?(tool_key)
           #TODO save solution workspace
           # Key is project sharing the same workspace, value is relative out dir path
@@ -1239,9 +1243,14 @@ module SDKGenerator
           generated_files[tool_key].push_uniq("devices/#{project_info[:platform_devices_soc_name]}/all_lib_device.cmake")
         end
         if ENV['FINAL_BUILD_DIR']
-          puts "generate #{project_type} project: #{project_info[:internal] ? 'internal' : ''} [#{project_info[:all_targets].join(' ')}] [#{project_name}]" + ' [' + File.join(ENV['FINAL_BUILD_DIR'], project_info[:outdir], project_info[:project_file_name]) + ']'
+          if ENV['SYSBUILD']
+            final_output_rootdir = File.join(ENV['FINAL_BUILD_DIR'], File.basename(@output_rootdir))
+          else
+            final_output_rootdir = ENV['FINAL_BUILD_DIR']
+          end
+          puts "\r\nGenerate #{project_type} project: #{project_info[:internal] ? 'internal' : ''} [#{project_info[:all_targets].join(' ')}] [#{project_name}]" + ' [' + File.join(final_output_rootdir, project_info[:outdir], project_info[:project_file_name]) + ']'
         else
-          puts "generate #{project_type} project: #{project_info[:internal] ? 'internal' : ''} [#{project_info[:all_targets].join(' ')}] [#{project_name}]" + ' [' + File.join(@output_rootdir, project_info[:outdir], project_info[:project_file_name]) + ']'
+          puts "\r\nGenerate #{project_type} project: #{project_info[:internal] ? 'internal' : ''} [#{project_info[:all_targets].join(' ')}] [#{project_name}]" + ' [' + File.join(@output_rootdir, project_info[:outdir], project_info[:project_file_name]) + ']'
         end
       end
 

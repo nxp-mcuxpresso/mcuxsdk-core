@@ -446,7 +446,11 @@ class Build(Forceable):
         source_dir = self._find_source_dir()
         app = os.path.split(source_dir)[1]
         # for standalone project, use a temporary build directory if using the directory from different disk on Windows
-        if self.args.target == 'standalone_project' and os.name == 'nt' and self.args.build_dir and not is_from_same_disk(self.args.build_dir):
+        if self.args.target == 'standalone_project' and \
+            os.name == 'nt' and \
+            self.args.build_dir and \
+            os.path.isabs(self.args.build_dir) and \
+            not is_from_same_disk(self.args.build_dir):
             build_dir = self._prepare_standalone_project_dir(self.args.build_dir, board, source_dir, app)
         else:
             build_dir = find_build_dir(self.args.build_dir, board=board,
@@ -692,7 +696,10 @@ class Build(Forceable):
             extra_args['GENERATE_GUI_PROJECT'] = _CMAKE_TRUE
 
         if self.args.target == 'standalone_project':
-            extra_args['GENERATE_STANDALONE_PROJECT'] = _CMAKE_TRUE
+            if self.args.sysbuild:
+                extra_args['SYSBUILD_GENERATE_STANDALONE_PROJECT'] = _CMAKE_TRUE
+            else:
+                extra_args['GENERATE_STANDALONE_PROJECT'] = _CMAKE_TRUE
 
         if self.args.compiler:
             if self.args.toolchain == 'armgcc':

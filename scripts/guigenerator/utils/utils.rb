@@ -272,6 +272,25 @@ module Utils
     os
   end
 
+  # judge if path_a and path_b in same disk drive
+  def self.same_disk_drive?(path_a, path_b)
+    if self.detect_os == 'windows'
+      drive_a = path_a[0, 1].upcase if path_a =~ /^[a-zA-Z]:/
+      drive_b = path_b[0, 1].upcase if path_b =~ /^[a-zA-Z]:/
+      return drive_a != nil && drive_b != nil && drive_a == drive_b
+    else
+      return true
+    end
+  end
+
+  # judge if path_a inside path_b
+  def self.path_inside?(path_a, path_b)
+    path_a = Pathname.new(path_a).cleanpath
+    path_b = Pathname.new(path_b).cleanpath
+  
+    path_a.fnmatch?(File.join(path_b, '**'))
+  end
+
   def self.find_executable(bin, path = nil)
     executable_file = proc do |name|
       begin

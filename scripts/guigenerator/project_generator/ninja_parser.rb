@@ -260,7 +260,7 @@ class NinjaParser
                 end
               else
                 begin
-                include_path = Pathname.new(_flag[1]).relative_path_from(Pathname.new(REPO_ROOT_PATH)).cleanpath.to_s
+                  include_path = Pathname.new(_flag[1]).relative_path_from(Pathname.new(REPO_ROOT_PATH)).cleanpath.to_s
                 rescue StandardError => e
                   raise "Get relative path error: Can't get relative path from #{REPO_ROOT_PATH} to #{_flag[1]}, please make sure the destination path is in the same disk for Windows"
                 end
@@ -493,9 +493,19 @@ class NinjaParser
             if res[1].start_with?('../') || res[1].start_with?('./')
               path = File.join('$PROJ_DIR$', translate_project_relative_path(File.join(ENV['build_dir'], res[1])))
             else
-              path = File.join('$PROJ_DIR$', translate_project_relative_path(res[1]))
+              path = File.join('$PROJ_DIR$', translate_project_relative_path(res[1], true))
             end
             result.push flag.gsub(res[1], path)
+          end
+        elsif flag.strip.start_with?("-Wl,--out-implib=")
+          pattern = /-Wl,--out-implib=(\S+)/
+          res = flag.strip.match(pattern)
+          if res[1]
+            # output lib are put into project root path
+            path = File.join('${ProjDirPath}', File.basename(res[1]))
+            result.push flag.gsub(res[1], path)
+          else
+            result.push flag
           end
         elsif flag.strip.match(/-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/)
           _flag = flag.match(/-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/)
@@ -537,19 +547,95 @@ class NinjaParser
   end
 
   # translate absolute path to path relative to project root path
-  def translate_project_relative_path(abs_path)
+  def translate_project_relative_path(abs_path, path_from_other_project = false)
     relative_path = Pathname.new(abs_path).relative_path_from(Pathname.new(@outdir)).to_s
     if ENV['standalone'] == 'true'
       if relative_path.start_with?('..')
-        path = abs_path.tr('\\', '/').split(REPO_ROOT_PATH)[-1]
+        # for path from other project, need extra '..' in path, because the project file is in <build_dir>/toolchain folder
+        if path_from_other_project
+          path = File.join('..', relative_path)
+        else
+          # if the path is for project itself, because all the file is in toolchain folder, and the folder structure is same
+          # as repo, we can intercept the rest of REPO_ROOT_PATH from abs_path
+          path = abs_path.tr('\\', '/').split(REPO_ROOT_PATH)[-1]
+        end
       else
         path = relative_path
       end
     else
-      # For gui project, project file is in toolchain/.. folder
+      # For gui project, project file is in <build_dir>/toolchain folder, need extra '..' in path
       path = File.join('..', relative_path)
     end
     Pathname.new(File.join('.', path)).cleanpath.to_s
+  end
+
+  def remove_last_quote_if_odd(str)
+    quote_count = str.count("'\"")
+    if quote_count.odd? && ["'", '"'].include?(str[-1])
+      # delete the last quotation mark
+      str.chop!
+    end
+    str
+  end
+
+  def translate_path_in_build_cmd(content)
+    repo_root_dir = File.basename(ENV['SdkRootDirPath'])
+    project_root_dir = File.join(@outdir, @toolchain)
+    cmd_list = content.split(" && ")
+    cmd_list.each_with_index do |cmd_item, index|
+      cmd_list[index] = nil if cmd_item.match(/(cmd.exe|cd)[\s\S]+[\/\\]#{File.basename(@outdir)}"?$/)
+    end
+    cmd_list =cmd_list.compact.join(' && ').split(' ')
+    # TODO Identify more toolchains if necessary
+    cmd_list.each_with_index do |item, index |
+      # copy file in build command in case it's not add by mcux_add_source
+      if ENV['standalone'] && File.file?(item.strip) && Utils.path_inside?(item.strip, ENV['SdkRootDirPath'])
+        dest_path = File.join(@outdir, @toolchain, get_relative_path(ENV['SdkRootDirPath'], File.dirname(item.strip)))
+        FileUtils.mkdir_p(dest_path)
+        FileUtils.cp_r(item.strip, dest_path)
+      end
+      if item.match(/bin[\/\\]iccarm/)
+        cmd_list[index] = "$TOOLKIT_DIR$/bin/iccarm"
+      elsif item.match(/bin[\/\\]armclang/)
+        cmd_list[index] = "$KARM/ARMCLANG/bin/armclang"
+      elsif item.match(/bin[\/\\]arm-none-eabi-gcc/)
+        cmd_list[index] = "${TOOLCHAIN_DIR}/bin/arm-none-eabi-gcc"
+      elsif item.match(/-[Io](\S+)/)
+        path = item.include?(repo_root_dir) && item.match(/-[Io](\S+)/)[1]
+        if File.exist?(path)
+          if ENV['standalone'] == 'true'
+            dest_path = File.join(File.join(@outdir, @toolchain), path.split(/#{repo_root_dir}[\/\\]/)[-1])
+            new_path = get_relative_path(File.join(@outdir, @toolchain), dest_path)
+          else
+            new_path = get_relative_path(File.join(@outdir, @toolchain), path)
+          end
+          if item.strip.start_with?('-I')
+            cmd_list[index] = "-I#{new_path}"
+          else
+            cmd_list[index] = "-o#{new_path}"
+          end
+        end
+      elsif item.include?(project_root_dir)
+        if ENV['standalone'] == 'true'
+          if @toolchain ==  'iar'
+            cmd_list[index] = item.gsub(project_root_dir, '$PROJ_DIR$')
+          elsif @toolchain ==  'mdk'
+            cmd_list[index] = item.gsub(project_root_dir, '$P')
+          elsif @toolchain ==  'armgcc'
+            cmd_list[index] = item.gsub(project_root_dir, '${ProjDirPath}')
+          end
+        end
+      elsif item.include?(repo_root_dir) && File.exist?(File.dirname(item))
+        if ENV['standalone'] == 'true'
+            dest_path = File.join(File.join(@outdir, @toolchain), item.split(/#{repo_root_dir}[\/\\]/)[-1])
+            cmd_list[index] = get_relative_path(File.join(@outdir, @toolchain), dest_path)
+        else
+            cmd_list[index] = get_relative_path(File.join(@outdir, @toolchain), item)
+        end
+      end
+    end
+    cmd_list = cmd_list.join(' ').split(' && ')
+    cmd_list.map! {|cmd_str|  remove_last_quote_if_odd(cmd_str)}
   end
 
   def parse_prebuild
@@ -560,44 +646,7 @@ class NinjaParser
         content = result[1].strip
         # cd . means no cmd
         break if content == 'cd .' || content == ':'
-        cmd_list = content.split(" && ")
-        cmd_list.each_with_index do |cmd_item, index|
-          cmd_list[index] = nil if cmd_item.match(/(cmd.exe|cd)[\s\S]+[\/\\]#{File.basename(@outdir)}"?$/)
-        end
-        cmd_list =cmd_list.compact.join(' && ').split(' ')
-        # TODO Identify more toolchains if necessary
-        cmd_list.each_with_index do |item, index |
-          if item.match(/bin[\/\\]iccarm/)
-            cmd_list[index] = "$TOOLKIT_DIR$/bin/iccarm"
-          elsif item.match(/bin[\/\\]armclang/)
-            cmd_list[index] = "$KARM/ARMCLANG/bin/armclang"
-          elsif item.match(/bin[\/\\]arm-none-eabi-gcc/)
-            cmd_list[index] = "${TOOLCHAIN_DIR}/bin/arm-none-eabi-gcc"
-          elsif item.match(/-[Io](\S+)/)
-            path = item.include?('mcu-sdk-3.0') && item.match(/-[Io](\S+)/)[1]
-            if File.exist?(path)
-              if ENV['standalone'] == 'true'
-                dest_path = File.join(File.join(@outdir, @toolchain), path.split(/mcu-sdk-3.0[\/\\]/)[-1])
-                new_path = get_relative_path(File.join(@outdir, @toolchain), dest_path)
-              else
-                new_path = get_relative_path(File.join(@outdir, @toolchain), path)
-              end
-              if item.strip.start_with?('-I')
-                cmd_list[index] = "-I#{new_path}"
-              else
-                cmd_list[index] = "-o#{new_path}"
-              end
-            end
-          elsif item.include?('mcu-sdk-3.0') && File.exist?(File.dirname(item))
-            if ENV['standalone'] == 'true'
-                dest_path = File.join(File.join(@outdir, @toolchain), item.split(/mcu-sdk-3.0[\/\\]/)[-1])
-                cmd_list[index] = get_relative_path(File.join(@outdir, @toolchain), dest_path)
-            else
-                cmd_list[index] = get_relative_path(File.join(@outdir, @toolchain), item)
-            end
-          end
-        end
-        cmd_list = cmd_list.join(' ').split(' && ')
+        cmd_list = translate_path_in_build_cmd(content)
         @logger.debug( "Parse prebuild command: #{cmd_list.join(' ')}")
         if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
           @data[@name]['contents']['configuration']['tools'][@toolchain]['prebuild'] = cmd_list
@@ -637,6 +686,7 @@ class NinjaParser
           elsif @toolchain == 'mdk'
             if ENV['project_type']  == 'LIBRARY'
                pattern = /\s\S+lib#{@name}\.a/
+               result = content.match(pattern)
                while(result)
                 content.sub!(result[ 0 ], ' $p/#L')
                 result = content.match(pattern)
@@ -646,11 +696,32 @@ class NinjaParser
               result = content.match(pattern)
               content.sub!(result[ 0 ], '--bincombined $p/#L') if result
             end
+          elsif @toolchain == 'armgcc'
+            # translate project elf/lib to $<TARGET_FILE:${MCUX_SDK_PROJECT_NAME}>
+            if ENV['project_type']  == 'LIBRARY'
+              pattern = /\s\S+lib#{@name}\.a/
+            else
+              pattern = /\s\S+#{@name}\.elf/
+            end
+            result = content.match(pattern)
+            while(result)
+              content.sub!(result[ 0 ], ' $<TARGET_FILE:${MCUX_SDK_PROJECT_NAME}>')
+              result = content.match(pattern)
+            end
+            # translate cmake to ${CMAKE_COMMAND}
+            pattern = /\s\S+bin[\/\\]cmake(\.exe)?/
+            result = content.match(pattern)
+            while(result)
+              content.sub!(result[ 0 ], ' ${CMAKE_COMMAND}')
+              result = content.match(pattern)
+            end
           end
+          cmd_list = translate_path_in_build_cmd(content)
+
           if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
-            @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = [content]
+            @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = cmd_list
           else
-            @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = [content]
+            @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = cmd_list
           end
           break
         end

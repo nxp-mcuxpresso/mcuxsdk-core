@@ -350,6 +350,7 @@ function(ExternalZephyrProject_Add)
       hardenconfig
       guiconfig
       guiproject # add ${secondary_project}_guiproject target
+      standalone_project # add ${secondary_project}_standalone_project target
       ${EXTRA_KCONFIG_TARGETS}
       )
 
@@ -572,6 +573,12 @@ function(ExternalZephyrProject_Cmake)
   if (${ZCMAKE_APPLICATION}_toolchain)
     list(APPEND cmake_extra_args "-DCONFIG_TOOLCHAIN=${${ZCMAKE_APPLICATION}_toolchain}")
   endif ()
+  if(DEFINED TEMP_BUILD_DIR)
+    list(APPEND cmake_extra_args "-DTEMP_BUILD_DIR=${TEMP_BUILD_DIR}")
+  endif()
+  if(DEFINED FINAL_BUILD_DIR)
+    list(APPEND cmake_extra_args "-DFINAL_BUILD_DIR=${FINAL_BUILD_DIR}")
+  endif()
   # get log level
   cmake_language(GET_MESSAGE_LOG_LEVEL cur_log_level)
 
@@ -596,11 +603,20 @@ function(ExternalZephyrProject_Cmake)
   endif()
 
   # Create GUI project for IAR/MDK automatically when invoking sysbuild
-  if (${${ZCMAKE_APPLICATION}_toolchain} MATCHES "iar|mdk|xtensa" AND FOUND_RUBY_EXECUTABLE)
+  if (${${ZCMAKE_APPLICATION}_toolchain} MATCHES "iar|mdk|xtensa|armgcc" AND FOUND_RUBY_EXECUTABLE)
+    
+    # Create standalone project if user add "-t standalone_project" in command
+    # Otherwise create GUI project
+    if(SYSBUILD_GENERATE_STANDALONE_PROJECT)
+      set(tmp_project_target standalone_project)
+    else()
+      set(tmp_project_target guiproject)
+    endif()
+
     execute_process(
             COMMAND ${CMAKE_COMMAND}
             --build ${BINARY_DIR}
-            --target guiproject
+            --target ${tmp_project_target}
             RESULT_VARIABLE   return_val
             WORKING_DIRECTORY ${BINARY_DIR}
     )

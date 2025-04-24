@@ -155,7 +155,7 @@ def is_from_same_disk(path):
     if os.name != 'nt':
         return True
     if not os.path.isabs(path):
-        build_dir = os.path.abspath(os.path.join(os.getcwd(), path))
+        path = os.path.abspath(path)
     default_disk = os.path.splitdrive(os.getcwd())[0].lower()
     target_disk = os.path.splitdrive(path)[0].lower()
     return default_disk == target_disk

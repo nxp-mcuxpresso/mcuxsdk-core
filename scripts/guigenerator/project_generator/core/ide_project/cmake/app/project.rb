@@ -77,23 +77,12 @@ module CMake
       end
 
       def linker_file(target, path, rootdir: nil)
-        if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-          path = File.join('${ProjDirPath}', path_mod(path, rootdir))
-        else
-          path = File.join('${SdkRootDirPath}', path)
-        end
+        path = File.join('${ProjDirPath}', path_mod(path, rootdir))
         super(target, path)
       end
 
       def add_link_library(target, library, rootdir: nil, linked_project_path: nil)
-        if is_underneath(Pathname.new(@output_dir).parent.to_s, library)
-          path = File.join('${ProjDirPath}', path_mod(library, rootdir))
-        elsif linked_project_path && is_underneath(Pathname.new(linked_project_path).parent.to_s, library)
-          # If libraries is in linked project path, should also use ${ProjDirPath}
-          path = File.join('${ProjDirPath}', path_mod(library, rootdir))
-        else
-          path = File.join('${SdkRootDirPath}', library)
-        end
+        path = File.join('${ProjDirPath}', path_mod(library, rootdir))
         super(target, path)
       end
 

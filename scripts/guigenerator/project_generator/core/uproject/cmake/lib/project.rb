@@ -32,6 +32,14 @@ module CMake
           clear_libraries!(target)
         end
       end
+
+      def add_prebuild_script(target, command)
+        @project_file.add_prebuild_script(command)
+      end
+
+      def add_postbuild_script(target, command)
+        @project_file.add_postbuild_script(command)
+      end
     end
   end
 end

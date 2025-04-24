@@ -14,12 +14,8 @@ module CMake
       include CMake::App::CommonProject
 
       def add_module_path(path, rootdir: nil)
-        if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-          path = path_mod(path, rootdir)
-          super(File.join('${ProjDirPath}', path))
-        else
-          super(File.join('${SdkRootDirPath}', path))
-        end
+        path = path_mod(path, rootdir)
+        super(File.join('${ProjDirPath}', path))
       end
 
       def add_cmake_module(component)
@@ -35,12 +31,8 @@ module CMake
       end
 
       def add_assembler_include_for_target(target, supported_targets, path, rootdir: nil)
-        if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-          path = path_mod(path, rootdir)
-          super(target, supported_targets, File.join('${ProjDirPath}', path))
-        else
-          super(target, supported_targets, File.join('${SdkRootDirPath}', path))
-        end
+        path = path_mod(path, rootdir)
+        super(target, supported_targets, File.join('${ProjDirPath}', path))
       end
     end
   end

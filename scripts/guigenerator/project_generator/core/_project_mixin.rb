@@ -22,7 +22,34 @@ module Mixin
 
     def path_mod(path, rootdir)
       if ENV['standalone'] == 'true'
-        file_fullpath = File.join(@modifier.fullpath(@output_dir), path)
+        if ENV['TEMP_BUILD_DIR']
+          tmp_dir = File.basename(ENV['TEMP_BUILD_DIR'])
+        else
+          tmp_dir = nil
+        end
+
+        path_full = File.join(ENV['SdkRootDirPath'], path)
+        build_common_root = File.dirname(ENV['build_dir'])
+
+        # For multicore standalone project, if the path is inside common root build dir but not inside the project build dir, it
+        # means the path comes from other project, so we need to translate it to full path and caclulate relative path from project build dir,
+        #not just suppose it is inside the project build dir
+        if ENV['SYSBUILD'] && Utils.path_inside?(path_full, build_common_root) && !Utils.path_inside?(path_full, ENV['build_dir'])
+          # remove tmp dir to calculate the real relative path
+          if tmp_dir && path.include?(tmp_dir)
+            rel_path = path.tr('\\', '/').gsub("#{tmp_dir}/", '')
+
+            rel_output_dir = @modifier.fullpath(@output_dir).tr('\\', '/').gsub("#{tmp_dir}/", '')
+
+            file_rel_fullpath = File.join(rel_output_dir, '../../..', rel_path)
+
+            return File.relpath(rel_output_dir, file_rel_fullpath)
+          else
+            file_fullpath = File.join(@modifier.fullpath(@output_dir), '../../..', path).tr('\\', '/')
+          end
+        else
+          file_fullpath = File.join(@modifier.fullpath(@output_dir), path)
+        end
       else
         file_fullpath = File.join(ENV['SdkRootDirPath'], path)
       end

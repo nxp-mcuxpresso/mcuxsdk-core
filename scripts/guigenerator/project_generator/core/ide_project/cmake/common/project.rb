@@ -7,30 +7,18 @@ module CMake
   module Project
 
     def add_source(path, vdir, rootdir: nil, source_target: nil)
-      if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-        path = path_mod(path, rootdir)
-        super(File.join('${ProjDirPath}', path), vdir)
-      else
-        super(File.join('${SdkRootDirPath}', path), vdir)
-      end
+      path = path_mod(path, rootdir)
+      super(File.join('${ProjDirPath}', path), vdir)
     end
 
     def set_config_file_property(path, comp_name, rootdir: nil)
-      if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-        path = path_mod(path, rootdir)
-        super(File.join('${ProjDirPath}', path), comp_name)
-      else
-        super(File.join('${SdkRootDirPath}', path), comp_name)
-      end
+      path = path_mod(path, rootdir)
+      super(File.join('${ProjDirPath}', path), comp_name)
     end
 
     def add_cmake_file(path, cache_dir, rootdir: nil)
-      if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-        path = path_mod(path, rootdir)
-        super(File.join('${ProjDirPath}', path), cache_dir)
-      else
-        super(File.join('${SdkRootDirPath}', path), cache_dir)
-      end
+      path = path_mod(path, rootdir)
+      super(File.join('${ProjDirPath}', path), cache_dir)
     end
 
     def set_build_dir(target, path, rootdir: nil)
@@ -43,39 +31,31 @@ module CMake
     end
 
     def add_assembler_include(target, path, rootdir: nil)
-      if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-        path = path_mod(path, rootdir)
-        super(target, File.join('${ProjDirPath}', path))
-      else
-        super(target, File.join('${SdkRootDirPath}', path))
-      end
+      path = path_mod(path, rootdir)
+      super(target, File.join('${ProjDirPath}', path))
     end
 
     def add_compiler_include(target, path, *args, vdir: nil, rootdir: nil)
-      if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-        path = path_mod(path, rootdir)
-        super(target, File.join('${ProjDirPath}', path))
-      else
-        super(target, File.join('${SdkRootDirPath}', path))
-      end
+      path = path_mod(path, rootdir)
+      super(target, File.join('${ProjDirPath}', path))
     end
 
     def set_preinclude_file(target, path, macro, linked_support, vdir: nil, rootdir: nil)
-      if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-        path = path_mod(path, rootdir)
-        super(target, File.join('${ProjDirPath}', path))
-      else
-        super(target, File.join('${SdkRootDirPath}', path))
-      end
+      path = path_mod(path, rootdir)
+      super(target, File.join('${ProjDirPath}', path))
+    end
+
+    def add_postbuild_script(target, cmd)
+      super(target, cmd)
+    end
+
+    def add_prebuild_script(target, cmd)
+      super(target, cmd)
     end
 
     def add_cpp_compiler_include(target, path, rootdir: nil)
-      if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-        path = path_mod(path, rootdir)
-        super(target, File.join('${ProjDirPath}', path))
-      else
-        super(target, File.join('${SdkRootDirPath}', path))
-      end
+      path = path_mod(path, rootdir)
+      super(target, File.join('${ProjDirPath}', path))
     end
 
     def binary_file(target, path, rootdir: nil)
@@ -103,12 +83,8 @@ module CMake
     end
 
     def exclude_building_for_target(target, path, exclude, *args, rootdir: nil)
-      if is_underneath(Pathname.new(@output_dir).parent.to_s, path)
-        path = path_mod(path, rootdir)
-        super(target, File.join('${ProjDirPath}',path), exclude)
-      else
-        super(target, File.join('${SdkRootDirPath}',path), exclude)
-      end
+      path = path_mod(path, rootdir)
+      super(target, File.join('${ProjDirPath}',path), exclude)
     end
   end
 end

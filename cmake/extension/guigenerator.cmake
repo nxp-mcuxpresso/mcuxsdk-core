@@ -68,6 +68,9 @@ endif()
 if(DEFINED SB_CONFIG_secondary_core_id)
     list(APPEND COMMON_ENV_SETTINGS SB_CONFIG_secondary_core_id=${SB_CONFIG_secondary_core_id})
 endif()
+if(DEFINED SYSBUILD)
+    list(APPEND COMMON_ENV_SETTINGS SYSBUILD=${SYSBUILD})
+endif()
 
 if(NOT DEFINED SB_CONF_FILE)
     # VARIABLE_FROM_CMAKE does not work for sysbuild
