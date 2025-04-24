@@ -20,7 +20,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_ENDAT2P2_DRIVER_VERSION (MAKE_VERSION(1, 0, 0)) /*!< Version 1.0.0 */
+#define FSL_ENDAT2P2_DRIVER_VERSION (MAKE_VERSION(1, 0, 1)) /*!< Version 1.0.1 */
 /*! @} */
 
 #define SSI_MODE            0x1
@@ -456,7 +456,7 @@ void ENDAT2P2_CMDWait(endat2p2_dev_t *dev);
  * @param param Parameter of memory.
  */
 void ENDAT2P2_CMDProcess(endat2p2_dev_t *dev, endat2p2_mode_cmd_t cmd,
-                             uint8_t msr_or_addr, uint16_t param);
+                         uint8_t msr_or_addr, uint16_t param);
 
 /*!
  * @brief Reset encoder
@@ -471,7 +471,7 @@ void ENDAT2P2_EncoderRest(endat2p2_dev_t *dev);
  * @param addr Memory address.
  * @return the value of the parameter.
  */
-int ENDAT2P2_GetParam(endat2p2_dev_t *dev, int page, int addr);
+int ENDAT2P2_GetParam(endat2p2_dev_t *dev, uint8_t page, uint8_t addr);
 
 /*!
  * @brief Set the parameter of memory.
@@ -480,7 +480,8 @@ int ENDAT2P2_GetParam(endat2p2_dev_t *dev, int page, int addr);
  * @param addr Memory address.
  * @param data Parameter of memory.
  */
-void ENDAT2P2_SetParam(endat2p2_dev_t *dev, int page, int addr, int data);
+void ENDAT2P2_SetParam(endat2p2_dev_t *dev, uint8_t page,
+                       uint8_t addr, uint16_t data);
 
 /*!
  * @brief Reset encoder and get the position resolution.
@@ -495,7 +496,7 @@ void ENDAT2P2_EncoderRestWithPos(endat2p2_dev_t *dev);
  * @param addr Memory address.
  * @return the value of the memory.
  */
-int ENDAT2P2_GetParamWithPos(endat2p2_dev_t *dev, int page, int addr);
+int ENDAT2P2_GetParamWithPos(endat2p2_dev_t *dev, uint8_t page, uint8_t addr);
 
 /*!
  * @brief Set the parameter and get the position resolution.
@@ -504,7 +505,8 @@ int ENDAT2P2_GetParamWithPos(endat2p2_dev_t *dev, int page, int addr);
  * @param addr Memory address.
  * @param data Parameter of memory.
  */
-void ENDAT2P2_SetParamWithPos(endat2p2_dev_t *dev, int page, int addr, int data);
+void ENDAT2P2_SetParamWithPos(endat2p2_dev_t *dev, uint8_t page,
+                              uint8_t addr, uint16_t data);
 
 /*!
  * @brief Get the position resolution.
@@ -772,7 +774,7 @@ void ENDAT2P2_EnableDelayCompensation(endat2p2_dev_t *dev);
  * @param dev EnDat2.2 device handle pointer.
  * @param sysclock system clock.
  */
-void ENDAT2P2_ConfigSYSClock(endat2p2_dev_t *dev, int sysclock);
+void ENDAT2P2_ConfigSYSClock(endat2p2_dev_t *dev, uint32_t sysclock);
 
 /*!
  * @brief Set the transmission rate for EnDat.
@@ -781,7 +783,7 @@ void ENDAT2P2_ConfigSYSClock(endat2p2_dev_t *dev, int sysclock);
  * @return 0 - successfully set ftclk.
  * @return -EINVAL - invalid clock parameter.
  */
-int ENDAT2P2_SetFTCLOCK(endat2p2_dev_t *dev, int clock);
+int ENDAT2P2_SetFTCLOCK(endat2p2_dev_t *dev, uint32_t clock);
 
 /*!
  * @brief Reset entire interface component.

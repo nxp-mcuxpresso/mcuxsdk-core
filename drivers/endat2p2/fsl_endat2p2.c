@@ -280,7 +280,7 @@ void ENDAT2P2_CMDWait(endat2p2_dev_t *dev)
 }
 
 void ENDAT2P2_CMDProcess(endat2p2_dev_t *dev, endat2p2_mode_cmd_t cmd,
-                          uint8_t msr_or_addr, uint16_t param)
+                         uint8_t msr_or_addr, uint16_t param)
 {
     ENDAT2P2_CMDBuild(dev, cmd, msr_or_addr, param);
     ENDAT2P2_CMDWait(dev);
@@ -294,7 +294,8 @@ void ENDAT2P2_EncoderRest(endat2p2_dev_t *dev)
     ENDAT2P2_CMDProcess(dev, ENDAT2P2_CMD_RECEIVE_RESET, 0, 0);
 }
 
-void ENDAT2P2_SetParam(endat2p2_dev_t *dev, int page, int addr, int data)
+void ENDAT2P2_SetParam(endat2p2_dev_t *dev, uint8_t page,
+                       uint8_t addr, uint16_t data)
 {
     /* select memory area */
     ENDAT2P2_CMDProcess(dev, ENDAT2P2_CMD_SELECT_MEM_AREA, page, 0);
@@ -303,7 +304,7 @@ void ENDAT2P2_SetParam(endat2p2_dev_t *dev, int page, int addr, int data)
     ENDAT2P2_CMDProcess(dev, ENDAT2P2_CMD_RECEIVE_PARAMETERS, addr, data);
 }
 
-int ENDAT2P2_GetParam(endat2p2_dev_t *dev, int page, int addr)
+int ENDAT2P2_GetParam(endat2p2_dev_t *dev, uint8_t page, uint8_t addr)
 {
     endat2p2_addr_param_t data;
 
@@ -313,15 +314,12 @@ int ENDAT2P2_GetParam(endat2p2_dev_t *dev, int page, int addr)
     /* send parameter for address */
     ENDAT2P2_CMDProcess(dev, ENDAT2P2_CMD_SEND_PARAMETERS, addr, 0);
 
-    if (!ENDAT2P2_CheckRecv(dev))
-        return -1;
-
     data = ENDAT2P2_RecvAddrParam(dev);
 
     return data.param;
 }
 
-int ENDAT2P2_GetParamWithPos(endat2p2_dev_t *dev, int page, int addr)
+int ENDAT2P2_GetParamWithPos(endat2p2_dev_t *dev, uint8_t page, uint8_t addr)
 {
     int data;
 
@@ -365,7 +363,7 @@ int ENDAT2P2_GetParamWithPos(endat2p2_dev_t *dev, int page, int addr)
 }
 
 void ENDAT2P2_SetParamWithPos(endat2p2_dev_t *dev,
-                              int page, int addr, int data)
+                              uint8_t page, uint8_t addr, uint16_t data)
 {
     /* Select Memory Area */
     ENDAT2P2_CMDProcess(dev, ENDAT2P2_CMD_SEND_POSVAL_WITH_ADDINFO_SEL_MEM,
@@ -426,19 +424,19 @@ int ENDAT2P2_GetStep(endat2p2_dev_t *dev)
     int param;
 
     param = ENDAT2P2_GetParam(dev,
-                             MRS_CODE_PARAM_ENCODER_MANUFACTURER_PAGE1,
-                             ENDAT2P2_MEM_WORD_4);
+                              MRS_CODE_PARAM_ENCODER_MANUFACTURER_PAGE1,
+                              ENDAT2P2_MEM_WORD_4);
 
     param |= ENDAT2P2_GetParam(dev,
-                              MRS_CODE_PARAM_ENCODER_MANUFACTURER_PAGE1,
-                              ENDAT2P2_MEM_WORD_5) << 16;
+                               MRS_CODE_PARAM_ENCODER_MANUFACTURER_PAGE1,
+                               ENDAT2P2_MEM_WORD_5) << 16;
 
     return param;
 }
 
 void ENDAT2P2_GetID(endat2p2_dev_t *dev)
 {
-    int word0, word1, word2;
+    uint32_t word0, word1, word2;
 
     word0 = ENDAT2P2_GetParam(dev,
                               MRS_CODE_PARAM_ENCODER_MANUFACTURER_PAGE1,
@@ -460,7 +458,7 @@ void ENDAT2P2_GetID(endat2p2_dev_t *dev)
 
 void ENDAT2P2_GetSN(endat2p2_dev_t *dev)
 {
-    int word0, word1, word2;
+    uint32_t word0, word1, word2;
 
     word0 = ENDAT2P2_GetParam(dev,
                               MRS_CODE_PARAM_ENCODER_MANUFACTURER_PAGE1,
@@ -512,17 +510,8 @@ void ENDAT2P2_GetStatusAddInfo(endat2p2_dev_t *dev)
 int ENDAT2P2_GetEncoderInfo(endat2p2_dev_t *dev)
 {
     dev->pos_res = ENDAT2P2_GetPosRes(dev);
-    if(dev->pos_res < 0)
-    {
-        return dev->pos_res;
-    }
-
     dev->multi_turn_res = ENDAT2P2_GetMultiTurnRes(dev);
-    if(dev->multi_turn_res < 0)
-    {
-        return dev->multi_turn_res;
-    }
-    else if(!dev->multi_turn_res)
+    if (dev->multi_turn_res == 0)
     {
         dev->single_turn_res = dev->pos_res;
     }
@@ -533,16 +522,8 @@ int ENDAT2P2_GetEncoderInfo(endat2p2_dev_t *dev)
     }
 
     dev->step = ENDAT2P2_GetStep(dev);
-    if(dev->step < 0)
-    {
-        return dev->step;
-    }
 
     dev->type = ENDAT2P2_GetType(dev);
-    if(dev->type < 0)
-    {
-        return dev->type;
-    }
 
     ENDAT2P2_GetID(dev);
 
@@ -750,34 +731,64 @@ int ENDAT2P2_GetTimeStamp(endat2p2_dev_t *dev)
 void ENDAT2P2_SetHWStrobe(endat2p2_dev_t *dev, bool enable)
 {
     uint32_t data;
+    uint32_t value;
+
+    if (enable)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
 
     data = dev->base->CONFIGREGISTER1;
     data = (data & (~ ENDAT2P2_CONFIGREGISTER1_HW_STROBE_MASK)) |
-           ENDAT2P2_CONFIGREGISTER1_HW_STROBE(enable);
+           ENDAT2P2_CONFIGREGISTER1_HW_STROBE(value);
     dev->base->CONFIGREGISTER1 = data;
 }
 
 void ENDAT2P2_SetDU(endat2p2_dev_t *dev, bool on)
 {
     uint32_t data;
+    uint32_t value;
+
+    if (on)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
 
     data = dev->base->CONFIGREGISTER1;
     data = (data & (~ ENDAT2P2_CONFIGREGISTER1_DU_MASK)) |
-           ENDAT2P2_CONFIGREGISTER1_DU(on);
+           ENDAT2P2_CONFIGREGISTER1_DU(value);
     dev->base->CONFIGREGISTER1 = data;
 }
 
 void ENDAT2P2_SetDT(endat2p2_dev_t *dev, bool on)
 {
     uint32_t data;
+    uint32_t value;
+
+    if (on)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
 
     data = dev->base->CONFIGREGISTER1;
     data = (data & (~ ENDAT2P2_CONFIGREGISTER1_DT_MASK)) |
-           ENDAT2P2_CONFIGREGISTER1_DT(on);
+           ENDAT2P2_CONFIGREGISTER1_DT(value);
     dev->base->CONFIGREGISTER1 = data;
 }
 
-int ENDAT2P2_SetFTCLOCK(endat2p2_dev_t *dev, int clock)
+int ENDAT2P2_SetFTCLOCK(endat2p2_dev_t *dev, uint32_t clock)
 {
     uint32_t data, value;
 
@@ -867,20 +878,40 @@ void ENDAT2P2_SetDataWordLength(endat2p2_dev_t *dev, int length)
 void ENDAT2P2_SetResetWindow(endat2p2_dev_t *dev, bool reset)
 {
     uint32_t data;
+    uint32_t value;
+
+    if (reset)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
 
     data = dev->base->CONFIGREGISTER1;
     data = (data & (~ ENDAT2P2_CONFIGREGISTER1_RESET_WINDOW_MASK)) |
-           ENDAT2P2_CONFIGREGISTER1_RESET_WINDOW(reset);
+           ENDAT2P2_CONFIGREGISTER1_RESET_WINDOW(value);
     dev->base->CONFIGREGISTER1 = data;
 }
 
 void ENDAT2P2_SetAutoReset(endat2p2_dev_t *dev, bool enable)
 {
     uint32_t data;
+    uint32_t value;
+
+    if (enable)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
 
     data = dev->base->CONFIGREGISTER1;
     data = (data & (~ ENDAT2P2_CONFIGREGISTER1_AUTOM_RESET_MASK)) |
-           ENDAT2P2_CONFIGREGISTER1_AUTOM_RESET(enable);
+           ENDAT2P2_CONFIGREGISTER1_AUTOM_RESET(value);
     dev->base->CONFIGREGISTER1 = data;
 }
 
@@ -907,10 +938,20 @@ void ENDAT2P2_SetCablePropagationTime(endat2p2_dev_t *dev, uint32_t time)
 void ENDAT2P2_SetDelayCompensation(endat2p2_dev_t *dev, bool enable)
 {
     uint32_t data;
+    uint32_t value;
+
+    if (enable)
+    {
+        value = 1;
+    }
+    else
+    {
+        value = 0;
+    }
 
     data = dev->base->CONFIGREGISTER1;
     data = (data & (~ ENDAT2P2_CONFIGREGISTER1_DELAY_COMPENSATION_MASK)) |
-           ENDAT2P2_CONFIGREGISTER1_DELAY_COMPENSATION(enable);
+           ENDAT2P2_CONFIGREGISTER1_DELAY_COMPENSATION(value);
     dev->base->CONFIGREGISTER1 = data;
 }
 
@@ -942,7 +983,7 @@ uint32_t ENDAT2P2_CalculatePropagationTime(endat2p2_dev_t *dev, int count)
     return sum / count;
 }
 
-void ENDAT2P2_ConfigSYSClock(endat2p2_dev_t *dev, int sysclock)
+void ENDAT2P2_ConfigSYSClock(endat2p2_dev_t *dev, uint32_t sysclock)
 {
     uint32_t value, data;
 
