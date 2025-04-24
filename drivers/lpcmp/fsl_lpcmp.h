@@ -20,8 +20,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief LPCMP driver version 2.3.1. */
-#define FSL_LPCMP_DRIVER_VERSION (MAKE_VERSION(2, 3, 1))
+/*! @brief LPCMP driver version 2.3.2. */
+#define FSL_LPCMP_DRIVER_VERSION (MAKE_VERSION(2, 3, 2))
 /*! @} */
 
 #define LPCMP_CCR1_COUTA_CFG_MASK  (LPCMP_CCR1_COUTA_OWEN_MASK | LPCMP_CCR1_COUTA_OW_MASK)
@@ -595,7 +595,7 @@ static inline void LPCMP_SetPreSetValue(LPCMP_Type *base, uint8_t mask)
  */
 static inline uint8_t LPCMP_GetComparisonResult(LPCMP_Type *base)
 {
-    return (uint8_t)base->RRCSR;
+    return (uint8_t)(base->RRCSR & 0xFFU);
 }
 
 /*!
@@ -620,7 +620,7 @@ static inline void LPCMP_ClearInputChangedFlags(LPCMP_Type *base, uint8_t mask)
  */
 static inline uint8_t LPCMP_GetInputChangedFlags(LPCMP_Type *base)
 {
-    return (uint8_t)base->RRSR;
+    return (uint8_t)(base->RRSR & 0xFFU);
 }
 
 /*! @} */

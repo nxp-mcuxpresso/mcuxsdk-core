@@ -1,5 +1,10 @@
 # LPCMP
 
+## [2.3.2]
+
+- Improvements
+  - Fixed LPCMP CERT-C issues.
+
 ## [2.3.1]
 
 - Improvements
