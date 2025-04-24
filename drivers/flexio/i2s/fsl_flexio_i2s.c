@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2019 NXP
+ * Copyright 2016-2019,2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -360,7 +360,7 @@ void FLEXIO_I2S_DisableInterrupts(FLEXIO_I2S_Type *base, uint32_t mask)
 void FLEXIO_I2S_MasterSetFormat(FLEXIO_I2S_Type *base, flexio_i2s_format_t *format, uint32_t srcClock_Hz)
 {
     uint32_t timDiv = 0;
-    
+
     if (format->sampleRate_Hz > 0)
     {
         timDiv = srcClock_Hz / format->sampleRate_Hz;
@@ -369,7 +369,7 @@ void FLEXIO_I2S_MasterSetFormat(FLEXIO_I2S_Type *base, flexio_i2s_format_t *form
             timDiv = timDiv / format->bitWidth / 2U;
         }
     }
-    
+
     uint32_t bclkDiv = 0;
 
     /* Shall keep bclk and fs div an integer */
@@ -399,7 +399,7 @@ void FLEXIO_I2S_SlaveSetFormat(FLEXIO_I2S_Type *base, flexio_i2s_format_t *forma
 {
     assert(format != NULL);
     assert(format->bitWidth <= (UINT32_MAX / 4UL));
-    
+
     /* Set Frame sync timer cmp */
     uint32_t fsTimerCmp = format->bitWidth * 4UL - 3UL;
     base->flexioBase->TIMCMP[base->fsTimerIndex] = FLEXIO_TIMCMP_CMP(fsTimerCmp);
@@ -866,7 +866,7 @@ void FLEXIO_I2S_TransferTxHandleIRQ(void *i2sBase, void *i2sHandle)
         {
             /* Handle error case where dataSize is larger than remaining data */
             handle->queue[handle->queueDriver].dataSize = 0;
-        }            
+        }
 
         handle->queue[handle->queueDriver].data =
         (uint8_t *)((uint32_t)handle->queue[handle->queueDriver].data + dataSize);
@@ -921,7 +921,7 @@ void FLEXIO_I2S_TransferRxHandleIRQ(void *i2sBase, void *i2sHandle)
         {
             /* Handle error case where dataSize is larger than remaining data */
             handle->queue[handle->queueDriver].dataSize = 0;
-        }            
+        }
 
         handle->queue[handle->queueDriver].data =
         (uint8_t *)((uint32_t)handle->queue[handle->queueDriver].data + dataSize);

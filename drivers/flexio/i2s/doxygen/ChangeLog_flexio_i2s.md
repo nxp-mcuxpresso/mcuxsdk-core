@@ -1,5 +1,10 @@
 # FLEXIO_I2S
 
+## [2.2.2]
+
+- Bug Fixes
+  - Fixed violations of MISRA C-2012 rule 12.4.
+
 ## [2.2.1]
 
 - Improvements
