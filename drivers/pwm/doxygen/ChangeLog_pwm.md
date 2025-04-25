@@ -1,5 +1,10 @@
 # PWM
 
+## [2.9.1]
+
+- Bug Fixes
+  - Fixed violations of the CERT INT31-C.
+
 ## [2.9.0]
 
 - Improvements

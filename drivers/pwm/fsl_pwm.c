@@ -317,16 +317,18 @@ status_t PWM_Init(PWM_Type *base, pwm_submodule_t subModule, const pwm_config_t 
      */
     reg &=
         ~(uint16_t)(PWM_CTRL2_CLK_SEL_MASK | PWM_CTRL2_FORCE_SEL_MASK | PWM_CTRL2_INIT_SEL_MASK | PWM_CTRL2_INDEP_MASK |
-#if !defined(FSL_FEATURE_PWM_HAS_NO_WAITEN) || (!FSL_FEATURE_PWM_HAS_NO_WAITEN)
+#if !(defined(FSL_FEATURE_PWM_HAS_NO_WAITEN) && FSL_FEATURE_PWM_HAS_NO_WAITEN)
                     PWM_CTRL2_WAITEN_MASK |
 #endif /* FSL_FEATURE_PWM_HAS_NO_WAITEN */
                     PWM_CTRL2_DBGEN_MASK | PWM_CTRL2_RELOAD_SEL_MASK);
+
     reg |= (PWM_CTRL2_CLK_SEL(config->clockSource) | PWM_CTRL2_FORCE_SEL(config->forceTrigger) |
-            PWM_CTRL2_INIT_SEL(config->initializationControl) | PWM_CTRL2_DBGEN(config->enableDebugMode) |
-#if !defined(FSL_FEATURE_PWM_HAS_NO_WAITEN) || (!FSL_FEATURE_PWM_HAS_NO_WAITEN)
-            PWM_CTRL2_WAITEN(config->enableWait) |
+            PWM_CTRL2_INIT_SEL(config->initializationControl) | PWM_CTRL2_RELOAD_SEL(config->reloadSelect));
+
+    reg |= ((config->enableDebugMode) ? PWM_CTRL2_DBGEN_MASK : 0U);
+#if !(defined(FSL_FEATURE_PWM_HAS_NO_WAITEN) && FSL_FEATURE_PWM_HAS_NO_WAITEN)
+    reg |= ((config->enableWait) ? PWM_CTRL2_WAITEN_MASK : 0U);
 #endif /* FSL_FEATURE_PWM_HAS_NO_WAITEN */
-            PWM_CTRL2_RELOAD_SEL(config->reloadSelect));
 
     /* Setup PWM A & B to be independent or a complementary-pair */
     switch (config->pairOperation)
@@ -377,12 +379,7 @@ status_t PWM_Init(PWM_Type *base, pwm_submodule_t subModule, const pwm_config_t 
     base->SM[subModule].CTRL = reg;
 
     /* Set PWM output normal */
-#if defined(PWM_MASK_UPDATE_MASK)
-    base->MASK &= (uint16_t)(~(uint16_t)(PWM_MASK_MASKX_MASK | PWM_MASK_MASKA_MASK | PWM_MASK_MASKB_MASK |
-                                         PWM_MASK_UPDATE_MASK_MASK));
-#else
-    base->MASK &= ~(uint16_t)(PWM_MASK_MASKX_MASK | PWM_MASK_MASKA_MASK | PWM_MASK_MASKB_MASK);
-#endif
+    base->MASK = 0U;
 
     base->DTSRCSEL = 0U;
 
@@ -635,6 +632,8 @@ status_t PWM_SetupPwmPhaseShift(PWM_Type *base,
     uint16_t pulseCnt = 0, pwmHighPulse = 0;
     uint16_t modulo = 0;
     uint16_t shift  = 0;
+    uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
+    assert(subModuleMsk <= 0x8U);
 
     if (pwmChannel != kPWM_PwmX)
     {
@@ -643,9 +642,9 @@ status_t PWM_SetupPwmPhaseShift(PWM_Type *base,
         pulseCnt = (uint16_t)(pwmClock / pwmFreq_Hz);
 
         /* Clear LDOK bit if it is set */
-        if (0U != (base->MCTRL & PWM_MCTRL_LDOK(1UL << (uint8_t)subModule)))
+        if (0U != (base->MCTRL & PWM_MCTRL_LDOK(subModuleMsk)))
         {
-            base->MCTRL |= PWM_MCTRL_CLDOK(1UL << (uint8_t)subModule);
+            base->MCTRL |= PWM_MCTRL_CLDOK(subModuleMsk);
         }
 
         modulo = (pulseCnt >> 1U);
@@ -684,7 +683,7 @@ status_t PWM_SetupPwmPhaseShift(PWM_Type *base,
         if (doSync)
         {
             /* Set LDOK bit to load VALx bit */
-            base->MCTRL |= PWM_MCTRL_LDOK(1UL << (uint8_t)subModule);
+            base->MCTRL |= PWM_MCTRL_LDOK(subModuleMsk);
         }
     }
     else
@@ -1085,11 +1084,13 @@ status_t PWM_SetOutputToIdle(PWM_Type *base, pwm_channels_t pwmChannel, pwm_subm
 {
     uint16_t valOn = 0, valOff = 0;
     uint16_t ldmod;
+    uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
+    assert(subModuleMsk <= 0x8U);
 
     /* Clear LDOK bit if it is set */
-    if (0U != (base->MCTRL & PWM_MCTRL_LDOK(1UL << (uint8_t)subModule)))
+    if (0U != (base->MCTRL & PWM_MCTRL_LDOK(subModuleMsk)))
     {
-        base->MCTRL |= PWM_MCTRL_CLDOK(1UL << (uint8_t)subModule);
+        base->MCTRL |= PWM_MCTRL_CLDOK(subModuleMsk);
     }
 
     valOff = base->SM[subModule].INIT;
@@ -1153,7 +1154,7 @@ status_t PWM_SetOutputToIdle(PWM_Type *base, pwm_channels_t pwmChannel, pwm_subm
     /* Set Load mode to make Buffered registers take effect immediately when LDOK bit set */
     base->SM[subModule].CTRL |= PWM_CTRL_LDMOD_MASK;
     /* Set LDOK bit to load buffer registers */
-    base->MCTRL |= PWM_MCTRL_LDOK(1UL << (uint8_t)subModule);
+    base->MCTRL |= PWM_MCTRL_LDOK(subModuleMsk);
     /* Restore Load mode */
     base->SM[subModule].CTRL = ldmod;
 
@@ -1187,11 +1188,13 @@ uint8_t PWM_GetPwmChannelState(PWM_Type *base, pwm_submodule_t subModule, pwm_ch
 void PWM_SetClockMode(PWM_Type *base, pwm_submodule_t subModule, pwm_clock_prescale_t prescaler)
 {
     uint16_t reg = base->SM[subModule].CTRL;
+    uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
+    assert(subModuleMsk <= 0x8U);
 
     /* Clear LDOK bit if it is set */
-    if (0U != (base->MCTRL & PWM_MCTRL_LDOK(1UL << (uint8_t)subModule)))
+    if (0U != (base->MCTRL & PWM_MCTRL_LDOK(subModuleMsk)))
     {
-        base->MCTRL |= PWM_MCTRL_CLDOK(1UL << (uint8_t)subModule);
+        base->MCTRL |= PWM_MCTRL_CLDOK(subModuleMsk);
     }
     /* Set submodule prescaler. */
     reg &= ~(uint16_t)PWM_CTRL_PRSC_MASK;
@@ -1200,7 +1203,7 @@ void PWM_SetClockMode(PWM_Type *base, pwm_submodule_t subModule, pwm_clock_presc
     /* Set Load mode to make Buffered registers take effect immediately when LDOK bit set */
     base->SM[subModule].CTRL |= PWM_CTRL_LDMOD_MASK;
     /* Set LDOK bit to load buffer registers */
-    base->MCTRL |= PWM_MCTRL_LDOK(1UL << (uint8_t)subModule);
+    base->MCTRL |= PWM_MCTRL_LDOK(subModuleMsk);
     /* Restore Load mode */
     base->SM[subModule].CTRL = reg;
 }
@@ -1220,18 +1223,20 @@ void PWM_SetPwmForceOutputToZero(PWM_Type *base, pwm_submodule_t subModule, pwm_
     uint16_t reg = base->SM[subModule].CTRL2;
 #endif
     uint16_t mask;
+    uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
+    assert(subModuleMsk <= 0x8U);
 
     if (kPWM_PwmA == pwmChannel)
     {
-        mask = PWM_MASK_MASKA(0x01UL << (uint8_t)subModule);
+        mask = PWM_MASK_MASKA(subModuleMsk);
     }
     else if (kPWM_PwmB == pwmChannel)
     {
-        mask = PWM_MASK_MASKB(0x01UL << (uint8_t)subModule);
+        mask = PWM_MASK_MASKB(subModuleMsk);
     }
     else
     {
-        mask = PWM_MASK_MASKX(0x01UL << (uint8_t)subModule);
+        mask = PWM_MASK_MASKX(subModuleMsk);
     }
 
     if (forcetozero)
@@ -1247,7 +1252,7 @@ void PWM_SetPwmForceOutputToZero(PWM_Type *base, pwm_submodule_t subModule, pwm_
 
 #if defined(PWM_MASK_UPDATE_MASK)
     /* Update output mask bits immediately with UPDATE_MASK bit */
-    base->MASK |= PWM_MASK_UPDATE_MASK(0x01UL << (uint8_t)subModule);
+    base->MASK |= PWM_MASK_UPDATE_MASK(subModuleMsk);
 #else
     /* Select local force signal */
     base->SM[subModule].CTRL2 &= ~(uint16_t)PWM_CTRL2_FORCE_SEL_MASK;
@@ -1273,22 +1278,24 @@ void PWM_SetChannelOutput(PWM_Type *base,
 {
     uint16_t mask, swcout, sourceShift;
     uint16_t reg = base->SM[subModule].CTRL2;
+    uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
+    assert(subModuleMsk <= 0x8U);
 
     if (kPWM_PwmA == pwmChannel)
     {
-        mask        = PWM_MASK_MASKA(0x01UL << (uint8_t)subModule);
+        mask        = PWM_MASK_MASKA(subModuleMsk);
         swcout      = (uint16_t)PWM_SWCOUT_SM0OUT23_MASK << ((uint8_t)subModule * 2U);
         sourceShift = PWM_DTSRCSEL_SM0SEL23_SHIFT + ((uint16_t)subModule * 4U);
     }
     else if (kPWM_PwmB == pwmChannel)
     {
-        mask        = PWM_MASK_MASKB(0x01UL << (uint8_t)subModule);
+        mask        = PWM_MASK_MASKB(subModuleMsk);
         swcout      = (uint16_t)PWM_SWCOUT_SM0OUT45_MASK << ((uint8_t)subModule * 2U);
         sourceShift = PWM_DTSRCSEL_SM0SEL45_SHIFT + ((uint16_t)subModule * 4U);
     }
     else
     {
-        mask        = PWM_MASK_MASKX(0x01UL << (uint8_t)subModule);
+        mask        = PWM_MASK_MASKX(subModuleMsk);
         swcout      = 0U;
         sourceShift = 0U;
     }
@@ -1353,11 +1360,13 @@ status_t PWM_SetPhaseDelay(PWM_Type *base, pwm_channels_t pwmChannel, pwm_submod
 {
     assert(subModule != kPWM_Module_0);
     uint16_t reg = base->SM[subModule].CTRL2;
+    uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
+    assert(subModuleMsk <= 0x8U);
 
     /* Clear LDOK bit if it is set */
-    if (0U != (base->MCTRL & PWM_MCTRL_LDOK(1UL << (uint8_t)subModule)))
+    if (0U != (base->MCTRL & PWM_MCTRL_LDOK(subModuleMsk)))
     {
-        base->MCTRL |= PWM_MCTRL_CLDOK(1UL << (uint8_t)subModule);
+        base->MCTRL |= PWM_MCTRL_CLDOK(subModuleMsk);
     }
 
     if (base->SM[kPWM_Module_0].VAL1 < delayCycles)
@@ -1395,11 +1404,12 @@ status_t PWM_SetPhaseDelay(PWM_Type *base, pwm_channels_t pwmChannel, pwm_submod
     }
 
     /* Select the master sync signal as the source for initialization */
-    reg = (reg & ~(uint16_t)PWM_CTRL2_INIT_SEL_MASK) | PWM_CTRL2_INIT_SEL(2);
+    reg &= ~((uint16_t)PWM_CTRL2_INIT_SEL_MASK);
+    reg |= PWM_CTRL2_INIT_SEL(2);
     /* Set Load mode to make Buffered registers take effect immediately when LDOK bit set */
     base->SM[subModule].CTRL |= PWM_CTRL_LDMOD_MASK;
     /* Set LDOK bit to load buffer registers */
-    base->MCTRL |= PWM_MCTRL_LDOK(1UL << (uint8_t)subModule);
+    base->MCTRL |= PWM_MCTRL_LDOK(subModuleMsk);
     /* Restore the source of phase delay register intialization */
     base->SM[subModule].CTRL2 = reg;
     return kStatus_Success;
