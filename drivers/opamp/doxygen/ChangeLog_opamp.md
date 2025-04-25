@@ -1,5 +1,10 @@
 # OPAMP
 
+## [2.2.1]
+
+- Improvements
+  - Fiexed CERT-C issues.
+
 ## [2.2.0]
 
 - Improvements
