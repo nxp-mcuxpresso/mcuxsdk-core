@@ -133,6 +133,7 @@ void SEMA42_Deinit(SEMA42_Type *base)
  *
  * retval kStatus_Success     Lock the sema42 gate successfully.
  * retval kStatus_SEMA42_Busy Sema42 gate has been locked by another processor.
+ * retval kStatus_InvalidArgument Incorrect argument provided.
  */
 status_t SEMA42_TryLock(SEMA42_Type *base, uint8_t gateNum, uint8_t procNum)
 {
@@ -140,8 +141,12 @@ status_t SEMA42_TryLock(SEMA42_Type *base, uint8_t gateNum, uint8_t procNum)
 
     assert(gateNum < (uint8_t)FSL_FEATURE_SEMA42_GATE_COUNT);
 
-    ++procNum;
-
+    if (procNum < UINT8_MAX) {
+        ++procNum;
+    } else {
+        /* Handle error case - procNum is at maximum value */
+        return kStatus_InvalidArgument; 
+    }
     /* Try to lock. */
     SEMA42_GATEn(base, gateNum) = procNum;
 

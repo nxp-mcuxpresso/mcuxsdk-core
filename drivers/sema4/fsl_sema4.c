@@ -130,6 +130,7 @@ void SEMA4_Deinit(SEMA4_Type *base)
  *
  * retval kStatus_Success     Lock the sema4 gate successfully.
  * retval kStatus_Fail Sema4 gate has been locked by another processor.
+ * retval kStatus_InvalidArgument Incorrect argument provided.
  */
 status_t SEMA4_TryLock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
 {
@@ -137,8 +138,12 @@ status_t SEMA4_TryLock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
 
     assert(gateNum < (uint8_t)FSL_FEATURE_SEMA4_GATE_COUNT);
 
-    ++procNum;
-
+    if (procNum < UINT8_MAX) {
+        ++procNum;
+    } else {
+        /* Handle error case - procNum is at maximum value */
+        return kStatus_InvalidArgument; 
+    }
     /* Try to lock. */
     SEMA4_GATEn(base, gateNum) = procNum;
 
