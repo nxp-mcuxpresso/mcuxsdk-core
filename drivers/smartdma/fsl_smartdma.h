@@ -16,8 +16,7 @@
     defined(MCXN946_cm33_core1_SERIES) || defined(MCXN947_cm33_core0_SERIES) || defined(MCXN947_cm33_core1_SERIES) || \
     defined(MCXN236_SERIES) || defined(MCXN235_SERIES)
 #include "fsl_smartdma_mcxn.h"
-#elif defined(MCXA276_SERIES) || defined(MCXA275_SERIES) || defined(MCXA176_SERIES) || defined(MCXA175_SERIES) || \
-      defined(MCXA166_SERIES) || defined(MCXA165_SERIES)
+#elif defined(MCXA345_SERIES) || defined(MCXA346_SERIES)
 #include "fsl_smartdma_mcxa.h"
 #else
 #error "Device not supported"
