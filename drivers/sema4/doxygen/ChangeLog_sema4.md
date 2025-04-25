@@ -1,5 +1,11 @@
 # SEMA4
 
+## [2.1.0]
+
+- Improvements
+  - Changed mask parameter type in SEMA4_EnableGateNotifyInterrupt() and SEMA4_DisableGateNotifyInterrupt() functions 
+    to avoid casting from unsigned long to unsigned short in the code when modifying the 16bits CPINE register.
+
 ## [2.0.3]
 
 - Improvements
