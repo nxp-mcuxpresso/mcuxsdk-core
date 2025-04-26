@@ -1,5 +1,10 @@
 # LPADC
 
+## [2.9.2]
+
+- Improvements
+  - Fixed CERT-C issues.
+
 ## [2.9.1]
 
 - Bug Fixes

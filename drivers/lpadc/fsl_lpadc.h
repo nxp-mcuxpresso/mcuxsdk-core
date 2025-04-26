@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2024 NXP
+ * Copyright 2016-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -22,8 +22,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief LPADC driver version 2.9.1. */
-#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 9, 1))
+/*! @brief LPADC driver version 2.9.2. */
+#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 9, 2))
 /*! @} */
 
 #if (defined(FSL_FEATURE_LPADC_OFSTRIM_COUNT) && (FSL_FEATURE_LPADC_OFSTRIM_COUNT == 1))
@@ -1502,7 +1502,7 @@ static inline void LPADC_SetTuneValue(ADC_Type *base, lpadc_tune_value_t tuneVal
  */
 static inline lpadc_tune_value_t LPADC_GetTuneValue(ADC_Type *base)
 {
-    return (lpadc_tune_value_t)((base->CFG2 & ADC_CFG2_TUNE_MASK) >> ADC_CFG2_TUNE_SHIFT);
+    return (lpadc_tune_value_t)(uint32_t)((base->CFG2 & ADC_CFG2_TUNE_MASK) >> ADC_CFG2_TUNE_SHIFT);
 }
 #endif /* ((defined(FSL_FEATURE_LPADC_HAS_CTRL_CALHS)) && FSL_FEATURE_LPADC_HAS_CTRL_CALHS) */
 
