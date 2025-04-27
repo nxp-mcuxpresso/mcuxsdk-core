@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021 NXP
- * All rights reserved.
+ * Copyright 2016-2021, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -1148,6 +1147,25 @@ void TPM_RegisterCallBack(TPM_Type *base, tpm_callback_t callback)
     /* Enable IRQ. */
     (void)EnableIRQ(s_tpmIRQ[instance]);
 #endif
+}
+
+/*!
+ * @brief TPM driver IRQ handler common entry.
+ *
+ * This function provides the common IRQ request entry for TPM.
+ *
+ * @param instance TPM instance.
+ */
+void TPM_DriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_tpmBases))
+    {
+        if (NULL != s_tpmCallback[instance])
+        {
+            s_tpmCallback[instance](s_tpmBases[instance]);
+        }
+    }
+    SDK_ISR_EXIT_BARRIER;
 }
 
 #if defined(TPM0)

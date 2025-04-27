@@ -1,5 +1,10 @@
 # TPM
 
+## [2.3.4]
+
+- New Feature
+  - Added common IRQ handler entry TPM_DriverIRQHandler.
+
 ## [2.3.3]
 
 - Improvements
