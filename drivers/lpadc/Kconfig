@@ -10,3 +10,31 @@ config MCUX_COMPONENT_driver.lpadc
     bool "lpadc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lpadc
+
+if MCUX_COMPONENT_driver.lpadc
+
+    config LPADC_CONVERSION_COMPLETE_TIMEOUT
+        int "Max loops to wait for LPADC conversion complete (0 means wait forever)"
+        default 0
+        help
+          When doing calibration, driver will wait for the completion of conversion.
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+    config LPADC_CALIBRATION_READY_TIMEOUT
+        int "Max loops to wait for LPADC calibration ready (0 means wait forever)"
+        default 0
+        help
+          Before doing calibration, driver will wait for the calibration ready.
+          This parameter defines how many loops to check the calibration ready.
+          If defined as 0, driver will wait forever until ready.
+
+    config LPADC_GAIN_CAL_READY_TIMEOUT
+        int "Max loops to wait for LPADC gain calibration GAIN_CAL ready (0 means wait forever)"
+        default 0
+        help
+          Before doing calibration, driver will wait for the gain calibration GAIN_CAL ready.
+          This parameter defines how many loops to check the gain calibration GAIN_CAL ready.
+          If defined as 0, driver will wait forever until ready.
+
+endif

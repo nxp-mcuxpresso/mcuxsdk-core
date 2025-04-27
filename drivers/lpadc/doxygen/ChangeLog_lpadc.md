@@ -1,5 +1,10 @@
 # LPADC
 
+## [2.9.3]
+
+- Improvements
+  - Add timeout for while loop code.
+
 ## [2.9.2]
 
 - Improvements
