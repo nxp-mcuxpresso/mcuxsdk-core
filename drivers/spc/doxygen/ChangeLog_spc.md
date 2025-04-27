@@ -1,5 +1,10 @@
 # SPC
 
+## [2.6.1]
+
+- Improvements
+  - Add timeout for while loop code.
+
 ## [2.6.0]
 
 - New Features

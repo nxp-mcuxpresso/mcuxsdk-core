@@ -10,3 +10,33 @@ config MCUX_COMPONENT_driver.spc
     bool "spc"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.spc
+
+if MCUX_COMPONENT_driver.spc
+
+    config SPC_BUSY_TIMEOUT
+        int "Max loops to wait for SPC to stop being busy (0 means wait forever)"
+        default 0
+        help
+          The BUSY bitfield will be set when the SPC performs any kind of power mode
+          transition in active mode or any chip low power mode. You need to wait until
+          this flag is cleared before changing the power mode configuration registers.
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, the driver will wait until completion.
+
+    config SPC_SRAM_ACK_TIMEOUT
+        int "Max loops to wait for SRAM voltage update request acknowledge (0 means wait forever)"
+        default 0
+        help
+          When changing SRAM voltage, need to wait for SRAM voltage update request acknowledgment.
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, the driver will wait until completion.
+
+    config SPC_DCDC_ACK_TIMEOUT
+        int "Max loops to wait for DCDC burst completed (0 means wait forever)"
+        default 0
+        help
+          When the DCDC burst is requested, it is necessary to wait for the DCDC burst to complete.
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, the driver will wait until it completes.
+
+endif

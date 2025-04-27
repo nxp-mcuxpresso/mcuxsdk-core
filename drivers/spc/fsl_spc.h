@@ -1,6 +1,5 @@
 /*
  * Copyright 2019-2025 NXP
- * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -28,9 +27,59 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.6.0. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 6, 0))
+/*! @brief SPC driver version 2.6.1. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 6, 1))
 /*! @} */
+
+/*! @name Configuration */
+
+/*!
+ * @brief Max loops to wait for SPC to stop being busy
+ *
+ * The BUSY bitfield will be set when the SPC performs any kind of power mode
+ * transition in active mode or any chip low power mode. You need to wait until
+ * this flag is cleared before changing the power mode configuration registers.
+ * This parameter defines how many loops to check completion before return timeout.
+ * If defined as 0, the driver will wait until completion.
+ */
+#ifndef SPC_BUSY_TIMEOUT
+    #ifdef CONFIG_SPC_BUSY_TIMEOUT
+        #define SPC_BUSY_TIMEOUT CONFIG_SPC_BUSY_TIMEOUT
+    #else
+        #define SPC_BUSY_TIMEOUT 0U
+    #endif
+#endif
+
+/*!
+ * @brief Max loops to wait for SPC to stop being busy
+ *
+ * When changing SRAM voltage, need to wait for SRAM voltage update request acknowledgment.
+ * This parameter defines how many loops to check completion before return timeout.
+ * If defined as 0, the driver will wait until completion.
+ */
+#ifndef SPC_SRAM_ACK_TIMEOUT
+    #ifdef CONFIG_SPC_SRAM_ACK_TIMEOUT
+        #define SPC_SRAM_ACK_TIMEOUT CONFIG_SPC_SRAM_ACK_TIMEOUT
+    #else
+        #define SPC_SRAM_ACK_TIMEOUT 0U
+    #endif
+#endif
+
+/*!
+ * @brief Max loops to wait for DCDC burst completed
+ *
+ * When the DCDC burst is requested, it is necessary to wait for the DCDC burst to complete.
+ * This parameter defines how many loops to check completion before return timeout.
+ * If defined as 0, the driver will wait until it completes.
+ */
+#ifndef SPC_DCDC_ACK_TIMEOUT
+    #ifdef CONFIG_SPC_DCDC_ACK_TIMEOUT
+        #define SPC_DCDC_ACK_TIMEOUT CONFIG_SPC_DCDC_ACK_TIMEOUT
+    #else
+        #define SPC_DCDC_ACK_TIMEOUT 0U
+    #endif
+#endif
+
 
 /*!
  * @brief SPC status enumeration.
@@ -786,6 +835,7 @@ static inline void SPC_DisableHighPowerModeVddCoreGlitchDetect(SPC_Type *base, b
  * @retval #kStatus_SPC_CORELDOLowDriveStrengthIgnore If any voltage detect enabled, core_ldo's drive strength can not
  * set to low.
  * @retval #kStatus_SPC_CORELDOVoltageWrong The selected voltage level in high power mode is not allowed.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base,  spc_hp_mode_core_ldo_option_t *option);
 
@@ -799,6 +849,7 @@ status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base,  spc_hp_mode
  * @retval #kStatus_SPC_Busy The SPC instance is busy to execute any type of power mode transition.
  * @retval #kStatus_SPC_SYSLDOOverDriveVoltageFail Fail to regulator to Over Drive Voltage.
  * @retval #kStatus_SPC_SYSLDOLowDriveStrengthIgnore Set driver strength to Low will be ignored.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, spc_hp_mode_sys_ldo_option_t *option);
 
@@ -811,6 +862,7 @@ status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, spc_hp_mod
  * @retval #kStatus_Success Config DCDC regulator in Active power mode successful.
  * @retval #kStatus_SPC_Busy The SPC instance is busy to execute any type of power mode transition.
  * @retval #kStatus_SPC_DCDCLowDriveStrengthIgnore Set driver strength to Low will be ignored.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetHighPowerModeDCDCRegulatorConfig(SPC_Type *base, spc_hp_mode_dcdc_option_t *option);
 
@@ -1070,6 +1122,7 @@ static inline void SPC_SetActiveModeVoltageTrimDelay(SPC_Type *base, uint16_t de
  * @retval #kStatus_SPC_SYSLDOOverDriveVoltageFail Fail to regulator to Over Drive Voltage.
  * @retval #kStatus_SPC_SYSLDOLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  * @retval #kStatus_SPC_DCDCLowDriveStrengthIgnore Set driver strength to Low will be ignored.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetActiveModeRegulatorsConfig(SPC_Type *base, const spc_active_mode_regulators_config_t *config);
 
@@ -1807,6 +1860,7 @@ static inline void SPC_PullDownCoreLDORegulator(SPC_Type *base, bool pulldown)
  * @retval #kStatus_SPC_CORELDOLowDriveStrengthIgnore If any voltage detect enabled, core_ldo's drive strength can not
  * set to low.
  * @retval #kStatus_SPC_CORELDOVoltageWrong The selected voltage level in active mode is not allowed.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_active_mode_core_ldo_option_t *option);
 
@@ -1827,6 +1881,7 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
  * @retval #kStatus_SPC_Busy The SPC instance is busy to execute any type of power mode transition.
  * @retval #kStatus_SPC_CORELDOLowDriveStrengthIgnore Set driver strength to low will be ignored.
  * @retval #kStatus_SPC_CORELDOVoltageSetFail. Fail to change Core LDO voltage level.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_lowpower_mode_core_ldo_option_t *option);
 
@@ -1900,6 +1955,7 @@ static inline void SPC_EnableSystemLDOSinkFeature(SPC_Type *base, bool sink)
  * @retval #kStatus_SPC_Busy The SPC instance is busy to execute any type of power mode transition.
  * @retval #kStatus_SPC_SYSLDOOverDriveVoltageFail Fail to regulator to Over Drive Voltage.
  * @retval #kStatus_SPC_SYSLDOLowDriveStrengthIgnore Set driver strength to Low will be ignored.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetActiveModeSystemLDORegulatorConfig(SPC_Type *base, const spc_active_mode_sys_ldo_option_t *option);
 
@@ -1918,6 +1974,7 @@ status_t SPC_SetActiveModeSystemLDORegulatorConfig(SPC_Type *base, const spc_act
  * @retval #kStatus_Success Config System LDO regulator in Low Power Mode successfully.
  * @retval #kStatus_SPC_Busy The SPC instance is busy to execute any type of power mode transition.
  * @retval #kStatus_SPC_SYSLDOLowDriveStrengthIgnore Set driver strength to low will be ignored.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetLowPowerModeSystemLDORegulatorConfig(SPC_Type *base, const spc_lowpower_mode_sys_ldo_option_t *option);
 
@@ -1959,8 +2016,11 @@ static inline void SPC_EnableDCDCRegulator(SPC_Type *base, bool enable)
  *
  * @param base SPC peripheral base address.
  * @param config Pointer to spc_dcdc_burst_config_t structure.
+ *
+ * @retval kStatus_Success Successfully configured.
+ * @retval kStatus_Timeout Timeout occurs while waiting completion.
  */
-void SPC_SetDCDCBurstConfig(SPC_Type *base, spc_dcdc_burst_config_t *config);
+status_t SPC_SetDCDCBurstConfig(SPC_Type *base, spc_dcdc_burst_config_t *config);
 
 /*!
  * @brief Set the count value of the reference clock.
@@ -1990,6 +2050,7 @@ void SPC_SetDCDCRefreshCount(SPC_Type *base, uint16_t count);
  * @retval #kStatus_Success Config DCDC regulator in Active power mode successful.
  * @retval #kStatus_SPC_Busy The SPC instance is busy to execute any type of power mode transition.
  * @retval #kStatus_SPC_DCDCLowDriveStrengthIgnore Set driver strength to Low will be ignored.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetActiveModeDCDCRegulatorConfig(SPC_Type *base, const spc_active_mode_dcdc_option_t *option);
 
@@ -2010,6 +2071,7 @@ status_t SPC_SetActiveModeDCDCRegulatorConfig(SPC_Type *base, const spc_active_m
  * @retval #kStatus_SPC_Busy The SPC instance is busy to execute any type of power mode transition.
  * @retval #kStatus_SPC_DCDCPulseRefreshModeIgnore Set driver strength to Pulse Refresh mode will be ignored.
  * @retval #kStatus_SPC_DCDCLowDriveStrengthIgnore Set driver strength to Low Drive Strength will be ignored.
+ * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetLowPowerModeDCDCRegulatorConfig(SPC_Type *base, const spc_lowpower_mode_dcdc_option_t *option);
 
@@ -2025,8 +2087,11 @@ status_t SPC_SetLowPowerModeDCDCRegulatorConfig(SPC_Type *base, const spc_lowpow
  *
  * @param base SPC peripheral base address.
  * @param voltage Target SRAM operate voltage level, please refer to @ref spc_sram_operat_voltage_t.
+ *
+ * @retval kStatus_Success Successfully configured.
+ * @retval kStatus_Timeout Timeout occurs while waiting completion.
  */
-void SPC_SetSRAMOperateVoltage(SPC_Type *base, spc_sram_operat_voltage_t voltage);
+status_t SPC_SetSRAMOperateVoltage(SPC_Type *base, spc_sram_operat_voltage_t voltage);
 
 /*! @} */
 
