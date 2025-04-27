@@ -4,17 +4,17 @@ rsource "../../arch/dsp56800/core/Kconfig"
 
 menu "Device header and startup"
     config MCUX_COMPONENT_device.CMSIS
-        bool "Use device header"
+        bool "header"
 
     config MCUX_COMPONENT_device.system
-        bool "Use device.system"
+        bool "system"
         imply MCUX_COMPONENT_device.CMSIS
 
     config MCUX_COMPONENT_device.startup_common
-        bool "Use device common startup"
+        bool "common startup"
 
     config MCUX_COMPONENT_device.startup
-        bool "Use device.startup"
+        bool "startup"
         imply MCUX_COMPONENT_device.system
         imply MCUX_COMPONENT_device.startup_common
 endmenu
