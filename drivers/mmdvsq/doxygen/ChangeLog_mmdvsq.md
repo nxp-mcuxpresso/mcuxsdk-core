@@ -1,5 +1,10 @@
 # MMDVSQ
 
+## [2.0.4]
+
+- Improvements
+  - Fixed CERT-C issues.
+
 ## [2.0.3]
 
 - Bug Fixes
