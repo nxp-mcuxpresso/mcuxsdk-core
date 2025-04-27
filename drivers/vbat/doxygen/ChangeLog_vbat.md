@@ -1,5 +1,10 @@
 # VBAT
 
+## [2.1.1]
+
+- Improvements
+  - Added timeout for while loop.
+
 ## [2.1.0]
 
 - Improvements

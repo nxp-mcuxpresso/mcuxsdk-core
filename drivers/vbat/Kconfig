@@ -10,3 +10,15 @@ config MCUX_COMPONENT_driver.vbat
     bool "vbat"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.vbat
+
+if MCUX_COMPONENT_driver.vbat
+
+    config VBAT_LDO_READY_TIMEOUT
+        int "Max loops to wait for VBAT LDO ready (0 means wait forever)"
+        default 0
+        help
+          When configuring the LDO, driver will wait for LDO ready.
+          This parameter defines how many loops to check completion 
+          before return timeout. If defined as 0, driver will wait
+          forever until completion.
+endif
