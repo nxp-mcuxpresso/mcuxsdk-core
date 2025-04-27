@@ -1,5 +1,10 @@
 # AFE
 
+## [2.0.3]
+
+- Improvements
+  - Fixed CERT-C issues
+
 ## [2.0.2]
 
 - Bug Fixes
