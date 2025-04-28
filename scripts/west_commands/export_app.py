@@ -106,7 +106,7 @@ class ExtensionMap(object):
 
         return yaml.load(extensions, yaml.BaseLoader)
 
-    _extensions = extensions()
+    _extensions = extensions.__func__()
 
     @classmethod
     def get_raw_args(cls, func_name):
@@ -514,6 +514,8 @@ class ExportApp(WestCommand):
             else:
                 s_src = self.source_dir / src
         if not s_src.exists():
+            if 'APPLICATION_BINARY_DIR' in s_src.as_posix():
+                return result
             if bool(re.search(r'\${(?!board$|core_id$)[^}]+}', s_src.as_posix().lower())):
                 result = '${SdkRootDirPath}/' + s_src.relative_to(SDK_ROOT_DIR).as_posix()
 
