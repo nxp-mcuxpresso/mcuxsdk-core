@@ -271,7 +271,7 @@ status_t OSTIMER_SetMatchRawValue(OSTIMER_Type *base, uint64_t count, ostimer_ca
     s_ostimerHandle[instance] = cb;
 
     /* Set the match value. */
-    base->MATCH_L = (uint32_t)tmp;
+    base->MATCH_L = (uint32_t)(tmp & 0xFFFFFFFFU);
     base->MATCH_H = (uint32_t)(tmp >> 32U);
 
 #ifdef OSTIMER_OSEVENT_CTRL_MATCH_WR_RDY_MASK

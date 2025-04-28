@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief OSTIMER driver version. */
-#define FSL_OSTIMER_DRIVER_VERSION (MAKE_VERSION(2, 2, 3))
+#define FSL_OSTIMER_DRIVER_VERSION (MAKE_VERSION(2, 2, 4))
 /*! @} */
 
 /*!
@@ -159,7 +159,7 @@ static inline void OSTIMER_SetMatchRegister(OSTIMER_Type *base, uint64_t value)
     }
 #endif
 
-    base->MATCH_L = (uint32_t)value;
+    base->MATCH_L = (uint32_t)(value & 0xFFFFFFFFU);
     base->MATCH_H = (uint32_t)(value >> 32U);
 }
 

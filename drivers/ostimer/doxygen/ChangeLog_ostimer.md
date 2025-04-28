@@ -1,5 +1,10 @@
 # OSTIMER
 
+## [2.2.4]
+
+- Bug Fixes
+  - Fixed CERT INT31-C violations.
+
 ## [2.2.3]
 
 - Improvements
