@@ -1,5 +1,10 @@
 # COP
 
+## [2.0.2]
+
+- Bug Fixes
+  - Fixed CERT INT31-C violations.
+
 ## [2.0.1]
 
 - Bug Fixes
