@@ -200,6 +200,8 @@ class ExportApp(WestCommand):
     def parse_app(self, source_dir):
         dest_list_file = self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'CMakeLists.txt'
         dest_list_file.parent.mkdir(parents=True, exist_ok=True)
+        if 'sysbuild.cmake' in os.listdir(source_dir):
+            shutil.copy(source_dir / 'sysbuild.cmake', dest_list_file.parent / 'sysbuild.cmake')
         shutil.copy(source_dir / 'example.yml', dest_list_file.parent / 'example.yml')
         example_yml = yaml.load(open(source_dir / 'example.yml'), yaml.BaseLoader)
         _, example_info = next(iter(example_yml.items()))
@@ -209,6 +211,10 @@ class ExportApp(WestCommand):
         raw_content = [line.strip(os.linesep) for line in open(list_file, 'r').readlines()]
         new_list_content = []
         new_list_content.extend(LICENSE_HEAD.split(os.linesep))
+        if self.sysbuild:
+            # workaround for sysbuild
+            relative_level = len(dest_list_file.parent.relative_to(self.output_dir).parts)
+            new_list_content.append(f'set(PrjRootDirPath {"../"*relative_level})')
         for func in list_content:
             try:
                 func_name = func['original_name'].lower()
