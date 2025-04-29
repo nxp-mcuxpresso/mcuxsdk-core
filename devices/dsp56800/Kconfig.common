@@ -10,16 +10,16 @@ menu "Device header and startup"
         bool "system"
         imply MCUX_COMPONENT_device.CMSIS
 
-    config MCUX_COMPONENT_device.startup_common
-        bool "common startup"
-
     config MCUX_COMPONENT_device.startup
         bool "startup"
         imply MCUX_COMPONENT_device.system
-        imply MCUX_COMPONENT_device.startup_common
 endmenu
 
 menu "Device Suite"
     config MCUX_PRJSEG_module.device.suite
         bool "Use default device suite"
 endmenu
+
+config MCUX_COMPONENT_device.startup_common
+    bool "common startup"
+    default y if MCUX_COMPONENT_device.startup
