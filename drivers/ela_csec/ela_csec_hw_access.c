@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "csec_hw_access.h"
+#include "ela_csec_hw_access.h"
 
 /**
  * @page misra_violations MISRA-C:2012 violations

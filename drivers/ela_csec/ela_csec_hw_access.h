@@ -44,7 +44,7 @@
  ******************************************************************************/
 
 #include <stddef.h>
-#include "csec_driver.h"
+#include "ela_csec_driver.h"
 
 /*!
  * @brief Specifies how the data is transferred to/from the CSE.
