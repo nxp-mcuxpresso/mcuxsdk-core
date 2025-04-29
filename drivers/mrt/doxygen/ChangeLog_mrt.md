@@ -1,5 +1,10 @@
 # MRT
 
+## [2.0.5]
+
+- Bug Fixes
+  - Fixed CERT INT31-C violations.
+
 ## [2.0.4]
 
 - Improvements
