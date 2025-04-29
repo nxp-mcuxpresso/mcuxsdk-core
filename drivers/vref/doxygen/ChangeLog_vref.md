@@ -1,5 +1,10 @@
 # VREF
 
+## [2.1.3]
+
+- Improvements
+  - Add timeout for APIs with dfmea issues.
+
 ## [2.1.2]
 
 - Bug Fixes
