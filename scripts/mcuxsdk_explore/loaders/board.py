@@ -6,6 +6,7 @@ import glob
 import os
 import os.path
 import re
+import pathlib
 import multiprocessing as mp
 from multiprocessing import Manager
 import datetime
@@ -56,10 +57,10 @@ class BoardDataLoader():
                 match = re.search(pattern, line)
                 if match:
                     device = match.group()
-                    board = os.path.normpath(filepath).split('\\')[-2]
+                    board = pathlib.Path(filepath).parts[-2]
                     if device and board:
                         data_record = dict()
-                        data_record[('board', 'name')] = os.path.normpath(filepath).split('\\')[-2]
+                        data_record[('board', 'name')] = pathlib.Path(filepath).parts[-2]
                         data_record[('part', 'name')] = match.group()
                         with lock:
                             shared_list.append(data_record)
