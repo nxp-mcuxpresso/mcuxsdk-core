@@ -17,7 +17,7 @@ class GuiView():
 
         self.parent =  tk.Tk()
 
-        self.parent.title("MCUXpresso SDK explorer")
+        self.parent.title("MCUXpresso SDK Explorer")
 
         self.tab_control = ttk.Notebook(self.parent)
         self.tab_control.pack(expand = 1, fill=tk.BOTH)
