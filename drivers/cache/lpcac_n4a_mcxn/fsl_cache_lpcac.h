@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023, 2025 NXP
+ * Copyright 2021-2023 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*@{*/
 /*! @brief cache driver version */
-#define FSL_CACHE_LPCAC_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+#define FSL_CACHE_LPCAC_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
 /*@}*/
 /*******************************************************************************
  * API
@@ -81,7 +81,6 @@ static inline void L1CACHE_DisableAllocation(void)
     SYSCON->LPCAC_CTRL |= SYSCON_LPCAC_CTRL_FRC_NO_ALLOC_MASK;
 }
 
-#if !(defined(FSL_FEATURE_SYSCON_HAS_LPCAC_CTRL_PARITY_MISS_EN_BIT) && (FSL_FEATURE_SYSCON_HAS_LPCAC_CTRL_PARITY_MISS_EN_BIT == 0U))
 /*!
  * @brief Enables parity.
  *
@@ -99,7 +98,6 @@ static inline void L1CACHE_DisableParity(void)
 {
     SYSCON->LPCAC_CTRL &= ~SYSCON_LPCAC_CTRL_PARITY_MISS_EN_MASK;
 }
-#endif /* FSL_FEATURE_SYSCON_HAS_LPCAC_CTRL_PARITY_MISS_EN_BIT */
 
 #if defined(FSL_FEATURE_LPCAC_SUPPORT_WRITE_BUFFER_CONTROL) && FSL_FEATURE_LPCAC_SUPPORT_WRITE_BUFFER_CONTROL
 /*!
@@ -137,9 +135,7 @@ static inline void L1CACHE_UnlimitParity(void)
 {
     SYSCON->LPCAC_CTRL |= SYSCON_LPCAC_CTRL_LIM_LPCAC_WTBF_MASK;
 }
-#endif /* FSL_FEATURE_LPCAC_SUPPORT_WRITE_BUFFER_CONTROL */
 
-#if !(defined(FSL_FEATURE_SYSCON_HAS_LPCAC_CTRL_PARITY_FAULT_EN_BIT) && (FSL_FEATURE_SYSCON_HAS_LPCAC_CTRL_PARITY_FAULT_EN_BIT == 0U))
 /*!
  * @brief Enables parity error report.
  *
@@ -157,7 +153,6 @@ static inline void L1CACHE_DisableParityErrorReport(void)
 {
     SYSCON->LPCAC_CTRL &= ~SYSCON_LPCAC_CTRL_PARITY_FAULT_EN_MASK;
 }
-#endif /* FSL_FEATURE_SYSCON_HAS_LPCAC_CTRL_PARITY_FAULT_EN_BIT */
 
 /*!
  * @brief Enables XOM(eXecute-Only-Memory) control.
@@ -176,6 +171,7 @@ static inline void L1CACHE_DisableXOMControl(void)
 {
     SYSCON->LPCAC_CTRL &= ~SYSCON_LPCAC_CTRL_LPCAC_XOM_MASK;
 }
+#endif
 
 /*@}*/
 
