@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -10,3 +10,15 @@ config MCUX_COMPONENT_driver.syspm
     bool "syspm"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.syspm
+
+if MCUX_COMPONENT_driver.syspm
+
+    config EVENT_COUNT_STABLE_TIMEOUT
+        int "Max loops to wait for SYSPM event count stable (0 means wait forever)"
+        default 0
+
+    config INSTRUCTION_COUNT_STABLE_TIMEOUT
+        int "Max loops to wait for SYSPM instruction count stable (0 means wait forever)"
+        default 0
+
+endif

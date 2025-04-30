@@ -1,5 +1,10 @@
 # SYSPM
 
+## [2.3.1]
+
+- Improvements
+  - Add timeout for while loop.
+
 ## [2.3.0]
 
 - New Features
