@@ -265,7 +265,7 @@ status_t VREF_SetTrimVal(VREF_Type *base, uint8_t trimValue)
         {
             return kStatus_Timeout;
         }
-#else
+#endif
     }
     return kStatus_Success;
 }
