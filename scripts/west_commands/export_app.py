@@ -9,6 +9,7 @@ import yaml
 import logging
 import shutil
 import re
+import glob
 from copy import deepcopy
 from datetime import datetime
 from subprocess import CalledProcessError, DEVNULL
@@ -69,10 +70,10 @@ def cmake_statement(func):
     return f"{func['original_name']}({' '.join(args)})"
 
 def current_list_dir_context(func):
-    def wrapper(self, source_dir: Path):
+    def wrapper(self, source_dir: Path, is_linked_app=False):
         backup = self.current_list_dir
         self.current_list_dir = '${SdkRootDirPath}/' + source_dir.relative_to(SDK_ROOT_DIR).as_posix()
-        ret = func(self, source_dir)
+        ret = func(self, source_dir, is_linked_app)
         self.current_list_dir = backup
         return ret
     return wrapper
@@ -197,11 +198,14 @@ class ExportApp(WestCommand):
             print(self.build_cmd)
 
     @current_list_dir_context
-    def parse_app(self, source_dir):
+    def parse_app(self, source_dir, is_linked_app=False):
         dest_list_file = self.output_dir / source_dir.relative_to(SDK_ROOT_DIR) / 'CMakeLists.txt'
         dest_list_file.parent.mkdir(parents=True, exist_ok=True)
         if 'sysbuild.cmake' in os.listdir(source_dir):
+            if source_dir == self.source_dir:
+                self.sysbuild = True
             shutil.copy(source_dir / 'sysbuild.cmake', dest_list_file.parent / 'sysbuild.cmake')
+            self.parse_linked_app(source_dir)
         shutil.copy(source_dir / 'example.yml', dest_list_file.parent / 'example.yml')
         example_yml = yaml.load(open(source_dir / 'example.yml'), yaml.BaseLoader)
         _, example_info = next(iter(example_yml.items()))
@@ -211,7 +215,7 @@ class ExportApp(WestCommand):
         raw_content = [line.strip(os.linesep) for line in open(list_file, 'r').readlines()]
         new_list_content = []
         new_list_content.extend(LICENSE_HEAD.split(os.linesep))
-        if self.sysbuild:
+        if is_linked_app:
             # workaround for sysbuild
             relative_level = len(dest_list_file.parent.relative_to(self.output_dir).parts)
             new_list_content.append(f'set(PrjRootDirPath {"../"*relative_level})')
@@ -235,13 +239,8 @@ class ExportApp(WestCommand):
                 self.die(f'Script error, please contact us.')
         # Force use \n to avoid multiple line breaks in windows
         open(dest_list_file, 'w').write("\n".join(new_list_content))
-        # self.format_listfile(dest_list_file)
         self.combine_prj_conf(source_dir)
         self.update_kconfig_path(source_dir)
-
-        if example_info.get('use_sysbuild'):
-            self.sysbuild = True
-            self.parse_linked_app(source_dir)
 
         return dest_list_file
 
@@ -269,27 +268,30 @@ class ExportApp(WestCommand):
             self.check_force(
                 linked_source.exists(),
                 f"Cannot find the sysbuild app dir {linked_source.as_posix()}")
-            backup = self.source_dir
+            backup_source_dir = self.source_dir
             self.source_dir = linked_source
-            self.parse_app(linked_source)
-            self.source_dir = backup
+            self.parse_app(linked_source, True)
+            self.source_dir = backup_source_dir
 
     def combine_prj_conf(self, source_dir):
         example_root_stem = self.examples_root.stem
+        if not source_dir.relative_to(SDK_ROOT_DIR).as_posix().startswith(example_root_stem):
+            return
         prj_conf = {}
         search_list = []
         example_common = source_dir
         while example_common.stem != example_root_stem:
             search_list.insert(0, example_common)
             example_common = example_common.parent
-        if self.board:
-          example_common_len = len(search_list)
-          example_specific = SDK_ROOT_DIR / example_root_stem / BOARD_DIR_NAME / self.board / source_dir.relative_to(self.examples_root)
-          if self.core_id:
-              example_specific = example_specific / self.core_id
-          while example_specific.stem != self.board:
-              search_list.insert(example_common_len, example_specific)
-              example_specific = example_specific.parent
+        # No need to search in board dir as we keep project_board_port_path
+        # if self.board:
+        #   example_common_len = len(search_list)
+        #   example_specific = SDK_ROOT_DIR / example_root_stem / BOARD_DIR_NAME / self.board / source_dir.relative_to(self.examples_root)
+        #   if self.core_id:
+        #       example_specific = example_specific / self.core_id
+        #   while example_specific.stem != self.board:
+        #       search_list.insert(example_common_len, example_specific)
+        #       example_specific = example_specific.parent
         for s_p in search_list:
             if not (e_conf := (s_p / 'prj.conf')).exists():
                 continue
@@ -373,21 +375,10 @@ class ExportApp(WestCommand):
 
     @cmake_func
     def cm_include(self, func: dict, argv: dict) -> dict:
-        for arg in func.get('args'):
-            arg['value'] = arg['value'].replace('${CMAKE_CURRENT_LIST_DIR}', self.current_list_dir)
-            if arg['value'].startswith('..'):
-                arg['value'] = (Path(self.current_list_dir) / arg['value']).as_posix()
-
-    # @cmake_func
-    # def cm_project(self, func: dict, argv: dict) -> dict:
-    #     if 'PROJECT_BOARD_PORT_PATH' not in argv:
-    #         return
-    #     new_result = [func]
-    #     ExportApp.remove_arg(func, argv, 'PROJECT_BOARD_PORT_PATH')
-    #     project_board_port_path = argv['PROJECT_BOARD_PORT_PATH']
-    #     self.cmake_variables['project_board_port_path'] = project_board_port_path
-    #     new_result.append(f'mcux_set_variable(project_board_port_path {project_board_port_path})')
-    #     return new_result
+        arg = func.get('args')[0]
+        arg['value'] = arg['value'].replace('${CMAKE_CURRENT_LIST_DIR}', self.current_list_dir)
+        if arg['value'].startswith('..') or '${' not in arg['value']:
+            arg['value'] = (Path(self.current_list_dir) / arg['value']).as_posix()
 
     @cmake_func
     def cm_mcux_add_source(self, func: dict, argv: dict) -> dict:
@@ -512,6 +503,9 @@ class ExportApp(WestCommand):
         src = self.replace_var(src, ['SdkRootDirPath'])
         result = src
         if base_path:
+            # For custom variables
+            if '${' in base_path and 'SdkRootDirPath' not in base_path:
+                return result
             s_src = SDK_ROOT_DIR / re.sub(r'\$\{SdkRootDirPath\}/?', '', base_path) / src
         else:
             if '${SdkRootDirPath}/' in src:
@@ -519,14 +513,20 @@ class ExportApp(WestCommand):
                 result = src.replace('${SdkRootDirPath}', '${PrjRootDirPath}') 
             else:
                 s_src = self.source_dir / src
+        d_src = (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))
         if not s_src.exists():
             if 'APPLICATION_BINARY_DIR' in s_src.as_posix():
                 return result
             if bool(re.search(r'\${(?!board$|core_id$)[^}]+}', s_src.as_posix().lower())):
                 result = '${SdkRootDirPath}/' + s_src.relative_to(SDK_ROOT_DIR).as_posix()
-
+            elif any(wildcard in s_src.as_posix() for wildcard in ['*', '?', '[', ']']):
+                if type == 'inc':
+                    self.wrn('Currently, export_app does not support wildcard in mcux_add_include')
+                    return result
+                os.makedirs(d_src.parent, exist_ok=True)
+                for f in glob.glob(s_src.as_posix()):
+                    shutil.copy(f, self.output_dir / Path(f).relative_to(SDK_ROOT_DIR))
         else:
-            d_src = (self.output_dir / s_src.relative_to(SDK_ROOT_DIR))
             if type == 'file':
                 os.makedirs(d_src.parent, exist_ok=True)
                 shutil.copy(s_src, d_src)
@@ -587,7 +587,7 @@ class ExportApp(WestCommand):
         self.examples_root = SDK_ROOT_DIR / self.source_dir.relative_to(SDK_ROOT_DIR).parts[0]
 
     def _app_precheck(self):
-        # NOTE do not support internal examples yet
+        sdk_project_target.MCUXAppTargets.config_internal_data()
         op = sdk_project_target.MCUXRepoProjects()
         self.board = self.args.board
         if not self.board:
