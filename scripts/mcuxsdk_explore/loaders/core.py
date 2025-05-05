@@ -3,7 +3,7 @@
 
 import pprint
 import glob
-import os
+import pathlib
 import multiprocessing as mp
 from multiprocessing import Manager
 import datetime
@@ -25,22 +25,19 @@ class CoreDataLoader():
         files = self.get_device_yml_files()
         return self.load_files_parallel(files)
 
-    def get_device_yml_files_from_directory(self, core_repo_dir):
-        target_files_patterns = ['chip.yml']
-        files = glob.glob(core_repo_dir + "/**/*", recursive=True)
-        files2 = list()
-        for file in files:
-            for pattern in target_files_patterns:
-                if file.endswith(pattern):
-                    files2.append(file)
-        files = files2
+    def get_device_yml_files_from_directory(self, device_directory):
+        p = pathlib.Path(device_directory)
+        files = p.glob('**/*/chip.yml')
         return list(sorted(set(files)))
 
     def get_device_yml_files(self):
         files = list()
-        files = self.get_device_yml_files_from_directory(self.core_root_path + '/devices')
-        if os.path.isdir(os.path.normpath(self.core_root_path+'/devices_int')):
-            files.extend(self.get_device_yml_files_from_directory(self.core_root_path + '/devices_int'))
+        p = pathlib.Path(self.core_root_path, 'devices')
+        if p.is_dir():
+            files.extend(self.get_device_yml_files_from_directory(p))
+        p = pathlib.Path(self.core_root_path, 'devices_int')
+        if p.is_dir():
+            files.extend(self.get_device_yml_files_from_directory(p))
         return list(sorted(set(files)))
 
     def load_single_file(self, args):
@@ -73,10 +70,9 @@ class CoreDataLoader():
         return result
 
 if __name__ == "__main__":
-
-    current_dir = os.getcwd().replace('\\','/')
-    manifest_path = current_dir + '/../../../../manifest'
-    core_path = current_dir + '/../../../../mcuxsdk'
+    current_dir = pathlib.Path().cwd()
+    manifest_path = pathlib.Path(current_dir, '../../../../manifest')
+    core_path = pathlib.Path(current_dir, '../../../../mcuxsdk')
 
     start_time = time.time()
     device_data = CoreDataLoader(manifest_path, core_path)

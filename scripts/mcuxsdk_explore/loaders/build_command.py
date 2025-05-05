@@ -4,7 +4,6 @@
 import pprint
 import sys
 import pathlib
-import os
 import re
 import datetime
 import time
@@ -35,10 +34,14 @@ class BuildCommandDataLoader():
     def get_all_build_commands(self):
         match_cases = list()
         op = sdk_project_target.MCUXRepoProjects()
-        match_cases = op.search_app_targets(app_path='examples',
-                                            board_cores_filter=[r'r@.']
-                                           )
-        if os.path.isdir(os.path.normpath(self.core_root_path+'/examples_int')):
+        p = pathlib.Path(self.core_root_path, 'examples')
+        if p.is_dir():
+            match_cases.extend(op.search_app_targets(app_path='examples',
+                                                     board_cores_filter=[r'r@.']
+                                                    )
+                              )
+        p = pathlib.Path(self.core_root_path, 'examples_int')
+        if p.is_dir():
             match_cases.extend(op.search_app_targets(app_path='examples_int',
                                                      board_cores_filter=[r'r@.']
                                                     )
@@ -87,9 +90,9 @@ class BuildCommandDataLoader():
 
 if __name__ == "__main__":
 
-    current_dir = os.getcwd().replace('\\','/')
-    manifest_path = current_dir + '/../../../../manifest'
-    core_path = current_dir + '/../../../../mcuxsdk'
+    current_dir = pathlib.Path().cwd()
+    manifest_path = pathlib.Path(current_dir, '../../../../manifest')
+    core_path = pathlib.Path(current_dir, '../../../../mcuxsdk')
 
     start_time = time.time()
 

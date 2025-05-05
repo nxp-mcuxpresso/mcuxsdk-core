@@ -4,7 +4,7 @@
 import tkinter as tk
 from tkinter import ttk, Text, PhotoImage
 import functools
-import os
+import pathlib
 
 class GuiView():
     def __init__(self, model, visualization_types):
@@ -44,7 +44,7 @@ class GuiView():
         self.parent.mainloop()
 
     def register_favicon(self, img_path):
-        img = PhotoImage(file = os.path.normpath(img_path))
+        img = PhotoImage(file = pathlib.Path(img_path))
         self.parent.iconphoto(False, img)
 
 

@@ -1,7 +1,7 @@
 # Copyright 2025 NXP
 # SPDX-License-Identifier: BSD-3-Clause
 
-import os.path
+import pathlib
 import sqlite3
 
 class DataBaseSQL():
@@ -30,10 +30,11 @@ class DataBaseSQL():
         self.db_file_path = None
 
     def initialize_database(self, database_file_path):
-        if not os.path.isdir(os.path.dirname(database_file_path)):
-            os.makedirs(os.path.dirname(database_file_path))
-        if os.path.exists(database_file_path):
-            os.remove(database_file_path)
+        db_path = pathlib.Path(database_file_path)
+        if not db_path.parent.is_dir():
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+        if db_path.exists():
+            db_path.unlink()
         self.conn = sqlite3.connect(database_file_path)
 
         self.sqlite_build_command_table()
@@ -44,7 +45,7 @@ class DataBaseSQL():
         self.sqlite_cores_table()
 
     def exist(self, database_file_path):
-        return os.path.isfile(database_file_path)
+        return pathlib.Path(database_file_path).is_file()
 
     def connect(self, database_file_path):
         self.conn = sqlite3.connect(database_file_path)
@@ -257,4 +258,3 @@ class DataBaseSQL():
         ;'''
         cursor.execute(sql)
         return cursor.fetchall()
-

@@ -3,8 +3,6 @@
 
 import pprint
 import glob
-import os
-import os.path
 import re
 import pathlib
 import multiprocessing as mp
@@ -27,28 +25,24 @@ class BoardDataLoader():
         files = self.get_device_yml_files()
         return self.load_files_parallel(files)
 
-    def get_prj_conf_files_from_directory(self, core_repo_dir):
-        target_files_patterns = ['prj.conf']
-        files = glob.glob(core_repo_dir + "/*/*", recursive=True)
-        files2 = list()
-        for file in files:
-            for pattern in target_files_patterns:
-                if file.endswith(pattern):
-                    files2.append(file)
-        files = files2
+    def get_prj_conf_files_from_directory(self, board_directory):
+        p = pathlib.Path(board_directory)
+        files = p.glob('*/prj.conf')
         return list(sorted(set(files)))
 
     def get_device_yml_files(self):
         files = list()
-        files = self.get_prj_conf_files_from_directory(self.core_root_path + '/examples/_boards')
-        if os.path.isdir(os.path.normpath(self.core_root_path + '/examples_int/_boards')):
-            files.extend(self.get_prj_conf_files_from_directory(self.core_root_path + '/examples_int/_boards'))
+        p = pathlib.Path(self.core_root_path, 'examples/_boards')
+        if p.is_dir():
+            files.extend(self.get_prj_conf_files_from_directory(p))
+        p = pathlib.Path(self.core_root_path, 'examples_int/_boards')
+        if p.is_dir():
+            files.extend(self.get_prj_conf_files_from_directory(p))
         return list(sorted(set(files)))
 
     def load_single_file(self, args):
         filepath, shared_list, lock = args
         pattern = r'(?<=CONFIG_MCUX_HW_DEVICE_PART_)(.*)(?=\=y)'
-
         board = None
         device = None
         with open(filepath, 'r', encoding="utf-8") as f_input:
@@ -78,9 +72,9 @@ class BoardDataLoader():
 
 if __name__ == "__main__":
 
-    current_dir = os.getcwd().replace('\\','/')
-    manifest_path = current_dir + '/../../../../manifest'
-    core_path = current_dir + '/../../../../mcuxsdk'
+    current_dir = pathlib.Path().cwd()
+    manifest_path = pathlib.Path(current_dir, '../../../../manifest')
+    core_path = pathlib.Path(current_dir, '../../../../mcuxsdk')
 
     start_time = time.time()
 

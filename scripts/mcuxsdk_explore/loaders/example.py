@@ -4,7 +4,6 @@
 import pprint
 import sys
 import pathlib
-import os
 import multiprocessing as mp
 from multiprocessing import Manager
 import datetime
@@ -68,9 +67,9 @@ class ExampleDataLoader():
 
 if __name__ == "__main__":
 
-    current_dir = os.getcwd().replace('\\','/')
-    manifest_path = current_dir + '/../../../../manifest'
-    core_path = current_dir + '/../../../../mcuxsdk'
+    current_dir = pathlib.Path().cwd()
+    manifest_path = pathlib.Path(current_dir, '../../../../manifest')
+    core_path = pathlib.Path(current_dir, '../../../../mcuxsdk')
 
     start_time = time.time()
 

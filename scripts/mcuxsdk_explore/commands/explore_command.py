@@ -1,12 +1,10 @@
 # Copyright 2025 NXP
 # SPDX-License-Identifier: BSD-3-Clause
 
-import os
 import sys
 import pathlib
 import datetime
 import time
-import os.path
 
 sys.path.append(f'{pathlib.Path(__file__).parent.resolve()}/../loaders')
 import device as dl
@@ -51,7 +49,7 @@ VISUALIZATION_TYPES = [
 class RunExplorer():
     def __init__(self, manifest_root_path, core_root_path):
 
-        database_file_path = os.path.normpath(f'{manifest_root_path}/../data/mcux_sqlite.db')
+        database_file_path = pathlib.Path(manifest_root_path, '../data/mcux_sqlite.db')
 
         timestamp1 = time.time()
         self.database_sql = db_sql.DataBaseSQL()
@@ -168,7 +166,7 @@ class RunExplorer():
         self.model = guim.GuiModel(self.database_sql, VISUALIZATION_TYPES)
         self.view = guiv.GuiView(self.model, VISUALIZATION_TYPES)
 
-        img_path = core_root_path + '/scripts/mcuxsdk_explore/resources/nxp.png'
+        img_path = pathlib.Path(core_root_path, 'scripts/mcuxsdk_explore/resources/nxp.png')
         self.view.register_favicon(img_path)
         self.controller = guic.GuiController(self.model, self.view)
 
@@ -178,7 +176,7 @@ class RunExplorer():
         self.view.start_mainloop()
 
 if __name__ == "__main__":
-    cwd = os.getcwd().replace('\\','/')
-    manifest_root_path = cwd + '/../../../../manifests'
-    core_root_path = cwd + '/../../../../mcuxsdk'
+    current_dir = pathlib.Path().cwd()
+    manifest_root_path = pathlib.Path(current_dir, '../../../../manifest')
+    core_root_path = pathlib.Path(current_dir, '../../../../mcuxsdk')
     RunExplorer(manifest_root_path, core_root_path)
