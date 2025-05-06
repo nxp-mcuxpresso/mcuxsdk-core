@@ -112,7 +112,7 @@ typedef enum trng_oscillator_mode_t
 typedef struct _trng_statistical_check_limit
 {
     uint32_t maximum; /*!< Maximum limit.*/
-    uint32_t minimum; /*!< Minimum limit.*/
+    int32_t minimum; /*!< Minimum limit.*/
 } trng_statistical_check_limit_t;
 
 /*!
