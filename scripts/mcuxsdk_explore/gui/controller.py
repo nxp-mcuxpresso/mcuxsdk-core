@@ -88,6 +88,6 @@ class GuiController():
         t = self.view.graphical_object['greyedtext'].text_statistics
         t.delete('1.0', tk.END)
         t.insert(tk.END,
-                 f'{len(resolved_command_list)}/{len(self.model.symbols[('raw_build_command',)])}')
+                 f"{len(resolved_command_list)}/{len(self.model.symbols[('raw_build_command',)])}")
         t.update()
         t.see(tk.END)
