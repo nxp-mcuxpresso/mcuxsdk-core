@@ -24,7 +24,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexIO MCULCD driver version. */
-#define FSL_FLEXIO_MCULCD_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+#define FSL_FLEXIO_MCULCD_DRIVER_VERSION (MAKE_VERSION(2, 3, 0))
 /*! @} */
 
 #ifndef FLEXIO_MCULCD_WAIT_COMPLETE_TIME
@@ -50,6 +50,19 @@
 
 #if (16UL != FLEXIO_MCULCD_DATA_BUS_WIDTH) && (8UL != FLEXIO_MCULCD_DATA_BUS_WIDTH)
 #error Only support data bus 8-bit or 16-bit
+#endif
+
+/*!
+ * @brief Whether to use legacy GPIO functions to control the CS/RS/RDWR pin signal.
+ *
+ * If using the legacy pin functions, there is no user defined argument passed to the function.
+ */
+#ifndef FLEXIO_MCULCD_LEGACY_GPIO_FUNC
+    #ifdef CONFIG_FLEXIO_MCULCD_LEGACY_GPIO_FUNC
+        #define FLEXIO_MCULCD_LEGACY_GPIO_FUNC CONFIG_FLEXIO_MCULCD_LEGACY_GPIO_FUNC
+    #else
+        #define FLEXIO_MCULCD_LEGACY_GPIO_FUNC 1
+    #endif
 #endif
 
 /*! @brief FlexIO LCD transfer status */
@@ -98,7 +111,11 @@ enum _flexio_mculcd_dma_enable
 };
 
 /*! @brief Function to set or clear the CS and RS pin. */
+#if FLEXIO_MCULCD_LEGACY_GPIO_FUNC
 typedef void (*flexio_mculcd_pin_func_t)(bool set);
+#else
+typedef void (*flexio_mculcd_pin_func_t)(bool set, void *userData);
+#endif
 
 /*! @brief Define FlexIO MCULCD access structure typedef. */
 typedef struct _flexio_mculcd_type
@@ -118,6 +135,9 @@ typedef struct _flexio_mculcd_type
     flexio_mculcd_pin_func_t setCSPin;   /*!< Function to set or clear the CS pin. */
     flexio_mculcd_pin_func_t setRSPin;   /*!< Function to set or clear the RS pin. */
     flexio_mculcd_pin_func_t setRDWRPin; /*!< Function to set or clear the RD/WR pin, only used in 6800 mode. */
+#if !FLEXIO_MCULCD_LEGACY_GPIO_FUNC
+    void *userData;                      /*!< Function parameter.*/
+#endif
 } FLEXIO_MCULCD_Type;
 
 /*! @brief Define FlexIO MCULCD configuration structure. */
@@ -525,7 +545,11 @@ static inline void FLEXIO_MCULCD_WriteData(FLEXIO_MCULCD_Type *base, uint32_t da
  */
 static inline void FLEXIO_MCULCD_StartTransfer(FLEXIO_MCULCD_Type *base)
 {
+#if FLEXIO_MCULCD_LEGACY_GPIO_FUNC
     base->setCSPin(false);
+#else
+    base->setCSPin(false, base->userData);
+#endif
 }
 
 /*!
@@ -535,7 +559,11 @@ static inline void FLEXIO_MCULCD_StartTransfer(FLEXIO_MCULCD_Type *base)
  */
 static inline void FLEXIO_MCULCD_StopTransfer(FLEXIO_MCULCD_Type *base)
 {
+#if FLEXIO_MCULCD_LEGACY_GPIO_FUNC
     base->setCSPin(true);
+#else
+    base->setCSPin(true, base->userData);
+#endif
 }
 
 /*!

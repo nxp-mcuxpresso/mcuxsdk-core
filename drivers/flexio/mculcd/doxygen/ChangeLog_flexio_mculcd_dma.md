@@ -1,5 +1,11 @@
 # FLEXIO_MCU_LCD_DMA
 
+## [2.0.6]
+
+- New Features
+  - Supported passing an extra user defined parameter to GPIO functions to control the
+    RDWR pin signal.
+
 ## [2.0.5]
 
 - New Features

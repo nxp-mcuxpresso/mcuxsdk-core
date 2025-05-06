@@ -41,3 +41,14 @@ config MCUX_COMPONENT_driver.flexio_mculcd
     bool "flexio_mculcd"
     select MCUX_COMPONENT_driver.flexio
     depends on MCUX_HAS_COMPONENT_driver.flexio_mculcd
+
+if MCUX_COMPONENT_driver.flexio_mculcd
+
+    config FLEXIO_MCULCD_LEGACY_GPIO_FUNC
+        bool "Whether to use legacy GPIO functions to control the CS/RS/RDWR pin signal"
+        default y
+        help
+          If using the legacy pin functions, there is no user defined argument passed
+          to the function.
+
+endif

@@ -5,6 +5,10 @@
 - Other Changes
   - Supported the MCXA platforms.
 
+- New Features
+  - Supported passing an extra user defined parameter to GPIO functions to control the
+    RDWR pin signal.
+
 ## [2.0.4]
 
 - New Features

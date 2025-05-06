@@ -1,5 +1,11 @@
 # FLEXIO_MCU_LCD
 
+## [2.3.0]
+
+- New Features
+  - Supported passing an extra user defined parameter to GPIO functions to control the
+    CS/RS/RDWR pin signal.
+
 ## [2.2.0]
 
 - Improvements
