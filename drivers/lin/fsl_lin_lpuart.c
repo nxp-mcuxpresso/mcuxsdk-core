@@ -1130,6 +1130,11 @@ lin_status_t LIN_LPUART_Deinit(LPUART_Type *base)
     lin_status_t retVal          = LIN_SUCCESS;
     uint32_t instance            = LIN_LPUART_GetInstance(base);
     lin_state_t *linCurrentState = g_linStatePtr[instance];
+
+#if LIN_LPUART_TRANSMISSION_COMPLETE_TIMEOUT
+    uint32_t waitTimes = LIN_LPUART_TRANSMISSION_COMPLETE_TIMEOUT;
+#endif
+
     if (linCurrentState == NULL)
     {
         retVal = LIN_ERROR;
@@ -1139,7 +1144,12 @@ lin_status_t LIN_LPUART_Deinit(LPUART_Type *base)
         /* Wait until the data is completely shifted out of shift register */
         while (0U == (LIN_LPUART_GetStatusFlags(base) & (uint32_t)kLPUART_TransmissionCompleteFlag))
         {
-            /* Do nothing */
+#if LIN_LPUART_TRANSMISSION_COMPLETE_TIMEOUT
+            if ((--waitTimes) == 0U)
+            {
+                return LIN_ERROR;
+            }
+#endif
         }
 
         /* Disable the LPUART transmitter and receiver */

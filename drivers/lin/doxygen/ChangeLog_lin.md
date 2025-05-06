@@ -1,5 +1,11 @@
 # LIN
 
+## [2.2.4]
+
+- Improvements
+  - Added Kconfig item LIN_LPUART_TRANSMISSION_COMPLETE_TIMEOUT, user can configure it to
+    none zero value for the while loop to break after retrying LIN_LPUART_TRANSMISSION_COMPLETE_TIMEOUT times.
+
 ## [2.2.3]
 
 - Improvements

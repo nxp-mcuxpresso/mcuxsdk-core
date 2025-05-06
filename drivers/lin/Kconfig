@@ -19,3 +19,15 @@ config MCUX_COMPONENT_driver.lin
     bool "lin"
     select MCUX_COMPONENT_driver.lin_lpuart
     depends on MCUX_HAS_COMPONENT_driver.lin
+
+if MCUX_COMPONENT_driver.lin_lpuart
+
+    config LIN_LPUART_TRANSMISSION_COMPLETE_TIMEOUT
+        int "Max loops to wait for LIN LPUART transmission complete (0 means wait forever)"
+        default 0
+        help
+          When de-initializing the LIN LPUART module, the program shall wait for the previous
+          transmission to complete. This parameter defines how many loops to check
+          completion before return error. If defined as 0, driver will wait forever until completion.
+
+endif
