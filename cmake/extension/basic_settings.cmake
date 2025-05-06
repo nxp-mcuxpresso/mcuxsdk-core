@@ -120,7 +120,7 @@ endif ()
 
 # if defined board, load board variables
 if(DEFINED board)
-  if (DEFINED CUSTOM_BOARD_ROOT)
+  if (DEFINED CUSTOM_BOARD_ROOT AND NOT CUSTOM_BOARD_ROOT STREQUAL "")
     get_filename_component(
       board_variable_path "${CUSTOM_BOARD_ROOT}/${board}/variable.cmake"
       ABSOLUTE)
