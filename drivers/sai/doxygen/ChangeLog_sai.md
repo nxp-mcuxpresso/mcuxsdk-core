@@ -1,4 +1,9 @@
 # SAI
+## [2.4.6]
+
+- Bug Fixes
+  - Fixed the IAR build warning.
+
 ## [2.4.5]
 
 - Bug Fixes

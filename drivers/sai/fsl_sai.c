@@ -383,9 +383,9 @@ static void SAI_GetCommonConfig(sai_transceiver_t *config,
     config->serialData.dataOrder           = kSAI_DataMSB;
 
     /* Bounds checking before the cast */
-    if (bitWidth > UINT8_MAX)
+    if (bitWidth > kSAI_WordWidth32bits)
     {
-        bitWidth = UINT8_MAX;
+        bitWidth = kSAI_WordWidth32bits;
     }
     config->serialData.dataWord0Length     = (uint8_t)bitWidth;
     config->serialData.dataWordLength      = (uint8_t)bitWidth;
@@ -1709,7 +1709,7 @@ void SAI_WriteMultiChannelBlocking(
         }
 
         /* Handle multiplication overflow */
-        if (bytesPerWord > UINT32_MAX / channelNums || (UINT32_MAX < (j + (bytesPerWord * channelNums)))) break;
+        if (bytesPerWord > UINT32_MAX / channelNums || (UINT32_MAX - j) < (bytesPerWord * channelNums)) break;
 
         SAI_WriteNonBlocking(base, channel, channelMask, endChannel, (uint8_t)bitWidth, buffer,
                              bytesPerWord * channelNums);
@@ -1778,7 +1778,7 @@ void SAI_ReadMultiChannelBlocking(
         }
 
         /* Handle multiplication overflow */
-        if (bytesPerWord > UINT32_MAX / channelNums || (UINT32_MAX < (j + (bytesPerWord * channelNums)))) break;
+        if (bytesPerWord > UINT32_MAX / channelNums || (UINT32_MAX - j) < (bytesPerWord * channelNums)) break;
 
         SAI_ReadNonBlocking(base, channel, channelMask, endChannel, (uint8_t)(bitWidth & 0xFFU), buffer,
                             bytesPerWord * channelNums);
