@@ -1,5 +1,10 @@
 # CACHE XCACHE
 
+## [2.0.3]
+
+- Bug Fixes
+  - Fixed CERT INT30-C violations.
+
 ## [2.0.2]
 
 - Bug Fixes
