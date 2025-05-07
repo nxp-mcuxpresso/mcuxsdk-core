@@ -27,7 +27,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief Group interrupt driver version for SDK */
-#define FSL_INPUTMUX_DRIVER_VERSION (MAKE_VERSION(2, 0, 8))
+#define FSL_INPUTMUX_DRIVER_VERSION (MAKE_VERSION(2, 0, 9))
 /*! @} */
 
 /*******************************************************************************

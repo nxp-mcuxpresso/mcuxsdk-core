@@ -1,5 +1,10 @@
 # INPUTMUX
 
+## [2.0.9]
+
+- Improvements
+  - Use INPUTMUX_CLOCKS to initialize the inputmux module clock to adapt to multiple inputmux instances
+
 ## [2.0.8]
 
 - Improvements
