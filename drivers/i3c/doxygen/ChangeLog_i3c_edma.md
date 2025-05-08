@@ -1,5 +1,10 @@
 # I3C_EDMA
 
+## [2.2.10]
+
+- Bug Fixes
+  - Fixed the issue that slave start event is cleared when it has not been handled.
+
 ## [2.2.9]
 
 - Bug Fixes

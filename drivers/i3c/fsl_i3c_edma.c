@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -33,9 +33,9 @@ enum _i3c_edma_transfer_states
 /*! @brief Common sets of flags used by the driver. */
 enum _i3c_edma_flag_constants
 {
-    /*! All flags which are cleared by the driver upon starting a transfer. */
-    kMasterClearFlags = kI3C_MasterSlaveStartFlag | kI3C_MasterControlDoneFlag | kI3C_MasterCompleteFlag |
-                        kI3C_MasterArbitrationWonFlag | kI3C_MasterSlave2MasterFlag | kI3C_MasterErrorFlag,
+    /*! Necessary flags which are cleared by the driver upon starting a transfer. */
+    kMasterClearFlags = kI3C_MasterControlDoneFlag | kI3C_MasterCompleteFlag | kI3C_MasterArbitrationWonFlag |
+                        kI3C_MasterSlave2MasterFlag | kI3C_MasterErrorFlag,
 
     /*! IRQ sources enabled by the non-blocking transactional API. */
     kMasterDMAIrqFlags = kI3C_MasterSlaveStartFlag | kI3C_MasterControlDoneFlag | kI3C_MasterCompleteFlag |
@@ -345,7 +345,7 @@ static status_t I3C_MasterRunTransferStateMachineEDMA(I3C_Type *base, i3c_master
         }
     }
 
-    if ((0UL != (status & (uint32_t)kI3C_MasterSlaveStartFlag)) && (handle->transfer.busType != kI3C_TypeI2C))
+    if ((0UL != (status & (uint32_t)kI3C_MasterSlaveStartFlag)) && (masterState == kI3C_MasterStateSlvReq) && (handle->transfer.busType != kI3C_TypeI2C))
     {
         handle->state = (uint8_t)kSlaveStartState;
     }
@@ -545,7 +545,7 @@ void I3C_MasterTransferCreateHandleEDMA(I3C_Type *base,
 
     /* Clear all flags. */
     I3C_MasterClearErrorStatusFlags(base, (uint32_t)kMasterErrorFlags);
-    I3C_MasterClearStatusFlags(base, (uint32_t)kMasterClearFlags);
+    I3C_MasterClearStatusFlags(base, (uint32_t)kI3C_MasterClearFlags);
     /* Reset fifos. These flags clear automatically. */
     base->MDATACTRL |= I3C_MDATACTRL_FLUSHTB_MASK | I3C_MDATACTRL_FLUSHFB_MASK;
 
@@ -573,8 +573,10 @@ status_t I3C_MasterTransferEDMA(I3C_Type *base, i3c_master_edma_handle_t *handle
     assert(NULL != handle);
     assert(NULL != transfer);
     assert(transfer->subaddressSize <= sizeof(transfer->subaddress));
+
     i3c_master_state_t masterState = I3C_MasterGetState(base);
     bool checkDdrState             = false;
+    status_t result = kStatus_Success;
 
     /* Return busy if another transaction is in progress. */
     if (handle->state != (uint8_t)kIdleState)
@@ -607,7 +609,7 @@ status_t I3C_MasterTransferEDMA(I3C_Type *base, i3c_master_edma_handle_t *handle
     base->MDATACTRL |= I3C_MDATACTRL_FLUSHTB_MASK | I3C_MDATACTRL_FLUSHFB_MASK;
 
     /* Generate commands to send. */
-    (void)I3C_MasterInitTransferStateMachineEDMA(base, handle);
+    result = I3C_MasterInitTransferStateMachineEDMA(base, handle);
 
     /* Enable I3C internal IRQ sources. NVIC IRQ was enabled in CreateHandle() */
     I3C_MasterEnableInterrupts(base, (uint32_t)(kMasterDMAIrqFlags));
@@ -617,7 +619,7 @@ status_t I3C_MasterTransferEDMA(I3C_Type *base, i3c_master_edma_handle_t *handle
         I3C_MasterDisableInterrupts(base, (uint32_t)kI3C_MasterSlaveStartFlag);
     }
 
-    return kStatus_Success;
+    return result;
 }
 
 void I3C_MasterTransferEDMAHandleIRQ(I3C_Type *base, void *i3cHandle)

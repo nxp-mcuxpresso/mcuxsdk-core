@@ -12,7 +12,7 @@ if(CONFIG_MCUX_COMPONENT_driver.i3c_dma)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.i3c_edma)
-    mcux_component_version(2.2.9)
+    mcux_component_version(2.2.10)
 
     mcux_add_source(SOURCES fsl_i3c_edma.c fsl_i3c_edma.h)
 
