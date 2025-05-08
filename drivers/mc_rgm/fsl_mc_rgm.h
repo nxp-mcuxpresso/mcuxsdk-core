@@ -21,14 +21,14 @@
 /*! @name Driver version */
 /*! @{ */
 
-/*! @brief MC_RGM driver version 2.0.0. */
-#define FSL_MC_RGM_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+/*! @brief MC_RGM driver version 2.1.0 */
+#define FSL_MC_RGM_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
 /*! @} */
 
 /*! 
  * @brief Destructive reset sources flag. 
  */
-typedef enum _mc_rgm_destructive_reset_sources_flag
+enum _mc_rgm_destructive_reset_sources_flag
 {
     kMC_RGM_PowerOnResetFlag = MC_RGM_DES_F_POR_MASK, /*!< A power-on destructive reset (POR) has occurred */
     kMC_RGM_FccuFailureToReactResetFlag = MC_RGM_DES_FCCU_FTR_MASK, /*!< FCCU failure to react destructive reset (FCCU_FTR) has occurred  */
@@ -51,12 +51,12 @@ typedef enum _mc_rgm_destructive_reset_sources_flag
                                         kMC_RGM_HseClockFailureResetFlag | kMC_RGM_SystemDividerFailureResetFlag | \
                                         kMC_RGM_HseTamperDetectResetFlag | kMC_RGM_HseSnvsTamperDetectionResetFlag | \
                                         kMC_RGM_SoftwareDestructiveResetFlag | kMC_RGM_DebugDestructiveResetFlag)
-} mc_rgm_destructive_reset_sources_flag_t;
+};
 
 /*!
  * @brief Functional reset sources flag.
  */
-typedef enum _mc_rgm_functional_reset_sources_flag
+enum _mc_rgm_functional_reset_sources_flag
 {
     kMC_RGM_ExternalDestructiveResetFLag = MC_RGM_FES_F_EXR_MASK, /*!< An external destructive reset (EXR) has occurred */
     kMC_RGM_FccuReactionResetFlag = MC_RGM_FES_FCCU_RST_MASK, /*!< FCCU reaction (FCCU_RST) functional reset has occurred */
@@ -71,27 +71,42 @@ typedef enum _mc_rgm_functional_reset_sources_flag
                                     kMC_RGM_SelfTestDoneDoneFlag | kMC_RGM_Swt0Reset0Flag | kMC_RGM_JtagResetFlag | \
                                     kMC_RGM_HseSoftwareTriggerResetFlag | kMC_RGM_HseBootResetFlag | \
                                     kMC_RGM_SoftwareFunctionalResetFlag | kMC_RGM_DebugFunctionalResetFlag)
-} mc_rgm_functional_reset_sources_flag_t;
+};
+
+/*!
+ * @brief Bidirectional functional reset sources.
+ */
+enum _mc_rgm_bidirectional_function_reset_sources
+{
+    kMC_RGM_BidirectionalDebugFunctionalReset = MC_RGM_FBRE_BE_DEBUG_FUNC_MASK, /*!< External reset pin is not asserted on a 'functional' reset event DEBUG_FUNC */
+    kMC_RGM_BidirectionalSoftwareFunctionalReset = MC_RGM_FBRE_BE_SW_FUNC_MASK, /*!< External reset pin is not asserted on a 'functional' reset event SW_FUNC */
+    kMC_RGM_BidirectionalHseBootReset = MC_RGM_FBRE_BE_HSE_BOOT_RST_MASK, /*!< External reset pin is not asserted on a 'functional' reset event HSE_BOOT_RST */
+    kMC_RGM_BidirectionalHseSwtReset = MC_RGM_FBRE_BE_HSE_SWT_RST_MASK, /*!< External reset pin is not asserted on a 'functional' reset event HSE_SWT_RST */
+    kMC_RGM_BidirectionalJtagReset = MC_RGM_FBRE_BE_JTAG_RST_MASK, /*!< External reset pin is not asserted on a 'functional' reset event JTAG_RST */
+    kMC_RGM_BidirectionalSwt0Reset = MC_RGM_FBRE_BE_SWT0_RST_MASK, /*!< External reset pin is not asserted on a 'functional' reset event SWT0_RST */
+    kMC_RGM_BidirectionalSelfTestDoneReset = MC_RGM_FBRE_BE_ST_DONE_MASK, /*!< External reset pin is not asserted on a 'functional' reset event ST_DONE */
+    kMC_RGM_BidirectionalFccuReactionReset = MC_RGM_FBRE_BE_FCCU_RST_MASK /*!< External reset pin is not asserted on a 'functional' reset event FCCU_RST */
+};
 
 /*!
  * @brief Demotable functional reset sources.
  */
-typedef enum _mc_rgm_demotable_functional_reset_sources
+enum _mc_rgm_demotable_functional_reset_sources
 {
     kMC_RGM_FccuReactionReset = MC_RGM_FERD_D_FCCU_RST_MASK, /*!< Functional reset event FCCU_RST generates an interrupt request. */
     kMC_RGM_Swt0Reset = MC_RGM_FERD_D_SWT0_RST_MASK, /*!< Functional reset event SWT0_RST generates an interrupt request. */
     kMC_RGM_JtagReset = MC_RGM_FERD_D_JTAG_RST_MASK, /*!< Functional reset event DEBUG_FUNC generates an interrupt request. */
     kMC_RGM_DebugFunctionalReset = MC_RGM_FERD_D_DEBUG_FUNC_MASK /*!< Functional reset event DEBUG_FUNC generates an interrupt request. */
-} mc_rgm_demotable_functional_reset_sources_t;
+};
 
 /*!
  * @brief Reset during standby status.
  */
-typedef enum _mc_rgm_reset_during_standby_status
+enum _mc_rgm_reset_during_standby_status
 {
     kMC_RGM_DestructiveResetDuringStandby = MC_RGM_RDSS_DES_RES_MASK, /*!< Destructive reset event occurred during standby mode. */
     kMC_RGM_FunctionalResetDuringStandby = MC_RGM_RDSS_FES_RES_MASK /*!< Functional reset event occurred during standby mode. */
-} mc_rgm_reset_during_standby_status_t;
+};
 
 /*******************************************************************************
  * API
@@ -110,7 +125,7 @@ extern "C" {
  *
  * @param base MC_RGM peripheral base address.
  * @return Destructive reset sources status, This is the logical OR of members of
- *         @ref mc_rgm_destructive_reset_sources_flag_t.
+ *         @ref _mc_rgm_destructive_reset_sources_flag.
  */
 static inline uint32_t MC_RGM_GetDestuctiveResetSourcesStatus(MC_RGM_Type *base)
 {
@@ -122,7 +137,7 @@ static inline uint32_t MC_RGM_GetDestuctiveResetSourcesStatus(MC_RGM_Type *base)
  *
  * @param base MC_RGM peripheral base address.
  * @param flag Destructive reset sources flag, it can be logical OR of members of
- *             @ref mc_rgm_destructive_reset_sources_flag_t.
+ *             @ref _mc_rgm_destructive_reset_sources_flag.
  */
 static inline void MC_RGM_ClearDestuctiveResetSourcesStatus(MC_RGM_Type *base, uint32_t flag)
 {
@@ -134,7 +149,7 @@ static inline void MC_RGM_ClearDestuctiveResetSourcesStatus(MC_RGM_Type *base, u
  *
  * @param base MC_RGM peripheral base address.
  * @return Functional reset sources status, This is the logical OR of members of
- *         @ref mc_rgm_functional_reset_sources_flag_t. 
+ *         @ref _mc_rgm_functional_reset_sources_flag.
  */
 static inline uint32_t MC_RGM_GetFunctionalResetSourcesStatus(MC_RGM_Type *base)
 {
@@ -146,7 +161,7 @@ static inline uint32_t MC_RGM_GetFunctionalResetSourcesStatus(MC_RGM_Type *base)
  *
  * @param base MC_RGM peripheral base address.
  * @param flag Functional reset sources flag, it can be logical OR of members of
- *             @ref mc_rgm_functional_reset_sources_flag_t.
+ *             @ref _mc_rgm_functional_reset_sources_flag.
  */
 static inline void MC_RGM_ClearFunctionalResetSourcesStatus(MC_RGM_Type *base, uint32_t flag)
 {
@@ -158,7 +173,7 @@ static inline void MC_RGM_ClearFunctionalResetSourcesStatus(MC_RGM_Type *base, u
  *
  * @param base MC_RGM peripheral base address.
  * @return Reset during standby status, This is the logical OR of members of
- *         @ref mc_rgm_reset_during_standby_status_t.
+ *         @ref _mc_rgm_reset_during_standby_status.
  */
 static inline uint32_t MC_RGM_GetResetDuringStandbyStatus(MC_RGM_Type *base)
 {
@@ -170,11 +185,23 @@ static inline uint32_t MC_RGM_GetResetDuringStandbyStatus(MC_RGM_Type *base)
  *
  * @param base MC_RGM peripheral base address.
  * @param flag Reset during standby status, it can be logical OR of members of
- *             @ref mc_rgm_reset_during_standby_status_t.
+ *             @ref _mc_rgm_reset_during_standby_status.
  */
 static inline void MC_RGM_ClearResetDuringStandbyStatus(MC_RGM_Type *base, uint32_t flag)
 {
     base->RDSS = flag;
+}
+
+/*!
+ * @brief External reset pin is not asserted on a given 'functional' reset event.
+ *
+ * @param base MC_RGM peripheral base address.
+ * @param flag Functional reset event, it can be logical OR of members of
+ *             @ref _mc_rgm_bidirectional_function_reset_sources.
+ */
+static inline void MC_RGM_DisableBidirectionalReset(MC_RGM_Type *base, uint32_t flag)
+{
+    base->FBRE = flag;
 }
 
 /*! @}*/
@@ -189,7 +216,7 @@ static inline void MC_RGM_ClearResetDuringStandbyStatus(MC_RGM_Type *base, uint3
  *
  * @param base MC_RGM peripheral base address.
  * @param mask Functional reset sources to be demoted to interrupts, it can be logical OR of members of
- *        @ref mc_rgm_demotable_functional_reset_sources_t.
+ *        @ref _mc_rgm_demotable_functional_reset_sources.
  */
 static inline void MC_RGM_DemoteFunctionalResetToInterrupt(MC_RGM_Type *base, uint32_t mask)
 {
