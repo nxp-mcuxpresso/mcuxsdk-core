@@ -141,6 +141,11 @@ void PIT_Deinit(PIT_Type *base)
 void PIT_RTI_Init(PIT_Type *base, const pit_config_t *config)
 {
     assert(NULL != config);
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+    /* Ungate the PIT clock*/
+    CLOCK_EnableClock(s_pitClocks[PIT_GetInstance(base)]);
+#endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
     /* Enable PIT RTI timer */
     base->MCR &= ~(PIT_MCR_MDIS_RTI_MASK | PIT_MCR_MDIS_MASK);
     /* Clear all status bits for RTI to make sure the status of TCTRL registers is clean. */
@@ -155,16 +160,6 @@ void PIT_RTI_Init(PIT_Type *base, const pit_config_t *config)
     {
         base->MCR |= PIT_MCR_FRZ_MASK;
     }
-}
-
-/*!
- * brief Disables the PIT RTI module.
- *
- * param base PIT peripheral base address
- */
-void PIT_RTI_Deinit(PIT_Type *base)
-{
-    base->MCR |= PIT_MCR_MDIS_RTI_MASK;
 }
 
 #endif /* FSL_FEATURE_PIT_HAS_RTI */

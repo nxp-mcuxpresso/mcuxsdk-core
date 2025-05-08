@@ -20,8 +20,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief PIT Driver Version 2.1.1 */
-#define FSL_PIT_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
+/*! @brief PIT Driver Version 2.2.0 */
+#define FSL_PIT_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*! @} */
 
 /*!
@@ -131,7 +131,10 @@ void PIT_RTI_Init(PIT_Type *base, const pit_config_t *config);
  *
  * @param base PIT peripheral base address
  */
-void PIT_RTI_Deinit(PIT_Type *base);
+static inline void PIT_RTI_Deinit(PIT_Type *base)
+{
+    base->MCR |= PIT_MCR_MDIS_RTI_MASK;
+}
 
 #endif /* FSL_FEATURE_PIT_HAS_RTI */
 
@@ -332,6 +335,32 @@ static inline void PIT_ClearRtiStatusFlags(PIT_Type *base, uint32_t mask)
     base->RTI_TFLG = mask;
 }
 
+/*!
+ * @brief Reads the RTI timer load synchronization status.
+ * 
+ * In the case of the RTI timer load, it will take several cycles
+ * until this value is synchronized into the RTI clock domain.
+ *
+ * @param base    PIT peripheral base address
+ *
+ * @return The status flags. This is the logical OR of members of the
+ *         enumeration ::pit_rti_ldval_status_flags_t
+ */
+static inline uint32_t PIT_GetRtiSyncStatus(PIT_Type *base)
+{
+    return (base->RTI_LDVAL_STAT & PIT_RTI_LDVAL_STAT_RT_STAT_MASK);
+}
+
+/*!
+ * @brief  Clears the RTI timer load synchronization status.
+ *
+ * @param base    PIT peripheral base address
+ */
+static inline void PIT_ClearRtiSyncStatus(PIT_Type *base)
+{
+    base->RTI_LDVAL_STAT = PIT_RTI_LDVAL_STAT_RT_STAT_MASK;
+}
+
 #endif /* FSL_FEATURE_PIT_HAS_RTI */
 
 /*! @}*/
@@ -381,21 +410,6 @@ static inline uint32_t PIT_GetCurrentTimerCount(PIT_Type *base, pit_chnl_t chann
 }
 
 #if defined(FSL_FEATURE_PIT_HAS_RTI) && (FSL_FEATURE_PIT_HAS_RTI)
-/*!
- * @brief Reads the RTI timer load synchronization status.
- * 
- * In the case of the RTI timer load, it will take several cycles
- * until this value is synchronized into the RTI clock domain.
- *
- * @param base    PIT peripheral base address
- *
- * @return The status flags. This is the logical OR of members of the
- *         enumeration ::pit_rti_ldval_status_flags_t
- */
-static inline uint32_t PIT_GetRtiSyncStatus(PIT_Type *base)
-{
-    return (base->RTI_LDVAL_STAT & PIT_RTI_LDVAL_STAT_RT_STAT_MASK);
-}
 
 /*!
  * @brief Sets the RTI timer period in units of count.
@@ -406,6 +420,18 @@ static inline uint32_t PIT_GetRtiSyncStatus(PIT_Type *base)
  * is loaded after the timer expires.
  *
  * @note Users can call the utility macros provided in fsl_common.h to convert to ticks.
+ * it will take several cycles until this value is synchronized into the RTI clock domain.
+ * So, in user code, it is recommended to check the RTI_LDVAL_STAT register
+ * @code
+ *   PIT_ClearRtiSyncStatus(base);
+ *   PIT_SetRtiTimerPeriod(base, count);
+ *   while(kPIT_RtiLoadValueSyncFlag != (PIT_GetRtiSyncStatus(base)))
+ *   {
+ *   }
+ * @endcode
+ * However, according to ERR050763, this is not reliable for dynamic load mode (User set a new
+ * counter period without restarting the timer). In such case, user shall manually check
+ * PIT_GetRtiTimerCount() to ensure the current timer expires and the new value was loaded.
  *
  * @param base    PIT peripheral base address
  * @param count   Timer period in units of ticks
@@ -413,17 +439,9 @@ static inline uint32_t PIT_GetRtiSyncStatus(PIT_Type *base)
 static inline void PIT_SetRtiTimerPeriod(PIT_Type *base, uint32_t count)
 {
     assert(count != 0U);
-    /* Clear the load status register */
-    base->RTI_LDVAL_STAT = kPIT_RtiLoadValueSyncFlag;
+
     /* According to RM, the LDVAL trigger = clock ticks -1 */
     base->RTI_LDVAL = count - 1U;
-    /* 
-     * In the case of the RTI timer load, it will take several cycles until this value is synchronized into the RTI
-     * clock domain.
-     */
-    while(kPIT_RtiLoadValueSyncFlag != (PIT_GetRtiSyncStatus(base)))
-    {
-    }
 }
 
 /*!
