@@ -268,8 +268,9 @@ static void I3C_MasterRunEDMATransfer(
             if (dataSize != 1U)
             {
                 address = (uint32_t)&base->MWDATAB1;
-                /* Cause controller sends command and data with same interface, need special buffer to store the END byte. */
-                instance = I3C_GetInstance(base);
+                /* Cause controller sends command and data with same interface, need special buffer to store the END
+                 * byte. */
+                instance             = I3C_GetInstance(base);
                 i3cEndByte[instance] = *(uint8_t *)((uint32_t)(uint32_t *)data + dataSize - 1U);
                 dataSize--;
             }
@@ -345,7 +346,8 @@ static status_t I3C_MasterRunTransferStateMachineEDMA(I3C_Type *base, i3c_master
         }
     }
 
-    if ((0UL != (status & (uint32_t)kI3C_MasterSlaveStartFlag)) && (masterState == kI3C_MasterStateSlvReq) && (handle->transfer.busType != kI3C_TypeI2C))
+    if ((0UL != (status & (uint32_t)kI3C_MasterSlaveStartFlag)) && (masterState == kI3C_MasterStateSlvReq) &&
+        (handle->transfer.busType != kI3C_TypeI2C))
     {
         handle->state = (uint8_t)kSlaveStartState;
     }
@@ -576,7 +578,7 @@ status_t I3C_MasterTransferEDMA(I3C_Type *base, i3c_master_edma_handle_t *handle
 
     i3c_master_state_t masterState = I3C_MasterGetState(base);
     bool checkDdrState             = false;
-    status_t result = kStatus_Success;
+    status_t result                = kStatus_Success;
 
     /* Return busy if another transaction is in progress. */
     if (handle->state != (uint8_t)kIdleState)
@@ -755,7 +757,8 @@ static void I3C_SlaveTransferEDMACallback(edma_handle_t *dmaHandle, void *param,
                 {
                 }
                 /* Send the last byte. */
-                i3cHandle->base->SWDATABE = *(uint8_t *)((uintptr_t)i3cHandle->transfer.txData + i3cHandle->transfer.txDataSize - 1U);
+                i3cHandle->base->SWDATABE =
+                    *(uint8_t *)((uintptr_t)i3cHandle->transfer.txData + i3cHandle->transfer.txDataSize - 1U);
             }
         }
         else
@@ -879,8 +882,7 @@ static void I3C_SlavePrepareRxEDMA(I3C_Type *base, i3c_slave_edma_handle_t *hand
     }
 #endif
 
-    EDMA_PrepareTransfer(&rxConfig, (void *)rxFifoBase, 1, xfer->rxData, 1, 1, dataSize,
-                         kEDMA_PeripheralToMemory);
+    EDMA_PrepareTransfer(&rxConfig, (void *)rxFifoBase, 1, xfer->rxData, 1, 1, dataSize, kEDMA_PeripheralToMemory);
     (void)EDMA_SubmitTransfer(handle->rxDmaHandle, &rxConfig);
     EDMA_StartTransfer(handle->rxDmaHandle);
 }
