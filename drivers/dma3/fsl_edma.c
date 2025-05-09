@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2022, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -959,9 +959,9 @@ void EDMA_PrepareTransferConfig(edma_transfer_config_t *config,
     assert(srcAddr != NULL);
     assert(destAddr != NULL);
     assert((srcWidth == 1U) || (srcWidth == 2U) || (srcWidth == 4U) || (srcWidth == 8U) || (srcWidth == 16U) ||
-           (srcWidth == 32U));
+           (srcWidth == 32U) || (srcWidth == 64U));
     assert((destWidth == 1U) || (destWidth == 2U) || (destWidth == 4U) || (destWidth == 8U) || (destWidth == 16U) ||
-           (destWidth == 32U));
+           (destWidth == 32U) || (destWidth == 64U));
     assert(transferBytes % bytesEachRequest == 0U);
     assert(((uint32_t)(uint32_t *)srcAddr % srcWidth) == 0U);
     assert(((uint32_t)(uint32_t *)destAddr % destWidth) == 0U);
@@ -1082,6 +1082,10 @@ void EDMA_PrepareTransfer(edma_transfer_config_t *config,
             break;
         case kEDMA_PeripheralToMemory:
             destOffset = (int16_t)destWidth;
+            srcOffset  = 0;
+            break;
+        case kEDMA_PeripheralToPeripheral:
+            destOffset = 0;
             srcOffset  = 0;
             break;
         default:

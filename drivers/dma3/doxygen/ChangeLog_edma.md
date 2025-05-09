@@ -1,5 +1,10 @@
 # EDMA (DMA3)
 
+## [2.4.0]
+
+- Improvements
+  - Added peripheral to peripheral support in DMA3 driver.
+
 ## [2.3.2]
 
 - Improvements

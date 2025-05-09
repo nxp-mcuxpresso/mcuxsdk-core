@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2022, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -23,7 +23,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief eDMA driver version */
-#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 3, 2)) /*!< Version 2.3.2. */
+#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 4, 0)) /*!< Version 2.4.0. */
 /*! @} */
 
 /*! @brief eDMA transfer configuration */
@@ -140,9 +140,10 @@ typedef enum _edma_interrupt_enable
 /*! @brief eDMA transfer type */
 typedef enum _edma_transfer_type
 {
-    kEDMA_MemoryToMemory = 0x0U, /*!< Transfer from memory to memory */
-    kEDMA_PeripheralToMemory,    /*!< Transfer from peripheral to memory */
-    kEDMA_MemoryToPeripheral,    /*!< Transfer from memory to peripheral */
+    kEDMA_MemoryToMemory = 0x0U,  /*!< Transfer from memory to memory */
+    kEDMA_PeripheralToMemory,     /*!< Transfer from peripheral to memory */
+    kEDMA_MemoryToPeripheral,     /*!< Transfer from memory to peripheral */
+    kEDMA_PeripheralToPeripheral, /*!< Transfer from Peripheral to peripheral */
 } edma_transfer_type_t;
 
 /*! @brief eDMA transfer status, _edma_transfer_status*/
