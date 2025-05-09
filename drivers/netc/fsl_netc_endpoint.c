@@ -13,11 +13,6 @@
 #include <math.h>
 #endif
 
-/* Component ID definition, used by tools. */
-#ifndef FSL_COMPONENT_ID
-#define FSL_COMPONENT_ID "platform.drivers.netc_switch"
-#endif
-
 /*! @name Defines some Ethernet parameters. */
 /*@{*/
 #define NETC_ENETC_LSO_TXFRAME_LEN_MAX (0x4FFFFFFFFU) /*!< The Maximum length of LSO frame length. */

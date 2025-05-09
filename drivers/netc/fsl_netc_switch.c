@@ -11,6 +11,11 @@
 #include <math.h>
 #endif
 
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.netc_switch"
+#endif
+
 /*! @name NETC register map. */
 /*@{*/
 #define NETC_SWT_PORT_GROUP_BASE_OFFSET (0x4000U) /*!< The Switch port group register base address offset. */
