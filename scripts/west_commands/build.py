@@ -736,6 +736,8 @@ class Build(Forceable):
 
         # Translate CONF_FILE to absolute path
         final_cmake_args = self._translate_conf_file_path(final_cmake_args)
+        # Translate CUSTOM_BOARD_ROOT to absolute path
+        final_cmake_args = self._translate_custom_board_path(final_cmake_args)
         run_cmake(final_cmake_args, dry_run=self.args.dry_run)
 
     def _run_pristine(self):
@@ -895,6 +897,16 @@ class Build(Forceable):
         This way can prevent the error when using CONF_FILE with relative path, developer invoke west command out of SdkRootDirPath, or use sysbuild.
         '''
         pattern = re.compile(r'-D.*CONF_FILE=(.*)')
+        return self._translate_macro_variable_path(cmake_args, pattern)
+
+    def _translate_custom_board_path(self, cmake_args):
+        '''
+        Translate CUSTOM_BOARD_ROOT to absolute path.
+        '''
+        pattern = re.compile(r'-D.*CUSTOM_BOARD_ROOT=(.*)')
+        return self._translate_macro_variable_path(cmake_args, pattern)
+
+    def _translate_macro_variable_path(self, cmake_args, pattern):
         final_cmake_opts = []
         for item in cmake_args:
             match = pattern.match(item)
