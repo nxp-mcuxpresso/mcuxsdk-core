@@ -1,5 +1,10 @@
 # XRDC
 
+## [2.0.7]
+
+- Improvements
+  - Handle errata ERR050593.
+
 ## [2.0.6]
 
 - Improvements
