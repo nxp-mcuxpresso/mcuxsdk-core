@@ -96,6 +96,14 @@ status_t FLASH_Init(flash_config_t *config)
 #elif (defined(CPU_KW43B43ZC7MFTA) || defined(CPU_MCXW70ADMFTA))
         config->msf1Config[0].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
+
+/* Instead of matching a device type default to generic size definition based on block count and size */
+
+#elif (defined(FLASH_FEATURE_PFLASH0_BLOCK_COUNT) && FLASH_FEATURE_PFLASH0_BLOCK_COUNT > 0)
+
+        config->msf1Config[0].flashDesc.totalSize =
+            FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
+
 #else
 #error "No valid CPU defined!"
 #endif
@@ -162,7 +170,10 @@ status_t FLASH_Init(flash_config_t *config)
         config->msf1Config[1].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH1_BLOCK_COUNT * FLASH_FEATURE_PFLASH1_BLOCK_SIZE;
 #else
-#error "No valid CPU defined!"
+        /* PFLASH1 not present */
+        config->msf1Config[1].flashDesc.blockBase  = 0U;
+        config->msf1Config[1].flashDesc.blockCount = 0U;
+        config->msf1Config[1].flashDesc.totalSize  = 0U;
 #endif
 
         status = kStatus_FLASH_Success;
@@ -777,6 +788,7 @@ status_t FLASH_GetProperty(flash_config_t *config, flash_property_tag_t whichPro
     return status;
 }
 
+#if defined(SMSCM)
 #if defined(FLASH_DRIVER_IS_FLASH_RESIDENT) && (FLASH_DRIVER_IS_FLASH_RESIDENT == 1)
 #if defined(__IAR_SYSTEMS_ICC__)
 __ramfunc
@@ -792,6 +804,7 @@ __attribute__ ((section (".ramfunc")))
     SMSCM->OCMDR0 = (SMSCM->OCMDR0 & (~SMSCM_FLASH_SPECULATION_CTRL_MASK)) | SMSCM_FLASH_SPECULATION_CTRL(0x3);
     __ISB();
     __DSB();
+
 }
 
 #if defined(FLASH_DRIVER_IS_FLASH_RESIDENT) && (FLASH_DRIVER_IS_FLASH_RESIDENT == 1)
@@ -841,6 +854,8 @@ __attribute__ ((section (".ramfunc")))
     __ISB();
     __DSB();
 }
+
+#endif
 
 static status_t flash_check_param(
     flash_config_t *config, FMU_Type *base, uint32_t start, uint32_t lengthInBytes, uint32_t alignmentBaseline)

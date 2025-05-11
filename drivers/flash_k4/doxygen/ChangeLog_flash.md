@@ -1,5 +1,10 @@
 # FLASH
 
+## [2.3.0]
+
+- New features
+ - Add support for MCX N series
+
 ## [2.2.1]
 
 - Improvement

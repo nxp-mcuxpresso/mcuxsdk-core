@@ -9,4 +9,4 @@ config MCUX_HAS_COMPONENT_driver.flash_k4
 config MCUX_COMPONENT_driver.flash_k4
     bool "flash_k4"
     select MCUX_COMPONENT_driver.common
-    depends on MCUX_HAS_COMPONENT_driver.flash_k4
+    depends on MCUX_HAS_COMPONENT_driver.flash_k4 || MCUX_HW_IP_DriverType_FMU
