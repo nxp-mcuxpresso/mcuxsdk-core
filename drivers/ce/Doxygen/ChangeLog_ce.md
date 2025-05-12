@@ -1,5 +1,9 @@
 # CE
 
+## [2.2.0]
+- Bug Fixes
+  - Fix the issue that eigenvectors are NaNs with triangular or square input Hermitian.
+
 ## [2.1.1]
 
 - Improvements
