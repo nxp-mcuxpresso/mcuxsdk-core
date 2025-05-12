@@ -19,8 +19,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*! @{ */
-/*! @brief BCTU driver version 2.0.1. */
-#define FSL_BCTU_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
+/*! @brief BCTU driver version 2.1.0. */
+#define FSL_BCTU_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
 /*! @} */
 
 /*! @brief BCTU interrupt mask. */
@@ -30,8 +30,10 @@ enum _bctu_int
     kBCTU_NewDataInt_0 = BCTU_MCR_IEN0_MASK,
     /*! Enables an interrupt request when BCTU writes a new conversion result to ADC data register 1. */
     kBCTU_NewDataInt_1 = BCTU_MCR_IEN1_MASK,
+#if defined(FSL_FEATURE_BCTU_ADCDR_COUNT) && (FSL_FEATURE_BCTU_ADCDR_COUNT == 3U)
     /*! Enables an interrupt request when BCTU writes a new conversion result to ADC data register 2. */
     kBCTU_NewDataInt_2 = BCTU_MCR_IEN2_MASK,
+#endif /* FSL_FEATURE_BCTU_ADCDR_COUNT */
 
     /*! Enables an interrupt request for the last conversion in a conversion list. */
     kBCTU_ConvListInt = BCTU_MCR_LIST_IEN_MASK,
@@ -47,22 +49,28 @@ enum _bctu_status_flags
      kBCTU_NewData_0_Ready = BCTU_MSR_NDATA0_MASK,
      /*! Indicates that new conversion data is available in ADC data register 1. */
      kBCTU_NewData_1_Ready = BCTU_MSR_NDATA1_MASK,
+#if defined(FSL_FEATURE_BCTU_ADCDR_COUNT) && (FSL_FEATURE_BCTU_ADCDR_COUNT == 3U)
      /*! Indicates that new conversion data is available in ADC data register 2. */
      kBCTU_NewData_2_Ready = BCTU_MSR_NDATA2_MASK,
+#endif /* FSL_FEATURE_BCTU_ADCDR_COUNT */
 
      /*! Indicates that the data in ADC data register 0 has been overwritten with new data. */
      kBCTU_NewData_0_OverWrite = BCTU_MSR_DATAOVR0_MASK,
      /*! Indicates that the data in ADC data register 1 has been overwritten with new data. */
      kBCTU_NewData_1_OverWrite = BCTU_MSR_DATAOVR1_MASK,
+#if defined(FSL_FEATURE_BCTU_ADCDR_COUNT) && (FSL_FEATURE_BCTU_ADCDR_COUNT == 3U)
      /*! Indicates that the data in ADC data register 2 has been overwritten with new data. */
      kBCTU_NewData_2_OverWrite = BCTU_MSR_DATAOVR2_MASK,
+#endif /* FSL_FEATURE_BCTU_ADCDR_COUNT */
 
      /*! Indicates that ADC0 has executed the last conversion in a conversion list. */
      kBCTU_ConvList_0_LastConvExecuted = BCTU_MSR_LIST0_Last_MASK,
      /*! Indicates that ADC1 has executed the last conversion in a conversion list. */
      kBCTU_ConvList_1_LastConvExecuted = BCTU_MSR_LIST1_Last_MASK,
+#if defined(FSL_FEATURE_BCTU_ADCDR_COUNT) && (FSL_FEATURE_BCTU_ADCDR_COUNT == 3U)
      /*! Indicates that ADC2 has executed the last conversion in a conversion list. */
      kBCTU_ConvList_2_LastConvExecuted = BCTU_MSR_LIST2_Last_MASK,
+#endif /* FSL_FEATURE_BCTU_ADCDR_COUNT */
 
      /*! Indicates at least one ADC was triggered. */
      kBCTU_Trig = BCTU_MSR_TRGF_MASK,
@@ -101,8 +109,57 @@ enum _bctu_trig_adc
 {
     kBCTU_TrigAdc_0 = 1U << 0U, /*!< Trigger ADC 0 to convert. */
     kBCTU_TrigAdc_1 = 1U << 1U, /*!< Trigger ADC 1 to convert. */
+#if defined(FSL_FEATURE_BCTU_ADCDR_COUNT) && (FSL_FEATURE_BCTU_ADCDR_COUNT == 3U)
     kBCTU_TrigAdc_2 = 1U << 2U, /*!< Trigger ADC 2 to convert. */
+#endif /* FSL_FEATURE_BCTU_ADCDR_COUNT */
 };
+
+/*! @brief BCTU software trigger mask. */
+enum _bctu_trig_mask
+{
+    kBCTU_TrigMask_0 = BCTU_SFTRGR1_SFTRG0_MASK,        /*!< Trigger mask 0. */
+    kBCTU_TrigMask_1 = kBCTU_TrigMask_0 << 1U,          /*!< Trigger mask 1. */
+    kBCTU_TrigMask_2 = kBCTU_TrigMask_0 << 2U,          /*!< Trigger mask 2. */
+    kBCTU_TrigMask_3 = kBCTU_TrigMask_0 << 3U,          /*!< Trigger mask 3. */
+    kBCTU_TrigMask_4 = kBCTU_TrigMask_0 << 4U,          /*!< Trigger mask 4. */
+    kBCTU_TrigMask_5 = kBCTU_TrigMask_0 << 5U,          /*!< Trigger mask 5. */
+    kBCTU_TrigMask_6 = kBCTU_TrigMask_0 << 6U,          /*!< Trigger mask 6. */
+    kBCTU_TrigMask_7 = kBCTU_TrigMask_0 << 7U,          /*!< Trigger mask 7. */
+    kBCTU_TrigMask_8 = kBCTU_TrigMask_0 << 8U,          /*!< Trigger mask 8. */
+    kBCTU_TrigMask_9 = kBCTU_TrigMask_0 << 9U,          /*!< Trigger mask 9. */
+    kBCTU_TrigMask_10 = kBCTU_TrigMask_0 << 10U,        /*!< Trigger mask 10. */
+    kBCTU_TrigMask_11 = kBCTU_TrigMask_0 << 11U,        /*!< Trigger mask 11. */
+    kBCTU_TrigMask_12 = kBCTU_TrigMask_0 << 12U,        /*!< Trigger mask 12. */
+    kBCTU_TrigMask_13 = kBCTU_TrigMask_0 << 13U,        /*!< Trigger mask 13. */
+    kBCTU_TrigMask_14 = kBCTU_TrigMask_0 << 14U,        /*!< Trigger mask 14. */
+    kBCTU_TrigMask_15 = kBCTU_TrigMask_0 << 15U,        /*!< Trigger mask 15. */
+    kBCTU_TrigMask_16 = kBCTU_TrigMask_0 << 16U,        /*!< Trigger mask 16. */
+    kBCTU_TrigMask_17 = kBCTU_TrigMask_0 << 17U,        /*!< Trigger mask 17. */
+    kBCTU_TrigMask_18 = kBCTU_TrigMask_0 << 18U,        /*!< Trigger mask 18. */
+    kBCTU_TrigMask_19 = kBCTU_TrigMask_0 << 19U,        /*!< Trigger mask 19. */
+    kBCTU_TrigMask_20 = kBCTU_TrigMask_0 << 20U,        /*!< Trigger mask 20. */
+    kBCTU_TrigMask_21 = kBCTU_TrigMask_0 << 21U,        /*!< Trigger mask 21. */
+    kBCTU_TrigMask_22 = kBCTU_TrigMask_0 << 22U,        /*!< Trigger mask 22. */
+    kBCTU_TrigMask_23 = kBCTU_TrigMask_0 << 23U,        /*!< Trigger mask 23. */
+    kBCTU_TrigMask_24 = kBCTU_TrigMask_0 << 24U,        /*!< Trigger mask 24. */
+    kBCTU_TrigMask_25 = kBCTU_TrigMask_0 << 25U,        /*!< Trigger mask 25. */
+    kBCTU_TrigMask_26 = kBCTU_TrigMask_0 << 26U,        /*!< Trigger mask 26. */
+    kBCTU_TrigMask_27 = kBCTU_TrigMask_0 << 27U,        /*!< Trigger mask 27. */
+    kBCTU_TrigMask_28 = kBCTU_TrigMask_0 << 28U,        /*!< Trigger mask 28. */
+    kBCTU_TrigMask_29 = kBCTU_TrigMask_0 << 29U,        /*!< Trigger mask 29. */
+    kBCTU_TrigMask_30 = kBCTU_TrigMask_0 << 30U,        /*!< Trigger mask 30. */
+    kBCTU_TrigMask_31 = kBCTU_TrigMask_0 << 31U,        /*!< Trigger mask 31. */
+};
+
+/*! @brief BCTU software trigger group. */
+typedef enum _bctu_trig_group
+{
+    kBCTU_TrigGroup_0 = 0U, /*!< Trigger group 0. */
+    kBCTU_TrigGroup_1 = 1U, /*!< Trigger group 1. */
+#if defined(FSL_FEATURE_BCTU_ADCDR_COUNT) && (FSL_FEATURE_BCTU_ADCDR_COUNT == 3U)
+    kBCTU_TrigGroup_2 = 2U, /*!< Trigger group 2. */
+#endif /* FSL_FEATURE_BCTU_ADCDR_COUNT */
+} bctu_trig_group_t;
 
 /*! @brief BCTU FIFO index. */
 typedef enum _bctu_fifo

@@ -107,7 +107,10 @@ void BCTU_SetTrigConfig(BCTU_Type *base, const bctu_trig_config_t *config)
 
     base->TRGCFG[config->trigIndex] = ((base->TRGCFG[config->trigIndex] & ~(BCTU_TRGCFG_LOOP_MASK
         | BCTU_TRGCFG_DATA_DEST_MASK | BCTU_TRGCFG_TRS_MASK | BCTU_TRGCFG_ADC_SEL0_MASK
-        | BCTU_TRGCFG_ADC_SEL1_MASK | BCTU_TRGCFG_ADC_SEL2_MASK
+        | BCTU_TRGCFG_ADC_SEL1_MASK
+#if defined(FSL_FEATURE_BCTU_ADCDR_COUNT) && (FSL_FEATURE_BCTU_ADCDR_COUNT == 3U)
+        | BCTU_TRGCFG_ADC_SEL2_MASK
+#endif /* FSL_FEATURE_BCTU_ADCDR_COUNT */
         | BCTU_TRGCFG_CHANNEL_VALUE_OR_LADDR_MASK))
         | (BCTU_TRGCFG_LOOP(config->enableLoop ? 1U : 0U) | BCTU_TRGCFG_DATA_DEST(config->dataDest)
         | BCTU_TRGCFG_TRS(config->trigRes) | BCTU_TRGCFG_CHANNEL_VALUE_OR_LADDR(config->chanAddr)
