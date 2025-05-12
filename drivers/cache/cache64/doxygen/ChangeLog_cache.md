@@ -1,5 +1,10 @@
 # CACHE64
 
+## [2.0.11]
+
+- Bug Fixes
+  - Fixed CERT INT30-C violations: check and guarantee address plus size is equal or smaller than UINT32_MAX.
+
 ## [2.0.10]
 
 - Improvements

@@ -239,6 +239,11 @@ void CACHE64_InvalidateCacheByRange(uint32_t address, uint32_t size_byte)
 {
     if (size_byte > 0UL)
     {
+        /* Check for potential overflow before adding */
+        if ((UINT32_MAX - address) < size_byte)
+        {
+            return;
+        }
         uint32_t endAddr = MSDK_REG_SECURE_ADDR(address + size_byte - 0x01U);
         uint32_t pccReg  = 0;
         /* Align address to cache line size. */
@@ -321,6 +326,11 @@ void CACHE64_CleanCacheByRange(uint32_t address, uint32_t size_byte)
 {
     if (size_byte > 0UL)
     {
+        /* Check for potential overflow before adding */
+        if ((UINT32_MAX - address) < size_byte)
+        {
+            return;
+        }
         uint32_t endAddr = MSDK_REG_SECURE_ADDR(address + size_byte - 0x01U);
         uint32_t pccReg  = 0;
         /* Align address to cache line size. */
@@ -405,6 +415,11 @@ void CACHE64_CleanInvalidateCacheByRange(uint32_t address, uint32_t size_byte)
 {
     if (size_byte > 0UL)
     {
+        /* Check for potential overflow before adding */
+        if ((UINT32_MAX - address) < size_byte)
+        {
+            return;
+        }
         uint32_t endAddr = MSDK_REG_SECURE_ADDR(address + size_byte - 0x01U);
         uint32_t pccReg  = 0;
         /* Align address to cache line size. */
