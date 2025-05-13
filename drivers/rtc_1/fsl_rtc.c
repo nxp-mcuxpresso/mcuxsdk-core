@@ -243,10 +243,11 @@ void RTC_Init(RTC_Type *base, const rtc_config_t *config)
         srcClock_Hz = CLOCK_GetFreq(kCLOCK_BusClk);
     }
 
+    srcClock_Hz /= RTC_GetDivideValue(base);
+    uint32_t moduleValue = (uint32_t)(USEC_TO_COUNT(config->time_us, srcClock_Hz) & 0xFFFFFFFFU);
+    assert(moduleValue > 1U);
     /* Set RTC module value */
-    RTC_SetModuloValue(
-        base,
-        (uint32_t)(USEC_TO_COUNT(config->time_us, (uint64_t)srcClock_Hz / (uint64_t)RTC_GetDivideValue(base)) - 1U));
+    RTC_SetModuloValue(base, moduleValue - 1U);
 }
 
 /*!
