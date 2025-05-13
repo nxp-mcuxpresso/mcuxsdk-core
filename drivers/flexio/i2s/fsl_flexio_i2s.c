@@ -398,7 +398,7 @@ void FLEXIO_I2S_MasterSetFormat(FLEXIO_I2S_Type *base, flexio_i2s_format_t *form
 void FLEXIO_I2S_SlaveSetFormat(FLEXIO_I2S_Type *base, flexio_i2s_format_t *format)
 {
     assert(format != NULL);
-    assert(format->bitWidth <= (UINT32_MAX / 4UL));
+    assert(format->bitWidth == 8U || format->bitWidth == 16U || format->bitWidth == 24U || format->bitWidth == 32U);
 
     /* Set Frame sync timer cmp */
     uint32_t fsTimerCmp = format->bitWidth * 4UL - 3UL;
