@@ -300,7 +300,7 @@ void ADC_SetCmdConfig(LPADC_Type *base, adc_cmd_index_t index, const adc_cmd_con
     if ((uint8_t)index <= LPADC_CV_COUNT)
     {
         tmpCmdHReg = ((tmpCmdHReg & ~LPADC_CMDH1_CMPEN_MASK) | LPADC_CMDH1_CMPEN(config->compMode));
-        base->CV[index] = (LPADC_CV_CVH(config->compValHigh) | LPADC_CV_CVL(config->compValLow));
+        base->CV[(uint8_t)index - 1U] = (LPADC_CV_CVH(config->compValHigh) | LPADC_CV_CVL(config->compValLow));
     }
     
     *(&(base->CMDH1) + (((uint8_t)index - 1U) * 2U)) = tmpCmdHReg;
