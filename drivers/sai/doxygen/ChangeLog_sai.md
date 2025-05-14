@@ -1,4 +1,8 @@
 # SAI
+## [2.4.7]
+
+- Added conditional support for bit clock swap feature
+
 ## [2.4.6]
 
 - Bug Fixes

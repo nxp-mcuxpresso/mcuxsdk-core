@@ -363,7 +363,9 @@ static void SAI_GetCommonConfig(sai_transceiver_t *config,
     config->masterSlave = kSAI_Master;
 
     /* bit default configurations */
+#if defined(FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP) && FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP
     config->bitClock.bclkSrcSwap    = false;
+#endif
     config->bitClock.bclkInputDelay = false;
     config->bitClock.bclkPolarity   = kSAI_SampleOnRisingEdge;
     config->bitClock.bclkSource     = kSAI_BclkSourceMclkDiv;
@@ -777,7 +779,7 @@ void SAI_TxSetBitClockRate(
     // Now check second multiplication with sampleRate
     if (sampleRate > (UINT32_MAX / bitsPerFrame))
     {
-        // Handle error case since this is invalid configuration  
+        // Handle error case since this is invalid configuration
         assert(false);
         return;
     }
@@ -845,7 +847,7 @@ void SAI_RxSetBitClockRate(
     // Now check second multiplication with sampleRate
     if (sampleRate > (UINT32_MAX / bitsPerFrame))
     {
-        // Handle error case since this is invalid configuration  
+        // Handle error case since this is invalid configuration
         assert(false);
         return;
     }
@@ -898,9 +900,16 @@ void SAI_TxSetBitclockConfig(I2S_Type *base, sai_master_slave_t masterSlave, sai
     {
         assert(config != NULL);
 
-        tcr2 &= ~(I2S_TCR2_BCD_MASK | I2S_TCR2_BCP_MASK | I2S_TCR2_BCI_MASK | I2S_TCR2_BCS_MASK | I2S_TCR2_MSEL_MASK);
+        tcr2 &= ~(I2S_TCR2_BCD_MASK | I2S_TCR2_BCP_MASK | I2S_TCR2_BCI_MASK |
+#if defined(FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP) && FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP
+            I2S_TCR2_BCS_MASK |
+#endif
+            I2S_TCR2_MSEL_MASK);
         tcr2 |= I2S_TCR2_BCD(1U) | I2S_TCR2_BCP(config->bclkPolarity) | I2S_TCR2_BCI(config->bclkInputDelay ? 1U : 0U) |
-                I2S_TCR2_BCS(config->bclkSrcSwap ? 1U : 0U) | I2S_TCR2_MSEL(config->bclkSource);
+#if defined(FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP) && FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP
+                I2S_TCR2_BCS(config->bclkSrcSwap ? 1U : 0U) |
+#endif
+                I2S_TCR2_MSEL(config->bclkSource);
     }
     else
     {
@@ -927,9 +936,16 @@ void SAI_RxSetBitclockConfig(I2S_Type *base, sai_master_slave_t masterSlave, sai
     {
         assert(config != NULL);
 
-        rcr2 &= ~(I2S_RCR2_BCD_MASK | I2S_RCR2_BCP_MASK | I2S_RCR2_BCI_MASK | I2S_RCR2_BCS_MASK | I2S_RCR2_MSEL_MASK);
+        rcr2 &= ~(I2S_RCR2_BCD_MASK | I2S_RCR2_BCP_MASK | I2S_RCR2_BCI_MASK |
+#if defined(FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP) && FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP
+            I2S_RCR2_BCS_MASK |
+#endif
+            I2S_RCR2_MSEL_MASK);
         rcr2 |= I2S_RCR2_BCD(1U) | I2S_RCR2_BCP(config->bclkPolarity) | I2S_RCR2_BCI(config->bclkInputDelay ? 1U : 0U) |
-                I2S_RCR2_BCS(config->bclkSrcSwap ? 1U : 0U) | I2S_RCR2_MSEL(config->bclkSource);
+#if defined(FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP) && FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP
+                I2S_RCR2_BCS(config->bclkSrcSwap ? 1U : 0U) |
+#endif
+                I2S_RCR2_MSEL(config->bclkSource);
     }
     else
     {
@@ -1190,7 +1206,7 @@ void SAI_TxSetConfig(I2S_Type *base, sai_transceiver_t *config)
 {
     assert(config != NULL);
     assert(FSL_FEATURE_SAI_CHANNEL_COUNTn(base) != -1);
-    
+
     uint8_t i           = 0U;
     uint32_t val        = 0U;
     uint8_t channelNums = 0U;
@@ -1205,7 +1221,7 @@ void SAI_TxSetConfig(I2S_Type *base, sai_transceiver_t *config)
         if(config->startChannel <= 7)
         {
             config->channelMask = 1U << config->startChannel;
-        }   
+        }
         else
         {
             config->channelMask = UINT8_MAX;
@@ -1331,7 +1347,7 @@ void SAI_RxSetConfig(I2S_Type *base, sai_transceiver_t *config)
 {
     assert(config != NULL);
     assert(FSL_FEATURE_SAI_CHANNEL_COUNTn(base) != -1);
-   
+
     uint8_t i           = 0U;
     uint32_t val        = 0U;
     uint8_t channelNums = 0U;
@@ -1346,7 +1362,7 @@ void SAI_RxSetConfig(I2S_Type *base, sai_transceiver_t *config)
         if(config->startChannel <= 7)
         {
             config->channelMask = 1U << config->startChannel;
-        }   
+        }
         else
         {
             config->channelMask = UINT8_MAX;
@@ -1624,7 +1640,7 @@ void SAI_WriteBlocking(I2S_Type *base, uint32_t channel, uint32_t bitWidth, uint
     uint32_t bytesPerWord = bitWidth / 8U;
 #if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
     uint32_t fifoCount = (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(base);
-    if (fifoCount >= base->TCR1) 
+    if (fifoCount >= base->TCR1)
     {
         bytesPerWord = ((fifoCount - base->TCR1) * bytesPerWord);
     }
@@ -1675,7 +1691,7 @@ void SAI_WriteMultiChannelBlocking(
 
 #if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
     uint32_t fifoCount = (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(base);
-    if (fifoCount >= base->TCR1) 
+    if (fifoCount >= base->TCR1)
     {
         bytesPerWord = ((fifoCount - base->TCR1) * bytesPerWord);
     }
@@ -1746,9 +1762,9 @@ void SAI_ReadMultiChannelBlocking(
     uint32_t channelNums = 0U, endChannel = 0U;
 #if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
     if (base->RCR1 && (bytesPerWord <= UINT32_MAX / base->RCR1))
-    {    
+    {
         bytesPerWord = base->RCR1 * bytesPerWord;
-    } 
+    }
 #endif
     for (i = 0U; (i < (uint32_t)FSL_FEATURE_SAI_CHANNEL_COUNTn(base)); i++)
     {
@@ -1804,9 +1820,9 @@ void SAI_ReadBlocking(I2S_Type *base, uint32_t channel, uint32_t bitWidth, uint8
     uint32_t bytesPerWord = bitWidth / 8U;
 #if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
     if (base->RCR1 && (bytesPerWord <= UINT32_MAX / base->RCR1))
-    {    
+    {
         bytesPerWord = base->RCR1 * bytesPerWord;
-    }    
+    }
 #endif
 
     while (i < size)
@@ -1820,7 +1836,7 @@ void SAI_ReadBlocking(I2S_Type *base, uint32_t channel, uint32_t bitWidth, uint8
         buffer = (uint8_t *)((uintptr_t)buffer + bytesPerWord);
 
         if (i > SIZE_MAX - bytesPerWord) break;
-        
+
         i += bytesPerWord;
     }
 }
@@ -2194,7 +2210,7 @@ void SAI_TransferTxHandleIRQ(I2S_Type *base, sai_handle_t *handle)
             size = MIN((handle->saiQueue[handle->queueDriver].dataSize),
                           (size_t)(((uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(base) - handle->watermark) * dataSize));
         }
-       
+
         /* Copy the data from sai buffer to FIFO */
         SAI_WriteNonBlocking(base, handle->channel, handle->channelMask, handle->endChannel, handle->bitWidth, buffer,
                              size);
@@ -2206,7 +2222,7 @@ void SAI_TransferTxHandleIRQ(I2S_Type *base, sai_handle_t *handle)
             handle->saiQueue[handle->queueDriver].dataSize -= size;
             handle->saiQueue[handle->queueDriver].data = (uint8_t *)((uintptr_t)buffer + size);
         }
-        else 
+        else
         {
             // Handle error case - size is larger than remaining data
             handle->saiQueue[handle->queueDriver].dataSize = 0;
@@ -2227,7 +2243,7 @@ void SAI_TransferTxHandleIRQ(I2S_Type *base, sai_handle_t *handle)
             handle->saiQueue[handle->queueDriver].dataSize -= size;
             handle->saiQueue[handle->queueDriver].data = (uint8_t *)((uintptr_t)buffer + size);
         }
-        else 
+        else
         {
             // Handle error case - size is larger than remaining data
             handle->saiQueue[handle->queueDriver].dataSize = 0;
@@ -2309,7 +2325,7 @@ void SAI_TransferRxHandleIRQ(I2S_Type *base, sai_handle_t *handle)
             handle->saiQueue[handle->queueDriver].dataSize -= size;
             handle->saiQueue[handle->queueDriver].data = (uint8_t *)((uintptr_t)buffer + size);
         }
-        else 
+        else
         {
             // Handle error case - size is larger than remaining data
             handle->saiQueue[handle->queueDriver].dataSize = 0;
@@ -2330,7 +2346,7 @@ void SAI_TransferRxHandleIRQ(I2S_Type *base, sai_handle_t *handle)
             handle->saiQueue[handle->queueDriver].dataSize -= size;
             handle->saiQueue[handle->queueDriver].data = (uint8_t *)((uintptr_t)buffer + size);
         }
-        else 
+        else
         {
             // Handle error case - size is larger than remaining data
             handle->saiQueue[handle->queueDriver].dataSize = 0;

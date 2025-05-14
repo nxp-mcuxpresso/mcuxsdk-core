@@ -22,7 +22,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_SAI_DRIVER_VERSION (MAKE_VERSION(2, 4, 6)) /*!< Version 2.4.6 */
+#define FSL_SAI_DRIVER_VERSION (MAKE_VERSION(2, 4, 7)) /*!< Version 2.4.7 */
 /*! @} */
 
 /*! @brief _sai_status_t, SAI return status.*/
@@ -352,7 +352,9 @@ typedef struct _sai_fifo
 /*! @brief sai bit clock configurations */
 typedef struct _sai_bit_clock
 {
+#if defined(FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP) && FSL_FEATURE_SAI_HAS_BIT_CLOCK_SWAP
     bool bclkSrcSwap;    /*!< bit clock source swap */
+#endif
     bool bclkInputDelay; /*!< bit clock actually used by the transmitter is delayed by the pad output delay,
                            this has effect of decreasing the data input setup time, but increasing the data output valid
                            time .*/
