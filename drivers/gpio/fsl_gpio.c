@@ -8,6 +8,14 @@
 
 #include "fsl_gpio.h"
 
+/*
+ * $Coverage Justification Reference$
+ *
+ * $Justification gpio_c_ref_1$
+ * The peripheral base address is always valid and checked by assert.
+ *
+ */
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -100,6 +108,11 @@ static uint32_t GPIO_GetInstance(GPIO_Type *base)
     uint32_t instance;
 
     /* Find the instance index from base address mappings. */
+    /*
+     * $Branch Coverage Justification$
+     * (instance >= ARRAY_SIZE(s_gpioBases)) not covered.
+     * $ref gpio_c_ref_1$.
+     */
     for (instance = 0; instance < ARRAY_SIZE(s_gpioBases); instance++)
     {
         if (MSDK_REG_SECURE_ADDR(s_gpioBases[instance]) == MSDK_REG_SECURE_ADDR(base))
