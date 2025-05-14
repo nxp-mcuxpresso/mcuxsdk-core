@@ -1,5 +1,10 @@
 # FLASH
 
+## [2.3.1]
+
+- Improvement
+ - Clear flash cache before every erase to prevent the possibility of returning stale data.
+
 ## [2.3.0]
 
 - New features
