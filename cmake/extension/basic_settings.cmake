@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Copyright (c) 2022, Nordic Semiconductor ASA
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 
 # Setup basic settings for a Zephyr project.
 #
@@ -22,17 +22,9 @@
 
 include_guard(GLOBAL)
 
-include(${SdkRootDirPath}/cmake/extension/misc_function.cmake)
-set(READ_TOOL_VERSION_PY "${SdkRootDirPath}/scripts/misc/read_tool_versions.py")
 set(INTERNAL_EXAMPLE_FOLDER "examples_int")
 
-_read_tool_versions(${READ_TOOL_VERSION_PY})
-
-log_status("CMake version: ${CMAKE_VERSION}")
-if (CMAKE_VERSION VERSION_LESS ${CMAKE_MINIMUM_VERSION})
-  message("warning: The system CMake version ${CMAKE_VERSION} is lower than the recommended version ${CMAKE_MINIMUM_VERSION} which may cause unexpected build failure especially for complicated project. Please upgrade CMake to version ${CMAKE_MINIMUM_VERSION} or above.")
-endif()
-
+include(${SdkRootDirPath}/cmake/extension/basic_settings_lite.cmake)
 include(${SdkRootDirPath}/cmake/extension/python.cmake)
 include(${SdkRootDirPath}/cmake/extension/ruby.cmake)
 include(${SdkRootDirPath}/cmake/extension/sysbuild/cmake/extensions.cmake)
@@ -52,65 +44,6 @@ set(CMAKE_CXX_FLAGS
 set(CMAKE_EXE_LINKER_FLAGS
     ""
     CACHE STRING "The Linker flags" FORCE)
-
-# Source-less library that encapsulates all the global compiler options needed
-# by all source files.
-add_library(mcux_build_properties INTERFACE)
-
-list(
-  APPEND
-  MCUX_SOURCE_CONDITION
-  COMPILERS
-  TOOLCHAINS
-  CORES
-  CORE_IDS
-  BOARDS
-  DEVICE_IDS
-  FPU
-  DSP
-  MPU
-  TRUSTZONE
-  COMPONENTS)
-list(
-  APPEND
-  CMAKE_CONDITION
-  CONFIG_COMPILER
-  CONFIG_TOOLCHAIN
-  CONFIG_MCUX_HW_CORE
-  CONFIG_MCUX_HW_CORE_ID
-  CONFIG_MCUX_HW_BOARD
-  CONFIG_MCUX_HW_DEVICE_ID
-  CONFIG_MCUX_HW_FPU
-  CONFIG_MCUX_HW_DSP
-  CONFIG_MCUX_HW_MPU
-  CONFIG_MCUX_HW_SAU
-  components)
-list(APPEND LIST_CMAKE_CONDITION components)
-list(
-  APPEND
-  HARDWARE_VARIABLES
-  CONFIG_MCUX_HW_KIT
-  CONFIG_MCUX_HW_BOARD
-  CONFIG_MCUX_HW_DEVICE
-  CONFIG_MCUX_HW_DEVICE_ID
-  CONFIG_MCUX_HW_DEVICE_PART
-  CONFIG_MCUX_HW_CORE
-  CONFIG_MCUX_HW_CORE_ID
-  CONFIG_MCUX_HW_DEVICE_CORE
-  CONFIG_MCUX_HW_FPU
-  CONFIG_MCUX_HW_FPU_TYPE
-  CONFIG_MCUX_HW_DSP
-  CONFIG_MCUX_TOOLCHAIN_MCUX_STARTUP
-  CONFIG_MCUX_TOOLCHAIN_LINKER_DEVICE_PREFIX
-  CONFIG_MCUX_TOOLCHAIN_IAR_CPU_IDENTIFIER
-  CONFIG_MCUX_TOOLCHAIN_MDK_CPU_IDENTIFIER
-  CONFIG_MCUX_TOOLCHAIN_JLINK_CPU_IDENTIFIER
-  CONFIG_MCUX_HW_SOC_MULTICORE_DEVICE)
-
-list(
-  APPEND
-  USED_CONFIG_SYMBOLS
-  CONFIG_TOOLCHAIN)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.25.0")
     # Get log level, can be ERROR, WARNING, NOTICE, STATUS (default), VERBOSE, DEBUG, or TRACE.
