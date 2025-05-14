@@ -6,6 +6,6 @@ if (CONFIG_MCUX_PRJSEG_module.board.suite)
     mcux_add_codewarrior_linker_script(
             TARGETS flash_sdm_hpm_debug flash_sdm_hpm_release
             BASE_PATH ${SdkRootDirPath}
-            LINKER ${device_root}/${soc_portfolio}/${soc_series}/${device}/codewarrior/${device}_Internal_PFlash_SDM.cmd
+            LINKER ${device_root}/${soc_portfolio}/${soc_series}/${device}/codewarrior/${CONFIG_MCUX_TOOLCHAIN_LINKER_DEVICE_PREFIX}_Internal_PFlash_SDM.cmd
     )
 endif()
