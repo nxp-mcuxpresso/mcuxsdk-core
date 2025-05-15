@@ -3,7 +3,8 @@
 ## [2.0.9]
 
 - Improvements
-  - Use INPUTMUX_CLOCKS to initialize the inputmux module clock to adapt to multiple inputmux instances
+  - Use INPUTMUX_CLOCKS to initialize the inputmux module clock to adapt to multiple inputmux instances.
+  - Modify the API base type from INPUTMUX_Type to void.
 
 ## [2.0.8]
 

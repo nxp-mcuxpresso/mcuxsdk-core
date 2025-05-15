@@ -40,7 +40,7 @@
  *
  * @param base INPUTMUX peripheral base address
  */
-static uint32_t INPUTMUX_GetInstance(INPUTMUX_Type *base);
+static uint32_t INPUTMUX_GetInstance(void *base);
 #endif
 
 /*******************************************************************************
@@ -48,7 +48,7 @@ static uint32_t INPUTMUX_GetInstance(INPUTMUX_Type *base);
  ******************************************************************************/
 #if defined(INPUTMUX_RESETS_ARRAY) || defined(INPUTMUX_CLOCKS)
 /*! @brief Pointers to INPUTMUX bases for each instance. */
-static INPUTMUX_Type *const s_inputmuxBases[] = INPUTMUX_BASE_PTRS;
+static void *const s_inputmuxBases[] = INPUTMUX_BASE_PTRS;
 #endif
 
 #if defined(INPUTMUX_RESETS_ARRAY)
@@ -67,7 +67,7 @@ static const clock_ip_name_t s_inputmuxClockName[] = INPUTMUX_CLOCKS;
  * Code
  ******************************************************************************/
 #if defined(INPUTMUX_RESETS_ARRAY) || defined(INPUTMUX_CLOCKS)
-static uint32_t INPUTMUX_GetInstance(INPUTMUX_Type *base)
+static uint32_t INPUTMUX_GetInstance(void *base)
 {
     uint32_t instance;
 
@@ -95,7 +95,7 @@ static uint32_t INPUTMUX_GetInstance(INPUTMUX_Type *base)
  *
  * retval None.
  */
-void INPUTMUX_Init(INPUTMUX_Type *base)
+void INPUTMUX_Init(void *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 #if defined(FSL_FEATURE_INPUTMUX_HAS_NO_INPUTMUX_CLOCK_SOURCE) && FSL_FEATURE_INPUTMUX_HAS_NO_INPUTMUX_CLOCK_SOURCE
@@ -130,7 +130,7 @@ void INPUTMUX_Init(INPUTMUX_Type *base)
  *
  * retval None.
  */
-void INPUTMUX_AttachSignal(INPUTMUX_Type *base, uint32_t index, inputmux_connection_t connection)
+void INPUTMUX_AttachSignal(void *base, uint32_t index, inputmux_connection_t connection)
 {
     uint32_t pmux_id;
     uint32_t output_id;
@@ -155,7 +155,7 @@ void INPUTMUX_AttachSignal(INPUTMUX_Type *base, uint32_t index, inputmux_connect
  *
  * retval None.
  */
-void INPUTMUX_EnableSignal(INPUTMUX_Type *base, inputmux_signal_t signal, bool enable)
+void INPUTMUX_EnableSignal(void *base, inputmux_signal_t signal, bool enable)
 {
     uint32_t ena_id;
     uint32_t ena_id_mask = (1UL << (32U - ENA_SHIFT)) - 1U;
@@ -199,7 +199,7 @@ void INPUTMUX_EnableSignal(INPUTMUX_Type *base, inputmux_signal_t signal, bool e
  *
  * retval None.
  */
-void INPUTMUX_Deinit(INPUTMUX_Type *base)
+void INPUTMUX_Deinit(void *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 #if defined(FSL_FEATURE_INPUTMUX_HAS_NO_INPUTMUX_CLOCK_SOURCE) && FSL_FEATURE_INPUTMUX_HAS_NO_INPUTMUX_CLOCK_SOURCE

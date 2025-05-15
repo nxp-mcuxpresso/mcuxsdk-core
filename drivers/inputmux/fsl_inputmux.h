@@ -47,7 +47,7 @@ extern "C" {
  *
  * @retval None.
  */
-void INPUTMUX_Init(INPUTMUX_Type *base);
+void INPUTMUX_Init(void *base);
 
 /*!
  * @brief Attaches a signal
@@ -66,7 +66,7 @@ void INPUTMUX_Init(INPUTMUX_Type *base);
  *
  * @retval None.
  */
-void INPUTMUX_AttachSignal(INPUTMUX_Type *base, uint32_t index, inputmux_connection_t connection);
+void INPUTMUX_AttachSignal(void *base, uint32_t index, inputmux_connection_t connection);
 
 #if defined(FSL_FEATURE_INPUTMUX_HAS_SIGNAL_ENA) && FSL_FEATURE_INPUTMUX_HAS_SIGNAL_ENA
 /*!
@@ -80,7 +80,7 @@ void INPUTMUX_AttachSignal(INPUTMUX_Type *base, uint32_t index, inputmux_connect
  *
  * @retval None.
  */
-void INPUTMUX_EnableSignal(INPUTMUX_Type *base, inputmux_signal_t signal, bool enable);
+void INPUTMUX_EnableSignal(void *base, inputmux_signal_t signal, bool enable);
 #endif
 
 /*!
@@ -92,7 +92,7 @@ void INPUTMUX_EnableSignal(INPUTMUX_Type *base, inputmux_signal_t signal, bool e
  *
  * @retval None.
  */
-void INPUTMUX_Deinit(INPUTMUX_Type *base);
+void INPUTMUX_Deinit(void *base);
 
 #ifdef __cplusplus
 }
