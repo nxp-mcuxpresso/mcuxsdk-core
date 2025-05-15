@@ -306,10 +306,10 @@ typedef enum _caam_ecc_ecdsel
 #define CAAM_DES_IV_SIZE 8
 
 /*! @brief CAAM blacken key size for ECB encryption */
-#define CAAM_BLACKEN_ECB_SIZE(x) (((x) + 15u) & ~15)
+#define CAAM_BLACKEN_ECB_SIZE(x) ((uint32_t)((x) + 15u) & ~15ul)
 
 /*! @brief CAAM blacken key size for CCM encryption */
-#define CAAM_BLACKEN_CCM_SIZE(x) ((((x) + 7u) & ~7) + 12u)
+#define CAAM_BLACKEN_CCM_SIZE(x) (((uint32_t)((x) + 7u) & ~7ul) + 12u)
 
 /*! @brief CAAM DSA public key length for EC domain */
 #define CAAM_DSA_PUBLIC_KEY_LENGTH(domain)         \
@@ -368,7 +368,7 @@ typedef enum _caam_ecc_ecdsel
                                               0u)
 
 /*! @brief CAAM ECC public key length for EC domain */
-#define CAAM_ECC_PUBLIC_KEY_LENGTH(domain) (CAAM_DSA_PUBLIC_KEY_LENGTH(domain) * 2)
+#define CAAM_ECC_PUBLIC_KEY_LENGTH(domain) (CAAM_DSA_PUBLIC_KEY_LENGTH(domain) * 2u)
 
 /*! @brief CAAM ECC private key length for EC domain */
 #define CAAM_ECC_PRIVATE_KEY_LENGTH(domain)        \
@@ -430,7 +430,7 @@ typedef enum _caam_ecc_ecdsel
  *
  * The second part of key size and buffer length needed for compution may differ.
  */
-#define CAAM_ECC_SECOND_SIGN_BUFFER_SIZE(domain) ((CAAM_ECC_PRIVATE_KEY_LENGTH(domain) + 15u) & ~15)
+#define CAAM_ECC_SECOND_SIGN_BUFFER_SIZE(domain) ((CAAM_ECC_PRIVATE_KEY_LENGTH(domain) + 15u) & ~15u)
 
 /*!
  *@}
@@ -4391,6 +4391,11 @@ size_t CAAM_ECC_PrivateKeySize(caam_ecc_encryption_type_t encryptKeyType, caam_e
 /*!
  * @brief Generates public and private key for ECC.
  *
+ * The buffer size of privKey can be determined using CAAM_ECC_PRIVATE_KEY_LENGTH.
+ * The buffer size of pubKey can be determined using CAAM_ECC_PUBLIC_KEY_LENGTH.
+ * For encrypted privKey, the buffer size can be determined using CAAM_BLACKEN_ECB_SIZE
+ * or CAAM_BLACKEN_CCM_SIZE macros.
+ *
  * @param base CAAM peripheral base address
  * @param handle Handle used for this request. Specifies jobRing.
  * @param ecdsel Elliptic curve domain selection
@@ -4408,6 +4413,9 @@ status_t CAAM_ECC_KeyPair(CAAM_Type *base,
 
 /*!
  * @brief Generates signature using ECC.
+ *
+ * The buffer size of signFirst can be determined using CAAM_ECC_PRIVATE_KEY_LENGTH.
+ * ! The buffer size of signSecond can be determined using CAAM_ECC_SECOND_SIGN_BUFFER_SIZE.
  *
  * @param base CAAM peripheral base address
  * @param handle Handle used for this request. Specifies jobRing.
@@ -4432,6 +4440,8 @@ status_t CAAM_ECC_Sign(CAAM_Type *base,
 
 /*!
  * @brief Verify ECC signature using public key
+ *
+ * The buffer size of tmp can be determined using CAAM_ECC_PUBLIC_KEY_LENGTH.
  *
  * @param base CAAM peripheral base address
  * @param handle Handle used for this request. Specifies jobRing.
@@ -4508,6 +4518,10 @@ size_t CAAM_RSA_PrivateExponentSize(caam_rsa_key_type_t prvKeyType, uint32_t pri
  * Generates modulus N and private exponent D give prime numbers P and Q and public exponent E.
  * Public key is {E,N}. Private key is {D,N}.
  *
+ * ! privExponentSize value may differ for different P abd Q with same bit length.
+ * For encrypted privExponent, the buffer size can be determined using CAAM_BLACKEN_ECB_SIZE
+ * or CAAM_BLACKEN_CCM_SIZE macros.
+ *
  * @param base CAAM peripheral base address
  * @param handle Handle used for this request. Specifies jobRing.
  * @param primeP Prime number P
@@ -4519,7 +4533,7 @@ size_t CAAM_RSA_PrivateExponentSize(caam_rsa_key_type_t prvKeyType, uint32_t pri
  * @param[out] modulus Buffer for calculated modulus N
  * @param modulusSize Byte length of modulus buffer
  * @param[out] privExponent Buffer for calculated private exponent D
- * @param privExponentSize Byte length of calculated private exponent (including encryption padding)
+ * @param[out] privExponentSize Byte length of calculated private exponent.
  * @return Operation status.
  */
 status_t CAAM_RSA_KeyPair(CAAM_Type *base,
@@ -4533,7 +4547,7 @@ status_t CAAM_RSA_KeyPair(CAAM_Type *base,
                           uint8_t *modulus,
                           uint32_t modulusSize,
                           uint8_t *privExponent,
-                          uint32_t privExponentSize);
+                          size_t *privExponentSize);
 
 /*!
  * @brief Performs the RSA public key primitive.

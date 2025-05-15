@@ -3197,7 +3197,6 @@ status_t CAAM_AES_DecryptCbcExtended(CAAM_Type *base,
 {
     caam_desc_aes_cbc_t descBuf;
     status_t status;
-    memset(descBuf, 0, sizeof(descBuf));
 
     do
     {
@@ -10897,7 +10896,7 @@ status_t CAAM_RSA_KeyPair(CAAM_Type *base,
                           uint8_t *modulus,
                           uint32_t modulusSize,
                           uint8_t *privExponent,
-                          uint32_t privExponentSize)
+                          size_t *privExponentSize)
 {
     caam_desc_rsa_t descriptor;
     uint32_t descriptorSize = ARRAY_SIZE(templateRsaKeyPair);
@@ -10913,7 +10912,7 @@ status_t CAAM_RSA_KeyPair(CAAM_Type *base,
     descriptor[6] |= ADD_OFFSET((uint32_t)pubExponent);
     descriptor[7] |= ADD_OFFSET((uint32_t)modulus);
     descriptor[8] |= ADD_OFFSET((uint32_t)privExponent);
-    descriptor[9] |= ADD_OFFSET((uint32_t)&privExponentSize);
+    descriptor[9] |= ADD_OFFSET((uint32_t)privExponentSize);
     descriptor[10] |= (uint32_t)prvKeyType;
 
     status_t status = caam_in_job_ring_add_and_wait(base, handle, descriptor, kCAAM_Blocking);
@@ -10922,7 +10921,8 @@ status_t CAAM_RSA_KeyPair(CAAM_Type *base,
     /* NOTE: DCACHE must be set to write-trough mode to safely invalidate cache!! */
     /* Invalidate unaligned data can cause memory corruption in write-back mode   */
     DCACHE_InvalidateByRange((uint32_t)modulus, modulusSize);
-    DCACHE_InvalidateByRange((uint32_t)privExponent, privExponentSize);
+    DCACHE_InvalidateByRange((uint32_t)privExponentSize, sizeof(*privExponentSize));
+    DCACHE_InvalidateByRange((uint32_t)privExponent, *privExponentSize);
 #endif /* CAAM_OUT_INVALIDATE */
 
     return status;
