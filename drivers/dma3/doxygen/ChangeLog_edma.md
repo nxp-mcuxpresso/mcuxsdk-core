@@ -4,6 +4,8 @@
 
 - Improvements
   - Added peripheral to peripheral support in DMA3 driver.
+- Bug Fixes
+  - Fixed the ERQ bit reading error issue.
 
 ## [2.3.2]
 

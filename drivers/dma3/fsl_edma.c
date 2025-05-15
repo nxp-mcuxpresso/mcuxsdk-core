@@ -1325,7 +1325,7 @@ void EDMA_StartTransfer(edma_handle_t *handle)
         {
             primask = DisableGlobalIRQ();
             /* Check if channel request is actually disable. */
-            if ((handle->base->CH[handle->channel].CH_CSR & DMA_CH_CSR_ERQ_MASK & (1U << handle->channel)) == 0U)
+            if ((handle->base->CH[handle->channel].CH_CSR & DMA_CH_CSR_ERQ_MASK) == 0U)
             {
                 /* Check if transfer is paused. */
                 /*
