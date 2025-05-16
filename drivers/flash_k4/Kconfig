@@ -6,7 +6,18 @@ config MCUX_HAS_COMPONENT_driver.flash_k4
     bool
     default y if MCUX_HW_IP_DriverType_FLASH_K4
 
+config MCUX_COMPONENT_driver.flash_k4.EXPLICITLY_ALLOW_FOR_FMU_IP
+    bool "Enable flash_k4 driver for MCX series with FMU IP"
+    default n
+    depends on MCUX_HW_IP_DriverType_FMU && MCUX_HW_SOC_SERIES_MCX
+    help
+        flash_k4 driver is also compatible with FMU IP used on MCX A/N devices
+        however its integration into SDK is currently problematic due to API
+        collision with ROM based FLASH driver. This option is used to enable the
+        use of flash_k4 driver and prevent its automatic enablement based on IP
+        compatibility.
+
 config MCUX_COMPONENT_driver.flash_k4
     bool "flash_k4"
     select MCUX_COMPONENT_driver.common
-    depends on MCUX_HAS_COMPONENT_driver.flash_k4 || MCUX_HW_IP_DriverType_FMU
+    depends on MCUX_HAS_COMPONENT_driver.flash_k4 || MCUX_COMPONENT_driver.flash_k4.EXPLICITLY_ALLOW_FOR_FMU_IP
