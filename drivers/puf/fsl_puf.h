@@ -283,6 +283,7 @@ status_t PUF_GetHwKey(
  */
 status_t PUF_Zeroize(PUF_Type *base);
 
+#if defined(FSL_FEATURE_PUF_HAS_KEYRESET) && (FSL_FEATURE_PUF_HAS_KEYRESET > 0)
 /*!
  * @brief PUF HW Key Register Clearing
  *
@@ -292,6 +293,7 @@ status_t PUF_Zeroize(PUF_Type *base);
  * @param keySlot Slot of the HW key to be cleared.
  */
 void PUF_ClearKey(PUF_Type *base, puf_key_slot_t keySlot);
+#endif /* FSL_FEATURE_PUF_HAS_KEYRESET */
 
 /*!
  * @brief Checks if Get Key operation is allowed.

@@ -952,6 +952,7 @@ status_t PUF_Zeroize(PUF_Type *base)
     return status;
 }
 
+#if !(defined(FSL_FEATURE_PUF_HAS_KEYRESET) && (FSL_FEATURE_PUF_HAS_KEYRESET > 0))
 /*!
  * brief PUF HW Key Register Clearing
  *
@@ -965,3 +966,4 @@ void PUF_ClearKey(PUF_Type *base, puf_key_slot_t keySlot)
     uint32_t regVal = ((uint32_t)2U << ((uint32_t)2U * (uint32_t)keySlot));
     base->KEYRESET  = regVal;
 }
+#endif /* FSL_FEATURE_PUF_HAS_KEYRESET */
