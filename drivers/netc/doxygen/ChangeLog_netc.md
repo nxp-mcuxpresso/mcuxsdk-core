@@ -1,5 +1,10 @@
 # NETC
 
+## [2.9.1]
+
+- Improvements
+  - NETC_TimerInit() will always ignore user config->atomicMode and set it to 1 internally. This guarantees that period updates, that change both the integer and fractional part are always done atomically.
+
 ## [2.9.0]
 
 - Bug Fixes
