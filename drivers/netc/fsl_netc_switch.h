@@ -2474,7 +2474,7 @@ static inline status_t SWT_EnablePortMacStationMove(swt_handle_t *handle, netc_h
     return kStatus_Success;
 }
 
-#if defined(FSL_FEATURE_NETC_HAS_PORT_PSRCR)
+#if defined(FSL_FEATURE_NETC_HAS_PORT_PSRCR) && FSL_FEATURE_NETC_HAS_PORT_PSRCR
 /*!
  * @brief Set the port seamless redundancy configuration
  *
@@ -2495,7 +2495,7 @@ static inline status_t SWT_SetPortSR(swt_handle_t *handle, netc_hw_port_idx_t po
 }
 #endif
 
-#if defined(FSL_FEATURE_NETC_HAS_PORT_PGCR)
+#if defined(FSL_FEATURE_NETC_HAS_PORT_PGCR) && FSL_FEATURE_NETC_HAS_PORT_PGCR
 /*!
  * @brief Set the port group configuration
  *
