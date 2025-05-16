@@ -1,0 +1,2 @@
+crc>=7.0.0
+jsonschema>=4.17.0
