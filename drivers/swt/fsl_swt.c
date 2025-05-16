@@ -241,3 +241,21 @@ void SWT_SoftUnlock(SWT_Type *base)
     base->SR = SWT_SR_WSC(SWT_SECOND_WORD_OF_SOFT_UNLOCK);
     EnableGlobalIRQ(primaskValue);
 }
+
+/*!
+ * brief Set the timeout value
+ *
+ * This function will set the SWT timeout period in clock cycles.
+ * 
+ * param base SWT peripheral base address
+ * param timeoutValue The timeout value
+ */
+void SWT_SetTimeoutValue(SWT_Type *base, uint32_t timeoutValue)
+{
+#if defined(FSL_FEATURE_SWT_HAS_ERRATA_052226) && FSL_FEATURE_SWT_HAS_ERRATA_052226
+    SWT_Refresh();
+#endif /* FSL_FEATURE_SWT_HAS_ERRATA_052226 */
+
+    /* Now safe to update timeout value */
+    base->TO = SWT_TO_WTO(timeoutValue);
+}

@@ -254,10 +254,7 @@ void SWT_Refresh(SWT_Type *base);
  * @param base SWT peripheral base address
  * @param timeoutValue The timeout value
  */
-static inline void SWT_SetTimeoutValue(SWT_Type *base, uint32_t timeoutValue)
-{
-    base->TO = SWT_TO_WTO(timeoutValue);
-}
+void SWT_SetTimeoutValue(SWT_Type *base, uint32_t timeoutValue);
 
 /*!
  * @brief Set the window start value
