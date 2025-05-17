@@ -68,9 +68,8 @@ static void EMIOS_ConfigCenterAlignedDeadTimeBufferedMode(EMIOS_Type *base,
 {
     uint32_t dutyCycle;
     uint32_t period = EMIOS_GetCounterBusPeriod(base, config->counterBus, channel);
-    uint32_t counterBusMode = EMIOS_GetCounterBusMode(base, config->counterBus, channel);
     assert(period != 0U);
-    assert(counterBusMode == UC_MC_MODE_MCB_UPDOWN);
+    assert(EMIOS_GetCounterBusMode(base, config->counterBus, channel) == UC_MC_MODE_MCB_UPDOWN);
 
     if (config->dutyCycle == config->period)
     {
@@ -105,12 +104,10 @@ static void EMIOS_ConfigEdgePlacementBufferedMode(EMIOS_Type *base,
                                                   const emios_uc_pwm_config_t *config,
                                                   uint8_t channel)
 {
-    uint32_t period = EMIOS_GetCounterBusPeriod(base, config->counterBus, channel);
-    uint32_t counterBusMode = EMIOS_GetCounterBusMode(base, config->counterBus, channel);
     uint32_t trailingEdge = config->phaseShift + config->dutyCycle;
-    assert(period != 0U);
-    assert(trailingEdge <= period);
-    assert(counterBusMode == UC_MC_MODE_MCB_UP);
+    assert(EMIOS_GetCounterBusPeriod(base, config->counterBus, channel) != 0U);
+    assert(trailingEdge <= EMIOS_GetCounterBusPeriod(base, config->counterBus, channel));
+    assert(EMIOS_GetCounterBusMode(base, config->counterBus, channel) == UC_MC_MODE_MCB_UP);
 
     base->UC[channel].A = config->phaseShift;
     base->UC[channel].B = trailingEdge;
