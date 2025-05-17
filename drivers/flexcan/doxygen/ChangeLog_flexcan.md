@@ -1,5 +1,17 @@
 # FLEXCAN
 
+## [2.14.1]
+
+- Bug Fixes
+  - Fixed register `IMASK2-4` `IFLAG2-4` `HR_TIME_STAMPn` access issue on FlexCAN instances with different number of MBs.
+  - Fixed bit field `MBDSR1-3` access issue on FlexCAN instances with different number of MBs.
+- Improvements
+  - Unified following API as same parameter and return value type:
+    - `FLEXCAN_GetMbStatusFlags`
+    - `FLEXCAN_ClearMbStatusFlags`
+    - `FLEXCAN_EnableMbInterrupts`
+    - `FLEXCAN_DisableMbInterrupts`
+
 ## [2.14.0]
 
 - Improvements

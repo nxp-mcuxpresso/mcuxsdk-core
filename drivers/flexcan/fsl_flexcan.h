@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexCAN driver version. */
-#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 14, 0))
+#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 14, 1))
 /*! @} */
 
 #if !(defined(FLEXCAN_WAIT_TIMEOUT) && FLEXCAN_WAIT_TIMEOUT)
@@ -1645,7 +1645,7 @@ static inline void FLEXCAN_GetBusErrCount(CAN_Type *base, uint8_t *txErrBuf, uin
 }
 
 /*!
- * @brief Gets the FlexCAN Message Buffer interrupt flags.
+ * @brief Gets the FlexCAN low 64 Message Buffer interrupt flags.
  *
  * This function gets the interrupt flags of a given Message Buffers.
  *
@@ -1653,18 +1653,17 @@ static inline void FLEXCAN_GetBusErrCount(CAN_Type *base, uint8_t *txErrBuf, uin
  * @param mask The ORed FlexCAN Message Buffer mask.
  * @return The status of given Message Buffers.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
 static inline uint64_t FLEXCAN_GetMbStatusFlags(CAN_Type *base, uint64_t mask)
-#else
-static inline uint32_t FLEXCAN_GetMbStatusFlags(CAN_Type *base, uint32_t mask)
-#endif
 {
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-    uint64_t tempflag = (uint64_t)base->IFLAG1;
-    return (tempflag | (((uint64_t)base->IFLAG2) << 32)) & mask;
-#else
-    return (base->IFLAG1 & mask);
+    uint64_t tempflag = 0U;
+    tempflag = (uint64_t)base->IFLAG1;
+#if defined(CAN_IFLAG2_BUF63TO32I_MASK)
+    if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 32)
+    {
+        tempflag |= ((uint64_t)base->IFLAG2 << 32U);
+    }
 #endif
+    return (tempflag & mask);
 }
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB) && FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB)
@@ -1680,36 +1679,38 @@ static inline uint32_t FLEXCAN_GetMbStatusFlags(CAN_Type *base, uint32_t mask)
 static inline uint64_t FLEXCAN_GetHigh64MbStatusFlags(CAN_Type *base, uint64_t mask)
 {
     uint64_t tempflag = 0U;
-#if defined(CAN_IFLAG3_BUF95TO64_MASK)
-    tempflag |= (uint64_t)base->IFLAG3;
-#endif
+    tempflag = (uint64_t)base->IFLAG3;
 #if defined(CAN_IFLAG4_BUF127TO96_MASK)
-    tempflag |= (uint64_t)base->IFLAG4;
+    if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 96)
+    {
+        tempflag |= ((uint64_t)base->IFLAG4 << 32U);
+    }
 #endif
     return (tempflag & mask);
 }
 #endif
 
 /*!
- * @brief Clears the FlexCAN Message Buffer interrupt flags.
+ * @brief Clears the FlexCAN low 64 Message Buffer interrupt flags.
  *
  * This function clears the interrupt flags of a given Message Buffers.
  *
  * @param base FlexCAN peripheral base address.
  * @param mask The ORed FlexCAN Message Buffer mask.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
 static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint64_t mask)
-#else
-static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint32_t mask)
-#endif
 {
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-    base->IFLAG1 = (uint32_t)(mask & 0xFFFFFFFFU);
-    base->IFLAG2 = (uint32_t)(mask >> 32);
-#else
-    base->IFLAG1 = mask;
+    if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 32)
+    {
+        base->IFLAG1 = (uint32_t)(mask & 0xFFFFFFFFU);
+#if defined(CAN_IFLAG2_BUF63TO32I_MASK)
+        base->IFLAG2 = (uint32_t)(mask >> 32U);
 #endif
+    }
+    else
+    {
+        base->IFLAG1 = (uint32_t)(mask & 0xFFFFFFFFU);
+    }
 }
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB) && FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB)
@@ -1723,12 +1724,17 @@ static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint32_t mask)
  */
 static inline void FLEXCAN_ClearHigh64MbStatusFlags(CAN_Type *base, uint64_t mask)
 {
-#if defined(CAN_IFLAG3_BUF95TO64_MASK)
-    base->IFLAG3 = (uint32_t)(mask & 0xFFFFFFFFU);
-#endif
+    if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 96)
+    {
+        base->IFLAG3 = (uint32_t)(mask & 0xFFFFFFFFU);
 #if defined(CAN_IFLAG4_BUF127TO96_MASK)
-    base->IFLAG4 = (uint32_t)(mask >> 32U);
+        base->IFLAG4 = (uint32_t)(mask >> 32U);
 #endif
+    }
+    else
+    {
+        base->IFLAG3 = (uint32_t)(mask & 0xFFFFFFFFU);
+    }
 }
 #endif
 
@@ -1924,27 +1930,28 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t mask)
 }
 
 /*!
- * @brief Enables FlexCAN Message Buffer interrupts.
+ * @brief Enables FlexCAN low 64 Message Buffer interrupts.
  *
  * This function enables the interrupts of given Message Buffers.
  *
  * @param base FlexCAN peripheral base address.
  * @param mask The ORed FlexCAN Message Buffer mask.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
 static inline void FLEXCAN_EnableMbInterrupts(CAN_Type *base, uint64_t mask)
-#else
-static inline void FLEXCAN_EnableMbInterrupts(CAN_Type *base, uint32_t mask)
-#endif
 {
     uint32_t primask = DisableGlobalIRQ();
 
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-    base->IMASK1 |= (uint32_t)(mask & 0xFFFFFFFFU);
-    base->IMASK2 |= (uint32_t)(mask >> 32);
-#else
-    base->IMASK1 |= mask;
+    if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 32)
+    {
+        base->IMASK1 |= (uint32_t)(mask & 0xFFFFFFFFU);
+#if defined(CAN_IMASK2_BUF63TO32M_MASK)
+        base->IMASK2 |= (uint32_t)(mask >> 32U);
 #endif
+    }
+    else
+    {
+        base->IMASK1 |= (uint32_t)(mask & 0xFFFFFFFFU);
+    }
     EnableGlobalIRQ(primask);
 }
 
@@ -1961,38 +1968,44 @@ static inline void FLEXCAN_EnableHigh64MbInterrupts(CAN_Type *base, uint64_t mas
 {
     uint32_t primask = DisableGlobalIRQ();
 
-#if defined(CAN_IMASK3_BUF95TO64M_MASK)
-    base->IMASK3 |= (uint32_t)(mask & 0xFFFFFFFFU);
+    if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 96)
+    {
+        base->IMASK3 |= (uint32_t)(mask & 0xFFFFFFFFU);
+#if defined(CAN_IMASK4_BUF127TO96M_MASK)
+        base->IMASK4 |= (uint32_t)(mask >> 32U);
 #endif
-#if defined(CAN_IMASK4_BUF127TO96_MASK)
-    base->IMASK4 |= (uint32_t)(mask >> 32U);
-#endif
+    }
+    else
+    {
+        base->IMASK3 |= (uint32_t)(mask & 0xFFFFFFFFU);
+    }
     EnableGlobalIRQ(primask);
 }
 #endif
 
 /*!
- * @brief Disables FlexCAN Message Buffer interrupts.
+ * @brief Disables FlexCAN low 64 Message Buffer interrupts.
  *
  * This function disables the interrupts of given Message Buffers.
  *
  * @param base FlexCAN peripheral base address.
  * @param mask The ORed FlexCAN Message Buffer mask.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
 static inline void FLEXCAN_DisableMbInterrupts(CAN_Type *base, uint64_t mask)
-#else
-static inline void FLEXCAN_DisableMbInterrupts(CAN_Type *base, uint32_t mask)
-#endif
 {
     uint32_t primask = DisableGlobalIRQ();
 
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-    base->IMASK1 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
-    base->IMASK2 &= ~((uint32_t)(mask >> 32));
-#else
-    base->IMASK1 &= ~mask;
+    if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 32)
+    {
+        base->IMASK1 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
+#if defined(CAN_IMASK2_BUF63TO32M_MASK)
+        base->IMASK2 &= ~((uint32_t)(mask >> 32U));
 #endif
+    }
+    else
+    {
+        base->IMASK1 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
+    }
     EnableGlobalIRQ(primask);
 }
 
@@ -2009,12 +2022,17 @@ static inline void FLEXCAN_DisableHigh64MbInterrupts(CAN_Type *base, uint64_t ma
 {
     uint32_t primask = DisableGlobalIRQ();
 
-#if defined(CAN_IMASK3_BUF95TO64M_MASK)
-    base->IMASK3 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
+    if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 96)
+    {
+        base->IMASK3 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
+#if defined(CAN_IMASK4_BUF127TO96M_MASK)
+        base->IMASK4 &= ~((uint32_t)(mask >> 32U));
 #endif
-#if defined(CAN_IMASK4_BUF127TO96_MASK)
-    base->IMASK4 &= ~((uint32_t)(mask >> 32U));
-#endif
+    }
+    else
+    {
+        base->IMASK3 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
+    }
     EnableGlobalIRQ(primask);
 }
 #endif
