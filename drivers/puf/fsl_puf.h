@@ -24,9 +24,9 @@
  */
 /*! @name Driver version */
 /*! @{ */
-/*! @brief PUF driver version. Version 2.1.7.
+/*! @brief PUF driver version. Version 2.2.0.
  *
- * Current version: 2.1.7
+ * Current version: 2.2.0
  *
  * Change log:
  * - 2.0.0
@@ -56,7 +56,7 @@
  * - 2.1.6
  *   - Changed wait time in PUF_Init(), when initialization fails it will try PUF_Powercycle() with shorter time. If
  * this shorter time will also fail, initialization will be tried with worst case time as before.
- * - 2.1.7
+ * - 2.2.0
  * - Add support for kPUF_KeySlot4.
  * - Add new PUF_ClearKey() function, that clears a desired PUF internal HW key register.
  */

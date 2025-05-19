@@ -952,7 +952,7 @@ status_t PUF_Zeroize(PUF_Type *base)
     return status;
 }
 
-#if !(defined(FSL_FEATURE_PUF_HAS_KEYRESET) && (FSL_FEATURE_PUF_HAS_KEYRESET > 0))
+#if defined(FSL_FEATURE_PUF_HAS_KEYRESET) && (FSL_FEATURE_PUF_HAS_KEYRESET > 0)
 /*!
  * brief PUF HW Key Register Clearing
  *

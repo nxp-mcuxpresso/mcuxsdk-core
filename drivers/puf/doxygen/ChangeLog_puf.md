@@ -1,6 +1,6 @@
 # PUF
 
-## [2.1.7]
+## [2.2.0]
 
 - Add support for kPUF_KeySlot4.
 - Add new PUF_ClearKey() function, that clears a desired PUF internal HW key register.
