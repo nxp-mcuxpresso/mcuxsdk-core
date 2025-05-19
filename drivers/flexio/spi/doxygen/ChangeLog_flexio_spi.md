@@ -1,5 +1,11 @@
 # FLEXIO_SPI
 
+## [2.4.2]
+
+- Bug Fixes
+  - Fixed `FLEXIO_SPI_MasterTransferBlocking` and `FLEXIO_SPI_MasterTransferNonBlocking`
+    issue in CS continuous mode, the CS might not be continuous.
+
 ## [2.4.1]
 
 - Bug Fixes
