@@ -17,7 +17,7 @@
           <Vendor>NXP</Vendor>
           <PackID>NXP.MCXE247_DFP.25.03.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
-          <Cpu>IRAM(0x14000000,0x1000) IRAM2(0x1ffe0000,0x020000) IROM(0x10000000,0x8000) IROM2(0x00000000,0x180000) XRAM(0x20000000,0x01f000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>IRAM(0x14000000,0x1000) IRAM2(0x1ffe0000,0x020000) IROM(0x10000000,0x080000) IROM2(0x00000000,0x180000) XRAM(0x20000000,0x01f000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
           <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD1FFE0000 -FC3F000 -FN1 -FF0MCXE247_P1536_4KB_SEC -FS00 -FL0180000 -FP0($$Device:MCXE247VLQ$devices\MCXE247\arm\MCXE247_P1536_4KB_SEC.FLM))</FlashDriverDll>
@@ -251,7 +251,7 @@
               <IROM>
                 <Type>1</Type>
                 <StartAddress>0x10000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x80000</Size>
               </IROM>
               <XRAM>
                 <Type>1</Type>
@@ -259,24 +259,24 @@
                 <Size>0x1f000</Size>
               </XRAM>
               <OCR_RVCT1>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
               </OCR_RVCT1>
               <OCR_RVCT2>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
               </OCR_RVCT2>
               <OCR_RVCT3>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x10000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x80000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -284,7 +284,7 @@
                 <Size>0x180000</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
-                <Type>0</Type>
+                <Type>1</Type>
                 <StartAddress>0x20000000</StartAddress>
                 <Size>0x1f000</Size>
               </OCR_RVCT6>
@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>   --c99 --diag_suppress=1296,186</MiscControls>
-              <Define>CPU_MCXE247VLQ DEBUG  KEIL NDEBUG</Define>
+              <Define>CPU_MCXE247VLQ DEBUG  KEIL</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -391,10 +391,10 @@
           <Vendor>NXP</Vendor>
           <PackID>NXP.MCXE247_DFP.25.03.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
-          <Cpu>IRAM(0x20000000,0x00007000) IRAM2(0x1FFF8000,0x00008000) IROM(0x00000000,0x00080000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>IRAM(0x14000000,0x1000) IRAM2(0x1ffe0000,0x020000) IROM(0x10000000,0x080000) IROM2(0x00000000,0x180000) XRAM(0x20000000,0x01f000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0MCXE247_P1536_4KB_SEC -FS00 -FL0180000 -FP0($$Device:MCXE247$Flash\MCXE247_P1536_4KB_SEC.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD1FFE0000 -FC3F000 -FN1 -FF0MCXE247_P1536_4KB_SEC -FS00 -FL0180000 -FP0($$Device:MCXE247$Flash\MCXE247_P1536_4KB_SEC.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
           <RegisterFile>$$Device:MCXE247$devices\MCXE247\fsl_device_registers.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
@@ -483,11 +483,11 @@
         </CommonProperty>
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
-          <SimDllArguments>  -MPU</SimDllArguments>
+          <SimDllArguments> </SimDllArguments>
           <SimDlgDll>DCM.DLL</SimDlgDll>
           <SimDlgDllArguments>-pCM4</SimDlgDllArguments>
           <TargetDllName>SARMCM3.DLL</TargetDllName>
-          <TargetDllArguments> -MPU</TargetDllArguments>
+          <TargetDllArguments></TargetDllArguments>
           <TargetDlgDll>TCM.DLL</TargetDlgDll>
           <TargetDlgDllArguments>-pCM4</TargetDlgDllArguments>
         </DllOption>
@@ -507,7 +507,7 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4096</DriverSelection>
+            <DriverSelection>-1</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
@@ -554,20 +554,20 @@
             <uocRam>0</uocRam>
             <hadIROM>1</hadIROM>
             <hadIRAM>1</hadIRAM>
-            <hadXRAM>0</hadXRAM>
+            <hadXRAM>1</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>2</RvdsVP>
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
             <nBranchProt>0</nBranchProt>
             <hadIRAM2>1</hadIRAM2>
-            <hadIROM2>0</hadIROM2>
-            <StupSel>8</StupSel>
-            <useUlib>0</useUlib>
+            <hadIROM2>1</hadIROM2>
+            <StupSel>16</StupSel>
+            <useUlib>1</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
-            <RoSelD>3</RoSelD>
+            <RoSelD>4</RoSelD>
             <RwSelD>4</RwSelD>
             <CodeSel>0</CodeSel>
             <OptFeed>0</OptFeed>
@@ -580,12 +580,12 @@
             <Ro2Chk>0</Ro2Chk>
             <Ro3Chk>0</Ro3Chk>
             <Ir1Chk>1</Ir1Chk>
-            <Ir2Chk>0</Ir2Chk>
+            <Ir2Chk>1</Ir2Chk>
             <Ra1Chk>0</Ra1Chk>
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
             <Im1Chk>1</Im1Chk>
-            <Im2Chk>0</Im2Chk>
+            <Im2Chk>1</Im2Chk>
             <OnChipMemories>
               <Ocm1>
                 <Type>0</Type>
@@ -619,48 +619,48 @@
               </Ocm6>
               <IRAM>
                 <Type>0</Type>
-                <StartAddress>0x20000000</StartAddress>
-                <Size>0x7000</Size>
+                <StartAddress>0x14000000</StartAddress>
+                <Size>0x1000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
+                <StartAddress>0x10000000</StartAddress>
                 <Size>0x80000</Size>
               </IROM>
               <XRAM>
-                <Type>0</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <Type>1</Type>
+                <StartAddress>0x20000000</StartAddress>
+                <Size>0x1f000</Size>
               </XRAM>
               <OCR_RVCT1>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
               </OCR_RVCT1>
               <OCR_RVCT2>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
               </OCR_RVCT2>
               <OCR_RVCT3>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x0</StartAddress>
                 <Size>0x0</Size>
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
+                <StartAddress>0x10000000</StartAddress>
                 <Size>0x80000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <Size>0x180000</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
-                <Type>0</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <Type>1</Type>
+                <StartAddress>0x20000000</StartAddress>
+                <Size>0x1f000</Size>
               </OCR_RVCT6>
               <OCR_RVCT7>
                 <Type>0</Type>
@@ -674,13 +674,13 @@
               </OCR_RVCT8>
               <OCR_RVCT9>
                 <Type>0</Type>
-                <StartAddress>0x20000000</StartAddress>
-                <Size>0x7000</Size>
+                <StartAddress>0x14000000</StartAddress>
+                <Size>0x1000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x1fff8000</StartAddress>
-                <Size>0x8000</Size>
+                <StartAddress>0x1ffe0000</StartAddress>
+                <Size>0x20000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
             <RvctStartVector></RvctStartVector>
@@ -690,7 +690,7 @@
             <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
-            <OneElfS>1</OneElfS>
+            <OneElfS>0</OneElfS>
             <Strict>0</Strict>
             <EnumInt>0</EnumInt>
             <PlainCh>0</PlainCh>
@@ -711,7 +711,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>   --c99 --diag_suppress=1296,186</MiscControls>
-              <Define>CPU_MCXE247VLL NDEBUG  KEIL CPU_MCXE247VLL</Define>
+              <Define>CPU_MCXE247VLL NDEBUG  KEIL</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
