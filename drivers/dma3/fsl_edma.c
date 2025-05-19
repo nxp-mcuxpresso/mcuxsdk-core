@@ -978,60 +978,9 @@ void EDMA_PrepareTransferConfig(edma_transfer_config_t *config,
 
     config->minorLoopBytes  = bytesEachRequest;
     config->majorLoopCounts = transferBytes / bytesEachRequest;
-    switch (srcWidth)
-    {
-        case 1U:
-            config->srcTransferSize = kEDMA_TransferSize1Bytes;
-            break;
-        case 2U:
-            config->srcTransferSize = kEDMA_TransferSize2Bytes;
-            break;
-        case 4U:
-            config->srcTransferSize = kEDMA_TransferSize4Bytes;
-            break;
-        case 8U:
-            config->srcTransferSize = kEDMA_TransferSize8Bytes;
-            break;
-        case 16U:
-            config->srcTransferSize = kEDMA_TransferSize16Bytes;
-            break;
-        case 32U:
-            config->srcTransferSize = kEDMA_TransferSize32Bytes;
-            break;
-        case 64U:
-            config->srcTransferSize = kEDMA_TransferSize64Bytes;
-            break;
-        default:
-            assert(false);
-            break;
-    }
-    switch (destWidth)
-    {
-        case 1U:
-            config->destTransferSize = kEDMA_TransferSize1Bytes;
-            break;
-        case 2U:
-            config->destTransferSize = kEDMA_TransferSize2Bytes;
-            break;
-        case 8U:
-            config->destTransferSize = kEDMA_TransferSize8Bytes;
-            break;
-        case 4U:
-            config->destTransferSize = kEDMA_TransferSize4Bytes;
-            break;
-        case 16U:
-            config->destTransferSize = kEDMA_TransferSize16Bytes;
-            break;
-        case 32U:
-            config->destTransferSize = kEDMA_TransferSize32Bytes;
-            break;
-        case 64U:
-            config->destTransferSize = kEDMA_TransferSize64Bytes;
-            break;
-        default:
-            assert(false);
-            break;
-    }
+
+    config->srcTransferSize = EDMA_GetTransferSize(srcWidth);
+    config->destTransferSize = EDMA_GetTransferSize(destWidth);
 
     config->destOffset = destOffset;
     config->srcOffset  = srcOffset;

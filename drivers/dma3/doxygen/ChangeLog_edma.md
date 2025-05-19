@@ -1,5 +1,10 @@
 # EDMA (DMA3)
 
+## [2.5.0]
+
+- Improvements
+  - Add API EDMA_GetTransferSize for EDMA_PrepareTransferConfig to reduce HIS CCM value.
+
 ## [2.4.0]
 
 - Improvements

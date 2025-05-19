@@ -23,7 +23,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief eDMA driver version */
-#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 4, 0)) /*!< Version 2.4.0. */
+#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 5, 0)) /*!< Version 2.5.0. */
 /*! @} */
 
 /*! @brief eDMA transfer configuration */
@@ -997,6 +997,50 @@ static inline uint32_t EDMA_GetUnusedTCDNumber(edma_handle_t *handle)
 static inline uint32_t EDMA_GetNextTCDAddress(edma_handle_t *handle)
 {
     return (handle->base->CH[handle->channel].TCD_DLAST_SGA);
+}
+
+/*!
+ * @brief Get the transfer size.
+ *
+ * This function gets the transfer size.
+ *
+ * @param width transfer width(bytes).
+ * @return The transfer size.
+ */
+static edma_transfer_size_t EDMA_GetTransferSize(uint32_t width)
+{
+    assert((width == 1U) || (width == 2U) || (width == 4U) || (width == 8U) || (width == 16U) ||
+           (width == 32U) || (width == 64U));
+    
+    edma_transfer_size_t transferSize;
+
+    switch (width)
+    {
+        case 1U:
+            transferSize =  kEDMA_TransferSize1Bytes;
+            break;
+        case 2U:
+            transferSize = kEDMA_TransferSize2Bytes;
+            break;
+        case 4U:
+            transferSize = kEDMA_TransferSize4Bytes;
+            break;
+        case 8U:
+            transferSize = kEDMA_TransferSize8Bytes;
+            break;
+        case 16U:
+            transferSize = kEDMA_TransferSize16Bytes;
+            break;
+        case 32U:
+            transferSize = kEDMA_TransferSize32Bytes;
+            break;
+        case 64U:
+            transferSize = kEDMA_TransferSize64Bytes;
+            break;
+    }
+    
+    return transferSize;
+
 }
 
 /*!
