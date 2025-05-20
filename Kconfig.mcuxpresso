@@ -79,6 +79,7 @@ menu "Middleware"
     osource "middleware/emwin/Kconfig"
     osource "middleware/dhara/Kconfig"
     osource "middleware/mcu_bootloader/Kconfig"
+    osource "middleware/canopennode/Kconfig"
 endmenu
 
 # RTOS config
