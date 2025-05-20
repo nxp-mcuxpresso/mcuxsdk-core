@@ -149,7 +149,7 @@ void PIT_RTI_Init(PIT_Type *base, const pit_config_t *config)
     /* Enable PIT RTI timer */
     base->MCR &= ~(PIT_MCR_MDIS_RTI_MASK | PIT_MCR_MDIS_MASK);
     /* Clear all status bits for RTI to make sure the status of TCTRL registers is clean. */
-    base->RTI_TCTRL &= ~(PIT_RTI_TCTRL_TEN_MASK | PIT_RTI_TCTRL_TIE_MASK | PIT_RTI_TCTRL_CHN_MASK);
+    base->RTI_TCTRL &= ~(PIT_RTI_TCTRL_TEN_MASK | PIT_RTI_TCTRL_TIE_MASK);
 
     /* Config timer operation when in debug mode */
     if (true == config->enableRunInDebug)

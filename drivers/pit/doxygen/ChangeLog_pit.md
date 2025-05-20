@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - According to ERR050763, PIT_LDVAL_STAT register is not reliable in dynamic load mode, so remove the status check in PIT_SetRtiTimerPeriod which added since 2.1.1.
+  - Removed not used bit PIT_RTI_TCTRL_CHN_MASK.
 - Improvements
   - Added more guide about get RTI load status in PIT_SetRtiTimerPeriod's API comment.
   - Change PIT_RTI_Deinit to inline API.
