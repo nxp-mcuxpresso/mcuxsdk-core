@@ -253,7 +253,7 @@ void SWT_SoftUnlock(SWT_Type *base)
 void SWT_SetTimeoutValue(SWT_Type *base, uint32_t timeoutValue)
 {
 #if defined(FSL_FEATURE_SWT_HAS_ERRATA_052226) && FSL_FEATURE_SWT_HAS_ERRATA_052226
-    SWT_Refresh();
+    SWT_Refresh(base);
 #endif /* FSL_FEATURE_SWT_HAS_ERRATA_052226 */
 
     /* Now safe to update timeout value */
