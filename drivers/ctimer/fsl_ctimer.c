@@ -54,7 +54,7 @@ static const reset_ip_name_t s_ctimerResets[] = CTIMER_RSTS;
 #endif
 #endif /* FSL_SDK_DISABLE_DRIVER_RESET_CONTROL */
 
-/*! @brief Pointers real ISRs installed by drivers for each instance. */
+/*! @brief Pointers to real ISRs function pointer installed by drivers for each instance. */
 static ctimer_callback_t *s_ctimerCallback[sizeof(s_ctimerBases) / sizeof(s_ctimerBases[0])] = {0};
 
 /*! @brief Callback type installed by drivers for each instance. */
@@ -532,8 +532,23 @@ void CTIMER_SetupCapture(CTIMER_Type *base,
 /*!
  * brief Register callback.
  *
+ * This function configures CTimer Callback in following modes:
+ * - Single Callback:
+ * cb_func should be pointer to callback function pointer
+ * For example:
+ * ctimer_callback_t ctimer_callback = pwm_match_callback;
+ * CTIMER_RegisterCallBack(CTIMER, &ctimer_callback, kCTIMER_SingleCallback);
+ * 
+ * - Multiple Callback:
+ * cb_func should be pointer to array of callback function pointers
+ * Each element corresponds to Interrupt Flag in IR register.
+ * For example:
+ * ctimer_callback_t ctimer_callback_table[] = {
+ *   ctimer_match0_callback, NULL, NULL, ctimer_match3_callback, NULL, NULL, NULL, NULL};
+ * CTIMER_RegisterCallBack(CTIMER, &ctimer_callback_table[0], kCTIMER_MultipleCallback);
+ *
  * param base      Ctimer peripheral base address
- * param cb_func   callback function
+ * param cb_func   Pointer to callback function pointer
  * param cb_type   callback function type, singular or multiple
  */
 void CTIMER_RegisterCallBack(CTIMER_Type *base, ctimer_callback_t *cb_func, ctimer_callback_type_t cb_type)
