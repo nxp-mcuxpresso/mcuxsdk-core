@@ -86,18 +86,12 @@ module CodeWarrior
     end
 
     def set_target_initialization_file(target, path, *args, rootdir: nil)
-      path = File.relpath(
-          @modifier.fullpath(@output_dir),
-          @modifier.fullpath(path)
-      )
+      path = path_mod(path, rootdir)
       super(target, File.join('${ProjDirPath}', path))
     end
 
     def set_memory_config_file(target, path, rootdir: nil)
-      path = File.relpath(
-          @modifier.fullpath(@output_dir),
-          @modifier.fullpath(path)
-      )
+      path = path_mod(path, rootdir)
       super(target, File.join('${ProjDirPath}', path))
     end
 
