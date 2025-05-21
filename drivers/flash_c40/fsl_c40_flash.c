@@ -7,6 +7,9 @@
  */
 
 /*
+    Version 1.1.0:
+        - Generic setup for entire family
+
     Version 1.0.0:
         - Support for Erase and Write
         - Basic support for Sector Locking
@@ -39,46 +42,47 @@
 #endif
 
 
-#ifdef CPU_MCXE31BMPB
+/* Flash size parameters that differ across devices*/
 
-/* Flash parameters for MCX E318 */
-
-#define C40_BLOCK_SIZE_CODE    (1024 * 1024)
-#define C40_BLOCK_SIZE_DATA    ( 128 * 1024)
-
-#define C40_BLOCK_COUNT_CODE    (4)
-#define C40_BLOCK_COUNT_DATA    (1)
-
-#define C40_BASE_ADDR_CODE       (0x00400000)
-#define C40_END_ADDR_CODE        (0x007FFFFF)
-
-#define C40_BASE_ADDR_DATA       (0x10000000)
-#define C40_END_ADDR_DATA        (0x1001FFFF)
-
-/*
- * RM, PFLASH chapter:
- * For 1 MB blocks, the first 768 KB is protected with super sector granularity.
- */
-#define C40_MAX_SUPER_SECTOR_BLOCK_AREA (768 * 1024)
-
-
-#else
-#error "No device specified"
-#endif
-
+#define C40_BLOCK_SIZE_CODE    FSL_FEATURE_FLASH_C40_BLOCK_SIZE_CODE
+#define C40_BLOCK_SIZE_DATA    FSL_FEATURE_FLASH_C40_BLOCK_SIZE_DATA
+#define C40_BLOCK_COUNT_CODE   FSL_FEATURE_FLASH_C40_BLOCK_COUNT_CODE
 
 
 /* Common definitions for entire family */
+
+#define C40_BLOCK_COUNT_DATA     (1)
+
+#define C40_BASE_ADDR_CODE       (0x00400000)
+#define C40_END_ADDR_CODE        (C40_BASE_ADDR_CODE + (C40_BLOCK_SIZE_CODE * C40_BLOCK_COUNT_CODE) - 1)
+
+#define C40_BASE_ADDR_DATA       (0x10000000)
+#define C40_END_ADDR_DATA        (C40_BASE_ADDR_DATA + (C40_BLOCK_SIZE_DATA * C40_BLOCK_COUNT_DATA) - 1)
+
 
 #define C40_SECTOR_SIZE        ( 8 * 1024)
 #define C40_SUPER_SECTOR_SIZE  (64 * 1024)
 
 #define C40_SECTORS_IN_SUPER_SECTOR (C40_SUPER_SECTOR_SIZE / C40_SECTOR_SIZE)
 
-/* Flash block count sanity check */
-#if (PFLASH_PFCBLKI_SPELOCK_COUNT-1) != C40_BLOCK_COUNT_CODE
-#error "C40 flash block count mismatch"
+/*
+ * RM, PFLASH chapter:
+ * For 512 KB blocks, the first half of the block is protected with super sector granularity.
+ * For 1 MB blocks, the first 768 KB is protected with super sector granularity.
+ */
+
+#if FSL_FEATURE_FLASH_C40_BLOCK_SIZE_CODE == (1024 * 1024)
+
+#define C40_MAX_SUPER_SECTOR_BLOCK_AREA (768 * 1024)
+
+#elif FSL_FEATURE_FLASH_C40_BLOCK_SIZE_CODE == (512 * 1024)
+
+#define C40_MAX_SUPER_SECTOR_BLOCK_AREA (512 * 1024)
+
+#else
+#error "Unexpected flash block size"
 #endif
+
 
 #define C40_NUM_SECTORS_PER_BLOCK_CODE    (C40_BLOCK_SIZE_CODE / C40_SECTOR_SIZE)
 #define C40_NUM_SECTORS_PER_BLOCK_DATA    (C40_BLOCK_SIZE_DATA / C40_SECTOR_SIZE)

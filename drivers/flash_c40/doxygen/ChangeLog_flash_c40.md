@@ -1,5 +1,9 @@
 # FLASH-C40
 
+## [1.1.0]
+
+- Generic device setup for entire MCX E31 family
+
 ## [1.0.1]
 
 - Fixed write to page unaligned address
