@@ -1,0 +1,76 @@
+/*!
+@defgroup rtc RTC: Real Time Clock
+@details The MCUXpresso SDK provides a driver for the Real Time Clock (RTC)
+         of MCUXpresso SDK devices.
+
+## Initialization and Configuration {#RTCInit}
+The following functions are provided for RTC initialization and configuration:
+- RTC_Init(): Initializes RTC with specified configurations
+- RTC_GetDefaultConfig(): Gets default configuration values
+- RTC_Deinit(): Resets RTC registers and disables module
+- RTC_Reset(): Performs software reset of RTC module
+
+## Time and Date Operations {#RTCDatetime}
+Functions for time/date operations:
+- RTC_SetDatetime(): Sets current date and time
+- RTC_GetDatetime(): Gets current date and time
+- RTC_StartTimer(): Starts RTC time counter
+- RTC_StopTimer(): Stops RTC time counter
+
+## Alarm Configuration {#RTCAlarm}
+Alarm-related functions:
+- RTC_SetAlarm(): Sets alarm time
+- RTC_GetAlarm(): Gets configured alarm time
+- RTC_EnableAlarm(): Enables specified alarm
+- RTC_DisableAlarm(): Disables specified alarm
+- RTC_ConfigureBCDAlarm(): Configures BCD format alarm
+
+## Watchdog Timer {#RTCWatchdog}
+Watchdog timer functions:
+- RTC_EnableWatchdog(): Enables watchdog timer
+- RTC_DisableWatchdog(): Disables watchdog timer
+- RTC_RefreshWatchdog(): Refreshes watchdog timer
+- RTC_SetWatchdogTimeout(): Sets watchdog timeout value
+
+## Tamper Detection {#RTCTamper}
+Tamper detection features:
+- RTC_ConfigureTamperInput(): Configures tamper input pins
+- RTC_EnableTamperInputPin(): Enables tamper detection
+- RTC_DisableTamperInputPin(): Disables tamper detection
+- RTC_GetTamperTimestamp(): Gets tamper event timestamp
+
+## Interrupts {#RTCInterrupt}
+Interrupt control functions:
+- RTC_EnableInterrupts(): Enables selected interrupts
+- RTC_DisableInterrupts(): Disables selected interrupts
+- RTC_GetEnabledInterrupts(): Gets enabled interrupts
+- RTC_GetInterruptFlags(): Gets interrupt status flags
+- RTC_ClearInterruptFlags(): Clears interrupt flags
+
+## Monotonic Counter {#RTCMonotonic}
+64-bit monotonic counter functions:
+- RTC_SetMonotonicCounter(): Writes to counter
+- RTC_GetMonotonicCounter(): Reads counter value
+- RTC_IncrementMonotonicCounter(): Increments counter
+
+## Callback Mechanism {#RTCCallback}
+Callback registration:
+- RTC_RegisterCallBack(): Registers callback function
+- RTC_UnregisterCallBack(): Unregisters callback
+
+# Typical Use Cases {#RTCUseCase}
+
+## Basic Timekeeping {#RTCBasic}
+Example for basic time/date functionality
+
+## Alarm Usage {#RTCAlarmUse}
+Example for setting and handling alarms
+
+## Watchdog Usage {#RTCWatchdogUse}
+Example for watchdog timer implementation
+
+## Tamper Detection {#RTCTamperUse}
+Example for tamper detection configuration
+
+Refer to driver examples at <SDK_ROOT>/boards/<BOARD>/driver_examples/rtc_analog
+*/

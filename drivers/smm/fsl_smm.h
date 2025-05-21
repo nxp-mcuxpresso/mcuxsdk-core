@@ -56,6 +56,15 @@ typedef struct _smm_backup_reg_content
     uint32_t word2; /* The second word of backend register 2. */
 } smm_backup_reg_content_t;
 
+/*!
+ * @brief Watchdog alarm use enumeration.
+ */
+typedef enum _smm_watchdog_alarm_use
+{
+    kSMM_WatchdogAlarmAsReset = 0U,       /*!< Watchdog alarm as reset. */
+    kSMM_WatchdogAlarmAsInterrupt = 1U    /*!< Watchdog alarm as interrupt. */
+} smm_watchdog_alarm_use_t;
+
 /*******************************************************************************
 * API
 ******************************************************************************/
@@ -441,6 +450,18 @@ static inline void SMM_ClearMainCpuWakeupSources(SMM_Type *base)
 static inline void SMM_ClearAonCpuWakeupSources(SMM_Type *base)
 {
     base->AON_CPU &= ~SMM_AON_CPU_WKUP_SRC_AON_CPU_MASK;
+}
+
+/*!
+ * @brief Config the watchdog alarm use.
+ *
+ * @param base SMM base address.
+ * @param alarmUse The watchdog alarm use.
+ */
+static inline void SMM_ConfigWatchdogAlarmUse(SMM_Type *base, smm_watchdog_alarm_use_t alarmUse)
+{
+    base->CNFG &= ~(SMM_CNFG_WTCHDG_USE_INT_MASK);
+    base->CNFG |= SMM_CNFG_WTCHDG_USE_INT(alarmUse);
 }
 
 

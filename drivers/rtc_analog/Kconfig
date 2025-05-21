@@ -1,0 +1,37 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.rtc_analog
+    bool
+    default y if MCUX_HW_IP_DriverType_RTC_ANALOG
+
+config MCUX_COMPONENT_driver.rtc_analog
+    bool "rtc"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.rtc_analog
+
+if MCUX_COMPONENT_driver.rtc_analog
+
+    config RTC_WAIT_INTERFACE_READY_TIMEOUT
+        int "RTC wait interface ready timeout"
+        default 0
+        help
+            RTC wait interface ready timeout.
+            type unsigned.
+
+    config RTC_WAIT_READ_COUNTER_LATCHED_READY
+        bool "RTC wait read counter latched ready"
+        default 0
+        help
+            Wait for the RTC counter to be latched before reading it.
+            type unsigned.
+
+    config RTC_WAIT_SECURE_KEY_READY_TIMEOUT
+        int "RTC wait secure key ready timeout"
+        default 0
+        help
+            RTC wait secure key ready timeout.
+            type unsigned.
+
+endif
