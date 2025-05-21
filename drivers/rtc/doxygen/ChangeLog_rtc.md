@@ -1,5 +1,10 @@
 # RTC
 
+## [2.3.2]
+
+- Improvements
+  - Handle errata 010716: Disable the counter before setting alarm register and then reenable the counter.
+
 ## [2.3.1]
 
 - Bug Fixes

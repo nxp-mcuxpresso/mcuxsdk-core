@@ -351,6 +351,10 @@ status_t RTC_SetAlarm(RTC_Type *base, const rtc_datetime_t *alarmTime)
     uint32_t alarmSeconds = 0;
     uint32_t currSeconds  = 0;
 
+#if defined(FSL_FEATURE_RTC_HAS_ERRATA_010716) && (FSL_FEATURE_RTC_HAS_ERRATA_010716)
+    bool restartCounter = false;
+#endif /* FSL_FEATURE_RTC_HAS_ERRATA_010716 */
+
     /* Return error if the alarm time provided is not valid */
     if (!(RTC_CheckDatetimeFormat(alarmTime)))
     {
@@ -368,8 +372,23 @@ status_t RTC_SetAlarm(RTC_Type *base, const rtc_datetime_t *alarmTime)
         return kStatus_Fail;
     }
 
+#if defined(FSL_FEATURE_RTC_HAS_ERRATA_010716) && (FSL_FEATURE_RTC_HAS_ERRATA_010716)
+    /* Save current TCE state */
+    restartCounter = ((base->SR & RTC_SR_TCE_MASK) != 0U);
+    /* Disable time counter */
+    base->SR &= ~RTC_SR_TCE_MASK;
+#endif /* FSL_FEATURE_RTC_HAS_ERRATA_010716 */
+
     /* Set alarm in seconds*/
     base->TAR = alarmSeconds;
+
+#if defined(FSL_FEATURE_RTC_HAS_ERRATA_010716) && (FSL_FEATURE_RTC_HAS_ERRATA_010716)
+    /* Restore TCE if it was enabled */
+    if (restartCounter)
+    {
+        base->SR |= RTC_SR_TCE_MASK;
+    }
+#endif /* FSL_FEATURE_RTC_HAS_ERRATA_010716 */
 
     return kStatus_Success;
 }

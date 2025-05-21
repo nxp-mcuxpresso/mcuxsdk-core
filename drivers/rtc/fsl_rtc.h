@@ -21,7 +21,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_RTC_DRIVER_VERSION (MAKE_VERSION(2, 3, 1)) /*!< Version 2.3.1 */
+#define FSL_RTC_DRIVER_VERSION (MAKE_VERSION(2, 3, 2)) /*!< Version 2.3.2 */
 /*! @} */
 
 /*! @brief List of RTC interrupts */
