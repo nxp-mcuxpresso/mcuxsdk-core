@@ -237,10 +237,9 @@ macro(project project_name)
         log_warn("There is no prj.conf in any path of CUSTOM_PRJ_CONF_PATH" ${CMAKE_CURRENT_LIST_FILE})
       endif()
     endif()
-    if(DEFINED EXTRA_MCUX_MODULES)
-      # extra module must be added first, then kconfig.cmake can add kconfig file from extra module
-      include(${SdkRootDirPath}/cmake/extension/mcux_module.cmake)
-    endif ()
+
+    # extra module must be added first, then kconfig.cmake can add kconfig file from extra module
+    include(${SdkRootDirPath}/cmake/extension/mcux_module.cmake)
 
     # kconfig process
     include(${SdkRootDirPath}/cmake/extension/kconfig.cmake)
@@ -253,7 +252,7 @@ macro(project project_name)
   mcux_load_project_ide_data()
 
   #load extra modules
-  if(DEFINED EXTRA_MCUX_MODULES)
+  if(DEFINED MCUX_MODULE_NAMES)
     mcux_load_extra_module()
   endif()
 

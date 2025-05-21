@@ -49,7 +49,8 @@ set(cmake_modules_file ${CMAKE_BINARY_DIR}/mcux_modules.txt)
 set(cmake_sysbuild_file ${CMAKE_BINARY_DIR}/sysbuild_modules.txt)
 set(mcux_settings_file ${CMAKE_BINARY_DIR}/mcux_settings.txt)
 
-if(EXTRA_MCUX_MODULES)
+# Search modules by using west, so only call it if west is installed
+if(DEFINED WEST)
     execute_process(
             COMMAND
             ${PYTHON_EXECUTABLE} ${SdkRootDirPath}/scripts/misc/mcux_module.py
@@ -209,7 +210,9 @@ function(mcux_load_extra_module)
                             endif()
                         endif()
                     else()
-                        log_warn("Module ${module_name} is not found, please check:
+                        # Since we have enabled automatic module loading feature, it's common for loaded modules not to be used. 
+                        # No need to give warning message.
+                        log_debug("Module ${module_name} is not found, please check:
                         1. The module is enabled in prj.conf or by kconfig
                         2. Whether module folder name is same as module name, if not, set \"name\" in module.yml which aligns with name in add_library() function " ${CMAKE_CURRENT_LIST_FILE})
                     endif()

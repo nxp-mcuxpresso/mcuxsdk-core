@@ -679,7 +679,8 @@ class Build(Forceable):
 
         extra_args = {
             'SdkRootDirPath': pathlib.Path(__file__).resolve().parent.parent.parent.as_posix(),
-            "HINT": self.args.hint
+            "HINT": self.args.hint,
+            'WEST': _CMAKE_TRUE
             }
         if self.args.toolchain == 'zephyr':
             extra_args['ZEPHYR_SDK'] = 'y'

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 #
 # Copyright (c) 2019, Nordic Semiconductor ASA
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 # Originally modified from:
 # https://github.com/zephyrproject-rtos/zephyr/blob/main/scripts/zephyr_module.py
 # SPDX-License-Identifier: Apache-2.0
 
-'''Tool for parsing a list of projects to determine if they are Zephyr
+'''Tool for parsing a list of projects to determine if they are mcux
 projects. If no projects are given then the output from `west list` will be
 used as project list.
 
@@ -16,7 +16,7 @@ A <name>:<path> text file is generated for use with CMake using --cmake-out.
 Using --twister-out <filename> an argument file for twister script will
 be generated which would point to test and sample roots available in modules
 that can be included during a twister run. This allows testing code
-maintained in modules in addition to what is available in the main Zephyr tree.
+maintained in modules in addition to what is available in the main mcux tree.
 '''
 
 import argparse
@@ -39,7 +39,7 @@ METADATA_SCHEMA = '''
 ## A pykwalify schema for basic validation of the structure of a
 ## metadata YAML file.
 ##
-# The zephyr/module.yml file is a simple list of key value pairs to be used by
+# The mcux/module.yml file is a simple list of key value pairs to be used by
 # the build system.
 type: map
 mapping:
@@ -189,8 +189,8 @@ def validate_setting(setting, module_path, filename=None):
 def process_module(module):
     module_path = PurePath(module)
 
-    # The input is a module if zephyr/module.{yml,yaml} is a valid yaml file
-    # or if both zephyr/CMakeLists.txt and zephyr/Kconfig are present.
+    # The input is a module if mcux/module.{yml,yaml} is a valid yaml file
+    # or if both mcux/CMakeLists.txt and mcux/Kconfig are present.
 
     for module_yml in [module_path / MODULE_YML_PATH,
                        module_path / MODULE_YML_PATH.with_suffix('.yaml')]:
@@ -208,12 +208,14 @@ def process_module(module):
             meta['name'] = meta.get('name', module_path.name)
             meta['name-sanitized'] = re.sub('[^a-zA-Z0-9]', '_', meta['name'])
             return meta
-
-    if Path(module_path.joinpath('zephyr/CMakeLists.txt')).is_file() and \
-            Path(module_path.joinpath('zephyr/Kconfig')).is_file():
-        return {'name': module_path.name,
-                'name-sanitized': re.sub('[^a-zA-Z0-9]', '_', module_path.name),
-                'build': {'cmake': 'zephyr', 'kconfig': 'zephyr/Kconfig'}}
+    # Note: Currently many middlewares in mcuxsdk/middleware also put cmake and kconfig files in mcux, and they have already been
+    # added by mcux_add_cmakelists, to prevent duplicated loading, disable the code below. Hence for mcux build system, external
+    # modules must set module.yml
+    # if Path(module_path.joinpath('mcux/CMakeLists.txt')).is_file() and \
+    #         Path(module_path.joinpath('mcux/Kconfig')).is_file():
+    #     return {'name': module_path.name,
+    #             'name-sanitized': re.sub('[^a-zA-Z0-9]', '_', module_path.name),
+    #             'build': {'cmake': 'mcux', 'kconfig': 'mcux/Kconfig'}}
 
     return None
 
@@ -221,7 +223,7 @@ def process_module(module):
 def process_cmake(module, meta):
     section = meta.get('build', dict())
     module_path = PurePath(module)
-    module_yml = module_path.joinpath('zephyr/module.yml')
+    module_yml = module_path.joinpath('mcux/module.yml')
 
     cmake_extern = section.get('cmake-ext', False)
     if cmake_extern:
@@ -236,7 +238,7 @@ def process_cmake(module, meta):
                  'does not contain a CMakeLists.txt file.'
                  .format(module_yml.as_posix(), cmake_setting))
 
-    cmake_path = os.path.join(module, cmake_setting or 'zephyr')
+    cmake_path = os.path.join(module, cmake_setting or 'mcux')
     cmake_file = os.path.join(cmake_path, 'CMakeLists.txt')
     if os.path.isfile(cmake_file):
         return('\"{}\":\"{}\":\"{}\"\n'
@@ -252,7 +254,7 @@ def process_cmake(module, meta):
 def process_sysbuildcmake(module, meta):
     section = meta.get('build', dict())
     module_path = PurePath(module)
-    module_yml = module_path.joinpath('zephyr/module.yml')
+    module_yml = module_path.joinpath('mcux/module.yml')
 
     cmake_extern = section.get('sysbuild-cmake-ext', False)
     if cmake_extern:
@@ -270,7 +272,7 @@ def process_sysbuildcmake(module, meta):
     if cmake_setting is None:
         return ""
 
-    cmake_path = os.path.join(module, cmake_setting or 'zephyr')
+    cmake_path = os.path.join(module, cmake_setting or 'mcux')
     cmake_file = os.path.join(cmake_path, 'CMakeLists.txt')
     if os.path.isfile(cmake_file):
         return('\"{}\":\"{}\":\"{}\"\n'
@@ -350,7 +352,7 @@ def process_kconfig(module, meta):
     taint_blobs = any(b['status'] != BLOB_NOT_PRESENT for b in blobs)
     section = meta.get('build', dict())
     module_path = PurePath(module)
-    module_yml = module_path.joinpath('zephyr/module.yml')
+    module_yml = module_path.joinpath('mcux/module.yml')
     kconfig_extern = section.get('kconfig-ext', False)
     if kconfig_extern:
         return kconfig_snippet(meta, module_path, blobs=taint_blobs)
@@ -361,7 +363,7 @@ def process_kconfig(module, meta):
                  'not point to a valid Kconfig file.'
                  .format(module_yml, kconfig_setting))
 
-    kconfig_file = os.path.join(module, kconfig_setting or 'zephyr/Kconfig')
+    kconfig_file = os.path.join(module, kconfig_setting or 'mcux/Kconfig')
     if os.path.isfile(kconfig_file):
         return kconfig_snippet(meta, module_path, Path(kconfig_file),
                                blobs=taint_blobs)
@@ -375,7 +377,7 @@ def process_kconfig(module, meta):
 def process_sysbuildkconfig(module, meta):
     section = meta.get('build', dict())
     module_path = PurePath(module)
-    module_yml = module_path.joinpath('zephyr/module.yml')
+    module_yml = module_path.joinpath('mcux/module.yml')
     kconfig_extern = section.get('sysbuild-kconfig-ext', False)
     if kconfig_extern:
         return kconfig_snippet(meta, module_path, sysbuild=True)
@@ -525,25 +527,25 @@ def process_meta(mcux_base, west_projs, modules, extra_modules=None,
     # with meta information for each input.
     #
     # The dictionary will contain meta info in the following lists:
-    # - zephyr:        path and revision
+    # - mcux:        path and revision
     # - modules:       name, path, and revision
     # - west-projects: path and revision
     #
     # returns the dictionary with said lists
 
-    meta = {'zephyr': None, 'modules': None, 'workspace': None}
+    meta = {'mcux': None, 'modules': None, 'workspace': None}
 
-    zephyr_project, zephyr_dirty = _create_meta_project(mcux_base)
-    zephyr_off = zephyr_project.get("remote") is None
+    mcux_project, mcux_dirty = _create_meta_project(mcux_base)
+    mcux_off = mcux_project.get("remote") is None
 
-    workspace_dirty = zephyr_dirty
+    workspace_dirty = mcux_dirty
     workspace_extra = extra_modules is not None
-    workspace_off = zephyr_off
+    workspace_off = mcux_off
 
-    if zephyr_off:
-        zephyr_project['revision'] += '-off'
+    if mcux_off:
+        mcux_project['revision'] += '-off'
 
-    meta['zephyr'] = zephyr_project
+    meta['mcux'] = mcux_project
     meta['workspace'] = {}
 
     if west_projs is not None:
@@ -555,8 +557,8 @@ def process_meta(mcux_base, west_projs, modules, extra_modules=None,
 
         # Special treatment of manifest project
         # Git information (remote/revision) are not provided by west for the Manifest (west.yml)
-        # To mitigate this, we check if we don't use the manifest from the zephyr repository or an other project.
-        # If it's from zephyr, reuse zephyr information
+        # To mitigate this, we check if we don't use the manifest from the mcux repository or an other project.
+        # If it's from mcux, reuse mcux information
         # If it's from an other project, ignore it, it will be added later
         # If it's not found, we extract data manually (remote/revision) from the directory
 
@@ -565,9 +567,9 @@ def process_meta(mcux_base, west_projs, modules, extra_modules=None,
         manifest_off = False
 
         if mcux_base == manifest_path:
-            manifest_project = zephyr_project
-            manifest_dirty = zephyr_dirty
-            manifest_off = zephyr_off
+            manifest_project = mcux_project
+            manifest_dirty = mcux_dirty
+            manifest_off = mcux_off
         elif not [ prj for prj in projects[1:] if prj.posixpath == manifest_path ]:
             manifest_project, manifest_dirty = _create_meta_project(
                 projects[0].posixpath)
@@ -631,14 +633,14 @@ def process_meta(mcux_base, west_projs, modules, extra_modules=None,
                               'extra': workspace_extra})
 
     if propagate_state:
-        zephyr_revision = zephyr_project['revision']
-        if workspace_dirty and not zephyr_dirty:
-            zephyr_revision += '-dirty'
+        mcux_revision = mcux_project['revision']
+        if workspace_dirty and not mcux_dirty:
+            mcux_revision += '-dirty'
         if workspace_extra:
-            zephyr_revision += '-extra'
-        if workspace_off and not zephyr_off:
-            zephyr_revision += '-off'
-        zephyr_project.update({'revision': zephyr_revision})
+            mcux_revision += '-extra'
+        if workspace_off and not mcux_off:
+            mcux_revision += '-off'
+        mcux_project.update({'revision': mcux_revision})
 
         if west_projs is not None:
             manifest_revision = manifest_project['revision']
@@ -701,10 +703,10 @@ def west_projects(manifest=None):
 def parse_modules(mcux_base, manifest=None, west_projs=None, modules=None,
                   extra_modules=None):
 
-    # if modules is None:
-    #     west_projs = west_projs or west_projects(manifest)
-    #     modules = ([p.posixpath for p in west_projs['projects']]
-    #                if west_projs else [])
+    if modules is None:
+        west_projs = west_projs or west_projects(manifest)
+        modules = ([p.posixpath for p in west_projs['projects']]
+                   if west_projs else [])
     if modules is None:
         modules = []
     if extra_modules is None:
@@ -721,7 +723,7 @@ def parse_modules(mcux_base, manifest=None, west_projs=None, modules=None,
     sorted_modules = []
 
     for project in modules + extra_modules:
-        # Avoid including Zephyr base project as module.
+        # Avoid including mcux base project as module.
         if project == mcux_base:
             continue
 
@@ -732,7 +734,7 @@ def parse_modules(mcux_base, manifest=None, west_projs=None, modules=None,
 
         elif project in extra_modules:
             sys.exit(f'{project}, given in MCUX_EXTRA_MODULES, '
-                     'is not a valid zephyr module')
+                     'is not a valid mcux module')
 
     for module in all_modules_by_name.values():
         if not module.depends:
@@ -770,7 +772,7 @@ def parse_modules(mcux_base, manifest=None, west_projs=None, modules=None,
 def main():
     parser = argparse.ArgumentParser(description='''
     Process a list of projects and create Kconfig / CMake include files for
-    projects which are also a Zephyr module''', allow_abbrev=False)
+    projects which are also a mcux module''', allow_abbrev=False)
 
     parser.add_argument('--kconfig-out',
                         help="""File to write with resulting KConfig import
@@ -789,12 +791,12 @@ def main():
                              values to use for including in CMake""")
     parser.add_argument('--meta-out',
                         help="""Write a build meta YaML file containing a list
-                             of Zephyr modules and west projects.
+                             of mcux modules and west projects.
                              If a module or project is also a git repository
                              the current SHA revision will also be written.""")
     parser.add_argument('--meta-state-propagate', action='store_true',
                         help="""Propagate state of modules and west projects
-                             to the suffix of the Zephyr SHA and if west is
+                             to the suffix of the mcux SHA and if west is
                              used, to the suffix of the manifest SHA""")
     parser.add_argument('--settings-out',
                         help="""File to write with resulting <name>:<value>
@@ -805,7 +807,7 @@ def main():
     parser.add_argument('-x', '--extra-modules', nargs='+',
                         help='List of extra modules to parse')
     parser.add_argument('-z', '--mcux-base',
-                        help='Path to zephyr repository')
+                        help='Path to mcux repository')
     args = parser.parse_args()
 
     kconfig = ""
@@ -815,8 +817,8 @@ def main():
     settings = ""
     twister = ""
 
-    # west_projs = west_projects()
-    west_projs = None
+    west_projs = west_projects()
+
     modules = parse_modules(args.mcux_base, None, west_projs,
                             args.modules, args.extra_modules)
 
