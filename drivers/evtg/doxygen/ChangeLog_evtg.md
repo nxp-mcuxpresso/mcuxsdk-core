@@ -1,5 +1,10 @@
 # EVTG
 
+## [2.0.2]
+
+- Bug Fixes
+  - MISRA C-2012 issue fixed: rule 10.8.
+
 ## [2.0.1]
 
 - Bug Fixes
