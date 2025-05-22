@@ -1,5 +1,10 @@
 # TPM
 
+## [2.3.5]
+
+- New Feature
+  - Added IRQ handler entry for TPM2.
+
 ## [2.3.4]
 
 - New Feature

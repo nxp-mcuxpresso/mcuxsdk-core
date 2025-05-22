@@ -1191,3 +1191,15 @@ void TPM1_DriverIRQHandler(void)
     SDK_ISR_EXIT_BARRIER;
 }
 #endif
+
+#if defined(TPM2)
+void TPM2_DriverIRQHandler(void);
+void TPM2_DriverIRQHandler(void)
+{
+    if (NULL != s_tpmCallback[2])
+    {
+        s_tpmCallback[2](TPM2);
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+#endif
