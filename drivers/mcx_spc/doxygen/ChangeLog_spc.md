@@ -1,5 +1,10 @@
 # MCX_SPC
 
+## [2.8.0]
+
+- New Features
+  - Updated MCX_SPC driver for compatibility with SoCs without PD_STATUS[PWR_REQ_STATUS].
+
 ## [2.7.0]
 
 - New Features
