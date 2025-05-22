@@ -1007,7 +1007,7 @@ static inline uint32_t EDMA_GetNextTCDAddress(edma_handle_t *handle)
  * @param width transfer width(bytes).
  * @return The transfer size.
  */
-static edma_transfer_size_t EDMA_GetTransferSize(uint32_t width)
+static inline edma_transfer_size_t EDMA_GetTransferSize(uint32_t width)
 {
     assert((width == 1U) || (width == 2U) || (width == 4U) || (width == 8U) || (width == 16U) ||
            (width == 32U) || (width == 64U));
