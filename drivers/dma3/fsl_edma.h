@@ -1014,6 +1014,8 @@ static inline edma_transfer_size_t EDMA_GetTransferSize(uint32_t width)
     
     edma_transfer_size_t transferSize;
 
+    transferSize = kEDMA_TransferSize1Bytes;
+
     switch (width)
     {
         case 1U:
