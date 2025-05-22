@@ -24,6 +24,10 @@ if(CONFIG_MCUX_COMPONENT_device.startup)
         ${SdkRootDirPath}/${device_root}/${soc_portfolio}/${soc_series}/${device}
         SOURCES
         startup_${CONFIG_MCUX_HW_DEVICE_CORE}.c
+        TOOLCHAINS
+        iar
+        armgcc
+        mdk
         CONFIG
         true)
 
