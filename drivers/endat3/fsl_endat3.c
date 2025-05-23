@@ -170,15 +170,15 @@ status_t ENDAT3_FG_Echo(ENDAT3_Type *base, uint16_t arbitrary_data)
 		return kStatus_Endat3_FG_ECHO_Failed;
 	}
 
-	if (rsp.hpf.hpf.data[6] != 0x0 || rsp.hpf.hpf.data[5] != 0x02) {
+	if (rsp.hpf.hpf.data[1] != 0x0 || rsp.hpf.hpf.data[0] != 0x02) {
 		return kStatus_Endat3_FG_ECHO_Failed;
 	}
 
-	if (rsp.hpf.hpf.data[4] != (arbitrary_data >> 8) || rsp.hpf.hpf.data[3] != (arbitrary_data & 0xFF)) {
+	if (rsp.hpf.hpf.data[5] != (arbitrary_data >> 8) || rsp.hpf.hpf.data[4] != (arbitrary_data & 0xFF)) {
 		return kStatus_Endat3_FG_ECHO_Failed;
 	}
 
-    return kStatus_Success;
+	return kStatus_Success;
 }
 
 /* FG requests for BUS mode */
@@ -229,15 +229,15 @@ status_t ENDAT3_FG_Bus_P2P_Echo(ENDAT3_Type *base, uint8_t addr, uint16_t arbitr
 		return kStatus_Endat3_FG_ECHO_Failed;
 	}
 
-	if (rsp.hpf.hpf.data[6] != 0x0 || rsp.hpf.hpf.data[5] != 0x02) {
+	if (rsp.hpf.hpf.data[1] != 0x0 || rsp.hpf.hpf.data[0] != 0x02) {
 		return kStatus_Endat3_FG_ECHO_Failed;
 	}
 
-	if (rsp.hpf.hpf.data[4] != (arbitrary_data >> 8) || rsp.hpf.hpf.data[3] != (arbitrary_data & 0xFF)) {
+	if (rsp.hpf.hpf.data[5] != (arbitrary_data >> 8) || rsp.hpf.hpf.data[4] != (arbitrary_data & 0xFF)) {
 		return kStatus_Endat3_FG_ECHO_Failed;
 	}
 
-    return kStatus_Success;
+	return kStatus_Success;
 }
 
 /* API interface for BG commnunication*/
@@ -270,9 +270,9 @@ status_t ENDAT3_BG_WaitReqFinished(ENDAT3_Type *base, uint8_t bus_addr, uint8_t 
 	while (!(base->BG_RSP_1 & (ENDAT3_BG_RSP_1_BG_HANDLER_IDLE_MASK | ENDAT3_BG_RSP_1_BG_HANDLER_ERROR_MASK))) {
 		if (fg_strobes) {
 #if (ENDAT3_PARTICIPANTS_NUM > 1)
-				ENDAT3_FG_Bus_P2P_Data(base, bus_addr, ENDAT3_FG_REQ_DATA0, NULL);
+			ENDAT3_FG_Bus_P2P_Data(base, bus_addr, ENDAT3_FG_REQ_DATA0, NULL);
 #else
-				ENDAT3_FG_Data(base, ENDAT3_FG_REQ_DATA0, NULL);
+			ENDAT3_FG_Data(base, ENDAT3_FG_REQ_DATA0, NULL);
 #endif
 		}
 
@@ -305,8 +305,6 @@ status_t ENDAT3_BG_Req_Rsp(ENDAT3_Type *base, uint8_t bus_addr, struct BGREQ *re
 
 	*rsp = ENDAT3_BG_GetRsp(base);
 	if (base->BG_RSP_1 & ENDAT3_BG_RSP_1_BG_ERR_EXEC_MASK) {
-
-		//PRINTF("BG_ERR: %s\r\n", ENDAT3_Err2str(*rsp & 0xFFFF));
 		return kStatus_Endat3_BG_Excute_Error;
 	}
 	return kStatus_Success;
@@ -370,8 +368,8 @@ status_t ENDAT3_BG_Read(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr, uint
 
 status_t ENDAT3_BG_Write(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr, const uint16_t word, uint8_t fg_strobes)
 {
-    struct BGREQ req = {0};
-    uint64_t bg_rsp;
+	struct BGREQ req = {0};
+	uint64_t bg_rsp;
 
 	req.WRITE.code = ENDAT3_BG_OPCODE_WRITE;
 	req.WRITE.addr[0] = (addr >> 16) & 0xFF;
@@ -383,11 +381,10 @@ status_t ENDAT3_BG_Write(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr, con
 	return ENDAT3_BG_Req_Rsp(base, bus_addr, &req, &bg_rsp, fg_strobes, 10);
 }
 
-
 status_t ENDAT3_BG_Auth(ENDAT3_Type *base, uint8_t bus_addr, uint8_t usrlevel, uint32_t pass, uint8_t fg_strobes)
 {
-    struct BGREQ req = {0};
-    uint64_t bg_rsp;
+	struct BGREQ req = {0};
+	uint64_t bg_rsp;
 	req.AUTH.code = ENDAT3_BG_OPCODE_AUTH;
 	req.AUTH.usrlevel = usrlevel;
 	req.AUTH.pass = BSWAP32(pass);
@@ -396,8 +393,8 @@ status_t ENDAT3_BG_Auth(ENDAT3_Type *base, uint8_t bus_addr, uint8_t usrlevel, u
 
 status_t ENDAT3_BG_Setpass(ENDAT3_Type *base, uint8_t bus_addr, uint8_t usrlevel, uint32_t pass, uint8_t fg_strobes)
 {
-    struct BGREQ req = {0};
-    uint64_t bg_rsp;
+	struct BGREQ req = {0};
+	uint64_t bg_rsp;
 	req.SETPASS.code = ENDAT3_BG_OPCODE_SETPASS;
 	req.SETPASS.usrlevel = usrlevel;
 	req.SETPASS.pass = BSWAP32(pass);
@@ -406,8 +403,8 @@ status_t ENDAT3_BG_Setpass(ENDAT3_Type *base, uint8_t bus_addr, uint8_t usrlevel
 
 status_t ENDAT3_BG_Protect(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr, uint8_t mode, const uint8_t acclevel, uint8_t *al_write, uint8_t *al_read, uint8_t fg_strobes)
 {
-    struct BGREQ req = {0};
-    uint64_t bg_rsp;
+	struct BGREQ req = {0};
+	uint64_t bg_rsp;
 	status_t status;
 	req.PROTECT.code = ENDAT3_BG_OPCODE_PROTECT;
 	req.PROTECT.address[0] = (addr >> 16) & 0xFF;
@@ -426,8 +423,8 @@ status_t ENDAT3_BG_Protect(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr, u
 
 status_t ENDAT3_BG_Locate(ENDAT3_Type *base, uint8_t bus_addr, uint8_t ctrl, uint8_t fg_strobes)
 {
-    struct BGREQ req = {0};
-    uint64_t bg_rsp;
+	struct BGREQ req = {0};
+	uint64_t bg_rsp;
 	req.LOCATE.code = ENDAT3_BG_OPCODE_LOCATE;
 	req.LOCATE.ctrl = ctrl;
 	return ENDAT3_BG_Req_Rsp(base, bus_addr, &req, &bg_rsp, fg_strobes, 20);
@@ -463,9 +460,8 @@ status_t ENDAT3_memRead(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr,  uin
 
 status_t ENDAT3_memWrite(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr,  uint16_t n_words, uint16_t *pbuf, uint8_t fg_strobes)
 {
-    status_t status;
+	status_t status;
 	while (n_words > 0) {
-
 		if ((status = ENDAT3_BG_Write(base, bus_addr, addr, *pbuf, fg_strobes)) != kStatus_Success) {
 			return status;
 		}
@@ -476,7 +472,6 @@ status_t ENDAT3_memWrite(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr,  ui
 
 	return kStatus_Success;
 }
-
 
 status_t ENDAT3_memCacheInit(ENDAT3_Type *base, uint8_t bus_addr, uint32_t mem_base, endat3_mem_cache_t *cache, uint16_t *pbuf, uint32_t pbufSize, uint8_t fg_strobes)
 {
@@ -545,7 +540,7 @@ uint16_t ENDAT3_memGetRangeSize(ENDAT3_Type *base, uint8_t bus_addr, uint32_t me
 {
 	uint32_t addr;
 	uint16_t size;
-	status_t status;
+
 	mem_base &= ~0xFFFF;
 	switch (mem_base) {
 		case ENDAT3_MEM_BASE_EL:
@@ -574,11 +569,11 @@ uint16_t ENDAT3_memGetRangeSize(ENDAT3_Type *base, uint8_t bus_addr, uint32_t me
 			addr = ENDAT3_MEM_FEATURE1_SIZE_OFFSET; break;
 		case ENDAT3_MEM_BASE_FEATURE2:
 			addr = ENDAT3_MEM_FEATURE2_SIZE_OFFSET; break;
-		default: return 0; break;
+		default: return 0;
 
 	}
 
-	if ((status = ENDAT3_memRead(base, bus_addr, addr, 1, &size, fg_strobes)) != kStatus_Success) {
+	if (ENDAT3_memRead(base, bus_addr, addr, 1, &size, fg_strobes) != kStatus_Success) {
 		return 0;
 	}
 
@@ -633,8 +628,8 @@ static uint32_t ENDAT3_memCalcCS(uint16_t *p, const uint16_t len)
 		}
 	}
 
-  cs = ENDAT3_memCalcCSReflect(cs, order);
-  cs = cs ^ xor_value;
+	cs = ENDAT3_memCalcCSReflect(cs, order);
+	cs = cs ^ xor_value;
 
 	return cs;
 }
@@ -648,7 +643,6 @@ status_t ENDAT3_memCacheCheckCS(endat3_mem_cache_t *cache)
 	}
 	return kStatus_Success;
 }
-
 
 status_t ENDAT3_memCacheUpdataCS(endat3_mem_cache_t *cache)
 {
@@ -678,8 +672,8 @@ void ENDAT3_lpfCacheGetXdimYdim(uint8_t z, endat3_mem_cache_t *lpf_cache, uint8_
 
 void ENDAT3_lpfCacheSetPointer(uint8_t z, endat3_mem_cache_t *lpf_cache, uint16_t pointer)
 {
- 	ENDAT3_memCacheSetDirty(lpf_cache, ENDAT3_MEM_LPFSET_LPFLIVE_HEAD_POINTER_1_OFFSET  + z - 1, 1);
-    *(lpf_cache->cacheMem + ENDAT3_MEM_LPFSET_LPFLIVE_HEAD_POINTER_1_OFFSET  + z - 1) = pointer;
+	ENDAT3_memCacheSetDirty(lpf_cache, ENDAT3_MEM_LPFSET_LPFLIVE_HEAD_POINTER_1_OFFSET  + z - 1, 1);
+	*(lpf_cache->cacheMem + ENDAT3_MEM_LPFSET_LPFLIVE_HEAD_POINTER_1_OFFSET  + z - 1) = pointer;
 }
 
 void ENDAT3_lpfCacheSetXdimYdim(uint8_t z, endat3_mem_cache_t *lpf_cache, uint8_t xdim, uint8_t y_dim)
@@ -771,31 +765,31 @@ void ENDAT3_lpfCacheListUpdate(endat3_mem_cache_t *global_cache, endat3_mem_cach
 /* FID_BASED_MEM API */
 status_t ENDAT3_FIDMEM_getLpf(ENDAT3_Type *base, uint8_t bus_addr, uint8_t fid, struct FID *fid_res)
 {
-       struct FID *temp =  ENDAT3_GET_FID_ADDR(base, bus_addr, fid);
-       memcpy (fid_res, temp, sizeof(struct FID));
-       return kStatus_Success;
+	struct FID *temp =  ENDAT3_GET_FID_ADDR(base, bus_addr, fid);
+	memcpy (fid_res, temp, sizeof(struct FID));
+	return kStatus_Success;
 }
 
 uint8_t ENDAT3_FIDMEM_getTimestamp(ENDAT3_Type *base, uint8_t bus_addr, uint8_t fid)
 {
 
-       struct FID *temp =  ENDAT3_GET_FID_ADDR(base, bus_addr, fid);
-       return temp->fid.timeStamp;
+	struct FID *temp =  ENDAT3_GET_FID_ADDR(base, bus_addr, fid);
+	return temp->fid.timeStamp;
 }
 
 
 uint8_t ENDAT3_lpfGetLPFVByFID(ENDAT3_Type *base, uint8_t bus_addr, uint8_t fid)
 {
 
-       struct FID *temp =  ENDAT3_GET_FID_ADDR(base, bus_addr, fid);
-       return temp->fid.lpfv;
+	struct FID *temp =  ENDAT3_GET_FID_ADDR(base, bus_addr, fid);
+	return temp->fid.lpfv;
 }
 
 uint64_t ENDAT3_FIDMEM_getData(ENDAT3_Type *base, uint8_t bus_addr, uint8_t fid)
 {
 
-       struct FID *temp =  ENDAT3_GET_FID_ADDR(base, bus_addr, fid);
-       return ENDAT3_READ_FID_LPF_DATA(temp->fid64);
+	struct FID *temp =  ENDAT3_GET_FID_ADDR(base, bus_addr, fid);
+	return ENDAT3_READ_FID_LPF_DATA(temp->fid64);
 }
 
 /* Assign bus address for all encoders */
