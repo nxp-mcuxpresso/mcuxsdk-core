@@ -1,5 +1,10 @@
 # BiSS
 
+## [1.0.2]
+
+- Bug Fixes
+    - Fixed freqMADiv and freqAGSDiv setting
+
 ## [1.0.1]
 
 - Bug Fixes

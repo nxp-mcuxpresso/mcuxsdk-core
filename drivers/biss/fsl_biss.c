@@ -405,28 +405,31 @@ biss_master_t *BISS_MasterInit(BISS_Type *base, uint32_t srcClock_Hz,
                                uint32_t ma_Hz, uint32_t ags_Hz)
 {
     biss_master_t *master = BISS_GetMaster(base);
+    int ret;
 
     master->base = base;
 
     BISS_MasterInfoReset(master);
 
     /* Configurate the clock div for BISS device */
-    master->freqMADiv = (uint8_t)BISS_CalculateMADiv(master, srcClock_Hz, ma_Hz);
-    if (master->freqMADiv == 0)
+    ret = BISS_CalculateMADiv(master, srcClock_Hz, ma_Hz);
+    if (ret < 0)
     {
         return NULL;
     }
 
+    master->freqMADiv = (uint8_t) ret;
     BISS_SetFREQS(master, master->freqMADiv);
     BISS_SetFREQR(master, 0x05);
 
     /* Configurate the clock div for BISS device */
-    master->freqAGSDiv = (uint8_t)BISS_CalculateAGSDiv(master, srcClock_Hz, ags_Hz);
-    if (master->freqAGSDiv == 0)
+    ret = BISS_CalculateAGSDiv(master, srcClock_Hz, ags_Hz);
+    if (ret < 0)
     {
         return NULL;
     }
 
+    master->freqAGSDiv = (uint8_t) ret;
     BISS_SetFREQAGS(master, master->freqAGSDiv);
 
     /* Setup CRC check and BANK config */
