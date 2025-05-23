@@ -1,5 +1,10 @@
 # ISI
 
+## [2.2.4]
+
+- Bug Fixes
+  - Fixed CERT INT31-C INT30-C violations.
+
 ## [2.0.2]
 
 - Bug Fixes
