@@ -12,7 +12,7 @@ if(CONFIG_MCUX_COMPONENT_driver.lpflexcomm_lpspi)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.lpflexcomm_lpspi_edma)
-    mcux_component_version(2.1.3)
+    mcux_component_version(2.1.4)
 
     mcux_add_source(SOURCES fsl_lpspi_edma.h fsl_lpspi_edma.c)
 

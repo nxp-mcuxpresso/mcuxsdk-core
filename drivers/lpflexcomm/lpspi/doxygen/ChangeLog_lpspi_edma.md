@@ -1,5 +1,10 @@
 # LPSPI_EDMA
 
+## [2.1.4]
+
+- Improvements
+  - Reduced DMA requests - transfer up to 4 FIFO words per DMA request
+
 ## [2.1.3]
 
 - Improvements
