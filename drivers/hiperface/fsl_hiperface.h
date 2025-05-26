@@ -22,14 +22,16 @@
 #define SYNC_SIGNAL_POLARITY_TRAILING_EDGE               1
 #define SYNC_SIGNAL_POLARITY_LEADING_EDGE                0
 
-#define DEBUG_OUTPUT PRINTF
-
 #ifndef BSWAP32
 #define BSWAP32 __REV
 #endif
 
 #ifndef BSWAP16
 #define BSWAP16 __REV16
+#endif
+
+#ifndef MY_UNUSED
+#define MY_UNUSED __attribute__((unused))
 #endif
 
 enum
@@ -520,8 +522,6 @@ status_t DSL_RDB_ReadAllNodeDefiningValue(HIPERFACE_Type *base, dsl_encoder_t *e
 void DSL_RDB_FreeAllNodeDefiningValue(HIPERFACE_Type *base, dsl_encoder_t *enc);
 dsl_rdb_node_t *DSL_RDB_FindNodeFromCache(dsl_rdb_node_t *root, uint16_t rid);
 char *DSL_RDB_AccessLevelToStr(uint16_t level);
-void DSL_RDB_DumpNodeDefiningValue(dsl_rdb_node_t *node, int level);
-void DSL_RDB_DumpAllNodeDefiningValue(dsl_encoder_t *enc);
 char *DSL_RDB_DataTypeToStr(uint16_t type);
 char *DSL_RDB_TypeOfEncoderTostr(uint16_t type);
 status_t DSL_RDB_GetTypeOfEncoder(HIPERFACE_Type *base, uint16_t *type);

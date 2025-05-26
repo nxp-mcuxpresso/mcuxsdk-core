@@ -5,7 +5,6 @@
  */
 
 #include "fsl_hiperface.h"
-#include "fsl_debug_console.h"
 
 /*******************************************************************************
  * Definitions
@@ -293,7 +292,6 @@ status_t DSL_RDB_GetResourceName(HIPERFACE_Type *base, dsl_rdb_node_t *node, uin
 	status_t status;
 	if ((status = _DSL_RDB_GetResourceName(base, rid, node->resourceName, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -306,7 +304,6 @@ status_t DSL_RDB_GetDataSize(HIPERFACE_Type *base, dsl_rdb_node_t *node, uint16_
 	status_t status;
 	if ((status = _DSL_RDB_GetDataSize(base, rid, &node->resourceDataLen, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -320,7 +317,6 @@ status_t DSL_RDB_GetReadAccessLevel(HIPERFACE_Type *base, dsl_rdb_node_t *node, 
 	status_t status;
 	if ((status = _DSL_RDB_GetReadAccessLevel(base, rid, &node->readAccessLevel, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -334,7 +330,6 @@ status_t DSL_RDB_GetWriteAccessLevel(HIPERFACE_Type *base, dsl_rdb_node_t *node,
 	status_t status;
 	if ((status = _DSL_RDB_GetWriteAccessLevel(base, rid, &node->writeAccessLevel, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -348,7 +343,6 @@ status_t DSL_RDB_GetTimeOverrun(HIPERFACE_Type *base, dsl_rdb_node_t *node, uint
 	status_t status;
 	if ((status = _DSL_RDB_GetTimeOverrun(base, rid, &node->timeOverrun, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -367,7 +361,6 @@ status_t DSL_RDB_GetDataType(HIPERFACE_Type *base, dsl_rdb_node_t *node, uint16_
 	status_t status;
 	if ((status = _DSL_RDB_GetDataType(base, rid, &node->dataType, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -376,14 +369,13 @@ status_t DSL_RDB_GetDataType(HIPERFACE_Type *base, dsl_rdb_node_t *node, uint16_
 }
 
 /*Read Resource Data with specified offset*/
-status_t DSL_RDB_ReadIndirecttWithOffset(HIPERFACE_Type *base, dsl_rdb_node_t *node, void *data, uint32_t datLen, uint16_t offset)
+status_t DSL_RDB_ReadIndirectWithOffset(HIPERFACE_Type *base, dsl_rdb_node_t *node, void *data, uint32_t datLen, uint16_t offset)
 {
 	uint16_t errno;
 	status_t status;
 	assert(datLen <= 8);
 	if ((status = DSL_RDB_Read(base, node->rid, offset, data, datLen,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -398,7 +390,6 @@ status_t DSL_RDB_ReadIndirect(HIPERFACE_Type *base, dsl_rdb_node_t *node, void *
 	assert(datLen <= 8);
 	if ((status = DSL_RDB_Read(base, node->rid, 0, data, datLen,  LMSG_F_INDIRECT | LMSG_F_NO_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -406,7 +397,7 @@ status_t DSL_RDB_ReadIndirect(HIPERFACE_Type *base, dsl_rdb_node_t *node, void *
 }
 
 /*Write Resource Data from offset 0 and the detLen is not greater than 8*/
-status_t DSL_RDB_ReadIndirecttMultiple(HIPERFACE_Type *base, dsl_rdb_node_t *node, void *data, uint32_t datLen)
+status_t DSL_RDB_ReadIndirectMultiple(HIPERFACE_Type *base, dsl_rdb_node_t *node, void *data, uint32_t datLen)
 {
 	uint16_t errno;
 	status_t status;
@@ -414,9 +405,8 @@ status_t DSL_RDB_ReadIndirecttMultiple(HIPERFACE_Type *base, dsl_rdb_node_t *nod
 	int len = datLen > 8 ? 8 : datLen;
 	int offset = 0;
 	while (len) {
-		if ((status = DSL_RDB_Read(base, node->rid, offset, data + offset, len,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
+		if ((status = DSL_RDB_Read(base, node->rid, offset, (uint8_t *)data + offset, len,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
 			if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-				DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 				return status;
 			}
 			offset += len;
@@ -436,7 +426,6 @@ status_t DSL_RDB_WriteIndirectWithOffset(HIPERFACE_Type *base, dsl_rdb_node_t *n
 	assert(datLen <= 8);
 	if ((status = DSL_RDB_Wrire(base, node->rid, offset, data, datLen,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -451,7 +440,6 @@ status_t DSL_RDB_WriteIndirect(HIPERFACE_Type *base, dsl_rdb_node_t *node, void 
 	assert(datLen <= 8);
 	if ((status = DSL_RDB_Wrire(base, node->rid, 0, data, datLen,  LMSG_F_INDIRECT | LMSG_F_NO_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -481,9 +469,8 @@ status_t DSL_RDB_WriteIndirectMultiple(HIPERFACE_Type *base, dsl_rdb_node_t *nod
 	int len = datLen > 8 ? 8 : datLen;
 	int offset = 0;
 	while (len) {
-		if ((status = DSL_RDB_Wrire(base, node->rid, offset, data + offset, len,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
+		if ((status = DSL_RDB_Wrire(base, node->rid, offset, (uint8_t *)data + offset, len,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
 			if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-				DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 				return status;
 			}
 			offset += len;
@@ -533,7 +520,6 @@ status_t DSL_RDB_GetNodeLinkedNum(HIPERFACE_Type *base, dsl_rdb_node_t *node)
 	status_t status;
 	if ((status = _DSL_RDB_GetLinkedNodeNum(base, node->rid, &node->childrenNum, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 
@@ -548,7 +534,6 @@ status_t DSL_RDB_GetNodeLinkedRID(HIPERFACE_Type *base, dsl_rdb_node_t *node, ui
 	status_t status;
 	if ((status = _DSL_RDB_GetLinkedNodeRID(base, node, index, rid, &errno)) != kStatus_Success) {
 		if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-			DEBUG_OUTPUT("RDB access failed: %s: %s\r\b", __func__, DSL_RDB_AccessErr2str(errno));
 			return status;
 		}
 	}
@@ -656,51 +641,6 @@ char *DSL_RDB_AccessLevelToStr(uint16_t level)
 		default: str = "Unknown";
 	}
 	return str;
-}
-
-void DSL_RDB_DumpNodeDefiningValue(dsl_rdb_node_t *node, int level)
-{
-	int i;
-	for (i = 0; i < level * 4; i++)
-		DEBUG_OUTPUT(" ");
-	DEBUG_OUTPUT("RID: 0x%x\r\n", node->rid);
-
-	for (i = 0; i < level * 4; i++)
-		DEBUG_OUTPUT(" ");
-	DEBUG_OUTPUT(" |_ Resource Name: %s\r\n", node->resourceName);
-
-	for (i = 0; i < level * 4; i++)
-		DEBUG_OUTPUT(" ");
-	DEBUG_OUTPUT(" |_ Access:\r\n");
-
-	for (i = 0; i < level * 4; i++)
-		DEBUG_OUTPUT(" ");
-	DEBUG_OUTPUT(" |   |_ Read: %s\r\n", DSL_RDB_AccessLevelToStr(node->readAccessLevel));
-
-	for (i = 0; i < level * 4; i++)
-		DEBUG_OUTPUT(" ");
-	DEBUG_OUTPUT(" |   |_ Write: %s\r\n", DSL_RDB_AccessLevelToStr(node->writeAccessLevel));
-
-	for (i = 0; i < level * 4; i++)
-		DEBUG_OUTPUT(" ");
-	DEBUG_OUTPUT(" |_ Time overrun: %d\r\n", node->timeOverrun > 254 ? 255 : node->timeOverrun);
-
-	for (i = 0; i < level * 4; i++)
-		DEBUG_OUTPUT(" ");
-	DEBUG_OUTPUT(" |_ Data type: %s\r\n", DSL_RDB_DataTypeToStr(node->dataType));
-
-
-	if (node->dataType == RDB_DATA_TYPE_NODE_INDICATOR) {
-		level++;
-		for (i = 0; i < node->childrenNum; i++) {
-			DSL_RDB_DumpNodeDefiningValue(&node->nodes[i], level);
-		}
-	}
-}
-
-void DSL_RDB_DumpAllNodeDefiningValue(dsl_encoder_t *enc)
-{
-	DSL_RDB_DumpNodeDefiningValue(&enc->rootNode, 0);
 }
 
 char *DSL_RDB_DataTypeToStr(uint16_t type)
@@ -818,7 +758,7 @@ status_t DSL_RDB_GetTypeNameOfEncoder(HIPERFACE_Type *base, uint8_t *name, uint3
 		return kStatus_OutOfRange;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttMultiple(base, &node, name, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, name, node.resourceDataLen)) != kStatus_Success) {
 		return status;
 	}
 	name[node.resourceDataLen] = '\0';
@@ -839,7 +779,7 @@ status_t DSL_RDB_GetSerialNumber(HIPERFACE_Type *base, uint8_t *serialNumber, ui
 		return kStatus_OutOfRange;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttMultiple(base, &node, serialNumber, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, serialNumber, node.resourceDataLen)) != kStatus_Success) {
 		return status;
 	}
 	serialNumber[node.resourceDataLen] = '\0';
@@ -860,7 +800,7 @@ status_t DSL_RDB_GetBaseiceVersion(HIPERFACE_Type *base, uint8_t *firmware_versi
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttMultiple(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1107,7 +1047,7 @@ status_t DSL_RDB_GetLifetimeRemaining(HIPERFACE_Type *base, uint32_t *RemainingT
 		return kStatus_Fail;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 4, 8)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 4, 8)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1125,7 +1065,7 @@ status_t DSL_RDB_GetErrorLogNumber(HIPERFACE_Type *base, uint32_t *num)
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 8, 0)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 8, 0)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1143,7 +1083,7 @@ status_t DSL_RDB_GetErrorLog(HIPERFACE_Type *base, uint32_t index, dsl_rdb_error
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 8, index + 1)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 8, index + 1)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1151,7 +1091,7 @@ status_t DSL_RDB_GetErrorLog(HIPERFACE_Type *base, uint32_t index, dsl_rdb_error
 	errlog->temperature = (buf[4] << 8) + buf[5];
 	errlog->technologySpecific = (buf[6] << 8) + buf[7];
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 8, index + 0x0101)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 8, index + 0x0101)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1174,7 +1114,7 @@ status_t DSL_RDB_GetUsageHistogram(HIPERFACE_Type *base, uint8_t encoder_paramet
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 4, (encoder_parameter << 8) + histogram_class)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 4, (encoder_parameter << 8) + histogram_class)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1322,7 +1262,7 @@ status_t DSL_RDB_GetCurrentAccessLevel(HIPERFACE_Type *base, uint8_t *accessLeve
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, 2)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, 2)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1391,7 +1331,7 @@ status_t DSL_RDB_GetUserDefinedWarnings(HIPERFACE_Type *base, uint8_t warningInd
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 8, warningIndex)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 8, warningIndex)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1401,7 +1341,7 @@ status_t DSL_RDB_GetUserDefinedWarnings(HIPERFACE_Type *base, uint8_t warningInd
 	warning->warningType = ((buf[0] >> 5) & 0x7);
 	warning->format = ((buf[0] >> 2) & 0x7);
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 8, warningIndex + 0x10)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 8, warningIndex + 0x10)) != kStatus_Success) {
 		return status;
 	}
 	memcpy(warning->value, buf, 8);
@@ -1553,7 +1493,7 @@ status_t DSL_RDB_GetUserDefinedEncoderIndexRID111(HIPERFACE_Type *base, uint8_t 
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, node.resourceDataLen, 0)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, node.resourceDataLen, 0)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1593,7 +1533,7 @@ status_t DSL_RDB_GetEncoderIndexIncorporationfunction(HIPERFACE_Type *base, uint
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, node.resourceDataLen, 1)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, node.resourceDataLen, 1)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1641,7 +1581,7 @@ status_t DSL_RDB_GetReadCounter(HIPERFACE_Type *base, uint32_t *counter)
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1740,7 +1680,7 @@ status_t DSL_RDB_ReadFile(HIPERFACE_Type *base, uint8_t *buf, int16_t len, uint1
 			buf[i] = '\0';
 		}
 
-		if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf + index, l, offset + index)) != kStatus_Success) {
+		if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf + index, l, offset + index)) != kStatus_Success) {
 			return status;
 		}
 		index += l;
@@ -1793,7 +1733,7 @@ status_t DSL_RDB_GetFileStatus(HIPERFACE_Type *base, uint8_t *ReadAccessRight, u
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectt(base, &node, buf, 4)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirect(base, &node, buf, 4)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1892,7 +1832,7 @@ status_t DSL_RDB_GetDirectoryBasicData(HIPERFACE_Type *base, uint8_t *userFilesN
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 8, 0)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 8, 0)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1914,7 +1854,7 @@ status_t DSL_RDB_GetDirectoryFileNmae(HIPERFACE_Type *base, char *fileName, uint
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, 8, index)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, 8, index)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1958,7 +1898,7 @@ status_t DSL_RDB_DigitalInputWithNumber(HIPERFACE_Type *base, uint8_t IO_index, 
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirecttWithOffset(base, &node, buf, node.resourceDataLen, IO_index)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectWithOffset(base, &node, buf, node.resourceDataLen, IO_index)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1968,7 +1908,7 @@ status_t DSL_RDB_DigitalInputWithNumber(HIPERFACE_Type *base, uint8_t IO_index, 
 
 uint8_t ENC_ST_register_reading(HIPERFACE_Type *base, uint8_t offset)
 {
-	volatile uint8_t dummy;
+	volatile uint8_t MY_UNUSED dummy;
 	offset -= 0x40;
 	volatile uint8_t const *enc_st_addr = &(base->ENC_ST[offset]) + 0x200 + (offset % 4) * 0x80;
 	base->EVENT_S &= 0xFE;
@@ -1976,9 +1916,9 @@ uint8_t ENC_ST_register_reading(HIPERFACE_Type *base, uint8_t offset)
 	while(!(base->EVENT_S & 0x01));
 	return base->S_PC_DATA_SAFE;
 }
+
 uint8_t ENC_ST_register_writing(HIPERFACE_Type *base, uint8_t offset, uint8_t value)
 {
-
 	offset -= 0x40;
 	volatile uint8_t *enc_st_addr = &(base->ENC_ST[offset]) + 0x200 + (offset % 4) * 0x80;
 	base->EVENT_S &= 0xFE;
@@ -2007,7 +1947,7 @@ void Slave_Ping_register_writing(HIPERFACE_Type *base, uint8_t value)
 
 uint8_t Slave_Ping_register_reading(HIPERFACE_Type *base)
 {
-	volatile uint8_t dummy;
+	volatile uint8_t MY_UNUSED dummy;
 	volatile uint8_t const *enc_st_addr = &(base->PING) + 0x380;
 	base->EVENT_S &= 0xFE;
 	dummy = *enc_st_addr;
@@ -2017,7 +1957,7 @@ uint8_t Slave_Ping_register_reading(HIPERFACE_Type *base)
 
 uint8_t Slave_SRSSI_register_reading(HIPERFACE_Type *base)
 {
-	volatile uint8_t dummy;
+	volatile uint8_t MY_UNUSED dummy;
 	volatile uint8_t const *enc_st_addr = &(base->SRSSI_SAFE) + 0x200;
 	base->EVENT_S &= 0xFE;
 	dummy = *enc_st_addr;
