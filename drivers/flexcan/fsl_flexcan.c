@@ -3101,9 +3101,21 @@ status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFra
 #endif
 
     uint32_t cs_temp;
+    uint32_t id_temp;
+    uint32_t word0_temp;
+    uint32_t word1_temp;
     uint32_t rx_code;
     status_t status;
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_050443) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_050443)
+    uint32_t primask;
+    bool enableCriticalSection = false;
+    if ((base->MCR & CAN_MCR_RFEN_MASK) != 0U)
+    {
+        enableCriticalSection = true;
+        primask = DisableGlobalIRQ();
+    }
+#endif
     /* Read CS field of Rx Message Buffer to lock Message Buffer. */
     cs_temp = base->MB[mbIdx].CS;
     /* Get Rx Message Buffer Code field. */
@@ -3112,8 +3124,22 @@ status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFra
     /* Check to see if Rx Message Buffer is full. */
     if (((uint32_t)kFLEXCAN_RxMbFull == rx_code) || ((uint32_t)kFLEXCAN_RxMbOverrun == rx_code))
     {
+        /* Read other contents of Rx Message Buffer. */
+        id_temp = base->MB[mbIdx].ID;
+        word0_temp = base->MB[mbIdx].WORD0;
+        word1_temp = base->MB[mbIdx].WORD1;
+
+        /* Read free-running timer to unlock Rx Message Buffer. */
+        (void)base->TIMER;
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_050443) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_050443)
+        if (enableCriticalSection == true)
+        {
+            EnableGlobalIRQ(primask);
+        }
+#endif
         /* Store Message ID. */
-        pRxFrame->id = base->MB[mbIdx].ID & (CAN_ID_EXT_MASK | CAN_ID_STD_MASK);
+        pRxFrame->id = id_temp & (CAN_ID_EXT_MASK | CAN_ID_STD_MASK);
 
         /* Get the message ID and format. */
         pRxFrame->format = (cs_temp & CAN_CS_IDE_MASK) != 0U ? (uint8_t)kFLEXCAN_FrameFormatExtend :
@@ -3130,11 +3156,8 @@ status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFra
         pRxFrame->timestamp = (uint16_t)((cs_temp & CAN_CS_TIME_STAMP_MASK) >> CAN_CS_TIME_STAMP_SHIFT);
 
         /* Store Message Payload. */
-        pRxFrame->dataWord0 = base->MB[mbIdx].WORD0;
-        pRxFrame->dataWord1 = base->MB[mbIdx].WORD1;
-
-        /* Read free-running timer to unlock Rx Message Buffer. */
-        (void)base->TIMER;
+        pRxFrame->dataWord0 = word0_temp;
+        pRxFrame->dataWord1 = word1_temp;
 
         if ((uint32_t)kFLEXCAN_RxMbFull == rx_code)
         {
@@ -3150,6 +3173,12 @@ status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFra
         /* Read free-running timer to unlock Rx Message Buffer. */
         (void)base->TIMER;
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_050443) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_050443)
+        if (enableCriticalSection == true)
+        {
+            EnableGlobalIRQ(primask);
+        }
+#endif
         status = kStatus_Fail;
     }
 
@@ -3280,13 +3309,29 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
     uint32_t can_id = 0;
     uint32_t dataSize;
     dataSize                  = (base->FDCTRL & CAN_FDCTRL_MBDSR0_MASK) >> CAN_FDCTRL_MBDSR0_SHIFT;
-    uint8_t payload_dword     = 1;
+    uint32_t payload_dword;
     volatile uint32_t *mbAddr = &(base->MB[0].CS);
     uint32_t offset           = FLEXCAN_GetFDMailboxOffset(base, mbIdx);
 
+    /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64 Bytes payload. */
+    payload_dword = 1U << (dataSize + 1U);
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_052403) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_052403)
+    uint32_t primask;
+    bool enableCriticalSection = false;
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    if (FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1)
+    {
+        if ((base->ERFCR & CAN_ERFCR_ERFEN_MASK) != 0U)
+        {
+            enableCriticalSection = true;
+            primask = DisableGlobalIRQ();
+        }
+    }
+#endif
+#endif
     /* Read CS field of Rx Message Buffer to lock Message Buffer. */
     cs_temp = mbAddr[offset];
-    can_id  = mbAddr[offset + 1U];
 
     /* Get Rx Message Buffer Code field. */
     rx_code = (uint8_t)((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT);
@@ -3294,6 +3339,24 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
     /* Check to see if Rx Message Buffer is full. */
     if (((uint8_t)kFLEXCAN_RxMbFull == rx_code) || ((uint8_t)kFLEXCAN_RxMbOverrun == rx_code))
     {
+        /* Read ID field of Rx Message Buffer. */
+        can_id  = mbAddr[offset + 1U];
+
+        /* Store Message Payload. */
+        for (cnt = 0; cnt < payload_dword; cnt++)
+        {
+            pRxFrame->dataWord[cnt] = mbAddr[offset + 2U + cnt];
+        }
+
+        /* Read free-running timer to unlock Rx Message Buffer. */
+        (void)base->TIMER;
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_052403) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_052403)
+        if (enableCriticalSection == true)
+        {
+            EnableGlobalIRQ(primask);
+        }
+#endif
         /* Store Message ID. */
         pRxFrame->id = can_id & (CAN_ID_EXT_MASK | CAN_ID_STD_MASK);
 
@@ -3317,22 +3380,6 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
         /* Get the time stamp. */
         pRxFrame->timestamp = (uint16_t)((cs_temp & CAN_CS_TIME_STAMP_MASK) >> CAN_CS_TIME_STAMP_SHIFT);
 
-        /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64
-           Bytes payload. */
-        for (cnt = 0; cnt < (dataSize + 1U); cnt++)
-        {
-            payload_dword *= 2U;
-        }
-
-        /* Store Message Payload. */
-        for (cnt = 0; cnt < payload_dword; cnt++)
-        {
-            pRxFrame->dataWord[cnt] = mbAddr[offset + 2U + cnt];
-        }
-
-        /* Read free-running timer to unlock Rx Message Buffer. */
-        (void)base->TIMER;
-
         if ((uint32_t)kFLEXCAN_RxMbFull == rx_code)
         {
             status = kStatus_Success;
@@ -3347,6 +3394,12 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
         /* Read free-running timer to unlock Rx Message Buffer. */
         (void)base->TIMER;
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_052403) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_052403)
+        if (enableCriticalSection == true)
+        {
+            EnableGlobalIRQ(primask);
+        }
+#endif
         status = kStatus_Fail;
     }
 

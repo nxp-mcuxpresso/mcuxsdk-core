@@ -11,6 +11,9 @@
     - `FLEXCAN_ClearMbStatusFlags`
     - `FLEXCAN_EnableMbInterrupts`
     - `FLEXCAN_DisableMbInterrupts`
+  - Add workaround for ERR050443 and ERR052403.
+  - Update message buffer read process in API `FLEXCAN_ReadRxMb` and `FLEXCAN_ReadFDRxMb` to make critical section
+    as short as possible.
 
 ## [2.14.0]
 
