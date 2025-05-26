@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -10,3 +10,20 @@ config MCUX_COMPONENT_driver.mu1
     bool "mu1"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.mu1
+
+config MU1_BUSY_POLL_COUNT
+    int "Maximum polling iterations for MU waiting loops (0 means poll indefinitely)"
+    default 0
+    depends on MCUX_COMPONENT_driver.mu1
+    help
+      This parameter defines the maximum number of iterations for any polling loop
+      in the MU code before timing out and returning an error.
+
+      It applies to all waiting loops in MU driver, such as waiting for TX register
+      to be empty or waiting for RX register to be full.
+
+      This is a count of loop iterations, not a time-based value.
+
+      If set to 0, polling loops will continue indefinitely until their exit condition
+      is met, which could potentially cause the system to hang if a core becomes
+      unresponsive.

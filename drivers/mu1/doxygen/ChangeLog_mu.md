@@ -1,5 +1,18 @@
 # MU
 
+## [2.8.0]
+
+- New Features
+  - Added MU1_BUSY_POLL_COUNT parameter to prevent infinite polling loops in MU operations.
+  - Added timeout mechanism to all polling loops in MU driver code.
+
+- Improvements
+  - Updated function signatures to return status codes for better error handling:
+    - Changed MU_ResetBothSides to return status_t instead of void
+    - Updated MU_SendMsg to return status_t for timeout indication
+    - Added new function MU_ReceiveMsgTimeout() to include timeout mechanism.
+  - Enhanced documentation across all functions to clarify timeout behavior and return values.
+
 ## [2.7.0]
 
 - New Features
