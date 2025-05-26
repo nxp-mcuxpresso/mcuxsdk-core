@@ -1,4 +1,4 @@
-# Copyright 2024,2025 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -25,4 +25,5 @@ config MCUX_COMPONENT_driver.smartdma_mcxn
 
 config MCUX_COMPONENT_driver.smartdma_mcxa
     bool
-    default y if MCUX_COMPONENT_driver.smartdma && MCUX_HW_DEVICE_ID_MCXA276
+    default y if MCUX_COMPONENT_driver.smartdma && (MCUX_HW_DEVICE_ID_MCXA276 || \
+                MCUX_HW_DEVICE_ID_MCXA345 || MCUX_HW_DEVICE_ID_MCXA346)

@@ -42,6 +42,18 @@ extern const uint8_t s_smartdmaCameraFirmware[];
 /*! @brief Size of s_smartdmacameraFirmware */
 extern const uint32_t s_smartdmaCameraFirmwareSize;
 
+/*! @brief The firmware used for keyscan. */
+extern const uint8_t s_smartdmaKeyscanFirmware[];
+
+/*! @brief The s_smartdmaKeyscanFirmware firmware memory address. */
+#define SMARTDMA_KEYSCAN_MEM_ADDR 0x04000000U
+
+/*! @brief Size of s_smartdmaKeyscanFirmware */
+#define SMARTDMA_KEYSCAN_FIRMWARE_SIZE (s_smartdmaKeyscanFirmwareSize)
+
+/*! @brief Size of s_smartdmaKeyscanFirmware */
+extern const uint32_t s_smartdmaKeyscanFirmwareSize;
+
 /*!
  * @brief The API index when using s_smartdmaDisplayFirmware.
  */
@@ -88,6 +100,15 @@ enum _smartdma_camera_api
 };
 
 /*!
+ * @brief The API index when using s_smartdmaKeyscanFirmware
+ */
+enum _smartdma_keyscan_api
+{
+    /*! Using SmartDma to control GPIO. */
+    kSMARTDMA_Keyscan_4x4 = 0U,
+};
+
+/*!
  * @brief Parameter for camera
  */
 typedef struct _smartdma_camera_param
@@ -107,6 +128,17 @@ typedef union
     smartdma_flexio_mculcd_param_t flexioMcuLcdParam;  /*!< Parameter for flexio MCULCD. */
     smartdma_camera_param_t cameraParam;               /*!< Parameter for camera. */
 } smartdma_param_t;
+
+/*!
+ * @brief Parameter for keyscan 4x4
+ */
+typedef struct _smartdma_keyscan_4x4_param
+{
+    uint32_t *smartdma_stack;           /*!< Stack used by SMARTDMA, shall be at least 64 bytes. */
+    uint32_t *p_gpio_reg;               /*!< Buffer to provide GPIO register for COL1, COL2, COL3, COL4, ROW1, ROW2, ROW3, ROW4. */
+    uint32_t *p_keyvalue;               /*!< Buffer to store key value. */
+    uint32_t *p_keycan_interval;        /*!< Delay how many system clock cycles. */
+} smartdma_keyscan_4x4_param_t;
 
 /*******************************************************************************
  * APIs

@@ -1,5 +1,11 @@
 # SMARTDMA
 
+## [2.13.0]
+
+- New Features
+  - Added MCXA keyscan firmware.
+  - Added functions to control CTRL[EXF].
+
 ## [2.12.0]
 
 - New Features
