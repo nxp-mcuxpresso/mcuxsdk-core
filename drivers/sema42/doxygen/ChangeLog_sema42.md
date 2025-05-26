@@ -1,5 +1,15 @@
 # SEMA42
 
+## [2.1.0]
+
+- New Features
+  - Added SEMA42_BUSY_POLL_COUNT parameter to prevent infinite polling loops in SEMA42 operations.
+  - Added timeout mechanism to all polling loops in SEMA42 driver code.
+
+- Improvements
+  - Updated SEMA42_Lock function to return status_t instead of void for better error handling.
+  - Enhanced documentation to clarify timeout behavior and return values.
+
 ## [2.0.4]
 
 - Improvements
