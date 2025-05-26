@@ -1,5 +1,11 @@
 # WDOG32
 
+## [2.2.0]
+
+- Improvements
+  - Added while loop timeout config value for WDOG32 reconfiguration and unlock sequence.
+  - Change the return type of WDOG32_Init, WDOG32_Deinit and WDOG32_Unlock from void to status_t.
+
 ## [2.1.0]
 
 - Improvements

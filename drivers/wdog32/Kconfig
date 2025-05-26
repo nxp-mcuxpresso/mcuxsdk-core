@@ -10,3 +10,19 @@ config MCUX_COMPONENT_driver.wdog32
     bool "wdog32"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.wdog32
+
+if MCUX_COMPONENT_driver.wdog32
+    config WDOG32_UNLOCK_TIMEOUT
+        int "Max loops to wait wdog32 unlock sequence complete (0 means wait forever)"
+        default 0
+        help
+            This is the maximum number of loops to wait for the wdog32 unlock sequence to complete.
+            If set to 0, it will wait indefinitely until the unlock sequence is complete.
+
+    config WDOG32_RECONFIG_TIMEOUT
+        int "Max loops to wait for wdog32 reconfiguration complete (0 means wait forever)"
+        default 0
+        help
+            This is the maximum number of loops to wait for the wdog32 reconfiguration to complete.
+            If set to 0, it will wait indefinitely until the reconfiguration is complete.
+endif
