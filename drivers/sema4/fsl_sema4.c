@@ -1,6 +1,5 @@
 /*
- * Copyright 2017-2019, 2022 NXP
- * All rights reserved.
+ * Copyright 2017-2019, 2022, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -142,7 +141,7 @@ status_t SEMA4_TryLock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
         ++procNum;
     } else {
         /* Handle error case - procNum is at maximum value */
-        return kStatus_InvalidArgument; 
+        return kStatus_InvalidArgument;
     }
     /* Try to lock. */
     SEMA4_GATEn(base, gateNum) = procNum;
@@ -167,15 +166,34 @@ status_t SEMA4_TryLock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
  * locked by other processors, this function waits until it is unlocked and then
  * lock it.
  *
+ * If SEMA4_BUSY_POLL_COUNT is defined and non-zero, the function will timeout
+ * after the specified number of polling iterations and return kStatus_Timeout.
+ *
  * param base SEMA4 peripheral base address.
  * param gateNum  Gate number to lock.
  * param procNum  Current processor number.
+ *
+ * return status_t
+ * retval kStatus_Success The gate was successfully locked.
+ * retval kStatus_Timeout Timeout occurred while waiting for the gate to be unlocked.
  */
-void SEMA4_Lock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
+status_t SEMA4_Lock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
 {
+#if SEMA4_BUSY_POLL_COUNT
+    uint32_t poll_count = SEMA4_BUSY_POLL_COUNT;
+#endif
+
     while (kStatus_Success != SEMA4_TryLock(base, gateNum, procNum))
     {
+#if SEMA4_BUSY_POLL_COUNT
+        if ((--poll_count) == 0u)
+        {
+            return kStatus_Timeout;
+        }
+#endif
     }
+
+    return kStatus_Success;
 }
 
 /*!

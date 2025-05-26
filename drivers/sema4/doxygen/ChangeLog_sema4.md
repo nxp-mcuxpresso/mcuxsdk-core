@@ -1,5 +1,15 @@
 # SEMA4
 
+## [2.2.0]
+
+- New Features
+  - Added SEMA4_BUSY_POLL_COUNT parameter to prevent infinite polling loops in SEMA4 operations.
+  - Added timeout mechanism to all polling loops in SEMA4 driver code.
+
+- Improvements
+  - Updated SEMA4_Lock function to return status_t instead of void for better error handling.
+  - Enhanced documentation to clarify timeout behavior and return values.
+
 ## [2.1.0]
 
 - Improvements
