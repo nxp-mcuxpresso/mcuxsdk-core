@@ -1,5 +1,10 @@
 # FTM
 
+## [2.7.2]
+
+- Improvements
+  - Add API `FTM_ERRATA_010856` for ERR010856 workaround.
+
 ## [2.7.1]
 
 - Bug Fixes
