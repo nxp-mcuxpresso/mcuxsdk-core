@@ -21,7 +21,7 @@
 /*! @{ */
 
 /*! @brief MAU driver version. */
-#define FSL_MAU_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
+#define FSL_MAU_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*! @} */
 
 /*! @brief MAU Q15 type. */
@@ -86,7 +86,11 @@ typedef struct _mau_config
 #define MAU_RES_SET(res)   ((res) << 7U)
 #define MAU_MOPC_SET(mopc) ((mopc) << 2U)
 
+#if defined(FSL_FEATURE_MAU_INDIRECT_IS_LOW_ADDR) && (FSL_FEATURE_MAU_INDIRECT_IS_LOW_ADDR == 1U)
+#define MAU_INDIRECT_ADDR(base, dt, ds, mopc) ((base) | MAU_DT_SET(dt) | MAU_RES_SET(ds) | MAU_MOPC_SET(mopc))
+#else
 #define MAU_INDIRECT_ADDR(base, dt, ds, mopc) ((base) | 0x800U | MAU_DT_SET(dt) | MAU_RES_SET(ds) | MAU_MOPC_SET(mopc))
+#endif
 
 #define MAU_REG_UINT32(addr) (*((volatile uint32_t *)(addr)))
 #define MAU_REG_Q15(addr)    (*((volatile mau_q15_t *)(addr)))
