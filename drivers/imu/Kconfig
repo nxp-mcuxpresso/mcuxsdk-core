@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -10,3 +10,19 @@ config MCUX_COMPONENT_driver.imu
     bool "imu"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.imu
+
+config IMU_BUSY_POLL_COUNT
+    int "Maximum polling iterations for IMU waiting loops (0 means poll indefinitely)"
+    default 0
+    depends on MCUX_COMPONENT_driver.imu
+    help
+      This parameter defines the maximum number of iterations for any polling loop
+      in the IMU driver code before timing out and returning an error.
+
+      It applies to all waiting loops in IMU driver.
+
+      This is a count of loop iterations, not a time-based value.
+
+      If set to 0, polling loops will continue indefinitely until their exit condition
+      is met, which could potentially cause the system to hang if sensors don't respond
+      or if communication interfaces fail.
