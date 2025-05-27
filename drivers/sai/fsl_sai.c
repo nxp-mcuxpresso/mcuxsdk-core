@@ -2373,6 +2373,42 @@ void SAI_TransferRxHandleIRQ(I2S_Type *base, sai_handle_t *handle)
     }
 }
 
+void SAI_DriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_saiBases))
+    {
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
+        if ((s_saiHandle[instance][1] != NULL) &&
+            SAI_RxGetEnabledInterruptStatus(s_saiBases[instance], (I2S_TCSR_FRIE_MASK | I2S_TCSR_FEIE_MASK),
+                                            (I2S_TCSR_FRF_MASK | I2S_TCSR_FEF_MASK)))
+#else
+        if ((s_saiHandle[instance][1] != NULL) &&
+            SAI_RxGetEnabledInterruptStatus(s_saiBases[instance], (I2S_TCSR_FWIE_MASK | I2S_TCSR_FEIE_MASK),
+                                            (I2S_TCSR_FWF_MASK | I2S_TCSR_FEF_MASK)))
+#endif
+        {
+            s_saiRxIsr(s_saiBases[instance], s_saiHandle[instance][1]);
+        }
+#if defined(FSL_FEATURE_SAI_HAS_FIFO) && (FSL_FEATURE_SAI_HAS_FIFO)
+        if ((s_saiHandle[instance][0] != NULL) &&
+            SAI_TxGetEnabledInterruptStatus(s_saiBases[instance], (I2S_TCSR_FRIE_MASK | I2S_TCSR_FEIE_MASK),
+                                            (I2S_TCSR_FRF_MASK | I2S_TCSR_FEF_MASK)))
+#else
+        if ((s_saiHandle[instance][0] != NULL) &&
+            SAI_TxGetEnabledInterruptStatus(s_saiBases[instance], (I2S_TCSR_FWIE_MASK | I2S_TCSR_FEIE_MASK),
+                                            (I2S_TCSR_FWF_MASK | I2S_TCSR_FEF_MASK)))
+#endif
+        {
+            s_saiTxIsr(s_saiBases[instance], s_saiHandle[instance][0]);
+        }
+        SDK_ISR_EXIT_BARRIER;
+    }
+    else
+    {
+        SDK_ISR_EXIT_BARRIER;
+    }
+}
+
 #if defined(I2S0)
 void I2S0_DriverIRQHandler(void);
 void I2S0_DriverIRQHandler(void)

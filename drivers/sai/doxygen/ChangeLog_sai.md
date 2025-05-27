@@ -2,6 +2,7 @@
 ## [2.4.7]
 
 - Added conditional support for bit clock swap feature
+- Added common IRQ handler entry SAI_DriverIRQHandler.
 
 ## [2.4.6]
 

@@ -1432,6 +1432,22 @@ void SAI_TransferRxHandleIRQ(I2S_Type *base, sai_handle_t *handle);
 
 /*! @} */
 
+/*!
+ * @name Common IRQ Handler
+ * @{
+ */
+
+/*!
+ * @brief SAI driver IRQ handler common entry.
+ *
+ * This function provides the common IRQ request entry for SAI.
+ *
+ * @param instance SAI instance.
+ */
+void SAI_DriverIRQHandler(uint32_t instance);
+
+/*! @} */
+
 #if defined(__cplusplus)
 }
 #endif /*_cplusplus*/
