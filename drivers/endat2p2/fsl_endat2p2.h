@@ -660,14 +660,14 @@ uint64_t ENDAT2P2_GetPosVal2(endat2p2_dev_t *dev);
  * @param dev EnDat2.2 device handle pointer.
  * @return the value of temperature.
  */
-float ENDAT2P2_GetTemperature1(endat2p2_dev_t *dev);
+double ENDAT2P2_GetTemperature1(endat2p2_dev_t *dev);
 
 /*!
  * @brief Get the temperature 2.
  * @param dev EnDat2.2 device handle pointer.
  * @return the value of temperature.
  */
-float ENDAT2P2_GetTemperature2(endat2p2_dev_t *dev);
+double ENDAT2P2_GetTemperature2(endat2p2_dev_t *dev);
 
 /*!
  * @brief Get the async position value 2.

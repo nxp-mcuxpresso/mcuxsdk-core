@@ -664,7 +664,7 @@ uint64_t ENDAT2P2_GetPosVal2(endat2p2_dev_t *dev)
     return data;
 }
 
-float ENDAT2P2_GetTemperature1(endat2p2_dev_t *dev)
+double ENDAT2P2_GetTemperature1(endat2p2_dev_t *dev)
 {
     uint32_t data;
 
@@ -672,10 +672,10 @@ float ENDAT2P2_GetTemperature1(endat2p2_dev_t *dev)
     ENDAT2P2_CMDProcess(dev, ENDAT2P2_CMD_SEND_POSVAL_WITH_ADDINFO, 0, 0);
     data = ENDAT2P2_GetAddInfo1(dev) & ENDAT2P2_ADDINFO_TEMP_MASK;
 
-    return (float)data / 10 + 115.0;
+    return data / 10.0 + 115.0;
 }
 
-float ENDAT2P2_GetTemperature2(endat2p2_dev_t *dev)
+double ENDAT2P2_GetTemperature2(endat2p2_dev_t *dev)
 {
     uint32_t data;
 
@@ -683,7 +683,7 @@ float ENDAT2P2_GetTemperature2(endat2p2_dev_t *dev)
     ENDAT2P2_CMDProcess(dev, ENDAT2P2_CMD_SEND_POSVAL_WITH_ADDINFO, 0, 0);
     data = ENDAT2P2_GetAddInfo1(dev) & ENDAT2P2_ADDINFO_TEMP_MASK;
 
-    return (float)data / 10 + 115.0;
+    return data / 10.0 + 115.0;
 }
 
 uint64_t ENDAT2P2_GetAsyncPosVal2(endat2p2_dev_t *dev)
