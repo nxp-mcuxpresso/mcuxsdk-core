@@ -15,7 +15,6 @@
 
 /*! @name Defines some Ethernet parameters. */
 /*@{*/
-#define NETC_ENETC_LSO_TXFRAME_LEN_MAX (0x4FFFFFFFFU) /*!< The Maximum length of LSO frame length. */
 #define NETC_ENETC_TXFRAME_LEN_MAX     (9600U)        /*!< The Maximum length of frame length. */
 #define NETC_ENETC_TXFRAME_LEN_MIN     (16U)          /*!< The Minimum length of frame length. */
 /*@}*/
@@ -765,9 +764,6 @@ status_t EP_SendFrameCommon(ep_handle_t *handle,
     uint32_t totBdNum            = frame->length;
     uint32_t frameLen            = 0;
     bool isExtEnable             = (bool)txDesc[0].standard.isExtended;
-#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
-    bool isLso = (bool)(txDesc[0].standard.flags & NETC_SI_TXDESCRIP_RD_LSO_MASK);
-#endif
     netc_tx_bd_t *txDesTemp = NULL;
     uint32_t address;
 
@@ -794,17 +790,10 @@ status_t EP_SendFrameCommon(ep_handle_t *handle,
     }
 
     /* Check the frame total length. */
-#if defined(FSL_FEATURE_NETC_HAS_SWITCH_TAG) && FSL_FEATURE_NETC_HAS_SWITCH_TAG
-    if ((!isLso && (frameLen > NETC_ENETC_TXFRAME_LEN_MAX)) || (isLso && (frameLen > NETC_ENETC_LSO_TXFRAME_LEN_MAX)))
-    {
-        result = kStatus_NETC_TxFrameOverLen;
-    }
-#else
     if (frameLen > NETC_ENETC_TXFRAME_LEN_MAX)
     {
         result = kStatus_NETC_TxFrameOverLen;
     }
-#endif
     /* Check whether the available BD number is enough for Tx data buffer. */
     else if (totBdNum > EP_GetIdleTxBDNum(txBdRing))
     {
