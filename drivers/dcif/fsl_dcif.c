@@ -219,33 +219,33 @@ void DCIF_SetCscMode(DCIF_Type *base, dcif_csc_mode_t mode)
      *
      */
 
-    base->CSC_CTRL_L[1] &= ~(DCIF_CSC_CTRL_L_CSC_MODE_MASK | DCIF_CSC_CTRL_L_CSC_EN_MASK);
+    base->CSC_CTRL_L[0] &= ~(DCIF_CSC_CTRL_L_CSC_MODE_MASK | DCIF_CSC_CTRL_L_CSC_EN_MASK);
     if (kDCIF_CscYUV2RGB == mode || kDCIF_CscYCbCr2RGB == mode)
     {
-        base->CSC_COEF0_L[1] = DCIF_CSC_COEF0_L_A1(0x0U)
+        base->CSC_COEF0_L[0] = DCIF_CSC_COEF0_L_A1(0x0U)
                                             | DCIF_CSC_COEF0_L_A2(0x0U);
-        base->CSC_COEF1_L[1] = DCIF_CSC_COEF1_L_A3(0x0U)
+        base->CSC_COEF1_L[0] = DCIF_CSC_COEF1_L_A3(0x0U)
                                             | DCIF_CSC_COEF1_L_B1(0x0U);
-        base->CSC_COEF2_L[1] = DCIF_CSC_COEF2_L_B2(0x0U)
+        base->CSC_COEF2_L[0] = DCIF_CSC_COEF2_L_B2(0x0U)
                                             | DCIF_CSC_COEF2_L_B3(0x0U);
-        base->CSC_COEF3_L[1] = DCIF_CSC_COEF3_L_C1(0x0U)
+        base->CSC_COEF3_L[0] = DCIF_CSC_COEF3_L_C1(0x0U)
                                             | DCIF_CSC_COEF3_L_C2(0x0U);
-        base->CSC_COEF4_L[1] = DCIF_CSC_COEF4_L_C3(0x0U)
+        base->CSC_COEF4_L[0] = DCIF_CSC_COEF4_L_C3(0x0U)
                                             | DCIF_CSC_COEF4_L_D1(0x0U);
-        base->CSC_COEF5_L[1] = DCIF_CSC_COEF5_L_D2(0x0U)
+        base->CSC_COEF5_L[0] = DCIF_CSC_COEF5_L_D2(0x0U)
                                             | DCIF_CSC_COEF5_L_D3(0x0U);
     }
     else
     {
-        base->CSC_COEF0_L[1] = 0x0U;
-        base->CSC_COEF1_L[1] = 0x0U;
-        base->CSC_COEF2_L[1] = 0x0U;
-        base->CSC_COEF3_L[1] = 0x0U;
-        base->CSC_COEF4_L[1] = 0x0U;
-        base->CSC_COEF5_L[1] = 0x0U;
-	base->CSC_CTRL_L[1] |= DCIF_CSC_CTRL_L_CSC_EN(0);
+        base->CSC_COEF0_L[0] = 0x0U;
+        base->CSC_COEF1_L[0] = 0x0U;
+        base->CSC_COEF2_L[0] = 0x0U;
+        base->CSC_COEF3_L[0] = 0x0U;
+        base->CSC_COEF4_L[0] = 0x0U;
+        base->CSC_COEF5_L[0] = 0x0U;
+	base->CSC_CTRL_L[0] |= DCIF_CSC_CTRL_L_CSC_EN(0);
     }
-    base->CSC_CTRL_L[1] |= DCIF_CSC_CTRL_L_CSC_MODE(mode);
+    base->CSC_CTRL_L[0] |= DCIF_CSC_CTRL_L_CSC_MODE(mode);
 }
 
 /*!
