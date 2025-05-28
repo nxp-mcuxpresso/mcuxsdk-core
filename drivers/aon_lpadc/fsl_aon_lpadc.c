@@ -26,11 +26,11 @@ static LPADC_Type *const s_ADCBases[] = LPADC_BASE_PTRS;
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*! @brief Pointers to LPADC clocks for each instance. */
-static const clock_ip_name_t s_ADCClocks[] = LPADC_CLOCKS;
+static const clock_ip_name_t s_ADCClocks[] = AON_LPADC_CLOCKS;
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-#if defined(ADC_RSTS)
-static const SYSCON_RSTn_t s_adcResets[] = ADC_RSTS;
+#if defined(AON_LPADC_RSTS)
+static const SYSCON_RSTn_t s_adcResets[] = AON_LPADC_RSTS;
 #endif /* ADC_RSTS */
 
 /*******************************************************************************
@@ -103,11 +103,11 @@ void ADC_Init(LPADC_Type *base, const adc_config_t *config)
     uint8_t tcmdres;
     uint8_t hpted;
 
-#if (defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+#if (defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && !FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     (void)CLOCK_EnableClock(s_ADCClocks[ADC_GetInstance(base)]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-#if defined(ADC_RSTS)
+#if defined(AON_LPADC_RSTS)
     RESET_ReleasePeripheralReset(s_adcResets[ADC_GetInstance(base)]);
 #endif
 
