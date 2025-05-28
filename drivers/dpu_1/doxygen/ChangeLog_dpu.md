@@ -1,5 +1,10 @@
 # DPU
 
+## [2.3.0]
+
+- New feature.
+  - Supported the SEERIS MDR7.
+
 ## [2.2.0]
 
 - New feature.
