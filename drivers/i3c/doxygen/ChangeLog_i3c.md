@@ -1,5 +1,10 @@
 # I3C
 
+## [2.14.1]
+
+- Improvements
+  - Split the function I3C_MasterTransferBlocking to meet the HIS-CCM requirement.
+
 ## [2.14.0]
 
 - Improvements

@@ -1769,32 +1769,128 @@ static void I3C_MasterClearFlagsAndEnableIRQ(I3C_Type *base)
 }
 
 /*!
- * @brief introduce function I3C_MasterTransferNoStartFlag.
+ * @brief Polling the START operation.
  *
- * This function was used of Check if device request wins arbitration.
+ * This function polls the START operation until it's over and check the status.
+ *
+ * @param base The I3C peripheral base address.
+ * @param type The bus type to use in this transaction.
+ * @param address 7-bit slave device address, in bits [6:0].
+ * @param dir Master transfer direction, either #kI3C_Read or #kI3C_Write. This parameter is used to set
+ *      the R/w bit (bit 0) in the transmitted slave address.
+ * @param tSize Read terminate size for the followed read transfer, limit to 255 bytes.
+ * @retval #kStatus_Success Data was received successfully.
+ * @retval #kStatus_I3C_Busy Another master is currently utilizing the bus.
+ * @retval #kStatus_I3C_Nak The slave device sent a NAK in response to a byte.
+ */
+static status_t I3C_MasterStartPolling(
+    I3C_Type *base, i3c_bus_type_t type, uint8_t address, i3c_direction_t dir, uint8_t tSize)
+{
+    status_t result = kStatus_Success;
+
+    result = I3C_MasterRepeatedStartWithRxSize(base, type, address, dir, tSize);
+    if (result != kStatus_Success)
+    {
+        return result;
+    }
+
+    result = I3C_MasterWaitForCtrlDone(base, false);
+    if (result != kStatus_Success)
+    {
+        return result;
+    }
+
+    if (0UL != (I3C_MasterGetStatusFlags(base) & (uint32_t)kI3C_MasterArbitrationWonFlag))
+    {
+        result = kStatus_I3C_IBIWon;
+    }
+
+    return result;
+}
+
+/*!
+ * @brief Prepare the blocking transfer.
+ *
+ * This function prepares the configuration for blocking transfer.
  *
  * @param base The I3C peripheral base address.
  * @param transfer Pointer to the transfer structure.
- * @retval #true if the device wins arbitration.
- * @retval #false if the device not wins arbitration.
+ * @retval #kStatus_Success Data was received successfully.
+ * @retval #kStatus_I3C_Busy Another master is currently utilizing the bus.
+ * @retval #kStatus_I3C_Nak The slave device sent a NAK in response to a byte.
  */
-static bool I3C_MasterTransferNoStartFlag(I3C_Type *base, i3c_master_transfer_t *transfer)
+static status_t I3C_MasterTransferPrepare(I3C_Type *base, i3c_master_transfer_t *transfer)
 {
-    /* Wait tx fifo empty. */
-    size_t txCount = 0xFFUL;
+    status_t result           = kStatus_Success;
+    i3c_direction_t direction = transfer->direction;
+    uint32_t subaddressRemaining;
+    uint8_t tSize;
 
-    while (txCount != 0U)
+    if (transfer->busType != kI3C_TypeI3CDdr)
     {
-        I3C_MasterGetFifoCounts(base, NULL, &txCount);
+        direction = (0UL != transfer->subaddressSize) ? kI3C_Write : transfer->direction;
+    }
+    assert(!((0UL != (transfer->flags & (uint32_t)kI3C_TransferNoStartFlag)) && (direction == kI3C_Read)));
+
+    if (0UL != (transfer->flags & (uint32_t)kI3C_TransferStartWithBroadcastAddr))
+    {
+        /* Issue 0x7E as start. */
+        result = I3C_MasterStartPolling(base, transfer->busType, 0x7E, kI3C_Write, 0);
+        if (result != kStatus_Success)
+        {
+            return result;
+        }
     }
 
-    /* Check if device request wins arbitration. */
-    if (0UL != (I3C_MasterGetStatusFlags(base) & (uint32_t)kI3C_MasterArbitrationWonFlag))
+    if (0UL == (transfer->flags & (uint32_t)kI3C_TransferNoStartFlag))
     {
-        I3C_MasterClearFlagsAndEnableIRQ(base);
-        return true;
+        tSize  = (0U != (transfer->flags & (uint32_t)kI3C_TransferRxAutoTermFlag)) ? (uint8_t)transfer->dataSize : 0U;
+        result = I3C_MasterStartPolling(base, transfer->busType, transfer->slaveAddress, direction, tSize);
+        if (result != kStatus_Success)
+        {
+            return result;
+        }
     }
-    return false;
+
+    /* Subaddress, MSB first. */
+    if (0U != transfer->subaddressSize)
+    {
+        subaddressRemaining = transfer->subaddressSize;
+        while (0UL != subaddressRemaining--)
+        {
+            uint8_t subaddressByte = (uint8_t)((transfer->subaddress >> (8UL * subaddressRemaining)) & 0xFFUL);
+
+            result = I3C_MasterWaitForTxReady(base, 1U);
+            if (kStatus_Success != result)
+            {
+                return result;
+            }
+
+            if ((0UL == subaddressRemaining) && ((transfer->direction == kI3C_Read) || (0UL == transfer->dataSize)) &&
+                (transfer->busType != kI3C_TypeI3CDdr))
+            {
+                base->MWDATABE = subaddressByte;
+                result         = I3C_MasterWaitForComplete(base, false);
+                if (kStatus_Success != result)
+                {
+                    return result;
+                }
+            }
+            else
+            {
+                base->MWDATAB = subaddressByte;
+            }
+        }
+
+        /* Need to send repeated start if switching directions to read. */
+        if ((transfer->busType != kI3C_TypeI3CDdr) && (transfer->direction == kI3C_Read))
+        {
+            tSize = (0U != (transfer->flags & (uint32_t)kI3C_TransferRxAutoTermFlag)) ? (uint8_t)transfer->dataSize : 0U;
+            result = I3C_MasterStartPolling(base, transfer->busType, transfer->slaveAddress, kI3C_Read, tSize);
+        }
+    }
+
+    return result;
 }
 
 /*!
@@ -1815,17 +1911,20 @@ static bool I3C_MasterTransferNoStartFlag(I3C_Type *base, i3c_master_transfer_t 
 status_t I3C_MasterTransferBlocking(I3C_Type *base, i3c_master_transfer_t *transfer)
 {
     assert(NULL != transfer);
+    assert(!((0UL != (transfer->flags & (uint32_t)kI3C_TransferStartWithBroadcastAddr)) &&
+             (0UL != (transfer->flags & (uint32_t)kI3C_TransferNoStartFlag))));
+    assert(!((0UL != (transfer->flags & (uint32_t)kI3C_TransferStartWithBroadcastAddr)) &&
+             (0UL != (transfer->flags & (uint32_t)kI3C_TransferRepeatedStartFlag))));
+    assert(!((transfer->direction == kI3C_Read) && (transfer->dataSize == 0U)));
     assert(transfer->subaddressSize <= sizeof(transfer->subaddress));
 
     status_t result                = kStatus_Success;
-    i3c_direction_t direction      = transfer->direction;
     i3c_master_state_t masterState = I3C_MasterGetState(base);
     bool checkDdrState             = false;
     i3c_rx_term_ops_t rxTermOps;
 
     /* Return an error if the bus is already in use not by us. */
     checkDdrState = (transfer->busType == kI3C_TypeI3CDdr) ? (masterState != kI3C_MasterStateDdr) : true;
-
     if ((masterState != kI3C_MasterStateIdle) && (masterState != kI3C_MasterStateNormAct) && checkDdrState)
     {
         return kStatus_I3C_Busy;
@@ -1838,11 +1937,6 @@ status_t I3C_MasterTransferBlocking(I3C_Type *base, i3c_master_transfer_t *trans
 
     /* Disable I3C IRQ sources while we configure stuff. */
     I3C_MasterDisableInterrupts(base, (uint32_t)kMasterIrqFlags);
-
-    if (transfer->busType != kI3C_TypeI3CDdr)
-    {
-        direction = (0UL != transfer->subaddressSize) ? kI3C_Write : transfer->direction;
-    }
 
     /* True: Set Rx termination bytes at start point, False: Set Rx termination one bytes in advance. */
     if ((transfer->flags & (uint32_t)kI3C_TransferDisableRxTermFlag) != 0U)
@@ -1858,125 +1952,6 @@ status_t I3C_MasterTransferBlocking(I3C_Type *base, i3c_master_transfer_t *trans
         rxTermOps = kI3C_RxTermLastByte;
     }
 
-    if (0UL != (transfer->flags & (uint32_t)kI3C_TransferStartWithBroadcastAddr))
-    {
-        if (0UL != (transfer->flags & (uint32_t)kI3C_TransferNoStartFlag))
-        {
-            return kStatus_InvalidArgument;
-        }
-
-        if (0UL != (transfer->flags & (uint32_t)kI3C_TransferRepeatedStartFlag))
-        {
-            return kStatus_InvalidArgument;
-        }
-
-        /* Issue 0x7E as start. */
-        result = I3C_MasterStart(base, transfer->busType, 0x7E, kI3C_Write);
-        if (result != kStatus_Success)
-        {
-            return result;
-        }
-
-        result = I3C_MasterWaitForCtrlDone(base, false);
-        if (result != kStatus_Success)
-        {
-            return result;
-        }
-    }
-
-    if (0UL == (transfer->flags & (uint32_t)kI3C_TransferNoStartFlag))
-    {
-        if ((direction == kI3C_Read) && (rxTermOps == kI3C_RxAutoTerm))
-        {
-            result = I3C_MasterStartWithRxSize(base, transfer->busType, transfer->slaveAddress, direction,
-                                               (uint8_t)transfer->dataSize);
-        }
-        else
-        {
-            result = I3C_MasterStart(base, transfer->busType, transfer->slaveAddress, direction);
-        }
-        if (result != kStatus_Success)
-        {
-            return result;
-        }
-
-        result = I3C_MasterWaitForCtrlDone(base, false);
-        if (result != kStatus_Success)
-        {
-            return result;
-        }
-
-        if (true == I3C_MasterTransferNoStartFlag(base, transfer))
-        {
-            return kStatus_I3C_IBIWon;
-        }
-    }
-    else
-    {
-        if ((direction == kI3C_Read) && (rxTermOps != kI3C_RxTermDisable))
-        {
-            /* Can't set Rx termination more than one bytes in advance without START. */
-            rxTermOps = kI3C_RxTermLastByte;
-        }
-    }
-
-    /* Subaddress, MSB first. */
-    if (0U != transfer->subaddressSize)
-    {
-        uint32_t subaddressRemaining = transfer->subaddressSize;
-        while (0UL != subaddressRemaining--)
-        {
-            uint8_t subaddressByte = (uint8_t)((transfer->subaddress >> (8UL * subaddressRemaining)) & 0xFFUL);
-
-            result = I3C_MasterWaitForTxReady(base, 1U);
-
-            if ((0UL == subaddressRemaining) && ((transfer->direction == kI3C_Read) || (0UL == transfer->dataSize)) &&
-                (transfer->busType != kI3C_TypeI3CDdr))
-            {
-                base->MWDATABE = subaddressByte;
-                result         = I3C_MasterWaitForComplete(base, false);
-                if (kStatus_Success != result)
-                {
-                    if (result == kStatus_I3C_Nak)
-                    {
-                        (void)I3C_MasterEmitStop(base, true);
-                    }
-                    I3C_MasterClearFlagsAndEnableIRQ(base);
-                    return result;
-                }
-            }
-            else
-            {
-                base->MWDATAB = subaddressByte;
-            }
-        }
-        /* Need to send repeated start if switching directions to read. */
-        if ((transfer->busType != kI3C_TypeI3CDdr) && (0UL != transfer->dataSize) && (transfer->direction == kI3C_Read))
-        {
-            if (rxTermOps == kI3C_RxAutoTerm)
-            {
-                result = I3C_MasterRepeatedStartWithRxSize(base, transfer->busType, transfer->slaveAddress, kI3C_Read,
-                                                           (uint8_t)transfer->dataSize);
-            }
-            else
-            {
-                result = I3C_MasterRepeatedStart(base, transfer->busType, transfer->slaveAddress, kI3C_Read);
-            }
-
-            if (kStatus_Success != result)
-            {
-                I3C_MasterClearFlagsAndEnableIRQ(base);
-                return result;
-            }
-
-            result = I3C_MasterWaitForCtrlDone(base, false);
-            if (result != kStatus_Success)
-            {
-                return result;
-            }
-        }
-    }
-
     if (rxTermOps == kI3C_RxAutoTerm)
     {
         transfer->flags |= (uint32_t)kI3C_TransferRxAutoTermFlag;
@@ -1986,14 +1961,22 @@ status_t I3C_MasterTransferBlocking(I3C_Type *base, i3c_master_transfer_t *trans
         transfer->flags &= ~(uint32_t)kI3C_TransferRxAutoTermFlag;
     }
 
-    /* Transmit data. */
+    result = I3C_MasterTransferPrepare(base, transfer);
+    if (result != kStatus_Success)
+    {
+        if (result == kStatus_I3C_Nak)
+        {
+            (void)I3C_MasterEmitStop(base, true);
+        }
+        I3C_MasterClearFlagsAndEnableIRQ(base);
+        return result;
+    }
+
     if ((transfer->direction == kI3C_Write) && (transfer->dataSize > 0UL))
     {
-        /* Send Data. */
         result = I3C_MasterSend(base, transfer->data, transfer->dataSize, transfer->flags);
     }
-    /* Receive Data. */
-    else if ((transfer->direction == kI3C_Read) && (transfer->dataSize > 0UL))
+    else if (transfer->direction == kI3C_Read)
     {
         result = I3C_MasterReceive(base, transfer->data, transfer->dataSize, transfer->flags);
     }
