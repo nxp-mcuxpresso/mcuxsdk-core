@@ -99,7 +99,7 @@ static inline void SMM_DisableMainCpuIsoSingal(SMM_Type *base)
  */
 static inline void SMM_EnableWakeupSourceToMainCpu(SMM_Type *base, uint32_t wakeupSources)
 {
-    base->WKUP_MAIN = SMM_WKUP_MAIN_WKUP_SRC_MAIN_CPU(wakeupSources);
+    base->WKUP_MAIN = SMM_WKUP_MAIN_WKUP_SRC_MAIN_CPU(1UL << wakeupSources);
 }
 
 /*!
@@ -110,7 +110,7 @@ static inline void SMM_EnableWakeupSourceToMainCpu(SMM_Type *base, uint32_t wake
  */
 static inline void SMM_DisableWakeupSourceToMainCpu(SMM_Type *base, uint32_t wakeupSources)
 {
-    base->WKUP_MAIN &= ~SMM_WKUP_MAIN_WKUP_SRC_MAIN_CPU(wakeupSources);
+    base->WKUP_MAIN &= ~SMM_WKUP_MAIN_WKUP_SRC_MAIN_CPU(1UL<< wakeupSources);
 }
 
 /*!
@@ -133,7 +133,7 @@ static inline uint32_t SMM_GetEnabledWakeupSourceToMainCpu(SMM_Type *base)
  */
 static inline void SMM_EnableWakeupSourceToAonCpu(SMM_Type *base, uint32_t wakeupSources)
 {
-    base->AON_CPU = SMM_AON_CPU_WKUP_SRC_AON_CPU(wakeupSources);
+    base->AON_CPU = SMM_AON_CPU_WKUP_SRC_AON_CPU(1UL << wakeupSources);
 }
 
 /*!
@@ -144,7 +144,7 @@ static inline void SMM_EnableWakeupSourceToAonCpu(SMM_Type *base, uint32_t wakeu
  */
 static inline void SMM_DisableWakeupSourceToAonCpu(SMM_Type *base, uint32_t wakeupSources)
 {
-    base->AON_CPU &= ~SMM_AON_CPU_WKUP_SRC_AON_CPU(wakeupSources);
+    base->AON_CPU &= ~SMM_AON_CPU_WKUP_SRC_AON_CPU(1UL << wakeupSources);
 }
 
 /*!
@@ -182,10 +182,12 @@ static inline void SMM_ShutDownBandgapInLowPowerModes(SMM_Type *base, bool shutd
     if (shutdown)
     {
         base->PWDN_CONFIG |= SMM_PWDN_CONFIG_BGR_DSBL_DPD_PD_MASK;
+        base->PWDN_CONFIG |= SMM_PWDN_CONFIG_DPD1_VDD1P1_SRC_MASK;
     }
     else
     {
         base->PWDN_CONFIG &= ~SMM_PWDN_CONFIG_BGR_DSBL_DPD_PD_MASK;
+        base->PWDN_CONFIG &= ~SMM_PWDN_CONFIG_DPD1_VDD1P1_SRC_MASK;
     }
 }
 
@@ -343,6 +345,104 @@ static inline void SMM_EnableIvsModeForSramRetention(SMM_Type *base, bool enable
         base->MEMORY_RTN &= ~SMM_MEMORY_RTN_IVS_EN_MASK;
     }
 }
+
+/*!
+ * @brief Get the power state.
+ * 
+ * @param base SMM base address.
+ * 
+ * @return Value of power state. 
+ */
+static inline uint8_t SMM_GetPowerState(SMM_Type *base)
+{
+    return (uint8_t)((base->STAT & SMM_STAT_DPD_STATE_MASK) >> SMM_STAT_DPD_STATE_SHIFT);
+}
+
+/*!
+ * @brief Wakeup the main domain CPU from low power mode.
+ * 
+ * @param base SMM base address.
+ */
+static inline void SMM_WakeupMainDomain(SMM_Type *base)
+{
+    base->PWDN_CONFIG |= SMM_PWDN_CONFIG_WKUP_CPU_M_MASK;
+    base->PWDN_CONFIG &= ~SMM_PWDN_CONFIG_WKUP_CPU_M_MASK;
+}
+
+/*!
+ * @brief Check if the external interrupt flag is asserted.
+ * 
+ * @param base SMM base address.
+ *
+ * @return True if external interrupt is active, false otherwise. 
+ */
+static inline bool SMM_CheckExternalIntActive(SMM_Type *base)
+{
+    return (bool)((base->STAT & SMM_STAT_EXT_INT_A_MASK) != 0UL);
+}
+
+/*!
+ * @brief Clear the external interrupt flag.
+ * 
+ * @param base SMM base address.
+ */
+static inline void SMM_ClearExternalIntFlag(SMM_Type *base)
+{
+    base->STAT = SMM_STAT_EXT_INT_A_MASK;
+}
+
+/*!
+ * @brief Disable the main CPU I/O signals.
+ * 
+ * @param base SMM base address.
+ */
+static inline void SMM_DisableMainCpuIso(SMM_Type *base)
+{
+    base->CNFG |= (SMM_CNFG_MAIN_ISO_DSBL_MASK);
+    base->CNFG &= ~(SMM_CNFG_MAIN_ISO_DSBL_MASK);
+}
+
+/*!
+ * @brief Disable the AON CPU I/O signals.
+ * 
+ * @param base SMM base address.
+ */
+static inline void SMM_DisableAonCpuIso(SMM_Type *base)
+{
+    base->CNFG |= (SMM_CNFG_AON_ISO_DSBL_MASK);
+    base->CNFG &= ~(SMM_CNFG_AON_ISO_DSBL_MASK);
+}
+
+/*!
+ * @brief Clear all low power sequence settings.
+ * 
+ * @param base SMM base address.
+ */
+static inline void SMM_ClearAllLowPowerSequence(SMM_Type *base)
+{
+    base->PWDN_CONFIG &= ~(SMM_PWDN_CONFIG_DPD_STRT_MASK | SMM_PWDN_CONFIG_DPD3_SHTDWN_MASK | SMM_PWDN_CONFIG_DPD2_AON_MASK);
+}
+
+/*!
+ * @brief Clear all wakeup sources to main domain.
+ * 
+ * @param base 
+ */
+static inline void SMM_ClearMainCpuWakeupSources(SMM_Type *base)
+{
+    base->WKUP_MAIN &= ~SMM_WKUP_MAIN_WKUP_SRC_MAIN_CPU_MASK;
+}
+
+/*!
+ * @brief Clear all wakeup sources to AON domain.
+ * 
+ * @param base 
+ */
+static inline void SMM_ClearAonCpuWakeupSources(SMM_Type *base)
+{
+    base->AON_CPU &= ~SMM_AON_CPU_WKUP_SRC_AON_CPU_MASK;
+}
+
 
 #if defined(__cplusplus)
 }

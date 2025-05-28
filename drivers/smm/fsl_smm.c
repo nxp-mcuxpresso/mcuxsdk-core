@@ -86,8 +86,10 @@ void SMM_EnableMainDomainSramRetention(SMM_Type *base, uint16_t sramCuts)
 {
     uint32_t tmp32 = (base->MEMORY_RTN & ~(SMM_MEMORY_RTN_RETAIN_EN_MASK | SMM_MEMORY_RTN_MAIN_CPU_SRAM_RET_MASK));
 
-    tmp32 |= SMM_MEMORY_RTN_MAIN_CPU_SRAM_RET(sramCuts) | SMM_MEMORY_RTN_RETAIN_EN_MASK;
+    if (sramCuts != 0U)
+    {
+        tmp32 |= SMM_MEMORY_RTN_MAIN_CPU_SRAM_RET(sramCuts) | SMM_MEMORY_RTN_RETAIN_EN_MASK;
+    }
 
     base->MEMORY_RTN = tmp32;
 }
- 

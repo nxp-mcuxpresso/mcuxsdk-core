@@ -1,0 +1,5 @@
+/*!
+@defgroup pmu PMU: Power Management Unit
+@details The MCUXpresso SDK provides a peripheral driver for the Power Management Unit(PMU) of MCUXpresso SDK devices.
+
+*/
