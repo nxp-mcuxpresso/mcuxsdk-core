@@ -288,11 +288,12 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
 
     edma_transfer_config_t transferConfigRx = {0};
     edma_transfer_config_t transferConfigTx = {0};
-    edma_tcd_t *softwareTCD_extraBytesRx    = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~0x1FU));
-    edma_tcd_t *softwareTCD_extraBytesTx    = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[2]) & (~0x1FU));
-    edma_tcd_t *softwareTCD_pcsContinuous   = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[3]) & (~0x1FU));
-
-    edma_tcd_t *nextTcd = NULL;
+    edma_tcd_t *softwareTCD_oneFifoBlockRx  = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_oneFifoBlockTx  = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[2]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_lastBytesRx     = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[3]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_lastBytesTx     = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[4]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_pcsContinuous   = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[5]) & (~0x1FU));
+    edma_tcd_t *nextTcd                     = NULL;
 
     handle->state = (uint8_t)kLPSPI_Busy;
 
@@ -300,27 +301,70 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
     handle->nbytes         = blockSize * 4U;
     handle->totalByteCount = transfer->dataSize;
 
-    handle->nextRxWatermark = -1;
+    handle->oneFifoBlockRxWatermark = -1;
+    handle->lastBytesRxWatermark    = -1;
 
     /* Configure EDMA transfer/s for read */
     EDMA_SetCallback(handle->edmaRxRegToRxDataHandle, EDMA_LpspiMasterCallback,
                      &s_lpspiMasterEdmaPrivateHandle[instance]);
     EDMA_ResetChannel(handle->edmaRxRegToRxDataHandle->base, handle->edmaRxRegToRxDataHandle->channel);
 
-    /* Count of access to fifo (read/write) aligned to 4 */
-    uint32_t fifoAccessCount = (transfer->dataSize / blockSize) / 4U;
-    /* Count of remaining access to fifo (read/write) not aligned to 4 */
-    uint32_t extraFifoAccess = (transfer->dataSize / blockSize) % 4U;
-    /* Count of remaining bytes (not aligned to 4 FIFO words) */
-    uint32_t extraBytes = extraFifoAccess * blockSize;
-    if (extraFifoAccess > 0U)
+    /* Count of blocks aligned to 4 FIFO words */
+    uint32_t fourFifoBlocks = (transfer->dataSize / blockSize) / 4U;
+    /* Count of blocks aligned to 1 FIFO words */
+    uint32_t oneFifoBlocks = (transfer->dataSize / blockSize) % 4U;
+    /* Count of bytes in oneFifoBlocks */
+    uint32_t oneFifoBlockBytes = oneFifoBlocks * blockSize;
+
+    uint32_t lastBytes = 0U;
+    if (bytesPerFrame > 4U)
+    {
+        lastBytes = transfer->dataSize - (fourFifoBlocks * 4U * blockSize) - oneFifoBlockBytes;
+    }
+
+    if (lastBytes > 0U)
+    {
+        /* Case when framesize is > 4 bytes and not aligned to 4 bytes - transfer config to handle unaligned part (1 or 2 bytes) */
+        transferConfigRx.srcAddr   = (uint32_t)LPSPI_GetRxRegisterAddress(base) + getRegAddrOffset(lastBytes, handle->isByteSwap);
+        transferConfigRx.srcOffset = 0;
+        if (transfer->rxData != NULL)
+        {
+            transferConfigRx.destAddr   = (uint32_t)transfer->rxData + transfer->dataSize - lastBytes;
+            transferConfigRx.destOffset = 1;
+        }
+        else
+        {
+            transferConfigRx.destAddr   = (uint32_t)&handle->rxBuffIfNull;
+            transferConfigRx.destOffset = 0;
+        }
+        transferConfigRx.srcTransferSize  = getEdmaTransferSize(lastBytes);
+        transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
+        transferConfigRx.minorLoopBytes   = lastBytes;
+        transferConfigRx.majorLoopCounts  = 1U;
+
+#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+        EDMA_TcdResetExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_lastBytesRx);
+        EDMA_TcdSetTransferConfigExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_lastBytesRx,
+                                     &transferConfigRx, NULL);
+        EDMA_TcdEnableInterruptsExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_lastBytesRx,
+                                    (uint32_t)kEDMA_MajorInterruptEnable);
+#else
+        EDMA_TcdReset(softwareTCD_lastBytesRx);
+        EDMA_TcdSetTransferConfig(softwareTCD_lastBytesRx, &transferConfigRx, NULL);
+        EDMA_TcdEnableInterrupts(softwareTCD_lastBytesRx, (uint32_t)kEDMA_MajorInterruptEnable);
+#endif
+        nextTcd = softwareTCD_lastBytesRx;
+        handle->lastBytesRxWatermark = 0;
+    }
+
+    if (oneFifoBlocks > 0U)
     {
         /* Transfer config for remaining FIFO words (1-3) */
         transferConfigRx.srcAddr   = (uint32_t)rxAddr;
         transferConfigRx.srcOffset = 0;
         if (transfer->rxData != NULL)
         {
-            transferConfigRx.destAddr   = (uint32_t)transfer->rxData + transfer->dataSize - extraBytes;
+            transferConfigRx.destAddr   = (uint32_t)transfer->rxData + transfer->dataSize - oneFifoBlockBytes - lastBytes;
             transferConfigRx.destOffset = 1;
         }
         else
@@ -330,39 +374,40 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
         }
         transferConfigRx.srcTransferSize  = getEdmaTransferSize(blockSize);
         transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
-        transferConfigRx.minorLoopBytes   = extraBytes;
+        transferConfigRx.minorLoopBytes   = oneFifoBlockBytes;
         transferConfigRx.majorLoopCounts  = 1U;
 
-        if (fifoAccessCount > 0U)
+        if (fourFifoBlocks > 0U)
         {
 #if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
-            EDMA_TcdResetExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_extraBytesRx);
-            EDMA_TcdSetTransferConfigExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_extraBytesRx,
-                                         &transferConfigRx, NULL);
-            EDMA_TcdEnableInterruptsExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_extraBytesRx,
+            EDMA_TcdResetExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_oneFifoBlockRx);
+            EDMA_TcdSetTransferConfigExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_oneFifoBlockRx,
+                                         &transferConfigRx, nextTcd);
+            EDMA_TcdEnableInterruptsExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_oneFifoBlockRx,
                                         (uint32_t)kEDMA_MajorInterruptEnable);
 #else
-            EDMA_TcdReset(softwareTCD_extraBytesRx);
-            EDMA_TcdSetTransferConfig(softwareTCD_extraBytesRx, &transferConfigRx, NULL);
-            EDMA_TcdEnableInterrupts(softwareTCD_extraBytesRx, (uint32_t)kEDMA_MajorInterruptEnable);
+            EDMA_TcdReset(softwareTCD_oneFifoBlockRx);
+            EDMA_TcdSetTransferConfig(softwareTCD_oneFifoBlockRx, &transferConfigRx, nextTcd);
+            EDMA_TcdEnableInterrupts(softwareTCD_oneFifoBlockRx, (uint32_t)kEDMA_MajorInterruptEnable);
 #endif
+            nextTcd = softwareTCD_oneFifoBlockRx;
         }
         else
         {
             EDMA_SetTransferConfig(handle->edmaRxRegToRxDataHandle->base, handle->edmaRxRegToRxDataHandle->channel,
-                                   &transferConfigRx, NULL);
+                                   &transferConfigRx, nextTcd);
 
             /* Enable edma interrupt to finish transfer */
             EDMA_EnableChannelInterrupts(handle->edmaRxRegToRxDataHandle->base,
                                          handle->edmaRxRegToRxDataHandle->channel,
                                          (uint32_t)kEDMA_MajorInterruptEnable);
 
-            LPSPI_SetFifoWatermarks(base, 4U, (extraFifoAccess - 1U));
-            handle->nbytes = extraBytes;
+            LPSPI_SetFifoWatermarks(base, 4U, (oneFifoBlocks - 1U));
+            handle->nbytes = oneFifoBlockBytes;
         }
     }
 
-    if (fifoAccessCount > 0U)
+    if (fourFifoBlocks > 0U)
     {
         /* Transfer config for part of data aligned to 4 FIFO entry */
         transferConfigRx.srcAddr   = (uint32_t)rxAddr;
@@ -380,18 +425,12 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
         transferConfigRx.srcTransferSize  = getEdmaTransferSize(blockSize);
         transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
         transferConfigRx.minorLoopBytes   = blockSize * 4U;
-        transferConfigRx.majorLoopCounts  = fifoAccessCount;
+        transferConfigRx.majorLoopCounts  = fourFifoBlocks;
 
-        if (extraBytes == 0U)
+        if (oneFifoBlockBytes > 0U)
         {
-            nextTcd = NULL;
-        }
-        else
-        {
-            nextTcd = softwareTCD_extraBytesRx;
-
             /* Set value for FIFO rx watermark for next part of data, used in EDMA_LpspiMasterCallback() */
-            handle->nextRxWatermark = (int8_t)(extraFifoAccess - 1U);
+            handle->oneFifoBlockRxWatermark = (int8_t)(oneFifoBlocks - 1U);
         }
 
         EDMA_SetTransferConfig(handle->edmaRxRegToRxDataHandle->base, handle->edmaRxRegToRxDataHandle->channel,
@@ -409,53 +448,7 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
     /* Configure EDMA transfer/s for write */
     EDMA_ResetChannel(handle->edmaTxDataToTxRegHandle->base, handle->edmaTxDataToTxRegHandle->channel);
 
-    if (extraFifoAccess > 0U)
-    {
-        /* Transfer config for remaining FIFO words (1-3) */
-        if (transfer->txData != NULL)
-        {
-            transferConfigTx.srcAddr   = (uint32_t)transfer->txData + transfer->dataSize - extraBytes;
-            transferConfigTx.srcOffset = 1;
-        }
-        else
-        {
-            transferConfigTx.srcAddr   = (uint32_t)&handle->txBuffIfNull;
-            transferConfigTx.srcOffset = 0;
-        }
-
-        transferConfigTx.destAddr         = (uint32_t)txAddr;
-        transferConfigTx.destOffset       = 0;
-        transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
-        transferConfigTx.destTransferSize = getEdmaTransferSize(blockSize);
-        transferConfigTx.minorLoopBytes   = extraBytes;
-        transferConfigTx.majorLoopCounts  = 1U;
-
-        if (handle->isPcsContinuous)
-        {
-            nextTcd = softwareTCD_pcsContinuous;
-        }
-        else
-        {
-            nextTcd = NULL;
-        }
-
-        if (fifoAccessCount > 0U)
-        {
-#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
-            EDMA_TcdResetExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_extraBytesTx);
-            EDMA_TcdSetTransferConfigExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_extraBytesTx,
-                                         &transferConfigTx, nextTcd);
-#else
-            EDMA_TcdReset(softwareTCD_extraBytesTx);
-            EDMA_TcdSetTransferConfig(softwareTCD_extraBytesTx, &transferConfigTx, nextTcd);
-#endif
-        }
-        else
-        {
-            EDMA_SetTransferConfig(handle->edmaTxDataToTxRegHandle->base, handle->edmaTxDataToTxRegHandle->channel,
-                                   &transferConfigTx, nextTcd);
-        }
-    }
+    nextTcd = NULL;
 
     if (handle->isPcsContinuous)
     {
@@ -479,9 +472,81 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
         EDMA_TcdReset(softwareTCD_pcsContinuous);
         EDMA_TcdSetTransferConfig(softwareTCD_pcsContinuous, &transferConfigTx, NULL);
 #endif
+        nextTcd = softwareTCD_pcsContinuous;
     }
 
-    if (fifoAccessCount > 0U)
+    if (lastBytes > 0U)
+    {
+        /* Case when framesize is > 4 bytes and not aligned to 4 bytes - transfer config to handle unaligned part (1 or 2 bytes) */
+        if (transfer->txData != NULL)
+        {
+            transferConfigTx.srcAddr   = (uint32_t)transfer->txData + transfer->dataSize - lastBytes;
+            transferConfigTx.srcOffset = 1;
+        }
+        else
+        {
+            transferConfigTx.srcAddr   = (uint32_t)&handle->txBuffIfNull;
+            transferConfigTx.srcOffset = 0;
+        }
+        transferConfigTx.destAddr         = (uint32_t)LPSPI_GetTxRegisterAddress(base) + getRegAddrOffset(lastBytes, handle->isByteSwap);
+        transferConfigTx.destOffset       = 0;
+        transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
+        transferConfigTx.destTransferSize = getEdmaTransferSize(lastBytes);
+        transferConfigTx.minorLoopBytes   = lastBytes;
+        transferConfigTx.majorLoopCounts  = 1U;
+
+#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+        EDMA_TcdResetExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_lastBytesTx);
+        EDMA_TcdSetTransferConfigExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_lastBytesTx,
+                                     &transferConfigTx, nextTcd);
+#else
+        EDMA_TcdReset(softwareTCD_lastBytesTx);
+        EDMA_TcdSetTransferConfig(softwareTCD_lastBytesTx, &transferConfigTx, nextTcd);
+#endif
+        nextTcd = softwareTCD_lastBytesTx;
+    }
+
+    if (oneFifoBlocks > 0U)
+    {
+        /* Transfer config for remaining FIFO words (1-3) */
+        if (transfer->txData != NULL)
+        {
+            transferConfigTx.srcAddr   = (uint32_t)transfer->txData + transfer->dataSize - oneFifoBlockBytes - lastBytes;
+            transferConfigTx.srcOffset = 1;
+        }
+        else
+        {
+            transferConfigTx.srcAddr   = (uint32_t)&handle->txBuffIfNull;
+            transferConfigTx.srcOffset = 0;
+        }
+
+        transferConfigTx.destAddr         = (uint32_t)txAddr;
+        transferConfigTx.destOffset       = 0;
+        transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
+        transferConfigTx.destTransferSize = getEdmaTransferSize(blockSize);
+        transferConfigTx.minorLoopBytes   = oneFifoBlockBytes;
+        transferConfigTx.majorLoopCounts  = 1U;
+
+        if (fourFifoBlocks > 0U)
+        {
+#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+            EDMA_TcdResetExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_oneFifoBlockTx);
+            EDMA_TcdSetTransferConfigExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_oneFifoBlockTx,
+                                         &transferConfigTx, nextTcd);
+#else
+            EDMA_TcdReset(softwareTCD_oneFifoBlockTx);
+            EDMA_TcdSetTransferConfig(softwareTCD_oneFifoBlockTx, &transferConfigTx, nextTcd);
+#endif
+            nextTcd = softwareTCD_oneFifoBlockTx;
+        }
+        else
+        {
+            EDMA_SetTransferConfig(handle->edmaTxDataToTxRegHandle->base, handle->edmaTxDataToTxRegHandle->channel,
+                                   &transferConfigTx, nextTcd);
+        }
+    }
+
+    if (fourFifoBlocks > 0U)
     {
         /* Transfer config for part of data aligned to 4 FIFO entry */
         if (transfer->txData != NULL)
@@ -499,23 +564,8 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
         transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
         transferConfigTx.destTransferSize = getEdmaTransferSize(blockSize);
         transferConfigTx.minorLoopBytes   = blockSize * 4U;
-        transferConfigTx.majorLoopCounts  = fifoAccessCount;
+        transferConfigTx.majorLoopCounts  = fourFifoBlocks;
 
-        if (extraBytes == 0U)
-        {
-            if (handle->isPcsContinuous)
-            {
-                nextTcd = softwareTCD_pcsContinuous;
-            }
-            else
-            {
-                nextTcd = NULL;
-            }
-        }
-        else
-        {
-            nextTcd = softwareTCD_extraBytesTx;
-        }
         EDMA_SetTransferConfig(handle->edmaTxDataToTxRegHandle->base, handle->edmaTxDataToTxRegHandle->channel,
                                &transferConfigTx, nextTcd);
     }
@@ -561,10 +611,17 @@ static void EDMA_LpspiMasterCallback(edma_handle_t *edmaHandle, void *userData, 
     assert(userData != NULL);
 
     lpspi_master_edma_private_handle_t *lpspiEdmaPrivateHandle = (lpspi_master_edma_private_handle_t *)userData;
-    if (lpspiEdmaPrivateHandle->handle->nextRxWatermark > -1)
+    if (lpspiEdmaPrivateHandle->handle->oneFifoBlockRxWatermark > -1)
     {
-        LPSPI_SetFifoWatermarks(lpspiEdmaPrivateHandle->base, 4U, lpspiEdmaPrivateHandle->handle->nextRxWatermark);
-        lpspiEdmaPrivateHandle->handle->nextRxWatermark = -1;
+        LPSPI_SetFifoWatermarks(lpspiEdmaPrivateHandle->base, 4U, lpspiEdmaPrivateHandle->handle->oneFifoBlockRxWatermark);
+        lpspiEdmaPrivateHandle->handle->oneFifoBlockRxWatermark = -1;
+        return;
+    }
+
+    if (lpspiEdmaPrivateHandle->handle->lastBytesRxWatermark > -1)
+    {
+        lpspiEdmaPrivateHandle->handle->lastBytesRxWatermark = -1;
+        LPSPI_SetFifoWatermarks(lpspiEdmaPrivateHandle->base, 4U, lpspiEdmaPrivateHandle->handle->lastBytesRxWatermark);
         return;
     }
 
@@ -723,8 +780,8 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
     LPSPI_PrepareTransferEDMA(base);
 
     bool isByteSwap        = ((transfer->configFlags & (uint32_t)kLPSPI_SlaveByteSwap) != 0U);
-    uint8_t dummyData      = g_lpspiDummyData[LPSPI_GetInstance(base)];
     uint32_t instance      = LPSPI_GetInstance(base);
+    uint8_t dummyData      = g_lpspiDummyData[instance];
     uint32_t whichPcs      = (transfer->configFlags & LPSPI_SLAVE_PCS_MASK) >> LPSPI_SLAVE_PCS_SHIFT;
     uint32_t bytesPerFrame = ((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT) / 8U + 1U;
     /* Size of transferred data - how many bytes will be read/write from/to FIFO (RDR/TDR) at once */
@@ -735,8 +792,10 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
 
     edma_transfer_config_t transferConfigRx = {0};
     edma_transfer_config_t transferConfigTx = {0};
-    edma_tcd_t *softwareTCD_extraBytesRx    = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~0x1FU));
-    edma_tcd_t *softwareTCD_extraBytesTx    = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[2]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_oneFifoBlockRx  = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_oneFifoBlockTx  = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[2]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_lastBytesRx     = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[3]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_lastBytesTx     = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[4]) & (~0x1FU));
     edma_tcd_t *nextTcd                     = NULL;
 
     handle->state = (uint8_t)kLPSPI_Busy;
@@ -745,7 +804,8 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
     handle->nbytes         = blockSize * 4U;
     handle->totalByteCount = transfer->dataSize;
 
-    handle->nextRxWatermark = -1;
+    handle->oneFifoBlockRxWatermark = -1;
+    handle->lastBytesRxWatermark    = -1;
 
     handle->txBuffIfNull =
         ((uint32_t)dummyData) | ((uint32_t)dummyData << 8) | ((uint32_t)dummyData << 16) | ((uint32_t)dummyData << 24);
@@ -765,20 +825,62 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
                      &s_lpspiSlaveEdmaPrivateHandle[instance]);
     EDMA_ResetChannel(handle->edmaRxRegToRxDataHandle->base, handle->edmaRxRegToRxDataHandle->channel);
 
-    /* Count of access to fifo (read/write) aligned to 4 */
-    uint32_t fifoAccessCount = (transfer->dataSize / blockSize) / 4U;
-    /* Count of remaining access to fifo (read/write) not aligned to 4 */
-    uint32_t extraFifoAccess = (transfer->dataSize / blockSize) % 4U;
-    /* Count of remaining bytes (not aligned to 4 FIFO words) */
-    uint32_t extraBytes = extraFifoAccess * blockSize;
-    if (extraFifoAccess > 0U)
+    /* Count of blocks aligned to 4 FIFO words */
+    uint32_t fourFifoBlocks = (transfer->dataSize / blockSize) / 4U;
+    /* Count of blocks aligned to 1 FIFO words */
+    uint32_t oneFifoBlocks = (transfer->dataSize / blockSize) % 4U;
+    /* Count of bytes in oneFifoBlocks */
+    uint32_t oneFifoBlockBytes = oneFifoBlocks * blockSize;
+
+    uint32_t lastBytes = 0U;
+    if (bytesPerFrame > 4U)
+    {
+        lastBytes = transfer->dataSize - (fourFifoBlocks * 4U * blockSize) - oneFifoBlockBytes;
+    }
+
+    if (lastBytes > 0U)
+    {
+        /* Case when framesize is > 4 bytes and not aligned to 4 bytes - transfer config to handle unaligned part (1 or 2 bytes) */
+        transferConfigRx.srcAddr   = (uint32_t)LPSPI_GetRxRegisterAddress(base) + getRegAddrOffset(lastBytes, isByteSwap);
+        transferConfigRx.srcOffset = 0;
+        if (transfer->rxData != NULL)
+        {
+            transferConfigRx.destAddr   = (uint32_t)transfer->rxData + transfer->dataSize - oneFifoBlockBytes - lastBytes;
+            transferConfigRx.destOffset = 1;
+        }
+        else
+        {
+            transferConfigRx.destAddr   = (uint32_t)&handle->rxBuffIfNull;
+            transferConfigRx.destOffset = 0;
+        }
+        transferConfigRx.srcTransferSize  = getEdmaTransferSize(lastBytes);
+        transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
+        transferConfigRx.minorLoopBytes   = lastBytes;
+        transferConfigRx.majorLoopCounts  = 1U;
+
+#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+        EDMA_TcdResetExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_lastBytesRx);
+        EDMA_TcdSetTransferConfigExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_lastBytesRx,
+                                     &transferConfigRx, NULL);
+        EDMA_TcdEnableInterruptsExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_lastBytesRx,
+                                    (uint32_t)kEDMA_MajorInterruptEnable);
+#else
+        EDMA_TcdReset(softwareTCD_lastBytesRx);
+        EDMA_TcdSetTransferConfig(softwareTCD_lastBytesRx, &transferConfigRx, NULL);
+        EDMA_TcdEnableInterrupts(softwareTCD_lastBytesRx, (uint32_t)kEDMA_MajorInterruptEnable);
+#endif
+        nextTcd = softwareTCD_lastBytesRx;
+        handle->lastBytesRxWatermark = 0;
+    }
+
+    if (oneFifoBlocks > 0U)
     {
         /* Transfer config for remaining FIFO words (1-3) */
         transferConfigRx.srcAddr   = (uint32_t)rxAddr;
         transferConfigRx.srcOffset = 0;
         if (transfer->rxData != NULL)
         {
-            transferConfigRx.destAddr   = (uint32_t)transfer->rxData + transfer->dataSize - extraBytes;
+            transferConfigRx.destAddr   = (uint32_t)transfer->rxData + transfer->dataSize - oneFifoBlockBytes;
             transferConfigRx.destOffset = 1;
         }
         else
@@ -788,39 +890,40 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
         }
         transferConfigRx.srcTransferSize  = getEdmaTransferSize(blockSize);
         transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
-        transferConfigRx.minorLoopBytes   = extraBytes;
+        transferConfigRx.minorLoopBytes   = oneFifoBlockBytes;
         transferConfigRx.majorLoopCounts  = 1U;
 
-        if (fifoAccessCount > 0U)
+        if (fourFifoBlocks > 0U)
         {
 #if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
-            EDMA_TcdResetExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_extraBytesRx);
-            EDMA_TcdSetTransferConfigExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_extraBytesRx,
-                                         &transferConfigRx, NULL);
-            EDMA_TcdEnableInterruptsExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_extraBytesRx,
+            EDMA_TcdResetExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_oneFifoBlockRx);
+            EDMA_TcdSetTransferConfigExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_oneFifoBlockRx,
+                                         &transferConfigRx, nextTcd);
+            EDMA_TcdEnableInterruptsExt(handle->edmaRxRegToRxDataHandle->base, softwareTCD_oneFifoBlockRx,
                                         (uint32_t)kEDMA_MajorInterruptEnable);
 #else
-            EDMA_TcdReset(softwareTCD_extraBytesRx);
-            EDMA_TcdSetTransferConfig(softwareTCD_extraBytesRx, &transferConfigRx, NULL);
-            EDMA_TcdEnableInterrupts(softwareTCD_extraBytesRx, (uint32_t)kEDMA_MajorInterruptEnable);
+            EDMA_TcdReset(softwareTCD_oneFifoBlockRx);
+            EDMA_TcdSetTransferConfig(softwareTCD_oneFifoBlockRx, &transferConfigRx, nextTcd);
+            EDMA_TcdEnableInterrupts(softwareTCD_oneFifoBlockRx, (uint32_t)kEDMA_MajorInterruptEnable);
 #endif
+            nextTcd = softwareTCD_oneFifoBlockRx;
         }
         else
         {
             EDMA_SetTransferConfig(handle->edmaRxRegToRxDataHandle->base, handle->edmaRxRegToRxDataHandle->channel,
-                                   &transferConfigRx, NULL);
+                                   &transferConfigRx, nextTcd);
 
             /* Enable edma interrupt to finish transfer */
             EDMA_EnableChannelInterrupts(handle->edmaRxRegToRxDataHandle->base,
                                          handle->edmaRxRegToRxDataHandle->channel,
                                          (uint32_t)kEDMA_MajorInterruptEnable);
 
-            LPSPI_SetFifoWatermarks(base, 4U, (extraFifoAccess - 1U));
-            handle->nbytes = extraBytes;
+            LPSPI_SetFifoWatermarks(base, 4U, (oneFifoBlocks - 1U));
+            handle->nbytes = oneFifoBlockBytes;
         }
     }
 
-    if (fifoAccessCount > 0U)
+    if (fourFifoBlocks > 0U)
     {
         /* Transfer config for part of data aligned to 4 FIFO entry */
         transferConfigRx.srcAddr   = (uint32_t)rxAddr;
@@ -838,18 +941,12 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
         transferConfigRx.srcTransferSize  = getEdmaTransferSize(blockSize);
         transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
         transferConfigRx.minorLoopBytes   = blockSize * 4U;
-        transferConfigRx.majorLoopCounts  = fifoAccessCount;
+        transferConfigRx.majorLoopCounts  = fourFifoBlocks;
 
-        if (extraBytes == 0U)
+        if (oneFifoBlockBytes > 0U)
         {
-            nextTcd = NULL;
-        }
-        else
-        {
-            nextTcd = softwareTCD_extraBytesRx;
-
             /* Set value for FIFO rx watermark for next part of data, used in EDMA_LpspiSlaveCallback() */
-            handle->nextRxWatermark = (int8_t)(extraFifoAccess - 1U);
+            handle->oneFifoBlockRxWatermark = (int8_t)(oneFifoBlocks - 1U);
         }
 
         EDMA_SetTransferConfig(handle->edmaRxRegToRxDataHandle->base, handle->edmaRxRegToRxDataHandle->channel,
@@ -875,12 +972,45 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
     /* Configure EDMA transfer/s for write */
     EDMA_ResetChannel(handle->edmaTxDataToTxRegHandle->base, handle->edmaTxDataToTxRegHandle->channel);
 
-    if (extraFifoAccess > 0U)
+    nextTcd = NULL;
+
+    if (lastBytes > 0U)
+    {
+        /* Case when framesize is > 4 bytes and not aligned to 4 bytes - transfer config to handle unaligned part (1 or 2 bytes) */
+        if (transfer->txData != NULL)
+        {
+            transferConfigTx.srcAddr   = (uint32_t)transfer->txData + transfer->dataSize - lastBytes;
+            transferConfigTx.srcOffset = 1;
+        }
+        else
+        {
+            transferConfigTx.srcAddr   = (uint32_t)&handle->txBuffIfNull;
+            transferConfigTx.srcOffset = 0;
+        }
+        transferConfigTx.destAddr         = (uint32_t)LPSPI_GetTxRegisterAddress(base) + getRegAddrOffset(lastBytes, isByteSwap);
+        transferConfigTx.destOffset       = 0;
+        transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
+        transferConfigTx.destTransferSize = getEdmaTransferSize(lastBytes);
+        transferConfigTx.minorLoopBytes   = lastBytes;
+        transferConfigTx.majorLoopCounts  = 1U;
+
+#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+        EDMA_TcdResetExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_lastBytesTx);
+        EDMA_TcdSetTransferConfigExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_lastBytesTx,
+                                     &transferConfigTx, nextTcd);
+#else
+        EDMA_TcdReset(softwareTCD_lastBytesTx);
+        EDMA_TcdSetTransferConfig(softwareTCD_lastBytesTx, &transferConfigTx, nextTcd);
+#endif
+        nextTcd = softwareTCD_lastBytesTx;
+    }
+
+    if (oneFifoBlocks > 0U)
     {
         /* Transfer config for remaining FIFO words (1-3) */
         if (transfer->txData != NULL)
         {
-            transferConfigTx.srcAddr   = (uint32_t)transfer->txData + transfer->dataSize - extraBytes;
+            transferConfigTx.srcAddr   = (uint32_t)transfer->txData + transfer->dataSize - oneFifoBlockBytes - lastBytes;
             transferConfigTx.srcOffset = 1;
         }
         else
@@ -893,28 +1023,29 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
         transferConfigTx.destOffset       = 0;
         transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
         transferConfigTx.destTransferSize = getEdmaTransferSize(blockSize);
-        transferConfigTx.minorLoopBytes   = extraBytes;
+        transferConfigTx.minorLoopBytes   = oneFifoBlockBytes;
         transferConfigTx.majorLoopCounts  = 1U;
 
-        if (fifoAccessCount > 0U)
+        if (fourFifoBlocks > 0U)
         {
 #if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
-            EDMA_TcdResetExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_extraBytesTx);
-            EDMA_TcdSetTransferConfigExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_extraBytesTx,
-                                         &transferConfigTx, NULL);
+            EDMA_TcdResetExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_oneFifoBlockTx);
+            EDMA_TcdSetTransferConfigExt(handle->edmaTxDataToTxRegHandle->base, softwareTCD_oneFifoBlockTx,
+                                         &transferConfigTx, nextTcd);
 #else
-            EDMA_TcdReset(softwareTCD_extraBytesTx);
-            EDMA_TcdSetTransferConfig(softwareTCD_extraBytesTx, &transferConfigTx, NULL);
+            EDMA_TcdReset(softwareTCD_oneFifoBlockTx);
+            EDMA_TcdSetTransferConfig(softwareTCD_oneFifoBlockTx, &transferConfigTx, nextTcd);
 #endif
+            nextTcd = softwareTCD_oneFifoBlockTx;
         }
         else
         {
             EDMA_SetTransferConfig(handle->edmaTxDataToTxRegHandle->base, handle->edmaTxDataToTxRegHandle->channel,
-                                   &transferConfigTx, NULL);
+                                   &transferConfigTx, nextTcd);
         }
     }
 
-    if (fifoAccessCount > 0U)
+    if (fourFifoBlocks > 0U)
     {
         /* Transfer config for part of data aligned to 4 FIFO entry */
         if (transfer->txData != NULL)
@@ -932,16 +1063,8 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
         transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
         transferConfigTx.destTransferSize = getEdmaTransferSize(blockSize);
         transferConfigTx.minorLoopBytes   = blockSize * 4U;
-        transferConfigTx.majorLoopCounts  = fifoAccessCount;
+        transferConfigTx.majorLoopCounts  = fourFifoBlocks;
 
-        if (extraBytes == 0U)
-        {
-            nextTcd = NULL;
-        }
-        else
-        {
-            nextTcd = softwareTCD_extraBytesTx;
-        }
         EDMA_SetTransferConfig(handle->edmaTxDataToTxRegHandle->base, handle->edmaTxDataToTxRegHandle->channel,
                                &transferConfigTx, nextTcd);
     }
@@ -958,10 +1081,17 @@ static void EDMA_LpspiSlaveCallback(edma_handle_t *edmaHandle, void *userData, b
     assert(userData != NULL);
 
     lpspi_slave_edma_private_handle_t *lpspiEdmaPrivateHandle = (lpspi_slave_edma_private_handle_t *)userData;
-    if (lpspiEdmaPrivateHandle->handle->nextRxWatermark > -1)
+    if (lpspiEdmaPrivateHandle->handle->oneFifoBlockRxWatermark > -1)
     {
-        LPSPI_SetFifoWatermarks(lpspiEdmaPrivateHandle->base, 4U, lpspiEdmaPrivateHandle->handle->nextRxWatermark);
-        lpspiEdmaPrivateHandle->handle->nextRxWatermark = -1;
+        LPSPI_SetFifoWatermarks(lpspiEdmaPrivateHandle->base, 4U, lpspiEdmaPrivateHandle->handle->oneFifoBlockRxWatermark);
+        lpspiEdmaPrivateHandle->handle->oneFifoBlockRxWatermark = -1;
+        return;
+    }
+
+    if (lpspiEdmaPrivateHandle->handle->lastBytesRxWatermark > -1)
+    {
+        lpspiEdmaPrivateHandle->handle->lastBytesRxWatermark = -1;
+        LPSPI_SetFifoWatermarks(lpspiEdmaPrivateHandle->base, 4U, lpspiEdmaPrivateHandle->handle->lastBytesRxWatermark);
         return;
     }
 

@@ -73,7 +73,8 @@ struct _lpspi_master_edma_handle
     uint32_t rxBuffIfNull;                          /*!< Used if there is not rxData for DMA purpose. */
 
     uint32_t transmitCommand;                       /*!< Used to write TCR for DMA purpose. */
-    volatile int8_t nextRxWatermark;                /*!< Used to change RXWATER in FCR for DMA purpose. */
+    volatile int8_t oneFifoBlockRxWatermark;        /*!< Used to change RXWATER in FCR for DMA purpose. */
+    volatile int8_t lastBytesRxWatermark;           /*!< Used to change RXWATER in FCR for DMA purpose. */
     volatile uint8_t state;                         /*!< LPSPI transfer state , _lpspi_transfer_state. */
 
     lpspi_master_edma_transfer_callback_t callback; /*!< Completion callback. */
@@ -82,7 +83,7 @@ struct _lpspi_master_edma_handle
     edma_handle_t *edmaRxRegToRxDataHandle;         /*!<edma_handle_t handle point used for RxReg to RxData buff */
     edma_handle_t *edmaTxDataToTxRegHandle;         /*!<edma_handle_t handle point used for TxData to TxReg buff */
 
-    edma_tcd_t lpspiSoftwareTCD[4];                 /*!<SoftwareTCD, internal used */
+    edma_tcd_t lpspiSoftwareTCD[6];                 /*!<SoftwareTCD, internal used */
 };
 
 /*! @brief LPSPI slave eDMA transfer handle structure used for transactional API.*/
@@ -94,7 +95,8 @@ struct _lpspi_slave_edma_handle
     uint32_t txBuffIfNull;                         /*!< Used if there is not txData for DMA purpose. */
     uint32_t rxBuffIfNull;                         /*!< Used if there is not rxData for DMA purpose. */
 
-    volatile int8_t nextRxWatermark;               /*!< Used to change RXWATER in FCR for DMA purpose. */
+    volatile int8_t oneFifoBlockRxWatermark;       /*!< Used to change RXWATER in FCR for DMA purpose. */
+    volatile int8_t lastBytesRxWatermark;          /*!< Used to change RXWATER in FCR for DMA purpose. */
     volatile uint8_t state;                        /*!< LPSPI transfer state. */
 
     lpspi_slave_edma_transfer_callback_t callback; /*!< Completion callback. */
@@ -103,7 +105,7 @@ struct _lpspi_slave_edma_handle
     edma_handle_t *edmaRxRegToRxDataHandle;        /*!<edma_handle_t handle point used for RxReg to RxData buff */
     edma_handle_t *edmaTxDataToTxRegHandle;        /*!<edma_handle_t handle point used for TxData to TxReg */
 
-    edma_tcd_t lpspiSoftwareTCD[3];                /*!<SoftwareTCD, internal used */
+    edma_tcd_t lpspiSoftwareTCD[5];                /*!<SoftwareTCD, internal used */
 };
 
 /***********************************************************************************************************************
