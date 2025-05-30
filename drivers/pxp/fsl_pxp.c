@@ -2262,7 +2262,7 @@ void PXP_SetWfeaConfig(PXP_Type *base, const pxp_wfea_engine_config_t *config)
  */
 void PXP_SetPath(PXP_Type *base, pxp_path_t path)
 {
-    volatile uint32_t *pathReg;
+    volatile uint32_t *pathReg = NULL;
     uint32_t mux = PXP_GET_MUX_FROM_PATH((uint32_t)path);
     uint32_t sel = PXP_GET_SEL_FROM_PATH((uint32_t)path);
 
