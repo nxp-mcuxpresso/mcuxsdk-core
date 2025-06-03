@@ -1,5 +1,10 @@
 # EDMA
 
+## [2.10.6]
+
+- Improvements
+  - Add macro FSL_FEATURE_EDMA_HAS_EDMA_TCD_CLOCK_ENABLE to enable tcd clocks in EDMA_Init function.
+
 ## [2.10.5]
 
 - Bug Fixes
