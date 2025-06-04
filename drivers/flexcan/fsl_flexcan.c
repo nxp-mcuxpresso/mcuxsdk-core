@@ -2387,7 +2387,7 @@ void FLEXCAN_SetTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable)
  * When CTRL2[RRS]=1, frame's ID is compared to the IDs of the receive mailboxes with the CODE field
  * configured as kFLEXCAN_RxMbEmpty, kFLEXCAN_RxMbFull or kFLEXCAN_RxMbOverrun. Message buffer will 
  * store the remote frame in the same fashion of a data frame. No automatic remote response frame will
- * be generated. User need to setup another message buffer to respond remote request.
+ * be generated. User can setup another message buffer to respond remote request.
  *
  * param base FlexCAN peripheral base address.
  * param mbIdx The Message Buffer index.
@@ -2553,12 +2553,6 @@ void FLEXCAN_SetFDRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_
         if (kFLEXCAN_FrameFormatExtend == pRxMbConfig->format)
         {
             cs_temp |= CAN_CS_IDE_MASK;
-        }
-
-        /* Setup Message Buffer type. */
-        if (kFLEXCAN_FrameTypeRemote == pRxMbConfig->type)
-        {
-            cs_temp |= CAN_CS_RTR_MASK;
         }
 
         /* Activate Rx Message Buffer. */
@@ -3238,12 +3232,6 @@ status_t FLEXCAN_WriteFDTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_fd_fra
             cs_temp |= CAN_CS_SRR_MASK | CAN_CS_IDE_MASK;
         }
 
-        /* Fill Message Type field. */
-        if ((uint32_t)kFLEXCAN_FrameTypeRemote == pTxFrame->type)
-        {
-            cs_temp |= CAN_CS_RTR_MASK;
-        }
-
         cs_temp |= CAN_CS_CODE(kFLEXCAN_TxMbDataOrRemote) | CAN_CS_DLC(pTxFrame->length) | CAN_CS_EDL(pTxFrame->edl) |
                    CAN_CS_BRS(pTxFrame->brs);
 
@@ -3371,8 +3359,7 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
         pRxFrame->edl = (cs_temp & CAN_CS_EDL_MASK) != 0U ? 1U : 0U;
 
         /* Get the message type. */
-        pRxFrame->type =
-            (cs_temp & CAN_CS_RTR_MASK) != 0U ? (uint8_t)kFLEXCAN_FrameTypeRemote : (uint8_t)kFLEXCAN_FrameTypeData;
+        pRxFrame->type = (uint8_t)kFLEXCAN_FrameTypeData;
 
         /* Get the message length. */
         pRxFrame->length = (uint8_t)((cs_temp & CAN_CS_DLC_MASK) >> CAN_CS_DLC_SHIFT);
@@ -4053,15 +4040,7 @@ status_t FLEXCAN_TransferFDSendNonBlocking(CAN_Type *base, flexcan_handle_t *han
     /* Check if Message Buffer is idle. */
     if ((uint8_t)kFLEXCAN_StateIdle == handle->mbState[pMbXfer->mbIdx])
     {
-        /* Distinguish transmit type. */
-        if ((uint32_t)kFLEXCAN_FrameTypeRemote == pMbXfer->framefd->type)
-        {
-            handle->mbState[pMbXfer->mbIdx] = (uint8_t)kFLEXCAN_StateTxRemote;
-        }
-        else
-        {
-            handle->mbState[pMbXfer->mbIdx] = (uint8_t)kFLEXCAN_StateTxData;
-        }
+        handle->mbState[pMbXfer->mbIdx] = (uint8_t)kFLEXCAN_StateTxData;
 
         if (kStatus_Success ==
             FLEXCAN_WriteFDTxMb(base, pMbXfer->mbIdx, (const flexcan_fd_frame_t *)(uintptr_t)pMbXfer->framefd))
@@ -4780,16 +4759,7 @@ static status_t FLEXCAN_SubHandlerForMB(CAN_Type *base, flexcan_handle_t *handle
         /* Solve Rx Remote Frame. User need to Read the frame in Mail box in time by Read from MB API. */
         case (uint8_t)kFLEXCAN_StateRxRemote:
             status = kStatus_FLEXCAN_RxRemote;
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
-            if (0U != (base->MCR & CAN_MCR_FDEN_MASK))
-            {
-                FLEXCAN_TransferFDAbortReceive(base, handle, (uint8_t)result);
-            }
-            else
-#endif
-            {
-                FLEXCAN_TransferAbortReceive(base, handle, (uint8_t)result);
-            }
+            FLEXCAN_TransferAbortReceive(base, handle, (uint8_t)result);
             break;
 
         /* Solve Tx Data Frame. */

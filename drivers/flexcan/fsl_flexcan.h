@@ -719,7 +719,7 @@ typedef struct _flexcan_fd_frame
                                 length <= 8, it equal to the data length, otherwise the number of valid frame data is
                                 not equal to the length value.  user can
                                 use DLC_LENGTH_DECODE(length) macro to get the number of valid data bytes. */
-        uint32_t type : 1;   /*!< CAN Frame Type(DATA or REMOTE). */
+        uint32_t type : 1;   /*!< CAN Frame Type(DATA only). */
         uint32_t format : 1; /*!< CAN Frame Identifier(STD or EXT format). */
         uint32_t srr : 1;    /*!< Substitute Remote request. */
         uint32_t : 6;
@@ -873,7 +873,7 @@ typedef struct _flexcan_rx_mb_config
     uint32_t id;                   /*!< CAN Message Buffer Frame Identifier, should be set using
                                         FLEXCAN_ID_EXT() or FLEXCAN_ID_STD() macro. */
     flexcan_frame_format_t format; /*!< CAN Frame Identifier format(Standard of Extend). */
-    flexcan_frame_type_t type;     /*!< CAN Frame Type(Data or Remote). */
+    flexcan_frame_type_t type;     /*!< CAN Frame Type(Data or Remote for classical CAN only). */
 } flexcan_rx_mb_config_t;
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)

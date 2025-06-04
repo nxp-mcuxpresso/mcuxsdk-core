@@ -1,5 +1,10 @@
 # FLEXCAN
 
+## [2.14.2]
+
+- Bug Fixes
+  - Remove remote frame feature in CANFD mode because there is no remote frame in the CANFD format.
+
 ## [2.14.1]
 
 - Bug Fixes
