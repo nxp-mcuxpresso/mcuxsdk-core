@@ -54,6 +54,8 @@ def _find_parser():
             result = 'cmparser.exe'
         elif sys_name == 'Linux':
             result = 'cmparser'
+        elif sys_name == 'Darwin':
+            result = 'cmparser_darwin_x86_64'
     elif arch in ['arm64']:
         if sys_name == 'Darwin':
             result = 'cmparser_darwin_arm64'
