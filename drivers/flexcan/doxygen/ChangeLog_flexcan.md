@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Remove remote frame feature in CANFD mode because there is no remote frame in the CANFD format.
+  - Remove legacy Rx FIFO disabled branch in `FLEXCAN_SubHandlerForLegacyRxFIFO` and `FLEXCAN_SubHandlerForDataTransfered`.
 
 ## [2.14.1]
 

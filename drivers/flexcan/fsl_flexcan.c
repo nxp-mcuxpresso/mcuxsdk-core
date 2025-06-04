@@ -7,17 +7,6 @@
 
 #include "fsl_flexcan.h"
 
-/*
- * $Coverage Justification Reference$
- *
- * $Justification flexcan_c_ref_1$
- * The FLEXCAN_ReadRxFifo() return fail only when Rx FIFO is diabled. But in IRQ handler, will first check whether the
- * FIFO is enabled, and only call FLEXCAN_ReadRxFifo if the FIFO is enabled. So to cover this line/branch, need to
- * interrupt the current execution by a high priority IRQ after confirming that the FIFO is enabled, and disabled the
- * FIFO in the high priority interrupt. It is difficult to simulate this situation in unit test, so add Justification.
- *
- */
-
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -4189,7 +4178,6 @@ status_t FLEXCAN_TransferReceiveFifoNonBlocking(CAN_Type *base,
  * retval kStatus_InvalidArgument count is Invalid.
  * retval kStatus_Success Successfully return the count.
  */
-
 status_t FLEXCAN_TransferGetReceiveFifoCount(CAN_Type *base, flexcan_handle_t *handle, size_t *count)
 {
     assert(NULL != handle);
@@ -4613,27 +4601,12 @@ static status_t FLEXCAN_SubHandlerForLegacyRxFIFO(CAN_Type *base, flexcan_handle
                 for (uint32_t i = 0; i < 5UL; i++)
                 {
                     status = FLEXCAN_ReadRxFifo(base, handle->rxFifoFrameBuf);
-                    /*
-                     * $Branch Coverage Justification$
-                     * (kStatus_Success != status) not covered. $ref flexcan_c_ref_1$.
-                     */
-                    if (kStatus_Success == status)
-                    {
-                        /* Align the current rxfifo timestamp to the timestamp array by handle. */
-                        handle->timestamp[i] = handle->rxFifoFrameBuf->timestamp;
-                        handle->rxFifoFrameBuf++;
-                        handle->rxFifoFrameNum--;
-                        /* Clean Rx Fifo available flag to discard the frame that has been read. */
-                        FLEXCAN_ClearMbStatusFlags(base, (uint64_t)kFLEXCAN_RxFifoFrameAvlFlag);
-                    }
-                    else
-                    {
-                        /*
-                         * $Line Coverage Justification$
-                         * $ref flexcan_c_ref_1$.
-                         */
-                        return kStatus_FLEXCAN_RxFifoDisabled;
-                    }
+                    /* Align the current rxfifo timestamp to the timestamp array by handle. */
+                    handle->timestamp[i] = handle->rxFifoFrameBuf->timestamp;
+                    handle->rxFifoFrameBuf++;
+                    handle->rxFifoFrameNum--;
+                    /* Clean Rx Fifo available flag to discard the frame that has been read. */
+                    FLEXCAN_ClearMbStatusFlags(base, (uint64_t)kFLEXCAN_RxFifoFrameAvlFlag);
                 }
                 if (handle->rxFifoFrameNum < 5UL)
                 {
@@ -4655,25 +4628,10 @@ static status_t FLEXCAN_SubHandlerForLegacyRxFIFO(CAN_Type *base, flexcan_handle
             if (handle->rxFifoFrameNum > 0U)
             {
                 status = FLEXCAN_ReadRxFifo(base, handle->rxFifoFrameBuf);
-                /*
-                 * $Branch Coverage Justification$
-                 * (kStatus_Success != status) not covered. $ref flexcan_c_ref_1$.
-                 */
-                if (kStatus_Success == status)
-                {
-                    /* Align the current (index 0) rxfifo timestamp to the timestamp array by handle. */
-                    handle->timestamp[0] = handle->rxFifoFrameBuf->timestamp;
-                    handle->rxFifoFrameBuf++;
-                    handle->rxFifoFrameNum--;
-                }
-                else
-                {
-                    /*
-                     * $Line Coverage Justification$
-                     * $ref flexcan_c_ref_1$.
-                     */
-                    return kStatus_FLEXCAN_RxFifoDisabled;
-                }
+                /* Align the current (index 0) rxfifo timestamp to the timestamp array by handle. */
+                handle->timestamp[0] = handle->rxFifoFrameBuf->timestamp;
+                handle->rxFifoFrameBuf++;
+                handle->rxFifoFrameNum--;
             }
             if (handle->rxFifoFrameNum == 0U)
             {
@@ -4862,18 +4820,6 @@ static status_t FLEXCAN_SubHandlerForDataTransfered(CAN_Type *base,
             ((base->MCR & CAN_MCR_RFEN_MASK) != 0U))
         {
             status = FLEXCAN_SubHandlerForLegacyRxFIFO(base, handle, result);
-            /*
-             * $Branch Coverage Justification$
-             * (status == kStatus_FLEXCAN_RxFifoDisabled) not covered. $ref flexcan_c_ref_1$.
-             */
-            if (status == kStatus_FLEXCAN_RxFifoDisabled)
-            {
-                /*
-                 * $Line Coverage Justification$
-                 * $ref flexcan_c_ref_1$.
-                 */
-                return status;
-            }
         }
         else
         {
