@@ -7,6 +7,33 @@
 
 #include "fsl_flexcan.h"
 
+/*
+ * $Coverage Justification Reference$
+ *
+ * $Justification flexcan_c_ref_1$
+ * Following FlexCAN IRQ handle function are invoked in specific platform startup file.
+ * It is hard to update startup file for unit test, so add Justification.
+ *  - FLEXCAN_MbHandleIRQ()
+ *  - FLEXCAN_EhancedRxFifoHandleIRQ()
+ *  - FLEXCAN_BusoffErrorHandleIRQ()
+ *  - FLEXCAN_PNWakeUpHandleIRQ()
+ *  - FLEXCAN_MemoryErrorHandleIRQ()
+ *  - FLEXCAN_DriverDataIRQHandler()
+ *  - FLEXCAN_DriverEventIRQHandler()
+ *  - FLEXCAN_DriverIRQHandler()
+ * 
+ * $Justification flexcan_c_ref_2$
+ * FDEN bit exists on platform which FlexCAN instances have CANFD mode, so code will not take if branch.
+ * 
+ * $Justification flexcan_c_ref_3$
+ * In IRQ handle function CODE field of message buffer must be FULL or OVERRUN, because message buffer has
+ * received a frame successfully after move-in process, so code will not take else branch.
+ * 
+ * $Justification flexcan_c_ref_4$
+ * On platform with 32 message buffers, startMbIdx is 0, endMbIdx is 31, startIdx and endIdx must be 0,
+ * bitEnd must be 31. For loop is terminated when find received mailbox. So code will not take else branch.
+ */
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -415,6 +442,10 @@ bool FLEXCAN_IsInstanceHasFDMode(CAN_Type *base)
     /* Enable CAN FD operation. */
     base->MCR |= CAN_MCR_FDEN_MASK;
 
+    /*
+     * $Branch Coverage Justification$
+     * (0U == (base->MCR & CAN_MCR_FDEN_MASK)) not covered. $ref flexcan_c_ref_2$.
+     */
     /* There are some SoC parts that don't support CAN FD.
      * Checking if FDEN bit is really set to 1 is a way to ensure that CAN FD is supported.
      * When SoC parts don't support CAN FD, FDEN bit stuck at 0 and can't be set to 1. */
@@ -4300,6 +4331,41 @@ void FLEXCAN_TransferAbortSend(CAN_Type *base, flexcan_handle_t *handle, uint8_t
     handle->mbState[mbIdx] = (uint8_t)kFLEXCAN_StateIdle;
 }
 
+/*!
+ * brief Aborts the interrupt driven message receive process.
+ *
+ * This function aborts the interrupt driven message receive process.
+ *
+ * param base FlexCAN peripheral base address.
+ * param handle FlexCAN handle pointer.
+ * param mbIdx The FlexCAN Message Buffer index.
+ */
+void FLEXCAN_TransferAbortReceive(CAN_Type *base, flexcan_handle_t *handle, uint8_t mbIdx)
+{
+    /* Assertion. */
+    assert(NULL != handle);
+    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
+#if !defined(NDEBUG)
+    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
+#endif
+
+    /* Disable Message Buffer Interrupt. */
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB) && FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB)
+    if (mbIdx >= 64U)
+    {
+        FLEXCAN_DisableHigh64MbInterrupts(base, (uint64_t)1U << (mbIdx - 64U));
+    }
+    else
+#endif
+    {
+        FLEXCAN_DisableMbInterrupts(base, (uint64_t)1U << mbIdx);
+    }
+
+    /* Un-register handle. */
+    handle->mbFrameBuf[mbIdx] = NULL;
+    handle->mbState[mbIdx]    = (uint8_t)kFLEXCAN_StateIdle;
+}
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * brief Aborts the interrupt driven message send process.
@@ -4382,41 +4448,6 @@ void FLEXCAN_TransferFDAbortReceive(CAN_Type *base, flexcan_handle_t *handle, ui
     handle->mbState[mbIdx]      = (uint8_t)kFLEXCAN_StateIdle;
 }
 #endif /* FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE */
-
-/*!
- * brief Aborts the interrupt driven message receive process.
- *
- * This function aborts the interrupt driven message receive process.
- *
- * param base FlexCAN peripheral base address.
- * param handle FlexCAN handle pointer.
- * param mbIdx The FlexCAN Message Buffer index.
- */
-void FLEXCAN_TransferAbortReceive(CAN_Type *base, flexcan_handle_t *handle, uint8_t mbIdx)
-{
-    /* Assertion. */
-    assert(NULL != handle);
-    assert(mbIdx <= (base->MCR & CAN_MCR_MAXMB_MASK));
-#if !defined(NDEBUG)
-    assert(!FLEXCAN_IsMbOccupied(base, mbIdx));
-#endif
-
-    /* Disable Message Buffer Interrupt. */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB) && FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB)
-    if (mbIdx >= 64U)
-    {
-        FLEXCAN_DisableHigh64MbInterrupts(base, (uint64_t)1U << (mbIdx - 64U));
-    }
-    else
-#endif
-    {
-        FLEXCAN_DisableMbInterrupts(base, (uint64_t)1U << mbIdx);
-    }
-
-    /* Un-register handle. */
-    handle->mbFrameBuf[mbIdx] = NULL;
-    handle->mbState[mbIdx]    = (uint8_t)kFLEXCAN_StateIdle;
-}
 
 /*!
  * brief Aborts the interrupt driven message receive from Legacy Rx FIFO process.
@@ -4676,6 +4707,11 @@ static status_t FLEXCAN_SubHandlerForMB(CAN_Type *base, flexcan_handle_t *handle
             if (0U != (base->MCR & CAN_MCR_FDEN_MASK))
             {
                 status = FLEXCAN_ReadFDRxMb(base, (uint8_t)result, handle->mbFDFrameBuf[result]);
+                /*
+                 * $Branch Coverage Justification$
+                 * (kStatus_Success != status) and (kStatus_FLEXCAN_RxOverflow != status) not covered.
+                 * $ref flexcan_c_ref_3$.
+                 */
                 if ((kStatus_Success == status) || (kStatus_FLEXCAN_RxOverflow == status))
                 {
                     /* Align the current index of RX MB timestamp to the timestamp array by handle. */
@@ -4691,6 +4727,11 @@ static status_t FLEXCAN_SubHandlerForMB(CAN_Type *base, flexcan_handle_t *handle
 #endif
             {
                 status = FLEXCAN_ReadRxMb(base, (uint8_t)result, handle->mbFrameBuf[result]);
+                /*
+                 * $Branch Coverage Justification$
+                 * (kStatus_Success != status) and (kStatus_FLEXCAN_RxOverflow != status) not covered.
+                 * $ref flexcan_c_ref_3$.
+                 */
                 if ((kStatus_Success == status) || (kStatus_FLEXCAN_RxOverflow == status))
                 {
                     /* Align the current index of RX MB timestamp to the timestamp array by handle. */
@@ -4795,6 +4836,12 @@ static status_t FLEXCAN_SubHandlerForDataTransfered(CAN_Type *base,
     uint32_t bitStart;
     uint32_t bitEnd;
 
+    /*
+     * $Branch Coverage Justification$
+     * (i != startIdx) not covered. $ref flexcan_c_ref_4$.
+     * (i != endIdx) not covered. $ref flexcan_c_ref_4$.
+     * (j > bitEnd) not covered. $ref flexcan_c_ref_4$.
+     */
     for (uint32_t i = startIdx; i <= endIdx; i++)
     {
         if (intflag[i] != 0U)
@@ -5014,6 +5061,19 @@ void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
         }
     } while (FLEXCAN_CheckUnhandleInterruptEvents(base));
 }
+
+/*
+ * $Function Coverage Justification$
+ * Following functions are not covered. $ref flexcan_c_ref_1$.
+ *  - FLEXCAN_MbHandleIRQ()
+ *  - FLEXCAN_EhancedRxFifoHandleIRQ()
+ *  - FLEXCAN_BusoffErrorHandleIRQ()
+ *  - FLEXCAN_PNWakeUpHandleIRQ()
+ *  - FLEXCAN_MemoryErrorHandleIRQ()
+ *  - FLEXCAN_DriverDataIRQHandler()
+ *  - FLEXCAN_DriverEventIRQHandler()
+ *  - FLEXCAN_DriverIRQHandler()
+ */
 
 /*!
  * brief FlexCAN Message Buffer IRQ handle function.
