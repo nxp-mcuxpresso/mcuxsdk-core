@@ -1,5 +1,10 @@
 # LPSPI_EDMA
 
+## [2.4.7]
+
+- Bug Fixes
+  - Add macro LPSPI_ALIGN_TCD_SIZE_MASK to align an address to edma_tcd_t size.
+
 ## [2.4.6]
 
 - Improvements

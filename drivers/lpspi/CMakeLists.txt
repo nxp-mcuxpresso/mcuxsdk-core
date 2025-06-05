@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if(CONFIG_MCUX_COMPONENT_driver.lpspi_edma)
-    mcux_component_version(2.4.6)
+    mcux_component_version(2.4.7)
 
     mcux_add_source(SOURCES fsl_lpspi_edma.h fsl_lpspi_edma.c)
 

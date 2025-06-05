@@ -24,6 +24,9 @@
 #define FSL_COMPONENT_ID "platform.drivers.lpspi_edma"
 #endif
 
+/* @brief Mask to align an address to edma_tcd_t size. */
+#define LPSPI_ALIGN_TCD_SIZE_MASK (sizeof(edma_tcd_t) - 1U)
+
 /*!
  * @brief Structure definition for dspi_master_edma_private_handle_t. The structure is private.
  */
@@ -323,8 +326,8 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
     uint32_t bytesPerFrame = ((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT) / 8U + 1U;
     edma_transfer_config_t transferConfigRx = {0};
     edma_transfer_config_t transferConfigTx = {0};
-    edma_tcd_t *softwareTCD_pcsContinuous   = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[2]) & (~0x1FU));
-    edma_tcd_t *softwareTCD_extraBytes      = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_pcsContinuous   = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[2]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
+    edma_tcd_t *softwareTCD_extraBytes      = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
 
     if (transfer->dataSize <= bytesPerFrame)
     {
@@ -954,7 +957,7 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
     uint32_t bytesPerFrame = ((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT) / 8U + 1U;
     edma_transfer_config_t transferConfigRx = {0};
     edma_transfer_config_t transferConfigTx = {0};
-    edma_tcd_t *softwareTCD_extraBytes      = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~0x1FU));
+    edma_tcd_t *softwareTCD_extraBytes      = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
 
     /* Assign the original value for members of transfer handle. */
     handle->state                  = (uint8_t)kLPSPI_Busy;
