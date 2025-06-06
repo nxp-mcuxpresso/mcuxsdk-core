@@ -324,13 +324,9 @@ static status_t ASRC_SetSampleRateRatioConfig(ASRC_Type *base,
 
     ratio = ((uint64_t)inRate << fracBits) / outRate;
 
-    if (ratio > UINT32_MAX)
-    {
-        return kStatus_InvalidArgument;
-    }
 
-    base->RS_RATIO_LOW[context].RS_RATIO_LOW  = (uint32_t)ratio & 0xFFFFFFFFU;
-    base->RS_RATIO_LOW[context].RS_RATIO_HIGH = ((uint32_t)(ratio >> 32U)) & 0xFFFFFFFFU;
+    base->RS_RATIO_LOW[context].RS_RATIO_LOW  = (uint32_t)(ratio & 0xFFFFFFFFUL);
+    base->RS_RATIO_LOW[context].RS_RATIO_HIGH = ((uint32_t)((ratio >> 32U)) & 0xFFFFFFFFUL);
 
     return kStatus_Success;
 }
@@ -492,18 +488,13 @@ static status_t ASRC_SetResamplerConfig(ASRC_Type *base,
     uint32_t i                   = 0U;
     const uint32_t *coeffPointer = config->filterCoeffAddress;
 
-    if (config->filterCenterTap > UINT32_MAX)
-    {
-        return kStatus_InvalidArgument;
-    }
-
     contextReg &= ~(ASRC_CTX_CTRL_EXT1_RS_INIT_MODE_MASK | ASRC_CTX_CTRL_EXT1_RS_STOP_MODE_MASK);
     contextReg |= ASRC_CTX_CTRL_EXT1_RS_INIT_MODE(config->initMode) | ASRC_CTX_CTRL_EXT1_RS_STOP_MODE(config->stopMode);
     base->CTX_CTRL_EXT1[context] = contextReg;
 
     /* center tap */
-    base->RS_CT_LOW  = (uint32_t)config->filterCenterTap & 0xFFFFFFFFU;
-    base->RS_CT_HIGH = (uint32_t)(config->filterCenterTap >> 32U) & 0xFFFFFFFFU;
+    base->RS_CT_LOW  = (uint32_t)(config->filterCenterTap & 0xFFFFFFFFUL);
+    base->RS_CT_HIGH = (uint32_t)((config->filterCenterTap >> 32U) & 0xFFFFFFFFUL);
 
     /* resampler taps */
     contextReg = base->CTX_RS_COEFF_CTRL;
