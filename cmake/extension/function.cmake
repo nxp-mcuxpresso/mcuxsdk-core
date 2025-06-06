@@ -61,19 +61,24 @@ function(mcux_add_source)
     get_filename_component(directory ${source_abs_path} DIRECTORY)
 
     set(files "")
-    # check if the file_name follow the pattern *.* and **
-    string(REGEX MATCH "\\*\\..*" match "${file}")
-    if (match)
+
+    if ("${file}" MATCHES "\\*\\*\\..*")
+      # If the file_name follows the pattern **.*, will search the type of files
+      # recursively in the folder.
+      file(GLOB_RECURSE files "${directory}/${file}")
+    elseif ("${file}" MATCHES "\\*\\..*")
+      # If the file_name follows the pattern *.*, will search the type of files
+      # in the folder.
       file(GLOB files "${directory}/${file}")
+    elseif ("${file}" MATCHES "\\*\\*")
+      # If the file_name follows the pattern **, will search all types of files
+      # recursively in the folder.
+      file(GLOB_RECURSE files "${directory}/*")
     else ()
-      string(REGEX MATCH "\\*\\*" match "${file}")
-      if (match)
-        file(GLOB_RECURSE files "${directory}/*")
-      else ()
-        # add source_abs_path to list file
-        list(APPEND files "${source_abs_path}")
-      endif ()
+      # add source_abs_path to list file
+      list(APPEND files "${source_abs_path}")
     endif ()
+
     foreach(source_abs_path ${files})
         # process config files, project customized config files have higher priority
         # over component default config files
