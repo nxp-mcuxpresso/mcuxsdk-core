@@ -1,5 +1,10 @@
 # RTC
 
+## [2.0.6]
+
+- Bug Fixes
+  - Fix RTC_GetDatetime function validating datetime issue.
+
 ## [2.0.5]
 
 - Bug Fixes
