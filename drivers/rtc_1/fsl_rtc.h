@@ -20,7 +20,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_RTC_DRIVER_VERSION (MAKE_VERSION(2, 0, 5)) /*!< Version 2.0.5 */
+#define FSL_RTC_DRIVER_VERSION (MAKE_VERSION(2, 0, 6)) /*!< Version 2.0.6 */
 /*! @} */
 
 /*! @brief Structure is used to hold the date and time */

@@ -325,9 +325,11 @@ status_t RTC_SetDatetime(RTC_Type *base, const rtc_datetime_t *datetime)
  */
 void RTC_GetDatetime(RTC_Type *base, rtc_datetime_t *datetime)
 {
-    assert(RTC_CheckDatetimeFormat(datetime));
+    assert(datetime != NULL);
 
     uint32_t seconds = 0;
+
+    (void)memset(datetime, 0, sizeof(rtc_datetime_t));
 
     seconds = base->TSR;
     RTC_ConvertSecondsToDatetime(seconds, datetime);

@@ -364,7 +364,9 @@ status_t RTC_SetDatetime(rtc_datetime_t *datetime)
  */
 void RTC_GetDatetime(rtc_datetime_t *datetime)
 {
-    assert(RTC_CheckDatetimeFormat(datetime));
+    assert(datetime != NULL);
+
+    (void)memset(datetime, 0, sizeof(rtc_datetime_t));
 
     /* Get current data time */
     RTC_ConvertSecondsToDatetime(s_CurrentTimeSeconds, datetime);
