@@ -515,6 +515,10 @@ module Internal
                 target, xpath, value, "string", used: used
             )
           end
+
+          def set_require_protos(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.language.prototypes\"]", value, "boolean", used: used)
+          end
         end
 
       end
@@ -538,6 +542,10 @@ module Internal
             @operations.create_option_state_node(
                 target, ASM_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.asm.input.include\"]", value, used: used
             )
+          end
+
+          def set_no_syspath(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(target, ASM_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.asm.input.nosyspath\"]", value, "boolean", used: used)
           end
         end
 
@@ -629,6 +637,13 @@ module Internal
             )
           end
 
+          def set_no_stdlib(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(target, LINKER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.linker.input.nostdlib\"]", value, "boolean", used: used)
+          end
+
+          def set_entry_point(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(target, LINKER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.linker.input.entryPoint\"]", value, "string", used: used)
+          end
         end
 
         class LinkorderTab < TabBase
@@ -662,6 +677,11 @@ module Internal
 
         class OutputTab < TabBase
 
+          private
+
+          def set_generate_map(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(target, LINKER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.linker.output.mapFile\"]", value, "boolean", used: used)
+          end
         end
 
       end
