@@ -2537,7 +2537,7 @@ status_t SWT_FMQueryTableEntry(swt_handle_t *handle, uint32_t entryID, netc_tb_f
         status               = NETC_CmdBDSendCommand(cdbrHandle.base, cdbrHandle.cmdr, &cmdBd, kNETC_NtmpV2_0);
         if (kStatus_Success == status)
         {
-            (void)memcpy(&config->cfge, &cdbrHandle.buffer->fm.response.cfge, sizeof(netc_tb_fm_config_t));
+            (void)memcpy(&config->cfge, &cdbrHandle.buffer->fm.response.cfge, sizeof(netc_tb_fm_cfge_t));
         }
     }
 
