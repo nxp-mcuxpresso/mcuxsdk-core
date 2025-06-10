@@ -128,9 +128,31 @@ module Internal
         return line
       end
 
+      def compiler_require_protos(target,line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-requireprotos\s/
+        result = line.match(pattern)
+        if result
+          @file.dscCompilerTab.languageTab.set_require_protos(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
       def compiler_addl_compiler(target, line)
         Core.assert(line.is_a?(String), 'not a string')
         @file.dscCompilerTab.languageTab.add_other_flags(target, line.strip) unless line.strip.empty?
+        return line
+      end
+
+      def assembler_no_syspath(target,line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-nosyspath\s/
+        result = line.match(pattern)
+        if result
+          @file.dscAssemblerTab.inputTab.set_no_syspath(target, true)
+          line.sub!(result[0], '')
+        end
         return line
       end
 
@@ -205,6 +227,39 @@ module Internal
           line.sub!(result[0], '')
         else
           @file.dscLinkerTab.generalTab.large_data_mem_model(target, false)
+        end
+        return line
+      end
+
+      def linker_no_stdlib(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-nostdlib\s/
+        result = line.match(pattern)
+        if result
+          @file.dscLinkerTab.inputTab.set_no_stdlib(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
+      def linker_generate_map(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-map\s/
+        result = line.match(pattern)
+        if result
+          @file.dscLinkerTab.outputTab.set_generate_map(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
+      def linker_entry_point(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-main\s+(\S+)\s/
+        result = line.match(pattern)
+        if result && result[1]
+          @file.dscLinkerTab.inputTab.set_entry_point(target, result[1])
+          line.sub!(result[0], '')
         end
         return line
       end

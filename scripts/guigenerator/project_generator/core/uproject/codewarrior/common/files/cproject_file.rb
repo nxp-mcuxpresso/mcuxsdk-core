@@ -87,6 +87,7 @@ module CodeWarrior
         class LanguageTab < LanguageTab
           def add_other_flags(*args, **kargs) super end
           def set_language_c99(*args, **kargs) super end
+          def set_require_protos(*args, **kargs) super end
         end
       end
 
@@ -105,6 +106,7 @@ module CodeWarrior
         class InputTab < InputTab
           def clear_include!(*args, **kargs) super end
           def add_user_include(*args, **kargs) super end
+          def set_no_syspath(*args, **kargs) super end
         end
 
         class GeneralTab < GeneralTab
@@ -141,6 +143,8 @@ module CodeWarrior
           def linker_cmd_file(*args, **kargs) super end
           def lib_search_path(*args, **kargs) super end
           def add_addl_lib(*args, **kargs) super end
+          def set_no_stdlib(*args, **kargs) super end
+          def set_entry_point(*args, **kargs) super end
         end
 
         class LinkorderTab < LinkorderTab
@@ -154,7 +158,7 @@ module CodeWarrior
         end
 
         class OutputTab < OutputTab
-
+          def set_generate_map(*args, **kargs) super end
         end
       end
   end
