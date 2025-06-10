@@ -65,7 +65,13 @@ module CodeWarrior
         end
 
         class WarningsTab < WarningsTab
-
+          def set_warn_illpragmas(*args, **kargs) super end
+          def set_warn_possible(*args, **kargs) super end
+          def set_warn_extended(*args, **kargs) super end
+          def set_warn_extracomma(*args, **kargs) super end
+          def set_warn_emptydecl(*args, **kargs) super end
+          def set_warn_structclass(*args, **kargs) super end
+          def set_warn_notinlined(*args, **kargs) super end
         end
 
         class OptimizationTab < OptimizationTab

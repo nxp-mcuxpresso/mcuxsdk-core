@@ -33,6 +33,13 @@ module CodeWarrior
         line = compiler_hawk_elf(target, line)
         line = compiler_language_c99(target, line)
         line = compiler_require_protos(target, line)
+        line = compiler_warn_illpragmas(target, line)
+        line = compiler_warn_possible(target, line)
+        line = compiler_warn_extended(target, line)
+        line = compiler_warn_extracomma(target, line)
+        line = compiler_warn_emptydecl(target, line)
+        line = compiler_warn_structclass(target, line)
+        line = compiler_warn_notinlined(target, line)
         line = compiler_addl_compiler(target, line)
       end
 

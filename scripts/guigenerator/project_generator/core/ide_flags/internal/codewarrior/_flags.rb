@@ -139,6 +139,83 @@ module Internal
         return line
       end
 
+      def compiler_warn_illpragmas(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-w=illpragmas\s/
+        result = line.match(pattern)
+        if result
+          @file.dscCompilerTab.warningsTab.set_warn_illpragmas(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
+      def compiler_warn_possible(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-w=possible\s/
+        result = line.match(pattern)
+        if result
+          @file.dscCompilerTab.warningsTab.set_warn_possible(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
+      def compiler_warn_extended(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-w=extended\s/
+        result = line.match(pattern)
+        if result
+          @file.dscCompilerTab.warningsTab.set_warn_extended(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
+      def compiler_warn_extracomma(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-w=extracomma\s/
+        result = line.match(pattern)
+        if result
+          @file.dscCompilerTab.warningsTab.set_warn_extracomma(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
+      def compiler_warn_emptydecl(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-w=emptydecl\s/
+        result = line.match(pattern)
+        if result
+          @file.dscCompilerTab.warningsTab.set_warn_emptydecl(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
+      def compiler_warn_structclass(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-w=structclass\s/
+        result = line.match(pattern)
+        if result
+          @file.dscCompilerTab.warningsTab.set_warn_structclass(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
+      def compiler_warn_notinlined(target, line)
+        Core.assert(line.is_a?(String), 'not a string')
+        pattern = /\s-w=notinlined\s/
+        result = line.match(pattern)
+        if result
+          @file.dscCompilerTab.warningsTab.set_warn_notinlined(target, true)
+          line.sub!(result[0], '')
+        end
+        return line
+      end
+
       def compiler_addl_compiler(target, line)
         Core.assert(line.is_a?(String), 'not a string')
         @file.dscCompilerTab.languageTab.add_other_flags(target, line.strip) unless line.strip.empty?
