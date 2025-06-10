@@ -878,13 +878,14 @@ void TPM_SetupDualEdgeCapture(TPM_Type *base,
                               uint32_t filterValue)
 {
     assert(NULL != edgeParam);
-    assert(((uint8_t)chnlPairNumber < (uint8_t)FSL_FEATURE_TPM_CHANNEL_COUNTn(base) / 2U) &&
+    assert(((int32_t)chnlPairNumber < (int32_t)FSL_FEATURE_TPM_CHANNEL_COUNTn(base) / 2) &&
            (-1 != (int8_t)FSL_FEATURE_TPM_CHANNEL_COUNTn(base)));
     assert(1U == (uint8_t)FSL_FEATURE_TPM_COMBINE_HAS_EFFECTn(base));
 
     uint32_t reg;
     uint32_t u32flag;
     uint8_t chnlId = (uint8_t)chnlPairNumber * 2U;
+    uint8_t chnlIdSecond = (uint8_t)chnlPairNumber * 2U + 1U;
 
 #if defined(FSL_FEATURE_TPM_HAS_QDCTRL) && FSL_FEATURE_TPM_HAS_QDCTRL
     /* The TPM's QDCTRL register required to be effective */
@@ -900,9 +901,7 @@ void TPM_SetupDualEdgeCapture(TPM_Type *base,
 
     /* When switching mode, disable channel first */
     TPM_DisableChannel(base, (tpm_chnl_t)chnlId);
-    chnlId++;
-    TPM_DisableChannel(base, (tpm_chnl_t)chnlId);
-    chnlId--;
+    TPM_DisableChannel(base, (tpm_chnl_t)chnlIdSecond);
 
     /* Now, the registers for input mode can be operated. */
     if (true == edgeParam->enableSwap)
@@ -913,8 +912,8 @@ void TPM_SetupDualEdgeCapture(TPM_Type *base,
 
         /* Input filter setup for channel n+1 input */
         reg = base->FILTER;
-        reg &= ~((uint32_t)TPM_FILTER_CH0FVAL_MASK << (TPM_FILTER_CH1FVAL_SHIFT * (chnlId + 1U)));
-        reg |= (filterValue << (TPM_FILTER_CH1FVAL_SHIFT * (chnlId + 1U)));
+        reg &= ~((uint32_t)TPM_FILTER_CH0FVAL_MASK << (TPM_FILTER_CH1FVAL_SHIFT * chnlIdSecond));
+        reg |= (filterValue << (TPM_FILTER_CH1FVAL_SHIFT * chnlIdSecond));
         base->FILTER = reg;
     }
     else
@@ -937,8 +936,7 @@ void TPM_SetupDualEdgeCapture(TPM_Type *base,
 
     /* Setup the edge detection from channel n and n+1*/
     TPM_EnableChannel(base, (tpm_chnl_t)chnlId, (uint8_t)edgeParam->currChanEdgeMode);
-    chnlId++;
-    TPM_EnableChannel(base, (tpm_chnl_t)chnlId, (uint8_t)edgeParam->nextChanEdgeMode);
+    TPM_EnableChannel(base, (tpm_chnl_t)chnlIdSecond, (uint8_t)edgeParam->nextChanEdgeMode);
 }
 #endif
 

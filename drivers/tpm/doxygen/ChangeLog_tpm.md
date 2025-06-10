@@ -1,5 +1,10 @@
 # TPM
 
+## [2.3.6]
+
+- Bug Fixes
+  - Fixed CERT INT30-C INT31-C issue for `TPM_SetupDualEdgeCapture`.
+
 ## [2.3.5]
 
 - New Feature
