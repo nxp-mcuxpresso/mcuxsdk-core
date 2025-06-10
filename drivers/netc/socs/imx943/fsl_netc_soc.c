@@ -85,7 +85,7 @@ status_t NETC_PHYInit(netc_mdio_handle_t *handle, phy_mode_t mode)
     uint32_t value;
     uint32_t sel_mplla = 0;
     uint32_t sel_mpllb = 0;
-    int portId;
+    int portId = 0;
 
     if (handle->mdio.port == kNETC_SWITCH0EthPort0)
     {
