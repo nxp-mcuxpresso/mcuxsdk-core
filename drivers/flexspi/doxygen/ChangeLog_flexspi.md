@@ -1,5 +1,17 @@
 # FLEXSPI
 
+## [2.8.0]
+- Bug Fixes
+  - Introduced the **disableAhbReadResume** field in the flexspi_config_t structure to provide control over
+    the AHBCR[RESUMEDISABLE] register bit.
+  - Implemented a workaround for hardware erratum ERR052733 by setting the default value of
+    **disableAhbReadResume** to **true**.
+  - Fixed issue in `FLEXSPI_TransferHandleIRQ` where the transfer completion was incorrectly signaled
+    despite pending read/write operations.
+
+- New Features
+  - Introduced a new function(`FLEXSPI_UpdateAhbBuffersSettings`) that allows users to update the AHB buffer configuration after the FLEXSPI module has been initialized
+
 ## [2.7.0]
 
 - New Features
