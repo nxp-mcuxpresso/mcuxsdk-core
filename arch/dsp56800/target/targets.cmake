@@ -43,7 +43,7 @@ if (CONFIG_MCUX_PRJSEG_module.board.suite)
                     flash_sdm_hpm_debug
                     flash_ldm_lpm_debug
                     flash_ldm_hpm_debug
-            CC "-opt level=1"
+            CC "-opt level=1 -opt speed"
     )
 
     mcux_add_codewarrior_configuration(
@@ -53,6 +53,6 @@ if (CONFIG_MCUX_PRJSEG_module.board.suite)
                     flash_ldm_lpm_release
                     flash_ldm_hpm_release
             AS "-nodebug_workaround"
-            CC "-nopadpipe -opt level=4"
+            CC "-nopadpipe -opt level=4 -opt speed"
     )
 endif()
