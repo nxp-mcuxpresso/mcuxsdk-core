@@ -17,4 +17,15 @@ if (CONFIG_MCUX_PRJSEG_config.dsp56800.shared)
     mcux_add_codewarrior_configuration(
         CC "-D__DSC__ -D__CW__"
     )
+
+    mcux_add_codewarrior_configuration(
+        AS "-msgstyle parseable -nosyspath -debug"
+        CC "-msgstyle parseable -g -requireprotos"
+        LD "-msgstyle parseable -g -nostdlib -main F_EntryPoint -map"
+    )
+
+    mcux_add_codewarrior_configuration(
+        CC "-w=illpragmas -w=possible -w=extended -w=extracomma -w=emptydecl -w=structclass -w=notinlined"
+    )
+
 endif()
