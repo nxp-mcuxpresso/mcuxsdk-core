@@ -1185,6 +1185,13 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
     {
         return kStatus_LPSPI_Busy;
     }
+
+    /* Check the SR[MBF] again - workaround for ERR010655 */
+    if ((LPSPI_GetStatusFlags(base) & (uint32_t)kLPSPI_ModuleBusyFlag) != 0U)
+    {
+        return kStatus_LPSPI_Busy;
+    }
+
     LPSPI_Enable(base, false);
     /* Check arguements */
     if (!LPSPI_CheckTransferArgument(base, transfer, false))

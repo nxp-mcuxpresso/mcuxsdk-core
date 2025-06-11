@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Workaround for errata ERR050607
+  - Workaround for errata ERR010655
 
 ## [2.7.0]
 
