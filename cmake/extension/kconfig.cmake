@@ -156,6 +156,7 @@ if(NOT DEFINED KCONFIG_ROOT)
 endif()
 
 set(COMMON_KCONFIG_ENV_SETTINGS
+    ${COMMON_KCONFIG_ENV_SETTINGS}
     project_board_port_path=${project_board_port_path}
     PYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}
     CONFIG_=${KCONFIG_NAMESPACE}_
