@@ -14,6 +14,7 @@
   - Add workaround for ERR050443 and ERR052403.
   - Update message buffer read process in API `FLEXCAN_ReadRxMb` and `FLEXCAN_ReadFDRxMb` to make critical section
     as short as possible.
+  - Simplify API `FLEXCAN_DriverDataIRQHandler` implementation by remove parameter `type`.
 
 ## [2.14.0]
 

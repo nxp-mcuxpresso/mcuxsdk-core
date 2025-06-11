@@ -5245,18 +5245,20 @@ void FLEXCAN_MemoryErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
 }
 #endif
 
-void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32_t endMbIdx, uint32_t type)
+void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32_t endMbIdx)
 {
     assert(NULL != s_flexcanHandle[instance]);
 
     s_flexcanMbIsr(s_flexcanBases[instance], s_flexcanHandle[instance], startMbIdx, endMbIdx);
 
-    if (type == 1U)
-    {
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+#if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
+    if (FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(s_flexcanBases[instance]) == 1)
+    {
         s_flexcanEhancedRxFifoIsr(s_flexcanBases[instance], s_flexcanHandle[instance]);
-#endif
     }
+#endif
+#endif
     SDK_ISR_EXIT_BARRIER;
 }
 
