@@ -1,5 +1,10 @@
 # LPSPI
 
+## [2.7.1]
+
+- Bug Fixes
+  - Workaround for errata ERR050607
+
 ## [2.7.0]
 
 - New Feature

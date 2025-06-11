@@ -58,7 +58,7 @@ typedef struct _lpspi_transfer_blocking_param
     bool isTxMask;
     bool isPcsContinuous;
     uint8_t bytesEachWrite;
-    uint8_t bytesEachRead;    
+    uint8_t bytesEachRead;
     const uint8_t *txData;
     uint8_t *rxData;
     uint32_t rxRemainingByteCount;
@@ -303,7 +303,7 @@ void LPSPI_MasterInit(LPSPI_Type *base, const lpspi_master_config_t *masterConfi
     base->CR |= LPSPI_CR_RRF_MASK | LPSPI_CR_RTF_MASK;
     base->IER = 0U;
     base->CR  = 0U;
-    
+
     /* Disable LPSPI first */
     LPSPI_Enable(base, false);
 
@@ -959,7 +959,7 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
     uint32_t rxFifoMaxBytes = MIN(bytesPerFrame, 4U) * LPSPI_GetRxFifoSize(base);
     uint32_t readData;
     uint8_t fifo_size      = LPSPI_GetRxFifoSize(base);
-    /*Write the TX data until txRemainingByteCount is equal to 0 */
+    /* Write the TX data until txRemainingByteCount is equal to 0 */
     while (txRemainingByteCount > 0U)
     {
         if (txRemainingByteCount < (stateParams->bytesEachWrite))
@@ -967,7 +967,7 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
             (stateParams->bytesEachWrite) = (uint8_t)txRemainingByteCount;
         }
 
-        /*Wait until TX FIFO is not full*/
+        /* Wait until TX FIFO is not full */
 #if SPI_RETRY_TIMES
         uint32_t waitTimes = SPI_RETRY_TIMES;
         while ((LPSPI_GetTxFifoCount(base) == fifo_size) && ((--waitTimes) != 0U))
@@ -984,8 +984,8 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
 #endif
 
         /* To prevent rxfifo overflow, ensure transmitting and receiving are executed in parallel */
-        if (((NULL == (stateParams->rxData)) ||
-             ((stateParams->rxRemainingByteCount) - txRemainingByteCount) < rxFifoMaxBytes))
+        if (((NULL == stateParams->rxData) ||
+             (stateParams->rxRemainingByteCount - txRemainingByteCount) < rxFifoMaxBytes))
         {
             if (stateParams->isTxMask)
             {
@@ -998,7 +998,8 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
                     /* For the last piece of frame size of data, if is PCS continous mode(TCR[CONT]), TCR[CONTC] should
                      * be cleared to de-assert the PCS. Be sure to clear the TXMSK as well otherwise another FRAMESZ
                      * of data will be received. */
-                    base->TCR = LPSPI_GetTcr(base) & ~(LPSPI_TCR_CONTC_MASK | LPSPI_TCR_CONT_MASK | LPSPI_TCR_TXMSK_MASK);
+                    base->TCR =
+                        LPSPI_GetTcr(base) & ~(LPSPI_TCR_CONTC_MASK | LPSPI_TCR_CONT_MASK | LPSPI_TCR_TXMSK_MASK);
                 }
                 else
                 {
@@ -1031,7 +1032,7 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
             }
         }
 
-        /* Check whether there is RX data in RX FIFO . Read out the RX data so that the RX FIFO would not overrun. */
+        /* Check whether there is RX data in RX FIFO. Read out the RX data so that the RX FIFO would not overrun. */
         /*
          * $Branch Coverage Justification$
          * Data will be transferred in the inner loop until complete, after which the interrupt will end.(will improve)
@@ -1158,7 +1159,7 @@ static bool LPSPI_MasterTransferReadDataInFifoNoBuf(LPSPI_Type *base, lpspi_tran
 /*!
  * brief LPSPI master transfer data using a polling method.
  *
- * This function transfers data using a  polling method. This is a blocking function, which does not return until all
+ * This function transfers data using a polling method. This is a blocking function, which does not return until all
  * transfers have been completed.
  *
  * Note:
@@ -1207,8 +1208,12 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
     stateParams.rxData               = transfer->rxData;
     stateParams.isTxMask             = false;
     stateParams.rxRemainingByteCount = transfer->dataSize;
-    /*The TX and RX FIFO sizes are always the same*/
-    uint32_t bytesPerFrame = ((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT) / 8U + 1U;
+
+    /* Backup frame size */
+    uint32_t frame_size     = (LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT;
+    uint32_t frame_size_new = frame_size;
+    uint32_t bytesPerFrame  = (frame_size / 8U) + 1U;
+
     /* No need to configure PCS continous if the transfer byte count is smaller than frame size */
     stateParams.isPcsContinuous = (((transfer->configFlags & (uint32_t)kLPSPI_MasterPcsContinuous) != 0U) &&
                                    (bytesPerFrame < transfer->dataSize));
@@ -1218,6 +1223,11 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
         (stateParams.txData == NULL))
     {
         stateParams.isTxMask = true;
+        if (stateParams.isPcsContinuous && (bytesPerFrame > 4U))
+        {
+            /* Workaround for ERR050607 */
+            frame_size_new = 31U;
+        }
     }
 
     base->CFGR1 &= (~LPSPI_CFGR1_NOSTALL_MASK);
@@ -1225,7 +1235,7 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
 
     /* Configure transfer control register. */
     base->TCR = (LPSPI_GetTcr(base) & ~(LPSPI_TCR_CONT_MASK | LPSPI_TCR_CONTC_MASK | LPSPI_TCR_RXMSK_MASK |
-                               LPSPI_TCR_TXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
+                                        LPSPI_TCR_TXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
 #if !(defined(FSL_FEATURE_LPSPI_HAS_NO_MULTI_WIDTH) && FSL_FEATURE_LPSPI_HAS_NO_MULTI_WIDTH)
                 LPSPI_TCR_WIDTH(width) |
 #endif
@@ -1241,8 +1251,9 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
     }
 
     /* PCS should be configured separately from the other bits, otherwise it will not take effect. */
-    base->TCR = LPSPI_GetTcr(base) | LPSPI_TCR_CONT(stateParams.isPcsContinuous) | LPSPI_TCR_CONTC(stateParams.isPcsContinuous) |
-                LPSPI_TCR_RXMSK(NULL == stateParams.rxData);
+    base->TCR = (LPSPI_GetTcr(base) & ~LPSPI_TCR_FRAMESZ_MASK) | LPSPI_TCR_CONT(stateParams.isPcsContinuous) |
+                LPSPI_TCR_CONTC(stateParams.isPcsContinuous) | LPSPI_TCR_RXMSK(NULL == stateParams.rxData) |
+                LPSPI_TCR_FRAMESZ(frame_size_new);
 
     /*TCR is also shared the FIFO, so wait for TCR written.*/
     /*
@@ -1314,6 +1325,12 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
         }
     }
 
+    /* Restore frame size */
+    if (frame_size != frame_size_new)
+    {
+        base->TCR = (LPSPI_GetTcr(base) & ~LPSPI_TCR_FRAMESZ_MASK) | LPSPI_TCR_FRAMESZ(frame_size);
+    }
+
     return kStatus_Success;
 }
 
@@ -1362,7 +1379,6 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     handle->isTxMask = false;
     uint8_t txWatermark;
     uint8_t dummyData = g_lpspiDummyData[LPSPI_GetInstance(base)];
-    uint32_t tmpTimes;
     uint32_t whichPcs = (transfer->configFlags & LPSPI_MASTER_PCS_MASK) >> LPSPI_MASTER_PCS_SHIFT;
     uint32_t temp     = (base->CFGR1 & LPSPI_CFGR1_PINCFG_MASK);
 
@@ -1374,7 +1390,12 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     handle->rxRemainingByteCount = transfer->dataSize;
     handle->totalByteCount       = transfer->dataSize;
     handle->writeTcrInIsr        = false;
-    handle->bytesPerFrame = (uint16_t)((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT) / 8U + 1U;
+
+    /* Backup frame size */
+    handle->frameSize     = (LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT;
+    uint32_t frameSizeNew = handle->frameSize;
+    handle->bytesPerFrame = (uint16_t)(handle->frameSize / 8U) + 1U;
+
     /* No need to configure PCS continous if the transfer byte count is smaller than frame size */
     bool isPcsContinuous = (((transfer->configFlags & (uint32_t)kLPSPI_MasterPcsContinuous) != 0U) &&
                             (transfer->dataSize > handle->bytesPerFrame));
@@ -1429,6 +1450,13 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
         (handle->txData == NULL))
     {
         handle->isTxMask = true;
+
+        if (isPcsContinuous && (handle->bytesPerFrame > 4U))
+        {
+            /* Workaround for ERR050607 */
+            frameSizeNew          = 31U;
+            handle->bytesPerFrame = 4;
+        }
     }
 
     /*Transfers will stall when transmit FIFO is empty or receive FIFO is full. */
@@ -1439,7 +1467,7 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
 
     /* Configure transfer control register. */
     base->TCR = (LPSPI_GetTcr(base) & ~(LPSPI_TCR_CONT_MASK | LPSPI_TCR_CONTC_MASK | LPSPI_TCR_RXMSK_MASK |
-                               LPSPI_TCR_TXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
+                                        LPSPI_TCR_TXMSK_MASK | LPSPI_TCR_PCS_MASK)) |
                 LPSPI_TCR_PCS(whichPcs);
 
     /*TCR is also shared the FIFO , so wait for TCR written.*/
@@ -1453,7 +1481,8 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     }
 
     /* PCS should be configured separately from the other bits, otherwise it will not take effect. */
-    base->TCR = LPSPI_GetTcr(base) | LPSPI_TCR_CONT(isPcsContinuous) | LPSPI_TCR_CONTC(isPcsContinuous) | LPSPI_TCR_RXMSK(isRxMask);
+    base->TCR = (LPSPI_GetTcr(base) & ~LPSPI_TCR_FRAMESZ_MASK) | LPSPI_TCR_CONT(isPcsContinuous) |
+                LPSPI_TCR_CONTC(isPcsContinuous) | LPSPI_TCR_RXMSK(isRxMask) | LPSPI_TCR_FRAMESZ(frameSizeNew);
 
 #if defined(LPSPI_IRQS)
     /* Enable the NVIC for LPSPI peripheral. Note that below code is useless if the LPSPI interrupt is in INTMUX ,
@@ -1462,7 +1491,7 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     (void)EnableIRQ(s_lpspiIRQ[LPSPI_GetInstance(base)]);
 #endif
 
-    /*TCR is also shared the FIFO , so wait for TCR written.*/
+    /* TCR is also shared the FIFO, so wait for TCR written. */
     /*
      * $Branch Coverage Justification$
      * $ref fsl_lpspi_c_ref_2$
@@ -1475,9 +1504,9 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     if (handle->isTxMask)
     {
         /* When TCR[TXMSK]=1, transfer is initiate by writting a new command word to TCR. TCR[TXMSK] is cleared by
-           hardware every time when TCR[FRAMESZ] bit of data is transfered. In this case TCR[TXMSK] should be set to
-           initiate each transfer. */
-
+         * hardware every time when TCR[FRAMESZ]+1 bit of data is transfered. In this case TCR[TXMSK] should be set to
+         * initiate each transfer.
+         */
         base->TCR = LPSPI_GetTcr(base) | LPSPI_TCR_TXMSK_MASK;
         handle->txRemainingByteCount -= (uint32_t)handle->bytesPerFrame;
         if (!LPSPI_WaitTxFifoEmpty(base))
@@ -1498,10 +1527,11 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     {
         if (handle->isTxMask)
         {
-            /* if tx data is masked, transfer is initiated by writing 1 to TCR[TXMSK] and TCR[FRMESZ] bits of data is
-               read. If rx water mark is set larger than TCR[FRMESZ], rx interrupt will not be generated. Lower the rx
-               water mark setting */
-            if ((handle->bytesPerFrame / 4U) < (uint16_t)handle->rxWatermark)
+            /* If tx data is masked, transfer is initiated by writing 1 to TCR[TXMSK] and TCR[FRMESZ]+1 bits of data is
+             * read. If rx water mark is set larger than TCR[FRMESZ]+1, rx interrupt will not be generated. Lower the rx
+             * water mark setting
+             */
+            if ((handle->bytesPerFrame / 4U) <= (uint16_t)handle->rxWatermark)
             {
                 handle->rxWatermark =
                     (uint8_t)(handle->bytesPerFrame / 4U) > 0U ? (uint8_t)(handle->bytesPerFrame / 4U - 1U) : 0U;
@@ -1510,13 +1540,13 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
         }
         else
         {
-            /*Set rxWatermark to (readRegRemainingTimes-1) if readRegRemainingTimes less than rxWatermark. Otherwise
-             *there is not RX interrupt for the last datas because the RX count is not greater than rxWatermark.
+            /* Set rxWatermark to (readRegRemainingTimes-1) if readRegRemainingTimes less than rxWatermark. Otherwise
+             * there is not RX interrupt for the last datas because the RX count is not greater than rxWatermark.
              */
-            tmpTimes = handle->readRegRemainingTimes;
-            if (tmpTimes <= handle->rxWatermark)
+            if (handle->readRegRemainingTimes <= handle->rxWatermark)
             {
-                base->FCR = (base->FCR & (~LPSPI_FCR_RXWATER_MASK)) | LPSPI_FCR_RXWATER(tmpTimes - 1U);
+                base->FCR =
+                    (base->FCR & (~LPSPI_FCR_RXWATER_MASK)) | LPSPI_FCR_RXWATER(handle->readRegRemainingTimes - 1U);
             }
         }
 
@@ -1693,6 +1723,7 @@ void LPSPI_MasterTransferHandleIRQ(LPSPI_Type *base, lpspi_master_handle_t *hand
     uint8_t bytesEachRead          = handle->bytesEachRead;
     bool isByteSwap                = handle->isByteSwap;
     uint32_t readRegRemainingTimes = handle->readRegRemainingTimes;
+    uint32_t frameSize;
 
     if (handle->rxData != NULL)
     {
@@ -1813,6 +1844,14 @@ void LPSPI_MasterTransferHandleIRQ(LPSPI_Type *base, lpspi_master_handle_t *hand
         {
             /* Complete the transfer and disable the interrupts */
             LPSPI_MasterTransferComplete(base, handle);
+
+            frameSize = (LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT;
+            if (frameSize != handle->frameSize)
+            {
+                /* Restore frame size */
+                base->TCR = (LPSPI_GetTcr(base) & ~LPSPI_TCR_FRAMESZ_MASK) | LPSPI_TCR_FRAMESZ(handle->frameSize);
+                handle->bytesPerFrame = (uint16_t)(handle->frameSize / 8U) + 1U;
+            }
         }
     }
 }
@@ -2241,7 +2280,7 @@ void LPSPI_SlaveTransferHandleIRQ(LPSPI_Type *base, lpspi_slave_handle_t *handle
             handle->state = (uint8_t)kLPSPI_Error;
         }
         handle->errorCount++;
-        /* ERR051588: Clear FIFO after underrun occurs */   
+        /* ERR051588: Clear FIFO after underrun occurs */
         LPSPI_FlushFifo(base, true, false);
     }
     /* Catch rx fifo overflow conditions, service only if rx over flow interrupt enabled */

@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPSPI driver version. */
-#define FSL_LPSPI_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
+#define FSL_LPSPI_DRIVER_VERSION (MAKE_VERSION(2, 7, 1))
 /*! @} */
 
 #ifndef LPSPI_DUMMY_DATA
@@ -381,6 +381,7 @@ struct _lpspi_master_handle
     volatile bool isByteSwap;        /*!< A flag that whether should byte swap. */
     volatile bool isTxMask;          /*!< A flag that whether TCR[TXMSK] is set. */
     volatile uint16_t bytesPerFrame; /*!< Number of bytes in each frame */
+    volatile uint16_t frameSize;     /*!< Backup of TCR[FRAMESZ] */
 
     volatile uint8_t fifoSize; /*!< FIFO dataSize. */
 
