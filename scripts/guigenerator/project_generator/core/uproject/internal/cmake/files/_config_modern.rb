@@ -55,6 +55,7 @@ module Internal
         @cmake_command = []
         @as_include_for_target = {}
         @cc_marco_str = {}
+        @as_marco_str = {}
         @exclude_building = {}
         @output_files_copied = {}
         @fpu = []
@@ -260,8 +261,21 @@ module Internal
         unless @cc_marco_str.empty?
           @cc_marco_str.each do |target, items|
             @config_cmakelists.puts "if(CMAKE_BUILD_TYPE STREQUAL #{target})"
-            @config_cmakelists.puts "     target_compile_definitions(${MCUX_SDK_PROJECT_NAME}  PRIVATE #{items.join(' ')})"
-            @config_cmakelists.puts "endif(CMAKE_BUILD_TYPE STREQUAL #{target})"
+            items&.each do |item|
+              @config_cmakelists.puts "     target_compile_options(${MCUX_SDK_PROJECT_NAME}  PRIVATE \"$<$<COMPILE_LANGUAGE:C,CXX>:#{item}>\" )"
+            end
+            @config_cmakelists.puts "endif()"
+            @config_cmakelists.puts "\n"
+          end
+        end
+
+        unless @as_marco_str.empty?
+          @as_marco_str.each do |target, items|
+            @config_cmakelists.puts "if(CMAKE_BUILD_TYPE STREQUAL #{target})"
+            items&.each do |item|
+              @config_cmakelists.puts "     target_compile_options(${MCUX_SDK_PROJECT_NAME}  PRIVATE \"$<$<COMPILE_LANGUAGE:ASM>:#{item}>\" )"
+            end
+            @config_cmakelists.puts "endif()"
             @config_cmakelists.puts "\n"
           end
         end

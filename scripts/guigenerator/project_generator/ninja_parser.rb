@@ -36,10 +36,12 @@ class NinjaParser
     parse_libraries
     parse_as_include_path
     parse_cc_include_path
+    parse_cx_include_path
     parse_prebuild
     parse_postbuild
     parse_precompile
     merge_ide_data
+    set_project_language
     remove_unsupported_config
     {"set.board.#{ENV['board']}" => @data}
   end
@@ -91,6 +93,7 @@ class NinjaParser
               'required' => true,
               'cc-include' => [],
               'as-include' => [],
+              'cx-include' => [],
               'files' => [],
             }
           }
@@ -166,6 +169,10 @@ class NinjaParser
 
   def parse_cc_include_path
     parse_include_path(get_pattern('cc'), 'cc')
+  end
+
+  def parse_cx_include_path
+    parse_include_path(get_pattern('cx'), 'cx')
   end
 
   def parse_as_include_path
@@ -314,7 +321,9 @@ class NinjaParser
     if File.exist?(file_list)
         content = File.read(file_list)
         content.strip.split(";").each do |file|
-            add_file(file, content, 'c_include') if ['.h', '.hpp'].include?(File.extname(file))
+            add_file(file, content, 'c_include') if ['.h', '.hpp', '.inc'].include?(File.extname(file))
+            # copy file to repo incase it's necessary for standalone project but not found in build.ninja
+            copy_repo_file(file) if File.exist?(file) if ENV['standalone'] == 'true'
         end
     end
   end
@@ -571,7 +580,7 @@ class NinjaParser
     if ENV['standalone'] == 'true'
       if relative_path.start_with?('..')
         # for path from other project, need extra '..' in path, because the project file is in <build_dir>/toolchain folder
-        if path_from_other_project
+        if path_from_other_project && ENV['SYSBUILD']
           path = File.join('..', relative_path)
         else
           # if the path is for project itself, because all the file is in toolchain folder, and the folder structure is same
@@ -1035,6 +1044,20 @@ class NinjaParser
     end
   end
 
+  def set_project_language
+    unless @data[@name]['contents']['configuration']['tools'][@toolchain].key?('project_language')
+      cx_flags =  @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]['cx-flags']
+      unless cx_flags.empty?
+        case @toolchain
+        when 'mdk', 'armgcc'
+          @data[@name]['contents']['configuration']['tools'][@toolchain]['project_language'] = 'cpp'
+        when 'iar'
+          @data[@name]['contents']['configuration']['tools'][@toolchain]['project_language'] = 'auto'
+        end
+      end
+    end
+  end
+
 
   def remove_unsupported_config
     @data[@name]['contents']['configuration']['tools'][@toolchain]['config'].each do |key, content|
@@ -1047,6 +1070,14 @@ class NinjaParser
         @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][key].delete(setting) if content[setting].empty?
       end
 
+    end
+  end
+
+  def copy_repo_file(src_path)
+    # copy repo file to build_dir/toolchain folder
+    if Utils.path_inside?(src_path, ENV['SdkRootDirPath']) && !Utils.path_inside?(src_path, @outdir)
+      relative_path = Pathname.new(src_path).relative_path_from(ENV['SdkRootDirPath']).to_s
+      FileUtils.cp_f(src_path, File.join(@outdir, @toolchain, relative_path))
     end
   end
 end

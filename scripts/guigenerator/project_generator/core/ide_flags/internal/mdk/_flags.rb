@@ -396,10 +396,11 @@ module Mdk
             return line unless @compiler == 'armclang'
             pattern = /(?i)\s(-std=c\+\+98|-std=gnu\+\+98|-std=c\+\+11|-std=gnu\+\+11|-std=c\+\+03|-std=c\+\+14|-std=gnu\+\+14|-std=c\+\+17|-std=gnu\+\+17)\s/
             result  = line.match(pattern)
-            if (result)
-                @logger.debug("recognize: #{result[ 0 ]}")
+            while (result && result[ 1 ])
+                @logger.debug("recognize: #{result[ 1 ]}")
                 @file.compilerTab.all_mode_cpp(target, result[1])
                 line.sub!(result[ 0 ], '')
+                result = line.match(pattern)
             end
             return line
         end

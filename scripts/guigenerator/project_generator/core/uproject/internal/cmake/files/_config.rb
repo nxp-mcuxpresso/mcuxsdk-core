@@ -43,6 +43,7 @@ module CMake
             @cmake_variables = {}
             @cmake_files = {}
             @cc_marco_str = {}
+            @as_marco_str = {}
         end
 
         def set_toolchainfile_path(name,path)
@@ -412,9 +413,8 @@ module CMake
             else
               result = value.to_s.match(/\\"(\S+)\\"/)
               if result && result[1]
-                # use target_compile_definitions for as and cc
-                @cc_marco_str[target] = [] unless @cc_marco_str[target]
-                @cc_marco_str[target].push_uniq "#{name}=\"#{result[1]}\""
+                @as_marco_str[target] = [] unless @as_marco_str[target]
+                @as_marco_str[target].push_uniq "-D#{name}=\\\"#{result[1]}\\\""
               else
                 @as_marco[target].push("-D#{name}=#{value}")
               end
@@ -442,7 +442,7 @@ module CMake
               result = value.to_s.match(/\\"(\S+)\\"/)
               if result && result[1]
                 @cc_marco_str[target] = [] unless @cc_marco_str[target]
-                @cc_marco_str[target].push_uniq "#{name}=\"#{result[1]}\""
+                @cc_marco_str[target].push_uniq "-D#{name}=\\\"#{result[1]}\\\""
               else
                 @cc_marco[target].push("-D#{name}=#{value}")
               end

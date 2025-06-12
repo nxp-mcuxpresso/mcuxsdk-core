@@ -131,7 +131,8 @@ module SDKGenerator
                   src_path = File.join(@generator_options[:input_dir], file['source'])
                   relative_path = Pathname.new(src_path).relative_path_from(Pathname.new(@generator_options[:output_dir])).to_s
                   if relative_path.start_with?('..')
-                    FileUtils.cp_f(src_path, File.join(@generator_options[:output_dir],toolchain, file['package_path'] || file['repo_path'], File.basename(file['source'])))
+                    dest_path = File.join(@generator_options[:output_dir], toolchain, file['package_path'] || file['repo_path'], File.basename(file['source']))
+                    FileUtils.cp_f(src_path, dest_path) unless File.exist?(dest_path)
                   else
                     # if the file is in build dir, copy it to build dir/toolchain folder
                     FileUtils.cp_f(src_path, File.join(@generator_options[:output_dir],toolchain, relative_path))
@@ -148,7 +149,8 @@ module SDKGenerator
                   Dir.glob("#{File.join(@generator_options[:input_dir], item['path'])}/*.{h,hpp}").each do |file|
                     relative_path = Pathname.new(file).relative_path_from(Pathname.new(@generator_options[:output_dir])).to_s
                     if relative_path.start_with?('..')
-                      FileUtils.cp_f(file, File.join(@generator_options[:output_dir],toolchain, item['package_path'] || item['path'], File.basename(file)))
+                      dest_path = File.join(@generator_options[:output_dir],toolchain, item['package_path'] || item['path'], File.basename(file))
+                      FileUtils.cp_f(file, dest_path) unless File.exist?(dest_path)
                     else
                       # if the file is in build dir, copy it to build dir/toolchain folder
                       FileUtils.cp_f(file, File.join(@generator_options[:output_dir],toolchain, relative_path))
