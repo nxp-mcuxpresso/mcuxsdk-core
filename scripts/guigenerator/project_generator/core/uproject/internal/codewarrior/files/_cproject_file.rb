@@ -422,7 +422,47 @@ module Internal
         end
 
         class WarningsTab < TabBase
+          def set_warn_illpragmas(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(
+                target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.warnings.warnIllPragma\"]", value, "boolean", used: used
+            )
+          end
 
+          def set_warn_possible(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(
+                target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.warnings.warnPossibleErr\"]", value, "boolean", used: used
+            )
+          end
+
+          def set_warn_extended(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(
+                target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.warnings.warnExtendedErrChecks\"]", value, "boolean", used: used
+            )
+          end
+
+          def set_warn_extracomma(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(
+                target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.warnings.extraCommas\"]", value, "boolean", used: used
+            )
+          end
+
+          def set_warn_emptydecl(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(
+                target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.warnings.emptyDecl\"]", value, "boolean", used: used
+            )
+          end
+
+          def set_warn_structclass(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(
+                target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.warnings.classStruct\"]", value, "boolean", used: used
+            )
+          end
+
+          def set_warn_notinlined(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(
+                target, COMPILER_CONFIG_BASE_PATH + "/option[\@superClass=\"com.freescale.dsc.cdt.toolchain.compiler.warnings.nonInlinedFunction\"]", value, "boolean", used: used
+            )
+          end
         end
 
         # Contains operations of "OptimizationTab"
