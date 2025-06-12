@@ -149,4 +149,7 @@ function(dump_gui_project_data)
     mcux_get_property(linker_file ${MCUX_SDK_PROJECT_NAME}_LINKER_PATH linker_path)
     list(APPEND SOURCE_FILES ${linker_file})
     file(WRITE "${APPLICATION_BINARY_DIR}/${MCUX_SDK_PROJECT_NAME}_source_list.txt" "${SOURCE_FILES}")
+    # Get the list of files that are excluded from the project for standalone projects file copy
+    mcux_get_property(_MCUX_EXCLUDE_FILE_LIST MCUX_EXCLUDE_FILE_LIST)
+    file(WRITE "${APPLICATION_BINARY_DIR}/${MCUX_SDK_PROJECT_NAME}_exclude_source_list.txt" "${_MCUX_EXCLUDE_FILE_LIST}")
 endfunction()

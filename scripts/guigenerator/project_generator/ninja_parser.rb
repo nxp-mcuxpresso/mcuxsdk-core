@@ -32,6 +32,7 @@ class NinjaParser
     parse_ld_flags
     parse_source
     parse_header
+    parse_exclude_files
     parse_libraries
     parse_as_include_path
     parse_cc_include_path
@@ -318,6 +319,17 @@ class NinjaParser
     end
   end
 
+  def parse_exclude_files
+    file_list = File.join(ENV['build_dir'], "#{@name}_exclude_source_list.txt")
+    if File.exist?(file_list)
+        content = File.read(file_list)
+        content.strip.split(";").each do |file|
+            next if file.nil? || file.strip.empty?
+            add_file(file, content, 'other', nil, true)
+        end
+    end
+  end
+
   def parse_libraries
     find_link_obj = false
     @content.each do |line|
@@ -348,7 +360,7 @@ class NinjaParser
     end
   end
 
-  def add_file(file_full_path, line, type, attribute = nil)
+  def add_file(file_full_path, line, type, attribute = nil, exclude = false)
     file_path = file_full_path.tr('\\', '/')
     # the library file may not in repo, will be created by other project
     if attribute != 'extra-libraries'
@@ -375,6 +387,7 @@ class NinjaParser
       'package_path' => File.dirname(file_path)
     }
     source_hash['attribute'] = attribute if attribute
+    source_hash['exclude'] = exclude if exclude
     
     # Codewarrior use "build" as build folder, can not set source file to this folder
     if @toolchain == 'codewarrior' && source_hash['project_path'] == 'build'

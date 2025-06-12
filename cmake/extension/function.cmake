@@ -220,6 +220,8 @@ function(mcux_add_source)
           target_sources(${MCUX_SDK_PROJECT_NAME} ${source_scope} ${source_abs_path})
           log_debug("Add source ${source_abs_path} into project"
                     ${CMAKE_CURRENT_LIST_FILE})
+        else()
+          mcux_set_property(MCUX_EXCLUDE_FILE_LIST ${source_abs_path} APPEND)
         endif ()
 
         # need to go through remove source list and remove the source from
