@@ -1723,6 +1723,11 @@ module Internal
         # Contains operations of "ExtraOptionTab"
         class ExtraOptionTab < TabBase
 
+          def initialize(operations)
+            super(operations)
+            @extra_options = {}
+          end
+
           private
 
           # Set suppression code
@@ -1730,11 +1735,13 @@ module Internal
           # target    - name of target
           # value     - string
           def use_commandline(target, value, *args, used: true, **kargs)
+            @extra_options[target] = [] unless @extra_options.key? target
+            @extra_options[target].push_uniq value
             @operations.set_state_node(
               target, "./settings[name=\"ICCARM\"]/data/option[name=\"IExtraOptionsCheck\"]/state", "1", used: used
             )
             @operations.set_state_node(
-              target, "./settings[name=\"ICCARM\"]/data/option[name=\"IExtraOptions\"]/state", @operations.convert_string(value), used: used
+              target, "./settings[name=\"ICCARM\"]/data/option[name=\"IExtraOptions\"]/state", @operations.convert_string(@extra_options[target].join(' ')), used: used
             )
           end
 
