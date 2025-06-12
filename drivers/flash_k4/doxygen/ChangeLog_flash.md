@@ -1,5 +1,10 @@
 # FLASH
 
+## [2.3.2]
+
+- Improvement
+ - Enabled the kFLASH_PropertyPflash1SectorSize properity support in FLASH_GetProperty API.
+
 ## [2.3.1]
 
 - Improvement

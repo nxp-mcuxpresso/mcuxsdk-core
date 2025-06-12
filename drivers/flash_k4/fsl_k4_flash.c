@@ -766,6 +766,7 @@ status_t FLASH_GetProperty(flash_config_t *config, flash_property_tag_t whichPro
             *value = config->msf1Config[0].flashDesc.blockBase;
             break;
         case kFLASH_PropertyPflash0SectorSize:
+        case kFLASH_PropertyPflash1SectorSize:
             *value = FLASH_FEATURE_SECTOR_SIZE;
             break;
         case kFLASH_PropertyPflash1TotalSize:
