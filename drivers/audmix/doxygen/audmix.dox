@@ -1,0 +1,45 @@
+/*!
+@defgroup audmix AUDMIX: Audio Mixer
+@details The MCUXpresso SDK provides a peripheral driver for the Audio Mixer
+         module of MCUXpresso SDK devices.
+
+The AUDMIX peripheral allows mixing of two TDM audio streams with configurable attenuation.
+The incoming audio data may be received from two different TDM interfaces at different
+sampling rates. The AUDMIX can detect frame rate and clock frequency differences between
+the two TDM interfaces and provides options to mask these differences.
+
+The Audio Mixer supports the following features:
+- Mixing of two TDM audio streams
+- Configurable attenuation for each TDM channel
+- Adjustable attenuation parameters (step divider, initial value, step factors, etc.)
+- Configurable output width (16-bit, 18-bit, 20-bit, or 24-bit)
+- Configurable output clock polarity
+- Frame rate and clock frequency difference detection
+- Sync mode support
+
+The Audio Mixer supports the following output sources:
+    kAUDMIX_OutputDisabled = 0U,     /*!< Output is disabled */
+    kAUDMIX_OutputFromTDM1 = 1U,     /*!< Output from TDM1 */
+    kAUDMIX_OutputFromTDM2 = 2U,     /*!< Output from TDM2 */
+    kAUDMIX_OutputSourceMixed = 3U   /*!< Output is mixed from TDM1 and TDM2 */
+
+# Typical use case {#AUDMIXCase}
+
+## AUDMIX basic audio mixing {#AUDMIXCaseBasic}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/audmix
+
+## AUDMIX with attenuation control {#AUDMIXCaseAttenuation}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/audmix
+
+## AUDMIX with sync mode {#AUDMIXCaseSync}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/audmix
+
+*/
+
+/*!
+@defgroup audmix_driver AUDMIX Driver
+@ingroup audmix
+*/
