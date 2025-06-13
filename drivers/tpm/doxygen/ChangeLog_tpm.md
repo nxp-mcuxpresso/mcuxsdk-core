@@ -1,5 +1,16 @@
 # TPM
 
+## [2.4.0]
+
+- New Feature
+  - Added while loop timeout for MOD CnV CnSC and SC register write sequence.
+  - Change the return type from void to status_t for following API:
+    - `TPM_DisableChannel`
+    - `TPM_EnableChannel`
+    - `TPM_SetupOutputCompare`
+    - `TPM_SetTimerPeriod`
+    - `TPM_StopTimer`
+
 ## [2.3.6]
 
 - Bug Fixes

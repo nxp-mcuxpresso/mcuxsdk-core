@@ -290,8 +290,9 @@ tpm_clock_prescale_t TPM_CalculateCounterClkDiv(TPM_Type *base, uint32_t counter
  * param mode        PWM operation mode, options available in enumeration ::tpm_pwm_mode_t
  * param chnlParams  A structure for configuring PWM channel parameters, used to configure the channel.
  *
- * return kStatus_Success if the PWM setup was successful,
- *         kStatus_Error on failure
+ * return kStatus_Success PWM setup successful
+ *        kStatus_Error   PWM setup failed
+ *        kStatus_Timeout PWM setup timeout when write register CnV
  */
 static status_t TPM_SetupSinglePwmChannel(TPM_Type *base,
                                           uint32_t mod,
@@ -302,6 +303,9 @@ static status_t TPM_SetupSinglePwmChannel(TPM_Type *base,
     uint32_t counterMax = TPM_MAX_COUNTER_VALUE(base);
     uint8_t controlBits;
     uint8_t chnlId;
+#if TPM_TIMEOUT
+    uint32_t timeout = TPM_TIMEOUT;
+#endif
 
     /* MSnB:MSnA field value always be 10, ELSnB:ELSnA field value should config according to the channel params */
 #if defined(FSL_FEATURE_TPM_HAS_PAUSE_LEVEL_SELECT) && FSL_FEATURE_TPM_HAS_PAUSE_LEVEL_SELECT
@@ -397,13 +401,19 @@ static status_t TPM_SetupSinglePwmChannel(TPM_Type *base,
         base->FILTER = filterVal;
 
         /* When switching mode, disable channel n first */
-        TPM_DisableChannel(base, (tpm_chnl_t)chnlId);
+        (void)TPM_DisableChannel(base, (tpm_chnl_t)chnlId);
         /* Set the requested PWM mode for channel n, under combine PWM mode, the active level is opposite of
          * edge-aligned mode */
-        TPM_EnableChannel(base, (tpm_chnl_t)chnlId, controlBits ^ TPM_CnSC_ELSA_MASK);
+        (void)TPM_EnableChannel(base, (tpm_chnl_t)chnlId, controlBits ^ TPM_CnSC_ELSA_MASK);
         /* Set the channel n value */
         do
         {
+#if TPM_TIMEOUT
+            if (timeout-- == 0U)
+            {
+                return kStatus_Timeout;
+            }
+#endif
             base->CONTROLS[chnlId].CnV = cnvFirstEdge;
             /*
              * $Branch Coverage Justification$
@@ -411,9 +421,12 @@ static status_t TPM_SetupSinglePwmChannel(TPM_Type *base,
              */
         } while (cnvFirstEdge != base->CONTROLS[chnlId].CnV);
 
+#if TPM_TIMEOUT
+        timeout = TPM_TIMEOUT;
+#endif
         chnlId += 1U;
         /* When switching mode, disable channel n + 1 */
-        TPM_DisableChannel(base, (tpm_chnl_t)chnlId);
+        (void)TPM_DisableChannel(base, (tpm_chnl_t)chnlId);
 #if defined(FSL_FEATURE_TPM_HAS_PAUSE_LEVEL_SELECT) && FSL_FEATURE_TPM_HAS_PAUSE_LEVEL_SELECT
         /* Select the pause level for second channel */
         controlBits = (uint8_t)((uint32_t)kTPM_ChnlMSBMask | TPM_CnSC_ELSB(chnlParams.secPauseLevel) |
@@ -423,17 +436,23 @@ static status_t TPM_SetupSinglePwmChannel(TPM_Type *base,
         if (chnlParams.enableComplementary)
         {
             /* Change the polarity on the second channel get complementary PWM signals */
-            TPM_EnableChannel(base, (tpm_chnl_t)chnlId, controlBits);
+            (void)TPM_EnableChannel(base, (tpm_chnl_t)chnlId, controlBits);
         }
         else
         {
             /* Second channel use same control bits as first channel */
-            TPM_EnableChannel(base, (tpm_chnl_t)chnlId, controlBits ^ TPM_CnSC_ELSA_MASK);
+            (void)TPM_EnableChannel(base, (tpm_chnl_t)chnlId, controlBits ^ TPM_CnSC_ELSA_MASK);
         }
 
         /* Set the channel n+1 value */
         do
         {
+#if TPM_TIMEOUT
+            if (timeout-- == 0U)
+            {
+                return kStatus_Timeout;
+            }
+#endif
             base->CONTROLS[chnlId].CnV = cnvFirstEdge + cnv;
             /*
              * $Branch Coverage Justification$
@@ -473,6 +492,12 @@ static status_t TPM_SetupSinglePwmChannel(TPM_Type *base,
          */
         do
         {
+#if TPM_TIMEOUT
+            if (timeout-- == 0U)
+            {
+                return kStatus_Timeout;
+            }
+#endif
             base->CONTROLS[chnlId].CnV = cnv;
             /*
              * $Branch Coverage Justification$
@@ -499,8 +524,9 @@ static status_t TPM_SetupSinglePwmChannel(TPM_Type *base,
  * param pwmFreq_Hz  PWM signal frequency in Hz
  * param srcClock_Hz TPM counter clock in Hz
  *
- * return kStatus_Success if the PWM setup was successful,
- *         kStatus_Error on failure
+ * return kStatus_Success PWM setup successful
+ *        kStatus_Error   PWM setup failed
+ *        kStatus_Timeout PWM setup timeout when write register CnV or MOD
  */
 status_t TPM_SetupPwm(TPM_Type *base,
                       const tpm_chnl_pwm_signal_param_t *chnlParams,
@@ -515,6 +541,9 @@ status_t TPM_SetupPwm(TPM_Type *base,
     uint32_t counterMax = TPM_MAX_COUNTER_VALUE(base);
     uint32_t tpmClock   = (srcClock_Hz / (1UL << (base->SC & TPM_SC_PS_MASK)));
     status_t status     = kStatus_Success;
+#if TPM_TIMEOUT
+    uint32_t timeout = TPM_TIMEOUT;
+#endif
 
     if ((0U == pwmFreq_Hz) || (0U == srcClock_Hz) || (0U == numOfChnls) || (tpmClock < pwmFreq_Hz))
     {
@@ -577,6 +606,12 @@ status_t TPM_SetupPwm(TPM_Type *base,
     do
     {
         base->MOD = mod;
+#if TPM_TIMEOUT
+        if (timeout-- == 0U)
+        {
+            return kStatus_Timeout;
+        }
+#endif
         /*
          * $Branch Coverage Justification$
          * (mod != base->MOD) not covered. $ref tpm_c_ref_5$.
@@ -617,8 +652,9 @@ status_t TPM_SetupPwm(TPM_Type *base,
  * param dutyCyclePercent  New PWM pulse width, value should be between 0 to 100
  *                          0=inactive signal(0% duty cycle)...
  *                          100=active signal (100% duty cycle)
- * return kStatus_Success if the PWM setup was successful,
- *        kStatus_Error on failure
+ * return kStatus_Success PWM setup successful
+ *        kStatus_Error   PWM setup failed
+ *        kStatus_Timeout PWM setup timeout when write register CnV
  */
 status_t TPM_UpdatePwmDutycycle(TPM_Type *base,
                                 tpm_chnl_t chnlNumber,
@@ -628,6 +664,9 @@ status_t TPM_UpdatePwmDutycycle(TPM_Type *base,
     uint32_t cnv, mod;
     uint32_t counterMax = TPM_MAX_COUNTER_VALUE(base);
     uint8_t chnlId      = (uint8_t)chnlNumber;
+#if TPM_TIMEOUT
+    uint32_t timeout = TPM_TIMEOUT;
+#endif
 
     /* Return error if requested chnlNumber is greater than the max allowed */
     /* Return error if requested dutycycle/chnlNumber is greater than the max allowed */
@@ -695,14 +734,29 @@ status_t TPM_UpdatePwmDutycycle(TPM_Type *base,
 
         do
         {
+#if TPM_TIMEOUT
+            if (timeout-- == 0U)
+            {
+                return kStatus_Timeout;
+            }
+#endif
             base->CONTROLS[chnlId * 2U].CnV = cnvFirstEdge;
             /*
              * $Branch Coverage Justification$
              * (cnvFirstEdge != base->CONTROLS[chnlId * 2U].CnV) not covered. $ref tpm_c_ref_1$.
              */
         } while (cnvFirstEdge != base->CONTROLS[chnlId * 2U].CnV);
+#if TPM_TIMEOUT
+        timeout = TPM_TIMEOUT;
+#endif
         do
         {
+#if TPM_TIMEOUT
+            if (timeout-- == 0U)
+            {
+                return kStatus_Timeout;
+            }
+#endif
             base->CONTROLS[(chnlId * 2U) + 1U].CnV = cnvFirstEdge + cnv;
         } while ((cnvFirstEdge + cnv) != base->CONTROLS[(chnlId * 2U) + 1U].CnV);
     }
@@ -725,6 +779,12 @@ status_t TPM_UpdatePwmDutycycle(TPM_Type *base,
 
         do
         {
+#if TPM_TIMEOUT
+            if (timeout-- == 0U)
+            {
+                return kStatus_Timeout;
+            }
+#endif
             base->CONTROLS[chnlId].CnV = cnv;
             /*
              * $Branch Coverage Justification$
@@ -758,14 +818,14 @@ void TPM_UpdateChnlEdgeLevelSelect(TPM_Type *base, tpm_chnl_t chnlNumber, uint8_
     uint8_t control = TPM_GetChannelContorlBits(base, chnlNumber);
 
     /* When switching mode, disable channel first */
-    TPM_DisableChannel(base, chnlNumber);
+    (void)TPM_DisableChannel(base, chnlNumber);
 
     /* Clear the field and write the new level value */
     control &= ~(uint8_t)(TPM_CnSC_ELSA_MASK | TPM_CnSC_ELSB_MASK);
     control |= ((uint8_t)level << TPM_CnSC_ELSA_SHIFT) & (TPM_CnSC_ELSA_MASK | TPM_CnSC_ELSB_MASK);
 
     /* Enable channle with new level value */
-    TPM_EnableChannel(base, chnlNumber, control);
+    (void)TPM_EnableChannel(base, chnlNumber, control);
 }
 
 /*!
@@ -806,9 +866,9 @@ void TPM_SetupInputCapture(TPM_Type *base, tpm_chnl_t chnlNumber, tpm_input_capt
     /*Clear CPWMS bit when the input capture mode is selected */
     base->SC &= ~TPM_SC_CPWMS_MASK;
     /* When switching mode, disable channel first */
-    TPM_DisableChannel(base, chnlNumber);
+    (void)TPM_DisableChannel(base, chnlNumber);
     /* Enable channel with new requested input capture mode */
-    TPM_EnableChannel(base, chnlNumber, (uint8_t)captureMode);
+    (void)TPM_EnableChannel(base, chnlNumber, (uint8_t)captureMode);
 }
 
 /*!
@@ -821,14 +881,19 @@ void TPM_SetupInputCapture(TPM_Type *base, tpm_chnl_t chnlNumber, tpm_input_capt
  * param chnlNumber   The channel number
  * param compareMode  Action to take on the channel output when the compare condition is met
  * param compareValue Value to be programmed in the CnV register.
+ * return kStatus_Success PWM setup successful
+ *        kStatus_Timeout PWM setup timeout when write register CnV
  */
-void TPM_SetupOutputCompare(TPM_Type *base,
+status_t TPM_SetupOutputCompare(TPM_Type *base,
                             tpm_chnl_t chnlNumber,
                             tpm_output_compare_mode_t compareMode,
                             uint32_t compareValue)
 {
     assert(((uint8_t)chnlNumber < (uint8_t)FSL_FEATURE_TPM_CHANNEL_COUNTn(base)) &&
            (-1 != (int8_t)FSL_FEATURE_TPM_CHANNEL_COUNTn(base)));
+#if TPM_TIMEOUT
+    uint32_t timeout = TPM_TIMEOUT;
+#endif
 
 #if defined(FSL_FEATURE_TPM_HAS_QDCTRL) && FSL_FEATURE_TPM_HAS_QDCTRL
     /* The TPM's QDCTRL register required to be effective */
@@ -845,19 +910,27 @@ void TPM_SetupOutputCompare(TPM_Type *base,
     /*Clear CPWMS bit when the output compare mode is selected */
     base->SC &= ~TPM_SC_CPWMS_MASK;
     /* When switching mode, disable channel first  */
-    TPM_DisableChannel(base, chnlNumber);
+    (void)TPM_DisableChannel(base, chnlNumber);
     /* Enable channel with new requested compare mode */
-    TPM_EnableChannel(base, chnlNumber, (uint8_t)compareMode);
+    (void)TPM_EnableChannel(base, chnlNumber, (uint8_t)compareMode);
 
     /* Setup the compare value */
     do
     {
+#if TPM_TIMEOUT
+        if (timeout-- == 0U)
+        {
+            return kStatus_Timeout;
+        }
+#endif
         base->CONTROLS[chnlNumber].CnV = compareValue;
         /*
          * $Branch Coverage Justification$
          * (compareValue != base->CONTROLS[chnlNumber].CnV) not covered. $ref tpm_c_ref_1$.
          */
     } while (compareValue != base->CONTROLS[chnlNumber].CnV);
+
+    return kStatus_Success;
 }
 
 #if defined(FSL_FEATURE_TPM_HAS_COMBINE) && FSL_FEATURE_TPM_HAS_COMBINE
@@ -900,8 +973,8 @@ void TPM_SetupDualEdgeCapture(TPM_Type *base,
 #endif
 
     /* When switching mode, disable channel first */
-    TPM_DisableChannel(base, (tpm_chnl_t)chnlId);
-    TPM_DisableChannel(base, (tpm_chnl_t)chnlIdSecond);
+    (void)TPM_DisableChannel(base, (tpm_chnl_t)chnlId);
+    (void)TPM_DisableChannel(base, (tpm_chnl_t)chnlIdSecond);
 
     /* Now, the registers for input mode can be operated. */
     if (true == edgeParam->enableSwap)
@@ -935,8 +1008,8 @@ void TPM_SetupDualEdgeCapture(TPM_Type *base,
     }
 
     /* Setup the edge detection from channel n and n+1*/
-    TPM_EnableChannel(base, (tpm_chnl_t)chnlId, (uint8_t)edgeParam->currChanEdgeMode);
-    TPM_EnableChannel(base, (tpm_chnl_t)chnlIdSecond, (uint8_t)edgeParam->nextChanEdgeMode);
+    (void)TPM_EnableChannel(base, (tpm_chnl_t)chnlId, (uint8_t)edgeParam->currChanEdgeMode);
+    (void)TPM_EnableChannel(base, (tpm_chnl_t)chnlIdSecond, (uint8_t)edgeParam->nextChanEdgeMode);
 }
 #endif
 
@@ -959,7 +1032,7 @@ void TPM_SetupQuadDecode(TPM_Type *base,
     assert(1U == (uint8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base));
 
     /* Disable channel 0 */
-    TPM_DisableChannel(base, kTPM_Chnl_0);
+    (void)TPM_DisableChannel(base, kTPM_Chnl_0);
 
     uint32_t reg;
 
@@ -989,7 +1062,7 @@ void TPM_SetupQuadDecode(TPM_Type *base,
 #endif
 
     /* Disable channel 1 */
-    TPM_DisableChannel(base, kTPM_Chnl_0);
+    (void)TPM_DisableChannel(base, kTPM_Chnl_0);
 
     /* Set Phase B filter value */
     reg = base->FILTER;
@@ -1024,7 +1097,6 @@ void TPM_SetupQuadDecode(TPM_Type *base,
     /* Enable Quad decode */
     base->QDCTRL |= TPM_QDCTRL_QUADEN_MASK;
 }
-
 #endif
 
 /*!

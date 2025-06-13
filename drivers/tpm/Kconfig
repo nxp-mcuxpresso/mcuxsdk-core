@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -10,3 +10,12 @@ config MCUX_COMPONENT_driver.tpm
     bool "tpm"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.tpm
+
+if MCUX_COMPONENT_driver.tpm
+    config TPM_TIMEOUT
+        int "Max loops to wait tpm register write complete (0 means wait forever)"
+        default 0
+        help
+            This is the maximum number of loops to wait for the tpm register write complete.
+            If set to 0, it will wait indefinitely until the register write complete.
+endif
