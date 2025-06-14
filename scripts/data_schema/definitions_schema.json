@@ -202,14 +202,24 @@
             "additionalProperties": false,
             "patternProperties": {
                 "\\w+((@\\w+)?)$": {
-                    "type": "array",
-                    "minItems": 0,
-                    "uniqueItems": true,
-                    "additionalItems": false,
-                    "items": {
-                        "$ref": "#/definitions/toolchainTargetSupportType"
-                    }
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/BoardDeviceToolchainTargetArrayType"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 }
+            }
+        },
+        "BoardDeviceToolchainTargetArrayType": {
+            "type": "array",
+            "minItems": 0,
+            "uniqueItems": true,
+            "additionalItems": false,
+            "items": {
+                "$ref": "#/definitions/toolchainTargetSupportType"
             }
         },
         "extraBuildArgsType": {
