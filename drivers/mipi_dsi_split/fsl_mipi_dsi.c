@@ -151,7 +151,7 @@ static uint8_t DSI_EncodeDphyPllCm(uint8_t cm);
  * find suitable dividers, return 0.
  */
 static uint32_t DSI_DphyGetPllDivider(
-    uint32_t *cn, uint32_t *cm, uint32_t *co, uint32_t refClkFreq_Hz, uint32_t desiredOutFreq_Hz);
+    uint8_t *cn, uint8_t *cm, uint8_t *co, uint32_t refClkFreq_Hz, uint32_t desiredOutFreq_Hz);
 #endif
 
 /*!
@@ -288,11 +288,11 @@ static uint8_t DSI_EncodeDphyPllCm(uint8_t cm)
 }
 
 static uint32_t DSI_DphyGetPllDivider(
-    uint32_t *cn, uint32_t *cm, uint32_t *co, uint32_t refClkFreq_Hz, uint32_t desiredOutFreq_Hz)
+    uint8_t *cn, uint8_t *cm, uint8_t *co, uint32_t refClkFreq_Hz, uint32_t desiredOutFreq_Hz)
 {
-    uint32_t cnCur;
-    uint32_t cmCur;
-    uint32_t coShiftCur;
+    uint8_t cnCur;
+    uint8_t cmCur;
+    uint8_t coShiftCur;
     uint32_t pllFreqCur;
     uint32_t diffCur;
     uint32_t vcoFreq;
@@ -322,7 +322,7 @@ static uint32_t DSI_DphyGetPllDivider(
         for (cnCur = DSI_DPHY_PLL_CN_MIN; cnCur <= DSI_DPHY_PLL_CN_MAX; cnCur++)
         {
             /* REF_CLK / CN. */
-            refClk_CN = refClkFreq_Hz / cnCur;
+            refClk_CN = refClkFreq_Hz / (uint32_t)cnCur;
 
             /* If desired REF_CLK / CN frequency is too large, try larger CN value. */
             if (refClk_CN > DSI_DPHY_PLL_REFCLK_CN_MAX)
@@ -337,7 +337,7 @@ static uint32_t DSI_DphyGetPllDivider(
             }
 
             /* Get the CM most close. */
-            cmCur = (vcoFreq + (refClk_CN / 2U)) / refClk_CN;
+            cmCur = (uint8_t)((vcoFreq + (refClk_CN / 2U)) / refClk_CN);
 
             /* If calculated value is (DSI_DPHY_PLL_CM_MAX + 1), use DSI_DPHY_PLL_CM_MAX. */
             if ((DSI_DPHY_PLL_CM_MAX + 1U) == cmCur)
@@ -351,7 +351,7 @@ static uint32_t DSI_DphyGetPllDivider(
             }
 
             /* Output frequency using current dividers. */
-            pllFreqCur = (refClk_CN * cmCur) >> coShiftCur;
+            pllFreqCur = (refClk_CN * (uint32_t)cmCur) >> coShiftCur;
 
             if (pllFreqCur > desiredOutFreq_Hz)
             {
@@ -395,8 +395,9 @@ static void DSI_ApbClearRxFifo(const MIPI_DSI_Type *base)
     volatile uint32_t dummy = 0U;
     uint32_t level          = base->apb->PKT_FIFO_RD_LEVEL;
 
-    while (0U != (level--))
+    while (0U != level)
     {
+        level--;
         dummy = base->apb->PKT_RX_PAYLOAD;
     }
 
@@ -620,9 +621,9 @@ uint32_t DSI_InitDphy(const MIPI_DSI_Type *base, const dsi_dphy_config_t *config
     DSI_HOST_Type *host                        = base->host;
 
 #if !((defined(FSL_FEATURE_MIPI_NO_DPHY_PLL)) && (0 != FSL_FEATURE_MIPI_DSI_HOST_NO_DPHY_PLL))
-    uint32_t cn = 0x0U;
-    uint32_t cm = 0x0U;
-    uint32_t co = 0x0U;
+    uint8_t cn = 0x0U;
+    uint8_t cm = 0x0U;
+    uint8_t co = 0x0U;
     uint32_t outputPllFreq;
 
     outputPllFreq = DSI_DphyGetPllDivider(&cn, &cm, &co, refClkFreq_Hz, config->txHsBitClk_Hz);
@@ -634,9 +635,9 @@ uint32_t DSI_InitDphy(const MIPI_DSI_Type *base, const dsi_dphy_config_t *config
     }
 
     /* Set the DPHY parameters. */
-    dphy->CN = (uint32_t)DSI_EncodeDphyPllCn((uint8_t)cn);
-    dphy->CM = (uint32_t)DSI_EncodeDphyPllCm((uint8_t)cm);
-    dphy->CO = co;
+    dphy->CN = (uint32_t)DSI_EncodeDphyPllCn(cn);
+    dphy->CM = (uint32_t)DSI_EncodeDphyPllCm(cm);
+    dphy->CO = (uint32_t)co;
 #endif
 
     /* Set the timing parameters. */
@@ -859,7 +860,7 @@ void DSI_WriteApbTxPayloadExt(
 {
     uint32_t firstWord;
     uint16_t i;
-    uint16_t payloadSizeLocal   = payloadSize;
+    uint32_t payloadSizeLocal   = (uint32_t)payloadSize;
     const uint8_t *payloadLocal = payload;
 
     DSI_HOST_APB_PKT_IF_Type *apb = base->apb;

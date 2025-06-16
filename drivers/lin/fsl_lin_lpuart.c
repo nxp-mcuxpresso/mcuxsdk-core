@@ -150,6 +150,8 @@ status_t LIN_LPUART_CalculateBaudRate(
     LPUART_Type *base, uint32_t baudRate_Bps, uint32_t srcClock_Hz, uint32_t *osr, uint16_t *sbr)
 {
     assert(0U != baudRate_Bps);
+    assert((srcClock_Hz / baudRate_Bps / 4U) <= 0xFFFFU);
+
     status_t status = kStatus_Success;
 
     uint16_t sbrTemp;
@@ -589,9 +591,9 @@ static void LIN_LPUART_EvalTwoBitTimeLength(uint32_t instance, uint32_t twoBitTi
                 {
                     /* $Branch Coverage Justification$ $ref lin_lpuart_c_ref_7 $ */
                     if ((twoBitTimeLength <
-                         ((100U - BIT_RATE_TOLERANCE_UNSYNC) * s_previousTwoBitTimeLength[instance] / 100U)) ||
+                         ((100U - BIT_RATE_TOLERANCE_UNSYNC) * (s_previousTwoBitTimeLength[instance] / 100U))) ||
                         (twoBitTimeLength >
-                         ((100U + BIT_RATE_TOLERANCE_UNSYNC) * s_previousTwoBitTimeLength[instance] / 100U)))
+                         ((100U + BIT_RATE_TOLERANCE_UNSYNC) * (s_previousTwoBitTimeLength[instance] / 100U))))
                     {
                         /* cancel capturing */
                         (void)LIN_LPUART_GotoIdleState(base);
@@ -1864,10 +1866,15 @@ lin_status_t LIN_LPUART_AutoBaudCapture(uint32_t instance)
         /* Calculate time between two bit (for service autobaud) */
         (void)linUserConfig->timerGetTimeIntervalCallback(&tmpTime);
 
+        if (s_timeMeasure[instance] > (0xFFFFFFFFUL - tmpTime))
+        {
+            return LIN_ERROR;
+        }
+        
         /* Get two bits time length */
         s_timeMeasure[instance] += tmpTime;
         s_countMeasure[instance]++;
-        if ((s_countMeasure[instance] > 1U))
+        if (s_countMeasure[instance] > 1U)
         {
             switch (linCurrentState->currentNodeState)
             {
