@@ -1,5 +1,10 @@
 # DAC12
 
+## [2.1.2]
+
+- Bug Fixes
+  - Fixed CERT INT31-C issue.
+
 ## [2.1.1]
 
 - Improvements
