@@ -1738,7 +1738,6 @@ class Kconfig(object):
             updated_config_prefix = sym.kconfig.config_prefix
 
         if sym.orig_type in _BOOL_TRISTATE:
-
             if val == "y":
                 _macro = "#define {}{} 1".format(updated_config_prefix, sym.name)
             elif val == 'n':
@@ -1749,7 +1748,9 @@ class Kconfig(object):
             if type_unsigned:
                 _macro += 'U'
 
-            list.append(_macro + '\n')
+            macro_str = _macro + '\n'
+            if macro_str not in list:
+                list.append(macro_str)
 
         elif sym.orig_type is STRING:
             if macro_value_in_quotes:
@@ -1757,7 +1758,8 @@ class Kconfig(object):
             else:
                 value = '#define {}{} {}\n'.format(updated_config_prefix, sym.name, c_define_escape(val))
 
-            list.append(value)
+            if value not in list:
+                list.append(value)
 
         else:  # sym.orig_type in _INT_HEX:
             if sym.orig_type is HEX and \
@@ -1768,7 +1770,9 @@ class Kconfig(object):
             if type_unsigned:
                 _macro += 'U'
 
-            list.append(_macro + '\n')
+            macro_str = _macro + '\n'
+            if macro_str not in list:
+                list.append(macro_str)
 
     def _mcux_misc_macro(self, name):
         for prefix in _MCUX_AUX_MACRO_PREFIXES:
