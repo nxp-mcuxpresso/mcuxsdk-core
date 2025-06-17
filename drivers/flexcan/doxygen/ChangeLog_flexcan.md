@@ -5,6 +5,18 @@
 - Improvements
   - Add Coverage Justification for uncovered code.
   - Adjust API `FLEXCAN_TransferAbortReceive` order.
+  - Update `FLEXCAN_Enable` to enter Freeze Mode first when enter Disable mode on some platform.
+  - Added while loop timeout for following API:
+    - `FLEXCAN_EnterFreezeMode`
+    - `FLEXCAN_ExitFreezeMode`
+    - `FLEXCAN_Enable`
+    - `FLEXCAN_Reset`
+    - `FLEXCAN_TransferSendBlocking`
+    - `FLEXCAN_TransferReceiveBlocking`
+    - `FLEXCAN_TransferFDSendBlocking`
+    - `FLEXCAN_TransferFDReceiveBlocking`
+    - `FLEXCAN_TransferReceiveFifoBlocking`
+    - `FLEXCAN_TransferReceiveEnhancedFifoBlocking`
 - Bug Fixes
   - Remove remote frame feature in CANFD mode because there is no remote frame in the CANFD format.
   - Remove legacy Rx FIFO disabled branch in `FLEXCAN_SubHandlerForLegacyRxFIFO` and `FLEXCAN_SubHandlerForDataTransfered`.

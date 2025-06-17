@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -22,3 +22,23 @@ config MCUX_COMPONENT_driver.flexcan
     bool "flexcan"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.flexcan
+
+if MCUX_COMPONENT_driver.flexcan
+    config FLEXCAN_POLLING_TIMEOUT
+        int "Max loops to wait flexcan polling transfer complete (0 means wait forever)"
+        default 0
+        help
+            This is the maximum number of loops to wait for flexcan polling transfer complete.
+            If set to 0, it will wait indefinitely until polling transfer complete.
+endif
+
+if MCUX_COMPONENT_driver.flexcan
+    config FLEXCAN_MODULE_TIMEOUT
+        int "Max loops to wait flexcan register access complete (0 means wait forever)"
+        default 0
+        help
+            This is the maximum number of loops to wait for flexcan register access complete.
+            Timeout includes waiting for Freeze Mode Acknowledge, Low-Power Mode Acknowledge, Soft Reset,
+            CBT and FDCBT register write complete.
+            If set to 0, it will wait indefinitely until the register write complete.
+endif
