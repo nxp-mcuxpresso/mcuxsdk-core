@@ -1,5 +1,10 @@
 # SEMA4
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fixed violations of the CERT INT31-C, MISRA C-2012 rules 10.3, 10.4.
+
 ## [2.2.0]
 
 - New Features
