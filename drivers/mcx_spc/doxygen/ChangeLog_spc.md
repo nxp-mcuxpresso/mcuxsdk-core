@@ -1,5 +1,11 @@
 # MCX_SPC
 
+## [2.8.1]
+
+- Improvements
+  - Fixed cert_int31_c_violation of  SPC_GetVoltageDetectStatusFlag(), SPC_GetExternalDomainsStatus()
+    and SPC_SetDCDCBurstConfig.
+
 ## [2.8.0]
 
 - New Features
