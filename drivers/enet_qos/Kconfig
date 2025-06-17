@@ -5,6 +5,7 @@
 config MCUX_HAS_COMPONENT_driver.enet_qos
     bool
     default y if MCUX_HW_IP_DriverType_ENET_QOS
+    default y if MCUX_HW_IP_DriverType_EMAC
 
 config MCUX_COMPONENT_driver.enet_qos
     bool "enet_qos"

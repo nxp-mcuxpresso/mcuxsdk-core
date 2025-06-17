@@ -1,5 +1,10 @@
 # ENET_QOS
 
+## [2.7.0]
+
+- New features
+  - The driver can work with EMAC IP now. EMAC is similar to ENET_QOS but doesn't support 100 % of its features.
+
 ## [2.6.5]
 
 - Bug Fixes
