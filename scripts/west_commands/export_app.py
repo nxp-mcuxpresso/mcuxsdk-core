@@ -36,6 +36,7 @@ class ExportApp(WestCommand):
         )
         self.core_id = None
         self.general_export = False
+        self.target_apps = []
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(
