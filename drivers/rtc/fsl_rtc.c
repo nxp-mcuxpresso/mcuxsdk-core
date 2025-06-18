@@ -118,6 +118,10 @@ static uint32_t RTC_ConvertDatetimeToSeconds(const rtc_datetime_t *datetime)
      * represented in the hours, minutes and seconds field*/
     seconds += ((uint32_t)datetime->day - 1U);
     /* For leap year if month less than or equal to Febraury, decrement day counter*/
+    /*
+     * $Branch Coverage Justification$
+     * ((0U == (datetime->year & 3U)) && (datetime->month <= 2U) && 0U == seconds) cannot be covered, when it is leap year(>1970), the seconds cannot be 0U
+     */
     if ((0U == (datetime->year & 3U)) && (datetime->month <= 2U) && 0U != seconds)
     {
         seconds--;
