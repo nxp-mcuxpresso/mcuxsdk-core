@@ -1,5 +1,10 @@
 # LPIT
 
+## [2.1.2]
+
+- Bug Fixes
+  - Fix CERT INT31-C issues.
+
 ## [2.1.1]
 
 - Improvements
