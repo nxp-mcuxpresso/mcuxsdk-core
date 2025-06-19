@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2017, 2023 NXP
+ * Copyright 2016-2017, 2023, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! Driver Version */
-#define FSL_LPTMR_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+#define FSL_LPTMR_DRIVER_VERSION (MAKE_VERSION(2, 2, 1))
 /*! @} */
 
 /*! @brief LPTMR pin selection used in pulse counter mode.*/

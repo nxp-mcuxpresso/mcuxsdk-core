@@ -1,5 +1,10 @@
 # LPTMR
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fix CERT INT31-C issues.
+
 ## [2.2.0]
 
 - Improvements

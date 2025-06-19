@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2017 NXP
+ * Copyright 2016-2017, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -96,11 +96,11 @@ void LPTMR_Init(LPTMR_Type *base, const lptmr_config_t *config)
 #endif /* LPTMR_CLOCKS */
 
     /* Configure the timers operation mode and input pin setup */
-    base->CSR = (LPTMR_CSR_TMS(config->timerMode) | LPTMR_CSR_TFC(config->enableFreeRunning) |
+    base->CSR = (LPTMR_CSR_TMS(config->timerMode) | LPTMR_CSR_TFC(config->enableFreeRunning ? 1U : 0U) |
                  LPTMR_CSR_TPP(config->pinPolarity) | LPTMR_CSR_TPS(config->pinSelect));
 
     /* Configure the prescale value and clock source */
-    base->PSR = (LPTMR_PSR_PRESCALE(config->value) | LPTMR_PSR_PBYP(config->bypassPrescaler) |
+    base->PSR = (LPTMR_PSR_PRESCALE(config->value) | LPTMR_PSR_PBYP(config->bypassPrescaler ? 1U : 0U) |
                  LPTMR_PSR_PCS(config->prescalerClockSource));
 }
 
