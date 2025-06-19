@@ -1,5 +1,10 @@
 # GPT
 
+## [2.0.6]
+
+- Bug Fixes
+  - Fix CERT INT30-C issues.
+
 ## [2.0.5]
 
 - Improvements
