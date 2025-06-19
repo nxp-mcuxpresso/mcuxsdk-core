@@ -1,5 +1,10 @@
 # IRTC
 
+## [2.3.3]
+
+- Bug Fixes
+  - Fix CERT INT31-C issue.
+
 ## [2.3.2]
 
 - Bug Fixes
