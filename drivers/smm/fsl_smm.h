@@ -25,8 +25,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief smm driver version 2.0.0. */
-#define FSL_SMM_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+/*! @brief smm driver version 2.0.1. */
+#define FSL_SMM_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*@}*/
 
 /*!
