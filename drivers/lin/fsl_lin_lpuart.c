@@ -70,6 +70,16 @@
  * $Justification lin_lpuart_c_ref_13$
  * The LIN driver test cases are run in bare metal environment and can only be usd
  * in non-blocking interrupt way.
+ * 
+ * $Justification lin_lpuart_c_ref_14$
+ * Normally no other interrupt status can be detected, the false branch can only be
+ * covered when the interrupt enablement is corrupted in user application such as
+ * other unrelated interrupt is enabled by mistake.
+ * 
+ * $Justification lin_lpuart_c_ref_15$
+ * The measurement overflow can only happen when the registered function uses a timer
+ * whose counter's clock source is not set properly, and the autobaud sequence the LIN
+ * master send uses an invalid baudrate.
  */
 
 /*******************************************************************************
@@ -1866,6 +1876,7 @@ lin_status_t LIN_LPUART_AutoBaudCapture(uint32_t instance)
         /* Calculate time between two bit (for service autobaud) */
         (void)linUserConfig->timerGetTimeIntervalCallback(&tmpTime);
 
+        /* $Branch Coverage Justification$ $ref lin_lpuart_c_ref_15$ */
         if (s_timeMeasure[instance] > (0xFFFFFFFFUL - tmpTime))
         {
             return LIN_ERROR;
@@ -2060,6 +2071,7 @@ void LIN_LPUART_IRQHandler(LPUART_Type *base)
             }
             else
             {
+                /* $Branch Coverage Justification$ $ref lin_lpuart_c_ref_14$ */
                 if (0U != (LIN_LPUART_GetStatusFlags(base) & (uint32_t)kLPUART_RxDataRegFullFlag))
                 {
                     (void)LIN_LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_RxDataRegFullFlag);
