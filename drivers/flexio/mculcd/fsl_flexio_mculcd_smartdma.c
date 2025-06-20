@@ -111,8 +111,9 @@ static void FLEXIO_MCULCD_SMARTDMA_GetTxChunkLen(
 
 static void FLEXIO_MCULCD_RGB656ToRGB888(const uint16_t *rgb565, uint32_t pixelCount, uint8_t *rgb888)
 {
-    while ((pixelCount--) != 0U)
+    while (pixelCount != 0U)
     {
+        pixelCount--;
         *rgb888 = (uint8_t)(((*rgb565) & 0x001FU) << 3U);
         rgb888++;
         *rgb888 = (uint8_t)(((*rgb565) & 0x07E0U) >> 3U);
