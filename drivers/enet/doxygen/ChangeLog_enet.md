@@ -1,5 +1,11 @@
 # ENET
 
+## [2.9.3]
+
+- Bug Fixes
+  - Fixed ENET_Ptp1588GetTimer incorrect timestamps when timer wraps occur after nanosecond capture:
+    - Now only increments second field when nanosecond value is less than half a second
+
 ## [2.9.2]
 
 - Bug Fixes
