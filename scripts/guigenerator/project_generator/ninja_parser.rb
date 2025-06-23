@@ -1077,7 +1077,13 @@ class NinjaParser
     # copy repo file to build_dir/toolchain folder
     if Utils.path_inside?(src_path, ENV['SdkRootDirPath']) && !Utils.path_inside?(src_path, @outdir)
       relative_path = Pathname.new(src_path).relative_path_from(ENV['SdkRootDirPath']).to_s
-      FileUtils.cp_f(src_path, File.join(@outdir, @toolchain, relative_path))
+      if !File.exist?(src_path)
+        @logger.error("File #{src_path} recorded from CMake does not exist, please check the file path.")
+      elsif File.directory?(src_path)
+        @logger.error("Dierctory #{src_path} should not be recorded in mcux_add_source, only file type is supported. Please check CMake setting.")
+      else
+        FileUtils.cp_f(src_path, File.join(@outdir, @toolchain, relative_path))
+      end
     end
   end
 end
