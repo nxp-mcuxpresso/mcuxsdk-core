@@ -5,6 +5,8 @@
 - Improvements
   - Support PWMX channel output for edge aligned PWM.
   - Forbid submodule 0 counter initialize with master sync and master reload mode.
+  - Clarify `kPWM_BusClock` meaning.
+  - Verify `pulseCnt` within 65535 when update period register.
 
 ## [2.8.4]
 
