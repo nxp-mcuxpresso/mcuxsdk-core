@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPSPI driver version. */
-#define FSL_LPSPI_DRIVER_VERSION (MAKE_VERSION(2, 7, 1))
+#define FSL_LPSPI_DRIVER_VERSION (MAKE_VERSION(2, 7, 2))
 /*! @} */
 
 #ifndef LPSPI_DUMMY_DATA
@@ -884,7 +884,7 @@ static inline void LPSPI_FlushFifo(LPSPI_Type *base, bool flushTxFifo, bool flus
 
     LPSPI_Enable(base, enabled);
 #else
-    base->CR |= ((uint32_t)flushTxFifo << LPSPI_CR_RTF_SHIFT) | ((uint32_t)flushRxFifo << LPSPI_CR_RRF_SHIFT);
+    base->CR |= ((flushTxFifo ? 1U : 0U) << LPSPI_CR_RTF_SHIFT) | ((flushRxFifo ? 1U : 0U) << LPSPI_CR_RRF_SHIFT);
 #endif
 }
 

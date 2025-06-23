@@ -1,5 +1,10 @@
 # LPSPI
 
+## [2.7.2]
+
+- Bug Fixes
+  - Fixed coverity issues.
+
 ## [2.7.1]
 
 - Bug Fixes

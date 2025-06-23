@@ -320,7 +320,7 @@ void LPSPI_MasterInit(LPSPI_Type *base, const lpspi_master_config_t *masterConfi
 #if !(defined(FSL_FEATURE_LPSPI_HAS_NO_PCSCFG) && FSL_FEATURE_LPSPI_HAS_NO_PCSCFG)
                   LPSPI_CFGR1_PCSCFG(masterConfig->pcsFunc) |
 #endif
-                  LPSPI_CFGR1_NOSTALL(0) | LPSPI_CFGR1_SAMPLE((uint32_t)masterConfig->enableInputDelay);
+                  LPSPI_CFGR1_NOSTALL(0) | LPSPI_CFGR1_SAMPLE(masterConfig->enableInputDelay ? 1U : 0U);
 
     if ((masterConfig->pinCfg == kLPSPI_SdiInSdiOut) || (masterConfig->pinCfg == kLPSPI_SdoInSdoOut))
     {
@@ -836,6 +836,7 @@ uint32_t LPSPI_MasterSetDelayTimes(LPSPI_Type *base,
     /* write the best scaler value for the delay */
     LPSPI_MasterSetDelayScaler(base, bestScaler, whichDelay);
 
+    assert(bestDelay <= UINT32_MAX);
     /* return the actual calculated delay value (in ns) */
     return (uint32_t)bestDelay;
 }
