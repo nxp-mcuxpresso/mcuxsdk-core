@@ -1,5 +1,10 @@
 # FLEXIO_UART
 
+## [2.6.3]
+
+- Bug Fixes
+  - Fixed coverity issues
+
 ## [2.6.2]
 
 - Bug Fixes
