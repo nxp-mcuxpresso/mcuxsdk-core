@@ -6,6 +6,11 @@
 
 #include "fsl_smartdma.h"
 
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.smartdma_mcxa"
+#endif
+
 #if defined(MCXA276_SERIES) || defined(MCXA275_SERIES) || defined(MCXA176_SERIES) || defined(MCXA175_SERIES)|| \
     defined(MCXA166_SERIES) || defined(MCXA165_SERIES) || defined(MCXA345_SERIES) || defined(MCXA346_SERIES)
 

@@ -7,6 +7,11 @@
 
 #include "fsl_smartdma.h"
 
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.smartdma_mcxn"
+#endif
+
 #if defined(MCXN546_cm33_core0_SERIES) || defined(MCXN546_cm33_core1_SERIES) || defined(MCXN547_cm33_core0_SERIES) || \
     defined(MCXN547_cm33_core1_SERIES) || defined(MCXN946_cm33_core0_SERIES) || defined(MCXN946_cm33_core1_SERIES) || \
     defined(MCXN947_cm33_core0_SERIES) || defined(MCXN947_cm33_core1_SERIES) || defined(MCXN236_SERIES)
