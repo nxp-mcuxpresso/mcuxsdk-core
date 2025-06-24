@@ -16,12 +16,12 @@
         <TargetCommonOption>
           <Device>MCXW236BIHNAR</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXW236B_DFP.13.0.0</PackID>
+          <PackID>NXP.MCXW236_DFP.13.0.0</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
           <Cpu>IRAM(0x10000000,0x100000) IRAM2(0x20004000,0x01c000) IROM(0x03000000,0x040000) IROM2(0x13000000,0x040000) XRAM(0x04000000,0x4000) XRAM2(0x14000000,0x4000) XRAM3(0x30004000,0x01c000) XROM(0x00000000,0x0fe000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20004000 -FC1000 -FN2 -FF0MCXW236B -FS00 -FL040000 -FF1MCXW236B_S -FS110000000 -FL140000 -FP0($$Device:MCXW236BIHNAR$arm\MCXW236B.FLM) -FP1($$Device:MCXW236BIHNAR$arm\MCXW236B_S.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20004000 -FC1000 -FN2 -FF0MCXW236 -FS00 -FL040000 -FF1MCXW236_S -FS110000000 -FL140000 -FP0($$Device:MCXW236BIHNAR$arm\MCXW236.FLM) -FP1($$Device:MCXW236BIHNAR$arm\MCXW236_S.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
           <RegisterFile>$$Device:MCXW236BIHNAR$fsl_device_registers.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
@@ -33,7 +33,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:MCXW236BIHNAR$MCXW236B.xml</SFDFile>
+          <SFDFile>$$Device:MCXW236BIHNAR$MCXW236.xml</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -391,12 +391,12 @@
         <TargetCommonOption>
           <Device>MCXW236BIHNAR</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXW236B_DFP.13.0.0</PackID>
+          <PackID>NXP.MCXW236_DFP.13.0.0</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
           <Cpu>IRAM(0x10000000,0x100000) IRAM2(0x20004000,0x01c000) IROM(0x03000000,0x040000) IROM2(0x13000000,0x040000) XRAM(0x04000000,0x4000) XRAM2(0x14000000,0x4000) XRAM3(0x30004000,0x01c000) XROM(0x00000000,0x0fe000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20004000 -FC1000 -FN2 -FF0MCXW236B -FS00 -FL040000 -FF1MCXW236B_S -FS110000000 -FL140000 -FP0($$Device:MCXW236BIHNAR$arm\MCXW236B.FLM) -FP1($$Device:MCXW236BIHNAR$arm\MCXW236B_S.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20004000 -FC1000 -FN2 -FF0MCXW236 -FS00 -FL040000 -FF1MCXW236_S -FS110000000 -FL140000 -FP0($$Device:MCXW236BIHNAR$arm\MCXW236.FLM) -FP1($$Device:MCXW236BIHNAR$arm\MCXW236_S.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
           <RegisterFile>$$Device:MCXW236BIHNAR$fsl_device_registers.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
@@ -408,7 +408,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:MCXW236BIHNAR$MCXW236B.xml</SFDFile>
+          <SFDFile>$$Device:MCXW236BIHNAR$MCXW236.xml</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -768,7 +768,7 @@
           <targetInfo name="Debug" versionMatchMode="fixed"/>
         </targetInfos>
       </package>
-      <package name="MCXW236B_DFP" schemaVersion="1.4" url="http://mcuxpresso.nxp.com/cmsis_pack/repo/" vendor="NXP" version="12.0.0">
+      <package name="MCXW236_DFP" schemaVersion="1.4" url="http://mcuxpresso.nxp.com/cmsis_pack/repo/" vendor="NXP" version="12.0.0">
         <targetInfos>
           <targetInfo name="Debug"/>
         </targetInfos>

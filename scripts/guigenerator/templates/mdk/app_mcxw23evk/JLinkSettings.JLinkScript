@@ -26,7 +26,7 @@ void InitTarget(void) {
 
   int v;
   JLINK_SYS_Report("******************************************************");
-  JLINK_SYS_Report("J-Link script: MCXW236B Cortex-M33 core J-Link script");
+  JLINK_SYS_Report("J-Link script: MCXW236 Cortex-M33 core J-Link script");
   JLINK_SYS_Report("******************************************************");
   JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=0;DRPost=0;IRLenDevice=4");
 
