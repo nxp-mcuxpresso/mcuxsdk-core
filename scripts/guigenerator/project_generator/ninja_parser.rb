@@ -692,8 +692,8 @@ class NinjaParser
       result = line.match(pattern)
       if result
         content = result[1].strip
-        if content.match(/\S+?.elf/) && content.match(/\S+(.bin|.srec)/) && content.match(/(-Obinary|--bin|-Osrec|--srec|--m32)/)
-          bin_file = File.basename(content.match(/\S+\.(bin|srec)/)[0])
+        if content.match(/\S+?.elf/) && content.match(/\S+(.bin|.srec|.hex)/) && content.match(/(-Obinary|--bin|-Osrec|--srec|--m32|-Oihex|--ihex|--i32)/)
+          bin_file = File.basename(content.match(/\S+\.(bin|srec|hex)/)[0])
           @data[@name]['contents']['configuration']['tools'][@toolchain]['binary-file'] = bin_file
           break
         else

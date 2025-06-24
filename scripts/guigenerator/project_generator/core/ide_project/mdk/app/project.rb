@@ -103,7 +103,8 @@ module Mdk
         format = File.extname(path).split('.')[1]
         format_map = {
             'srec' => "\"$L#{File.basename(path)}\" --m32combined",
-            'bin'  => "\"$L#{File.basename(path)}\" --bincombined"
+            'bin'  => "\"$L#{File.basename(path)}\" --bincombined",
+            'hex'  => "\"$L#{File.basename(path)}\" --i32combined"
         }
         Core.assert(format_map.key?(format)) do
           "type '#{format}' is not valid"
