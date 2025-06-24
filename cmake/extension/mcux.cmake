@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # transfer to cmake path to error caused by "\"
@@ -247,6 +247,9 @@ macro(project project_name)
 
   # run / debug support
   include(${SdkRootDirPath}/cmake/extension/run.cmake)
+
+  mcux_add_cmakelists(${SdkRootDirPath}/cmake/extension/usage)
+  mcux_add_cmakelists(${SdkRootDirPath}/cmake/extension/reports)
 
   # load ide data
   mcux_load_project_ide_data()

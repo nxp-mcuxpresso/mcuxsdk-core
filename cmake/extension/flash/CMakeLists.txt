@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 
 function(runners_yaml_append content)
   # Append ${content}\n to a target property which is later evaluated as a
@@ -173,7 +173,7 @@ foreach(target flash debug debugserver attach)
   endif()
   string(TOUPPER ${target} TARGET_UPPER)
 
-  list(APPEND RUNNERS_DEPS ${logical_target_for_zephyr_elf})
+  list(APPEND RUNNERS_DEPS ${MCUX_SDK_PROJECT_NAME})
 
   # Enable verbose output, if requested.
   if(CMAKE_VERBOSE_MAKEFILE)
