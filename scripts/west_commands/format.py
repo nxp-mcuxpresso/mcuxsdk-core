@@ -201,7 +201,7 @@ class Format(WestCommand):
                 if versionObject is not None:
                     version=versionObject.group(1)
                     if not version==self.formatconfig[f"{c['id']}-version"]:
-                        self.err(f"{c['id']} version ({version}) doesnt match the expected version ({self.formatconfig[f"{c['id']}-version"]}), will skip file with type: '{skip_types}")
+                        self.err(f"{c['id']} version ({version}) doesnt match the expected version ({self.formatconfig[c['id']+'-version']}), will skip file with type: '{skip_types}")
 
                 else:
                     self.err(f"Couldnt check version of {c['id']}, will skip file with type: '{skip_types}")
