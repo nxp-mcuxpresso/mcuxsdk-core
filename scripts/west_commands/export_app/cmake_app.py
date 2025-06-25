@@ -71,6 +71,7 @@ class CmakeApp(object):
             if idx == 0:
                 self.name = k
                 self.example_info = self.example_yml[k]
+                self.extra_files = self.example_info.get('contents', {}).get('extra_files', [])
                 self.is_sysbuild = self._is_sysbuild()
                 continue
             if not (extra_build_args := v.get('contents', {}).get('document', {}).get('extra_build_args')):
@@ -116,10 +117,36 @@ class CmakeApp(object):
         new_cmake_content = self.parse_cmake_file(self.list_file)
         # Force use \n to avoid multiple line breaks in windows
         open(self.dest_list_file, 'w').write("\n".join(new_cmake_content))
+        for entry in self.extra_files:
+            if isinstance(entry, str):
+                src_path = self._replace_cmake_variables(entry, {**self.extra_variables, **self.cmake_variables})
+                src_file = Path(src_path)
+                dest_file = self.output_dir / src_file.relative_to(SDK_ROOT_DIR)
+            elif isinstance(entry, dict):
+                src_path = self._replace_cmake_variables(entry.get('source', ''), {**self.extra_variables, **self.cmake_variables})
+                dest_path = entry.get('destination', '')
+                src_file = Path(src_path)
+                dest_file = self.output_dir / dest_path
+            else:
+                logger.warning(f"[extra_files] Invalid entry format: {entry}")
+                continue
+
+            if src_file.is_file():
+                dest_file.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(src_file, dest_file)
+            elif src_file.is_dir():
+                dest_dir = dest_file if dest_file.suffix == '' else dest_file.parent
+                shutil.copytree(src_file, dest_dir, dirs_exist_ok=True)
+            else:
+                logger.warning(f"[extra_files] File or directory not found: {src_file}")
+
         self.combine_prj_conf()
         self.update_kconfig_path()
         if self.is_sysbuild:
             self.parse_sysbuild()
+        # Apply replacements defined in example.yml
+        self.apply_replacements()
+
 
     def parse_cmake_file(self, cmake_file, target_funcs=[], add_license=True):
         '''
@@ -395,3 +422,34 @@ class CmakeApp(object):
         for k, v in var_dict.items():
             ori_str = re.sub(rf'\$\{{{re.escape(k)}}}', v, ori_str, re.IGNORECASE)
         return ori_str
+
+    def apply_replacements(self):
+        '''
+        Apply replacements defined in example.yml to the files in the output directory.
+        The 'replacements' section should look like this in example.yml:
+        
+        contents:
+            ...
+            replacements:
+            - file: CMakeLists.txt
+              replace:
+                - from: "original_value"
+                  to: "new_value"
+        '''
+        replacements = self.example_info.get('contents', {}).get('replacements', [])
+        for replacement in replacements:
+            file_path = self.output_dir / replacement['file']
+            if not file_path.exists():
+                logger.warning(f"[replacements] File not found: {file_path}")
+                continue
+
+            with open(file_path, 'r') as f:
+                content = f.read()
+
+            for r in replacement['replace']:
+                content = content.replace(r['from'], r['to'])
+
+            with open(file_path, 'w') as f:
+                f.write(content)
+
+            logger.debug(f"[replacements] Applied replacements to {file_path}")
