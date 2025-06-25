@@ -2,7 +2,7 @@
 rsource "../../arch/dsp56800/configuration/Kconfig"
 rsource "../../arch/dsp56800/core/Kconfig"
 
-menu "Device header and startup"
+menu "Startup components"
     config MCUX_COMPONENT_device.CMSIS
         bool "header"
 
@@ -15,11 +15,11 @@ menu "Device header and startup"
         imply MCUX_COMPONENT_device.system
 endmenu
 
-menu "Device Suite"
-    config MCUX_PRJSEG_module.device.suite
-        bool "Use default device suite"
-endmenu
+config MCUX_PRJSEG_module.device.suite
+    bool
+    default y
 
 config MCUX_COMPONENT_device.startup_common
-    bool "common startup"
+    bool
     default y if MCUX_COMPONENT_device.startup
+

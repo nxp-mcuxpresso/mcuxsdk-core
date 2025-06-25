@@ -2,7 +2,7 @@
 rsource "../../arch/xtensa/configuration/Kconfig"
 rsource "../../arch/xtensa/core/Kconfig"
 
-menu "Device header and startup"
+menu "Startup components"
     config MCUX_COMPONENT_device.CMSIS
         bool "header"
 
@@ -11,7 +11,6 @@ menu "Device header and startup"
         imply MCUX_COMPONENT_device.CMSIS
 endmenu
 
-menu "Device Suite"
-    config MCUX_PRJSEG_module.device.suite
-        bool "Use default device suite"
-endmenu
+config MCUX_PRJSEG_module.device.suite
+    bool
+    default y

@@ -6,7 +6,7 @@ rsource "../../arch/riscv/configuration/Kconfig"
 rsource "../../arch/riscv/core/Kconfig"
 rsource "../../arch/riscv/headers/Kconfig"
 
-menu "Device header and startup"
+menu "Startup components"
     config MCUX_COMPONENT_device.CMSIS
         bool "header"
 
@@ -19,7 +19,6 @@ menu "Device header and startup"
         imply MCUX_COMPONENT_device.system
 endmenu
 
-menu "Device Suite"
-    config MCUX_PRJSEG_module.device.suite
-        bool "Use default device suite"
-endmenu
+config MCUX_PRJSEG_module.device.suite
+    bool
+    default y
