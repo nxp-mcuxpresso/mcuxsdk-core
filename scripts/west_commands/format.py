@@ -195,16 +195,16 @@ class Format(WestCommand):
                     f"{c['dep']} is not installed, will skip file with type: '{skip_types}', please "
                     f"run 'pip install -U {c['dep']}'"
                 )
-            if "getVersion" in c.keys() and f"{c["id"]}-version"in self.formatconfig:
+            if "getVersion" in c.keys() and f"{c['id']}-version"in self.formatconfig:
                 versionCmdOutput=subprocess.check_output(c["getVersion"],text=True)
                 versionObject=re.match(r'clang version ((\d|\.)*).*$',versionCmdOutput,re.MULTILINE)
                 if versionObject is not None:
                     version=versionObject.group(1)
-                    if not version==self.formatconfig[f"{c["id"]}-version"]:
-                        self.err(f"{c["id"]} version ({version}) doesnt match the expected version ({self.formatconfig[f"{c["id"]}-version"]}), will skip file with type: '{skip_types}")
+                    if not version==self.formatconfig[f"{c['id']}-version"]:
+                        self.err(f"{c['id']} version ({version}) doesnt match the expected version ({self.formatconfig[f"{c['id']}-version"]}), will skip file with type: '{skip_types}")
 
                 else:
-                    self.err(f"Couldnt check version of {c["id"]}, will skip file with type: '{skip_types}")
+                    self.err(f"Couldnt check version of {c['id']}, will skip file with type: '{skip_types}")
                     skip_types = " ".join(list(c["types"]))
                 
         # if not os.path.exists(os.path.join(self.main_repo_dir, '.pre-commit-config.yaml')):
