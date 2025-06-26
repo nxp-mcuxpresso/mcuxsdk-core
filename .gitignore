@@ -23,6 +23,7 @@ svd/
 firmware/
 middleware/aws_iot
 middleware/cadence/nnlib
+middleware/canopennode/protocol
 middleware/dhara
 middleware/emwin
 middleware/lvgl
