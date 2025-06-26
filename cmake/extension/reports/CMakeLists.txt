@@ -16,13 +16,13 @@ foreach(report ram_report rom_report)
     ${report}
     ${PYTHON_EXECUTABLE}
     ${SdkRootDirPath}/scripts/footprint/size_report
-    -k ${APPLICATION_BINARY_DIR}/${MCUX_SDK_PROJECT_NAME}.elf
+    -k ${APPLICATION_BINARY_DIR}/${APPLICATION_BINARY_NAME}.elf
     -z ${SdkRootDirPath}
     -o ${CMAKE_BINARY_DIR}
     ${workspace_arg}
     -d ${report_depth}
     ${flag_for_${report}}
-    DEPENDS ${MCUX_SDK_PROJECT_NAME}
+    DEPENDS ${APPLICATION_BINARY_NAME}
             $<TARGET_PROPERTY:mcux_build_properties,${report}_DEPENDENCIES>
     USES_TERMINAL
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -90,12 +90,12 @@ if(NOT ${PUNCOVER} STREQUAL PUNCOVER-NOTFOUND)
   add_custom_target(
     puncover
     ${PUNCOVER}
-    --elf_file       ${ZEPHYR_BINARY_DIR}/${KERNEL_ELF_NAME}
+    --elf_file       ${APPLICATION_BINARY_DIR}/${APPLICATION_BINARY_NAME}.elf
     --gcc_tools_base ${CROSS_COMPILE}
     --src_root       ${SdkRootDirPath}
     --build_dir      ${CMAKE_BINARY_DIR}
-    DEPENDS ${MCUX_SDK_PROJECT_NAME}
-            $<TARGET_PROPERTY:zephyr_property_target,${report}_DEPENDENCIES>
+    DEPENDS ${APPLICATION_BINARY_NAME}
+            $<TARGET_PROPERTY:mcux_build_properties,${report}_DEPENDENCIES>
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     USES_TERMINAL
     )
@@ -111,9 +111,9 @@ if(NOT ${PAHOLE} STREQUAL PAHOLE-NOTFOUND)
     --nested_anon_include
     --show_decl_info
     $<$<BOOL:${CMAKE_VERBOSE_MAKEFILE}>:--verbose>
-    ${ZEPHYR_BINARY_DIR}/${KERNEL_ELF_NAME}
-    DEPENDS ${MCUX_SDK_PROJECT_NAME}
-            $<TARGET_PROPERTY:zephyr_property_target,${report}_DEPENDENCIES>
+    ${APPLICATION_BINARY_DIR}/${APPLICATION_BINARY_NAME}.elf
+    DEPENDS ${APPLICATION_BINARY_NAME}
+            $<TARGET_PROPERTY:mcux_build_properties,${report}_DEPENDENCIES>
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     USES_TERMINAL
     )

@@ -180,7 +180,6 @@ macro(project project_name)
     ########################################################
     # endregion
     ########################################################
-
     # declare CMake project
     if (NOT DEFINED __PROJECT_TYPE)
       add_executable(${MCUX_SDK_PROJECT_NAME})
@@ -193,6 +192,8 @@ macro(project project_name)
     else()
       log_fatal("Unsupported project type: ${__PROJECT_TYPE}, it should be EXECUTABLE, LIBRARY or LIBRARY_OBJECT")
     endif ()
+
+    set(APPLICATION_BINARY_NAME ${MCUX_SDK_PROJECT_NAME})
 
     # get full_project_board_port_path
     set(project_board_port_path ${__PROJECT_BOARD_PORT_PATH})
