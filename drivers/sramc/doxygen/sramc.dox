@@ -1,0 +1,20 @@
+/*!
+@defgroup sramc SRAMC: SRAMC Driver
+@details The MCUXpresso SDK provides a peripheral driver for the SRAMC module of MCUXpresso SDK devices.
+SRAMC driver is created to help user to operate the SRAMC module. The SRAMC supports to access asynchronous SRAM or SRAM like FPGA. The APIs can be used to initialize the SRAMC module.
+
+# Function groups {#SRAMCFunc}
+The SRAMC driver supports to access asynchronous SRAM or SRAM like FPGA.
+
+## Initialization and deinitialization {#SRAMCInit}
+The SRAMC_GetDefaultConfig() generates the default config.
+The SRAMC_Init() function initializes the SRAMC with specified configurations.
+The SRAMC_Deinit() function set regisrers to default value.
+
+## SRAMC timing paramters calculation {#SRAMCTimingCalculation}
+The function SRAMC_CalculateTimingValue() calculates the SRAMC register timing field value from nanoseconds.
+
+# Typical use case {#SRAMCUseCase}
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/SRAMC/
+
+*/
