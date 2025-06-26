@@ -261,9 +261,13 @@ status_t Read_IFR_Into_MISR(
 
 /*! @} */
 
-#if defined(SMSCM)
+#if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
 void flash_cache_disable(void);
 
+void flash_cache_speculation_control(bool isPreProcess, FMU_Type *base);
+#endif
+
+#if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFS_MASK)
 void flash_cache_speculation_control(bool isPreProcess, FMU_Type *base);
 #endif
 
