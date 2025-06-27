@@ -1,5 +1,10 @@
 # LPUART
 
+## [2.9.2]
+
+- Bug Fixes
+  - Fixed coverity issues.
+
 ## [2.9.1]
 
 - Bug Fixes
