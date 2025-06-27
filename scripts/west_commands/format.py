@@ -51,7 +51,7 @@ west format [-h] [src1, src2 ...]
 
 If no source file given, will format all git staged files under the repository
 you run this command.
-Currently support following file types:
+Currently supports the following file types:
 
 {', '.join([t for c in DEFAULT_CONFIG for t in c["types"]])}
 """
