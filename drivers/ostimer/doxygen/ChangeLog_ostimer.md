@@ -1,5 +1,10 @@
 # OSTIMER
 
+## [2.2.5]
+
+- Improvements
+  - Support binary encoded ostimer.
+
 ## [2.2.4]
 
 - Bug Fixes

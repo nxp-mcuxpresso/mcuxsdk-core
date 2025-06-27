@@ -3,7 +3,7 @@
 @details The MCUXpresso SDK provides a peripheral driver for the OSTIMER module of MCUXpresso SDK devices.
 OSTIMER driver is created to help user to operate the OSTIMER module. The OSTIMER timer can be used as a low power timer. 
 The APIs can be used to enable the OSTIMER module, initialize it and set the match time, get the current timer count.
-And the raw value in OS timer register is gray-code type, so both decimal and gray-code format API were added for users. 
+And the raw value in OS timer register may be gray-code type, so both decimal and gray-code format API were added for users. 
 OSTIMER can be used as a wake up source from low power mode.
 
 
