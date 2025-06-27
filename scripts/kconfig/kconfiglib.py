@@ -1775,8 +1775,11 @@ class Kconfig(object):
                 list.append(macro_str)
 
     def _mcux_misc_macro(self, name):
-        for prefix in _MCUX_AUX_MACRO_PREFIXES:
+        for prefix in _MCUX_AUX_MACRO_AWAY_PREFIXES:
             if name.startswith(prefix):
+                return True
+        for word in _MCUX_AUX_MACRO_AWAY_WORDS:
+            if word in name:
                 return True
         return False
 
@@ -7299,13 +7302,26 @@ _EXAMPLE_CONFIG_HEAD = "mcux_config.h"
 _COPYRIGHT_HEADER_FILE = os.path.join(os.path.dirname(__file__), "copyright_header.txt")
 
 # Removed macro prefix
-_MCUX_AUX_MACRO_PREFIXES = frozenset({
-    # "MCUX_COMPONENT",
-    # "MCUX_HAS",
-    # "MCUX_PRJSEG",
-    # "MCUX_IP",
-    # "DEPENDENCY_COMPONENT",
-    "MCUX_"
+_MCUX_AUX_MACRO_AWAY_PREFIXES = frozenset({
+    "MCUX_COMPONENT",
+    "MCUX_HAS",
+    "MCUX_PRJSEG",
+    "MCUX_IP",
+    "MCUX_HW",
+    "MCUX_DEPENDENCY",
+    "MCUX_SETTING",
+    "MCUX_COMPILER",
+    "MCUX_TOOLCHAIN",
+    "MCUX_SOURCE_CONDITION",
+    "MCUX_STRING",
+    "MCUX_EXCLUDE",
+    "MCUX_MODULE",
+    "MCUX_ABSTRACT",
+    "MCUX_MISC",
+})
+
+_MCUX_AUX_MACRO_AWAY_WORDS = frozenset({
+    "."
 })
 
 _MCUX_DRIVER_PREFIX = "MCUX_COMPONENT_driver"
