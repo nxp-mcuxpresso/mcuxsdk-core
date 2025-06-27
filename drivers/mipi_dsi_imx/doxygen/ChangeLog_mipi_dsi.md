@@ -1,5 +1,11 @@
 # MIPI_DSI
 
+## [2.0.3]
+
+- Improvements
+  - Supported DSI_ConfigDphy api.
+  - Supported DSI_EnableVpgEnMode to config the video mode pattern generator.
+
 ## [2.0.2]
 
 - Improvements
