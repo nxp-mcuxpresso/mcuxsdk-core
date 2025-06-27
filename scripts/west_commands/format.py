@@ -49,7 +49,7 @@ DEFAULT_CONFIG = [
 FORMAT_USAGE = f"""
 west format [-h] [src1, src2 ...]
 
-If no source file given, will format all git staged files under the repository
+If no source is given, script will format all git stage area of the current repository.
 you run this command.
 Currently supports the following file types:
 
