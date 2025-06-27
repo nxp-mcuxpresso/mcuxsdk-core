@@ -14,6 +14,7 @@ try:
     from identify.identify import tags_from_path
 except ImportError:
     print("Please run 'pip install -U identify'")
+    exit(1)
 
 # Meta hook config style from pre-commit, add 'dep' for required pip package
 DEFAULT_CONFIG = [
@@ -30,7 +31,8 @@ DEFAULT_CONFIG = [
         "dep": "clang-format",
         "args": ["-i"],
         "types": ["c", "c++", "cuda"],
-        "getVersion":["clang","--version"]
+        "getVersion":["clang","--version"],
+        "versionRegex":r'clang version ((\d|\.)*).*$'
     },
     {
         "id": "py_format",
@@ -188,7 +190,7 @@ class Format(WestCommand):
         for c in self.formatter_config:
             if not c.get("dep"):
                 continue
-            if c["dep"] not in installed_packs:
+            if c["dep"] not in installed_packs and "getVersion" not in c.keys():
                 self.missing_packs.append(c["dep"])
                 skip_types = " ".join(list(c["types"]))
                 self.err(
@@ -197,7 +199,7 @@ class Format(WestCommand):
                 )
             if "getVersion" in c.keys() and f"{c['id']}-version"in self.formatconfig:
                 versionCmdOutput=subprocess.check_output(c["getVersion"],text=True)
-                versionObject=re.match(r'clang version ((\d|\.)*).*$',versionCmdOutput,re.MULTILINE)
+                versionObject=re.match(c["versionRegex"],versionCmdOutput,re.MULTILINE)
                 if versionObject is not None:
                     version=versionObject.group(1)
                     if not version==self.formatconfig[f"{c['id']}-version"]:
