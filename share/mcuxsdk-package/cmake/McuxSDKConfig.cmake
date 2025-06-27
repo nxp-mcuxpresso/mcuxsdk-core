@@ -26,6 +26,7 @@ if(DEFINED EXTRA_MCUX_MODULES)
 endif ()
 
 set(APPLICATION_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+set(APPLICATION_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 if(DEFINED SYSBUILD)
     # Since SYSBUILD has already defined these variables, we should reset them for each project
