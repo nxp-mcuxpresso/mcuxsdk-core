@@ -109,6 +109,8 @@ class Format(WestCommand):
 
     def format_source(self, sources: list[str]) -> None:
         for source in sources:
+            if not os.path.exists(source) and os.path.exists(source[1:]):
+                source=source[1:]
             if source==".":
                 source=os.getcwd()
             if os.path.isfile(source):
@@ -203,11 +205,12 @@ class Format(WestCommand):
                 if versionObject is not None:
                     version=versionObject.group(1)
                     if not version==self.formatconfig[f"{c['id']}-version"]:
+                        skip_types = " ".join(list(c["types"]))
                         self.err(f"{c['id']} version ({version}) doesnt match the expected version ({self.formatconfig[c['id']+'-version']}), will skip file with type: '{skip_types}")
 
                 else:
-                    self.err(f"Couldnt check version of {c['id']}, will skip file with type: '{skip_types}")
                     skip_types = " ".join(list(c["types"]))
+                    self.err(f"Couldnt check version of {c['id']}, will skip file with type: '{skip_types}")
                 
         # if not os.path.exists(os.path.join(self.main_repo_dir, '.pre-commit-config.yaml')):
         #     self.die(f"Missing mandatory .pre-commit-config.yaml under {self.main_repo_dir}")
