@@ -7,3 +7,5 @@ lxml
 junitparser>=2
 pylint
 yamllint
+#used by west format
+identify
