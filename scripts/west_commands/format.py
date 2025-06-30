@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -212,17 +212,5 @@ class Format(WestCommand):
                     skip_types = " ".join(list(c["types"]))
                     self.err(f"Couldnt check version of {c['id']}, will skip file with type: '{skip_types}")
                 
-        # if not os.path.exists(os.path.join(self.main_repo_dir, '.pre-commit-config.yaml')):
-        #     self.die(f"Missing mandatory .pre-commit-config.yaml under {self.main_repo_dir}")
-
-        # completed_process = self.run_subprocess(
-        #     ['pre-commit', 'install'],
-        #     capture_output=True,
-        #     text=True,
-        #     cwd=self.main_repo_dir
-        # )
-        # if completed_process.returncode != 0:
-        #     self.die(f"Cannot perform 'pre-commit install': {completed_process.stderr}")
-
     def skip_banner(self, msg):
         self.inf(f"=== {msg}")
