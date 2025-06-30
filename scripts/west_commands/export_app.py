@@ -15,13 +15,13 @@ from misc import sdk_project_target
 
 _ARG_SEPARATOR = '--'
 SDK_ROOT_DIR = SCRIPT_DIR.parent
-DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/Build_And_Configuration_System_Based_On_CMake_And_Kconfig.html#freestanding-example'
+DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/sdk/example_development.html#freestanding-examples'
 
 USAGE = f'''\
 west export_app [-h] [source_dir] [-b board_id] [-DCMAKE_VAR=VAL] [-o OUTPUT_DIR] [--build]
 The script will directly generate all files to OUTPUT_DIR, so please make sure the directory is empty.
 You can use -Dcore_id=xxx to export multi-core example. When use '--build' feature, you can 
-pass other parameters to west build command, like --config, --toolchain, etc.
+pass other parameters to west build command, like '--config', '--toolchain', etc.
 To know what is freestanding example and how it works, see
 {DOC_URL}
 '''
@@ -31,7 +31,7 @@ class ExportApp(WestCommand):
         super().__init__(
             'export_app',
             'Create a freestanding application',
-            f'Create a freestanding application.',
+            f'Create a freestanding application from sdk repository example.',
             accepts_unknown_args=True
         )
         self.core_id = None
@@ -50,7 +50,8 @@ class ExportApp(WestCommand):
                            default='armgcc', help='Specify toolchain')
         parser.add_argument('-o', '--output-dir', required=True,
                             help='output directory to hold the freestanding project')
-        parser.add_argument('--build', action="store_true", default=False, help="Build the project after creating.")
+        # Only for internal use
+        parser.add_argument('--build', action="store_true", default=False, help=argparse.SUPPRESS)
         return parser
     
     def do_run(self, args, remainder):
