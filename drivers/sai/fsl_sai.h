@@ -123,7 +123,7 @@ typedef enum _sai_bclk_source
     kSAI_BclkSourceMclkOption1 = 0x1U, /*!< Bit clock MCLK option 1 */
     kSAI_BclkSourceMclkOption2 = 0x2U, /*!< Bit clock MCLK option2  */
     kSAI_BclkSourceMclkOption3 = 0x3U, /*!< Bit clock MCLK option3 */
-    /* Kinetis device bit clock source definition */
+    /* Specific device (such as Kinetis and some MCXC) bit clock source definition */
     kSAI_BclkSourceMclkDiv   = 0x1U, /*!< Bit clock using master clock divider */
     kSAI_BclkSourceOtherSai0 = 0x2U, /*!< Bit clock from other SAI device  */
     kSAI_BclkSourceOtherSai1 = 0x3U  /*!< Bit clock from other SAI device */
