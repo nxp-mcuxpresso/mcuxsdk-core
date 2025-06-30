@@ -494,7 +494,7 @@ class NinjaParser
         next if flag.nil? || flag.strip.empty?
         if keep_prefix.include?(flag.strip)
           # update relative path for preinclude file
-          preinclude_file = all_flags[index+1]
+          preinclude_file = all_flags[index+1].delete_prefix('"').delete_suffix('"')
           if File.exist?(preinclude_file)
             path = translate_project_relative_path(preinclude_file)
             if @toolchain == 'iar'
