@@ -1,5 +1,10 @@
 # TSI_V5
 
+## [2.6.1]
+
+- Improvements
+  - The SHIELD register write was fixed to be rewritten.
+
 ## [2.6.0]
 
 - Improvements
