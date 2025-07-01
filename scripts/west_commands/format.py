@@ -10,6 +10,8 @@ import subprocess
 import re
 from pathlib import Path
 from west.commands import WestCommand
+import concurrent.futures 
+import multiprocessing
 try:
     from identify.identify import tags_from_path
 except ImportError:
@@ -77,7 +79,7 @@ class Format(WestCommand):
         parser = parser_adder.add_parser(
             self.name, help=self.help, description=self.description, usage=FORMAT_USAGE
         )
-
+        #TODO specify which file types to format
         # TODO Support user defined file type
         # parser.add_argument('-t', '--type',
         #                     help='''Specify the formatter. For most files, we
@@ -92,6 +94,7 @@ class Format(WestCommand):
         parser.add_argument(
             "source", metavar="SOURCE", nargs="*", help="source file or dir path to format"
         )
+        parser.add_argument("--numberThreads", "-t", type=int, default=4, help="Number of parallel jobs to run (default: 4)")
 
         return parser
 
@@ -100,83 +103,101 @@ class Format(WestCommand):
         self.formatter_config = DEFAULT_CONFIG
         self._setup_environment()
         self.fileStatus={"Files":0,"Formated":0,"Skipped":0,"Error":0}
+        filesList=[]
         if self.args.source:
-            self.format_source(self.args.source)
+            filesList=self.get_files_from_dir(self.args.source)
         else:
-            self.format_git()
+            filesList=self.get_files_from_git()
+        file_queue=multiprocessing.Manager().Queue()
+        for file in filesList:
+            file_queue.put(file)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=args.numberThreads) as pool:
+            futures = [pool.submit(self.format_file,file_queue) for i in range(args.numberThreads)]
+        result=concurrent.futures.as_completed(futures)
+
+    
         for key,value in self.fileStatus.items():
             print(f"{key}: {value}")
 
-    def format_source(self, sources: list[str]) -> None:
+    def get_files_from_dir(self, sources: list[str]) -> list[Path]:
+        filesList=[]
         for source in sources:
             if not os.path.exists(source) and os.path.exists(source[1:]):
                 source=source[1:]
             if source==".":
                 source=os.getcwd()
             if os.path.isfile(source):
-                self.format_file(os.path.abspath(source))
+                filesList.append(source)#self.format_file(os.path.abspath(source))
             elif os.path.isdir(source):
                 folderContent=glob.glob(source+"**/**",recursive=True)
                 for path in folderContent:
                     if os.path.isfile(path):
-                        self.format_file(os.path.abspath(path))
+                        filesList.append(path)
+                        #self.format_file(os.path.abspath(path))
             else:
                 self.err(f"Skip '{source}': not a valid path.")
-
-    def format_git(self):
+        return filesList
+    
+    def get_files_from_git(self):
         mancur_repo_abspath = Path(self.check_output(
             ['git', 'rev-parse', '--show-toplevel'])[:-1].decode('utf-8')).resolve().as_posix()
         diffs = self.check_output(['git', 'diff', '--name-only', '--cached']).decode('utf-8').split()
+        filesList=[]
         for path in diffs:
-            self.format_file(os.path.join(mancur_repo_abspath, path))
+            filesList.append(os.path.join(mancur_repo_abspath, path))#self.format_file(os.path.join(mancur_repo_abspath, path))
+        return filesList
 
-    def format_file(self, path: str) -> bool:
-        self.fileStatus["Files"]+=1
-        if not os.path.exists(path):
-            self.err(f"Invalid file path '{path}'")
-            self.fileStatus["Skipped"]+=1
-            return False
-
-        tags = tags_from_path(path)
-
-        find_formatter = False
-        for formatter in self.formatter_config:
-            if formatter.get("dep") and formatter["dep"] in self.missing_packs:
-                continue
-            if not tags & frozenset(formatter["types"]):
-                continue
-            self.banner(f"start format {path}")
-            find_formatter = True
-            cmd_list = [formatter["entry"]] + formatter.get("args", []) + [path]
+    def format_file(self,file_queue):
+        while True:
             try:
-                unformated=secondRun=open(path,'rb').read()
-                completed_process = self.run_subprocess(
-                    cmd_list, capture_output=True, text=True
-                )
-                firstRun=open(path,'rb').read()
-                completed_process = self.run_subprocess(
-                    cmd_list, capture_output=True, text=True
-                )
-                secondRun=open(path,'rb').read()
-                if secondRun != firstRun:
-                    open(path,'wb').write(unformated)
-                    self.skip_banner(f"Cannot format file {path}. Second format is diferent than first format")
-                    self.fileStatus["Skipped"]+=1
-                else:
-                    self.fileStatus["Formated"]+=1
+                path = file_queue.get(timeout=1)
+            except  multiprocessing.Queue.Empty:
+                return
+            self.fileStatus["Files"]+=1
+            if not os.path.exists(path):
+                self.err(f"Invalid file path '{path}'")
+                self.fileStatus["Skipped"]+=1
+                return False
 
-            except PermissionError as e:
-                self.err(f"Please check whether {path} is opened with another program.")
-                self.fileStatus["Errror"]+=1
+            tags = tags_from_path(path)
+
+            find_formatter = False
+            for formatter in self.formatter_config:
+                if formatter.get("dep") and formatter["dep"] in self.missing_packs:
+                    continue
+                if not tags & frozenset(formatter["types"]):
+                    continue
+                self.banner(f"start format {path}")
+                find_formatter = True
+                cmd_list = [formatter["entry"]] + formatter.get("args", []) + [path]
+                try:
+                    unformated=secondRun=open(path,'rb').read()
+                    completed_process = self.run_subprocess(
+                        cmd_list, capture_output=True, text=True
+                    )
+                    firstRun=open(path,'rb').read()
+                    completed_process = self.run_subprocess(
+                        cmd_list, capture_output=True, text=True
+                    )
+                    secondRun=open(path,'rb').read()
+                    if secondRun != firstRun:
+                        open(path,'wb').write(unformated)
+                        self.skip_banner(f"Cannot format file {path}. Second format is diferent than first format")
+                        self.fileStatus["Skipped"]+=1
+                    else:
+                        self.fileStatus["Formated"]+=1
+
+                except PermissionError as e:
+                    self.err(f"Please check whether {path} is opened with another program.")
+                    self.fileStatus["Errror"]+=1
+                    break
+                if completed_process.returncode != 0:
+                    self.err(f"{formatter['id']}: {completed_process.stderr}")
+                    self.fileStatus["Error"]+=1
                 break
-            if completed_process.returncode != 0:
-                self.err(f"{formatter['id']}: {completed_process.stderr}")
-                self.fileStatus["Error"]+=1
-            break
-        if not find_formatter:
-            self.skip_banner(f"Skip {path}")
-            self.fileStatus["Skipped"]+=1
-        return True
+            if not find_formatter:
+                self.skip_banner(f"Skip {path}")
+                self.fileStatus["Skipped"]+=1
 
     def _setup_environment(self) -> None:
         installed_packs = {p.project_name for p in pkg_resources.working_set}
