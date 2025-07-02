@@ -104,6 +104,15 @@ class CmakeApp(object):
             return True
         return False
 
+    def _should_skip_entry(self, entry, current_board):
+        board_condition = entry.get('board')
+        if board_condition:
+            if isinstance(board_condition, str):
+                return board_condition != current_board
+            elif isinstance(board_condition, list):
+                return current_board not in board_condition
+        return False
+
     def run(self):
         self.output_dir.mkdir(parents=True, exist_ok=True)
         # Do not copy custom application info
@@ -117,16 +126,31 @@ class CmakeApp(object):
         new_cmake_content = self.parse_cmake_file(self.list_file)
         # Force use \n to avoid multiple line breaks in windows
         open(self.dest_list_file, 'w').write("\n".join(new_cmake_content))
+        
+        variables = {**self.extra_variables, **self.cmake_variables}
+        current_board = self.cmake_variables.get('board')
+
         for entry in self.extra_files:
             if isinstance(entry, str):
-                src_path = self._replace_cmake_variables(entry, {**self.extra_variables, **self.cmake_variables})
+                src_path = self._replace_cmake_variables(entry, variables)
+                if not src_path:
+                    logger.warning(f"[extra_files] Empty source path in entry: {entry}")
+                    continue
                 src_file = Path(src_path)
                 dest_file = self.output_dir / src_file.relative_to(SDK_ROOT_DIR)
+
             elif isinstance(entry, dict):
-                src_path = self._replace_cmake_variables(entry.get('source', ''), {**self.extra_variables, **self.cmake_variables})
+                if self._should_skip_entry(entry, current_board):
+                    continue
+
+                src_path = self._replace_cmake_variables(entry.get('source', ''), variables)
+                if not src_path:
+                    logger.warning(f"[extra_files] Empty source path in entry: {entry}")
+                    continue
                 dest_path = entry.get('destination', '')
                 src_file = Path(src_path)
                 dest_file = self.output_dir / dest_path
+
             else:
                 logger.warning(f"[extra_files] Invalid entry format: {entry}")
                 continue
@@ -138,7 +162,7 @@ class CmakeApp(object):
                 dest_dir = dest_file if dest_file.suffix == '' else dest_file.parent
                 shutil.copytree(src_file, dest_dir, dirs_exist_ok=True)
             else:
-                logger.warning(f"[extra_files] File or directory not found: {src_file}")
+                logger.warning(f"[extra_files] File or directory not found: {src_file} (from entry: {entry})")
 
         self.combine_prj_conf()
         self.update_kconfig_path()
@@ -437,7 +461,11 @@ class CmakeApp(object):
                   to: "new_value"
         '''
         replacements = self.example_info.get('contents', {}).get('replacements', [])
+        current_board = self.cmake_variables.get('board')
         for replacement in replacements:
+            if self._should_skip_entry(replacement, current_board):
+                continue
+
             file_path = self.output_dir / replacement['file']
             if not file_path.exists():
                 logger.warning(f"[replacements] File not found: {file_path}")
