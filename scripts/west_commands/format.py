@@ -109,7 +109,6 @@ class Format(WestCommand):
         self.args = args
         self.formatter_config = DEFAULT_CONFIG
         self._setup_environment()
-        self.fileStatus={"Files":0,"Formated":0,"Skipped":0,"Error":0}
         filesList=[]
         
         # Create a multiprocessing event for signaling interruption
@@ -132,8 +131,7 @@ class Format(WestCommand):
                 filesList=self.get_files_from_dir(self.args.source)
             else:
                 filesList=self.get_files_from_git()
-            
-            # Use a regular queue instead of multiprocessing Queue for better interrupt handling
+            self.fileStatus={"Files":len(filesList),"Finished":0,"Formated":0,"Skipped":0,"Error":0}
             file_queue = manager.Queue()
             for file in filesList:
                 file_queue.put(file)
@@ -218,9 +216,9 @@ class Format(WestCommand):
             if self.stop_event.is_set():
                 return
                 
-            self.fileStatus["Files"]+=1
+            self.fileStatus["Finished"]+=1
             if not os.path.exists(path):
-                self.err(f"Invalid file path '{path}'")
+                self.err(f"Invalid file path '{path}' (Finished: {self.fileStatus['Finished']}/{self.fileStatus['Files']})")
                 self.fileStatus["Skipped"]+=1
                 continue
 
@@ -231,6 +229,7 @@ class Format(WestCommand):
                     skipped = True
                     break
             if skipped:
+                self.skip_banner(f"Skip {path} (Finished: {self.fileStatus['Finished']}/{self.fileStatus['Files']})")
                 self.fileStatus["Skipped"] += 1
                 continue
             find_formatter = False
@@ -242,7 +241,7 @@ class Format(WestCommand):
                     continue
                 if not tags & frozenset(formatter["types"]):
                     continue
-                self.banner(f"start format {path}")
+                self.banner(f"start format {path} (Finished: {self.fileStatus['Finished']}/{self.fileStatus['Files']})")
                 find_formatter = True
                 cmd_list = [formatter["entry"]] + formatter.get("args", []) + [path]
                 try:
@@ -271,7 +270,7 @@ class Format(WestCommand):
                     self.fileStatus["Error"]+=1
                 break
             if not find_formatter:
-                self.skip_banner(f"Skip {path}")
+                self.skip_banner(f"Skip {path} (Finished: {self.fileStatus['Finished']}/{self.fileStatus['Files']})")
                 self.fileStatus["Skipped"]+=1
 
     def _setup_environment(self) -> None:
