@@ -8,10 +8,12 @@ import glob
 import yaml
 import subprocess
 import re
+import signal
 from pathlib import Path
 from west.commands import WestCommand
 import concurrent.futures 
 import multiprocessing
+import queue
 try:
     from identify.identify import tags_from_path
 except ImportError:
@@ -74,6 +76,8 @@ class Format(WestCommand):
         self.main_repo_dir = os.path.dirname(
             os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         )
+        # Shared variable for signaling interruption
+        self.stop_event = None
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(
@@ -104,20 +108,73 @@ class Format(WestCommand):
         self._setup_environment()
         self.fileStatus={"Files":0,"Formated":0,"Skipped":0,"Error":0}
         filesList=[]
-        if self.args.source:
-            filesList=self.get_files_from_dir(self.args.source)
-        else:
-            filesList=self.get_files_from_git()
-        file_queue=multiprocessing.Manager().Queue()
-        for file in filesList:
-            file_queue.put(file)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=args.numberThreads) as pool:
-            futures = [pool.submit(self.format_file,file_queue) for i in range(args.numberThreads)]
-        result=concurrent.futures.as_completed(futures)
-
-    
-        for key,value in self.fileStatus.items():
-            print(f"{key}: {value}")
+        
+        # Create a multiprocessing event for signaling interruption
+        manager = multiprocessing.Manager()
+        self.stop_event = manager.Event()
+        
+        # Set up signal handler for Ctrl+C
+        original_sigint_handler = signal.getsignal(signal.SIGINT)
+        
+        def handle_interrupt(sig, frame):
+            print("\nReceived interrupt signal. Stopping formatting process gracefully...")
+            self.stop_event.set()
+            # If pressed again, use the original handler
+            signal.signal(signal.SIGINT, original_sigint_handler)
+        
+        signal.signal(signal.SIGINT, handle_interrupt)
+        
+        try:
+            if self.args.source:
+                filesList=self.get_files_from_dir(self.args.source)
+            else:
+                filesList=self.get_files_from_git()
+            
+            # Use a regular queue instead of multiprocessing Queue for better interrupt handling
+            file_queue = manager.Queue()
+            for file in filesList:
+                file_queue.put(file)
+            
+            # Start worker threads
+            with concurrent.futures.ThreadPoolExecutor(max_workers=args.numberThreads) as executor:
+                futures = []
+                for _ in range(min(args.numberThreads, len(filesList) or 1)):
+                    futures.append(executor.submit(self.format_file, file_queue))
+                
+                # Wait for completion or interruption
+                while futures and not self.stop_event.is_set():
+                    # Check if any futures are done
+                    done, not_done = concurrent.futures.wait(
+                        futures, timeout=0.5, 
+                        return_when=concurrent.futures.FIRST_COMPLETED
+                    )
+                    
+                    # Remove completed futures
+                    for future in done:
+                        futures.remove(future)
+                        # Handle any exceptions
+                        try:
+                            future.result()
+                        except Exception as e:
+                            self.err(f"Error in worker thread: {e}")
+                
+                # If interrupted, cancel remaining futures
+                if self.stop_event.is_set():
+                    for future in futures:
+                        future.cancel()
+            
+            if self.stop_event.is_set():
+                print("\nFormatting process was interrupted.")
+            
+            print("\nSummary:")
+            for key, value in self.fileStatus.items():
+                print(f"{key}: {value}")
+                
+        finally:
+            # Restore original signal handler
+            signal.signal(signal.SIGINT, original_sigint_handler)
+            # Clean up manager
+            manager.shutdown()
 
     def get_files_from_dir(self, sources: list[str]) -> list[Path]:
         filesList=[]
@@ -127,13 +184,12 @@ class Format(WestCommand):
             if source==".":
                 source=os.getcwd()
             if os.path.isfile(source):
-                filesList.append(source)#self.format_file(os.path.abspath(source))
+                filesList.append(source)
             elif os.path.isdir(source):
                 folderContent=glob.glob(source+"**/**",recursive=True)
                 for path in folderContent:
                     if os.path.isfile(path):
                         filesList.append(path)
-                        #self.format_file(os.path.abspath(path))
             else:
                 self.err(f"Skip '{source}': not a valid path.")
         return filesList
@@ -144,25 +200,34 @@ class Format(WestCommand):
         diffs = self.check_output(['git', 'diff', '--name-only', '--cached']).decode('utf-8').split()
         filesList=[]
         for path in diffs:
-            filesList.append(os.path.join(mancur_repo_abspath, path))#self.format_file(os.path.join(mancur_repo_abspath, path))
+            filesList.append(os.path.join(mancur_repo_abspath, path))
         return filesList
 
-    def format_file(self,file_queue):
-        while True:
+    def format_file(self, file_queue):
+        while not self.stop_event.is_set():
             try:
-                path = file_queue.get(timeout=1)
-            except  multiprocessing.Queue.Empty:
+                # Use a timeout to periodically check for stop event
+                path = file_queue.get(timeout=0.5)
+            except queue.Empty:
+                # Queue is empty, exit the thread
                 return
+                
+            if self.stop_event.is_set():
+                return
+                
             self.fileStatus["Files"]+=1
             if not os.path.exists(path):
                 self.err(f"Invalid file path '{path}'")
                 self.fileStatus["Skipped"]+=1
-                return False
+                continue
 
             tags = tags_from_path(path)
 
             find_formatter = False
             for formatter in self.formatter_config:
+                if self.stop_event.is_set():
+                    return
+                    
                 if formatter.get("dep") and formatter["dep"] in self.missing_packs:
                     continue
                 if not tags & frozenset(formatter["types"]):
@@ -189,7 +254,7 @@ class Format(WestCommand):
 
                 except PermissionError as e:
                     self.err(f"Please check whether {path} is opened with another program.")
-                    self.fileStatus["Errror"]+=1
+                    self.fileStatus["Error"]+=1
                     break
                 if completed_process.returncode != 0:
                     self.err(f"{formatter['id']}: {completed_process.stderr}")
