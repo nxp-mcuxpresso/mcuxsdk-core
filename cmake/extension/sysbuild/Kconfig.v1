@@ -1,5 +1,14 @@
 # Copyright (c) 2023 Nordic Semiconductor
+# Copyright 2025 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
 # Intentionally left empty as sysbuild Kconfig doesn't support hw model v1.
+
+menu "Modules"
+
+comment "Available modules."
+
+source "$(KCONFIG_BINARY_DIR)/Kconfig.sysbuild.modules"
+
+endmenu

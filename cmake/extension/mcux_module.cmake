@@ -1,5 +1,5 @@
 # Copyright (c) 2019-2024, Nordic Semiconductor ASA
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 
 # Originally modified from:
 # https://github.com/zephyrproject-rtos/zephyr/blame/main/cmake/modules/zephyr_module.cmake
@@ -50,7 +50,8 @@ set(cmake_sysbuild_file ${CMAKE_BINARY_DIR}/sysbuild_modules.txt)
 set(mcux_settings_file ${CMAKE_BINARY_DIR}/mcux_settings.txt)
 
 # Search modules by using west, so only call it if west is installed
-if(DEFINED WEST)
+# For sysbuild project which using execute_process directly, also need to search modules
+if(DEFINED WEST OR SYSBUILD)
     execute_process(
             COMMAND
             ${PYTHON_EXECUTABLE} ${SdkRootDirPath}/scripts/misc/mcux_module.py

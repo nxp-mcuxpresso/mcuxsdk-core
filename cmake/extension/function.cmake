@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 function(mcux_add_source)
@@ -1806,6 +1806,10 @@ function(mcux_load_sysbuild_config)
   endif()
 
   foreach(name ${sysbuild_variable_names})
+    # SB_CONF_FILE is used for sysbuild only, no need to be set for sub projects
+    if("${name}" MATCHES "SB_CONF_FILE")
+      continue()
+    endif()
     # For main app, all variables are valid, for other apps, only those with
     # prefix is valid
     if(SYSBUILD_MAIN_APP)

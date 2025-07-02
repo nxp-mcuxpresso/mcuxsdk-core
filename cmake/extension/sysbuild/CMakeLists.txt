@@ -1,5 +1,5 @@
 # Copyright (c) 2021-2023 Nordic Semiconductor
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.25.0)
@@ -44,7 +44,8 @@ if(EXISTS ${SdkRootDirPath}/examples/_boards/${board})
 elseif(EXISTS ${SdkRootDirPath}/examples_int/_boards/${board})
   set(board_root examples_int/_boards)
 endif()
-
+include(${CMAKE_CURRENT_LIST_DIR}/../function.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../mcux_module.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/extensions.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/modules/sysbuild_extensions.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/modules/sysbuild_kconfig.cmake)

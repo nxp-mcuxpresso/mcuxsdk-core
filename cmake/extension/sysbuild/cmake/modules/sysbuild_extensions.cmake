@@ -1,5 +1,5 @@
 # Copyright (c) 2021-2023 Nordic Semiconductor
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -631,7 +631,7 @@ function(ExternalZephyrProject_Cmake)
   endif ()
 
   load_cache(IMAGE ${ZCMAKE_APPLICATION} BINARY_DIR ${BINARY_DIR})
-  if(EXISTS ${BINARY_DIR}/.config.sysbuild)
+  if(EXISTS ${BINARY_DIR}/.config)
     import_kconfig(CONFIG_ ${BINARY_DIR}/.config TARGET ${ZCMAKE_APPLICATION})
   endif()
 
@@ -777,6 +777,10 @@ endfunction()
 
 function(set_config_string image setting value)
   set_property(TARGET ${image} APPEND_STRING PROPERTY CONFIG "${setting}=\"${value}\"\n")
+endfunction()
+
+function(set_config_int image setting value)
+  set_property(TARGET ${image} APPEND_STRING PROPERTY CONFIG "${setting}=${value}\n")
 endfunction()
 
 # Usage:
