@@ -99,10 +99,13 @@ class Format(WestCommand):
             "source", metavar="SOURCE", nargs="*", help="source file or dir path to format"
         )
         parser.add_argument("--numberThreads", "-t", type=int, default=4, help="Number of parallel jobs to run (default: 4)")
-
+        parser.add_argument('-s', '--skipTypes',help='''Specify file types to skip during formatting.Provide a comma-separated list of file types (e.g., "cpp,python,yaml").''')
         return parser
 
     def do_run(self, args, unkonwn_args):
+        self.skip_types=[]
+        if args.skipTypes:
+            self.skip_types = args.skipTypes.split(',')
         self.args = args
         self.formatter_config = DEFAULT_CONFIG
         self._setup_environment()
@@ -222,7 +225,14 @@ class Format(WestCommand):
                 continue
 
             tags = tags_from_path(path)
-
+            skipped=False
+            for tag in tags:
+                if tag in self.skip_types:
+                    skipped = True
+                    break
+            if skipped:
+                self.fileStatus["Skipped"] += 1
+                continue
             find_formatter = False
             for formatter in self.formatter_config:
                 if self.stop_event.is_set():
@@ -291,6 +301,7 @@ class Format(WestCommand):
                 if versionObject is not None:
                     version=versionObject.group(1)
                     if not version==self.formatconfig[f"{c['id']}-version"]:
+                        self.missing_packs.append(c["dep"])
                         skip_types = " ".join(list(c["types"]))
                         self.err(f"{c['id']} version ({version}) doesnt match the expected version ({self.formatconfig[c['id']+'-version']}), will skip file with type: '{skip_types}")
 
