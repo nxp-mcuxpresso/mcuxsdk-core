@@ -96,7 +96,7 @@ class Format(WestCommand):
             "source", metavar="SOURCE", nargs="*", help="source file or dir path to format"
         )
         parser.add_argument("--numberThreads", "-t", type=int, default=4, help="Number of parallel jobs to run (default: 4)")
-        parser.add_argument('-s', '--formatTypes',help='''Specify file types to format.Provide a comma-separated list of file types (e.g., "cpp,python,yaml").(default:all supported filetypes)''')
+        parser.add_argument('-f', '--formatTypes',help='''Specify file types to format.Provide a comma-separated list of file types (e.g., "cpp,python,yaml").(default:all supported filetypes)''')
 
 
         return parser
@@ -104,7 +104,7 @@ class Format(WestCommand):
     def do_run(self, args, unkonwn_args):
         format_types=[]
         if args.formatTypes:
-            format_types = args.skipTypes.split(',')
+            format_types = args.formatTypes.split(',')
         self.args = args
         self.formatter_config = DEFAULT_CONFIG
         self._setup_environment()
