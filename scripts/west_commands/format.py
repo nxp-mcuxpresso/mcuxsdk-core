@@ -96,10 +96,15 @@ class Format(WestCommand):
             "source", metavar="SOURCE", nargs="*", help="source file or dir path to format"
         )
         parser.add_argument("--numberThreads", "-t", type=int, default=4, help="Number of parallel jobs to run (default: 4)")
+        parser.add_argument('-s', '--formatTypes',help='''Specify file types to format.Provide a comma-separated list of file types (e.g., "cpp,python,yaml").(default:all supported filetypes)''')
+
 
         return parser
 
     def do_run(self, args, unkonwn_args):
+        format_types=[]
+        if args.formatTypes:
+            format_types = args.skipTypes.split(',')
         self.args = args
         self.formatter_config = DEFAULT_CONFIG
         self._setup_environment()
@@ -124,7 +129,7 @@ class Format(WestCommand):
         #result=concurrent.futures.as_completed(futures)    
         processes=[]
         for i in range(args.numberThreads):
-            processes.append(multiprocessing.Process(target=format_mp.format_file, args=(self.formatter_config,self.missing_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesCount,mutex,)))
+            processes.append(multiprocessing.Process(target=format_mp.format_file, args=(self.formatter_config,self.missing_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesCount,format_types,mutex,)))
             processes[i].start()
         for proces in processes:
             proces.join()

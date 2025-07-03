@@ -8,7 +8,7 @@ import subprocess
 import concurrent.futures
 from identify.identify import tags_from_path
 
-def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesCount,mutex):
+def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesCount,format_types,mutex):
     while True:
         try:
             path = file_queue.get(timeout=1)
@@ -23,7 +23,19 @@ def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormat
             return False
 
         tags = tags_from_path(path)
-
+        skipped=True
+        if format_types==[]:
+            skipped= False
+        else:
+            for tag in tags:
+                if tag in format_types:
+                    skipped = False
+                    break
+            if skipped:
+                print(f"==Skip {path} (Finished: {filesFinished.value}/{filesCount})")
+                with mutex:
+                    filesSkipped.value += 1 #self.fileStatus["Skipped"]+=1
+                continue
         find_formatter = False
         for formatter in formatter_config:
             if formatter.get("dep") and formatter["dep"] in skip_packs:
