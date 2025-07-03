@@ -4,11 +4,11 @@
 
 toolchains:
   armgcc:
-    name: GCC ARM Embedded 10-2021.10
+    name: GCC ARM Embedded 14.2.Rel1
     toolchain: armgcc
-    version: 13.2.1
+    version: 14.2.1
     compiler: gcc
-    compiler_version: 13.2.1
+    compiler_version: 14.2.1
     vendor: GCC ARM Embedded
     vendor_url: http://launchpad.net/gcc-arm-embedded
     os:
@@ -27,11 +27,11 @@ toolchains:
     - windows
   iar:
     name: IAR Embedded Workbench for ARM
-    user_name: IAR Toolchain for ARM - 7.x
+    user_name: IAR Toolchain for ARM - 9.x
     toolchain: iar
-    version: 9.60.3
+    version: 9.60.4
     compiler: iar
-    compiler_version: 9.60.3
+    compiler_version: 9.60.4
     vendor: IAR Systems
     vendor_url: http://www.iar.com
     os:
@@ -39,9 +39,9 @@ toolchains:
   xcc:
     name: Xtensa C Compiler
     toolchain: xcc
-    version: 10.0.1
+    version: '2023.11'
     compiler: xcc
-    compiler_version: 10.0.1
+    compiler_version: '2023.11'
     vendor: Cadence
     vendor_url: https://www.cadence.com/
     included: always
@@ -50,9 +50,9 @@ toolchains:
   xtensa:
     name: Xtensa Xplorer
     toolchain: xtensa
-    version: '14.11'
+    version: '10.1.11'
     compiler: xcc
-    compiler_version: 10.0.1
+    compiler_version: 10.1.11
     vendor: Cadence
     vendor_url: https://www.cadence.com/
     included: always
