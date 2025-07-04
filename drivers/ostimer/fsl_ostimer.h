@@ -164,6 +164,39 @@ static inline void OSTIMER_SetMatchRegister(OSTIMER_Type *base, uint64_t value)
 }
 
 /*!
+ * @brief Get the match value from OSTIMER.
+ *
+ * This function will get the match value from OSTIMER.
+ * The value of timer match is gray code format.
+ *
+ * @param base   OSTIMER peripheral base address.
+ * @return Value of match register, data format is gray code.
+ */
+static inline uint64_t OSTIMER_GetMatchRegister(OSTIMER_Type *base)
+{
+    uint64_t tmp = 0U;
+
+    tmp = base->MATCH_L;
+    tmp |= (uint64_t)(base->MATCH_H) << 32U;
+
+    return tmp;
+}
+
+/*!
+ * @brief Get the match value from OSTIMER.
+ *
+ * This function will get a match value from OSTIMER.
+ *
+ * @param base   OSTIMER peripheral base address.
+ * @return Value of match register.
+ */
+static inline uint64_t OSTIMER_GetMatchValue(OSTIMER_Type *base)
+{
+    uint64_t value = OSTIMER_GetMatchRegister(base);
+    return OSTIMER_GrayToDecimal(value);
+}
+
+/*!
  * @brief Enable the OSTIMER counter match interrupt.
  *
  * Enable the timer counter match interrupt. The interrupt happens when OSTIMER
