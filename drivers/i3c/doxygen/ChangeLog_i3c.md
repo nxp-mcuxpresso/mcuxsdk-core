@@ -1,5 +1,11 @@
 # I3C
 
+## [2.14.2]
+
+- Improvements
+  - Added timeout for ENTDAA process API.
+  - Added build system macro to control the timeout setting.
+
 ## [2.14.1]
 
 - Improvements

@@ -30,3 +30,12 @@ config MCUX_COMPONENT_driver.i3c
     bool "i3c"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.i3c
+
+if MCUX_COMPONENT_driver.i3c
+    config I3C_RETRY_TIMES
+        int "Max loops to wait for I3C operation status complete (0 means wait forever)"
+        default 0
+        help
+            This is the maximum number of loops to wait for I3C operation status complete.
+            If set to 0, it will wait indefinitely.
+endif
