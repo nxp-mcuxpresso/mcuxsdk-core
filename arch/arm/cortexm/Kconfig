@@ -61,3 +61,19 @@ config MCUX_PRJSEG_config.arm.core.cm23_nosau
 config MCUX_PRJSEG_config.arm.core.cm0p
     bool
     default y if MCUX_HW_CORE_CM0P
+
+config MCUX_PRJSEG_config.arm.core.cm55
+    bool
+    default y if MCUX_HW_CORE_CM55 && MCUX_HW_DSP && MCUX_HW_SAU
+
+config MCUX_PRJSEG_config.arm.core.cm55_nodsp_nosau
+    bool
+    default y if MCUX_HW_CORE_CM55 && !MCUX_HW_DSP && !MCUX_HW_SAU
+
+config MCUX_PRJSEG_config.arm.core.cm55_dsp_nosau
+    bool
+    default y if MCUX_HW_CORE_CM55 && MCUX_HW_DSP && !MCUX_HW_SAU
+
+config MCUX_PRJSEG_config.arm.core.cm55_nodsp_sau
+    bool
+    default y if MCUX_HW_CORE_CM55 && !MCUX_HW_DSP && MCUX_HW_SAU
