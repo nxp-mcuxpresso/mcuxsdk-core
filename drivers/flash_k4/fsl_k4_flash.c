@@ -216,6 +216,11 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
                 start += FLASH_FEATURE_SECTOR_SIZE;
             }
         }
+        /*
+         * Data cache may contain stale values following a flash programming or erasing operation.
+         * Data cache invalidation is only on KW43.
+         */
+        flash_cache_invalidate();
     }
     else
     {
@@ -246,6 +251,11 @@ status_t FLASH_EraseAll(FMU_Type *base, uint32_t key)
     if (kStatus_FLASH_Success == status)
     {
         status = FLASH_CMD_EraseAll(base);
+        /*
+         * Data cache may contain stale values following a flash programming or erasing operation.
+         * Data cache invalidation is only on KW43.
+         */
+        flash_cache_invalidate();
     }
     else
     {
@@ -327,6 +337,11 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
 
             status = FLASH_CMD_ProgramPhrase(base, start, extraData);
         }
+        /*
+         * Data cache may contain stale values following a flash programming or erasing operation.
+         * Data cache invalidation is only on KW43.
+         */
+        flash_cache_invalidate();
     }
     else
     {
@@ -412,6 +427,11 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
 
             status = FLASH_CMD_ProgramPage(base, start, extraData);
         }
+        /*
+         * Data cache may contain stale values following a flash programming or erasing operation.
+         * Data cache invalidation is only on KW43.
+         */
+        flash_cache_invalidate();
     }
     else
     {
@@ -851,9 +871,30 @@ FCT_PLACEMENT void flash_cache_speculation_control(bool isPreProcess, FMU_Type *
     __ISB();
     __DSB();
 }
+
+void flash_cache_invalidate(void)
+{
+}
+
 #else
 
 #if defined SYSCON_FMC0_CTRL_DFC_MASK
+
+FCT_PLACEMENT void flash_cache_invalidate(void)
+{
+    SYSCON->AUTHENTICATE = 0xaaaaaaaa;
+    __ISB();
+    __DSB();
+    SYSCON->FMC0_CTRL |= SYSCON_FMC0_CTRL_ECFC_MASK; /* Execute clear cache */
+    __ISB();
+    __DSB();
+    SYSCON->FMC0_CTRL |= (SYSCON_FMC0_CTRL_DFDC_MASK|SYSCON_FMC0_CTRL_DFS_MASK|SYSCON_FMC0_CTRL_DDP_MASK); /* Disable Data Cache - Disable Data Prefetch - Disable Flash Speculation */
+    __ISB();
+    __DSB();
+    SYSCON->FMC0_CTRL &= ~(SYSCON_FMC0_CTRL_DFDC_MASK|SYSCON_FMC0_CTRL_ECFC_MASK|SYSCON_FMC0_CTRL_DFS_MASK|SYSCON_FMC0_CTRL_DDP_MASK); /* re-enable all the disabled bits */
+    __ISB();
+    __DSB();
+}
 
 FCT_PLACEMENT void flash_cache_disable(void)
 {
@@ -865,6 +906,16 @@ FCT_PLACEMENT void flash_cache_disable(void)
     __ISB();
     __DSB();
 }
+FCT_PLACEMENT void flash_cache_enable(void)
+{
+    SYSCON->AUTHENTICATE = 0xaaaaaaaa;
+    SYSCON->FMC0_CTRL &= ~(SYSCON_FMC0_CTRL_DFDC_MASK | SYSCON_FMC0_CTRL_DFC_MASK | SYSCON_FMC0_CTRL_DFIC_MASK);
+    /* Memory barriers for good measure.
+     * All Cache, Branch predictor and TLB maintenance operations before this instruction complete */
+    __ISB();
+    __DSB();
+}
+
 #endif
 
 #if defined SYSCON_FMC0_CTRL_DFS_MASK
