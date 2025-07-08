@@ -227,8 +227,8 @@ int CE_MatrixInvHerm_CF32(
     cmdstruct.arg_ptr_array[1]   = (void *)pA;
     cmdstruct.arg_ptr_array[2]   = (void *)pScratch;
     cmdstruct.arg_param_array[0] = M;
-    cmdstruct.arg_param_array[1] = flag_packedInput;
-    cmdstruct.arg_param_array[2] = flag_cholInv;
+    cmdstruct.arg_param_array[1] = (int)flag_packedInput;
+    cmdstruct.arg_param_array[2] = (int)flag_cholInv;
 
     status = CE_CmdAdd(kCE_Cmd_MAT_INV_HERM_CF32, &cmdstruct);
 
@@ -283,7 +283,7 @@ int CE_MatrixEvdHerm_CF32(float *pLambdaOut,
     cmdstruct.arg_param_array[0] = M;
     cmdstruct.arg_param_array[1] = *ptemp;
     cmdstruct.arg_param_array[2] = max_iter;
-    cmdstruct.arg_param_array[3] = flag_packedInput;
+    cmdstruct.arg_param_array[3] = (int)flag_packedInput;
 
     status = CE_CmdAdd(kCE_Cmd_MAT_EVD_HERM_CF32, &cmdstruct);
 

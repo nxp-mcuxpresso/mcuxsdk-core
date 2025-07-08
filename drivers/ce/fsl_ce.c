@@ -64,7 +64,7 @@ void CE_InstallFirmware(ce_copy_image_t *ceCopyImage)
     srcAddr = ceCopyImage->srcAddr;
     size    = ceCopyImage->size;
 
-    memcpy((void *)(uint32_t *)dstAddr, (const void *)(uint32_t *)srcAddr, size);
+    (void)memcpy((void *)(uint32_t *)dstAddr, (const void *)(uint32_t *)srcAddr, size);
 #endif
 }
 

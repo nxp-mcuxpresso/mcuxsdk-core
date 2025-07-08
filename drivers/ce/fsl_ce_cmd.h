@@ -61,7 +61,7 @@ int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
  *
  * @return Currently only return 0.
  */
-int CE_CmdReset();
+int CE_CmdReset(void);
 
 /*!
  * @brief Adds a command to the command queue
@@ -89,7 +89,7 @@ int CE_CmdLaunch(int force_launch);
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_CmdLaunchBlocking();
+int CE_CmdLaunchBlocking(void);
 
 /*!
  * @brief Launches the current command queue and returns without waiting for completion on CE
@@ -99,7 +99,7 @@ int CE_CmdLaunchBlocking();
  *
  * @return Currently only return 0.
  */
-int CE_CmdLaunchNonBlocking();
+int CE_CmdLaunchNonBlocking(void);
 
 /*!
  * @brief Checks the command queue execution status on CE
@@ -107,7 +107,7 @@ int CE_CmdLaunchNonBlocking();
  * @retval 0 Task completed and CE is ready for next command(s)
  * @retval 1 Task still running; CE is busy
  */
-int CE_CmdCheckStatus();
+int CE_CmdCheckStatus(void);
 
 #ifdef __cplusplus
 }

@@ -11,11 +11,11 @@ Interface Definitions for CM33-CE Driver
 #ifndef FSL_CE_IF_H
 #define FSL_CE_IF_H
 
-#define CE_CMD_MAX_ARGS     6
-#define CE_CMD_MAX_CMDS_ZVQ 18
+#define CE_CMD_MAX_ARGS     6U
+#define CE_CMD_MAX_CMDS_ZVQ 18U
 
-#define CE_STATUS_BUSY  0xB054U
-#define CE_STATUS_IDLE  0xFF00U
+#define CE_STATUS_BUSY  0xB054
+#define CE_STATUS_IDLE  0xFF00
 
 /* CMD name definitions */
 typedef enum
@@ -105,9 +105,9 @@ typedef enum
 /* structure defining the ce command buffer configuration */
 typedef struct
 {
-    unsigned int *buffer_base_ptr;
-    unsigned int *next_buffer_ptr;
-    int *status_buffer_ptr;
+    volatile uint32_t *buffer_base_ptr;
+    volatile uint32_t *next_buffer_ptr;
+    volatile uint32_t *status_buffer_ptr;
     unsigned int n_cmd;
     ce_cmd_mode_t cmdmode;
 } ce_cmdbuffer_t;

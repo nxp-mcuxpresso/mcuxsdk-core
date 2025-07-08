@@ -36,16 +36,16 @@ int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
     s_ce_cmdbuffer = psCmdBuffer;
 
     s_ce_cmdbuffer->cmdmode           = cmdmode;
-    s_ce_cmdbuffer->buffer_base_ptr   = (unsigned int *)cmdbuffer;
-    s_ce_cmdbuffer->status_buffer_ptr = (int *)statusbuffer;
-    CE_CmdReset();
+    s_ce_cmdbuffer->buffer_base_ptr   = cmdbuffer;
+    s_ce_cmdbuffer->status_buffer_ptr = statusbuffer;
+    (void)CE_CmdReset();
 
     return 0;
 }
 
-int CE_CmdReset()
+int CE_CmdReset(void)
 {
-    unsigned int *cmd_base          = s_ce_cmdbuffer->buffer_base_ptr;
+    volatile uint32_t *cmd_base     = s_ce_cmdbuffer->buffer_base_ptr;
     *cmd_base                       = 0xCCCC;
     s_ce_cmdbuffer->next_buffer_ptr = cmd_base + 1;
     s_ce_cmdbuffer->n_cmd           = 0;
@@ -55,20 +55,22 @@ int CE_CmdReset()
 
 int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
 {
-    int i, size, addstatus;
-    unsigned short *nargsbase;
-    unsigned int *cmdbase;
+    int addstatus;
+    volatile unsigned short *nargsbase;
+    unsigned short i;
+    unsigned int size;
+    volatile uint32_t *cmdbase;
     void **ptrargbase;
     int *ptrparambase;
 
     if (s_ce_cmdbuffer->n_cmd < CE_CMD_MAX_CMDS_ZVQ)
     {
-        size    = sizeof(void *) * cmdargs->n_ptr_args + sizeof(int) * (cmdargs->n_param_args + 1) + sizeof(short) * 2;
+        size    = sizeof(void *) * cmdargs->n_ptr_args + sizeof(int) * ((unsigned int)cmdargs->n_param_args + 1U) + sizeof(short) * 2U;
         cmdbase = s_ce_cmdbuffer->next_buffer_ptr;
 
         *cmdbase = (unsigned int)cmd;
 
-        nargsbase  = (unsigned short *)(cmdbase + 1);
+        nargsbase  = (volatile unsigned short *)(cmdbase + 1U);
         *nargsbase = cmdargs->n_ptr_args;
         nargsbase += 1;
         *nargsbase = cmdargs->n_param_args;
@@ -130,11 +132,11 @@ int CE_CmdLaunch(int force_launch)
     return 0;
 }
 
-int CE_CmdLaunchBlocking()
+int CE_CmdLaunchBlocking(void)
 {
     unsigned int n_cmd;
 
-    if (s_ce_cmdbuffer->n_cmd == 0)
+    if (s_ce_cmdbuffer->n_cmd == 0U)
     {
         return -2; /* no commands to send */
     }
@@ -143,7 +145,7 @@ int CE_CmdLaunchBlocking()
     MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, s_ce_cmdbuffer->n_cmd);
     CE_CmdDelay();
     /* launch CE by sending MU interrupt */
-    status_t status = MU_TriggerInterrupts((MU_Type *)DSP0_MU_BASE_ADDR, kMU_GenInt0InterruptTrigger);
+    status_t status = MU_TriggerInterrupts((MU_Type *)DSP0_MU_BASE_ADDR, (uint32_t)kMU_GenInt0InterruptTrigger);
 
     if (kStatus_Success != status)
     {
@@ -159,26 +161,26 @@ int CE_CmdLaunchBlocking()
         n_cmd = *(s_ce_cmdbuffer->buffer_base_ptr);
     }
 
-    CE_CmdReset();
+    (void)CE_CmdReset();
 
     /* read the status register */
-    return *(s_ce_cmdbuffer->status_buffer_ptr + 1);
+    return (int)(*(s_ce_cmdbuffer->status_buffer_ptr + 1U));
 }
 
-int CE_CmdLaunchNonBlocking()
+int CE_CmdLaunchNonBlocking(void)
 {
     /* Launches non-blocking */
-    if (s_ce_cmdbuffer->n_cmd == 0)
+    if (s_ce_cmdbuffer->n_cmd == 0U)
     {
         return -2; /* no commands to send */
     }
     /* Write number of commands via TX2 reg,
      * set MSb to indicate non-blocking mode to ZENV: ZENV will send interrupt back in this case. */
-    MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, 0x80000000 | s_ce_cmdbuffer->n_cmd);
+    MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, 0x80000000U | s_ce_cmdbuffer->n_cmd);
     CE_CmdDelay();
 
     /* launch CE by sending MU interrupt */
-    status_t status = MU_TriggerInterrupts((MU_Type *)DSP0_MU_BASE_ADDR, kMU_GenInt0InterruptTrigger);
+    status_t status = MU_TriggerInterrupts((MU_Type *)DSP0_MU_BASE_ADDR, (uint32_t)kMU_GenInt0InterruptTrigger);
     if (kStatus_Success != status)
     {
         assert(false);
@@ -188,7 +190,7 @@ int CE_CmdLaunchNonBlocking()
     return 0;
 }
 
-int CE_CmdCheckStatus()
+int CE_CmdCheckStatus(void)
 {
     int status         = -1;
     unsigned int n_cmd = *(s_ce_cmdbuffer->buffer_base_ptr);
@@ -200,7 +202,7 @@ int CE_CmdCheckStatus()
     else
     {
         status = CE_STATUS_IDLE; /* completed */
-        CE_CmdReset();
+        (void)CE_CmdReset();
     }
 
     return status;

@@ -12,13 +12,13 @@ Implementation file for CE wrapper/driver functions on ARM
 #include "fsl_ce_basic.h"
 #include "fsl_ce_cmd.h"
 
-int CE_ExecCmd()
+int CE_ExecCmd(void)
 {
     int status = CE_CmdLaunch(1);
     return status;
 }
 
-int CE_NullCmd()
+int CE_NullCmd(void)
 {
     int status;
     ce_cmdstruct_t cmdstruct;

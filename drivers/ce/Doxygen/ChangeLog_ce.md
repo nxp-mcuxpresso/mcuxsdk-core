@@ -1,5 +1,9 @@
 # CE
 
+## [2.2.1]
+- Improvements
+  - Fixed MISRA issue 7.2, 17.7, 10.4 and 10.3.
+
 ## [2.2.0]
 - Bug Fixes
   - Fix the issue that eigenvectors are NaNs with triangular or square input Hermitian.

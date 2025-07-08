@@ -38,14 +38,14 @@ extern "C" {
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_ExecCmd();
+int CE_ExecCmd(void);
 
 /*!
  * @brief Simple echo test cmd
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_NullCmd();
+int CE_NullCmd(void);
 
 /*!
  * @brief Copies one memory buffer to another
