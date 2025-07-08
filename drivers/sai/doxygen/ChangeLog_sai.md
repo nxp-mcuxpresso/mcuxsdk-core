@@ -1,4 +1,10 @@
 # SAI
+
+## [2.4.8]
+
+- Bug Fixes
+  - Fixed violations of MISRA C-2012 rule 10.1, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 12.4.
+
 ## [2.4.7]
 
 - Added conditional support for bit clock swap feature

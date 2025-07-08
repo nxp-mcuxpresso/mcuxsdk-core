@@ -1218,9 +1218,10 @@ void SAI_TxSetConfig(I2S_Type *base, sai_transceiver_t *config)
      use it to get channel mask value */
     if (config->channelMask == 0U)
     {
-        if(config->startChannel <= 7)
+        if(config->startChannel < 8U)
         {
-            config->channelMask = 1U << config->startChannel;
+            config->channelMask = 1;
+            config->channelMask <<= config->startChannel;
         }
         else
         {
@@ -1232,7 +1233,16 @@ void SAI_TxSetConfig(I2S_Type *base, sai_transceiver_t *config)
     {
         if (IS_SAI_FLAG_SET(1UL << i, config->channelMask))
         {
-            channelNums++;
+            // Prevent potential addition overflow by capping at maximum value
+            if (channelNums < UINT8_MAX)
+            {
+                channelNums++;
+            }
+            else
+            {
+                channelNums = UINT8_MAX;
+            }
+
             config->endChannel = i;
         }
     }
@@ -1315,6 +1325,7 @@ void SAI_TransferTxSetConfig(I2S_Type *base, sai_handle_t *handle, sai_transceiv
 {
     assert(handle != NULL);
     assert(config != NULL);
+    assert(FSL_FEATURE_SAI_CHANNEL_COUNTn(base) >= 0);
     assert(config->channelNums <= (uint32_t)FSL_FEATURE_SAI_CHANNEL_COUNTn(base));
 
     handle->bitWidth = config->serialData.dataWordNLength;
@@ -1359,9 +1370,10 @@ void SAI_RxSetConfig(I2S_Type *base, sai_transceiver_t *config)
      use it to get channel mask value */
     if (config->channelMask == 0U)
     {
-        if(config->startChannel <= 7)
+        if(config->startChannel < 8U)
         {
-            config->channelMask = 1U << config->startChannel;
+            config->channelMask = 1;
+            config->channelMask <<= config->startChannel;
         }
         else
         {
@@ -1373,7 +1385,16 @@ void SAI_RxSetConfig(I2S_Type *base, sai_transceiver_t *config)
     {
         if (IS_SAI_FLAG_SET((1UL << i), config->channelMask))
         {
-            channelNums++;
+            // Prevent potential addition overflow by capping at maximum value
+            if (channelNums < UINT8_MAX)
+            {
+                channelNums++;
+            }
+            else
+            {
+                channelNums = UINT8_MAX;
+            }
+
             config->endChannel = i;
         }
     }
@@ -1642,7 +1663,17 @@ void SAI_WriteBlocking(I2S_Type *base, uint32_t channel, uint32_t bitWidth, uint
     uint32_t fifoCount = (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(base);
     if (fifoCount >= base->TCR1)
     {
-        bytesPerWord = ((fifoCount - base->TCR1) * bytesPerWord);
+        fifoCount -= base->TCR1;
+
+        // Prevent potential multiplication overflow by limiting bytesPerWord
+        if ((bitWidth / 8U) < (UINT32_MAX / fifoCount))
+        {
+            bytesPerWord = (fifoCount * (bitWidth / 8U));
+        }
+        else
+        {
+            bytesPerWord = UINT32_MAX;
+        }
     }
 #endif
 
@@ -1693,7 +1724,17 @@ void SAI_WriteMultiChannelBlocking(
     uint32_t fifoCount = (uint32_t)FSL_FEATURE_SAI_FIFO_COUNTn(base);
     if (fifoCount >= base->TCR1)
     {
-        bytesPerWord = ((fifoCount - base->TCR1) * bytesPerWord);
+        fifoCount -= base->TCR1;
+
+        // Prevent potential multiplication overflow by limiting bytesPerWord
+        if ((bitWidth / 8U) < (UINT32_MAX / fifoCount))
+        {
+            bytesPerWord = (fifoCount * (bitWidth / 8U));
+        }
+        else
+        {
+            bytesPerWord = UINT32_MAX;
+        }
     }
 #endif
 
@@ -1701,7 +1742,16 @@ void SAI_WriteMultiChannelBlocking(
     {
         if (IS_SAI_FLAG_SET((1UL << i), channelMask))
         {
-            channelNums++;
+            // Prevent potential addition overflow by capping at maximum value
+            if (channelNums < UINT32_MAX)
+            {
+                channelNums++;
+            }
+            else
+            {
+                channelNums = UINT32_MAX;
+            }
+
             endChannel = i;
         }
     }
@@ -1770,7 +1820,16 @@ void SAI_ReadMultiChannelBlocking(
     {
         if (IS_SAI_FLAG_SET((1UL << i), channelMask))
         {
-            channelNums++;
+            // Prevent potential addition overflow by capping at maximum value
+            if (channelNums < UINT32_MAX)
+            {
+                channelNums++;
+            }
+            else
+            {
+                channelNums = UINT32_MAX;
+            }
+
             endChannel = i;
         }
     }
@@ -1921,6 +1980,7 @@ void SAI_TransferRxCreateHandle(I2S_Type *base, sai_handle_t *handle, sai_transf
 status_t SAI_TransferSendNonBlocking(I2S_Type *base, sai_handle_t *handle, sai_transfer_t *xfer)
 {
     assert(handle != NULL);
+    assert(FSL_FEATURE_SAI_CHANNEL_COUNTn(base) >= 0);
     assert(handle->channelNums <= (uint32_t)FSL_FEATURE_SAI_CHANNEL_COUNTn(base));
 
     /* Check if the queue is full */
@@ -1970,6 +2030,7 @@ status_t SAI_TransferSendNonBlocking(I2S_Type *base, sai_handle_t *handle, sai_t
 status_t SAI_TransferReceiveNonBlocking(I2S_Type *base, sai_handle_t *handle, sai_transfer_t *xfer)
 {
     assert(handle != NULL);
+    assert(FSL_FEATURE_SAI_CHANNEL_COUNTn(base) >= 0);
     assert(handle->channelNums <= (uint32_t)FSL_FEATURE_SAI_CHANNEL_COUNTn(base));
 
     /* Check if the queue is full */
