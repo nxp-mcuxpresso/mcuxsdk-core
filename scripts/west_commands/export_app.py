@@ -92,7 +92,7 @@ class ExportApp(WestCommand):
     def all_l_build_cmd(self):
         result = [self.l_build_cmd()]
         for conf_file in self.entry_app.custom_conf_files:
-            result.append(self.l_build_cmd([f'-DCONF={conf_file}']))
+            result.append(self.l_build_cmd([f'-DCONF_FILE={conf_file}']))
         return result
 
     def _parse_remainder(self, remainder):
