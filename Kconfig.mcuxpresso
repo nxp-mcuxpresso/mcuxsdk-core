@@ -81,6 +81,7 @@ menu "Middleware"
     osource "middleware/dhara/Kconfig"
     osource "middleware/mcu_bootloader/Kconfig"
     osource "middleware/canopennode/Kconfig"
+	osource "middleware/safety_iec60730b/Kconfig"
 endmenu
 
 # RTOS config
