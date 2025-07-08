@@ -137,7 +137,7 @@ status_t SEMA4_TryLock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
 
     assert(gateNum < (uint8_t)FSL_FEATURE_SEMA4_GATE_COUNT);
 
-    if (procNum < 0xFFU) {
+    if (procNum < 0xFEU) {
         ++procNum;
     } else {
         /* Handle error case - procNum is at maximum value */

@@ -1,5 +1,10 @@
 # SEMA42
 
+## [2.1.1]
+
+- Improvements
+  - Updated SEMA42_TryLock function to avoid unsigned integer operations wrap issue.
+
 ## [2.1.0]
 
 - New Features

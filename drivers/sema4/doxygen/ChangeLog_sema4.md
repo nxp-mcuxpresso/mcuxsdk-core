@@ -1,5 +1,10 @@
 # SEMA4
 
+## [2.2.2]
+
+- Improvements
+  - Updated SEMA4_TryLock function to avoid unsigned integer operations wrap issue.
+
 ## [2.2.1]
 
 - Bug Fixes
