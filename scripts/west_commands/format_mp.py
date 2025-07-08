@@ -8,7 +8,7 @@ import subprocess
 import concurrent.futures
 from identify.identify import tags_from_path
 
-def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesCount,format_types,mutex):
+def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesCount,format_types,mutex,timeout):
     while True:
         try:
             path = file_queue.get(timeout=1)
@@ -48,10 +48,10 @@ def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormat
             try:
                 unformated=open(path,'rb').read()
                 #completed_process = self.run_subprocess(
-                completed_process=subprocess.run(cmd_list, capture_output=True, text=True)
+                completed_process=subprocess.run(cmd_list, capture_output=True, text=True,timeout=timeout)
                 #)
                 firstRun=open(path,'rb').read()
-                completed_process=subprocess.run(cmd_list, capture_output=True, text=True)
+                completed_process=subprocess.run(cmd_list, capture_output=True, text=True,timeout=timeout)
                 #completed_process = self.run_subprocess(
                 #    cmd_list, capture_output=True, text=True
                 #)
