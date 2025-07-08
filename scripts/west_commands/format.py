@@ -123,6 +123,7 @@ class Format(WestCommand):
         filesFormated=multiprocessing.Value('i',0)
         filesSkipped=multiprocessing.Value('i',0)
         filesError=multiprocessing.Value('i',0)
+        filesTimeout=multiprocessing.Value('i',0)
         filesCount=len(filesList)
         file_queue=manager.Queue()
         for file in filesList:
@@ -132,7 +133,7 @@ class Format(WestCommand):
         #result=concurrent.futures.as_completed(futures)    
         processes=[]
         for i in range(args.numberThreads):
-            processes.append(multiprocessing.Process(target=format_mp.format_file, args=(self.formatter_config,self.missing_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesCount,format_types,mutex,args.timeout,)))
+            processes.append(multiprocessing.Process(target=format_mp.format_file, args=(self.formatter_config,self.missing_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesTimeout,filesCount,format_types,mutex,args.timeout,)))
             processes[i].start()
         for proces in processes:
             proces.join()
@@ -143,6 +144,8 @@ class Format(WestCommand):
         print(f"Formatted Files: {filesFormated.value}")
         print(f"Skipped Files: {filesSkipped.value}")
         print(f"Error Files: {filesError.value}")
+        print(f"Timeout Files: {filesTimeout.value}")
+        
 
     def get_files_from_dir(self, sources: list[str]) -> list[Path]:
         filesList=[]

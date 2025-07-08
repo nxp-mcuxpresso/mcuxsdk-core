@@ -8,7 +8,7 @@ import subprocess
 import concurrent.futures
 from identify.identify import tags_from_path
 
-def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesCount,format_types,mutex,timeout):
+def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormated,filesSkipped,filesError,filesTimeout,filesCount,format_types,mutex,timeout):
     while True:
         try:
             path = file_queue.get(timeout=1)
@@ -71,6 +71,11 @@ def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormat
                 with mutex:
                     filesError.value += 1#self.fileStatus["Errror"]+=1
                 break
+            except subprocess.TimeoutExpired:
+                print(f"ERROR: Formatting {path} timed out after {timeout} seconds")
+                with mutex:
+                    filesTimeout.value += 1
+                continue
             if completed_process.returncode != 0:
                 print(f"ERROR: {formatter['id']}: {completed_process.stderr}")
                 with mutex:
