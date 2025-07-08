@@ -118,6 +118,15 @@
                     "description": "The project configuration.",
                     "additionalProperties": false,
                     "properties": {
+                        "toolchains": {
+                            "type": "array",
+                            "minItems": 0,
+                            "uniqueItems": true,
+                            "additionalItems": false,
+                            "items": {
+                                "$ref": "#/definitions/toolchainTargetSupportType"
+                            }
+                        },
                         "document": {
                             "type": "object",
                             "properties": {

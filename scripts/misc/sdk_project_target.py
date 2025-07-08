@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -379,24 +379,29 @@ class MCUXAppTargets(object):
             mcux_error(f"Invalid example file {app_example_file}")
             return apps
 
+        app_shared_content = {}
         for app_name, app_data in example_data.items():
             if app_data.get('skip_build', False):
                 continue
+            # Only example.yml shall only have one application
+            if (app_data.get('section-type', '') == 'application') and not app_shared_content:
+                if (app_toolchains := app_data.get('contents', {}).get('toolchains', [])):
+                    app_shared_content['toolchains'] = app_toolchains
             if (boards_data := app_data.get('boards', {})):
-                self.get_instance_targets(app_dir, apps, app_name, app_data, boards_data, is_pick_one_target_for_app, 'board')
+                self.get_instance_targets(app_dir, apps, app_name, app_data, boards_data, is_pick_one_target_for_app, 'board', app_shared_content)
             elif (devices_data := app_data.get('devices', {})):
-                self.get_instance_targets(app_dir, apps, app_name, app_data, devices_data, is_pick_one_target_for_app, 'device')
+                self.get_instance_targets(app_dir, apps, app_name, app_data, devices_data, is_pick_one_target_for_app, 'device', app_shared_content)
 
         return apps
 
-    def get_instance_targets(self, app_dir, apps, app_name, app_data, instance_data, is_pick_one_target_for_app=False, instance_type='board'):
+    def get_instance_targets(self, app_dir, apps, app_name, app_data, instance_data, is_pick_one_target_for_app=False, instance_type='board', app_shared_content={}):
         assert(instance_type in ['board', 'device'])
         if app_name in MCUXAppTargets.INT_EXAMPLE_DATA:
             instance_data = { **instance_data, **MCUXAppTargets.INT_EXAMPLE_DATA[app_name] }
         use_sysbuild = app_data.get('use_sysbuild', False)
 
         extra_build_args = app_data.get('contents', {}).get('document', {}).get('extra_build_args', [])
-        app_toolchains = app_data.get('contents', {}).get('toolchains', [])
+        app_toolchains = app_data.get('contents', {}).get('toolchains', []) or app_shared_content.get('toolchains', [])
         app_category = app_data.get('contents', {}).get('document', {}).get('category', app_dir.replace('\\', '/').split('/')[1])
         # SDKGEN-3118 Currently one example shall be bound with only one shield
         shield = list(app_data['shields'])[0] if app_data.get('shields', {}).keys() else None
