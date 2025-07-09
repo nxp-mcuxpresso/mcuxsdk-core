@@ -59,7 +59,7 @@ def format_file(formatter_config,skip_packs,file_queue,filesFinished,filesFormat
                 secondRun=open(path,'rb').read()
                 if secondRun != firstRun:
                     open(path,'wb').write(unformated)
-                    print(f"==Cannot format file {path}. Second format is diferent than first format")
+                    print(f"==WARNING: Cannot format file {path}. Second format is diferent than first format")
                     with mutex:
                         filesSkipped.value += 1 #self.fileStatus["Skipped"]+=1
                 else:

@@ -10,7 +10,6 @@ import subprocess
 import re
 from pathlib import Path
 from west.commands import WestCommand
-import concurrent.futures 
 import multiprocessing
 import format_mp
 try:
