@@ -448,6 +448,10 @@ if(DEFINED FORCED_CONF_FILE)
   list(APPEND input_configs_flags --forced-input-configs)
 endif()
 
+if(DEFINED GENERATE_PROMPTLESS_SYMS)
+  list(APPEND input_configs_flags --generate-promptless-syms)
+endif()
+
 cmake_path(GET AUTOCONF_H PARENT_PATH autoconf_h_path)
 if(NOT EXISTS ${autoconf_h_path})
   file(MAKE_DIRECTORY ${autoconf_h_path})

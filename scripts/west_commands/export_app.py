@@ -4,8 +4,10 @@
 
 import os, sys
 import argparse
+import shutil
 from pathlib import Path
 from west.commands import WestCommand
+from west.configuration import config
 from export_app.cmake_app import CmakeApp
 from export_app.cmake_parser import cmparser
 
@@ -16,6 +18,7 @@ from misc import sdk_project_target
 _ARG_SEPARATOR = '--'
 SDK_ROOT_DIR = SCRIPT_DIR.parent
 DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/sdk/example_development.html#freestanding-examples'
+DEFAULT_BOARD_FOLDERS=["examples"]
 
 USAGE = f'''\
 west export_app [-h] [source_dir] [-b board_id] [-DCMAKE_VAR=VAL] [-o OUTPUT_DIR] [--build]
@@ -25,6 +28,18 @@ pass other parameters to west build command, like '--config', '--toolchain', etc
 To know what is freestanding example and how it works, see
 {DOC_URL}
 '''
+
+
+class BoardCopyFolderAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        current = getattr(namespace, self.dest, None)
+        if current is None:
+            current = []
+
+        if not values:
+            setattr(namespace, self.dest, DEFAULT_BOARD_FOLDERS)
+        else:
+            setattr(namespace, self.dest, values)
 
 class ExportApp(WestCommand):
     def __init__(self):
@@ -36,7 +51,6 @@ class ExportApp(WestCommand):
         )
         self.core_id = None
         self.general_export = False
-        self.target_apps = []
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(
@@ -48,8 +62,10 @@ class ExportApp(WestCommand):
         parser.add_argument('-b', '--board', nargs=None, default=None, help="board id like mimxrt700evk")
         parser.add_argument('--toolchain', dest='toolchain', action='store',
                            default='armgcc', help='Specify toolchain')
-        parser.add_argument('-o', '--output-dir', required=True,
+        parser.add_argument('-o', '--output-dir', default=None,
                             help='output directory to hold the freestanding project')
+        parser.add_argument('--bf', dest='board_copy_folders', action=BoardCopyFolderAction, nargs='*',
+                            help='Copy board related files')
         # Only for internal use
         parser.add_argument('--build', action="store_true", default=False, help=argparse.SUPPRESS)
         return parser
@@ -60,40 +76,20 @@ class ExportApp(WestCommand):
         self._parse_remainder(remainder)
         self._sanity_precheck()
         self._app_precheck()
-        self.entry_app = CmakeApp(self.source_dir, self.output_dir, self.cmake_variables, self.extra_variables, False, self.target_apps)
+        self.entry_app = CmakeApp(self.source_dir, self.output_dir, self.cmake_variables, self.extra_variables, 'main_app', self.misc_options)
         self.entry_app.run()
         self.banner(f'Successfully create the freestanding project, see {self.entry_app.dest_list_file}.')
         if self.args.build:
             self.banner('Start building the project')
-            for l_cmd in self.all_l_build_cmd():
+            for l_cmd in self.entry_app.build_cmds():
                 ret = self.run_subprocess(l_cmd, cwd=SDK_ROOT_DIR.as_posix())
                 print(' '.join(l_cmd))
             if ret.returncode != 0:
                 self.die("Build Failed!", exit_code=ret.returncode)
         else:
             self.banner('you can use following command to build it.')
-            for l_cmd in self.all_l_build_cmd():
+            for l_cmd in self.entry_app.build_cmds():
                 print(' '.join(l_cmd))
-
-    def l_build_cmd(self, extra_args=[]):
-        board_var = self.board if self.board else "<board_id>"
-        cmd_list = ['west', 'build', '-b', board_var, '--toolchain', self.args.toolchain,
-                    '-p', 'always', self.entry_app.dest_list_file.parent.as_posix(),
-                    '-d', (self.output_dir/'build').as_posix(),
-                    ]
-        if self.entry_app.is_sysbuild:
-            cmd_list.append('--sysbuild')
-        if self.args.cmake_opts:
-            cmd_list.extend(self.args.cmake_opts)
-        if extra_args:
-            cmd_list.extend(extra_args)
-        return cmd_list
-    
-    def all_l_build_cmd(self):
-        result = [self.l_build_cmd()]
-        for conf_file in self.entry_app.custom_conf_files:
-            result.append(self.l_build_cmd([f'-DCONF_FILE={conf_file}']))
-        return result
 
     def _parse_remainder(self, remainder):
         self.args.source_dir = None
@@ -136,12 +132,20 @@ class ExportApp(WestCommand):
         self.check_force(
             'example.yml' in os.listdir(app),
             "{} doesn't contain a example.yml".format(app))
-        out = self.args.output_dir
+        if self.args.output_dir:
+            out = self.args.output_dir
+        elif config_out := config.get('export_app', 'output_dir', fallback=None):
+            out = config_out
+        else:
+            self.die('You must specify output directory with "-o" option or set it in west config')
         if (os.path.isdir(out)) and (len(os.listdir(out)) != 0):
             self.wrn(f"f'Output directory {out} is not empty.")
 
         self.source_dir = Path(app).resolve()
         self.output_dir = Path(out).resolve()
+        if config.get('export_app', 'clean_output_dir', fallback=False) and self.output_dir.exists():
+            self.dbg('Clean output directory first...')
+            shutil.rmtree(self.output_dir)
 
     def _app_precheck(self):
         sdk_project_target.MCUXAppTargets.config_internal_data()
@@ -162,10 +166,17 @@ class ExportApp(WestCommand):
         if self.core_id:
             board_core = board_core + '@' + self.core_id
         matched_app = op.search_app_targets(app_path=self.source_dir.as_posix(), board_cores_filter=[board_core])
-        self.target_apps = list(set([app.name for app in matched_app]))
+        target_apps = list(set([app.name for app in matched_app]))
         self.check_force(matched_app,
                          f'Cannot find any app match your input, please ensure following command can get a valid output\
                           {os.linesep}west list_project -p {self.source_dir} -b {board_core}')
+        self.misc_options = {
+            'main_output': self.output_dir,
+            'cmake_opts': self.args.cmake_opts,
+            'target_apps': target_apps,
+        }
+        if self.args.board_copy_folders:
+            self.misc_options['board_copy_folders'] = [ (SDK_ROOT_DIR / p).as_posix() for p in self.args.board_copy_folders ]
 
     def check_force(self, cond, msg):
         if not cond:

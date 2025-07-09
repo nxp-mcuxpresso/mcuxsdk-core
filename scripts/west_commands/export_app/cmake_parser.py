@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 
 RENDER_TEMPLATE = '''
 {{ func.name }}(
+{%- if func.nargs %}
+    {{ ' '.join(func.nargs) }}
+{%- endif %}
 {%- for arg_name, arg_data in func.single_args.items() %}
     {{ arg_name }} {{ arg_data }}
 {%- endfor %}
@@ -28,9 +31,6 @@ RENDER_TEMPLATE = '''
     {{ arg_name }} {{ ' '.join(arg_data) }}
     {%- endif %}
 {%- endfor %}
-{%- if func.nargs %}
-    {{ ' '.join(func.nargs) }}
-{%- endif %}
 )
 '''
 

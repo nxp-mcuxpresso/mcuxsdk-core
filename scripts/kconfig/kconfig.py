@@ -80,6 +80,10 @@ def main():
         check_assigned_sym_values(kconf)
         # check_assigned_choice_values(kconf)
 
+    if args.generate_promptless_syms:
+        promptless_syms = [sym.config_string for sym in kconf.unique_defined_syms if promptless(sym)]
+        open(os.path.join(args.header_out_dir, '.promptless_config'), 'w').writelines(promptless_syms)
+
     if kconf.syms.get('WARN_DEPRECATED', kconf.y).tri_value == 2:
         check_deprecated(kconf)
     if kconf.syms.get('WARN_EXPERIMENTAL', kconf.y).tri_value == 2:
@@ -118,7 +122,6 @@ def check_no_promptless_assign(kconf):
 {sym.name_and_loc} is assigned in a configuration file, but is not directly
 user-configurable (has no prompt). It gets its value indirectly from other
 symbols. """ + SYM_INFO_HINT.format(sym))
-
 
 def check_assigned_sym_values(kconf):
     # Verifies that the values assigned to symbols "took" (matches the value
@@ -289,6 +292,10 @@ def parse_args():
     parser.add_argument("--enable-all-drivers",
                         action="store_true",
                         help="Indicate the all base SDK drivers should be enabled if the dependency is ok. Technically equals add default y to all driver kconfig symbol.")
+    parser.add_argument("--generate-promptless-syms",
+                        action="store_true",
+                        help="Generate a file with all promptless symbols "
+                             "this was useful for freestanding examples with board files ")
     parser.add_argument("--zephyr-base",
                         help="Path to current Zephyr installation")
     parser.add_argument("kconfig_file",

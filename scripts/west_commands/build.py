@@ -173,7 +173,7 @@ class Build(Forceable):
         group.add_argument('--hint', action='store_true', default=False, help='Execute external assistant command like'
                                                                               'west list_project')
         group.add_argument('-nsc','--no_sanity_check', dest='no_sanity_check', action='store_true', default=False, help='Skip sanity check')
-        group.add_argument('--trace_dir', default=[], action='append', help='Use with cmake option "--trace", only filter result with expected location. Do not use with "--trace-expand"')
+        group.add_argument('--trace-dir', default=[], action="append", help='Use with cmake option "--trace", only filter result with expected location. Do not use with "--trace-expand"')
         group = parser.add_mutually_exclusive_group()
         group.add_argument('--sysbuild', action='store_true',
                            help='''create multi domain build system''')
@@ -751,19 +751,19 @@ class Build(Forceable):
         if '--trace-expand' in final_cmake_args:
             self.wrn('Remove "--trace-expand" as the result cannot be filtered.')
             final_cmake_args.remove("--trace-expand")
-        final_cmake_args.extend(['--trace-redirect', trace_log_path := os.path.join(self.build_dir, 'trace_log')])
+        final_cmake_args.extend(['--trace-redirect', trace_log_path := os.path.join(self.build_dir, 'trace.log')])
         run_cmake(final_cmake_args, dry_run=self.args.dry_run)
         expected_lines = []
+        filter_patterns = [d.strip('\'"') for d in self.args.trace_dir]
         for line in open(trace_log_path, 'r').readlines():
             match = re.search(r'(.+?)\(\d+\):', line)
-            if match:
-                path = match.group(1)
-            else:
+            if not match:
                 continue
-            if not any(re.search(re.compile(p), path) for p in self.args.trace_dir):
+            path = match.group(1)
+            if not any(re.search(re.compile(p), path) for p in filter_patterns):
                 continue
             expected_lines.append(line)
-        with open(trace_log_path := os.path.join(self.build_dir, 'trace_log'), 'w') as f:
+        with open(trace_log_path := os.path.join(self.build_dir, 'trace.log'), 'w') as f:
             f.writelines(expected_lines)
         self.inf(f"Trace will be written to {trace_log_path}")
 
