@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>MCXA346VLQ</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXA346_DFP.21.0.0</PackID>
+          <PackID>NXP.MCXA346_DFP.25.06.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
           <Cpu>IRAM(0x20000000,0x03c000) IRAM2(0x04000000,0x2000) IROM(0x03000000,0x2000) IROM2(0x00000000,0x0fe000) XRAM(0x04002000,0x2000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -389,16 +389,16 @@
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>MCXA166VLQ</Device>
+          <Device>MCXA346VLQ</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXA166_DFP.19.0.0</PackID>
+          <PackID>NXP.MCXA346_DFP.25.06.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
-          <Cpu>IRAM(0x20000000,0x03c000) IRAM2(0x04000000,0x2000) IROM(0x03000000,0x2000) IROM2(0x00000000,0x100000) XRAM(0x04002000,0x2000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>IRAM(0x20000000,0x03c000) IRAM2(0x04000000,0x2000) IROM(0x03000000,0x2000) IROM2(0x00000000,0x0fe000) XRAM(0x04002000,0x2000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0MCXA16X_1024 -FS00 -FL0100000 -FP0($$Device:MCXA166VLQ$devices/MCXA166/arm/MCXA16X_1024.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0MCXA_1024 -FS00 -FL0FE000 -FP0($$Device:MCXA346VLQ$devices\MCXA346\arm\MCXA_1024.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:MCXA166VLQ$devices/MCXA166/fsl_device_registers.h</RegisterFile>
+          <RegisterFile>$$Device:MCXA346VLQ$devices\MCXA346\fsl_device_registers.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -408,7 +408,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:MCXA166VLQ$devices/MCXA166/MCXA166.xml</SFDFile>
+          <SFDFile>$$Device:MCXA346VLQ$devices\MCXA346\MCXA346.xml</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -657,7 +657,7 @@
               <OCR_RVCT5>
                 <Type>1</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0x100000</Size>
+                <Size>0xfe000</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
                 <Type>0</Type>

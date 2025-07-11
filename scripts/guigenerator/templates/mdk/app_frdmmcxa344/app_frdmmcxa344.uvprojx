@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>MCXA344VLL</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXA344_DFP.21.0.0</PackID>
+          <PackID>NXP.MCXA344_DFP.25.06.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
           <Cpu>IRAM(0x20000000,0xc000) IRAM2(0x04000000,0x2000) IROM(0x03000000,0x6000) IROM2(0x00000000,0x040000) XRAM(0x04002000,0x2000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -391,7 +391,7 @@
         <TargetCommonOption>
           <Device>MCXA344VLL</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXA344_DFP.21.0.0</PackID>
+          <PackID>NXP.MCXA344_DFP.25.06.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
           <Cpu>IRAM(0x20000000,0xc000) IRAM2(0x04000000,0x2000) IROM(0x03000000,0x6000) IROM2(0x00000000,0x040000) XRAM(0x04002000,0x2000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -660,7 +660,7 @@
                 <Size>0x40000</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x4002000</StartAddress>
                 <Size>0x2000</Size>
               </OCR_RVCT6>
