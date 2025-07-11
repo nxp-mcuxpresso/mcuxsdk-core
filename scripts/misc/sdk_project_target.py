@@ -121,29 +121,9 @@ class MCUXProjectData(object):
 
     @project_file.setter
     def project_file(self, value):
-        # Convert to absolute path
-        abs_path = os.path.abspath(value)
-
-        # Ensure the path exists
-        if not os.path.exists(abs_path):
-            raise ValueError(f"Project path {abs_path} does not exist")
-
-        try:
-            # Try to make the path relative to the SDK root
-            rel_path = os.path.relpath(abs_path, sdk_root_dir)
-            # If the path is inside the SDK, store it as relative
-            if not rel_path.startswith('..') and not os.path.isabs(rel_path):
-                path_to_store = rel_path
-            else:
-                # Otherwise, store the absolute path
-                path_to_store = abs_path
-        except Exception:
-            # Fallback to absolute path if relative conversion fails
-            path_to_store = abs_path
-
-        # Normalize and store the path
-        self.raw['project_file'] = path_to_store.replace('\\', '/')
-
+        if not os.path.exists(os.path.join(sdk_root_dir, value)):
+            raise ValueError(f"Project file {value} does not exist in repository")
+        self.raw['project_file'] = value.replace('\\', '/')
 
     @property
     def category(self):
@@ -390,16 +370,7 @@ class MCUXAppTargets(object):
 
     def get_app_targets(self, app_example_file: str, is_pick_one_target_for_app=False, validate=False) -> list:
         apps = []
-        
-        # Determine the directory of the example file
-        app_dir_path = Path(app_example_file).resolve().parent
-        try:
-            # Try to make the path relative to the SDK root
-            app_dir = str(app_dir_path.relative_to(Path(sdk_root_dir)))
-        except ValueError:
-            # If the example is outside the SDK, use the absolute path
-            app_dir = str(app_dir_path)
-
+        app_dir = os.path.relpath(os.path.dirname(app_example_file), sdk_root_dir)
         example_data = mcux_read_yaml(app_example_file)
         if validate:
             self._validate_example_data(app_example_file, example_data)
@@ -524,15 +495,9 @@ class MCUXRepoProjects(object):
         expanded_example_files = list(set(expanded_example_files))
         expanded_example_files_filtered = []
         for example_file in expanded_example_files:
-            example_path = Path(example_file)
-            if sdk_root_dir in str(example_path):
-                try:
-                    example_category = example_path.relative_to(Path(sdk_root_dir)).parts[1]
-                    if example_category in ["_boards", "_devices"]:
-                        continue  # Skip these
-                except ValueError:
-                    pass  # Shouldn't happen, but safe fallback
-            expanded_example_files_filtered.append(example_file)
+            example_category = Path(example_file).relative_to(Path(sdk_root_dir)).parts[1]
+            if example_category not in ["_boards", "_devices"]:
+                expanded_example_files_filtered.append(example_file)
 
         # mcux_debug(f"Searching app targets in {example_file_pattern}")
         for example_file in expanded_example_files_filtered:
