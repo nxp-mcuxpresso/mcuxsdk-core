@@ -1,5 +1,10 @@
 # TSTMR
 
+## [2.0.3]
+
+- Bugfix
+  - Fix CERT INT30-C that Unsigned integer operation TSTMR_ReadTimeStamp(base) - startTime may wrap.
+
 ## [2.0.2]
 
 - Improvements
