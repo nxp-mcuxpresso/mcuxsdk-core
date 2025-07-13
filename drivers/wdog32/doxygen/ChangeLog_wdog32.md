@@ -1,5 +1,10 @@
 # WDOG32
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fix CERT INT31-C that the bool value shall be converted to unsigned int 0 or 1 then passed to registers.
+
 ## [2.2.0]
 
 - Improvements

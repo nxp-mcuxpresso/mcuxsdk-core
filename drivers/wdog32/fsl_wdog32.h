@@ -32,7 +32,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief WDOG32 driver version. */
-#define FSL_WDOG32_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+#define FSL_WDOG32_DRIVER_VERSION (MAKE_VERSION(2, 2, 1))
 /*! @} */
 
 /*!
