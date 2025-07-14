@@ -1,10 +1,14 @@
 # MAU
 
+## [2.2.1]
+
+- Improvements
+  - Fixed CERT-C issues.
 
 ## [2.2.0]
 
 - New Features
-  - Add some CMSIS DSP functions.
+  - Support indirect operation in low address.
 
 ## [2.1.0]
 
