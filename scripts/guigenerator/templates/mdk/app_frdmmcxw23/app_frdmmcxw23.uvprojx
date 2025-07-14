@@ -338,7 +338,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>-Wunused-variable  -fno-common  -fdata-sections  -ffreestanding  -fno-builtin  -mthumb</MiscControls>
-              <Define>CPU_LPC55S69JBD100_cm33_core0, DEBUG,__CC_ARM,KEIL</Define>
+              <Define>CPU_MCXW236BIHNAR, DEBUG,__CC_ARM,KEIL</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -356,7 +356,7 @@
             <ClangAsOpt>2</ClangAsOpt>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>CPU_LPC55S69JBD100_cm33_core0, DEBUG,__CC_ARM,KEIL</Define>
+              <Define>CPU_MCXW236BIHNAR, DEBUG,__CC_ARM,KEIL</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -713,7 +713,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>CPU_LPC55S69JBD100_cm33_core0, NDEBUG,__CC_ARM,KEIL</Define>
+              <Define>CPU_MCXW236BIHNAR, NDEBUG,__CC_ARM,KEIL</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -731,7 +731,7 @@
             <ClangAsOpt>2</ClangAsOpt>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>CPU_LPC55S69JBD100_cm33_core0, NDEBUG,__CC_ARM,KEIL</Define>
+              <Define>CPU_MCXW236BIHNAR, NDEBUG,__CC_ARM,KEIL</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
