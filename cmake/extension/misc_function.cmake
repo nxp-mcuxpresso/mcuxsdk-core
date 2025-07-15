@@ -4,7 +4,7 @@
 
 function(_read_tool_versions read_tool_version_py)
     set(TOOL_YML ${SdkRootDirPath}/tool.yml)
-    set(TOOL_YML_SCHEMA ${SdkRootDirPath}/mcusdk/script/data_schema/tool.json)
+    set(TOOL_YML_SCHEMA ${SdkRootDirPath}/scripts/data_schema/tool.json)
     set(DEFAULT_TOOL_VERSION_CMAKE ${SdkRootDirPath}/cmake/extension/default_tool_version.cmake)
     # Execute the Python script and capture the output
     execute_process(
