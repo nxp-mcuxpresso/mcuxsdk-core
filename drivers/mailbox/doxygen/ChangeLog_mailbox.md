@@ -1,5 +1,10 @@
 # MAILBOX
 
+## [2.3.3]
+
+- Improvements
+  - Added support for the MCXN556S, MCXN537, MCXN536, MCXN527 and MCXN526 series
+
 ## [2.3.2]
 
 - Improvements
