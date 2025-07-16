@@ -1,0 +1,6 @@
+source "https://rubygems.org"
+# mirrors for china users
+# source 'https://mirrors.tuna.tsinghua.edu.cn/rubygems/'
+
+gem 'deep_merge'
+gem 'nokogiri'
