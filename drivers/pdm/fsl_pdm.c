@@ -247,9 +247,10 @@ static status_t PDM_ValidateSrcClockRate(uint32_t channelMask,
         return kStatus_Fail;
     }
 
-    if (rightSide < (UINT32_MAX / 100U) / (8U * osr))
+    if (rightSide < (UINT32_MAX / 100U))
     {
-        rightSide *= 100U / (8U * osr);
+        rightSide *= 100U;
+        rightSide /= (8U * osr);
     }
     else
     {
