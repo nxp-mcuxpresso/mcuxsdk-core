@@ -873,7 +873,8 @@ module Mdk
             def set_cpu_fpu(target, cpu, fpu, dsp, *args, used: true, **kargs)
               convert_cpu = {'cortex-m0' => 'Cortex-M0', 'cortex-m0plus' => 'Cortex-M0+',
                          'cortex-m4' => 'Cortex-M4', 'cortex-m7' => 'Cortex-M7',
-                         'cortex-m23' => 'Cortex-M23', 'cortex-m33' => 'Cortex-M33'}
+                         'cortex-m23' => 'Cortex-M23', 'cortex-m33' => 'Cortex-M33', 
+                         'cortex-m55' => 'Cortex-M55', 'cortex-m85' => 'Cortex-M85'}
               convert_fpu = {'fpv4-sp-d16' => 'FPU2', 'fpv5-d16' => 'FPU3(DFPU)', 'fpv5-sp-d16' => 'FPU3(SFPU)', 'none' => ''}
               cpu_value = convert_cpu[cpu]
               Core.assert(cpu_value.is_a?(String), "unsupported cpu core!")

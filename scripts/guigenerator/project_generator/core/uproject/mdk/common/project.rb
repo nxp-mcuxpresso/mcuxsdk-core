@@ -169,7 +169,9 @@ module Mdk
 
     def set_device_vendor(target, value, *_args, **_kwargs)
       if value
-        cpu_convert = { 'cortex-m0plus' => 'ARMCM0P', 'cortex-m4' => 'ARMCM4', 'cortex-m7' => 'ARMCM7', 'cortex-m33' => 'ARMCM33' }
+        cpu_convert = { 'cortex-m0plus' => 'ARMCM0P', 'cortex-m4' => 'ARMCM4', 'cortex-m7' => 'ARMCM7', 
+                          'cortex-m33' => 'ARMCM33', 'cortex-m23' => 'ARMCM23', 'cortex-m55' => 'ARMCM55',
+                          'cortex-m85' => 'ARMCM85'}
         device = []
         compiler_flags = value.join(' ').to_s
         pattern_cpu = /(?i)\s-mcpu=(\S+?)\+?(nodsp)?\s/

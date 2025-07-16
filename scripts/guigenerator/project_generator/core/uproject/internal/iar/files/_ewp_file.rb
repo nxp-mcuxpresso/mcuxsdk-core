@@ -963,7 +963,7 @@ module Internal
           # target    - name of target
           # value     - 'cortex-m4', 'cortex-m0', 'cortex-m0+', 'cortex-a5'
           def core(target, value, *args, used: true, **kargs)
-            convert = {'cortex-m4' => 39, 'cortex-m4f' => 40, 'cortex-m7' => 41,'cortex-m0' => 34, 'cortex-m0+' => 35, 'cortex-a5' => 47, 'cortex-a5.neon' => 47, 'cortex-a7' => 50, 'cortex-m33' => 58}
+            convert = {'cortex-m4' => 39, 'cortex-m4f' => 40, 'cortex-m7' => 41,'cortex-m0' => 34, 'cortex-m0+' => 35, 'cortex-a5' => 47, 'cortex-a5.neon' => 47, 'cortex-a7' => 50, 'cortex-m33' => 58, 'cortex-m23' => 61, 'cortex-m55' => 64, 'cortex-m85' => 65}
             @operations.set_state_node_nocheck(
               target, "./settings[name=\"General\"]/data/option[name=\"Variant\"]/state", @operations.convert_enum(value, convert), used: used
             )
