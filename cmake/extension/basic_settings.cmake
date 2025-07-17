@@ -40,6 +40,9 @@ include(${SdkRootDirPath}/cmake/extension/sysbuild/cmake/extensions.cmake)
 include(${SdkRootDirPath}/cmake/toolchain/toolchain.cmake)
 include(${SdkRootDirPath}/cmake/extension/function.cmake)
 
+# generate compile_commands.json for tool usage
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # clean cached variable at the very beginning
 set(CMAKE_ASM_FLAGS
     ""
