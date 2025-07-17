@@ -300,12 +300,11 @@ static inline void LPTMR_ClearStatusFlags(LPTMR_Type *base, uint32_t mask)
  * 2. Call the utility macros provided in the fsl_common.h to convert to ticks.
  *
  * @param base  LPTMR peripheral base address
- * @param ticks A timer period in units of ticks, which should be equal or greater than 1.
+ * @param ticks A timer period in units of ticks
  */
 static inline void LPTMR_SetTimerPeriod(LPTMR_Type *base, uint32_t ticks)
 {
-    assert(ticks > 0U);
-    base->CMR = LPTMR_CMR_COMPARE(ticks - 1U);
+    base->CMR = LPTMR_CMR_COMPARE((ticks - 1U) & LPTMR_CMR_COMPARE_MASK);
 }
 
 /*!
