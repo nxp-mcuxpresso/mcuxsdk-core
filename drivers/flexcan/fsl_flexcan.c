@@ -5197,15 +5197,54 @@ void FLEXCAN_MbHandleIRQ(CAN_Type *base, flexcan_handle_t *handle, uint32_t star
 {
     status_t status;
     uint32_t mbNum;
+    uint32_t tempmask;
+    uint32_t tempflag;
+    bool fgRet = false;
+#if defined(CAN_IMASK2_BUF63TO32M_MASK)
+    uint32_t maxMB;
+    maxMB = FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base);
+#endif
     mbNum = 0xFFU;
 
-    /* Handle Message Buffer or Legacy Rx FIFO transfer. */
-    status = FLEXCAN_SubHandlerForDataTransfered(base, handle, startMbIdx, endMbIdx, &mbNum);
-
-    if (handle->callback != NULL)
+    do
     {
-        handle->callback(base, handle, status, mbNum, handle->userData);
-    }
+        /* Handle Message Buffer or Legacy Rx FIFO transfer. */
+        status = FLEXCAN_SubHandlerForDataTransfered(base, handle, startMbIdx, endMbIdx, &mbNum);
+
+        if (handle->callback != NULL)
+        {
+            handle->callback(base, handle, status, mbNum, handle->userData);
+        }
+
+        /* Check whether exist MB and Legacy RX FIFO interrupt flags */
+        tempmask = base->IMASK1;
+        tempflag = base->IFLAG1;
+        fgRet = (0U != (tempmask & tempflag));
+#if defined(CAN_IMASK2_BUF63TO32M_MASK)
+        if (maxMB > 32U && fgRet == false)
+        {
+            tempmask = base->IMASK2;
+            tempflag = base->IFLAG2;
+            fgRet = (0U != (tempmask & tempflag));
+        }
+#endif
+#if defined(CAN_IMASK3_BUF95TO64M_MASK)
+        if (maxMB > 64U && fgRet == false)
+        {
+            tempmask = base->IMASK3;
+            tempflag = base->IFLAG3;
+            fgRet = (0U != (tempmask & tempflag));
+        }
+#endif
+#if defined(CAN_IMASK4_BUF127TO96M_MASK)
+        if (maxMB > 96U && fgRet == false)
+        {
+            tempmask = base->IMASK4;
+            tempflag = base->IFLAG4;
+            fgRet = (0U != (tempmask & tempflag));
+        }
+#endif
+    } while (fgRet);
 }
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
@@ -5220,20 +5259,31 @@ void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
     status_t status;
     uint64_t result;
     uint32_t enableInt;
-    result = FLEXCAN_GetStatusFlags(base);
+    uint32_t tempmask;
+    uint32_t tempflag;
+    bool fgRet = false;
     enableInt = base->ERFIER;
     enableInt &= (CAN_ERFIER_ERFUFWIE_MASK | CAN_ERFIER_ERFOVFIE_MASK | CAN_ERFIER_ERFWMIIE_MASK |
                   CAN_ERFIER_ERFDAIE_MASK);
 
-    if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG) & enableInt))
+    do
     {
-        status = FLEXCAN_SubHandlerForEhancedRxFifo(base, handle, result);
-
-        if (handle->callback != NULL)
+        result = FLEXCAN_GetStatusFlags(base);
+        if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG) & enableInt))
         {
-            handle->callback(base, handle, status, result, handle->userData);
+            status = FLEXCAN_SubHandlerForEhancedRxFifo(base, handle, result);
+
+            if (handle->callback != NULL)
+            {
+                handle->callback(base, handle, status, result, handle->userData);
+            }
         }
-    }
+
+        /* Checking whether exist enhanced RX FIFO interrupt status. */
+        tempmask = base->ERFIER;
+        tempflag = base->ERFSR;
+        fgRet    = (0U != (tempmask & tempflag));
+    } while (fgRet);
 }
 #endif
 

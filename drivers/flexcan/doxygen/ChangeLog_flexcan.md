@@ -1,5 +1,12 @@
 # FLEXCAN
 
+## [2.14.3]
+
+- Improvements
+  - Add unhandled interrupt events check for following API:
+    - `FLEXCAN_MbHandleIRQ`
+    - `FLEXCAN_EhancedRxFifoHandleIRQ`
+
 ## [2.14.2]
 
 - Improvements
