@@ -1627,12 +1627,40 @@ endfunction()
 
 function(mcux_project_remove_source)
   set(single_value BASE_PATH)
-  set(multi_value SOURCES)
+  set(multi_value SOURCES ${MCUX_SOURCE_CONDITION})
   cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}"
                         ${ARGN})
 
   # remove sources
   foreach(item ${__SOURCES})
+    foreach(cond ${MCUX_SOURCE_CONDITION})
+      if(__${cond})
+
+        list(FIND MCUX_SOURCE_CONDITION ${cond} INDEX)
+
+        if(${INDEX} GREATER -1)
+
+          list(GET CMAKE_CONDITION ${INDEX} _cmake_cond)
+
+          if(_cmake_cond IN_LIST LIST_CMAKE_CONDITION)
+            set(condition_meet 0)
+            foreach(cmake_condition_item ${${_cmake_cond}})
+              if(cmake_condition_item IN_LIST __${cond})
+                set(condition_meet 1)
+              endif()
+            endforeach()
+            if(NOT condition_meet)
+              return()
+            endif()
+          elseif(NOT ${${_cmake_cond}} IN_LIST __${cond})
+            return()
+          endif()
+        endif()
+
+      endif()
+
+    endforeach()
+
     if(__BASE_PATH)
       set(source_abs_path ${__BASE_PATH}/${item})
     else()
@@ -1668,12 +1696,39 @@ endfunction()
 
 function(mcux_project_remove_include)
   set(single_value BASE_PATH)
-  set(multi_value INCLUDES)
+  set(multi_value INCLUDES ${MCUX_SOURCE_CONDITION})
   cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}"
                         ${ARGN})
 
   # remove includes
   foreach(item ${__INCLUDES})
+    foreach(cond ${MCUX_SOURCE_CONDITION})
+      if(__${cond})
+
+        list(FIND MCUX_SOURCE_CONDITION ${cond} INDEX)
+
+        if(${INDEX} GREATER -1)
+
+          list(GET CMAKE_CONDITION ${INDEX} _cmake_cond)
+
+          if(_cmake_cond IN_LIST LIST_CMAKE_CONDITION)
+            set(condition_meet 0)
+            foreach(cmake_condition_item ${${_cmake_cond}})
+              if(cmake_condition_item IN_LIST __${cond})
+                set(condition_meet 1)
+              endif()
+            endforeach()
+            if(NOT condition_meet)
+              return()
+            endif()
+          elseif(NOT ${${_cmake_cond}} IN_LIST __${cond})
+            return()
+          endif()
+        endif()
+
+      endif()
+    endforeach()
+
     set(include_abs_path "")
 
     if(__BASE_PATH)
