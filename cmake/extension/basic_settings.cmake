@@ -25,6 +25,15 @@ include_guard(GLOBAL)
 set(INTERNAL_EXAMPLE_FOLDER "examples_int")
 
 include(${SdkRootDirPath}/cmake/extension/basic_settings_lite.cmake)
+include(${SdkRootDirPath}/cmake/extension/misc_function.cmake)
+
+set(READ_TOOL_VERSION_PY "${SdkRootDirPath}/scripts/misc/read_tool_versions.py")
+_read_tool_versions(${READ_TOOL_VERSION_PY})
+log_status("CMake version: ${CMAKE_VERSION}")
+if (CMAKE_VERSION VERSION_LESS ${CMAKE_MINIMUM_VERSION})
+  message("warning: The system CMake version ${CMAKE_VERSION} is lower than the recommended version ${CMAKE_MINIMUM_VERSION} which may cause unexpected build failure especially for complicated project. Please upgrade CMake to version ${CMAKE_MINIMUM_VERSION} or above.")
+endif()
+
 include(${SdkRootDirPath}/cmake/extension/python.cmake)
 include(${SdkRootDirPath}/cmake/extension/ruby.cmake)
 include(${SdkRootDirPath}/cmake/extension/sysbuild/cmake/extensions.cmake)
