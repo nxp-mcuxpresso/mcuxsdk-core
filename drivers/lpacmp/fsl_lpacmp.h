@@ -20,7 +20,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPACMP driver version */
-#define FSL_LPACMP_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+#define FSL_LPACMP_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*! @} */
 
 /*! @brief Comparator negative input source */
@@ -196,7 +196,8 @@ static inline void LPACMP_SetComparePolarity(LPACMP_Type *base,
 {
     assert(channel < LPACMP_EXT_TRIG_COUNT);
 
-    base->EXT_TRIG[channel].SEL = ((base->EXT_TRIG[channel].SEL & ~(LPACMP_SEL_HIGHER_MASK)) | LPACMP_SEL_HIGHER(polarity));
+    base->EXT_TRIG[channel].SEL = ((base->EXT_TRIG[channel].SEL & ~(LPACMP_SEL_HIGHER_MASK)) |
+                                    LPACMP_SEL_HIGHER(polarity ? 1U : 0U));
 }
 
 /*!
