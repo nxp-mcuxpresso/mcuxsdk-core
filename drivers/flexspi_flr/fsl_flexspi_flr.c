@@ -219,7 +219,7 @@ void FLEXSPI_SLV_HandleIRQ(FLEXSPI_SLV_Type *base, flexspi_slv_handle_t *handle)
     }
     else if (FLEXSPI_SLV_GetEnabledMailInterrupt(base))
     {
-        status |= kFLEXSPI_SLV_MailInterruptFlag;
+        status |= (uint32_t)kFLEXSPI_SLV_MailInterruptFlag;
         FLEXSPI_SLV_ClearMailInterruptFlag(base);
     }
     else

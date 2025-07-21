@@ -26,7 +26,7 @@
 #define FSL_FLEXSPI_SLV_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
 /*@}*/
 
-#define FLEXSPI_SLV_CMD_DDR(x) (((x) << 8U) | (x))
+#define FLEXSPI_SLV_CMD_DDR(x) (((uint16_t)(x) << 8U) | (uint16_t)(x))
 
 /*! @brief IO mode enumeration of FLEXSPI FOLLOWER.*/
 enum
@@ -240,7 +240,7 @@ static inline void FLEXSPI_SLV_SetReadWatermark(FLEXSPI_SLV_Type *base, uint32_t
     base->READ_COMMAND_CONTROL =
         (base->READ_COMMAND_CONTROL &
          ~(FLEXSPI_SLV_READ_COMMAND_CONTROL_WMEN_MASK | FLEXSPI_SLV_READ_COMMAND_CONTROL_RDWM_MASK)) |
-        FLEXSPI_SLV_READ_COMMAND_CONTROL_WMEN((uint32_t)enable) | FLEXSPI_SLV_READ_COMMAND_CONTROL_RDWM(rxWatermark);
+        (enable ? FLEXSPI_SLV_READ_COMMAND_CONTROL_WMEN_MASK : 0U) | FLEXSPI_SLV_READ_COMMAND_CONTROL_RDWM(rxWatermark);
 }
 
 /*!
