@@ -444,7 +444,16 @@ static inline void SMM_DisableMainCpuIso(SMM_Type *base)
     {
         i++;
     }
-   base->CNFG |= (SMM_CNFG_MAIN_ISO_DSBL_MASK);
+    base->CNFG |= (SMM_CNFG_MAIN_ISO_DSBL_MASK);
+    for (uint32_t i = 0UL; i < 1000UL; i++)
+    {
+        i++;
+    }
+    base->CNFG &= ~(SMM_CNFG_MAIN_ISO_DSBL_MASK);
+    for (uint32_t i = 0UL; i < 1000UL; i++)
+    {
+        i++;
+    }
 }
 
 /*!
@@ -465,6 +474,15 @@ static inline void SMM_DisableAonCpuIso(SMM_Type *base)
         i++;
     }
     base->CNFG |= (SMM_CNFG_AON_ISO_DSBL_MASK);
+    for (uint32_t i = 0UL; i < 1000UL; i++)
+    {
+        i++;
+    }
+    base->CNFG &= ~(SMM_CNFG_AON_ISO_DSBL_MASK);
+    for (uint32_t i = 0UL; i < 1000UL; i++)
+    {
+        i++;
+    }
 }
 
 /*!
