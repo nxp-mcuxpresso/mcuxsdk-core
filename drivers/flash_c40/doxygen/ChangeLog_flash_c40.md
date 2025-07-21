@@ -1,5 +1,9 @@
 # FLASH-C40
 
+## [1.2.0]
+
+- UTEST write support
+
 ## [1.1.0]
 
 - Generic device setup for entire MCX E31 family
