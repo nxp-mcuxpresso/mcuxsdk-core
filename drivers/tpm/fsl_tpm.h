@@ -31,7 +31,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief TPM driver version 2.4.0. */
-#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 0))
+#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 1))
 /*! @} */
 
 /*!

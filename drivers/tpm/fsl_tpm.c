@@ -27,6 +27,10 @@
  *
  * $Justification tpm_c_ref_5$
  * Hardware limitations make this code impossible to implement.
+ * 
+ * $Justification tpm_c_ref_6$
+ * Following TPM IRQ handle functions are invoked in specific platform startup file or specific core.
+ * It is hard to update startup file for unit test, so add Justification.
  */
 
 /*******************************************************************************
@@ -1219,6 +1223,13 @@ void TPM_RegisterCallBack(TPM_Type *base, tpm_callback_t callback)
 #endif
 }
 
+/*
+ * $Function Coverage Justification$
+ * Following functions are not covered. $ref tpm_c_ref_6$.
+ *  - TPM_DriverIRQHandler()
+ *  - TPM2_DriverIRQHandler()
+ */
+
 /*!
  * @brief TPM driver IRQ handler common entry.
  *
@@ -1230,10 +1241,8 @@ void TPM_DriverIRQHandler(uint32_t instance)
 {
     if (instance < ARRAY_SIZE(s_tpmBases))
     {
-        if (NULL != s_tpmCallback[instance])
-        {
-            s_tpmCallback[instance](s_tpmBases[instance]);
-        }
+        assert(NULL != s_tpmCallback[instance]);
+        s_tpmCallback[instance](s_tpmBases[instance]);
     }
     SDK_ISR_EXIT_BARRIER;
 }
@@ -1242,10 +1251,8 @@ void TPM_DriverIRQHandler(uint32_t instance)
 void TPM0_DriverIRQHandler(void);
 void TPM0_DriverIRQHandler(void)
 {
-    if (NULL != s_tpmCallback[0])
-    {
-        s_tpmCallback[0](TPM0);
-    }
+    assert(NULL != s_tpmCallback[0]);
+    s_tpmCallback[0](TPM0);
     SDK_ISR_EXIT_BARRIER;
 }
 #endif
@@ -1254,10 +1261,8 @@ void TPM0_DriverIRQHandler(void)
 void TPM1_DriverIRQHandler(void);
 void TPM1_DriverIRQHandler(void)
 {
-    if (NULL != s_tpmCallback[1])
-    {
-        s_tpmCallback[1](TPM1);
-    }
+    assert(NULL != s_tpmCallback[1]);
+    s_tpmCallback[1](TPM1);
     SDK_ISR_EXIT_BARRIER;
 }
 #endif
@@ -1266,10 +1271,8 @@ void TPM1_DriverIRQHandler(void)
 void TPM2_DriverIRQHandler(void);
 void TPM2_DriverIRQHandler(void)
 {
-    if (NULL != s_tpmCallback[2])
-    {
-        s_tpmCallback[2](TPM2);
-    }
+    assert(NULL != s_tpmCallback[2]);
+    s_tpmCallback[2](TPM2);
     SDK_ISR_EXIT_BARRIER;
 }
 #endif

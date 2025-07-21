@@ -1,5 +1,10 @@
 # TPM
 
+## [2.4.1]
+
+- Improvements
+  - Add Coverage Justification for uncovered code.
+
 ## [2.4.0]
 
 - New Feature
