@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief QSPI driver version. */
-#define FSL_QSPI_DRIVER_VERSION (MAKE_VERSION(2, 3, 0))
+#define FSL_QSPI_DRIVER_VERSION (MAKE_VERSION(2, 3, 1))
 /*! @} */
 
 /*! @brief Macro functions for LUT table */

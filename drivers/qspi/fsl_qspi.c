@@ -226,6 +226,8 @@ void QSPI_Deinit(QuadSPI_Type *base)
  */
 void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config)
 {
+    assert(FSL_FEATURE_QSPI_AMBA_BASE + config->flashA1Size > FSL_FEATURE_QSPI_AMBA_BASE);
+
     uint32_t address = FSL_FEATURE_QSPI_AMBA_BASE + config->flashA1Size;
     uint32_t val     = 0;
     uint32_t i       = 0;
@@ -365,12 +367,15 @@ void QSPI_SetDqsConfig(QuadSPI_Type *base, qspi_dqs_config_t *config)
 void QSPI_SetDelayChainConfig(QuadSPI_Type *base, qspi_delay_chain_config_t *config)
 {
     QUADSPI->DLLCRA &= ~(QuadSPI_DLLCRA_SLV_UPD_MASK | QuadSPI_DLLCRA_SLV_DLL_BYPASS_MASK | QuadSPI_DLLCRA_SLV_EN_MASK |
-                         QuadSPI_DLLCRA_SLV_DLY_COARSE_MASK | QuadSPI_DLLCRA_SLV_DLY_OFFSET_MASK | QuadSPI_DLLCRA_SLV_FINE_OFFSET_MASK |
-                         QuadSPI_DLLCRA_FREQEN_MASK);
+                         QuadSPI_DLLCRA_SLV_DLY_COARSE_MASK | QuadSPI_DLLCRA_SLV_DLY_OFFSET_MASK |
+                         QuadSPI_DLLCRA_SLV_FINE_OFFSET_MASK | QuadSPI_DLLCRA_FREQEN_MASK);
 
-    QUADSPI->DLLCRA |= QuadSPI_DLLCRA_FREQEN(config->highFreqDelay) | QuadSPI_DLLCRA_SLV_FINE_OFFSET(config->fineDelay) | QuadSPI_DLLCRA_SLV_DLY_OFFSET(config->div16Delay) |
-                       QuadSPI_DLLCRA_SLV_DLY_COARSE(config->coarseDelay) | QuadSPI_DLLCRA_SLV_EN(config->dqsDelayEnable) | QuadSPI_DLLCRA_SLV_DLL_BYPASS(config->coarseDelayEnable) |
-                       QuadSPI_DLLCRA_SLV_UPD_MASK;
+    QUADSPI->DLLCRA |= (config->highFreqDelay ? QuadSPI_DLLCRA_FREQEN_MASK : 0U) |
+                       (config->dqsDelayEnable ? QuadSPI_DLLCRA_SLV_EN_MASK : 0U) |
+                       (config->coarseDelayEnable ? QuadSPI_DLLCRA_SLV_DLL_BYPASS_MASK : 0U) |
+                       QuadSPI_DLLCRA_SLV_FINE_OFFSET(config->fineDelay) |
+                       QuadSPI_DLLCRA_SLV_DLY_OFFSET(config->div16Delay) |
+                       QuadSPI_DLLCRA_SLV_DLY_COARSE(config->coarseDelay) | QuadSPI_DLLCRA_SLV_UPD_MASK;
 }
 #endif
 
@@ -468,7 +473,7 @@ void QSPI_ExecuteAHBCommand(QuadSPI_Type *base, uint32_t index)
  */
 void QSPI_UpdateLUT(QuadSPI_Type *base, uint32_t index, uint32_t *cmd)
 {
-    assert(index <= (FSL_FEATURE_QSPI_LUT_DEPTH - FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
+    assert(index <= ((uint32_t)FSL_FEATURE_QSPI_LUT_DEPTH - FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
     assert((index % FSL_FEATURE_QSPI_LUT_SEQ_UNIT) == 0U);
 
     uint8_t i = 0;
