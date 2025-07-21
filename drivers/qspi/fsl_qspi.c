@@ -187,8 +187,8 @@ void QSPI_GetDefaultQspiConfig(qspi_config_t *config)
 
 #if (!defined(FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)) || (!FSL_FEATURE_QSPI_HAS_SOC_SPECIFIC_CONFIG)
 #if !defined(FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL) || (!FSL_FEATURE_QSPI_CLOCK_CONTROL_EXTERNAL)
-    config->clockSource               = 2U;
-    config->baudRate                  = 24000000U;
+    config->clockSource = 2U;
+    config->baudRate    = 24000000U;
 #endif
 #endif
     config->AHBbufferMaster[0]        = 0xE;
@@ -240,7 +240,8 @@ void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config)
     address += config->flashA2Size;
     base->SFA2AD = address;
 #if defined(FSL_FEATURE_QSPI_SUPPORT_SINGLE_MODE) && (FSL_FEATURE_QSPI_SUPPORT_SINGLE_MODE)
-    /* For single mode configuration, you must write the same value to SFB1AD and SFB2AD registers that you write to the SFA2AD register. */
+    /* For single mode configuration, you must write the same value to SFB1AD and SFB2AD registers that you write to the
+     * SFA2AD register. */
     base->SFB1AD = address;
     base->SFB2AD = address;
 #endif /* FSL_FEATURE_QSPI_SUPPORT_SINGLE_MODE */
@@ -448,7 +449,8 @@ void QSPI_ExecuteIPCommand(QuadSPI_Type *base, uint32_t index)
     QSPI_ClearCommandSequence(base, kQSPI_IPSeq);
 
     /* Write the seqid bit */
-    base->IPCR = ((base->IPCR & (~QuadSPI_IPCR_SEQID_MASK)) | QuadSPI_IPCR_SEQID(index / FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
+    base->IPCR =
+        ((base->IPCR & (~QuadSPI_IPCR_SEQID_MASK)) | QuadSPI_IPCR_SEQID(index / FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
 }
 
 /*! brief Executes AHB commands located in LUT table.
@@ -462,7 +464,8 @@ void QSPI_ExecuteAHBCommand(QuadSPI_Type *base, uint32_t index)
     {
     }
     QSPI_ClearCommandSequence(base, kQSPI_BufferSeq);
-    base->BFGENCR = ((base->BFGENCR & (~QuadSPI_BFGENCR_SEQID_MASK)) | QuadSPI_BFGENCR_SEQID(index / FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
+    base->BFGENCR = ((base->BFGENCR & (~QuadSPI_BFGENCR_SEQID_MASK)) |
+                     QuadSPI_BFGENCR_SEQID(index / FSL_FEATURE_QSPI_LUT_SEQ_UNIT));
 }
 
 /*! brief Updates the LUT table.
