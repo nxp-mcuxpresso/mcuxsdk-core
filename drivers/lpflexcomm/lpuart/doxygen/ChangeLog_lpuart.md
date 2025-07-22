@@ -1,5 +1,10 @@
 # LPUART
 
+## [2.3.5]
+
+- Improvements
+  - Merged duplicate code.
+
 ## [2.3.4]
 
 - Bug Fixes
