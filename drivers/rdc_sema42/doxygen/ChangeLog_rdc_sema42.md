@@ -1,5 +1,10 @@
 # RDC_SEMA42
 
+## [2.0.5]
+
+- Bug Fixes
+  - Fixed CERT INT30-C issues.
+
 ## [2.0.4]
 
 - Improvements
