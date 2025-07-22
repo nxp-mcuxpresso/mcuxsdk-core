@@ -729,12 +729,31 @@ static inline status_t MU_ResetBothSides(MU_Type *base)
 #endif /* MU_BUSY_POLL_COUNT */
 
     /* Wait for the other side out of reset. */
-    while (0U != (base->SR & MU_SR_RS_MASK))
+    /*
+     * $Branch Coverage Justification$
+     * The while loop condition cannot be reliably tested to be true because:
+     * 1. MU_SR_RS_MASK is cleared by hardware immediately after MU reset
+     * 2. The other side comes out of reset within microseconds in normal operation
+     * 3. Testing the true condition would require hardware fault injection
+     * 4. The loop body execution represents a hardware malfunction scenario
+     */
+    while (0U != (base->SR & MU_SR_RS_MASK)) /* GCOVR_EXCL_BR_LINE */
     {
 #if MU_BUSY_POLL_COUNT
-        if ((--poll_count) == 0u)
+        /*
+         * $Branch Coverage Justification$
+         * Timeout branch - only reachable if while condition is true,
+         * which cannot be reliably tested in normal hardware operation.
+         */
+        if ((--poll_count) == 0u) /* GCOVR_EXCL_LINE */
         {
-            return kStatus_Timeout;
+            /*
+             * $Branch Coverage Justification$
+             * MU peripheral timeout return path - only reachable during hardware malfunction
+             * or when other core's MU peripheral is unresponsive. Cannot be reliably tested
+             * without hardware fault injection capabilities.
+             */
+            return kStatus_Timeout; /* GCOVR_EXCL_LINE */
         }
 #endif /* MU_BUSY_POLL_COUNT */
     }
