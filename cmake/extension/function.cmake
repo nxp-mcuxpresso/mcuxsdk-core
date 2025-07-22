@@ -553,7 +553,7 @@ endfunction()
 
 function(mcux_convert_binary)
   set(single_value BINARY TARGET)
-  set(multi_value TOOLCHAINS EXTRA_ARGS)
+  set(multi_value TOOLCHAINS EXTRA_ARGS CONVERT_CUSTOM_COMMANDS)
   cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}"
                         ${ARGN})
 
@@ -590,6 +590,15 @@ function(mcux_convert_binary)
   file(MAKE_DIRECTORY ${FILE_PATH})
 
   log_debug("Convert to binary file ${binary_name}")
+
+  if(__CONVERT_CUSTOM_COMMANDS)
+    add_custom_command(
+      TARGET ${target_name}
+      POST_BUILD
+      ${__CONVERT_CUSTOM_COMMANDS}
+    )
+    return()
+  endif()
 
   # Get file extension name and set proper OBJDUMP_BIN_CMD
   get_filename_component(FILE_EXT ${binary_name} EXT)
