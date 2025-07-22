@@ -1,5 +1,10 @@
 # IRQSTEER
 
+## [2.1.5]
+
+- Bug Fixes
+  - Fixed the violation of MISRA C-2012 Rules and CERT-C.
+
 ## [2.1.4]
 
 - Bug Fixes
