@@ -4,6 +4,7 @@
 
 - New Features
   - Supported IP version class commands in VSI-PSI message driver.
+  - Added VSI3 definition.
 
 ## [2.10.0]
 
