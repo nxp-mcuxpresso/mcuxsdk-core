@@ -1,5 +1,10 @@
 # NETC
 
+## [2.10.1]
+
+- New Features
+  - Supported IP version class commands in VSI-PSI message driver.
+
 ## [2.10.0]
 
 - Bug Fixes
