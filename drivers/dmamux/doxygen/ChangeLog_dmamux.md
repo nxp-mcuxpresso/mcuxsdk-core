@@ -1,5 +1,10 @@
 # DMAMUX
 
+## [2.1.3]
+
+- Improvements
+  - Wrap DMAMUX_GetInstance into FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL to avoid build issues.
+
 ## [2.1.2]
 
 - Bug Fixes
