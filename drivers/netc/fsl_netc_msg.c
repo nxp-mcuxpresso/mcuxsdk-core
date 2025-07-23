@@ -238,7 +238,6 @@ static uint16_t EP_RxL2MFQueryDeleteEMTableEntry(ep_handle_t *handle, uint8_t si
                                  *(uint32_t *)(uintptr_t)&macAddr[m];
         }
 
-        cmdBd.generic.addr     = 0;
         cmdBd.generic.en       = 1;
         cmdBd.generic.siBitMap = siBitMap;
         cmdBd.generic.index    = result[i].index;
