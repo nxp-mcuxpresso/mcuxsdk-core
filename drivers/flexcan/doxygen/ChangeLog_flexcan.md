@@ -6,6 +6,8 @@
   - Add unhandled interrupt events check for following API:
     - `FLEXCAN_MbHandleIRQ`
     - `FLEXCAN_EhancedRxFifoHandleIRQ`
+- Bug Fixes
+  - Remove `FLEXCAN_MemoryErrorHandleIRQ` on some platform without memory error interrupt.
 
 ## [2.14.2]
 
