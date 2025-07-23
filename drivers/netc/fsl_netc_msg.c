@@ -1140,7 +1140,7 @@ void EP_PsiHandleRxMsg(ep_handle_t *handle, uint8_t vsi, netc_psi_rx_msg_t *msgI
     }
 
 out:
-    base->PSI_A.PSIMSGRR = ((uint32_t)vsi << 1U) | ((uint32_t)code << 16U);
+    base->PSI_A.PSIMSGRR = ((uint32_t)1U << vsi) | ((uint32_t)code << 16U);
 
     if (notify)
     {
