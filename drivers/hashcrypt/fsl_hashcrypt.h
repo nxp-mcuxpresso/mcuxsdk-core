@@ -179,7 +179,7 @@ typedef struct _hashcrypt_handle hashcrypt_handle_t;
 
 /*! @brief HASHCRYPT HASH Context size. */
 #if defined(FSL_FEATURE_HASHCRYPT_HAS_RELOAD_FEATURE) && (FSL_FEATURE_HASHCRYPT_HAS_RELOAD_FEATURE > 0)
-#define HASHCRYPT_HASH_CTX_SIZE 30
+#define HASHCRYPT_HASH_CTX_SIZE 31
 #else
 #define HASHCRYPT_HASH_CTX_SIZE 22
 #endif
