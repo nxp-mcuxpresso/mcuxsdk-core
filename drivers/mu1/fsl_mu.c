@@ -158,7 +158,7 @@ status_t MU_SendMsg(MU_Type *base, uint32_t regIndex, uint32_t msg)
  */
 status_t MU_ReceiveMsgTimeout(MU_Type *base, uint32_t regIndex, uint32_t *readValue)
 {
-    assert(regIndex < MU_TR_COUNT);
+    assert(regIndex < MU_RR_COUNT);
 
     if (NULL == readValue)
     {
@@ -170,7 +170,7 @@ status_t MU_ReceiveMsgTimeout(MU_Type *base, uint32_t regIndex, uint32_t *readVa
 #endif /* MU_BUSY_POLL_COUNT */
 
     /* Wait RX register to be full. */
-    while (0U == (base->SR & (((uint32_t)kMU_Rx0FullFlag) >> regIndex)))
+    while (0U == (base->RSR & (1UL << regIndex)))
     {
 #if MU_BUSY_POLL_COUNT
         if ((--poll_count) == 0u)
@@ -205,10 +205,10 @@ status_t MU_ReceiveMsgTimeout(MU_Type *base, uint32_t regIndex, uint32_t *readVa
  */
 uint32_t MU_ReceiveMsg(MU_Type *base, uint32_t regIndex)
 {
-    assert(regIndex < MU_TR_COUNT);
+    assert(regIndex < MU_RR_COUNT);
 
     /* Wait RX register to be full. */
-    while (0U == (base->SR & (((uint32_t)kMU_Rx0FullFlag) >> regIndex)))
+    while (0U == (base->RSR & (1UL << regIndex)))
     {
         ; /* Intentional empty while*/
     }
