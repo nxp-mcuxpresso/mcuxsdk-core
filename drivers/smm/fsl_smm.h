@@ -315,7 +315,7 @@ static inline void SMM_PowerOnAonSramManually(SMM_Type *base, uint8_t sramCuts)
 static inline void SMM_PowerOffAonSramAutomatically(SMM_Type *base, uint8_t sramCuts)
 {
     base->PWDN_CONFIG |=  SMM_PWDN_CONFIG_CTRL_SRAM_DPD2_MASK;
-    base->MEMORY_RTN  = ((base->MEMORY_RTN & ~SMM_MEMORY_RTN_CPU_RAM_PWD_MASK) | SMM_MEMORY_RTN_CPU_RAM_PWD(sramCuts));
+    base->MEMORY_RTN  = ((base->MEMORY_RTN & ~SMM_MEMORY_RTN_CPU_SRAMBn_PWD_MASK) | SMM_MEMORY_RTN_CPU_SRAMBn_PWD(sramCuts));
 }
 
 /*!
