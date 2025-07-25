@@ -197,16 +197,11 @@ uint32_t LPUART_GetInstance(LPUART_Type *base)
     uint32_t instance;
 
     /* Find the instance index from base address mappings. */
-    /*
-     * $Branch Coverage Justification$
-     * (instance >= ARRAY_SIZE(s_lpuartBases)) not covered. The peripheral base
-     * address is always valid and checked by assert.
-     */
     for (instance = 0U; instance < ARRAY_SIZE(s_lpuartBases); instance++)
     {
         if (MSDK_REG_SECURE_ADDR(s_lpuartBases[instance]) == MSDK_REG_SECURE_ADDR(base))
         {
-            break;
+            return instance;
         }
     }
 
@@ -418,10 +413,6 @@ static void LPUART_ConfigureBaudRegister(LPUART_Type *base, uint8_t osr, uint16_
 
     /* Acceptable baud rate, check if OSR is between 4x and 7x oversampling.
      * If so, then "BOTHEDGE" sampling must be turned on */
-    /*
-     * $Branch Coverage Justification$
-     * $ref fsl_lpuart_c_ref_1$
-     */
     if ((osr > 3U) && (osr < 8U))
     {
         temp |= LPUART_BAUD_BOTHEDGE_MASK;
