@@ -62,6 +62,16 @@ typedef enum _mailbox_cpu_id
     kMAILBOX_CM33_Core0 = 0,
     kMAILBOX_CM33_Core1
 } mailbox_cpu_id_t;
+#elif defined(MIMXRT400_SERIES)
+typedef enum _mailbox_cpu_id
+{
+    kMAILBOX_CM55 = 0,
+    kMAILBOX_CoolFlux,
+    kMAILBOX_Ext_Irq0,
+    kMAILBOX_Ext_Irq1,
+    kMAILBOX_Ext_Irq2,
+    kMAILBOX_Ext_Irq3
+} mailbox_cpu_id_t;
 #endif
 
 /*******************************************************************************
@@ -122,7 +132,8 @@ static inline void MAILBOX_Deinit(MAILBOX_Type *base)
      defined(MCXN536_cm33_core0_SERIES) || defined(MCXN536_cm33_core1_SERIES) || \
      defined(MCXN527_cm33_core0_SERIES) || defined(MCXN527_cm33_core1_SERIES) || \
      defined(MCXN526_cm33_core0_SERIES) || defined(MCXN526_cm33_core1_SERIES) || \
-     defined(LPC54114_cm4_SERIES) || defined(LPC54114_cm0plus_SERIES))
+     defined(LPC54114_cm4_SERIES) || defined(LPC54114_cm0plus_SERIES)) || \
+     defined(MIMXRT400_SERIES)
 /*!
  * @brief Set data value in the mailbox based on the CPU ID.
  *
@@ -149,6 +160,8 @@ static inline void MAILBOX_SetValue(MAILBOX_Type *base, mailbox_cpu_id_t cpu_id,
     assert((cpu_id == kMAILBOX_CM33_Core0) || (cpu_id == kMAILBOX_CM33_Core1));
 #elif ((defined(LPC54114_cm4_SERIES) || defined(LPC54114_cm0plus_SERIES)))
     assert((cpu_id == kMAILBOX_CM0Plus) || (cpu_id == kMAILBOX_CM4));
+#elif defined(MIMXRT400_SERIES)
+    assert((cpu_id >= kMAILBOX_CM55) && (cpu_id <= kMAILBOX_Ext_Irq3));
 #endif
     base->MBOXIRQ[cpu_id].IRQ = mboxData;
 }
@@ -178,6 +191,8 @@ static inline uint32_t MAILBOX_GetValue(MAILBOX_Type *base, mailbox_cpu_id_t cpu
     assert((cpu_id == kMAILBOX_CM33_Core0) || (cpu_id == kMAILBOX_CM33_Core1));
 #elif ((defined(LPC54114_cm4_SERIES) || defined(LPC54114_cm0plus_SERIES)))
     assert((cpu_id == kMAILBOX_CM0Plus) || (cpu_id == kMAILBOX_CM4));
+#elif defined(MIMXRT400_SERIES)
+    assert((cpu_id >= kMAILBOX_CM55) && (cpu_id <= kMAILBOX_Ext_Irq3));
 #endif
     return base->MBOXIRQ[cpu_id].IRQ;
 }
@@ -209,6 +224,8 @@ static inline void MAILBOX_SetValueBits(MAILBOX_Type *base, mailbox_cpu_id_t cpu
     assert((cpu_id == kMAILBOX_CM33_Core0) || (cpu_id == kMAILBOX_CM33_Core1));
 #elif ((defined(LPC54114_cm4_SERIES) || defined(LPC54114_cm0plus_SERIES)))
     assert((cpu_id == kMAILBOX_CM0Plus) || (cpu_id == kMAILBOX_CM4));
+#elif defined(MIMXRT400_SERIES)
+    assert((cpu_id >= kMAILBOX_CM55) && (cpu_id <= kMAILBOX_Ext_Irq3));
 #endif
     base->MBOXIRQ[cpu_id].IRQSET = mboxSetBits;
 }
@@ -240,6 +257,8 @@ static inline void MAILBOX_ClearValueBits(MAILBOX_Type *base, mailbox_cpu_id_t c
     assert((cpu_id == kMAILBOX_CM33_Core0) || (cpu_id == kMAILBOX_CM33_Core1));
 #elif ((defined(LPC54114_cm4_SERIES) || defined(LPC54114_cm0plus_SERIES)))
     assert((cpu_id == kMAILBOX_CM0Plus) || (cpu_id == kMAILBOX_CM4));
+#elif defined(MIMXRT400_SERIES)
+    assert((cpu_id >= kMAILBOX_CM55) && (cpu_id <= kMAILBOX_Ext_Irq3));
 #endif
     base->MBOXIRQ[cpu_id].IRQCLR = mboxClrBits;
 }

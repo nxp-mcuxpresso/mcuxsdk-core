@@ -4,6 +4,7 @@
 
 - Improvements
   - Remove support for NXH2004 series
+  - Added support for RT400 series
 
 ## [2.3.3]
 
