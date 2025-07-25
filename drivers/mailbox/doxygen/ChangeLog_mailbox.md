@@ -1,5 +1,10 @@
 # MAILBOX
 
+## [2.3.4]
+
+- Improvements
+  - Remove support for NXH2004 series
+
 ## [2.3.3]
 
 - Improvements
