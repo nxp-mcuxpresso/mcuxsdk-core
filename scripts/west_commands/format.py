@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import os
-import pkg_resources
 import glob
 import yaml
 import subprocess
@@ -11,6 +10,7 @@ import re
 from pathlib import Path
 from west.commands import WestCommand
 import multiprocessing
+from importlib.metadata import distributions
 import format_mp
 try:
     from identify.identify import tags_from_path
@@ -175,7 +175,7 @@ class Format(WestCommand):
         return filesList
 
     def _setup_environment(self) -> None:
-        installed_packs = {p.project_name for p in pkg_resources.working_set}
+        installed_packs = {dist.metadata['name'] for dist in distributions()}
         self.missing_packs = []
         configPath=Path(__file__).parent.absolute().parent.absolute()
         configPath=configPath / "formatter_config.yml"
@@ -191,7 +191,7 @@ class Format(WestCommand):
             if c["dep"] not in installed_packs and "getVersion" not in c.keys():
                 self.missing_packs.append(c["dep"])
                 skip_types = " ".join(list(c["types"]))
-                self.err(
+                self.wrn(
                     f"{c['dep']} is not installed, will skip file with type: '{skip_types}', please "
                     f"run 'pip install -U {c['dep']}'"
                 )
