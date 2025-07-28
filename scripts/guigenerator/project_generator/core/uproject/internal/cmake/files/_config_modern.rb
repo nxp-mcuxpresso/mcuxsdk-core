@@ -396,9 +396,9 @@ module Internal
         @config_cmakelists.puts ""
         # add postbuild command
         unless @postbuild_cmd.empty?
-          @config_cmakelists.puts "ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD COMMAND"
+          @config_cmakelists.puts "ADD_CUSTOM_COMMAND(TARGET ${MCUX_SDK_PROJECT_NAME} POST_BUILD"
           @postbuild_cmd&.each do | cmd |
-            @config_cmakelists.puts "#{cmd}"
+            @config_cmakelists.puts "COMMAND #{cmd}"
           end
           @config_cmakelists.puts ")"
           @config_cmakelists.puts ""

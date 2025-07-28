@@ -730,7 +730,8 @@ class NinjaParser
       result = line.match(pattern)
       if result
         content = result[1].strip
-        if content.match(/\S+?.elf/) && content.match(/\S+(.bin|.srec|.hex)/) && content.match(/(-Obinary|--bin|-Osrec|--srec|--m32|-Oihex|--ihex|--i32)/)
+        # match binary convert command, unless there are extra process by other tool such as python
+        if content.match(/\S+?.elf/) && content.match(/\S+(.bin|.srec|.hex)/) && content.match(/(-Obinary|--bin|-Osrec|--srec|--m32|-Oihex|--ihex|--i32)/) && !content.include?("python")
           bin_file = File.basename(content.match(/\S+\.(bin|srec|hex)/)[0])
           @data[@name]['contents']['configuration']['tools'][@toolchain]['binary-file'] = bin_file
           break
@@ -1217,10 +1218,16 @@ class NinjaParser
       return "$TOOLKIT_DIR$"
     elsif path.match(/bin[\/\\]iccarm/)
       return "$TOOLKIT_DIR$/bin/iccarm"
+    elsif path.match(/bin[\/\\]ielftool/)
+      return "$TOOLKIT_DIR$/bin/ielftool"
     elsif path.match(/bin[\/\\]armclang/)
       return "$KARM/ARMCLANG/bin/armclang"
+    elsif path.match(/bin[\/\\]fromelf/)
+      return "$KARM/ARMCLANG/bin/fromelf"
     elsif path.match(/bin[\/\\]arm-none-eabi-gcc/)
       return "${TOOLCHAIN_DIR}/bin/arm-none-eabi-gcc"
+    elsif path.match(/bin[\/\\]arm-none-eabi-objcopy/)
+      return "${TOOLCHAIN_DIR}/bin/arm-none-eabi-objcopy"
     else
       return path
     end

@@ -135,7 +135,8 @@ module SDKGenerator
                     FileUtils.cp_f(src_path, dest_path) unless File.exist?(dest_path)
                   else
                     # if the file is in build dir, copy it to build dir/toolchain folder
-                    FileUtils.cp_f(src_path, File.join(@generator_options[:output_dir],toolchain, relative_path))
+                    dest_path = File.join(@generator_options[:output_dir],toolchain, relative_path)
+                    FileUtils.cp_f(src_path, dest_path) unless File.exist?(dest_path)
                     content['files'][index] = {
                       'source' => relative_path,
                       'package_path' => File.dirname(relative_path),
@@ -153,7 +154,8 @@ module SDKGenerator
                       FileUtils.cp_f(file, dest_path) unless File.exist?(dest_path)
                     else
                       # if the file is in build dir, copy it to build dir/toolchain folder
-                      FileUtils.cp_f(file, File.join(@generator_options[:output_dir],toolchain, relative_path))
+                      dest_path = File.join(@generator_options[:output_dir],toolchain, relative_path)
+                      FileUtils.cp_f(file, dest_path) unless File.exist?(dest_path)
                       content[path_type][index] = {
                         'path' => File.dirname(relative_path),
                         'package_path' => File.dirname(relative_path),
