@@ -2,95 +2,122 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+config CPU_CORTEX_M
+    bool
+    help
+      This option signifies the use of a CPU of the Cortex-M family.
+
 config MCUX_PRJSEG_config.arm.core.cm4
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM4
 
 config MCUX_PRJSEG_config.arm.core.cm4f
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM4F
 
 config MCUX_PRJSEG_config.arm.core.fpu.no_fpu
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_NO_FPU
 
 config MCUX_PRJSEG_config.arm.core.fpu.fpv4_sp
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_FPV4_SP
 
 config MCUX_PRJSEG_config.device_core.define
     bool
+    select CPU_CORTEX_M
     default y
 
 config MCUX_PRJSEG_config.arm.core.cm7f
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM7F
 
 config MCUX_PRJSEG_config.arm.core.fpu.fpv5_dp
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_FPV5_DP
 
 config MCUX_PRJSEG_config.arm.core.fpu.fpv5_sp
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_FPV5_SP
 
 config MCUX_PRJSEG_config.arm.core.cm33
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM33 && MCUX_HW_DSP && MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm33_nodsp_nosau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM33 && !MCUX_HW_DSP && !MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm33_dsp_nosau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM33 && MCUX_HW_DSP && !MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm33_nodsp_sau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM33 && !MCUX_HW_DSP && MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm23
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM23 && MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm23_nosau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM23 && !MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm0p
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM0P
 
 config MCUX_PRJSEG_config.arm.core.cm55
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM55 && MCUX_HW_DSP && MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm55_nodsp_nosau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM55 && !MCUX_HW_DSP && !MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm55_dsp_nosau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM55 && MCUX_HW_DSP && !MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm55_nodsp_sau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM55 && !MCUX_HW_DSP && MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm85
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM85 && MCUX_HW_DSP && MCUX_HW_SAU
-
 
 config MCUX_PRJSEG_config.arm.core.cm85_nodsp_nosau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM85 && !MCUX_HW_DSP && !MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm85_dsp_nosau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM85 && MCUX_HW_DSP && !MCUX_HW_SAU
 
 config MCUX_PRJSEG_config.arm.core.cm85_nodsp_sau
     bool
+    select CPU_CORTEX_M
     default y if MCUX_HW_CORE_CM85 && !MCUX_HW_DSP && MCUX_HW_SAU
