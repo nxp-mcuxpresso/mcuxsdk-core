@@ -1,5 +1,12 @@
 # FLEXIO_I2C
 
+## [2.6.2]
+
+- Improvements
+  - Added timeout for while loop in FLEXIO_I2C_MasterTransferBlocking().
+- Bug Fixes
+  - Fixed build issues related to I2C_RETRY_TIMES.
+
 ## [2.6.1]
 
 - Bug Fixes
