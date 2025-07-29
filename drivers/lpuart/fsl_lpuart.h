@@ -21,12 +21,16 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPUART driver version. */
-#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 9, 2))
+#define FSL_LPUART_DRIVER_VERSION (MAKE_VERSION(2, 9, 3))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
 #ifndef UART_RETRY_TIMES
+#ifdef CONFIG_UART_RETRY_TIMES
+#define UART_RETRY_TIMES CONFIG_UART_RETRY_TIMES
+#else
 #define UART_RETRY_TIMES 0U /* Defining to zero means to keep waiting for the flag until it is assert/deassert. */
+#endif
 #endif
 
 /*! @brief Error codes for the LPUART driver. */
@@ -414,8 +418,10 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
  * This function waits for transmit to complete, disables TX and RX, and disables the LPUART clock.
  *
  * @param base LPUART peripheral base address.
+ * @retval kStatus_Success Deinit is success.
+ * @retval kStatus_LPUART_Timeout Timeout during deinit.
  */
-void LPUART_Deinit(LPUART_Type *base);
+status_t LPUART_Deinit(LPUART_Type *base);
 
 /*!
  * @brief Gets the default configuration structure.

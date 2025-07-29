@@ -1,5 +1,10 @@
 # LPUART
 
+## [2.9.3]
+
+- Improvements
+  - Added timeout for while loops in LPUART_Deinit().
+
 ## [2.9.2]
 
 - Bug Fixes

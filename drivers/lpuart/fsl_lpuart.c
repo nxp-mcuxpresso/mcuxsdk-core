@@ -590,20 +590,41 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
  * This function waits for transmit to complete, disables TX and RX, and disables the LPUART clock.
  *
  * param base LPUART peripheral base address.
+ * retval kStatus_Success Deinit is success.
+ * retval kStatus_LPUART_Timeout Timeout during deinit.
  */
-void LPUART_Deinit(LPUART_Type *base)
+status_t LPUART_Deinit(LPUART_Type *base)
 {
     uint32_t temp;
+#if UART_RETRY_TIMES
+    uint32_t waitTimes = UART_RETRY_TIMES;
+#endif
 
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
-    /* Wait tx FIFO send out*/
+    /* Wait tx FIFO send out */
     while (0U != ((base->WATER & LPUART_WATER_TXCOUNT_MASK) >> LPUART_WATER_TXWATER_SHIFT))
     {
+#if UART_RETRY_TIMES
+        if (--waitTimes == 0U)
+        {
+            return kStatus_LPUART_Timeout;
+        }
+#endif
     }
+#endif
+
+#if UART_RETRY_TIMES
+    waitTimes = UART_RETRY_TIMES;
 #endif
     /* Wait last char shift out */
     while (0U == (base->STAT & LPUART_STAT_TC_MASK))
     {
+#if UART_RETRY_TIMES
+        if (--waitTimes == 0U)
+        {
+            return kStatus_LPUART_Timeout;
+        }
+#endif
     }
 
     /* Clear all status flags */
@@ -634,6 +655,8 @@ void LPUART_Deinit(LPUART_Type *base)
 #endif
 
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
+    return kStatus_Success;
 }
 
 /*!
