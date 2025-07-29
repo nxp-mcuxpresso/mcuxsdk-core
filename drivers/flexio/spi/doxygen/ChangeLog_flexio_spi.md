@@ -1,5 +1,10 @@
 # FLEXIO_SPI
 
+## [2.4.3]
+
+- Improvements
+  - Make SPI_RETRY_TIMES configurable by CONFIG_SPI_RETRY_TIMES.
+
 ## [2.4.2]
 
 - Bug Fixes
