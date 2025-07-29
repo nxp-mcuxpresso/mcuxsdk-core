@@ -1,5 +1,10 @@
 # LPI2C
 
+## [2.6.2]
+
+- Improvements
+  - Added timeout for while loop in LPI2C_TransferStateMachineSendCommand().
+
 ## [2.6.1]
 
 - Bug Fixes
