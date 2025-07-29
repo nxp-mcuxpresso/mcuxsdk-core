@@ -28,3 +28,12 @@ config MCUX_COMPONENT_driver.flexio_uart
     bool "flexio_uart"
     select MCUX_COMPONENT_driver.flexio
     depends on MCUX_HAS_COMPONENT_driver.flexio
+
+if MCUX_COMPONENT_driver.flexio_uart
+    config UART_RETRY_TIMES
+        int "Max loops to wait for operation complete (0 means wait forever)"
+        default 0
+        help
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+endif

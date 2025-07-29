@@ -1,5 +1,10 @@
 # FLEXIO_UART
 
+## [2.6.4]
+
+- Improvements
+  - Make UART_RETRY_TIMES configurable by CONFIG_UART_RETRY_TIMES.
+
 ## [2.6.3]
 
 - Bug Fixes
