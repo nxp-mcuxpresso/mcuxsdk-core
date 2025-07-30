@@ -1,5 +1,13 @@
 # CE
 
+## [2.2.2]
+- Improvements
+  - New memory map ("cmd_buffer" and "status_buffer" in the API CE_CmdInitBuffer needs to be mapped to 0x20029000 and 0x20029400, respectively)
+  - 0x20020000 : 0x20027FFF => ZV Program Memory
+    0x20028000 : 0x20028FFF => ZV Stack
+    0x20029000 : 0x20029617 => Reserved for ZV Driver
+    0x20029618 : 0x20037FFF => ZV Data RAM
+
 ## [2.2.1]
 - Improvements
   - Fixed MISRA issue 7.2, 17.7, 10.4 and 10.3.
