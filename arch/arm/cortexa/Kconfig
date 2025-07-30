@@ -1,0 +1,8 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config CPU_CORTEX_A
+    bool
+    help
+      This option signifies the use of a CPU of the Cortex-A family.
