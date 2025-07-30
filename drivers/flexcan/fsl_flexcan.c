@@ -1394,8 +1394,10 @@ void FLEXCAN_FDInit(
     /* update the FDCTL register. */
     base->FDCTRL = fdctrl;
 
+#if defined(CAN_CTRL2_ISOCANFDEN_MASK)
     /* Enable CAN FD ISO mode by default. */
     base->CTRL2 |= CAN_CTRL2_ISOCANFDEN_MASK;
+#endif
 
     /* Exit Freeze Mode. */
     (void)FLEXCAN_ExitFreezeMode(base);

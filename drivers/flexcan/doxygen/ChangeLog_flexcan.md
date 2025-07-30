@@ -8,6 +8,7 @@
     - `FLEXCAN_EhancedRxFifoHandleIRQ`
 - Bug Fixes
   - Remove `FLEXCAN_MemoryErrorHandleIRQ` on some platform without memory error interrupt.
+  - Add conditional compile for CTRL2[ISOCANFDEN] because some platform do not have this bit.
 
 ## [2.14.2]
 
