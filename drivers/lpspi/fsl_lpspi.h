@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPSPI driver version. */
-#define FSL_LPSPI_DRIVER_VERSION (MAKE_VERSION(2, 7, 2))
+#define FSL_LPSPI_DRIVER_VERSION (MAKE_VERSION(2, 7, 3))
 /*! @} */
 
 #ifndef LPSPI_DUMMY_DATA
@@ -32,7 +32,11 @@
 
 /*! @brief Retry times for waiting flag. */
 #ifndef SPI_RETRY_TIMES
+#ifdef CONFIG_SPI_RETRY_TIMES
+#define SPI_RETRY_TIMES CONFIG_SPI_RETRY_TIMES
+#else
 #define SPI_RETRY_TIMES 0U /* Define to zero means keep waiting until the flag is assert/deassert. */
+#endif
 #endif
 
 /*! @brief Global variable for dummy data value setting. */

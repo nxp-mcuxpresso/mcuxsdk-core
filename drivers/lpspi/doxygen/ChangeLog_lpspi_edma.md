@@ -1,5 +1,10 @@
 # LPSPI_EDMA
 
+## [2.4.8]
+
+- Improvements
+  - Added timeout for while loop in EDMA_LpspiMasterCallback() and EDMA_LpspiSlaveCallback().
+
 ## [2.4.7]
 
 - Bug Fixes

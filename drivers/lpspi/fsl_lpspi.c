@@ -1040,13 +1040,23 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
          */
         if (((stateParams->rxData) != NULL) && ((stateParams->rxRemainingByteCount) != 0U))
         {
+#if SPI_RETRY_TIMES
+            uint32_t waitTimes = SPI_RETRY_TIMES;
+#endif
             /* To ensure parallel execution in 3-wire mode, after writting 1 to TXMSK to generate clock of
                bytesPerFrame's data wait until bytesPerFrame's data is received. */
             while ((stateParams->isTxMask) && (LPSPI_GetRxFifoCount(base) == 0U))
             {
-            }
 #if SPI_RETRY_TIMES
-            uint32_t waitTimes = SPI_RETRY_TIMES;
+                if (--waitTimes == 0U)
+                {
+                    return false;
+                }
+#endif
+            }
+
+#if SPI_RETRY_TIMES
+            waitTimes = SPI_RETRY_TIMES;
             while ((LPSPI_GetRxFifoCount(base) != 0U) && (--waitTimes != 0U))
 #else
             while (LPSPI_GetRxFifoCount(base) != 0U)

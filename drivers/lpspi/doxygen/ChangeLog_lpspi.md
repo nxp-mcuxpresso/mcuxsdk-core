@@ -1,5 +1,11 @@
 # LPSPI
 
+## [2.7.3]
+
+- Improvements
+  - Added timeout for while loop in LPSPI_MasterTransferWriteAllTxData().
+  - Make SPI_RETRY_TIMES configurable by CONFIG_SPI_RETRY_TIMES.
+
 ## [2.7.2]
 
 - Bug Fixes

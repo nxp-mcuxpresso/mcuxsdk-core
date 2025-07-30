@@ -22,3 +22,12 @@ config MCUX_COMPONENT_driver.lpspi
     bool "lpspi"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.lpspi
+
+if MCUX_COMPONENT_driver.lpspi
+    config SPI_RETRY_TIMES
+        int "Max loops to wait for operation complete (0 means wait forever)"
+        default 0
+        help
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+endif

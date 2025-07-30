@@ -777,8 +777,18 @@ static void EDMA_LpspiMasterCallback(edma_handle_t *edmaHandle,
             /* Once DMA transfer */
             if (lpspiEdmaPrivateHandle->handle->isThereExtraRxBytes)
             {
+#if SPI_RETRY_TIMES
+                uint32_t waitTimes = SPI_RETRY_TIMES;
+#endif
                 while (LPSPI_GetRxFifoCount(lpspiEdmaPrivateHandle->base) == 0U)
                 {
+#if SPI_RETRY_TIMES
+                    if (--waitTimes == 0U)
+                    {
+                        callbackStatus = kStatus_LPSPI_Timeout;
+                        break;
+                    }
+#endif
                 }
                 readData = LPSPI_ReadData(lpspiEdmaPrivateHandle->base);
                 if (lpspiEdmaPrivateHandle->handle->rxData != NULL)
@@ -1260,8 +1270,18 @@ static void EDMA_LpspiSlaveCallback(edma_handle_t *edmaHandle,
      */
     if (lpspiEdmaPrivateHandle->handle->isThereExtraRxBytes)
     {
+#if SPI_RETRY_TIMES
+        uint32_t waitTimes = SPI_RETRY_TIMES;
+#endif
         while (LPSPI_GetRxFifoCount(lpspiEdmaPrivateHandle->base) == 0U)
         {
+#if SPI_RETRY_TIMES
+            if (--waitTimes == 0U)
+            {
+                callbackStatus = kStatus_LPSPI_Timeout;
+                break;
+            }
+#endif
         }
         readData = LPSPI_ReadData(lpspiEdmaPrivateHandle->base);
 
