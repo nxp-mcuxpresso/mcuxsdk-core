@@ -1,5 +1,9 @@
 # WWDT
 
+## [2.1.10]
+- Bug Fixes
+  - Chek WWDT_RSTS instead of FSL_FEATURE_WWDT_HAS_NO_RESET to determine whether the peripheral can be reset.
+
 ## [2.1.9]
 
 - Bug Fixes
