@@ -123,7 +123,7 @@ if (CONFIG_MCUX_COMPONENT_middleware.canopennode.storage)
             protocol/storage/CO_storage.c
             protocol/storage/CO_storage.h
             protocol/storage/CO_storageEeprom.c
-            protocol/storage/CO_storageEeprom.c
+            protocol/storage/CO_storageEeprom.h
     )
 endif ()
 
