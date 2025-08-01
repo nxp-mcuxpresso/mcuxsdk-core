@@ -1,5 +1,11 @@
 # RTC
 
+## [2.4.0]
+
+- New features
+  - Add support for RTC clock output.
+  - Add support for RTC time seconds interrupt configuration.
+
 ## [2.3.3]
 
 - Bug Fixes
