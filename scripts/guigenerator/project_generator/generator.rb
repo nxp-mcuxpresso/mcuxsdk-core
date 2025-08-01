@@ -1146,6 +1146,9 @@ module SDKGenerator
         if content.key?('debugger_extra_options')
           project_instance.set_debugger_extra_options(identifier, content['debugger_extra_options']) if project_instance.methods.include?(:set_debugger_extra_options)
         end
+        if content.key?('use_flash_loaders')
+          project_instance.use_flash_loader(identifier, content['use_flash_loaders']) if project_instance.methods.include?(:use_flash_loader)
+        end
         # Set cpp compiler for iar and mcux
         if @generator_options[:gen_cpp] || (!project_info[:project_language].nil? && project_info[:project_language] != 'c')
           project_instance.set_cpp_compiler(identifier, project_info[:project_language] || 'cpp') if project_instance.methods.include?(:set_cpp_compiler)
