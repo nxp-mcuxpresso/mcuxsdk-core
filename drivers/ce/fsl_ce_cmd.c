@@ -136,6 +136,10 @@ int CE_CmdLaunchBlocking(void)
 {
     unsigned int n_cmd;
 
+#if CE_COMPUTE_TIMEOUT
+    uint32_t timeout = CE_COMPUTE_TIMEOUT;
+#endif
+
     if (s_ce_cmdbuffer->n_cmd == 0U)
     {
         return -2; /* no commands to send */
@@ -155,8 +159,15 @@ int CE_CmdLaunchBlocking(void)
     /* blocking: so poll till completion */
     /* completion is signaled when ZV2117 writes "D09E"to top of cmd buffer */
     n_cmd = *(s_ce_cmdbuffer->buffer_base_ptr);
+
     while (n_cmd != CE_COMPUTE_DONE)
     {
+#if CE_COMPUTE_TIMEOUT
+        if (--timeout == 0U)
+        {
+            return kStatus_Timeout;
+        }
+#endif
         CE_CmdDelay();
         n_cmd = *(s_ce_cmdbuffer->buffer_base_ptr);
     }

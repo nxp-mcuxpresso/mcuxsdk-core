@@ -1,5 +1,9 @@
 # CE
 
+## [2.2.3]
+- Improvements
+  - Added timeout for while loop in CE_CmdLaunchBlocking().
+
 ## [2.2.2]
 - Improvements
   - New memory map ("cmd_buffer" and "status_buffer" in the API CE_CmdInitBuffer needs to be mapped to 0x20029000 and 0x20029400, respectively)

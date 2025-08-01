@@ -22,6 +22,20 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+/*!
+ * @brief Maximum loop wait time for CE computation.
+ *
+ * When CE is computeing, driver will wait for the computation to complete.
+ * This parameter defines how many loops to check completion before return timeout.
+ * If defined as 0, driver will wait forever until completion.
+ */
+#ifndef CE_COMPUTE_TIMEOUT
+    #ifdef CONFIG_CE_COMPUTE_TIMEOUT
+        #define CE_COMPUTE_TIMEOUT CONFIG_CE_COMPUTE_TIMEOUT
+    #else
+        #define CE_COMPUTE_TIMEOUT 0U
+    #endif
+#endif
 
 /*******************************************************************************
  * Variables
