@@ -1,5 +1,10 @@
 # INPUTMUX
 
+## [2.0.10]
+
+- Bug Fixes
+  - Fixed CERT-C violations.
+
 ## [2.0.9]
 
 - Improvements
