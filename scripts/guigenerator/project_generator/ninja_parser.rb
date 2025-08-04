@@ -523,9 +523,9 @@ class NinjaParser
         next if flag.nil? || flag.strip.empty?
         if keep_prefix.include?(flag.strip)
           # update relative path for preinclude file
-          preinclude_file = all_flags[index+1].delete_prefix('"').delete_suffix('"')
-          if File.exist?(preinclude_file)
-            path = translate_project_relative_path(preinclude_file)
+          config_file = all_flags[index+1].delete_prefix('"').delete_suffix('"')
+          if File.exist?(config_file)
+            path = translate_project_relative_path(config_file)
             if @toolchain == 'iar'
               all_flags[index+1] = File.join('$PROJ_DIR$', path)
             elsif @toolchain == 'xtensa'
@@ -535,6 +535,9 @@ class NinjaParser
             else
               all_flags[index+1] = path
             end
+          elsif config_file.start_with?('-Map=')
+            # translate map file path for standalone project
+            all_flags[index+1] = translate_to_standalone_path(config_file)
           end
           if flag.strip == "--config_def"
             result.push "#{flag}=#{all_flags[index+1]}"
@@ -682,21 +685,14 @@ class NinjaParser
             cmd_list[index] = "-o#{new_path}"
           end
         end
-      elsif item.include?(project_root_dir)
-        # translate path in build/${toolchain} for standalone project. 
-        # eg, build/armgcc/mcux_config.h to $PROJ_DIR$/mcux_config.h
-        cmd_list[index] = item.gsub(project_root_dir, get_tool_rootdir(@toolchain)) if ENV['standalone'] == 'true'
-      elsif item.include?(@outdir)
-        # translate path in build for standalone project, because it will be copied to build/${toolchain}.
-        #. eg, build/pdum_gen.h to $PROJ_DIR$/pdum_gen.h
-        cmd_list[index] = item.gsub(@outdir, get_tool_rootdir(@toolchain)) if ENV['standalone'] == 'true'
+      elsif item.include?(project_root_dir) || item.include?(@outdir)
+        cmd_list[index] = translate_to_standalone_path(item)
       elsif item.include?(repo_root_dir) && File.exist?(File.dirname(item))
         # translate path in mcuxsdk
         if ENV['standalone'] == 'true'
-            dest_path = File.join(File.join(@outdir, @toolchain), item.split(/#{repo_root_dir}[\/\\]/)[-1])
-            cmd_list[index] = File.join(get_tool_rootdir(@toolchain), get_relative_path(File.join(@outdir, @toolchain), dest_path))
+          cmd_list[index] = translate_to_standalone_path(item)
         else
-            cmd_list[index] = get_relative_path(File.join(@outdir, @toolchain), item)
+          cmd_list[index] = get_relative_path(File.join(@outdir, @toolchain), item)
         end
       end
     end
@@ -1210,7 +1206,7 @@ class NinjaParser
   def translate_toolchain_path_variable(path)
     ext_name = Utils.detect_os == 'windows' ? '.exe' : ''
     # translate toolchain folder
-    if File.exist?(File.join(path, "lib/gcc/arm-none-eabi#{ext_name}"))
+    if File.exist?(File.join(path, "lib/gcc/arm-none-eabi"))
       return "${TOOLCHAIN_DIR}"
     elsif File.exist?(File.join(path, "bin/armclang#{ext_name}"))
       return "$KARM/ARMCLANG"
@@ -1232,4 +1228,27 @@ class NinjaParser
       return path
     end
   end
+  
+  # translate path to standalone project path
+  def translate_to_standalone_path(path)
+    if !ENV['standalone'] || ENV['standalone'] != 'true'
+      return path
+    end
+
+    if path.include?(File.join(@outdir, @toolchain))
+      # translate path in build/${toolchain} for standalone project. 
+      # eg, build/armgcc/mcux_config.h to $PROJ_DIR$/mcux_config.h
+      return path.gsub(File.join(@outdir, @toolchain), get_tool_rootdir(@toolchain))
+    elsif path.include?(@outdir)
+      # translate path in build for standalone project, because it will be copied to build/${toolchain}.
+      #. eg, build/pdum_gen.h to $PROJ_DIR$/pdum_gen.h
+      return path.gsub(@outdir, get_tool_rootdir(@toolchain))
+    elsif path.include?(File.basename(ENV['SdkRootDirPath']))
+      dest_path = File.join(File.join(@outdir, @toolchain), path.split(/#{File.basename(ENV['SdkRootDirPath'])}[\/\\]/)[-1])
+      return File.join(get_tool_rootdir(@toolchain), get_relative_path(File.join(@outdir, @toolchain), dest_path))
+    else
+      return path
+    end
+  end
+
 end
