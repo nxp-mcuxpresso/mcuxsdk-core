@@ -1,5 +1,10 @@
 # TRNG
 
+## [2.0.19]
+
+- New features:
+  - Added support for MCXA and MCXL.
+
 ## [2.0.18]
 
 - Bug fix:
