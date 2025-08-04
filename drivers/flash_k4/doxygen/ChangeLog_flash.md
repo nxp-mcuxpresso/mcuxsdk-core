@@ -1,5 +1,10 @@
 # FLASH
 
+## [2.3.3]
+- Improvements
+  - Added timeout for while loop in flash_command_pre_sequence, flash_command_sequence,
+    flash_erase_sequence, flash_pgm_sequence and flash_command_pre_sequence API.
+
 ## [2.3.2]
 
 - Improvement

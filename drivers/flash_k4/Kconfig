@@ -21,3 +21,26 @@ config MCUX_COMPONENT_driver.flash_k4
     bool "flash_k4"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.flash_k4 || MCUX_COMPONENT_driver.flash_k4.EXPLICITLY_ALLOW_FOR_FMU_IP
+
+if MCUX_COMPONENT_driver.flash_k4
+    config FLASH_COMMAND_COMPLETE_TIMEOUT
+        int "Max loops to wait for flash command operations (0 means wait forever)"
+        default 0
+        help
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+    config FLASH_WRITE_ENABLE_TIMEOUT
+        int "Max loops to wait for flash program-erase write enable (0 means wait forever)"
+        default 0
+        help
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+    config FLASH_PROGRAM_ERASE_READY_TIMEOUT
+        int "Max loops to wait for flash program-erase ready (0 means wait forever)"
+        default 0
+        help
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+endif
