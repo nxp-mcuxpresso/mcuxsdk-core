@@ -1,5 +1,13 @@
 # TSTMR
 
+## [2.1.0]
+
+- New Features
+  - Support configured clock frequency.
+  - Add TSTMR_Init and TSTMR_init APIs.
+- Improvements
+  - Change TSTMR_DelayUs from static inline function to normal function.
+
 ## [2.0.4]
 
 - Bugfix

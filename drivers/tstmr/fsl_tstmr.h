@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2017, 2023 NXP
+ * Copyright 2016-2017, 2023, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -19,14 +19,9 @@
  * Definitions
  ******************************************************************************/
 
-/* Component ID definition, used by tools. */
-#ifndef FSL_COMPONENT_ID
-#define FSL_COMPONENT_ID "platform.drivers.tstmr"
-#endif
-
 /*! @name Driver version */
 /*! @{ */
-#define FSL_TSTMR_DRIVER_VERSION (MAKE_VERSION(2, 0, 4)) /*!< Version 2.0.4 */
+#define FSL_TSTMR_DRIVER_VERSION (MAKE_VERSION(2, 1, 0)) /*!< Version 2.1.0 */
                                                          /*! @} */
 
 /*******************************************************************************
@@ -38,11 +33,36 @@ extern "C" {
 #endif
 
 /*!
+ * @name Initialization and deinitialization
+ * @{
+ */
+
+/*!
+ * @brief Init TSTMR.
+ *
+ * This function initializes the TSTMR module.
+ *
+ * @param base TSTMR peripheral base address.
+ */
+void TSTMR_Init(TSTMR_Type *base);
+
+/*!
+ * @brief Deinit TSTMR.
+ *
+ * This function deinitializes the TSTMR module.
+ *
+ * @param base TSTMR peripheral base address.
+ */
+void TSTMR_Deinit(TSTMR_Type *base);
+
+/*! @}*/
+
+/*!
  * @brief Reads the time stamp.
  *
  * This function reads the low and high registers and returns the 56-bit free running
  * counter value. This can be read by software at any time to determine the software ticks.
- * TSTMR registers can be read with 32-bit accesses only. The TSTMR LOW read should occur first, 
+ * TSTMR registers can be read with 32-bit accesses only. The TSTMR LOW read should occur first,
  * followed by the TSTMR HIGH read.
  *
  * @param base TSTMR peripheral base address.
@@ -76,35 +96,7 @@ static inline uint64_t TSTMR_ReadTimeStamp(TSTMR_Type *base)
  * @param base      TSTMR peripheral base address.
  * @param delayInUs Delay value in microseconds.
  */
-static inline void TSTMR_DelayUs(TSTMR_Type *base, uint64_t delayInUs)
-{
-#if defined(TSTMR_CLOCK_FREQUENCY_MHZ)
-    /* 56-bit mask */
-    const uint64_t TSTMR_MASK = 0x00FFFFFFFFFFFFFFULL;
-    uint64_t startTime = TSTMR_ReadTimeStamp(base);
-    uint64_t targetTicks = TSTMR_CLOCK_FREQUENCY_MHZ * delayInUs;
-    while (true)
-    {
-        uint64_t currentTime = TSTMR_ReadTimeStamp(base);
-        uint64_t elapsed;
-        if (currentTime >= startTime)
-        {
-            elapsed = currentTime - startTime;
-        }
-        else
-        {
-            /* Timer wrapped, handle wrap around for 56 bits */
-            elapsed = (TSTMR_MASK - startTime + 1U) + currentTime;
-        }
-        if (elapsed >= targetTicks)
-        {
-            break;
-        }
-    }
-#else
-    assert(0);
-#endif
-}
+void TSTMR_DelayUs(TSTMR_Type *base, uint64_t delayInUs);
 
 #if defined(__cplusplus)
 }
