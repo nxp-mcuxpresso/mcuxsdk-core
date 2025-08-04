@@ -1,5 +1,10 @@
 # SPC
 
+## [2.7.0]
+
+- Improvements
+  - Added new APIs to control VDD Core Glitch Detector.
+
 ## [2.6.1]
 
 - Improvements
