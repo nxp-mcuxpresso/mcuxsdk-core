@@ -16,7 +16,10 @@
     defined(MCXN946_cm33_core1_SERIES) || defined(MCXN947_cm33_core0_SERIES) || defined(MCXN947_cm33_core1_SERIES) || \
     defined(MCXN236_SERIES) || defined(MCXN235_SERIES)
 #include "fsl_smartdma_mcxn.h"
-#elif defined(MCXA345_SERIES) || defined(MCXA346_SERIES) || defined(MCXA276_SERIES)
+#elif defined(MCXA175_SERIES) || defined(MCXA176_SERIES) || defined(MCXA185_SERIES) || defined(MCXA186_SERIES) || \
+    defined(MCXA255_SERIES) || defined(MCXA256_SERIES) || defined(MCXA265_SERIES) || defined(MCXA266_SERIES) ||   \
+    defined(MCXA345_SERIES) || defined(MCXA346_SERIES) || defined(MCXA355_SERIES) || defined(MCXA356_SERIES) ||   \
+    defined(MCXA365_SERIES) || defined(MCXA366_SERIES) || defined(MCXA343_SERIES) || defined(MCXA344_SERIES)
 #include "fsl_smartdma_mcxa.h"
 #else
 #error "Device not supported"
@@ -34,7 +37,7 @@
 /*! @name Driver version */
 /*@{*/
 /*! @brief SMARTDMA driver version */
-#define FSL_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 13, 0))
+#define FSL_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 13, 1))
 /*@}*/
 
 /*! @brief Callback function prototype for the smartdma driver. */

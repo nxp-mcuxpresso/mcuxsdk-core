@@ -1,5 +1,10 @@
 # SMARTDMA
 
+## [2.13.1]
+
+- Other Changes
+  - Add more MCXA devices support.
+
 ## [2.13.0]
 
 - New Features
