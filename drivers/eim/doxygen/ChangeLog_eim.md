@@ -1,5 +1,12 @@
 # EIM
 
+## [2.0.2]
+
+- Improvements
+  - Reset the peripheral during initialization, otherwise some platforms may not work.
+- Bug Fixes
+  - Fixed incorrect register access in EIM_GetDataBitMask().
+
 ## [2.0.1]
 
 - Improvements

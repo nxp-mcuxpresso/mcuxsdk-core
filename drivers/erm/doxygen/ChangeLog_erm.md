@@ -1,5 +1,12 @@
 # ERM
 
+## [2.0.2]
+
+- Improvements
+  - Reset the peripheral during initialization, otherwise some platforms may not work.
+- Bug Fixes
+  - Only keep bit 0-3 of ERM_GetInterruptStatus() as it may get other channel results in higher bits.
+
 ## [2.0.1]
 
 - Improvements
