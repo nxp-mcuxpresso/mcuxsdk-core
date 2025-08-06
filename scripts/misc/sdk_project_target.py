@@ -516,13 +516,13 @@ class MCUXRepoProjects(object):
         expanded_example_files_filtered = []
         for example_file in expanded_example_files:
             example_path = Path(example_file)
-            if sdk_root_dir in str(example_path):
-                try:
-                    example_category = example_path.relative_to(Path(sdk_root_dir)).parts[1]
-                    if example_category in ["_boards", "_devices"]:
-                        continue  # Skip these
-                except ValueError:
-                    pass  # Shouldn't happen, but safe fallback
+            try:
+                # For Python < 3.9
+                example_category = example_path.relative_to(Path(sdk_root_dir)).parts[1]
+                if example_category in ["_boards", "_devices"]:
+                    continue  # Skip these
+            except ValueError:
+                pass
             expanded_example_files_filtered.append(example_file)
 
         # mcux_debug(f"Searching app targets in {example_file_pattern}")
