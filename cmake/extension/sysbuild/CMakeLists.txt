@@ -65,6 +65,10 @@ set(DEFAULT_IMAGE "${app_name}")
 sysbuild_add_subdirectory(images)
 
 get_property(IMAGES GLOBAL PROPERTY sysbuild_images)
+
+# Analysis build order
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/build_order.cmake)
+
 sysbuild_module_call(PRE_CMAKE MODULES ${SYSBUILD_MODULE_NAMES} IMAGES ${IMAGES})
 sysbuild_images_order(IMAGES_CONFIGURATION_ORDER CONFIGURE IMAGES ${IMAGES})
 foreach(image ${IMAGES_CONFIGURATION_ORDER})

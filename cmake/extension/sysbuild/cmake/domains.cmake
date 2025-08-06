@@ -1,4 +1,5 @@
 # Copyright (c) 2021 Nordic Semiconductor
+# Copyright 2025 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -16,4 +17,5 @@ foreach(image ${IMAGES_FLASHING_ORDER})
   set(flash_cond "$<NOT:$<BOOL:$<TARGET_PROPERTY:${image},BUILD_ONLY>>>")
   set(domains_yaml "${domains_yaml}$<${flash_cond}:\n  - ${image}>")
 endforeach()
+set(domains_yaml "${domains_yaml}\n${BUILD_ORDER_CONTENT}")
 file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/domains.yaml CONTENT "${domains_yaml}")

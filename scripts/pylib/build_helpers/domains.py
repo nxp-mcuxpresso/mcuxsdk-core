@@ -1,4 +1,5 @@
 # Copyright (c) 2022 Nordic Semiconductor ASA
+# Copyright 2025 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -41,6 +42,11 @@ mapping:
             required: true
             type: str
   flash_order:
+    required: false
+    type: seq
+    sequence:
+      - type: str
+  build_order:
     required: false
     type: seq
     sequence:
