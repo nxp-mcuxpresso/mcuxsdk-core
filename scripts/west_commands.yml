@@ -51,3 +51,8 @@ west-commands:
       - name: explore
         class: McuxsdkExplore
         help: Graphical interactive build command selection.
+  - file: scripts/west_commands/project_info.py
+    commands:
+      - name: project-info
+        class: ProjectInfo
+        help: Extract project info
