@@ -50,7 +50,6 @@ class ExportApp(WestCommand):
             accepts_unknown_args=True
         )
         self.core_id = None
-        self.general_export = False
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(
@@ -139,7 +138,7 @@ class ExportApp(WestCommand):
         else:
             self.die('You must specify output directory with "-o" option or set it in west config')
         if (os.path.isdir(out)) and (len(os.listdir(out)) != 0):
-            self.wrn(f"f'Output directory {out} is not empty.")
+            self.wrn(f"Output directory: {out} is not empty.")
 
         self.source_dir = Path(app).resolve()
         self.output_dir = Path(out).resolve()
@@ -152,11 +151,16 @@ class ExportApp(WestCommand):
         op = sdk_project_target.MCUXRepoProjects()
         self.board = self.args.board
         self.extra_variables = {}
+        self.misc_options = {
+            'main_output': self.output_dir,
+            'cmake_opts': self.args.cmake_opts,
+        }
         if not self.board:
-            self.general_export = True
             if self.args.build:
-                self.wrn("--build is only valid when you specify board")
+                self.wrn("--build is only valid when you specify board/core")
                 self.args.build = False
+            if self.args.board_copy_folders:
+                self.wrn('--bf is only valid when you specify board/core')
             return
         if 'core_id' in self.cmake_variables:
             self.core_id = self.cmake_variables['core_id']
@@ -170,11 +174,7 @@ class ExportApp(WestCommand):
         self.check_force(matched_app,
                          f'Cannot find any app match your input, please ensure following command can get a valid output\
                           {os.linesep}west list_project -p {self.source_dir} -b {board_core}')
-        self.misc_options = {
-            'main_output': self.output_dir,
-            'cmake_opts': self.args.cmake_opts,
-            'target_apps': target_apps,
-        }
+        self.misc_options['target_apps'] = target_apps
         if self.args.board_copy_folders:
             self.misc_options['board_copy_folders'] = [ (SDK_ROOT_DIR / p).as_posix() for p in self.args.board_copy_folders ]
 
