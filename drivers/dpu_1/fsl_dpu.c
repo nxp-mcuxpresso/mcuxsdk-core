@@ -1032,7 +1032,7 @@ static DPU_SUBLAYER_CONTROL_Type *DPU_GetSubLayer(DISPLAY_SEERIS_Type *base, dpu
 static uint32_t DPU_ConvertFloat(float floatValue, uint8_t intBits, uint8_t fracBits)
 {
     /* One bit reserved for sign bit. */
-    assert(intBits + fracBits < 32U);
+    assert(intBits + fracBits + 1U < 32U);
 
     u32_f32_t u32_f32;
     uint32_t ret;
@@ -1064,7 +1064,7 @@ static uint32_t DPU_ConvertFloat(float floatValue, uint8_t intBits, uint8_t frac
     /* Set the sign bit. */
     if (0U != (floatBits & 0x80000000UL))
     {
-        ret = ((~ret) + 1U) & ~(((uint32_t)-1) << (intBits + fracBits + 1U));
+        ret = ((~(uint32_t)ret) + 1U) & ~(0xFFFFFFFFU << (intBits + fracBits + 1U));
     }
 
     return ret;
@@ -1603,7 +1603,7 @@ void DPU_SetLayerBlendConfig(DISPLAY_SEERIS_Type *base, dpu_unit_t unit, const d
     /* Set alpha mask config. */
     layerBlend->CONTROL = ((layerBlend->CONTROL & ~(DPU_LAYERBLEND_CONTROL_AlphaMaskEnable_MASK |
                                                     DPU_LAYERBLEND_CONTROL_AlphaMaskMode_MASK)) |
-                           DPU_LAYERBLEND_CONTROL_AlphaMaskEnable(config->enableAlphaMask) |
+                           DPU_LAYERBLEND_CONTROL_AlphaMaskEnable(config->enableAlphaMask ? 1U : 0U) |
                            DPU_LAYERBLEND_CONTROL_AlphaMaskMode(config->alphaMaskMode));
 }
 
@@ -2755,7 +2755,7 @@ status_t DPU_InitFetchUnitWarp(DISPLAY_SEERIS_Type *base, dpu_unit_t unit, const
     /* Setup warping. */
     fetchWarp->WARPCONTROL = DPU_FETCHWARP_WARPCONTROL_WarpBitsPerPixel(config->warpBitsPerPixel) |
                              DPU_FETCHWARP_WARPCONTROL_WarpCoordinateMode(config->coordMode) |
-                             DPU_FETCHWARP_WARPCONTROL_WarpSymmetricOffset(config->enableSymmetricOffset);
+                             DPU_FETCHWARP_WARPCONTROL_WarpSymmetricOffset(config->enableSymmetricOffset ? 1UL : 0UL);
 
     fetchWarp->ARBSTARTX = config->arbStartX;
     fetchWarp->ARBSTARTY = config->arbStartY;

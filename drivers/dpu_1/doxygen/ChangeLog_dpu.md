@@ -1,5 +1,10 @@
 # DPU
 
+## [2.3.1]
+
+- Bug Fixes
+  - Fixed CERT-C violations.
+
 ## [2.3.0]
 
 - New feature.
