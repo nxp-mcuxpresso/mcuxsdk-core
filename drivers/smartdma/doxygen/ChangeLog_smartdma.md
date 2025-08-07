@@ -1,5 +1,10 @@
 # SMARTDMA
 
+## [2.13.2]
+
+- Other Changes
+  - Add more MCXN devices support.
+
 ## [2.13.1]
 
 - Other Changes

@@ -12,9 +12,14 @@
 #define FSL_COMPONENT_ID "platform.drivers.smartdma_mcxn"
 #endif
 
-#if defined(MCXN546_cm33_core0_SERIES) || defined(MCXN546_cm33_core1_SERIES) || defined(MCXN547_cm33_core0_SERIES) || \
-    defined(MCXN547_cm33_core1_SERIES) || defined(MCXN946_cm33_core0_SERIES) || defined(MCXN946_cm33_core1_SERIES) || \
-    defined(MCXN947_cm33_core0_SERIES) || defined(MCXN947_cm33_core1_SERIES) || defined(MCXN236_SERIES)
+#if defined(MCXN235_SERIES) || defined(MCXN236_SERIES) || defined(MCXN247_SERIES) ||                                  \
+    defined(MCXN526_cm33_core0_SERIES) || defined(MCXN526_cm33_core1_SERIES) || defined(MCXN527_cm33_core0_SERIES) || \
+    defined(MCXN527_cm33_core1_SERIES) || defined(MCXN536_cm33_core0_SERIES) || defined(MCXN536_cm33_core1_SERIES) || \
+    defined(MCXN537_cm33_core0_SERIES) || defined(MCXN537_cm33_core1_SERIES) || defined(MCXN546_cm33_core0_SERIES) || \
+    defined(MCXN546_cm33_core1_SERIES) || defined(MCXN547_cm33_core0_SERIES) || defined(MCXN547_cm33_core1_SERIES) || \
+    defined(MCXN556S_cm33_core0_SERIES) || defined(MCXN556S_cm33_core1_SERIES) ||                                     \
+    defined(MCXN946_cm33_core0_SERIES) || defined(MCXN946_cm33_core1_SERIES) || defined(MCXN947_cm33_core0_SERIES) || \
+    defined(MCXN947_cm33_core1_SERIES)
 
 /*******************************************************************************
  * Definitions
