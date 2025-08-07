@@ -26,7 +26,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_TSTMR_DRIVER_VERSION (MAKE_VERSION(2, 0, 3)) /*!< Version 2.0.3 */
+#define FSL_TSTMR_DRIVER_VERSION (MAKE_VERSION(2, 0, 4)) /*!< Version 2.0.4 */
                                                          /*! @} */
 
 /*******************************************************************************
@@ -83,7 +83,7 @@ static inline void TSTMR_DelayUs(TSTMR_Type *base, uint64_t delayInUs)
     const uint64_t TSTMR_MASK = 0x00FFFFFFFFFFFFFFULL;
     uint64_t startTime = TSTMR_ReadTimeStamp(base);
     uint64_t targetTicks = TSTMR_CLOCK_FREQUENCY_MHZ * delayInUs;
-    while (1)
+    while (true)
     {
         uint64_t currentTime = TSTMR_ReadTimeStamp(base);
         uint64_t elapsed;
@@ -94,7 +94,7 @@ static inline void TSTMR_DelayUs(TSTMR_Type *base, uint64_t delayInUs)
         else
         {
             /* Timer wrapped, handle wrap around for 56 bits */
-            elapsed = (TSTMR_MASK - startTime + 1) + currentTime;
+            elapsed = (TSTMR_MASK - startTime + 1U) + currentTime;
         }
         if (elapsed >= targetTicks)
         {

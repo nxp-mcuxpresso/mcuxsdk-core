@@ -1,5 +1,10 @@
 # TSTMR
 
+## [2.0.4]
+
+- Bugfix
+  - Fix MISRA C-2012 Rule 10.4 and 14.4 issues.
+
 ## [2.0.3]
 
 - Bugfix
