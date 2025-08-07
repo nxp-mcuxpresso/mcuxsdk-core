@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -26,7 +26,6 @@ endif()
 
 SET(TARGET_TRIPLET "bin")
 
-
 set(AS "as")
 set(CC "gcc")
 set(CXX "g++")
@@ -34,7 +33,22 @@ set(CPP "gcc")
 set(OC "objcopy")
 set(OD "objdump")
 
+set(CORTEX_ACORE "ca53" "ca55")
+if(core_id IN_LIST CORTEX_ACORE)
+    # if core_id is specified, check whether it is Cortex-A core
+    set(PREFIX aarch64-none-elf-)
+    if(NOT EXISTS "${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${PREFIX}${CC}${TOOLCHAIN_EXT}")
+        message(FATAL_ERROR "***Wrong toolchain for CPU Core ${core_id}***")
+    endif()
+else()
+    # if core_id is not specified, fail back to a-core toolchain
+    if(NOT EXISTS "${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${PREFIX}${CC}${TOOLCHAIN_EXT}")
+        set(PREFIX aarch64-none-elf-)
+    endif()
+endif()
+
 set(CROSS_COMPILE ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${PREFIX})
+
 set(AS ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${PREFIX}${AS}${TOOLCHAIN_EXT})
 set(CC ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${PREFIX}${CC}${TOOLCHAIN_EXT})
 set(CXX ${TOOLCHAIN_ROOT}/${TARGET_TRIPLET}/${PREFIX}${CXX}${TOOLCHAIN_EXT})
