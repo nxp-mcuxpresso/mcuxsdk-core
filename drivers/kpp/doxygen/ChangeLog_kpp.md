@@ -1,5 +1,11 @@
 # KPP
 
+## [2.1.0]
+
+- Improvements
+  - Optimize rowData debounce method to adapt to multi-key detection
+  - Modify the KPP_keyPressScanning type to status_t.
+
 ## [2.0.1]
 
 - Bug Fixes
