@@ -112,3 +112,7 @@
 ## [2.2.16]
 
 - Add DSB instruction inside hashcrypt_sha_ldm_stm_16_words() to fix issues with some optimization flags
+
+## [2.2.17]
+
+- Fix context size when hashcrypt built with reload feature
