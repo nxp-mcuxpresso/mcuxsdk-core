@@ -1,5 +1,6 @@
 rsource "../../arch/arm/configuration/Kconfig"
 rsource "../../arch/arm/cortexm/Kconfig"
+rsource "../../arch/arm/cortexa/Kconfig"
 orsource "../../arch/arm/CMSIS/Kconfig"
 
 menu "Startup components"
