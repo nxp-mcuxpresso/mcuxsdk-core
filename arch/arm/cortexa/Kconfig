@@ -6,3 +6,13 @@ config CPU_CORTEX_A
     bool
     help
       This option signifies the use of a CPU of the Cortex-A family.
+
+config MCUX_PRJSEG_config.arm.core.ca53
+    bool
+    select CPU_CORTEX_A
+    default y if MCUX_HW_CORE_CA53
+
+config MCUX_PRJSEG_config.arm.core.ca55
+    bool
+    select CPU_CORTEX_A
+    default y if MCUX_HW_CORE_CA55
