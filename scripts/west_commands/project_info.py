@@ -16,6 +16,7 @@ import json
 import os
 import shutil
 
+from west import log
 from west.commands import WestCommand
 
 # Description text for the project-info west command that explains its purpose
@@ -56,11 +57,11 @@ class ProjectInfo(WestCommand):
         Handles both single-core and multi-core project configurations.
         """ 
         try:
-            print("Running CMake configuration build...")
+            log.inf("\nRunning CMake configuration build...")
             if self.args.core:
-                print(f"Target: {self.args.board} (core: {self.args.core})")
+                log.inf(f"Target: {self.args.board} (core: {self.args.core})")
             else:
-                print(f"Target: {self.args.board}")
+                log.inf(f"Target: {self.args.board}")
 
             build_output_path = os.path.join(self.output_dir, self.build_dir)
             if (self.args.core):
@@ -84,7 +85,7 @@ class ProjectInfo(WestCommand):
                 )
             
         except subprocess.CalledProcessError as e:
-            print("Error occurred:\n", e.stderr)
+            log.err("Error occurred:\n", e.stderr)
 
     def parse_build_output(self):
         """
@@ -98,19 +99,19 @@ class ProjectInfo(WestCommand):
         cmake_cache =  open(os.path.join(self.output_dir, self.build_dir, "CMakeCache.txt"), 'r').read()
         if cmake_cache:
             project_path_regex = r".*APPLICATION_SOURCE_DIR:PATH=([^\s]+)"
-            project_path = self.regex_match_heleper(project_path_regex, cmake_cache)
+            project_path = self.regex_match_helper(project_path_regex, cmake_cache)
 
             project_name_regex = r".*CMAKE_PROJECT_NAME:STATIC=([^\s]+)"
-            project_name = self.regex_match_heleper(project_name_regex, cmake_cache)
+            project_name = self.regex_match_helper(project_name_regex, cmake_cache)
 
             board_regex = r".*board:STRING=([^\s]+)"
-            board = self.regex_match_heleper(board_regex, cmake_cache)
+            board = self.regex_match_helper(board_regex, cmake_cache)
 
             device_regex = r".*device:STRING=([^\s]+)"
-            device = self.regex_match_heleper(device_regex, cmake_cache)
+            device = self.regex_match_helper(device_regex, cmake_cache)
 
             core_regex = r".*core_id:UNINITIALIZED=([^\s]+)"
-            core = self.regex_match_heleper(core_regex, cmake_cache)
+            core = self.regex_match_helper(core_regex, cmake_cache)
             
             self.project_info = {
                 "projectRootPath": project_path,
@@ -124,7 +125,7 @@ class ProjectInfo(WestCommand):
 
             return self.project_info
 
-    def regex_match_heleper(self, regex, string):
+    def regex_match_helper(self, regex, string):
         """
         Helper function to perform regex matching on strings.
         
@@ -166,9 +167,9 @@ class ProjectInfo(WestCommand):
             self.project_info["files"] = list(file_paths)
 
         except FileNotFoundError:
-            print(f"Compile commands file not found at {compile_commands_path}")
+            log.err(f"Compile commands file not found at {compile_commands_path}")
         except json.JSONDecodeError:
-            print(f"Error parsing compile commands JSON at {compile_commands_path}")
+            log.err(f"Error parsing compile commands JSON at {compile_commands_path}")
 
         return self.project_info
 
@@ -214,12 +215,11 @@ class ProjectInfo(WestCommand):
         Main execution method for the project-info west command.
         """
 
-        print("Starting project info extraction...")
-        print(f"Source directory: {args.source_dir}")
-        print(f"Board: {args.board}")
+        log.inf("Starting project info extraction...")
+        log.inf(f"Source directory: {args.source_dir}")
+        log.inf(f"Board: {args.board}")
         if args.core:
-            print(f"Core: {args.core}")
-        print()
+            log.inf(f"Core: {args.core}")
 
         self.args = args
         self.build_dir = "tmp_build"
@@ -232,20 +232,20 @@ class ProjectInfo(WestCommand):
 
         folder_exist = self.check_cfg_tools_folder()
         if not folder_exist:
-            print(f"Could not create output directory: {self.output_dir}")
+            log.err(f"Could not create output directory: {self.output_dir}")
 
 
         self.run_build_command()
 
-        print("\nCreating project_info.json file from build output...")
+        log.inf("\nCreating project_info.json file from build output...")
         self.parse_build_output()
         self.parse_compile_commands()
         self.create_json_file()
         self.delete_temp_build_file()
 
-        print("Project info extraction completed successfully!\n")
-        print(f"Output file: {os.path.join(os.path.abspath(self.output_dir), 'project_info.json')}")
-        print("-- Use the output file directory (cfg_tools) in Config Tools as a toolchain project information source. --")
+        log.inf("Project info extraction completed successfully!\n")
+        log.inf(f"Output file: {os.path.join(os.path.abspath(self.output_dir), 'project_info.json')}")
+        log.inf("-- Use the output file directory (cfg_tools) in Config Tools as a toolchain project information source. --")
 
 
         
