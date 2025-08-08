@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fix CERT INT31-C that the bool value shall be converted to unsigned int 0 or 1 then passed to registers.
+  - Fix MISRA 2012 20.3 vilation.
 
 ## [2.2.0]
 
