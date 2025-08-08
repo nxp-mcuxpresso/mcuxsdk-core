@@ -1,5 +1,10 @@
 # FLEXCAN
 
+## [2.14.4]
+
+- Bug Fixes
+  - Fixed violations of the MISRA C-2012 rules 8.4, 10.1, 10.4, 18.1.
+
 ## [2.14.3]
 
 - Improvements
