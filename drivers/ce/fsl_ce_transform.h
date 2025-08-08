@@ -10,6 +10,9 @@
 
 #include <stdint.h>
 
+// define FFT Error Codes
+#define FFT_ERROR_SZOUTSIDERANGE 0xE00B
+
 /*!
  * @ingroup ce
  * @defgroup ce_transform CE Transform Functions

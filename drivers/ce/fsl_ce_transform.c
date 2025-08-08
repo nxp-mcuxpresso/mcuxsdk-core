@@ -16,6 +16,12 @@ int CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int log2N)
 {
     int status;
 
+    if (log2N < 5 || log2N > 15)
+    {
+        status = FFT_ERROR_SZOUTSIDERANGE;
+        return status;
+    }
+
     ce_cmdstruct_t cmdstruct;
     cmdstruct.n_ptr_args         = 3;
     cmdstruct.n_param_args       = 1;
@@ -37,6 +43,12 @@ int CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int log2N)
 int CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int log2N)
 {
     int status;
+
+    if (log2N < 5 || log2N > 15)
+    {
+        status = FFT_ERROR_SZOUTSIDERANGE;
+        return status;
+    }
 
     ce_cmdstruct_t cmdstruct;
     cmdstruct.n_ptr_args         = 3;
@@ -60,6 +72,12 @@ int CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int log2N)
 {
     int status;
 
+    if (log2N < 5 || log2N > 15)
+    {
+        status = FFT_ERROR_SZOUTSIDERANGE;
+        return status;
+    }
+
     ce_cmdstruct_t cmdstruct;
     cmdstruct.n_ptr_args         = 3;
     cmdstruct.n_param_args       = 1;
@@ -81,6 +99,12 @@ int CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int log2N)
 int CE_TransformIFFT_F32(float *pY, float *pX, float *pScratch, int log2N)
 {
     int status;
+
+    if (log2N < 5 || log2N > 15)
+    {
+        status = FFT_ERROR_SZOUTSIDERANGE;
+        return status;
+    }
 
     ce_cmdstruct_t cmdstruct;
     cmdstruct.n_ptr_args         = 3;

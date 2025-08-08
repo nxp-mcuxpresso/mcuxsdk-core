@@ -30,24 +30,34 @@ extern "C" {
 #endif
 
 /*!
- * @brief Adds two MxN matrices with data in specified format
+ * @brief Calculates the sum of 2 real 16-bit integer (Q15) matrices.
  *
- * Adds two MxN matrices; matrices can be in either of row or columns major
- * formats.
- * Data precision and format is as defined by the argument type
+ * Computes C = A+B where A, B, C are an MxN real int16 matrices.
+ * The matrices A, B, and C are assumed to be in the same formats.
  *
- * @param pDst Pointer to buffer for output matrix
- * @param pA Pointer to buffer for input matrix A
- * @param pB Pointer to buffer for input matrix B
- * @param M  Number of rows for each input matrix
- * @param N  Number of columns for each input matrix
+ * @param pDst Pointer to real output matrix C (size MxN)
+ * @param pA Pointer to real input matrix A (size MxN)
+ * @param pB Pointer to real input matrix B (size MxN)
+ * @param M Number of rows of matrices A, B, C
+ * @param N Number of columns of matrices A, B, C
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
 int CE_MatrixAdd_Q15(int16_t *pDst, int16_t *pA, int16_t *pB, int M, int N);
 
 /*!
- * @copydoc CE_MatrixAdd_Q15
+ * @brief Calculates the sum of 2 real 32-bit integer (Q31) matrices
+ *
+ * Computes C = A+B where A, B, C are an MxN real int32 matrices.
+ * The matrices A, B, and C are assumed to be in the same formats.
+ *
+ * @param pDst Pointer to real output matrix C (size MxN)
+ * @param pA Pointer to real input matrix A (size MxN)
+ * @param pB Pointer to real input matrix B (size MxN)
+ * @param M Number of rows of matrices A, B, C
+ * @param N Number of columns of matrices A, B, C
+ *
+ * @return Return 0 if succeeded, otherwise return error code.
  */
 int CE_MatrixAdd_Q31(int32_t *pDst, int32_t *pA, int32_t *pB, int M, int N);
 
@@ -98,45 +108,6 @@ int CE_MatrixMul_F32(float *pDst, float *pA, float *pB, int M, int N, int P);
  */
 int CE_MatrixMul_CF32(float *pDst, float *pA, float *pB, int M, int N, int P);
 
-/*
- * @brief Matrix Inversion
- *
- * Calculates inv(A) where A is a MxM real matrix
- *
- * @param pAinv Pointer to buffer for output inverse matrix
- * @param pA    Pointer to buffer for input matrix A
- * @param M     Number of rows or columns of A
- *
- * @return Return 0 if succeeded, otherwise return error code.
- */
-int CE_MatrixInv_F32(float *pAinv, float *pA, int M);
-
-/*
- * @brief Matrix Inversion
- *
- * Calculates inv(A) where A is a MxM symmetric real matrix
- *
- * @param pAinv Pointer to buffer for output inverse matrix
- * @param pA    Pointer to buffer for input matrix A
- * @param M     Number of rows or columns of A
- *
- * @return Return 0 if succeeded, otherwise return error code.
- */
-int CE_MatrixInvSymm_F32(float *pAinv, float *pA, int M);
-
-/*
- * @brief Matrix Inversion
- *
- * Calculates inv(A) where A is a MxM complex matrix
- *
- * @param pAinv Pointer to buffer for output inverse matrix
- * @param pA    Pointer to buffer for input matrix A
- * @param M     Number of rows or columns of A
- *
- * @return Return 0 if succeeded, otherwise return error code.
- */
-int CE_MatrixInv_CF32(float *pAinv, float *pA, int M);
-
 /*!
  * @brief Matrix Inversion
  *
@@ -182,7 +153,7 @@ int CE_MatrixInvHerm_CF32(
  * @param pUout      Pointer to buffer with output Eigen Values (Mx1)
  * @param pUin       Pointer to buffer for input matrix A
  * @param M          Number of rows or columns of A
- * @param pScratch   Scratch memory, the minimum scratch size required is (40 x 40 x 4 + 360) x 4 bytes.
+ * @param pScratch   Scratch memory, the minimum scratch size required is (M x M x 4 + 360) x 4 bytes.
  * @param tol        Tolerance specifying exit condition for the iterative computation
  * @param max_iter   Upper bound on number of iterations for convergence of each Eigen value
  * @param flag_packedInput Flag indicating input matrix format.
@@ -201,19 +172,25 @@ int CE_MatrixEvdHerm_CF32(float *pLambdaOut,
                           uint8_t flag_packedInput);
 
 /*!
- * @brief Cholesky Decomposition
+ * @brief Calculates the Cholesky Decomposition of a complex Hermitian matrix (in float32 precision).
  *
- * Calculates L = chol(A) where A is a MxM complex Hermitian matrix
- * This Cholesky Decomposition returns a lower triangular matrix L,
- * such that A = L*L^H, A and L are expected to be in column major format
+ * Computes the Cholesky Decomposition of a complex Hermitian 32-bit floating point MxM input matrix, that is:
+ * L = chol(A), L is lower triangular matrix such that A = L*LH.
+ * Input matrix is expected to be row major format and can either be packed (that is, only the upper
+ * triangular elements are part of the input structure), or, as a full MxM matrix.
+ * Only the lower diagonal part of the output matrix is written (since the output matrix is triangular).
+ * The output format is also row major. Thus, total number of output elements is given by Mc, where:
+ * Mc = (M+1)*M/2. The input, output and scratch buffers must be unique allocations.
  *
- * @param pL Pointer to buffer for output triangular matrix L
- * @param pA Pointer to buffer for input matrix A
- * @param M  Number of rows or columns of A
+ * @param pL Pointer to the Cholesky Decomposition output triangular matrix. Mc elements are written. (complex float32 data) in row major format
+ * @param pA Pointer to the MxM input matrix (or Mc element packed matrix) in row major format (complex float32 data)
+ * @param pScratch Pointer to a scratch buffer (minimum size Mc*8 bytes)
+ * @param M Number of rows or columns of input matrix A
+ * @param flag_packedInput Set to 0 if the input is a full matrix, or, set to 1 if the input is a packed upper triangular matrix.
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_MatrixChol_CF32(float *pL, float *pA, int M);
+int CE_MatrixChol_CF32(float *pL, float *pA, float *pScratch, int M, uint8_t flag_packedInput);
 
 #ifdef __cplusplus
 }
