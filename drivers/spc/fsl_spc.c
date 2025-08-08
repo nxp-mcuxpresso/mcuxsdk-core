@@ -159,6 +159,10 @@ status_t SPC_SetActiveModeBandgapModeConfig(SPC_Type *base, spc_bandgap_mode_t m
             return kStatus_SPC_BandgapModeWrong;
         }
 
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         /* The bandgap mode must be enabled if any regulators' drive strength set as Normal. */
         if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_SYSLDO_VDD_DS_MASK) ==
                 SPC_ACTIVE_CFG_SYSLDO_VDD_DS(kSPC_SysLDO_NormalDriveStrength) ||
@@ -253,6 +257,10 @@ status_t SPC_SetLowPowerModeBandgapmodeConfig(SPC_Type *base, spc_bandgap_mode_t
             return kStatus_SPC_BandgapModeWrong;
         }
 
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         /* The bandgap mode must be enabled if any regulators' drive strength set as Normal. */
         if (((base->LP_CFG & SPC_LP_CFG_DCDC_VDD_DS_MASK) == SPC_LP_CFG_DCDC_VDD_DS(kSPC_DCDC_NormalDriveStrength)) ||
             ((base->LP_CFG & SPC_LP_CFG_SYSLDO_VDD_DS_MASK) ==
@@ -818,6 +826,10 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
     }
 
 #if defined(FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS) && FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS
+    /*
+     * $Branch Coverage Justification$
+     * $ref spc_c_ref_1$.
+     */
     if (option->CoreLDODriveStrength == kSPC_CoreLDO_LowDriveStrength)
     {
         /* If any voltage detect feature is enabled in Active mode, then CORE_LDO's drive strength must not set to low.
@@ -920,6 +932,10 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_low
         }
 
         preVoltage = SPC_GetLowPowerCoreLDOVDDVoltageLevel(base);
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         /* Core LDO voltage level can only be changed when the Core LDO Drive Strength set to Normal */
         if ((option->CoreLDOVoltage >= kSPC_CoreLDO_MidDriveVoltage) && (preVoltage != option->CoreLDOVoltage))
         {
@@ -1016,6 +1032,10 @@ status_t SPC_SetActiveModeSystemLDORegulatorConfig(SPC_Type *base, const spc_act
             return kStatus_SPC_SYSLDOLowDriveStrengthIgnore;
         }
 
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         /* If select voltage level as Over Drive Voltage, Drive Strength can not be set to low. */
         if (option->SysLDOVoltage == kSPC_SysLDO_OverDriveVoltage)
         {
@@ -1252,6 +1272,10 @@ status_t SPC_SetLowPowerModeDCDCRegulatorConfig(SPC_Type *base, const spc_lowpow
 
     if (state != 0UL)
     {
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         /* If any HVD/LVDs are kept enabled write to set DCDC regulator's drive strength to low/pluse refresh will be
          * ignored. */
         if (option->DCDCDriveStrength == kSPC_DCDC_PulseRefreshMode)
@@ -1397,6 +1421,10 @@ status_t SPC_SetActiveModeRegulatorsConfig(SPC_Type *base, const spc_active_mode
     if (status == kStatus_Success)
     {
         status = SPC_SetActiveModeDCDCRegulatorConfig(base, &config->DCDCOption);
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         if (status == kStatus_Success)
         {
             while (SPC_GetBusyStatusFlag(base) == true)
@@ -1541,6 +1569,10 @@ status_t SPC_SetHighPowerModeBandgapModeConfig(SPC_Type *base, spc_bandgap_mode_
             return kStatus_SPC_BandgapModeWrong;
         }
 
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         /* state of GLITCH_DETECT_DISABLE will be ignored if bandgap is disabled. */
         if ((base->HP_CFG & SPC_HP_CFG_GLITCH_DETECT_DISABLE_MASK) == 0UL)
         {
@@ -1601,6 +1633,10 @@ status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base, spc_hp_mode_
 #if defined(FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS) && FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS
     if (option->CoreLDODriveStrength == kSPC_CoreLDO_LowDriveStrength)
     {
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         /* If any voltage detect feature is enabled in High power mode, then CORE_LDO's drive strength must not set to
          * low.
          */
@@ -1681,6 +1717,10 @@ status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, spc_hp_mod
 
     if (option->SysLDODriveStrength == kSPC_SysLDO_NormalDriveStrength)
     {
+        /*
+         * $Branch Coverage Justification$
+         * $ref spc_c_ref_1$.
+         */
         /* When select System LDO voltage level to Over Drive voltage, The HVD of System LDO must be disabled. */
         if (((base->HP_CFG & SPC_HP_CFG_SYS_HVDE_MASK) != 0UL) &&
             (option->SysLDOVoltage == kSPC_SysLDO_OverDriveVoltage))
