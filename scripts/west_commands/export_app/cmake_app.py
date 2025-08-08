@@ -83,6 +83,9 @@ class CmakeApp(object):
             'CMAKE_CURRENT_SOURCE_DIR': self.source_dir.as_posix()
         })
         if self.misc_options.get('board_copy_folders'):
+            self.app_copy_folders = self.misc_options['board_copy_folders']
+            if self.misc_options.get('freestanding_copied_folders'):
+                self.app_copy_folders.extend(self.misc_options['freestanding_copied_folders'])
             self.need_copy_board_files = True
             self.dest_board_dirname = self.cmake_variables['board']
             if self.cmake_variables.get('core_id'):
@@ -104,6 +107,8 @@ class CmakeApp(object):
                 self.example_info = self.example_yml[k]
                 self.extra_files = self.example_info.get('contents', {}).get('extra_files', [])
                 self.is_sysbuild = self._is_sysbuild()
+                if (freestanding_copied_folders := self.example_info.get('contents', {}).get('freestanding_copied_folders', [])):
+                    self.misc_options['freestanding_copied_folders'] = freestanding_copied_folders
                 continue
             if not (extra_build_args := v.get('contents', {}).get('document', {}).get('extra_build_args')):
                 continue
@@ -522,7 +527,7 @@ class CmakeApp(object):
                     ]
         if self.cmake_variables.get('core_id'):
             cmd_list.append(f'-Dcore_id={self.cmake_variables["core_id"]}')
-        for folder in self.misc_options.get('board_copy_folders', []):
+        for folder in self.app_copy_folders:
             cmd_list.extend(['--trace-dir', f'"{folder}"'])
         return cmd_list
 
@@ -538,7 +543,7 @@ class CmakeApp(object):
         if not linked_source.exists():
             logger.fatal(f"Cannot find the sysbuild app dir {linked_source.as_posix()}")
         if self.need_copy_board_files:
-            if not self.misc_options.get('board_copy_folders'):
+            if not self.misc_options.get('sysbuild_variables'):
                 self.misc_options['sysbuild_variables'] = {}
             for k, v in o_func.single_args.items():
                 if k == 'SOURCE_DIR':
@@ -569,6 +574,8 @@ class CmakeApp(object):
         '''
         if not (var_name := o_func.nargs[0]):
             logger.error("Cannot find the variable name to set.")
+            return o_func
+        if len(o_func.nargs) == 1:
             return o_func
         if not (var_value := o_func.nargs[1]):
             logger.error("Cannot find the variable value to set.")

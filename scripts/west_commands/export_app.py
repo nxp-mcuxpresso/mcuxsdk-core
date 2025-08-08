@@ -18,7 +18,7 @@ from misc import sdk_project_target
 _ARG_SEPARATOR = '--'
 SDK_ROOT_DIR = SCRIPT_DIR.parent
 DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/sdk/example_development.html#freestanding-examples'
-DEFAULT_BOARD_FOLDERS=["examples"]
+DEFAULT_BOARD_FOLDERS=["examples/"]
 
 USAGE = f'''\
 west export_app [-h] [source_dir] [-b board_id] [-DCMAKE_VAR=VAL] [-o OUTPUT_DIR] [--build]
@@ -176,7 +176,7 @@ class ExportApp(WestCommand):
                           {os.linesep}west list_project -p {self.source_dir} -b {board_core}')
         self.misc_options['target_apps'] = target_apps
         if self.args.board_copy_folders:
-            self.misc_options['board_copy_folders'] = [ (SDK_ROOT_DIR / p).as_posix() for p in self.args.board_copy_folders ]
+            self.misc_options['board_copy_folders'] = self.args.board_copy_folders
 
     def check_force(self, cond, msg):
         if not cond:

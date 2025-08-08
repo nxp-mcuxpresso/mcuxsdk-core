@@ -138,6 +138,13 @@
                                 ],
                                 "additionalProperties": false
                             }
+                        },
+                        "freestanding_copied_folders": {
+                            "type": "array",
+                            "description": "List of custom copy folders for export_app",
+                            "items": {
+                              "type": "string"
+                            }
                         }
                     },
                     "required": [

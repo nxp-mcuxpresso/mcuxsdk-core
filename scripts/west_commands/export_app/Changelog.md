@@ -4,6 +4,7 @@
 
 - New Features
   - Support new option "--bf", this will copy board files to the output directory.
+  - User can set "freestanding_copied_folders" in example.yml => example => contents to specify default board copy folders.
   - Support set output_dir and clean_output_dir in west config file.
 
 - Improvements
