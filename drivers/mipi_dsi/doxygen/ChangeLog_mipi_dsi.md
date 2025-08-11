@@ -1,5 +1,11 @@
 # MIPI_DSI
 
+## [2.3.0]
+
+- Bug Fixes
+  - Fixed typo in member of dsi_transfer_t structure. The sendDscCmd and dscCmd shall
+    be sendDcsCmd and dcsCmd.
+
 ## [2.2.2]
 
 - Bug Fixes

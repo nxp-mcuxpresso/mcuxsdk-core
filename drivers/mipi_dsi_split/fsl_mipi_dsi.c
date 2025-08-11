@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022,2024 NXP
+ * Copyright 2020-2022,2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -856,7 +856,7 @@ void DSI_WriteApbTxPayload(const MIPI_DSI_Type *base, const uint8_t *payload, ui
 }
 
 void DSI_WriteApbTxPayloadExt(
-    const MIPI_DSI_Type *base, const uint8_t *payload, uint16_t payloadSize, bool sendDscCmd, uint8_t dscCmd)
+    const MIPI_DSI_Type *base, const uint8_t *payload, uint16_t payloadSize, bool sendDcsCmd, uint8_t dcsCmd)
 {
     uint32_t firstWord;
     uint16_t i;
@@ -865,7 +865,7 @@ void DSI_WriteApbTxPayloadExt(
 
     DSI_HOST_APB_PKT_IF_Type *apb = base->apb;
 
-    if (sendDscCmd)
+    if (sendDcsCmd)
     {
         payloadSizeLocal += 1U;
     }
@@ -873,9 +873,9 @@ void DSI_WriteApbTxPayloadExt(
     assert(payloadSizeLocal <= FSL_DSI_TX_MAX_PAYLOAD_BYTE);
 
     /* The first 4-byte. */
-    if (sendDscCmd)
+    if (sendDcsCmd)
     {
-        firstWord = dscCmd;
+        firstWord = dcsCmd;
     }
     else
     {
@@ -953,10 +953,10 @@ static status_t DSI_PrepareApbTransfer(const MIPI_DSI_Type *base, dsi_transfer_t
         }
 
         /* ========================== Prepare TX. ========================== */
-        /* If xfer->sendDscCmd is true, then the DSC command is not included in the
-           xfer->txData, but specified by xfer->dscCmd.
+        /* If xfer->sendDcsCmd is true, then the DCS command is not included in the
+           xfer->txData, but specified by xfer->dcsCmd.
          */
-        if (xfer->sendDscCmd)
+        if (xfer->sendDcsCmd)
         {
             txDataSize = (uint32_t)xfer->txDataSize + 1U;
         }
@@ -976,9 +976,9 @@ static status_t DSI_PrepareApbTransfer(const MIPI_DSI_Type *base, dsi_transfer_t
             {
                 txDataIndex = 0;
 
-                if (xfer->sendDscCmd)
+                if (xfer->sendDcsCmd)
                 {
-                    wordCount = xfer->dscCmd;
+                    wordCount = xfer->dcsCmd;
                 }
                 else
                 {
@@ -995,7 +995,7 @@ static status_t DSI_PrepareApbTransfer(const MIPI_DSI_Type *base, dsi_transfer_t
         else
         {
             wordCount = (uint16_t)txDataSize;
-            DSI_WriteApbTxPayloadExt(base, xfer->txData, xfer->txDataSize, xfer->sendDscCmd, xfer->dscCmd);
+            DSI_WriteApbTxPayloadExt(base, xfer->txData, xfer->txDataSize, xfer->sendDcsCmd, xfer->dcsCmd);
         }
 
         DSI_SetApbPacketControl(base, wordCount, xfer->virtualChannel, xfer->txDataType, xfer->flags);
