@@ -1,5 +1,9 @@
 # FLASH
 
+## [3.3.0]
+- New Feature
+  - Support for EEPROM Quick Write on devices with FTFC
+
 ## [3.2.0]
 
 - New Feature

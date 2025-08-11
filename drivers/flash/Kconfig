@@ -59,5 +59,14 @@ if MCUX_COMPONENT_driver.flash
 
         endif
 
+        config IFLASH_EEPROM_QUICK_WRITE
+        bool "Use EEPROM Quick Write mode in flexnvm_eeprom example"
+        default n
+        depends on MCUX_HW_IP_DriverType_FTFC
+        help
+            This option enables EEPROM Quick Write mode in flexnvm_eeprom example
+            instead of the normal EEPROM mode. This is currently only available for
+            devices with FTFC flash controller such as MCXE247.
+
     endmenu
 endif
