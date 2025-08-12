@@ -76,6 +76,7 @@ toolchains:
     compiler_version: 19.1.7
     vendor: NXP Semiconductors
     vendor_url: http://www.nxp.com
+    included: always
     os:
     - windows
     - linux
