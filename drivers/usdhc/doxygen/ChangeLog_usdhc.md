@@ -1,5 +1,10 @@
 # USDHC
 
+## [2.8.6]
+
+- Bug Fixes
+  - Invalidate cache after blocking read.
+
 ## [2.8.5]
 
 - Improvements
