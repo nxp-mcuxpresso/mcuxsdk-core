@@ -1,6 +1,6 @@
 # Copyright 2024-2025 NXP
 #
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BSD-3-Clause
 
 import os, sys
 import argparse
