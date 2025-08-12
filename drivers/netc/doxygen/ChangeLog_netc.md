@@ -1,5 +1,10 @@
 # NETC
 
+## [2.10.2]
+
+- Bug Fixes
+  - Correct transmit start time bit width of transmit buffer descriptor format.
+
 ## [2.10.1]
 
 - New Features
