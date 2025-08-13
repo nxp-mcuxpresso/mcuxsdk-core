@@ -74,8 +74,13 @@ static inline uint16_t PWM_GetComplementU16(uint16_t value)
 
 static inline uint16_t dutyCycleToReloadValue(uint8_t dutyCyclePercent)
 {
+    uint32_t dutyCycleCount;
+
     /* Rounding calculations to improve the accuracy of reloadValue */
-    return ((65535U * dutyCyclePercent) + 50U) / 100U;
+    dutyCycleCount = ((65535UL * dutyCyclePercent) + 50UL) / 100UL;
+    assert(dutyCycleCount <= 0xFFFFU);
+
+    return (uint16_t)dutyCycleCount;
 }
 
 static uint32_t PWM_GetInstance(PWM_Type *base)
@@ -509,7 +514,7 @@ status_t PWM_SetupPwm(PWM_Type *base,
     uint32_t pwmClock;
     uint16_t pulseCnt = 0, pwmHighPulse = 0;
     uint16_t polarityShift = 0, outputEnableShift = 0;
-    uint32_t temp;
+    uint32_t ticksTemp;
     uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
     assert(subModuleMsk <= 0x8U);
 
@@ -525,9 +530,9 @@ status_t PWM_SetupPwm(PWM_Type *base,
     /* Divide the clock by the prescale value */
     pwmClock = (srcClock_Hz / (1UL << ((base->SM[subModule].CTRL & PWM_CTRL_PRSC_MASK) >> PWM_CTRL_PRSC_SHIFT)));
 
-    temp = pwmClock / pwmFreq_Hz;
-    assert(temp <= 0xFFFFU);
-    pulseCnt = (uint16_t)(temp);
+    ticksTemp = pwmClock / pwmFreq_Hz;
+    assert(ticksTemp <= 0xFFFFU);
+    pulseCnt = (uint16_t)ticksTemp;
 
     /* Update register about period */
     PWM_SetPeriodRegister(base, subModule, mode, pulseCnt);
@@ -536,7 +541,9 @@ status_t PWM_SetupPwm(PWM_Type *base,
     for (i = 0; i < numOfChnls; i++)
     {
         /* Calculate pulse width */
-        pwmHighPulse = (pulseCnt * chnlParams->dutyCyclePercent) / 100U;
+        ticksTemp = ((uint32_t)pulseCnt * chnlParams->dutyCyclePercent) / 100UL;
+        assert(ticksTemp <= 0xFFFFU);
+        pwmHighPulse = (uint16_t)ticksTemp;
 
         /* Update register about dutycycle */
         PWM_SetDutycycleRegister(base, subModule, chnlParams->pwmChannel, mode, pulseCnt, pwmHighPulse);
@@ -639,8 +646,9 @@ status_t PWM_SetupPwmPhaseShift(PWM_Type *base,
 
     uint32_t pwmClock;
     uint16_t pulseCnt = 0, pwmHighPulse = 0;
-    uint16_t modulo = 0;
+    uint16_t modulo = 0, complement = 0;
     uint16_t shift  = 0;
+    uint32_t ticksTemp;
     uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
     assert(subModuleMsk <= 0x8U);
 
@@ -648,7 +656,10 @@ status_t PWM_SetupPwmPhaseShift(PWM_Type *base,
     {
         /* Divide the clock by the prescale value */
         pwmClock = (srcClock_Hz / (1UL << ((base->SM[subModule].CTRL & PWM_CTRL_PRSC_MASK) >> PWM_CTRL_PRSC_SHIFT)));
-        pulseCnt = (uint16_t)(pwmClock / pwmFreq_Hz);
+
+        ticksTemp = pwmClock / pwmFreq_Hz;
+        assert(ticksTemp <= 0xFFFFU);
+        pulseCnt = (uint16_t)ticksTemp;
 
         /* Clear LDOK bit if it is set */
         if (0U != (base->MCTRL & PWM_MCTRL_LDOK(subModuleMsk)))
@@ -657,8 +668,10 @@ status_t PWM_SetupPwmPhaseShift(PWM_Type *base,
         }
 
         modulo = (pulseCnt >> 1U);
+        complement = PWM_GetComplementU16(modulo);
+
         /* Indicates the start of the PWM period */
-        base->SM[subModule].INIT = PWM_GetComplementU16(modulo);
+        base->SM[subModule].INIT = complement;
         /* Indicates the center value */
         base->SM[subModule].VAL0 = 0;
         /* Indicates the end of the PWM period */
@@ -669,20 +682,22 @@ status_t PWM_SetupPwmPhaseShift(PWM_Type *base,
         base->SM[subModule].CTRL |= PWM_CTRL_LDMOD_MASK;
 
         /* phase shift value */
-        shift = (pulseCnt * shiftvalue) / 100U;
+        ticksTemp = ((uint32_t)pulseCnt * (uint32_t)shiftvalue) / 100UL;
+        assert(ticksTemp <= 0xFFFFU);
+        shift = (uint16_t)ticksTemp;
 
         /* duty cycle 50% */
         pwmHighPulse = pulseCnt / 2U;
 
         if (pwmChannel == kPWM_PwmA)
         {
-            base->SM[subModule].VAL2 = PWM_GetComplementU16(modulo) + shift;
-            base->SM[subModule].VAL3 = PWM_GetComplementU16(modulo) + pwmHighPulse + shift - 1U;
+            base->SM[subModule].VAL2 = complement + shift;
+            base->SM[subModule].VAL3 = complement + pwmHighPulse + shift - 1U;
         }
         else if (pwmChannel == kPWM_PwmB)
         {
-            base->SM[subModule].VAL4 = PWM_GetComplementU16(modulo) + shift;
-            base->SM[subModule].VAL5 = PWM_GetComplementU16(modulo) + pwmHighPulse + shift - 1U;
+            base->SM[subModule].VAL4 = complement + shift;
+            base->SM[subModule].VAL5 = complement + pwmHighPulse + shift - 1U;
         }
         else
         {
@@ -748,28 +763,29 @@ void PWM_UpdatePwmDutycycle(PWM_Type *base,
 void PWM_UpdatePwmDutycycleHighAccuracy(
     PWM_Type *base, pwm_submodule_t subModule, pwm_channels_t pwmSignal, pwm_mode_t currPwmMode, uint16_t dutyCycle)
 {
-    uint16_t pulseCnt = 0, pwmHighPulse = 0;
-    uint16_t pulseEndCnt;
+    uint16_t pulseCnt, pulseEndCnt;
+    uint32_t pwmHighPulse;
     uint8_t subModuleSync;
 
     /* If submodule initialization control is Master Sync, PWM period is submodule 0 PWM period. */
     if (((base->SM[subModule].CTRL2 & PWM_CTRL2_INIT_SEL_MASK) >> PWM_CTRL2_INIT_SEL_SHIFT) ==
-        kPWM_Initialize_MasterSync)
+        (uint16_t)kPWM_Initialize_MasterSync)
     {
-        subModuleSync = kPWM_Module_0;
+        subModuleSync = (uint8_t)kPWM_Module_0;
     }
     else
     {
-        subModuleSync = subModule;
+        subModuleSync = (uint8_t)subModule;
     }
 
     /* Get pwm period and pulse width. */
     pulseEndCnt = base->SM[subModuleSync].VAL1;
     pulseCnt = pulseEndCnt - base->SM[subModuleSync].INIT + 1U;
-    pwmHighPulse = (pulseCnt * dutyCycle) / 65535U;
+    pwmHighPulse = ((uint32_t)pulseCnt * (uint32_t)dutyCycle) / 65535UL;
+    assert(pwmHighPulse <= 0xFFFFU);
 
     /* Update register about dutycycle */
-    PWM_SetDutycycleRegister(base, subModule, pwmSignal, currPwmMode, pulseCnt, pwmHighPulse);
+    PWM_SetDutycycleRegister(base, subModule, pwmSignal, currPwmMode, pulseCnt, (uint16_t)pwmHighPulse);
 
     /* Get the pwm duty cycle */
     s_pwmGetPwmDutyCycle[subModule][pwmSignal] = (uint8_t)(dutyCycle * 100U / 65535U);
@@ -806,11 +822,14 @@ void PWM_UpdatePwmPeriodAndDutycycle(PWM_Type *base,
                                      uint16_t dutyCycle)
 {
     uint16_t pwmHighPulse = 0;
+    uint32_t ticksTemp;
 
     assert(pwmSignal != kPWM_PwmX);
 
     /* Calculate pulse width */
-    pwmHighPulse = (pulseCnt * dutyCycle) / 65535U;
+    ticksTemp = ((uint32_t)pulseCnt * (uint32_t)dutyCycle) / 65535UL;
+    assert(ticksTemp <= 0xFFFFU);
+    pwmHighPulse = (uint16_t)ticksTemp;
 
     /* Update register about period */
     PWM_SetPeriodRegister(base, subModule, currPwmMode, pulseCnt);
@@ -1110,6 +1129,8 @@ void PWM_SetupForceSignal(PWM_Type *base, pwm_submodule_t subModule, pwm_channel
 status_t PWM_SetOutputToIdle(PWM_Type *base, pwm_channels_t pwmChannel, pwm_submodule_t subModule, bool idleStatus)
 {
     uint16_t valOn = 0, valOff = 0;
+    uint16_t init;
+    uint32_t val1;
     uint16_t ldmod;
     uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
     assert(subModuleMsk <= 0x8U);
@@ -1120,8 +1141,12 @@ status_t PWM_SetOutputToIdle(PWM_Type *base, pwm_channels_t pwmChannel, pwm_subm
         base->MCTRL |= PWM_MCTRL_CLDOK(subModuleMsk);
     }
 
-    valOff = base->SM[subModule].INIT;
-    valOn  = base->SM[subModule].VAL1 + 0x1U;
+    init = base->SM[subModule].INIT;
+    val1 = base->SM[subModule].VAL1 + 1UL;
+
+    assert(val1 <= 0xFFFFU);
+    valOn  = (uint16_t)val1;
+    valOff = init;
 
     if ((valOff + 1U) == valOn)
     {
@@ -1135,16 +1160,16 @@ status_t PWM_SetOutputToIdle(PWM_Type *base, pwm_channels_t pwmChannel, pwm_subm
         {
             if (!idleStatus)
             {
-                valOn  = base->SM[subModule].INIT;
-                valOff = base->SM[subModule].VAL1 + 0x1U;
+                valOn  = init;
+                valOff = (uint16_t)val1;
             }
         }
         else
         {
             if (idleStatus)
             {
-                valOn  = base->SM[subModule].INIT;
-                valOff = base->SM[subModule].VAL1 + 0x1U;
+                valOn  = init;
+                valOff = (uint16_t)val1;
             }
         }
         base->SM[subModule].VAL2 = valOn;
@@ -1156,16 +1181,16 @@ status_t PWM_SetOutputToIdle(PWM_Type *base, pwm_channels_t pwmChannel, pwm_subm
         {
             if (!idleStatus)
             {
-                valOn  = base->SM[subModule].INIT;
-                valOff = base->SM[subModule].VAL1 + 0x1U;
+                valOn  = init;
+                valOff = (uint16_t)val1;
             }
         }
         else
         {
             if (idleStatus)
             {
-                valOn  = base->SM[subModule].INIT;
-                valOff = base->SM[subModule].VAL1 + 0x1U;
+                valOn  = init;
+                valOff = (uint16_t)val1;
             }
         }
         base->SM[subModule].VAL4 = valOn;
