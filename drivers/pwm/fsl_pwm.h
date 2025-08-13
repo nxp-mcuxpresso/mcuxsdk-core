@@ -23,9 +23,9 @@
 /*! @} */
 
 /*! Number of bits per submodule for software output control */
-#define PWM_SUBMODULE_SWCONTROL_WIDTH 2
+#define PWM_SUBMODULE_SWCONTROL_WIDTH 2U
 /*! Submodule channels include PWMA, PWMB, PWMX. */
-#define PWM_SUBMODULE_CHANNEL 3
+#define PWM_SUBMODULE_CHANNEL 3U
 
 /*! @brief List of PWM submodules */
 typedef enum _pwm_submodule
@@ -706,7 +706,7 @@ void PWM_SetupForceSignal(PWM_Type *base,
 static inline void PWM_EnableInterrupts(PWM_Type *base, pwm_submodule_t subModule, uint32_t mask)
 {
     /* Upper 16 bits are for related to the submodule */
-    base->SM[subModule].INTEN |= ((uint16_t)mask & 0xFFFFU);
+    base->SM[subModule].INTEN |= (uint16_t)(mask & 0xFFFFUL);
     /* Fault related interrupts */
     base->FCTRL |= ((uint16_t)(mask >> 16U) & PWM_FCTRL_FIE_MASK);
 }
@@ -721,7 +721,7 @@ static inline void PWM_EnableInterrupts(PWM_Type *base, pwm_submodule_t subModul
  */
 static inline void PWM_DisableInterrupts(PWM_Type *base, pwm_submodule_t subModule, uint32_t mask)
 {
-    base->SM[subModule].INTEN &= ~((uint16_t)mask & 0xFFFFU);
+    base->SM[subModule].INTEN &= ~(uint16_t)(mask & 0xFFFFUL);
     base->FCTRL &= ~((uint16_t)(mask >> 16U) & PWM_FCTRL_FIE_MASK);
 }
 
@@ -874,7 +874,7 @@ static inline void PWM_ClearStatusFlags(PWM_Type *base, pwm_submodule_t subModul
 {
     uint16_t reg;
 
-    base->SM[subModule].STS = ((uint16_t)mask & 0xFFFFU);
+    base->SM[subModule].STS = (uint16_t)(mask & 0xFFFFUL);
     reg                     = base->FSTS;
     /* Clear the fault flags and set only the ones we wish to clear as the fault flags are cleared
      * by writing a login one
@@ -1024,6 +1024,8 @@ static inline void PWM_OutputTriggerEnable(PWM_Type *base,
                                            pwm_value_register_t valueRegister,
                                            bool activate)
 {
+    assert((uint16_t)valueRegister <= 5U);
+
     if (activate)
     {
         base->SM[subModule].TCTRL |= ((uint16_t)1U << (uint16_t)valueRegister);
@@ -1077,15 +1079,17 @@ static inline void PWM_DeactivateOutputTrigger(PWM_Type *base, pwm_submodule_t s
  */
 static inline void PWM_SetupSwCtrlOut(PWM_Type *base, pwm_submodule_t subModule, pwm_channels_t pwmChannel, bool value)
 {
+    assert(pwmChannel != kPWM_PwmX);
+    uint32_t swcout = (((uint32_t)subModule * PWM_SUBMODULE_SWCONTROL_WIDTH) + (uint32_t)pwmChannel);
+    assert(swcout <= 7U);
+
     if (value)
     {
-        base->SWCOUT |=
-            ((uint16_t)1U << (((uint16_t)subModule * (uint16_t)PWM_SUBMODULE_SWCONTROL_WIDTH) + (uint16_t)pwmChannel));
+        base->SWCOUT |= ((uint16_t)1U << swcout);
     }
     else
     {
-        base->SWCOUT &=
-            ~((uint16_t)1U << (((uint16_t)subModule * (uint16_t)PWM_SUBMODULE_SWCONTROL_WIDTH) + (uint16_t)pwmChannel));
+        base->SWCOUT &= ~((uint16_t)1U << swcout);
     }
 }
 
@@ -1209,17 +1213,20 @@ static inline void PWM_SetupFaultDisableMap(PWM_Type *base,
  */
 static inline void PWM_OutputEnable(PWM_Type *base, pwm_channels_t pwmChannel, pwm_submodule_t subModule)
 {
+    uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
+    assert(subModuleMsk <= 0x8U);
+
     /* Set PWM output */
     switch (pwmChannel)
     {
         case kPWM_PwmA:
-            base->OUTEN |= ((uint16_t)1U << ((uint16_t)PWM_OUTEN_PWMA_EN_SHIFT + (uint16_t)subModule));
+            base->OUTEN |= ((uint16_t)subModuleMsk << PWM_OUTEN_PWMA_EN_SHIFT);
             break;
         case kPWM_PwmB:
-            base->OUTEN |= ((uint16_t)1U << ((uint16_t)PWM_OUTEN_PWMB_EN_SHIFT + (uint16_t)subModule));
+            base->OUTEN |= ((uint16_t)subModuleMsk << PWM_OUTEN_PWMB_EN_SHIFT);
             break;
         case kPWM_PwmX:
-            base->OUTEN |= ((uint16_t)1U << ((uint16_t)PWM_OUTEN_PWMX_EN_SHIFT + (uint16_t)subModule));
+            base->OUTEN |= ((uint16_t)subModuleMsk << PWM_OUTEN_PWMX_EN_SHIFT);
             break;
         default:
             assert(false);
@@ -1239,16 +1246,19 @@ static inline void PWM_OutputEnable(PWM_Type *base, pwm_channels_t pwmChannel, p
  */
 static inline void PWM_OutputDisable(PWM_Type *base, pwm_channels_t pwmChannel, pwm_submodule_t subModule)
 {
+    uint32_t subModuleMsk = 1UL << (uint32_t)subModule;
+    assert(subModuleMsk <= 0x8U);
+
     switch (pwmChannel)
     {
         case kPWM_PwmA:
-            base->OUTEN &= ~((uint16_t)1U << ((uint16_t)PWM_OUTEN_PWMA_EN_SHIFT + (uint16_t)subModule));
+            base->OUTEN &= ~((uint16_t)subModuleMsk << PWM_OUTEN_PWMA_EN_SHIFT);
             break;
         case kPWM_PwmB:
-            base->OUTEN &= ~((uint16_t)1U << ((uint16_t)PWM_OUTEN_PWMB_EN_SHIFT + (uint16_t)subModule));
+            base->OUTEN &= ~((uint16_t)subModuleMsk << PWM_OUTEN_PWMB_EN_SHIFT);
             break;
         case kPWM_PwmX:
-            base->OUTEN &= ~((uint16_t)1U << ((uint16_t)PWM_OUTEN_PWMX_EN_SHIFT + (uint16_t)subModule));
+            base->OUTEN &= ~((uint16_t)subModuleMsk << PWM_OUTEN_PWMX_EN_SHIFT);
             break;
         default:
             assert(false);
