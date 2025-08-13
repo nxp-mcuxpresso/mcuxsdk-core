@@ -188,7 +188,7 @@ int CE_MatrixChol_CF32(float *pL, float *pA, float *pScratch, int M, uint8_t fla
     cmdstruct.arg_ptr_array[1]   = (void *)pA;
     cmdstruct.arg_ptr_array[2]   = (void *)pScratch;
     cmdstruct.arg_param_array[0] = M;
-    cmdstruct.arg_param_array[1] = flag_packedInput;
+    cmdstruct.arg_param_array[1] = (int)flag_packedInput;
 
     status = CE_CmdAdd(kCE_Cmd_MAT_CHOL_CF32, &cmdstruct);
 

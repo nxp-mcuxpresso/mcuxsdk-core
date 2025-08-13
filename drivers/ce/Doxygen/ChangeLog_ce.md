@@ -1,5 +1,11 @@
 # CE
 
+## [2.3.1]
+
+- Improvements
+  - Updated the API CE_CmdInitBuffer, type of the parameter statusbuffer is updated from uint32_t to int
+  - Fixed MISRA 17.7 violation
+
 ## [2.3.0]
 
 - New Features

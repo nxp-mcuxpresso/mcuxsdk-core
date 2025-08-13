@@ -30,7 +30,7 @@ static inline void CE_CmdDelay(void)
 
 int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
                      volatile uint32_t cmdbuffer[],
-                     volatile uint32_t statusbuffer[],
+                     volatile int statusbuffer[],
                      ce_cmd_mode_t cmdmode)
 {
     s_ce_cmdbuffer = psCmdBuffer;
@@ -135,6 +135,7 @@ int CE_CmdLaunch(int force_launch)
 int CE_CmdLaunchBlocking(void)
 {
     unsigned int n_cmd;
+    status_t status = kStatus_Fail;
 
 #if CE_COMPUTE_TIMEOUT
     uint32_t timeout = CE_COMPUTE_TIMEOUT;
@@ -146,11 +147,15 @@ int CE_CmdLaunchBlocking(void)
     }
 
     /* write number of commands via TX2 reg */
-    MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, s_ce_cmdbuffer->n_cmd);
+    status = MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, s_ce_cmdbuffer->n_cmd);
+    if (kStatus_Success != status)
+    {
+        assert(false);
+    }
+
     CE_CmdDelay();
     /* launch CE by sending MU interrupt */
-    status_t status = MU_TriggerInterrupts((MU_Type *)DSP0_MU_BASE_ADDR, (uint32_t)kMU_GenInt0InterruptTrigger);
-
+    status = MU_TriggerInterrupts((MU_Type *)DSP0_MU_BASE_ADDR, (uint32_t)kMU_GenInt0InterruptTrigger);
     if (kStatus_Success != status)
     {
         assert(false);
@@ -175,11 +180,13 @@ int CE_CmdLaunchBlocking(void)
     (void)CE_CmdReset();
 
     /* read the status register */
-    return (int)(*(s_ce_cmdbuffer->status_buffer_ptr + 1U));
+    return *(s_ce_cmdbuffer->status_buffer_ptr + 1U);
 }
 
 int CE_CmdLaunchNonBlocking(void)
 {
+    status_t status = kStatus_Fail;
+
     /* Launches non-blocking */
     if (s_ce_cmdbuffer->n_cmd == 0U)
     {
@@ -187,11 +194,16 @@ int CE_CmdLaunchNonBlocking(void)
     }
     /* Write number of commands via TX2 reg,
      * set MSb to indicate non-blocking mode to ZENV: ZENV will send interrupt back in this case. */
-    MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, 0x80000000U | s_ce_cmdbuffer->n_cmd);
+    status = MU_SendMsg((MU_Type *)DSP0_MU_BASE_ADDR, 2U, 0x80000000U | s_ce_cmdbuffer->n_cmd);
+    if (kStatus_Success != status)
+    {
+        assert(false);
+    }
+
     CE_CmdDelay();
 
     /* launch CE by sending MU interrupt */
-    status_t status = MU_TriggerInterrupts((MU_Type *)DSP0_MU_BASE_ADDR, (uint32_t)kMU_GenInt0InterruptTrigger);
+    status = MU_TriggerInterrupts((MU_Type *)DSP0_MU_BASE_ADDR, (uint32_t)kMU_GenInt0InterruptTrigger);
     if (kStatus_Success != status)
     {
         assert(false);
