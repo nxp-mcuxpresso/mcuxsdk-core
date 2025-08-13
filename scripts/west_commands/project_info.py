@@ -1,3 +1,7 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 West command for exporting project information and configuration details.
 
@@ -86,6 +90,9 @@ class ProjectInfo(WestCommand):
             
         except subprocess.CalledProcessError as e:
             log.err("Error occurred:\n", e.stderr)
+            return False
+        
+        return True
 
     def parse_build_output(self):
         """
@@ -96,34 +103,39 @@ class ProjectInfo(WestCommand):
             Dictionary containing extracted project information with keys:
             projectRootPath, name, device_package, board, and optionally core
         """
-        cmake_cache =  open(os.path.join(self.output_dir, self.build_dir, "CMakeCache.txt"), 'r').read()
-        if cmake_cache:
-            project_path_regex = r".*APPLICATION_SOURCE_DIR:PATH=([^\s]+)"
-            project_path = self.regex_match_helper(project_path_regex, cmake_cache)
+        try:
+            cmake_cache =  open(os.path.join(self.output_dir, self.build_dir, "CMakeCache.txt"), 'r').read()
+            if cmake_cache:
+                project_path_regex = r".*APPLICATION_SOURCE_DIR:PATH=([^\s]+)"
+                project_path = self.regex_match_helper(project_path_regex, cmake_cache)
 
-            project_name_regex = r".*CMAKE_PROJECT_NAME:STATIC=([^\s]+)"
-            project_name = self.regex_match_helper(project_name_regex, cmake_cache)
+                project_name_regex = r".*CMAKE_PROJECT_NAME:STATIC=([^\s]+)"
+                project_name = self.regex_match_helper(project_name_regex, cmake_cache)
 
-            board_regex = r".*board:STRING=([^\s]+)"
-            board = self.regex_match_helper(board_regex, cmake_cache)
+                board_regex = r".*board:STRING=([^\s]+)"
+                board = self.regex_match_helper(board_regex, cmake_cache)
 
-            device_regex = r".*device:STRING=([^\s]+)"
-            device = self.regex_match_helper(device_regex, cmake_cache)
+                device_regex = r".*device:STRING=([^\s]+)"
+                device = self.regex_match_helper(device_regex, cmake_cache)
 
-            core_regex = r".*core_id:UNINITIALIZED=([^\s]+)"
-            core = self.regex_match_helper(core_regex, cmake_cache)
+                core_regex = r".*core_id:UNINITIALIZED=([^\s]+)"
+                core = self.regex_match_helper(core_regex, cmake_cache)
+                
+                self.project_info = {
+                    "projectRootPath": project_path,
+                    "name": project_name,
+                    "device_package": device,
+                    "board": board,
+                }
+
+                if core:
+                    self.project_info["core"] = core
+
+                return True
             
-            self.project_info = {
-                "projectRootPath": project_path,
-                "name": project_name,
-                "device_package": device,
-                "board": board,
-            }
-
-            if core:
-                self.project_info["core"] = core
-
-            return self.project_info
+        except FileNotFoundError:
+            log.err(f"CMakeCache.txt not found in {os.path.join(self.output_dir, self.build_dir)}")
+            return False
 
     def regex_match_helper(self, regex, string):
         """
@@ -168,10 +180,12 @@ class ProjectInfo(WestCommand):
 
         except FileNotFoundError:
             log.err(f"Compile commands file not found at {compile_commands_path}")
+            return False
         except json.JSONDecodeError:
             log.err(f"Error parsing compile commands JSON at {compile_commands_path}")
+            return False
 
-        return self.project_info
+        return True
 
     def create_json_file(self):
         """
@@ -180,17 +194,26 @@ class ProjectInfo(WestCommand):
         The file is written to the cfg_tools directory
         within the project root for use by MCUXpresso Config Tools.
         """
-        self.json_data_raw["schema"] = "http://json-schema.org/draft-07/schema#"
+        try:
+            self.json_data_raw["schema"] = "https://mcuxpresso.nxp.com/staticdata/mcux/schema/project_info/project_info_schema_1.0.json"
 
-        projects = list()
-        projects.append(self.project_info)
-        self.json_data_raw["projects"] = list(projects)
+            projects = list()
+            projects.append(self.project_info)
+            self.json_data_raw["projects"] = list(projects)
 
-        json_file_path = os.path.join(self.output_dir, "project_info.json")
+            json_file_path = os.path.join(self.output_dir, "project_info.json")
 
-        json_data_real = json.dumps(self.json_data_raw, indent=4)
+            json_data_real = json.dumps(self.json_data_raw, indent=4)
 
-        open(json_file_path, 'w').write(json_data_real)
+            open(json_file_path, 'w').write(json_data_real)
+
+        except (OSError, IOError) as e:
+            log.err(f"Error writing project_info.json file: {e}")
+            return False
+        
+        except json.JSONEncodeError as e:
+            log.err(f"Error encoding JSON data: {e}")
+            return False
 
     def check_cfg_tools_folder(self):
         """
@@ -210,7 +233,7 @@ class ProjectInfo(WestCommand):
             shutil.rmtree(build_path)
         
 
-    def do_run(self, args, unknown):
+    def do_run(self, args, remainder):
         """
         Main execution method for the project-info west command.
         """
@@ -235,12 +258,32 @@ class ProjectInfo(WestCommand):
             log.err(f"Could not create output directory: {self.output_dir}")
 
 
-        self.run_build_command()
+        status = self.run_build_command()
+        if not status:
+            log.err("Build command failed: terminating project info extraction")
+            self.delete_temp_build_file()
+            return
 
         log.inf("\nCreating project_info.json file from build output...")
-        self.parse_build_output()
-        self.parse_compile_commands()
-        self.create_json_file()
+
+        status = self.parse_build_output()
+        if not status:
+            log.err("Build data parsing failed: terminating project info extraction")
+            self.delete_temp_build_file()
+            return
+        
+        status = self.parse_compile_commands()
+        if not status:
+            log.err("Build data parsing failed: terminating project info extraction")
+            self.delete_temp_build_file()
+            return
+        
+        status = self.create_json_file()
+        if not status:
+            log.err("Creating project_info.json failed: terminating project info extraction")
+            self.delete_temp_build_file()
+            return
+        
         self.delete_temp_build_file()
 
         log.inf("Project info extraction completed successfully!\n")
