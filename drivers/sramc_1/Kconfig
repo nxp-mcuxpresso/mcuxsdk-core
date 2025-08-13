@@ -1,0 +1,12 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.sramc_1
+    bool
+    default y if MCUX_HW_IP_DriverType_SRAMC_1
+
+config MCUX_COMPONENT_driver.sramc_1
+    bool "sramc_1"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.sramc_1
