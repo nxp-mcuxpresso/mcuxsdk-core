@@ -1,5 +1,11 @@
 # OSTIMER
 
+## [2.2.6]
+
+- Improvements
+  - Drop the check of MATCH_WR_RDY and ostimer counter value in OSTIMER_SetMatchRawValue. In most applications, they are useless and may bring at least 7 OSTimer ticks latency, which is unacceptable when OSTimer is working under slow peripheral clock.
+  - Optimize software gray code to binary conversion: replaced loop-based implementation with branchless bitwise operations.
+
 ## [2.2.5]
 
 - Improvements
