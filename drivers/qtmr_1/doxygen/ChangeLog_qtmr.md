@@ -1,5 +1,10 @@
 # QTMR
 
+## [2.3.0]
+
+- Improvements
+  - Support for platforms which QTMR registers are 32-bit.
+
 ## [2.2.2]
 
 - Bug Fixes
