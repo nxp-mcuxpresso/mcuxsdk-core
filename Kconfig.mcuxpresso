@@ -96,6 +96,9 @@ menu "FreeRTOS"
     osource "rtos/freertos/corepkcs11/Kconfig"
     osource "rtos/freertos/freertos-plus-tcp/Kconfig"
 endmenu
+menu "Eclipse ThreadX"
+    osource "rtos/eclipse-threadx/threadx/Kconfig"
+endmenu
 endmenu
 
 menu "External Modules"
