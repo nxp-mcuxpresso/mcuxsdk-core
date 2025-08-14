@@ -1,0 +1,7 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_COMPONENT_driver.cache_armv8_a
+    bool "cache driver for AArch64"
+    default y if CPU_CORTEX_A
