@@ -41,6 +41,12 @@ typedef struct
 extern "C" {
 #endif
 
+/*!
+ * @brief FFT Implementation API to be compatible with CM33 FFT API.
+ * Please refer to CM33 documentation for details.
+ *
+ * Note: This API only support float32 FFTs.
+ */
 void ce_arm_cfft_f32(const arm_cfft_instance_f32 *S,
                      float *p1, /* input pointer */
                      uint8_t ifftFlag,

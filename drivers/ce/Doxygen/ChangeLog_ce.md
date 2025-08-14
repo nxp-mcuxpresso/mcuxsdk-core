@@ -5,6 +5,7 @@
 - Improvements
   - Updated the API CE_CmdInitBuffer, type of the parameter statusbuffer is updated from uint32_t to int
   - Fixed MISRA 17.7 violation
+  - Added API descriptions in CE driver C code
 
 ## [2.3.0]
 

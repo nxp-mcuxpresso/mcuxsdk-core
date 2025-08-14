@@ -62,7 +62,18 @@ int CE_MatrixAdd_Q15(int16_t *pDst, int16_t *pA, int16_t *pB, int M, int N);
 int CE_MatrixAdd_Q31(int32_t *pDst, int32_t *pA, int32_t *pB, int M, int N);
 
 /*!
- * @copydoc CE_MatrixAdd_Q15
+ * @brief Calculates the sum of 2 real 32-bit floating point matrices.
+ *
+ * Computes C = A+B where A, B, C are an MxN real float32 matrices.
+ * The matrices A, B, and C are assumed to be in the same formats.
+ *
+ * @param pDst Pointer to real output matrix C (size MxN)
+ * @param pA Pointer to real input matrix A (size MxN)
+ * @param pB Pointer to real input matrix B (size MxN)
+ * @param M Number of rows of matrices A, B, C
+ * @param N Number of columns of matrices A, B, C
+ *
+ * @return Return 0 if succeeded, otherwise return error code.
  */
 int CE_MatrixAdd_F32(float *pDst, float *pA, float *pB, int M, int N);
 
@@ -87,9 +98,8 @@ int CE_MatrixElemMul_F32(float *pDst, float *pA, float *pB, int M, int N);
 /*!
  * @brief Matrix multiply between two MxN matrices
  *
- * Matrix multiply C[MxP] = A[MxN] x B[NxP] matrices with data in specified
- * format.
- * Multiply between MxN and NxP matrices; matrices must be in row major format
+ * Computes C = A*B where A is an MxN real float32 matrix, B is an NxP real float32
+ * matrix and C is a MxP real float32 matrix. All matrices are assumed to be in row-major format.
  *
  * @param pDst Pointer to buffer for output matrix [MxP]
  * @param pA   Pointer to buffer for input matrix A [MxN]
@@ -100,11 +110,29 @@ int CE_MatrixElemMul_F32(float *pDst, float *pA, float *pB, int M, int N);
  *
  * Data precision and format is as defined by the argument type
  * @note Limits on max value of N: For F32: N < 128; For CF32: N < 64
+ *
+ * @return Return 0 if succeeded, otherwise return error code.
  */
 int CE_MatrixMul_F32(float *pDst, float *pA, float *pB, int M, int N, int P);
 
 /*!
- * @copydoc CE_MatrixMul_F32
+ * @brief Calculates the product 2 complex 32-bit floating point matrices.
+ *
+ * Computes C = A*B where A is an MxN complex float32 matrix, B is an NxP complex
+ * float32 matrix and C is a MxP complex float32 matrix. All matrices are assumed
+ * to be in row-major format.
+ *
+ * @param pDst Pointer to buffer for output matrix [MxP]
+ * @param pA   Pointer to buffer for input matrix A [MxN]
+ * @param pB   Pointer to buffer for input matrix B [NxP]
+ * @param M    Number of rows of matrix A
+ * @param N    Number of columns (rows) of matrix A (B)
+ * @param P    Number of columns of matrix B
+ *
+ * Data precision and format is as defined by the argument type
+ * @note Limits on max value of N: For F32: N < 128; For CF32: N < 64
+ *
+ * @return Return 0 if succeeded, otherwise return error code.
  */
 int CE_MatrixMul_CF32(float *pDst, float *pA, float *pB, int M, int N, int P);
 

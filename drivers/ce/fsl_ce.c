@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -18,6 +18,11 @@ Implementation file for CE wrapper/driver functions on ARM
 #define FSL_COMPONENT_ID "platform.drivers.ce"
 #endif
 
+/*!
+ * brief Initialize the CE.
+ *
+ * param ceCopyImage The information about the CE image to copy.
+ */
 void CE_Init(ce_copy_image_t *ceCopyImage)
 {
 #if (defined(KW47_core0_SERIES) || defined(MCXW72_core0_SERIES))
@@ -48,6 +53,11 @@ void CE_Init(ce_copy_image_t *ceCopyImage)
 #endif
 }
 
+/*!
+ * brief install CE firmware by given image info
+ *
+ * param ceCopyImage The information about the CE image to copy.
+ */
 void CE_InstallFirmware(ce_copy_image_t *ceCopyImage)
 {
 #if (defined(KW47_core0_SERIES) || defined(MCXW72_core0_SERIES))
@@ -68,6 +78,13 @@ void CE_InstallFirmware(ce_copy_image_t *ceCopyImage)
 #endif
 }
 
+/*!
+ * brief Initialize the CE.
+ *
+ * This function is similar with CE_Init, the difference is this function
+ * does not install the firmware, the firmware could be installed using
+ * CE_InstallFirmware.
+ */
 void CE_InitWithoutFirmware(void)
 {
     CLOCK_EnableClock(kCLOCK_DSP0);

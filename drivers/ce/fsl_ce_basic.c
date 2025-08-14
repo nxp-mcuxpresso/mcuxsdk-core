@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -12,12 +12,22 @@ Implementation file for CE wrapper/driver functions on ARM
 #include "fsl_ce_basic.h"
 #include "fsl_ce_cmd.h"
 
+/*!
+ * brief Execute command in command queue
+ *
+ * return Return 0 if succeeded, otherwise return error code.
+ */
 int CE_ExecCmd(void)
 {
     int status = CE_CmdLaunch(1);
     return status;
 }
 
+/*!
+ * brief Simple echo test cmd
+ *
+ * return Return 0 if succeeded, otherwise return error code.
+ */
 int CE_NullCmd(void)
 {
     int status;
@@ -35,6 +45,18 @@ int CE_NullCmd(void)
     return status;
 }
 
+/*!
+ * brief Copies one memory buffer to another
+ *
+ * Copies one memory buffer to another. Copy is in units of words. Any data type
+ * can be used.
+ *
+ * param pDst Pointer to destination buffer
+ * param pSrc Pointer to source buffer
+ * param N    Number of words to copy
+ *
+ * return Return 0 if succeeded, otherwise return error code.
+ */
 int CE_Copy(int *pDst, int *pSrc, const int N)
 {
     int status;
