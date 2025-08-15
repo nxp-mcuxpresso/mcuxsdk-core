@@ -11,6 +11,15 @@
  ******************************************************************************/
 #include "fsl_lin_lpuart.h"
 
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.lin_lpuart"
+#endif
+
 /*
  * $Coverage Justification Reference$
  *
