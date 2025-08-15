@@ -1,5 +1,11 @@
 # DMIC_DMA
 
+## [2.4.2]
+
+- Bug Fixes
+  - Fixed coverity High Impact finding
+
+
 ## [2.4.1]
 
 - Bug Fixes
