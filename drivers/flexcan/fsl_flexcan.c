@@ -4380,7 +4380,7 @@ status_t FLEXCAN_TransferReceiveEnhancedFifoNonBlocking(CAN_Type *base,
     status_t status;
     uint32_t watermark = ((base->ERFCR & CAN_ERFCR_ERFWM_MASK) >> CAN_ERFCR_ERFWM_SHIFT) + 1U;
     uint64_t irqMask =
-        (uint64_t)kFLEXCAN_ERxFifoUnderflowInterruptEnable | (uint64_t)kFLEXCAN_ERxFifoOverflowInterruptEnable;
+        FLEXCAN_EFIFO_INT_MASK(CAN_ERFIER_ERFUFWIE_MASK) | FLEXCAN_EFIFO_INT_MASK(CAN_ERFIER_ERFOVFIE_MASK);
 
     /* Check if Enhanced Rx FIFO is idle. */
     if ((uint8_t)kFLEXCAN_StateIdle == handle->rxFifoState)
@@ -4395,12 +4395,12 @@ status_t FLEXCAN_TransferReceiveEnhancedFifoNonBlocking(CAN_Type *base,
         if (handle->rxFifoTransferTotalNum >= watermark)
         {
             /* Enable watermark interrupt. */
-            irqMask |= (uint64_t)kFLEXCAN_ERxFifoWatermarkInterruptEnable;
+            irqMask |= FLEXCAN_EFIFO_INT_MASK(CAN_ERFIER_ERFWMIIE_MASK);
         }
         else
         {
             /* Enable data available interrupt. */
-            irqMask |= (uint64_t)kFLEXCAN_ERxFifoDataAvlInterruptEnable;
+            irqMask |= FLEXCAN_EFIFO_INT_MASK(CAN_ERFIER_ERFDAIE_MASK);
         }
         /* Enable Enhanced Rx FIFO Interrupt. */
         FLEXCAN_EnableInterrupts(base, irqMask);
@@ -4626,10 +4626,10 @@ void FLEXCAN_TransferAbortReceiveEnhancedFifo(CAN_Type *base, flexcan_handle_t *
     if (0U != (base->ERFCR & CAN_ERFCR_ERFEN_MASK))
     {
         /* Disable all Rx Message FIFO interrupts. */
-        FLEXCAN_DisableInterrupts(base, (uint64_t)kFLEXCAN_ERxFifoUnderflowInterruptEnable |
-                                            (uint64_t)kFLEXCAN_ERxFifoOverflowInterruptEnable |
-                                            (uint64_t)kFLEXCAN_ERxFifoWatermarkInterruptEnable |
-                                            (uint64_t)kFLEXCAN_ERxFifoDataAvlInterruptEnable);
+        FLEXCAN_DisableInterrupts(base, FLEXCAN_EFIFO_INT_MASK(CAN_ERFIER_ERFUFWIE_MASK) | 
+                                        FLEXCAN_EFIFO_INT_MASK(CAN_ERFIER_ERFOVFIE_MASK) | 
+                                        FLEXCAN_EFIFO_INT_MASK(CAN_ERFIER_ERFWMIIE_MASK) | 
+                                        FLEXCAN_EFIFO_INT_MASK(CAN_ERFIER_ERFDAIE_MASK));
 
         /* Un-register handle. */
         handle->rxFifoFDFrameBuf = NULL;
@@ -4681,7 +4681,7 @@ static bool FLEXCAN_CheckUnhandleInterruptEvents(CAN_Type *base)
     bool fgRet = false;
 
     if (0U == (FLEXCAN_GetStatusFlags(base) &   \
-              (FLEXCAN_ERROR_AND_STATUS_INT_FLAG | FLEXCAN_WAKE_UP_FLAG | FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG)))
+              (FLEXCAN_ERROR_AND_STATUS_INT_FLAG | FLEXCAN_WAKE_UP_FLAG | FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG)))
     {
         /* If no error, wake_up or enhanced RX FIFO status, Checking whether exist MB interrupt status and legacy RX
          * FIFO interrupt status */
@@ -4715,7 +4715,7 @@ static bool FLEXCAN_CheckUnhandleInterruptEvents(CAN_Type *base)
 #endif
     }
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-    else if (0U != (FLEXCAN_GetStatusFlags(base) & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG))
+    else if (0U != (FLEXCAN_GetStatusFlags(base) & FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG))
     {
         /* Checking whether exist enhanced RX FIFO interrupt status. */
         tempmask = (uint64_t)base->ERFIER;
@@ -5168,7 +5168,7 @@ void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
             FLEXCAN_ClearStatusFlags(base, FLEXCAN_WAKE_UP_FLAG);
         }
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-        else if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG) & base->ERFIER))
+        else if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG) & base->ERFIER))
         {
             status = FLEXCAN_SubHandlerForEhancedRxFifo(base, handle, result);
         }
@@ -5286,7 +5286,7 @@ void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
     do
     {
         result = FLEXCAN_GetStatusFlags(base);
-        if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG) & enableInt))
+        if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG) & enableInt))
         {
             status = FLEXCAN_SubHandlerForEhancedRxFifo(base, handle, result);
 

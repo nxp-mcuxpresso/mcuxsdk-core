@@ -224,44 +224,47 @@
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
-#define FLEXCAN_ERROR_AND_STATUS_INT_FLAG                                                                            \
-    ((uint32_t)kFLEXCAN_ErrorIntFlag | (uint32_t)kFLEXCAN_FDErrorIntFlag | (uint32_t)kFLEXCAN_BusoffDoneIntFlag | \
-     (uint32_t)kFLEXCAN_TxWarningIntFlag | (uint32_t)kFLEXCAN_RxWarningIntFlag | (uint32_t)kFLEXCAN_BusOffIntFlag)
+#define FLEXCAN_ERROR_AND_STATUS_INT_FLAG              \
+    (CAN_ESR1_ERRINT_MASK | CAN_ESR1_ERRINT_FAST_MASK | CAN_ESR1_BOFFDONEINT_MASK | \
+     CAN_ESR1_TWRNINT_MASK | CAN_ESR1_RWRNINT_MASK | CAN_ESR1_BOFFINT_MASK)
 #else
-#define FLEXCAN_ERROR_AND_STATUS_INT_FLAG                                                                          \
-    ((uint32_t)kFLEXCAN_TxWarningIntFlag | (uint32_t)kFLEXCAN_RxWarningIntFlag | (uint32_t)kFLEXCAN_BusOffIntFlag | \
-     (uint32_t)kFLEXCAN_ErrorIntFlag)
+#define FLEXCAN_ERROR_AND_STATUS_INT_FLAG   \
+    (CAN_ESR1_TWRNINT_MASK | CAN_ESR1_RWRNINT_MASK | CAN_ESR1_BOFFINT_MASK | CAN_ESR1_ERRINT_MASK)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
-#define FLEXCAN_PNWAKE_UP_FLAG ((uint64_t)kFLEXCAN_PNMatchIntFlag | (uint64_t)kFLEXCAN_PNTimeoutIntFlag)
+#define FLEXCAN_PNWAKE_UP_FLAG  \
+    (FLEXCAN_PN_STATUS_MASK(CAN_WU_MTC_WUMF_MASK) |  \
+     FLEXCAN_PN_STATUS_MASK(CAN_WU_MTC_WTOF_MASK))
 #else
 #define FLEXCAN_PNWAKE_UP_FLAG (0U)
 #endif
 
 #if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT)
-#define FLEXCAN_WAKE_UP_FLAG ((uint32_t)kFLEXCAN_WakeUpIntFlag | FLEXCAN_PNWAKE_UP_FLAG)
+#define FLEXCAN_WAKE_UP_FLAG (CAN_ESR1_WAKINT_MASK | FLEXCAN_PNWAKE_UP_FLAG)
 #else
 #define FLEXCAN_WAKE_UP_FLAG (FLEXCAN_PNWAKE_UP_FLAG)
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
-#define FLEXCAN_MEMORY_ERROR_INT_FLAG ((uint64_t)kFLEXCAN_AllMemoryErrorIntFlag)
+#define FLEXCAN_MEMORY_ERROR_INT_FLAG   \
+    (FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_HANCEIF_MASK) | \
+     FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_FANCEIF_MASK) | \
+     FLEXCAN_MECR_STATUS_MASK(CAN_ERRSR_CEIF_MASK))
 #else
 #define FLEXCAN_MEMORY_ERROR_INT_FLAG (0U)
 #endif
 
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-#define FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG                                             \
-    ((uint64_t)kFLEXCAN_ERxFifoUnderflowIntFlag | (uint64_t)kFLEXCAN_ERxFifoOverflowIntFlag | \
-     (uint64_t)kFLEXCAN_ERxFifoWatermarkIntFlag | (uint64_t)kFLEXCAN_ERxFifoDataAvlIntFlag)
-#endif
-
 /*! @brief FlexCAN Enhanced Rx FIFO base address helper macro. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+#define FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG        \
+    (FLEXCAN_EFIFO_STATUS_MASK(CAN_ERFSR_ERFUFW_MASK) | \
+     FLEXCAN_EFIFO_STATUS_MASK(CAN_ERFSR_ERFOVF_MASK) | \
+     FLEXCAN_EFIFO_STATUS_MASK(CAN_ERFSR_ERFWMI_MASK) | \
+     FLEXCAN_EFIFO_STATUS_MASK(CAN_ERFSR_ERFDA_MASK))
 #define E_RX_FIFO(base) ((uintptr_t)(base) + 0x2000U)
 #else
-#define FLEXCAN_MEMORY_ENHANCED_RX_FIFO_INT_FLAG (0U)
+#define FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG (0U)
 #endif
 
 /*! @brief FlexCAN transfer status. */
@@ -1896,7 +1899,8 @@ static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t mask)
  * @param base FlexCAN peripheral base address.
  * @param mask The interrupts to disable. Logical OR of @ref _flexcan_interrupt_enable.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE) || \
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE) ||                   \
+    (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) || \
     (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
 static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint64_t mask)
 #else
