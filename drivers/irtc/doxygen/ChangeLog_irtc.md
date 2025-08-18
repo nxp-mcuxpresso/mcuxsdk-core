@@ -1,5 +1,12 @@
 # IRTC
 
+## [2.4.0]
+
+- New Features
+  - Support tamper number up to 8.
+  - Add APIs to disable and configure minutes count down timer
+  - Support RTC BCD mode process, including the daylight saving time registers.
+
 ## [2.3.4]
 - Bug Fixes
   - Fixed CERT INT31-C violations to ensure safe integer conversions.

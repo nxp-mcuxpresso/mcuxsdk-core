@@ -20,6 +20,43 @@
 #define YEAR_RANGE_START (1984U) /* Valid values for year range from -128 to 127; 2112 - 128 */
 #define YEAR_RANGE_END   (2239U) /* Valid values for year range from -128 to 127; 2112 + 127 */
 
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+
+#define RTC_BCD_YEARMON_MON_CNT_MASK   0xFF
+#define RTC_BCD_YEARMON_MON_CNT(x)     ((uint16_t)(((uint16_t)(x)) & RTC_BCD_YEARMON_MON_CNT_MASK))
+#define RTC_BCD_DAYS_DAY_CNT_MASK      0xFF
+#define RTC_BCD_DAYS_DAY_CNT(x)        ((uint16_t)(((uint16_t)(x)) & RTC_BCD_DAYS_DAY_CNT_MASK))
+#define RTC_BCD_HOURMIN_MIN_CNT_MASK   0xFF
+#define RTC_BCD_HOURMIN_MIN_CNT(x)     ((uint16_t)(((uint16_t)(x)) & RTC_BCD_HOURMIN_MIN_CNT_MASK))
+#define RTC_BCD_HOURMIN_HOUR_CNT_MASK  0xFF00
+#define RTC_BCD_HOURMIN_HOUR_CNT_SHIFT 8U
+#define RTC_BCD_HOURMIN_HOUR_CNT(x) \
+    ((uint16_t)(((uint16_t)(x) << RTC_BCD_HOURMIN_HOUR_CNT_SHIFT) & RTC_BCD_HOURMIN_HOUR_CNT_MASK))
+#define RTC_BCD_SECONDS_SEC_CNT_MASK       0xFF
+#define RTC_BCD_SECONDS_SEC_CNT(x)         ((uint16_t)(((uint16_t)(x)) & RTC_BCD_SECONDS_SEC_CNT_MASK))
+#define RTC_BCD_ALM_YEARMON_ALM_MON_MASK   0xFF
+#define RTC_BCD_ALM_YEARMON_ALM_MON(x)     ((uint16_t)(((uint16_t)(x)) & RTC_BCD_ALM_YEARMON_ALM_MON_MASK))
+#define RTC_BCD_ALM_DAYS_ALM_DAY_MASK      0xFF
+#define RTC_BCD_ALM_DAYS_ALM_DAY(x)        ((uint16_t)(((uint16_t)(x)) & RTC_BCD_ALM_DAYS_ALM_DAY_MASK))
+#define RTC_BCD_ALM_HOURMIN_ALM_MIN_MASK   0xFF
+#define RTC_BCD_ALM_HOURMIN_ALM_MIN(x)     ((uint16_t)(((uint16_t)(x)) & RTC_BCD_ALM_HOURMIN_ALM_MIN_MASK))
+#define RTC_BCD_ALM_HOURMIN_ALM_HOUR_MASK  0xFF00
+#define RTC_BCD_ALM_HOURMIN_ALM_HOUR_SHIFT 8U
+#define RTC_BCD_ALM_HOURMIN_ALM_HOUR(x) \
+    ((uint16_t)(((uint16_t)(x) << RTC_BCD_ALM_HOURMIN_ALM_HOUR_SHIFT) & RTC_BCD_ALM_HOURMIN_ALM_HOUR_MASK))
+#define RTC_BCD_ALM_SECONDS_ALM_SEC_MASK 0xFF
+#define RTC_BCD_ALM_SECONDS_ALM_SEC(x)   ((uint16_t)(((uint16_t)(x)) & RTC_BCD_ALM_SECONDS_ALM_SEC_MASK))
+
+/* In BCD mode the daylight saving registers store the start value in the high byte (bits 15:8) and the
+ * end value in the low byte (bits 7:0) as 8-bit BCD values. */
+#define RTC_BCD_DST_END_MASK    0xFF
+#define RTC_BCD_DST_END(x)      ((uint16_t)(((uint16_t)(x)) & RTC_BCD_DST_END_MASK))
+#define RTC_BCD_DST_START_MASK  0xFF00
+#define RTC_BCD_DST_START_SHIFT 8U
+#define RTC_BCD_DST_START(x)    ((uint16_t)(((uint16_t)(x) << RTC_BCD_DST_START_SHIFT) & RTC_BCD_DST_START_MASK))
+
+#endif /* FSL_FEATURE_RTC_HAS_BCD_MODE */
+
 #if (!(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)) || \
     (defined(FSL_FEATURE_RTC_HAS_RESET) && FSL_FEATURE_RTC_HAS_RESET)
 /*! @brief Array to map IRTC instance number to base pointer. */
@@ -174,31 +211,38 @@ status_t IRTC_Init(RTC_Type *base, const irtc_config_t *config)
             base->CTRL2 &= ~(uint16_t)RTC_CTRL2_WAKEUP_MODE_MASK;
         }
 #endif
-        /* Setup alarm match operation, sampling clock operation in standby mode, 16.384kHz RTC clock and selected clock outout to other peripherals */
+        /* Setup alarm match operation, sampling clock operation in standby mode, 16.384kHz RTC clock and selected clock
+         * outout to other peripherals */
         reg = base->CTRL;
         reg &= ~(
 #if !defined(FSL_FEATURE_RTC_HAS_NO_TIMER_STB_MASK) || (!FSL_FEATURE_RTC_HAS_NO_TIMER_STB_MASK)
-               (uint16_t)RTC_CTRL_TIMER_STB_MASK_MASK |
+            (uint16_t)RTC_CTRL_TIMER_STB_MASK_MASK |
 #endif
 #if defined(FSL_FEATURE_RTC_HAS_CLOCK_SELECT) && FSL_FEATURE_RTC_HAS_CLOCK_SELECT
-               (uint16_t)RTC_CTRL_CLK_SEL_MASK |
-#endif 
-#if defined(FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT_DISABLE) && FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT_DISABLE
-               (uint16_t)RTC_CTRL_CLKO_DIS_MASK |
+            (uint16_t)RTC_CTRL_CLK_SEL_MASK |
 #endif
-               (uint16_t)RTC_CTRL_ALM_MATCH_MASK);
+#if defined(FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT_DISABLE) && FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT_DISABLE
+            (uint16_t)RTC_CTRL_CLKO_DIS_MASK |
+#endif
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+            (uint16_t)RTC_CTRL_BCD_EN_MASK |
+#endif
+            (uint16_t)RTC_CTRL_ALM_MATCH_MASK);
         reg |= (
 #if !defined(FSL_FEATURE_RTC_HAS_NO_TIMER_STB_MASK) || (!FSL_FEATURE_RTC_HAS_NO_TIMER_STB_MASK)
-               RTC_CTRL_TIMER_STB_MASK(config->timerStdMask ? 1U : 0U) |
+            RTC_CTRL_TIMER_STB_MASK(config->timerStdMask ? 1U : 0U) |
 
 #endif
 #if defined(FSL_FEATURE_RTC_HAS_CLOCK_SELECT) && FSL_FEATURE_RTC_HAS_CLOCK_SELECT
-               RTC_CTRL_CLK_SEL(config->clockSelect) |
+            RTC_CTRL_CLK_SEL(config->clockSelect) |
 #endif
 #if defined(FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT_DISABLE) && FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT_DISABLE
-               RTC_CTRL_CLKO_DIS(config->disableClockOutput ? 1U : 0U) |
+            RTC_CTRL_CLKO_DIS(config->disableClockOutput ? 1U : 0U) |
 #endif
-               RTC_CTRL_ALM_MATCH(config->alrmMatch));
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+            RTC_CTRL_BCD_EN(config->bcdModeEnable ? 1U : 0U) |
+#endif
+            RTC_CTRL_ALM_MATCH(config->alrmMatch));
         base->CTRL = reg;
     }
     else
@@ -237,6 +281,9 @@ status_t IRTC_Deinit(RTC_Type *base)
  *    config->wakeupSelect = true;
  *    config->timerStdMask = false;
  *    config->alrmMatch = kRTC_MatchSecMinHr;
+ *    config->clockSelect = kIRTC_Clk16K;
+ *    config->disableClockOutput = true;
+ *    config->bcdModeEnable = false;
  * endcode
  * param config Pointer to user's IRTC config structure.
  */
@@ -269,6 +316,11 @@ void IRTC_GetDefaultConfig(irtc_config_t *config)
     /* The selected clock is not output to other peripherals */
     config->disableClockOutput = true;
 #endif
+
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+    /* BCD mode is disabled */
+    config->bcdModeEnable = false;
+#endif
 }
 
 #if !(defined(FSL_FEATURE_RTC_IS_SLAVE) && (FSL_FEATURE_RTC_IS_SLAVE != 0U))
@@ -289,6 +341,32 @@ status_t IRTC_SetDatetime(RTC_Type *base, const irtc_datetime_t *datetime)
 
     status_t status = kStatus_Success;
 
+    uint16_t month, day, hour, minute, second;
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+    if (IRTC_IsBCDModeEnabled(base))
+    {
+        month  = RTC_BCD_YEARMON_MON_CNT(IRTC_BinaryToBCD(datetime->month));
+        day    = RTC_BCD_DAYS_DAY_CNT(IRTC_BinaryToBCD(datetime->day));
+        hour   = RTC_BCD_HOURMIN_HOUR_CNT(IRTC_BinaryToBCD(datetime->hour));
+        minute = RTC_BCD_HOURMIN_MIN_CNT(IRTC_BinaryToBCD(datetime->minute));
+        second = RTC_BCD_SECONDS_SEC_CNT(IRTC_BinaryToBCD(datetime->second));
+    }
+    else
+    {
+        month  = RTC_YEARMON_MON_CNT(datetime->month);
+        day    = RTC_DAYS_DAY_CNT(datetime->day);
+        hour   = RTC_HOURMIN_HOUR_CNT(datetime->hour);
+        minute = RTC_HOURMIN_MIN_CNT(datetime->minute);
+        second = RTC_SECONDS_SEC_CNT(datetime->second);
+    }
+#else
+    month  = RTC_YEARMON_MON_CNT(datetime->month);
+    day    = RTC_DAYS_DAY_CNT(datetime->day);
+    hour   = RTC_HOURMIN_HOUR_CNT(datetime->hour);
+    minute = RTC_HOURMIN_MIN_CNT(datetime->minute);
+    second = RTC_SECONDS_SEC_CNT(datetime->second);
+#endif /* FSL_FEATURE_RTC_HAS_BCD_MODE */
+
     /* Return error if the time provided is not valid */
     if (IRTC_CheckDatetimeFormat(datetime))
     {
@@ -296,22 +374,21 @@ status_t IRTC_SetDatetime(RTC_Type *base, const irtc_datetime_t *datetime)
         if (datetime->year < IRTC_BASE_YEAR)
         {
             /* Values for years less than the base year range from -128 to 1 */
-            base->YEARMON =
-                RTC_YEARMON_YROFST(0x100U + datetime->year - IRTC_BASE_YEAR) | RTC_YEARMON_MON_CNT(datetime->month);
+            base->YEARMON = RTC_YEARMON_YROFST(0x100U + datetime->year - IRTC_BASE_YEAR) | month;
         }
         else
         {
             /* Values for years greater or equal to the base year range from 0 to 127 */
-            base->YEARMON = RTC_YEARMON_YROFST(datetime->year - IRTC_BASE_YEAR) | RTC_YEARMON_MON_CNT(datetime->month);
+            base->YEARMON = RTC_YEARMON_YROFST(datetime->year - IRTC_BASE_YEAR) | month;
         }
         /* Update the Day Count and Day of the week field */
-        base->DAYS = RTC_DAYS_DOW(datetime->weekDay) | RTC_DAYS_DAY_CNT(datetime->day);
+        base->DAYS = RTC_DAYS_DOW(datetime->weekDay) | day;
 
         /* Update hour and minute field */
-        base->HOURMIN = RTC_HOURMIN_HOUR_CNT(datetime->hour) | RTC_HOURMIN_MIN_CNT(datetime->minute);
+        base->HOURMIN = hour | minute;
 
         /* Update the seconds register */
-        base->SECONDS = RTC_SECONDS_SEC_CNT(datetime->second);
+        base->SECONDS = second;
     }
     else
     {
@@ -350,12 +427,32 @@ void IRTC_GetDatetime(RTC_Type *base, irtc_datetime_t *datetime)
     /* Restore all interrupts. */
     EnableGlobalIRQ(irqMask);
 
-    datetime->second  = (uint8_t)(seconds & RTC_SECONDS_SEC_CNT_MASK);
-    datetime->hour    = (uint8_t)((hourMin & RTC_HOURMIN_HOUR_CNT_MASK) >> RTC_HOURMIN_HOUR_CNT_SHIFT);
-    datetime->minute  = (uint8_t)(hourMin & RTC_HOURMIN_MIN_CNT_MASK);
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+    if (IRTC_IsBCDModeEnabled(base))
+    {
+        datetime->second = IRTC_BCDToBinary((uint8_t)(seconds & RTC_BCD_SECONDS_SEC_CNT_MASK));
+        datetime->hour =
+            IRTC_BCDToBinary((uint8_t)((hourMin & RTC_BCD_HOURMIN_HOUR_CNT_MASK) >> RTC_BCD_HOURMIN_HOUR_CNT_SHIFT));
+        datetime->minute = IRTC_BCDToBinary((uint8_t)(hourMin & RTC_BCD_HOURMIN_MIN_CNT_MASK));
+        datetime->day    = IRTC_BCDToBinary((uint8_t)(days & RTC_BCD_DAYS_DAY_CNT_MASK));
+        datetime->month  = IRTC_BCDToBinary((uint8_t)(yearMon & RTC_BCD_YEARMON_MON_CNT_MASK));
+    }
+    else
+    {
+        datetime->second = (uint8_t)(seconds & RTC_SECONDS_SEC_CNT_MASK);
+        datetime->hour   = (uint8_t)((hourMin & RTC_HOURMIN_HOUR_CNT_MASK) >> RTC_HOURMIN_HOUR_CNT_SHIFT);
+        datetime->minute = (uint8_t)(hourMin & RTC_HOURMIN_MIN_CNT_MASK);
+        datetime->day    = (uint8_t)(days & RTC_DAYS_DAY_CNT_MASK);
+        datetime->month  = (uint8_t)(yearMon & RTC_YEARMON_MON_CNT_MASK);
+    }
+#else
+    datetime->second = (uint8_t)(seconds & RTC_SECONDS_SEC_CNT_MASK);
+    datetime->hour   = (uint8_t)((hourMin & RTC_HOURMIN_HOUR_CNT_MASK) >> RTC_HOURMIN_HOUR_CNT_SHIFT);
+    datetime->minute = (uint8_t)(hourMin & RTC_HOURMIN_MIN_CNT_MASK);
+    datetime->day    = (uint8_t)(days & RTC_DAYS_DAY_CNT_MASK);
+    datetime->month  = (uint8_t)(yearMon & RTC_YEARMON_MON_CNT_MASK);
+#endif /* FSL_FEATURE_RTC_HAS_BCD_MODE */
     datetime->weekDay = (uint8_t)((days & RTC_DAYS_DOW_MASK) >> RTC_DAYS_DOW_SHIFT);
-    datetime->day     = (uint8_t)(days & RTC_DAYS_DAY_CNT_MASK);
-    datetime->month   = (uint8_t)(yearMon & RTC_YEARMON_MON_CNT_MASK);
     datetime->year =
         (uint16_t)IRTC_BASE_YEAR + (uint16_t)((int8_t)(uint8_t)((yearMon >> RTC_YEARMON_YROFST_SHIFT) & 0xFFU));
 }
@@ -381,26 +478,50 @@ status_t IRTC_SetAlarm(RTC_Type *base, const irtc_datetime_t *alarmTime)
     /* Return error if the alarm time provided is not valid */
     if (IRTC_CheckDatetimeFormat(alarmTime))
     {
-        /* Set the alarm year */
-        if (alarmTime->year < IRTC_BASE_YEAR)
+        uint16_t month, day, hour, minute, second;
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+        if (IRTC_IsBCDModeEnabled(base))
         {
-            base->ALM_YEARMON = RTC_ALM_YEARMON_ALM_YEAR(0x100U + alarmTime->year - IRTC_BASE_YEAR) |
-                                RTC_ALM_YEARMON_ALM_MON(alarmTime->month);
+            month  = RTC_BCD_ALM_YEARMON_ALM_MON(IRTC_BinaryToBCD(alarmTime->month));
+            day    = RTC_BCD_ALM_DAYS_ALM_DAY(IRTC_BinaryToBCD(alarmTime->day));
+            hour   = RTC_BCD_ALM_HOURMIN_ALM_HOUR(IRTC_BinaryToBCD(alarmTime->hour));
+            minute = RTC_BCD_ALM_HOURMIN_ALM_MIN(IRTC_BinaryToBCD(alarmTime->minute));
+            second = RTC_BCD_ALM_SECONDS_ALM_SEC(IRTC_BinaryToBCD(alarmTime->second));
         }
         else
         {
-            base->ALM_YEARMON =
-                RTC_ALM_YEARMON_ALM_YEAR(alarmTime->year - IRTC_BASE_YEAR) | RTC_ALM_YEARMON_ALM_MON(alarmTime->month);
+            month  = RTC_YEARMON_MON_CNT(alarmTime->month);
+            day    = RTC_DAYS_DAY_CNT(alarmTime->day);
+            hour   = RTC_HOURMIN_HOUR_CNT(alarmTime->hour);
+            minute = RTC_HOURMIN_MIN_CNT(alarmTime->minute);
+            second = RTC_SECONDS_SEC_CNT(alarmTime->second);
+        }
+#else
+        month  = RTC_YEARMON_MON_CNT(alarmTime->month);
+        day    = RTC_DAYS_DAY_CNT(alarmTime->day);
+        hour   = RTC_HOURMIN_HOUR_CNT(alarmTime->hour);
+        minute = RTC_HOURMIN_MIN_CNT(alarmTime->minute);
+        second = RTC_SECONDS_SEC_CNT(alarmTime->second);
+#endif /* FSL_FEATURE_RTC_HAS_BCD_MODE */
+
+        /* Set the alarm year */
+        if (alarmTime->year < IRTC_BASE_YEAR)
+        {
+            base->ALM_YEARMON = RTC_ALM_YEARMON_ALM_YEAR(0x100U + alarmTime->year - IRTC_BASE_YEAR) | month;
+        }
+        else
+        {
+            base->ALM_YEARMON = RTC_ALM_YEARMON_ALM_YEAR(alarmTime->year - IRTC_BASE_YEAR) | month;
         }
 
         /* Set the alarm day */
-        base->ALM_DAYS = RTC_ALM_DAYS_ALM_DAY(alarmTime->day);
+        base->ALM_DAYS = day;
 
         /* Set the alarm hour and minute */
-        base->ALM_HOURMIN = RTC_ALM_HOURMIN_ALM_HOUR(alarmTime->hour) | RTC_ALM_HOURMIN_ALM_MIN(alarmTime->minute);
+        base->ALM_HOURMIN = hour | minute;
 
         /* Set the alarm seconds */
-        base->ALM_SECONDS = RTC_ALM_SECONDS_ALM_SEC(alarmTime->second);
+        base->ALM_SECONDS = second;
     }
     else
     {
@@ -420,19 +541,36 @@ void IRTC_GetAlarm(RTC_Type *base, irtc_datetime_t *datetime)
 {
     assert(NULL != datetime);
 
-    uint16_t temp = base->ALM_YEARMON;
+    uint16_t yearMon = base->ALM_YEARMON;
+    uint16_t hourMin = base->ALM_HOURMIN;
 
     datetime->year =
-        (uint16_t)IRTC_BASE_YEAR + (uint16_t)((int8_t)(uint8_t)((temp >> RTC_ALM_YEARMON_ALM_YEAR_SHIFT) & 0xFFU));
-    datetime->month = (uint8_t)temp & RTC_ALM_YEARMON_ALM_MON_MASK;
-
-    datetime->day = (uint8_t)(base->ALM_DAYS) & RTC_ALM_DAYS_ALM_DAY_MASK;
-
-    temp             = base->ALM_HOURMIN;
-    datetime->hour   = (uint8_t)((temp & RTC_ALM_HOURMIN_ALM_HOUR_MASK) >> RTC_ALM_HOURMIN_ALM_HOUR_SHIFT);
-    datetime->minute = (uint8_t)temp & RTC_ALM_HOURMIN_ALM_MIN_MASK;
-
-    datetime->second = (uint8_t)(base->ALM_SECONDS) & RTC_ALM_SECONDS_ALM_SEC_MASK;
+        (uint16_t)IRTC_BASE_YEAR + (uint16_t)((int8_t)(uint8_t)((yearMon >> RTC_ALM_YEARMON_ALM_YEAR_SHIFT) & 0xFFU));
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+    if (IRTC_IsBCDModeEnabled(base))
+    {
+        datetime->month = IRTC_BCDToBinary((uint8_t)(yearMon & RTC_BCD_ALM_YEARMON_ALM_MON_MASK));
+        datetime->day   = IRTC_BCDToBinary((uint8_t)(base->ALM_DAYS & RTC_BCD_ALM_DAYS_ALM_DAY_MASK));
+        datetime->hour  = IRTC_BCDToBinary(
+            (uint8_t)((hourMin & RTC_BCD_ALM_HOURMIN_ALM_HOUR_MASK) >> RTC_BCD_ALM_HOURMIN_ALM_HOUR_SHIFT));
+        datetime->minute = IRTC_BCDToBinary((uint8_t)(hourMin & RTC_BCD_ALM_HOURMIN_ALM_MIN_MASK));
+        datetime->second = IRTC_BCDToBinary((uint8_t)(base->ALM_SECONDS & RTC_BCD_ALM_SECONDS_ALM_SEC_MASK));
+    }
+    else
+    {
+        datetime->month  = (uint8_t)(yearMon & RTC_ALM_YEARMON_ALM_MON_MASK);
+        datetime->day    = (uint8_t)(base->ALM_DAYS & RTC_ALM_DAYS_ALM_DAY_MASK);
+        datetime->hour   = (uint8_t)((hourMin & RTC_ALM_HOURMIN_ALM_HOUR_MASK) >> RTC_ALM_HOURMIN_ALM_HOUR_SHIFT);
+        datetime->minute = (uint8_t)(hourMin & RTC_ALM_HOURMIN_ALM_MIN_MASK);
+        datetime->second = (uint8_t)(base->ALM_SECONDS & RTC_ALM_SECONDS_ALM_SEC_MASK);
+    }
+#else
+    datetime->month  = (uint8_t)(yearMon & RTC_ALM_YEARMON_ALM_MON_MASK);
+    datetime->day    = (uint8_t)(base->ALM_DAYS & RTC_ALM_DAYS_ALM_DAY_MASK);
+    datetime->hour   = (uint8_t)((hourMin & RTC_ALM_HOURMIN_ALM_HOUR_MASK) >> RTC_ALM_HOURMIN_ALM_HOUR_SHIFT);
+    datetime->minute = (uint8_t)(hourMin & RTC_ALM_HOURMIN_ALM_MIN_MASK);
+    datetime->second = (uint8_t)(base->ALM_SECONDS & RTC_ALM_SECONDS_ALM_SEC_MASK);
+#endif /* FSL_FEATURE_RTC_HAS_BCD_MODE */
 }
 
 /*!
@@ -504,15 +642,31 @@ void IRTC_SetDaylightTime(RTC_Type *base, const irtc_daylight_time_t *datetime)
     /* Disable daylight saving time */
     base->CTRL &= ~(uint16_t)RTC_CTRL_DST_EN_MASK;
 
-    /* Set the daylight saving time start month and end month value */
-    base->DST_MONTH =
-        RTC_DST_MONTH_DST_START_MONTH(datetime->startMonth) | RTC_DST_MONTH_DST_END_MONTH(datetime->endMonth);
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+    if (IRTC_IsBCDModeEnabled(base))
+    {
+        /* The daylight saving registers are BCD-applicable: program them as 8-bit BCD values */
+        base->DST_MONTH = RTC_BCD_DST_START(IRTC_BinaryToBCD(datetime->startMonth)) |
+                          RTC_BCD_DST_END(IRTC_BinaryToBCD(datetime->endMonth));
+        base->DST_DAY = RTC_BCD_DST_START(IRTC_BinaryToBCD(datetime->startDay)) |
+                        RTC_BCD_DST_END(IRTC_BinaryToBCD(datetime->endDay));
+        base->DST_HOUR = RTC_BCD_DST_START(IRTC_BinaryToBCD(datetime->startHour)) |
+                         RTC_BCD_DST_END(IRTC_BinaryToBCD(datetime->endHour));
+    }
+    else
+#endif /* FSL_FEATURE_RTC_HAS_BCD_MODE */
+    {
+        /* Set the daylight saving time start month and end month value */
+        base->DST_MONTH =
+            RTC_DST_MONTH_DST_START_MONTH(datetime->startMonth) | RTC_DST_MONTH_DST_END_MONTH(datetime->endMonth);
 
-    /* Set the daylight saving time start day and end day value */
-    base->DST_DAY = RTC_DST_DAY_DST_START_DAY(datetime->startDay) | RTC_DST_DAY_DST_END_DAY(datetime->endDay);
+        /* Set the daylight saving time start day and end day value */
+        base->DST_DAY = RTC_DST_DAY_DST_START_DAY(datetime->startDay) | RTC_DST_DAY_DST_END_DAY(datetime->endDay);
 
-    /* Set the daylight saving time start hour and end hour value */
-    base->DST_HOUR = RTC_DST_HOUR_DST_START_HOUR(datetime->startHour) | RTC_DST_HOUR_DST_END_HOUR(datetime->endHour);
+        /* Set the daylight saving time start hour and end hour value */
+        base->DST_HOUR =
+            RTC_DST_HOUR_DST_START_HOUR(datetime->startHour) | RTC_DST_HOUR_DST_END_HOUR(datetime->endHour);
+    }
 
     /* Enable daylight saving time */
     base->CTRL |= RTC_CTRL_DST_EN_MASK;
@@ -529,22 +683,39 @@ void IRTC_GetDaylightTime(RTC_Type *base, irtc_daylight_time_t *datetime)
 {
     assert(NULL != datetime);
 
-    uint16_t temp = base->DST_MONTH;
+    uint16_t dstMonth = base->DST_MONTH;
+    uint16_t dstDay   = base->DST_DAY;
+    uint16_t dstHour  = base->DST_HOUR;
 
-    /* Get the daylight savings time start and end month value */
-    datetime->startMonth =
-        (uint8_t)((temp & RTC_DST_MONTH_DST_START_MONTH_MASK) >> RTC_DST_MONTH_DST_START_MONTH_SHIFT);
-    datetime->endMonth = (uint8_t)((temp & RTC_DST_MONTH_DST_END_MONTH_MASK) >> RTC_DST_MONTH_DST_END_MONTH_SHIFT);
+#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
+    if (IRTC_IsBCDModeEnabled(base))
+    {
+        /* In BCD mode the start value is the high byte and the end value is the low byte of each register */
+        datetime->startMonth = IRTC_BCDToBinary((uint8_t)((dstMonth & RTC_BCD_DST_START_MASK) >> RTC_BCD_DST_START_SHIFT));
+        datetime->endMonth   = IRTC_BCDToBinary((uint8_t)(dstMonth & RTC_BCD_DST_END_MASK));
+        datetime->startDay   = IRTC_BCDToBinary((uint8_t)((dstDay & RTC_BCD_DST_START_MASK) >> RTC_BCD_DST_START_SHIFT));
+        datetime->endDay     = IRTC_BCDToBinary((uint8_t)(dstDay & RTC_BCD_DST_END_MASK));
+        datetime->startHour  = IRTC_BCDToBinary((uint8_t)((dstHour & RTC_BCD_DST_START_MASK) >> RTC_BCD_DST_START_SHIFT));
+        datetime->endHour    = IRTC_BCDToBinary((uint8_t)(dstHour & RTC_BCD_DST_END_MASK));
+    }
+    else
+#endif /* FSL_FEATURE_RTC_HAS_BCD_MODE */
+    {
+        /* Get the daylight savings time start and end month value */
+        datetime->startMonth =
+            (uint8_t)((dstMonth & RTC_DST_MONTH_DST_START_MONTH_MASK) >> RTC_DST_MONTH_DST_START_MONTH_SHIFT);
+        datetime->endMonth =
+            (uint8_t)((dstMonth & RTC_DST_MONTH_DST_END_MONTH_MASK) >> RTC_DST_MONTH_DST_END_MONTH_SHIFT);
 
-    /* Get the daylight savings time start and end day value */
-    temp               = base->DST_DAY;
-    datetime->startDay = (uint8_t)((temp & RTC_DST_DAY_DST_START_DAY_MASK) >> RTC_DST_DAY_DST_START_DAY_SHIFT);
-    datetime->endDay   = (uint8_t)((temp & RTC_DST_DAY_DST_END_DAY_MASK) >> RTC_DST_DAY_DST_END_DAY_SHIFT);
+        /* Get the daylight savings time start and end day value */
+        datetime->startDay = (uint8_t)((dstDay & RTC_DST_DAY_DST_START_DAY_MASK) >> RTC_DST_DAY_DST_START_DAY_SHIFT);
+        datetime->endDay   = (uint8_t)((dstDay & RTC_DST_DAY_DST_END_DAY_MASK) >> RTC_DST_DAY_DST_END_DAY_SHIFT);
 
-    /* Get the daylight savings time start and end hour value */
-    temp                = base->DST_HOUR;
-    datetime->startHour = (uint8_t)((temp & RTC_DST_HOUR_DST_START_HOUR_MASK) >> RTC_DST_HOUR_DST_START_HOUR_SHIFT);
-    datetime->endHour   = (uint8_t)((temp & RTC_DST_HOUR_DST_END_HOUR_MASK) >> RTC_DST_HOUR_DST_END_HOUR_SHIFT);
+        /* Get the daylight savings time start and end hour value */
+        datetime->startHour =
+            (uint8_t)((dstHour & RTC_DST_HOUR_DST_START_HOUR_MASK) >> RTC_DST_HOUR_DST_START_HOUR_SHIFT);
+        datetime->endHour = (uint8_t)((dstHour & RTC_DST_HOUR_DST_END_HOUR_MASK) >> RTC_DST_HOUR_DST_END_HOUR_SHIFT);
+    }
 }
 
 #if !(defined(FSL_FEATURE_RTC_IS_SLAVE) && (FSL_FEATURE_RTC_IS_SLAVE != 0U))
