@@ -49,15 +49,14 @@ def _find_parser():
     sys_name = platform.system()
     result = None
 
-    if arch in ['x86_64', 'AMD64']:
-        if sys_name == 'Windows':
-            result = 'cmparser.exe'
-        elif sys_name == 'Linux':
-            result = 'cmparser'
-        elif sys_name == 'Darwin':
+    if sys_name == 'Windows':
+        result = 'cmparser.exe'
+    elif sys_name == 'Linux':
+        result = 'cmparser'
+    elif sys_name == 'Darwin':
+        if arch in ['x86_64', 'AMD64']:
             result = 'cmparser_darwin_x86_64'
-    elif arch in ['arm64']:
-        if sys_name == 'Darwin':
+        elif arch in ['arm64']:
             result = 'cmparser_darwin_arm64'
 
     if not result:
