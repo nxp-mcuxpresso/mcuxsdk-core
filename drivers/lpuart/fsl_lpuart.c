@@ -139,6 +139,24 @@ static void LPUART_TransferHandleSendDataEmpty(LPUART_Type *base, lpuart_handle_
  */
 static void LPUART_TransferHandleTransmissionComplete(LPUART_Type *base, lpuart_handle_t *handle);
 
+/*!
+ * @brief Wait for read data availability and check for errors.
+ *
+ * This function polls the receiver register/FIFO and waits for data to be available.
+ * It monitors and handles RX error conditions including overrun, parity, framing,
+ * and noise errors during the wait period.
+ *
+ * @param base LPUART peripheral base address.
+ * @retval kStatus_Success Data available, no errors.
+ * @retval kStatus_LPUART_Timeout Timeout waiting for data.
+ * @retval kStatus_LPUART_RxHardwareOverrun RX overrun error.
+ * @retval kStatus_LPUART_ParityError Parity error.
+ * @retval kStatus_LPUART_FramingError Framing error.
+ * @retval kStatus_LPUART_NoiseError Noise error.
+ * @retval kStatus_LPUART_FlagCannotClearManually Error flag cannot be cleared.
+ */
+static status_t LPUART_WaitForReadData(LPUART_Type *base);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -197,11 +215,16 @@ uint32_t LPUART_GetInstance(LPUART_Type *base)
     uint32_t instance;
 
     /* Find the instance index from base address mappings. */
+    /*
+     * $Branch Coverage Justification$
+     * (instance >= ARRAY_SIZE(s_lpuartBases)) not covered. The peripheral base
+     * address is always valid and checked by assert.
+     */
     for (instance = 0U; instance < ARRAY_SIZE(s_lpuartBases); instance++)
     {
         if (MSDK_REG_SECURE_ADDR(s_lpuartBases[instance]) == MSDK_REG_SECURE_ADDR(base))
         {
-            return instance;
+            break;
         }
     }
 
@@ -267,6 +290,7 @@ static void LPUART_WriteNonBlocking(LPUART_Type *base, const uint8_t *data, size
         base->DATA = data[i];
     }
 }
+
 static void LPUART_WriteNonBlocking16bit(LPUART_Type *base, const uint16_t *data, size_t length)
 {
     assert(NULL != data);
@@ -1164,6 +1188,7 @@ status_t LPUART_WriteBlocking(LPUART_Type *base, const uint8_t *data, size_t len
 #endif
     return kStatus_Success;
 }
+
 /*!
  * brief Writes to the transmitter register using a blocking method in 9bit or 10bit mode.
  *
@@ -1225,6 +1250,87 @@ status_t LPUART_WriteBlocking16bit(LPUART_Type *base, const uint16_t *data, size
     return kStatus_Success;
 }
 
+static status_t LPUART_WaitForReadData(LPUART_Type *base)
+{
+    status_t status = kStatus_Success;
+    uint32_t statusFlag;
+
+#if UART_RETRY_TIMES
+    uint32_t waitTimes = UART_RETRY_TIMES;
+#endif
+
+#if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
+    while (0U == ((base->WATER & LPUART_WATER_RXCOUNT_MASK) >> LPUART_WATER_RXCOUNT_SHIFT))
+#else
+    while (0U == (base->STAT & LPUART_STAT_RDRF_MASK))
+#endif
+    {
+
+#if UART_RETRY_TIMES
+        if (0U == --waitTimes)
+        {
+            status = kStatus_LPUART_Timeout;
+            break;
+        }
+#endif
+        statusFlag = LPUART_GetStatusFlags(base);
+
+        if (0U != (statusFlag & (uint32_t)kLPUART_RxOverrunFlag))
+        {
+            /*
+             * $Branch Coverage Justification$
+             * $ref fsl_lpuart_c_ref_2$.
+             */
+            status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_RxOverrunFlag)) ?
+                          (kStatus_LPUART_RxHardwareOverrun) :
+                          (kStatus_LPUART_FlagCannotClearManually));
+            /* Other error flags(FE, NF, and PF) are prevented from setting once OR is set, no need to check other
+             * error flags*/
+            break;
+        }
+
+        if (0U != (statusFlag & (uint32_t)kLPUART_ParityErrorFlag))
+        {
+            /*
+             * $Branch Coverage Justification$
+             * $ref fsl_lpuart_c_ref_2$.
+             */
+            status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_ParityErrorFlag)) ?
+                          (kStatus_LPUART_ParityError) :
+                          (kStatus_LPUART_FlagCannotClearManually));
+        }
+
+        if (0U != (statusFlag & (uint32_t)kLPUART_FramingErrorFlag))
+        {
+            /*
+             * $Branch Coverage Justification$
+             * $ref fsl_lpuart_c_ref_2$.
+             */
+            status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_FramingErrorFlag)) ?
+                          (kStatus_LPUART_FramingError) :
+                          (kStatus_LPUART_FlagCannotClearManually));
+        }
+
+        if (0U != (statusFlag & (uint32_t)kLPUART_NoiseErrorFlag))
+        {
+            /*
+             * $Branch Coverage Justification$
+             * $ref fsl_lpuart_c_ref_2$.
+             */
+            status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_NoiseErrorFlag)) ?
+                          (kStatus_LPUART_NoiseError) :
+                          (kStatus_LPUART_FlagCannotClearManually));
+        }
+
+        if (kStatus_Success != status)
+        {
+            break;
+        }
+    }
+
+    return status;
+}
+
 /*!
  * brief Reads the receiver data register using a blocking method.
  *
@@ -1246,7 +1352,6 @@ status_t LPUART_ReadBlocking(LPUART_Type *base, uint8_t *data, size_t length)
     assert(NULL != data);
 
     status_t status = kStatus_Success;
-    uint32_t statusFlag;
     uint8_t *dataAddress = data;
 
 #if defined(FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT) && FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT
@@ -1255,83 +1360,11 @@ status_t LPUART_ReadBlocking(LPUART_Type *base, uint8_t *data, size_t length)
                             (((ctrl & LPUART_CTRL_M_MASK) == 0U) && ((ctrl & LPUART_CTRL_PE_MASK) != 0U)));
 #endif
 
-#if UART_RETRY_TIMES
-    uint32_t waitTimes;
-#endif
-
     while (0U != length)
     {
         length--;
-#if UART_RETRY_TIMES
-        waitTimes = UART_RETRY_TIMES;
-#endif
-#if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
-        while (0U == ((base->WATER & LPUART_WATER_RXCOUNT_MASK) >> LPUART_WATER_RXCOUNT_SHIFT))
-#else
-        while (0U == (base->STAT & LPUART_STAT_RDRF_MASK))
-#endif
-        {
-#if UART_RETRY_TIMES
-            if (0U == --waitTimes)
-            {
-                status = kStatus_LPUART_Timeout;
-                break;
-            }
-#endif
-            statusFlag = LPUART_GetStatusFlags(base);
 
-            if (0U != (statusFlag & (uint32_t)kLPUART_RxOverrunFlag))
-            {
-                /*
-                 * $Branch Coverage Justification$
-                 * $ref fsl_lpuart_c_ref_2$.
-                 */
-                status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_RxOverrunFlag)) ?
-                              (kStatus_LPUART_RxHardwareOverrun) :
-                              (kStatus_LPUART_FlagCannotClearManually));
-                /* Other error flags(FE, NF, and PF) are prevented from setting once OR is set, no need to check other
-                 * error flags*/
-                break;
-            }
-
-            if (0U != (statusFlag & (uint32_t)kLPUART_ParityErrorFlag))
-            {
-                /*
-                 * $Branch Coverage Justification$
-                 * $ref fsl_lpuart_c_ref_2$.
-                 */
-                status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_ParityErrorFlag)) ?
-                              (kStatus_LPUART_ParityError) :
-                              (kStatus_LPUART_FlagCannotClearManually));
-            }
-
-            if (0U != (statusFlag & (uint32_t)kLPUART_FramingErrorFlag))
-            {
-                /*
-                 * $Branch Coverage Justification$
-                 * $ref fsl_lpuart_c_ref_2$.
-                 */
-                status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_FramingErrorFlag)) ?
-                              (kStatus_LPUART_FramingError) :
-                              (kStatus_LPUART_FlagCannotClearManually));
-            }
-
-            if (0U != (statusFlag & (uint32_t)kLPUART_NoiseErrorFlag))
-            {
-                /*
-                 * $Branch Coverage Justification$
-                 * $ref fsl_lpuart_c_ref_2$.
-                 */
-                status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_NoiseErrorFlag)) ?
-                              (kStatus_LPUART_NoiseError) :
-                              (kStatus_LPUART_FlagCannotClearManually));
-            }
-            if (kStatus_Success != status)
-            {
-                break;
-            }
-        }
-
+        status = LPUART_WaitForReadData(base);
         if (kStatus_Success == status)
         {
 #if defined(FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT) && FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT
@@ -1358,6 +1391,7 @@ status_t LPUART_ReadBlocking(LPUART_Type *base, uint8_t *data, size_t length)
 
     return status;
 }
+
 /*!
  * brief Reads the receiver data register in 9bit or 10bit mode.
  *
@@ -1378,85 +1412,13 @@ status_t LPUART_ReadBlocking16bit(LPUART_Type *base, uint16_t *data, size_t leng
     assert(NULL != data);
 
     status_t status = kStatus_Success;
-    uint32_t statusFlag;
     uint16_t *dataAddress = data;
-
-#if UART_RETRY_TIMES
-    uint32_t waitTimes;
-#endif
 
     while (0U != length)
     {
         length--;
-#if UART_RETRY_TIMES
-        waitTimes = UART_RETRY_TIMES;
-#endif
-#if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
-        while (0U == ((base->WATER & LPUART_WATER_RXCOUNT_MASK) >> LPUART_WATER_RXCOUNT_SHIFT))
-#else
-        while (0U == (base->STAT & LPUART_STAT_RDRF_MASK))
-#endif
-        {
-#if UART_RETRY_TIMES
-            if (0U == --waitTimes)
-            {
-                status = kStatus_LPUART_Timeout;
-                break;
-            }
-#endif
-            statusFlag = LPUART_GetStatusFlags(base);
 
-            if (0U != (statusFlag & (uint32_t)kLPUART_RxOverrunFlag))
-            {
-                /*
-                 * $Branch Coverage Justification$
-                 * $ref fsl_lpuart_c_ref_2$.
-                 */
-                status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_RxOverrunFlag)) ?
-                              (kStatus_LPUART_RxHardwareOverrun) :
-                              (kStatus_LPUART_FlagCannotClearManually));
-                /* Other error flags(FE, NF, and PF) are prevented from setting once OR is set, no need to check other
-                 * error flags*/
-                break;
-            }
-
-            if (0U != (statusFlag & (uint32_t)kLPUART_ParityErrorFlag))
-            {
-                /*
-                 * $Branch Coverage Justification$
-                 * $ref fsl_lpuart_c_ref_2$.
-                 */
-                status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_ParityErrorFlag)) ?
-                              (kStatus_LPUART_ParityError) :
-                              (kStatus_LPUART_FlagCannotClearManually));
-            }
-
-            if (0U != (statusFlag & (uint32_t)kLPUART_FramingErrorFlag))
-            {
-                /*
-                 * $Branch Coverage Justification$
-                 * $ref fsl_lpuart_c_ref_2$.
-                 */
-                status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_FramingErrorFlag)) ?
-                              (kStatus_LPUART_FramingError) :
-                              (kStatus_LPUART_FlagCannotClearManually));
-            }
-
-            if (0U != (statusFlag & (uint32_t)kLPUART_NoiseErrorFlag))
-            {
-                /*
-                 * $Branch Coverage Justification$
-                 * $ref fsl_lpuart_c_ref_2$.
-                 */
-                status = ((kStatus_Success == LPUART_ClearStatusFlags(base, (uint32_t)kLPUART_NoiseErrorFlag)) ?
-                              (kStatus_LPUART_NoiseError) :
-                              (kStatus_LPUART_FlagCannotClearManually));
-            }
-            if (kStatus_Success != status)
-            {
-                break;
-            }
-        }
+        status = LPUART_WaitForReadData(base);
         if (kStatus_Success == status)
         {
             *(dataAddress) = (uint16_t)(base->DATA & 0x03FFU);
