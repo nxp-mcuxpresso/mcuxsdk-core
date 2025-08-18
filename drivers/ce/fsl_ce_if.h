@@ -107,8 +107,8 @@ typedef struct
 {
     volatile uint32_t *buffer_base_ptr;
     volatile uint32_t *next_buffer_ptr;
-    volatile int *status_buffer_ptr;
-    unsigned int n_cmd;
+    volatile int32_t *status_buffer_ptr;
+    uint32_t n_cmd;
     ce_cmd_mode_t cmdmode;
 } ce_cmdbuffer_t;
 

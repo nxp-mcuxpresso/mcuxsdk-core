@@ -65,7 +65,7 @@ extern "C" {
  */
 int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
                      volatile uint32_t cmdbuffer[],
-                     volatile int statusbuffer[],
+                     volatile int32_t statusbuffer[],
                      ce_cmd_mode_t cmdmode);
 
 /*!

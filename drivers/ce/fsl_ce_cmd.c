@@ -47,7 +47,7 @@ static inline void CE_CmdDelay(void)
  */
 int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
                      volatile uint32_t cmdbuffer[],
-                     volatile int statusbuffer[],
+                     volatile int32_t statusbuffer[],
                      ce_cmd_mode_t cmdmode)
 {
     s_ce_cmdbuffer = psCmdBuffer;
@@ -180,7 +180,7 @@ int CE_CmdLaunch(int force_launch)
  */
 int CE_CmdLaunchBlocking(void)
 {
-    unsigned int n_cmd;
+    uint32_t n_cmd;
     status_t status = kStatus_Fail;
 
 #if CE_COMPUTE_TIMEOUT
@@ -276,7 +276,7 @@ int CE_CmdLaunchNonBlocking(void)
 int CE_CmdCheckStatus(void)
 {
     int status         = -1;
-    unsigned int n_cmd = *(s_ce_cmdbuffer->buffer_base_ptr);
+    uint32_t n_cmd = *(s_ce_cmdbuffer->buffer_base_ptr);
 
     if (n_cmd != CE_COMPUTE_DONE)
     {
