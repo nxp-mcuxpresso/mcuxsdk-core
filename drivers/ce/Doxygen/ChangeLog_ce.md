@@ -1,5 +1,10 @@
 # CE
 
+## [2.3.2]
+
+- Bug Fixes
+  - Fixed FFT size error check for F32
+
 ## [2.3.1]
 
 - Improvements

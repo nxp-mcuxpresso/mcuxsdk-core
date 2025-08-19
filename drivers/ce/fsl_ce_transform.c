@@ -73,7 +73,7 @@ int CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int log2N)
 {
     int status;
 
-    if (log2N < 5 || log2N > 15)
+    if (log2N < 4 || log2N > 15)
     {
         status = FFT_ERROR_SZOUTSIDERANGE;
         return status;
@@ -158,7 +158,7 @@ int CE_TransformIFFT_F32(float *pY, float *pX, float *pScratch, int log2N)
 {
     int status;
 
-    if (log2N < 5 || log2N > 15)
+    if (log2N < 4 || log2N > 15)
     {
         status = FFT_ERROR_SZOUTSIDERANGE;
         return status;
