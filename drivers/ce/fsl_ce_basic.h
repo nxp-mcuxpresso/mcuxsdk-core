@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -38,14 +38,14 @@ extern "C" {
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_ExecCmd(void);
+int32_t CE_ExecCmd(void);
 
 /*!
  * @brief Simple echo test cmd
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_NullCmd(void);
+int32_t CE_NullCmd(void);
 
 /*!
  * @brief Copies one memory buffer to another
@@ -59,7 +59,7 @@ int CE_NullCmd(void);
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_Copy(int *pDst, int *pSrc, const int N);
+int32_t CE_Copy(int32_t *pDst, int32_t *pSrc, const int32_t N);
 
 #ifdef __cplusplus
 }

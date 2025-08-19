@@ -1,5 +1,10 @@
 # CE
 
+## [2.3.3]
+
+- Improvements
+  - Updated the type of the variables and the parameters from int to int32_t
+
 ## [2.3.2]
 
 - Bug Fixes

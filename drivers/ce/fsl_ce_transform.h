@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -48,7 +48,7 @@ extern "C" {
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int log2N);
+int32_t CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2N);
 
 /*!
  * @brief Calculates the FFT for complex 32-bit floating point data.
@@ -63,7 +63,7 @@ int CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int log2N);
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int log2N);
+int32_t CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2N);
 
 /*!
  * @brief Calculates the IFFT for complex 16-bit floating point data.
@@ -81,7 +81,7 @@ int CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int log2N);
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int log2N);
+int32_t CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2N);
 
 /*!
  * @brief Calculates the IFFT for complex 32-bit floating point data.
@@ -96,7 +96,7 @@ int CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int log2N);
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_TransformIFFT_F32(float *pY, float *pX, float *pScratch, int log2N);
+int32_t CE_TransformIFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2N);
 
 #ifdef __cplusplus
 }

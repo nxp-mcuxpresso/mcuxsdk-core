@@ -45,7 +45,7 @@ static inline void CE_CmdDelay(void)
  *
  * return Currently only return 0.
  */
-int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
+int32_t CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
                      volatile uint32_t cmdbuffer[],
                      volatile int32_t statusbuffer[],
                      ce_cmd_mode_t cmdmode)
@@ -67,9 +67,10 @@ int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
  *
  * return Currently only return 0.
  */
-int CE_CmdReset(void)
+int32_t CE_CmdReset(void)
 {
     volatile uint32_t *cmd_base     = s_ce_cmdbuffer->buffer_base_ptr;
+
     *cmd_base                       = 0xCCCC;
     s_ce_cmdbuffer->next_buffer_ptr = cmd_base + 1;
     s_ce_cmdbuffer->n_cmd           = 0;
@@ -85,24 +86,24 @@ int CE_CmdReset(void)
  * retval 0  Command added successfully
  * retval -1 Command not added since command queue is at maximum limit
  */
-int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
+int32_t CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
 {
-    int addstatus;
-    volatile unsigned short *nargsbase;
-    unsigned short i;
-    unsigned int size;
+    int32_t addstatus;
+    volatile uint16_t *nargsbase;
+    uint16_t i;
+    uint32_t size;
     volatile uint32_t *cmdbase;
     void **ptrargbase;
-    int *ptrparambase;
+    int32_t *ptrparambase;
 
     if (s_ce_cmdbuffer->n_cmd < CE_CMD_MAX_CMDS_ZVQ)
     {
-        size    = sizeof(void *) * cmdargs->n_ptr_args + sizeof(int) * ((unsigned int)cmdargs->n_param_args + 1U) + sizeof(short) * 2U;
+        size    = sizeof(void *) * cmdargs->n_ptr_args + sizeof(int32_t) * ((uint32_t)cmdargs->n_param_args + 1U) + sizeof(int16_t) * 2U;
         cmdbase = s_ce_cmdbuffer->next_buffer_ptr;
 
-        *cmdbase = (unsigned int)cmd;
+        *cmdbase = (uint32_t)cmd;
 
-        nargsbase  = (volatile unsigned short *)(cmdbase + 1U);
+        nargsbase  = (volatile uint16_t *)(cmdbase + 1U);
         *nargsbase = cmdargs->n_ptr_args;
         nargsbase += 1;
         *nargsbase = cmdargs->n_param_args;
@@ -115,7 +116,7 @@ int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
             ptrargbase += 1;
         }
 
-        ptrparambase = (int *)ptrargbase;
+        ptrparambase = (int32_t *)ptrargbase;
         for (i = 0; i < cmdargs->n_param_args; i++)
         {
             *ptrparambase = cmdargs->arg_param_array[i];
@@ -124,7 +125,7 @@ int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
 
         s_ce_cmdbuffer->n_cmd++;
 
-        cmdbase += (size / sizeof(int));
+        cmdbase += (size / sizeof(int32_t));
         s_ce_cmdbuffer->next_buffer_ptr = cmdbase;
 
         addstatus = 0;
@@ -146,7 +147,7 @@ int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_CmdLaunch(int force_launch)
+int32_t CE_CmdLaunch(int32_t force_launch)
 {
     if (force_launch == 1)
     {
@@ -178,7 +179,7 @@ int CE_CmdLaunch(int force_launch)
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_CmdLaunchBlocking(void)
+int32_t CE_CmdLaunchBlocking(void)
 {
     uint32_t n_cmd;
     status_t status = kStatus_Fail;
@@ -237,7 +238,7 @@ int CE_CmdLaunchBlocking(void)
  *
  * return Currently only return 0.
  */
-int CE_CmdLaunchNonBlocking(void)
+int32_t CE_CmdLaunchNonBlocking(void)
 {
     status_t status = kStatus_Fail;
 
@@ -273,9 +274,9 @@ int CE_CmdLaunchNonBlocking(void)
  * retval 0 Task completed and CE is ready for next command(s)
  * retval 1 Task still running; CE is busy
  */
-int CE_CmdCheckStatus(void)
+int32_t CE_CmdCheckStatus(void)
 {
-    int status         = -1;
+    int32_t status         = -1;
     uint32_t n_cmd = *(s_ce_cmdbuffer->buffer_base_ptr);
 
     if (n_cmd != CE_COMPUTE_DONE)

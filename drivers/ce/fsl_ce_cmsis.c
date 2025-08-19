@@ -22,7 +22,7 @@ Implementation file for ARM API compatible FFT functions on CE
 void ce_arm_cfft_f32(
     const arm_cfft_instance_f32 *S, float *p1, uint8_t ifftFlag, uint8_t bitReverseFlag, float *pOut, float *pScratch)
 {
-    int l2N = 0;
+    int32_t l2N = 0;
     uint16_t temp = S->fftLen;
 
     if (temp > 0U)

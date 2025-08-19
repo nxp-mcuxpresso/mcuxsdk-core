@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -115,10 +115,10 @@ typedef struct
 /* structure for a single zv/ce command */
 typedef struct
 {
-    unsigned short n_ptr_args;            /* number of pointer arguments */
-    unsigned short n_param_args;          /* number of integer arguments */
-    void *arg_ptr_array[CE_CMD_MAX_ARGS]; /* array of pointer arguments */
-    int arg_param_array[CE_CMD_MAX_ARGS]; /* array of integer arguments */
+    uint16_t n_ptr_args;                      /* number of pointer arguments */
+    uint16_t n_param_args;                    /* number of integer arguments */
+    void *arg_ptr_array[CE_CMD_MAX_ARGS];     /* array of pointer arguments */
+    int32_t arg_param_array[CE_CMD_MAX_ARGS]; /* array of integer arguments */
 } ce_cmdstruct_t;
 
 #endif /*FSL_CE_IF_H*/

@@ -28,9 +28,9 @@ Implementation file for CE wrapper/driver FFT functions on ARM
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int log2N)
+int32_t CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
-    int status;
+    int32_t status;
 
     if (log2N < 5 || log2N > 15)
     {
@@ -69,9 +69,9 @@ int CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int log2N)
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int log2N)
+int32_t CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
-    int status;
+    int32_t status;
 
     if (log2N < 4 || log2N > 15)
     {
@@ -113,9 +113,9 @@ int CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int log2N)
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int log2N)
+int32_t CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
-    int status;
+    int32_t status;
 
     if (log2N < 5 || log2N > 15)
     {
@@ -154,9 +154,9 @@ int CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int log2N)
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_TransformIFFT_F32(float *pY, float *pX, float *pScratch, int log2N)
+int32_t CE_TransformIFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
-    int status;
+    int32_t status;
 
     if (log2N < 4 || log2N > 15)
     {

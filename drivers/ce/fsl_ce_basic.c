@@ -17,9 +17,10 @@ Implementation file for CE wrapper/driver functions on ARM
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_ExecCmd(void)
+int32_t CE_ExecCmd(void)
 {
-    int status = CE_CmdLaunch(1);
+    int32_t status = CE_CmdLaunch(1);
+
     return status;
 }
 
@@ -28,9 +29,10 @@ int CE_ExecCmd(void)
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_NullCmd(void)
+int32_t CE_NullCmd(void)
 {
-    int status;
+    int32_t status;
+
     ce_cmdstruct_t cmdstruct;
     cmdstruct.n_ptr_args   = 0;
     cmdstruct.n_param_args = 0;
@@ -57,9 +59,9 @@ int CE_NullCmd(void)
  *
  * return Return 0 if succeeded, otherwise return error code.
  */
-int CE_Copy(int *pDst, int *pSrc, const int N)
+int32_t CE_Copy(int32_t *pDst, int32_t *pSrc, const int32_t N)
 {
-    int status;
+    int32_t status;
 
     ce_cmdstruct_t cmdstruct;
     cmdstruct.n_ptr_args         = 2;

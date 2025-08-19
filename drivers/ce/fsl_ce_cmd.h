@@ -63,7 +63,7 @@ extern "C" {
  *
  * @return Currently only return 0.
  */
-int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
+int32_t CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
                      volatile uint32_t cmdbuffer[],
                      volatile int32_t statusbuffer[],
                      ce_cmd_mode_t cmdmode);
@@ -75,7 +75,7 @@ int CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
  *
  * @return Currently only return 0.
  */
-int CE_CmdReset(void);
+int32_t CE_CmdReset(void);
 
 /*!
  * @brief Adds a command to the command queue
@@ -85,7 +85,7 @@ int CE_CmdReset(void);
  * @retval 0  Command added successfully
  * @retval -1 Command not added since command queue is at maximum limit
  */
-int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs);
+int32_t CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs);
 
 /*!
  * @brief Launches the command queue for execution on CE
@@ -96,14 +96,14 @@ int CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs);
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_CmdLaunch(int force_launch);
+int32_t CE_CmdLaunch(int32_t force_launch);
 
 /*!
  * @brief Launches the current command queue and returns upon completion of the queue on CE
  *
  * @return Return 0 if succeeded, otherwise return error code.
  */
-int CE_CmdLaunchBlocking(void);
+int32_t CE_CmdLaunchBlocking(void);
 
 /*!
  * @brief Launches the current command queue and returns without waiting for completion on CE
@@ -113,7 +113,7 @@ int CE_CmdLaunchBlocking(void);
  *
  * @return Currently only return 0.
  */
-int CE_CmdLaunchNonBlocking(void);
+int32_t CE_CmdLaunchNonBlocking(void);
 
 /*!
  * @brief Checks the command queue execution status on CE
@@ -121,7 +121,7 @@ int CE_CmdLaunchNonBlocking(void);
  * @retval 0 Task completed and CE is ready for next command(s)
  * @retval 1 Task still running; CE is busy
  */
-int CE_CmdCheckStatus(void);
+int32_t CE_CmdCheckStatus(void);
 
 #ifdef __cplusplus
 }
