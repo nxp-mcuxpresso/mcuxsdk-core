@@ -807,6 +807,13 @@ void SAI_TxSetBitClockRate(
     if (bitClockDiv == 1U)
     {
         tcr2 |= I2S_TCR2_BYP_MASK;
+/* ERR051421 workaround: Set BCI bit when sync mode and bypass is used */
+#if defined(FSL_FEATURE_SAI_HAS_ERRATA_051421) && (FSL_FEATURE_SAI_HAS_ERRATA_051421)
+        if (base->RCR2 & I2S_RCR2_SYNC_MASK)
+        {
+            base->RCR2 |= I2S_RCR2_BCI(1U);
+        }
+#endif
     }
     else
 #endif
@@ -875,6 +882,13 @@ void SAI_RxSetBitClockRate(
     if (bitClockDiv == 1U)
     {
         rcr2 |= I2S_RCR2_BYP_MASK;
+/* ERR051421 workaround: Set BCI bit when sync mode and bypass is used */
+#if defined(FSL_FEATURE_SAI_HAS_ERRATA_051421) && (FSL_FEATURE_SAI_HAS_ERRATA_051421)
+        if (base->TCR2 & I2S_TCR2_SYNC_MASK)
+        {
+            base->TCR2 |= I2S_TCR2_BCI(1U);
+        }
+#endif
     }
     else
 #endif
@@ -918,6 +932,14 @@ void SAI_TxSetBitclockConfig(I2S_Type *base, sai_master_slave_t masterSlave, sai
         tcr2 |= I2S_TCR2_BCP(config->bclkPolarity);
     }
 
+/* ERR051421 workaround: Set BCI bit when sync mode and bypass is used */
+#if defined(FSL_FEATURE_SAI_HAS_ERRATA_051421) && (FSL_FEATURE_SAI_HAS_ERRATA_051421)
+    if ((base->RCR2 & I2S_RCR2_BYP_MASK) && (base->TCR2 & I2S_TCR2_SYNC_MASK))
+    {
+        tcr2 |= I2S_TCR2_BCI(1U)
+    }
+#endif
+
     base->TCR2 = tcr2;
 }
 
@@ -953,6 +975,14 @@ void SAI_RxSetBitclockConfig(I2S_Type *base, sai_master_slave_t masterSlave, sai
         rcr2 &= ~(I2S_RCR2_BCD_MASK | I2S_RCR2_BCP_MASK);
         rcr2 |= I2S_RCR2_BCP(config->bclkPolarity);
     }
+
+/* ERR051421 workaround: Set BCI bit when sync mode and bypass is used */
+#if defined(FSL_FEATURE_SAI_HAS_ERRATA_051421) && (FSL_FEATURE_SAI_HAS_ERRATA_051421)
+    if ((base->TCR2 & I2S_TCR2_BYP_MASK) && (base->RCR2 & I2S_RCR2_SYNC_MASK))
+    {
+        rcr2 |= I2S_RCR2_BCI(1U)
+    }
+#endif
 
     base->RCR2 = rcr2;
 }

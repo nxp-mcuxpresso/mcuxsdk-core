@@ -1,5 +1,9 @@
 # SAI
 
+## [2.4.9]
+
+- Added Errata ERR051421 workaround.
+
 ## [2.4.8]
 
 - Bug Fixes
