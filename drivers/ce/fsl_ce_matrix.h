@@ -41,7 +41,7 @@ extern "C" {
  * @param M Number of rows of matrices A, B, C
  * @param N Number of columns of matrices A, B, C
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status.
  */
 int32_t CE_MatrixAdd_Q15(int16_t *pDst, int16_t *pA, int16_t *pB, int32_t M, int32_t N);
 
@@ -57,7 +57,7 @@ int32_t CE_MatrixAdd_Q15(int16_t *pDst, int16_t *pA, int16_t *pB, int32_t M, int
  * @param M Number of rows of matrices A, B, C
  * @param N Number of columns of matrices A, B, C
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status.
  */
 int32_t CE_MatrixAdd_Q31(int32_t *pDst, int32_t *pA, int32_t *pB, int32_t M, int32_t N);
 
@@ -73,7 +73,7 @@ int32_t CE_MatrixAdd_Q31(int32_t *pDst, int32_t *pA, int32_t *pB, int32_t M, int
  * @param M Number of rows of matrices A, B, C
  * @param N Number of columns of matrices A, B, C
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status.
  */
 int32_t CE_MatrixAdd_F32(float *pDst, float *pA, float *pB, int32_t M, int32_t N);
 
@@ -91,7 +91,7 @@ int32_t CE_MatrixAdd_F32(float *pDst, float *pA, float *pB, int32_t M, int32_t N
  * @param M    Number of rows for each input matrix
  * @param N    Number of columns for each input matrix
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status.
  */
 int32_t CE_MatrixElemMul_F32(float *pDst, float *pA, float *pB, int32_t M, int32_t N);
 
@@ -111,7 +111,7 @@ int32_t CE_MatrixElemMul_F32(float *pDst, float *pA, float *pB, int32_t M, int32
  * Data precision and format is as defined by the argument type
  * @note Limits on max value of N: For F32: N < 128; For CF32: N < 64
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status.
  */
 int32_t CE_MatrixMul_F32(float *pDst, float *pA, float *pB, int32_t M, int32_t N, int32_t P);
 
@@ -132,7 +132,7 @@ int32_t CE_MatrixMul_F32(float *pDst, float *pA, float *pB, int32_t M, int32_t N
  * Data precision and format is as defined by the argument type
  * @note Limits on max value of N: For F32: N < 128; For CF32: N < 64
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status.
  */
 int32_t CE_MatrixMul_CF32(float *pDst, float *pA, float *pB, int32_t M, int32_t N, int32_t P);
 
@@ -164,7 +164,7 @@ int32_t CE_MatrixMul_CF32(float *pDst, float *pA, float *pB, int32_t M, int32_t 
  *   - 0: Out = inv(A)
  *   - 1: Out = inv(chol(A))
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status.
  */
 int32_t CE_MatrixInvHerm_CF32(
     float *pAinv, float *pA, float *pScratch, int32_t M, uint8_t flag_packedInput, uint8_t flag_cholInv);
@@ -177,8 +177,8 @@ int32_t CE_MatrixInvHerm_CF32(
  * the output matrix of eigen vectors, and T is the diagonal matrix of eigen
  * values.
  *
- * @param pLambdaOut Pointer to buffer for output Eigen Vectors (MxM)
- * @param pUout      Pointer to buffer with output Eigen Values (Mx1)
+ * @param pLambdaOut Pointer to buffer for output Eigen Vectors (Mx1)
+ * @param pUout      Pointer to buffer with output Eigen Values (MxM)
  * @param pUin       Pointer to buffer for input matrix A
  * @param M          Number of rows or columns of A
  * @param pScratch   Scratch memory, the minimum scratch size required is (M x M x 4 + 360) x 4 bytes.
@@ -188,7 +188,7 @@ int32_t CE_MatrixInvHerm_CF32(
  *   - 0: full matrix
  *   - 1: upper triangular part only
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status. Return the number of QR iterations executed in status[3] register.
  */
 int32_t CE_MatrixEvdHerm_CF32(float *pLambdaOut,
                           float *pUout,
@@ -216,7 +216,7 @@ int32_t CE_MatrixEvdHerm_CF32(float *pLambdaOut,
  * @param M Number of rows or columns of input matrix A
  * @param flag_packedInput Set to 0 if the input is a full matrix, or, set to 1 if the input is a packed upper triangular matrix.
  *
- * @return Return 0 if succeeded, otherwise return error code.
+ * @return Command execution status.
  */
 int32_t CE_MatrixChol_CF32(float *pL, float *pA, float *pScratch, int32_t M, uint8_t flag_packedInput);
 

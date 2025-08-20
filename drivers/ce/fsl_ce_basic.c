@@ -15,7 +15,7 @@ Implementation file for CE wrapper/driver functions on ARM
 /*!
  * brief Execute command in command queue
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return Command execution status.
  */
 int32_t CE_ExecCmd(void)
 {
@@ -27,7 +27,7 @@ int32_t CE_ExecCmd(void)
 /*!
  * brief Simple echo test cmd
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return Command execution status.
  */
 int32_t CE_NullCmd(void)
 {
@@ -57,7 +57,7 @@ int32_t CE_NullCmd(void)
  * param pSrc Pointer to source buffer
  * param N    Number of words to copy
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return Command execution status.
  */
 int32_t CE_Copy(int32_t *pDst, int32_t *pSrc, const int32_t N)
 {

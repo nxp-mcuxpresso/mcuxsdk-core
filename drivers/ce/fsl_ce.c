@@ -35,6 +35,11 @@ void CE_Init(ce_copy_image_t *ceCopyImage)
     CE_InitWithoutFirmware();
 
 #if (defined(KW47_core0_SERIES) || defined(MCXW72_core0_SERIES))
+    /*
+     * $Branch Coverage Justification$
+     * The CE images released in the SDK use the STCM6 as the stack and the STCM7 as the data RAM.
+     * In this case, the CE core cannot boot from the STCM6 and STCM7.
+     */
     switch (ceCopyImage->destAddr)
     {
         case CE_STCM5_BASE:

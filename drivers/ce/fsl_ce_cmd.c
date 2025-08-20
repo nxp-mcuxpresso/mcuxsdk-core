@@ -43,7 +43,7 @@ static inline void CE_CmdDelay(void)
  * param[in] cmdmode Whether one command or multi command queue, and, blocking or non-blocking
  * call
  *
- * return Currently only return 0.
+ * return 0: Initialization successful.
  */
 int32_t CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
                      volatile uint32_t cmdbuffer[],
@@ -65,7 +65,7 @@ int32_t CE_CmdInitBuffer(ce_cmdbuffer_t *psCmdBuffer,
  *
  * Any pending commands in the queue will be flushed.
  *
- * return Currently only return 0.
+ * return 0: Reset successful.
  */
 int32_t CE_CmdReset(void)
 {
@@ -145,7 +145,7 @@ int32_t CE_CmdAdd(ce_cmd_t cmd, ce_cmdstruct_t *cmdargs)
  *    - 1: executes the queue regardless of the command mode
  *    - 0: executes the queue only if in ONE cmd mode. Otherwise, does nothing
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return 0: Launch successful.
  */
 int32_t CE_CmdLaunch(int32_t force_launch)
 {
@@ -177,7 +177,7 @@ int32_t CE_CmdLaunch(int32_t force_launch)
 /*!
  * brief Launches the current command queue and returns upon completion of the queue on CE
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return 0: Launch successful.
  */
 int32_t CE_CmdLaunchBlocking(void)
 {
@@ -236,7 +236,7 @@ int32_t CE_CmdLaunchBlocking(void)
  * CE Will send an interrupt via MUA->GCR to ARM upon completion of task. User can also poll to check for completion.
  * User has to call CE_CmdReset() in the IRQ handler. IRQ::DSP_IRQn needs to be enabled.
  *
- * return Currently only return 0.
+ * return 0: Launch successful.
  */
 int32_t CE_CmdLaunchNonBlocking(void)
 {
@@ -271,8 +271,8 @@ int32_t CE_CmdLaunchNonBlocking(void)
 /*!
  * brief Checks the command queue execution status on CE
  *
- * retval 0 Task completed and CE is ready for next command(s)
- * retval 1 Task still running; CE is busy
+ * retval CE_STATUS_BUSY ZV2117 is busy executing current command queue
+ * retval CE_STATUS_IDLE Command queue execution completed on ZV2117. ZV2117 is ready to process next set of commands
  */
 int32_t CE_CmdCheckStatus(void)
 {

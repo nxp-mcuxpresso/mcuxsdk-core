@@ -26,7 +26,7 @@ Implementation file for CE wrapper/driver FFT functions on ARM
  * param pScratch Pointer to scratch buffer. Must be equal to or greater than size of the output buffer
  * param log2N log2(N), where N is the FFT size
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return Command execution status.
  */
 int32_t CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
@@ -67,7 +67,7 @@ int32_t CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2
  * param pScratch Pointer to a scratch buffer (minimum size N*8 bytes)
  * param log2N log2(N) where N is the FFT size
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return Command execution status.
  */
 int32_t CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
@@ -111,7 +111,7 @@ int32_t CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2
  * param pScratch Pointer to scratch buffer. Must be equal to or greater than size of the output buffer
  * param log2N log2(N), where N is the IFFT size
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return Command execution status.
  */
 int32_t CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
@@ -152,7 +152,7 @@ int32_t CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2
  * param pScratch Pointer to scratch buffer. Must be equal to or greater than size of the output buffer
  * param log2N log2(N), where N is the IFFT size
  *
- * return Return 0 if succeeded, otherwise return error code.
+ * return Command execution status.
  */
 int32_t CE_TransformIFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
