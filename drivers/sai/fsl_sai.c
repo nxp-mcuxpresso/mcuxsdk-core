@@ -936,7 +936,7 @@ void SAI_TxSetBitclockConfig(I2S_Type *base, sai_master_slave_t masterSlave, sai
 #if defined(FSL_FEATURE_SAI_HAS_ERRATA_051421) && (FSL_FEATURE_SAI_HAS_ERRATA_051421)
     if ((base->RCR2 & I2S_RCR2_BYP_MASK) && (base->TCR2 & I2S_TCR2_SYNC_MASK))
     {
-        tcr2 |= I2S_TCR2_BCI(1U)
+        tcr2 |= I2S_TCR2_BCI(1U);
     }
 #endif
 
@@ -980,7 +980,7 @@ void SAI_RxSetBitclockConfig(I2S_Type *base, sai_master_slave_t masterSlave, sai
 #if defined(FSL_FEATURE_SAI_HAS_ERRATA_051421) && (FSL_FEATURE_SAI_HAS_ERRATA_051421)
     if ((base->TCR2 & I2S_TCR2_BYP_MASK) && (base->RCR2 & I2S_RCR2_SYNC_MASK))
     {
-        rcr2 |= I2S_RCR2_BCI(1U)
+        rcr2 |= I2S_RCR2_BCI(1U);
     }
 #endif
 
