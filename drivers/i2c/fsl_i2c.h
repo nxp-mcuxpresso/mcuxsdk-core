@@ -294,8 +294,9 @@ extern "C" {
  * @param base I2C base pointer
  * @param masterConfig A pointer to the master configuration structure
  * @param srcClock_Hz I2C peripheral clock frequency in Hz
+ * @return the actual applied baudrate
  */
-void I2C_MasterInit(I2C_Type *base, const i2c_master_config_t *masterConfig, uint32_t srcClock_Hz);
+uint32_t I2C_MasterInit(I2C_Type *base, const i2c_master_config_t *masterConfig, uint32_t srcClock_Hz);
 
 /*!
  * @brief Initializes the I2C peripheral. Call this API to ungate the I2C clock
@@ -555,8 +556,9 @@ static inline uint32_t I2C_GetDataRegAddr(I2C_Type *base)
  * @param base I2C base pointer
  * @param baudRate_Bps the baud rate value in bps
  * @param srcClock_Hz Source clock
+ * @return the actual applied baudrate
  */
-void I2C_MasterSetBaudRate(I2C_Type *base, uint32_t baudRate_Bps, uint32_t srcClock_Hz);
+uint32_t I2C_MasterSetBaudRate(I2C_Type *base, uint32_t baudRate_Bps, uint32_t srcClock_Hz);
 
 /*!
  * @brief Sends a START on the I2C bus.
