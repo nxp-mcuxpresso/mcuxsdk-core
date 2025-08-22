@@ -12,7 +12,7 @@ configuration data, parses build outputs, and generates a structured project
 information file.
 
 Usage:
-    west cfg_project_info -b <board> <source_dir> [-c <core>]
+    west cfg_project_info -b <board> <source_dir> [-Dcore_id=<core>]
 """
 import subprocess
 import re
@@ -50,7 +50,7 @@ class ProjectInfo(WestCommand):
         
         parser.add_argument('-b', '--board', help='board for which to create the project info file')
         parser.add_argument('source_dir', help="source directory for project")
-        parser.add_argument('-c', '--core', default=None, help="specific core for multi-core project")
+        parser.add_argument('-D', action='append', dest='cmake_defines', help="CMake defines in format key=value (e.g., -Dcore_id=cm33)")
 
         return parser
     
@@ -61,32 +61,28 @@ class ProjectInfo(WestCommand):
         Handles both single-core and multi-core project configurations.
         """ 
         try:
-            log.inf("\nRunning CMake configuration build...")
-            if self.args.core:
-                log.inf(f"Target: {self.args.board} (core: {self.args.core})")
+            log.inf("\n=== Running CMake configuration build: ", colorize=True)
+            if self.core_id:
+                log.inf(f"Target: {self.args.board} (core: {self.core_id})")
             else:
                 log.inf(f"Target: {self.args.board}")
 
             build_output_path = os.path.join(self.output_dir, self.build_dir)
-            if (self.args.core):
-                core_arg = f"-Dcore_id={self.args.core}"
-                build_output = subprocess.run(
-                    ["west", "build", "--cmake-only", "--pristine=always","-b", 
-                    self.args.board, self.args.source_dir, "-d", build_output_path, "--", core_arg, "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"],
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
-            else:
-                build_output = subprocess.run(
-                    ["west", "build", "--cmake-only", "--pristine=always","-b", 
-                    self.args.board, self.args.source_dir, "-d", build_output_path, "--", "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"],
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
+            cmd_args = ["west", "build", "--cmake-only", "--pristine=always", "-b", 
+                   self.args.board, self.args.source_dir, "-d", build_output_path, "--"]
+            
+            if self.core_id:
+                cmd_args.append(f"-Dcore_id={self.core_id}")
+            
+            cmd_args.append("-DCMAKE_EXPORT_COMPILE_COMMANDS=ON")
+            
+            build_output = subprocess.run(
+                cmd_args,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
             
         except subprocess.CalledProcessError as e:
             log.err("Error occurred:\n", e.stderr)
@@ -240,11 +236,17 @@ class ProjectInfo(WestCommand):
         Main execution method for the project-info west command.
         """
 
-        log.inf("Starting project info extraction...")
+        log.inf("=== Starting project info extraction: ", colorize=True)
         log.inf(f"Source directory: {args.source_dir}")
         log.inf(f"Board: {args.board}")
-        if args.core:
-            log.inf(f"Core: {args.core}")
+
+        self.core_id = None
+        if args.cmake_defines:
+            for define in args.cmake_defines:
+                if define.startswith('core_id='):
+                    self.core_id = define.split('=', 1)[1]
+                    log.inf(f"Core: {self.core_id}")
+                    break
 
         self.args = args
         self.build_dir = "tmp_build"
@@ -266,7 +268,7 @@ class ProjectInfo(WestCommand):
             self.delete_temp_build_file()
             return
 
-        log.inf("\nCreating project_info.json file from build output...")
+        log.inf("\n=== Creating project_info.json file from build output: ", colorize=True)
 
         status = self.parse_build_output()
         if not status:
@@ -290,9 +292,4 @@ class ProjectInfo(WestCommand):
 
         log.inf("Project info extraction completed successfully!\n")
         log.inf(f"Output file: {os.path.join(os.path.abspath(self.output_dir), 'project_info.json')}")
-        log.inf("-- Use the output file directory (cfg_tools) in Config Tools as a toolchain project information source. --")
-
-
-        
-    
-
+        log.inf("-- Use the output file directory (cfg_tools) in Config Tools as a toolchain project information source. --", colorize=True)
