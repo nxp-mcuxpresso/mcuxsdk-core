@@ -12,7 +12,7 @@ configuration data, parses build outputs, and generates a structured project
 information file.
 
 Usage:
-    west project-info -b <board> -s <source_dir> [-c <core>]
+    west project-info -b <board> <source_dir> [-c <core>]
 """
 import subprocess
 import re
@@ -36,7 +36,7 @@ class ProjectInfo(WestCommand):
     """
     def __init__(self):
         super().__init__(
-            'project-info',
+            'cfg_project_info',
             # Keep this in sync with the string in west-commands.yml.
             'export project information and configuration details',
             PROJECT_INFO_DESCRIPTION,
@@ -49,7 +49,7 @@ class ProjectInfo(WestCommand):
             description=self.description)
         
         parser.add_argument('-b', '--board', help='board for which to create the project info file')
-        parser.add_argument('-s', '--source_dir', help="source directory for project")
+        parser.add_argument('source_dir', help="source directory for project")
         parser.add_argument('-c', '--core', default=None, help="specific core for multi-core project")
 
         return parser
@@ -214,6 +214,8 @@ class ProjectInfo(WestCommand):
         except json.JSONEncodeError as e:
             log.err(f"Error encoding JSON data: {e}")
             return False
+        
+        return True
 
     def check_cfg_tools_folder(self):
         """

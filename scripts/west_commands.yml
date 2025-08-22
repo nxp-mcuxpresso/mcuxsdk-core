@@ -53,6 +53,6 @@ west-commands:
         help: Graphical interactive build command selection.
   - file: scripts/west_commands/project_info.py
     commands:
-      - name: project-info
+      - name: cfg_project_info
         class: ProjectInfo
         help: Extract project info
