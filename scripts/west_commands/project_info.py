@@ -12,7 +12,7 @@ configuration data, parses build outputs, and generates a structured project
 information file.
 
 Usage:
-    west project-info -b <board> <source_dir> [-c <core>]
+    west cfg_project_info -b <board> <source_dir> [-c <core>]
 """
 import subprocess
 import re
