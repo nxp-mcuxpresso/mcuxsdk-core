@@ -3,7 +3,7 @@
 # Originally modified from:
 #   https://github.com/zephyrproject-rtos/zephyr/blame/main/cmake/modules/extensions.cmake
 
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 
 function(board_runner_args runner)
   string(MAKE_C_IDENTIFIER ${runner} runner_id)
@@ -187,7 +187,7 @@ function(find_arm_gdb)
     return()
   endif()
 
-  find_program(CMAKE_GDB     ${ARMGCC_ROOT}/bin/arm-none-eabi-gdb-py  PATHS ${ARMGCC_ROOT} NO_DEFAULT_PATH)
+  find_program(CMAKE_GDB     ${ARMGCC_ROOT}/bin/${CMAKE_PREFIX}gdb-py  PATHS ${ARMGCC_ROOT} NO_DEFAULT_PATH)
 
   if(CMAKE_GDB)
     execute_process(
@@ -199,7 +199,7 @@ function(find_arm_gdb)
   endif()
 
   if(NOT CMAKE_GDB OR GDB_CFG_ERR)
-    find_program(CMAKE_GDB_NO_PY ${ARMGCC_ROOT}/bin/arm-none-eabi-gdb PATHS ${ARMGCC_ROOT} NO_DEFAULT_PATH)
+    find_program(CMAKE_GDB_NO_PY ${ARMGCC_ROOT}/bin/${CMAKE_PREFIX}gdb PATHS ${ARMGCC_ROOT} NO_DEFAULT_PATH)
 
     if(CMAKE_GDB_NO_PY)
       set(CMAKE_GDB ${CMAKE_GDB_NO_PY} CACHE FILEPATH "Path to a program." FORCE)
