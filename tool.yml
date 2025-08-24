@@ -19,10 +19,10 @@ toolchains:
     name: Keil MDK
     toolchain: mdk
     compiler: armclang
-    compiler_version: '6.22'
+    compiler_version: '6.23'
     vendor: ARM
     vendor_url: http://www.arm.com
-    version: '5.41'
+    version: '5.42'
     os:
     - windows
   iar:
