@@ -182,9 +182,18 @@ endfunction()
 
 function(find_arm_gdb)
   set(ARMGCC_ROOT $ENV{ARMGCC_DIR})
+  set(CMAKE_GDB $ENV{GDB})
   if(NOT ARMGCC_ROOT)
     message(WARNING "Cannot find 'ARMGCC_DIR' to get gdb, so west debug may not work.")
     return()
+  endif()
+
+  if(CMAKE_GDB)
+    message(STATUS "Use GDB specified by envirorment variable GDB=${CMAKE_GDB}")
+    set(CMAKE_GDB $ENV{GDB} PARENT_SCOPE)
+    return()
+  else()
+    message(STATUS "GDB is not specified by envirorment variable GDB, try to use gdb provided by toolchain")
   endif()
 
   find_program(CMAKE_GDB     ${ARMGCC_ROOT}/bin/${CMAKE_PREFIX}gdb-py  PATHS ${ARMGCC_ROOT} NO_DEFAULT_PATH)
