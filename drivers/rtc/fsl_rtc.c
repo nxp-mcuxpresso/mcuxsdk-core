@@ -255,7 +255,7 @@ void RTC_Init(RTC_Type *base, const rtc_config_t *config)
 
 #if !(defined(FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT) && FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT == 0)
     reg &= ~RTC_CR_CLKO_MASK;
-    reg |= RTC_CR_CLKO(config->clockOutput ? 1U : 0U);
+    reg |= RTC_CR_CLKO(config->clockOutput ? 0U : 1U);
 #endif /* FSL_FEATURE_RTC_HAS_CLOCK_OUTPUT */
 
     base->CR = reg;
