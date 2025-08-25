@@ -21,7 +21,6 @@
           <Cpu>CPUTYPE("Cortex-M0+")</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll></FlashDriverDll>
           <DeviceId>0</DeviceId>
           <RegisterFile>$$Device:MCXL255VDF$devices/MCXL255/fsl_device_registers.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
