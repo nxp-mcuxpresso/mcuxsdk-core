@@ -22,6 +22,10 @@ menu "Startup components"
         hex "Flash base address"
         default 0x0
 
+    config SRAM_BASE_ADDRESS
+        hex "SRAM base address for the application"
+        default 0x0
+
     config FLASH_DEFAULT_APP_OFFSET
         hex "Default application offset in flash(DO NOT CHANGE, use load offset instead)"
         default 0x0
