@@ -1,5 +1,10 @@
 # I3C
 
+## [2.14.3]
+
+- Improvements
+  - Fixed Coverity CERT-C violations.
+
 ## [2.14.2]
 
 - Improvements

@@ -20,7 +20,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief I3C driver version */
-#define FSL_I3C_DRIVER_VERSION (MAKE_VERSION(2, 14, 2))
+#define FSL_I3C_DRIVER_VERSION (MAKE_VERSION(2, 14, 3))
 /*! @} */
 
 /*!
@@ -620,7 +620,7 @@ struct _i3c_slave_handle
     uint32_t transferredCount;              /*!< Count of bytes transferred. */
     i3c_slave_transfer_callback_t callback; /*!< Callback function called at transfer event. */
     void *userData;                         /*!< Callback parameter passed to callback. */
-    uint8_t txFifoSize;                     /*!< Tx Fifo size */
+    size_t txFifoSize;                      /*!< Tx Fifo size */
 };
 
 /*! @brief Typedef for slave interrupt handler. */
@@ -1516,7 +1516,7 @@ void I3C_SlaveDeinit(I3C_Type *base);
  */
 static inline void I3C_SlaveEnable(I3C_Type *base, bool isEnable)
 {
-    base->SCONFIG = (base->SCONFIG & ~I3C_SCONFIG_SLVENA_MASK) | I3C_SCONFIG_SLVENA(isEnable);
+    base->SCONFIG = (base->SCONFIG & ~I3C_SCONFIG_SLVENA_MASK) | (isEnable ? I3C_SCONFIG_SLVENA_MASK : 0UL);
 }
 
 /*! @} */
