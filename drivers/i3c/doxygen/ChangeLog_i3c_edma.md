@@ -1,5 +1,10 @@
 # I3C_EDMA
 
+## [2.2.11]
+
+- Improvements
+  - Fixed Coverity CERT-C violations.
+
 ## [2.2.10]
 
 - Bug Fixes
