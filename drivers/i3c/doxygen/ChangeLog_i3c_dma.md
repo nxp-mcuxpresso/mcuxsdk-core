@@ -1,5 +1,10 @@
 # I3C_DMA
 
+## [2.1.9]
+
+- Improvements
+  - Fixed Coverity CERT-C violations.
+
 ## [2.1.8]
 
 - Bug Fixes
