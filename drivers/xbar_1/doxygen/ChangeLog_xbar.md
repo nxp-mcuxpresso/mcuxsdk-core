@@ -1,5 +1,10 @@
 # XBAR
 
+## [2.2.0]
+
+- New Features
+  - Support register write protection.
+
 ## [2.1.2]
 
 - Correct bits of SEL registers
