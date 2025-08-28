@@ -5,6 +5,7 @@
 import os, sys
 import argparse
 import shutil
+import logging
 from pathlib import Path
 from west.commands import WestCommand
 from west.configuration import config
@@ -18,7 +19,7 @@ from misc import sdk_project_target
 _ARG_SEPARATOR = '--'
 SDK_ROOT_DIR = SCRIPT_DIR.parent
 DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/sdk/example_development.html#freestanding-examples'
-DEFAULT_BOARD_FOLDERS=["examples/"]
+DEFAULT_BOARD_FOLDERS=[f"{SDK_ROOT_DIR.name}/examples/"]
 
 USAGE = f'''\
 west export_app [-h] [source_dir] [-b board_id] [-DCMAKE_VAR=VAL] [-o OUTPUT_DIR] [--build]
@@ -67,10 +68,12 @@ class ExportApp(WestCommand):
                             help='Copy board related files')
         # Only for internal use
         parser.add_argument('--build', action="store_true", default=False, help=argparse.SUPPRESS)
+        parser.add_argument('--debug', action="store_true", default=config.getboolean('export_app', 'debug', fallback=False), help=argparse.SUPPRESS)
         return parser
     
     def do_run(self, args, remainder):
         self.args = args
+        self._setup_logging(self.args.debug)
         # To align with west build usage
         self._parse_remainder(remainder)
         self._sanity_precheck()
@@ -154,6 +157,7 @@ class ExportApp(WestCommand):
         self.misc_options = {
             'main_output': self.output_dir,
             'cmake_opts': self.args.cmake_opts,
+            'debug': self.args.debug,
         }
         if not self.board:
             if self.args.build:
@@ -177,6 +181,19 @@ class ExportApp(WestCommand):
         self.misc_options['target_apps'] = target_apps
         if self.args.board_copy_folders:
             self.misc_options['board_copy_folders'] = self.args.board_copy_folders
+
+    def _setup_logging(self, debug):
+        if debug:
+            logging.getLogger("export_app").setLevel(logging.DEBUG)
+            level = logging.DEBUG
+        else:
+            level = logging.INFO
+        logging.basicConfig(
+            level=level,
+            format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            datefmt="%H:%M:%S",
+            force=True
+        )
 
     def check_force(self, cond, msg):
         if not cond:

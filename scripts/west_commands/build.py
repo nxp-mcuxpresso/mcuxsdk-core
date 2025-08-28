@@ -755,14 +755,8 @@ class Build(Forceable):
         run_cmake(final_cmake_args, dry_run=self.args.dry_run)
         expected_lines = []
         filter_patterns = [d.strip('\'"') for d in self.args.trace_dir]
-        for line in open(trace_log_path, 'r').readlines():
-            match = re.search(r'(.+?)\(\d+\):', line)
-            if not match:
-                continue
-            path = match.group(1)
-            if not any(re.search(re.compile(p), path) for p in filter_patterns):
-                continue
-            expected_lines.append(line)
+        from export_app.cmake_trace_parser import filter_trace_log
+        expected_lines = filter_trace_log(trace_log_path, filter_patterns)
         with open(trace_log_path := os.path.join(self.build_dir, 'trace.log'), 'w') as f:
             f.writelines(expected_lines)
         self.inf(f"Trace will be written to {trace_log_path}")
