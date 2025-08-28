@@ -213,6 +213,19 @@ foreach(kconfig_target ${KCONFIG_TARGETS} ${EXTRA_KCONFIG_TARGETS})
     USES_TERMINAL COMMAND_EXPAND_LISTS)
 endforeach()
 
+
+set(SYSBUILD_EXTRA_CONF_FILE_AS_LIST)
+if(SYSBUILD)
+  # load sysbuild project config file in sysbuild folder automatically for sysbuild project
+  # Similar to Zephyr: https://docs.zephyrproject.org/latest/build/sysbuild/index.html#sysbuild-file-suffix-support
+  zephyr_get(SYSBUILD_EXTRA_CONF_FILE SYSBUILD LOCAL VAR EXTRA_CONF_FILE MERGE REVERSE)
+  
+  if(SYSBUILD_EXTRA_CONF_FILE)
+    string(CONFIGURE "${SYSBUILD_EXTRA_CONF_FILE}" SYSBUILD_EXTRA_CONF_FILE_EXPANDED)
+    string(REPLACE " " ";" SYSBUILD_EXTRA_CONF_FILE_AS_LIST "${SYSBUILD_EXTRA_CONF_FILE_EXPANDED}")
+  endif()
+endif()
+
 if(DEFINED SB_CONF_FILE)
   list(APPEND merge_config_files ${BOARD_DEFCONFIG})
 elseif (NOT NO_DEFAULT_CONFIG)
@@ -226,6 +239,7 @@ elseif (NOT NO_DEFAULT_CONFIG)
   #    board/<core_id>
   #    example category, like src/demo_apps
   #    example, like src/demo_apps/hello_world
+  #    sysbuild example config file, like trustzone_examples/hello_world_ns/sysbuild/hello_world_s.conf
   #    board example category, like examples/frdmk64f/demo_apps
   #    board example, like examples/frdmk64f/demo_apps/hello_world
   #    prj.conf provided by CUSTOM_PRJ_CONF_PATHS
@@ -317,6 +331,8 @@ elseif (NOT NO_DEFAULT_CONFIG)
     else()
       list(APPEND merge_config_files ${APPLICATION_SOURCE_DIR}/prj.conf)
     endif()
+      
+    list(APPEND merge_config_files ${SYSBUILD_EXTRA_CONF_FILE_AS_LIST})
 
     if ((NOT DEFINED CUSTOM_BOARD_ROOT) OR (DEFINED CUSTOM_BOARD_ROOT AND CUSTOM_BOARD_ROOT STREQUAL ""))
       get_target_source_in_sub_folders(${full_project_port_path} "${board_device_folder}" "prj.conf")
@@ -326,6 +342,7 @@ elseif (NOT NO_DEFAULT_CONFIG)
     if (EXISTS ${APPLICATION_SOURCE_DIR}/prj.conf)
       list(APPEND merge_config_files ${APPLICATION_SOURCE_DIR}/prj.conf)
     endif()
+    list(APPEND merge_config_files ${SYSBUILD_EXTRA_CONF_FILE_AS_LIST})
   endif()
 endif()
  
