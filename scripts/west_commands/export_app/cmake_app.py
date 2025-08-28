@@ -9,29 +9,12 @@ import shutil
 import re
 import glob
 from copy import deepcopy
-from datetime import datetime
+
 from pathlib import Path
-from export_app.cmake_parser import *
-
-LICENSE_HEAD = f'''
-# Copyright {datetime.now().year} NXP
-#
-# SPDX-License-Identifier: Apache-2.0
-'''
-
-CONFIG_CHOICE_MAP = {
-    'CONFIG_MCUX_PRJSEG_module.board.clock': 'CONFIG_MCUX_PRJSEG_module.board.clock_customize_folder',
-    'CONFIG_MCUX_PRJSEG_module.board.pinmux': 'CONFIG_MCUX_PRJSEG_module.board.pinmux_customize_folder',
-    r"CONFIG_MCUX_PRJSEG_module.use_.*_peripheral": 'CONFIG_MCUX_PRJSEG_module.use_customize_peripheral',
-    r'CONFIG_MCUX_PRJSEG_project.hw_(core|app|project)': 'CONFIG_MCUX_PRJSEG_project.hw_app_customize_folder'
-}
-
-# We cannot process ps which was defined in other locations
-PS_BLACK_LIST = [
-    'CONFIG_MCUX_PRJSEG_config.arm.shared',
-    'CONFIG_MCUX_PRJSEG_module.board.suite',
-    'CONFIG_MCUX_PRJSEG_module.device.suite',
-]
+from .cmake_parser import *
+from .cmake_trace_parser import parse_ps_cmake_trace_log
+from .misc import LICENSE_HEAD, CONFIG_CHOICE_MAP
+from .misc import replace_cmake_variables, process_path, temp_attrs
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +65,11 @@ class CmakeApp(object):
             'CMAKE_CURRENT_LIST_DIR': self.source_dir.as_posix(),
             'CMAKE_CURRENT_SOURCE_DIR': self.source_dir.as_posix()
         })
+        self.need_copy_board_files = False
+        self.process_include = False
         if self.misc_options.get('board_copy_folders'):
+            self.process_include = True
+            self.board_includes = []
             self.app_copy_folders = self.misc_options['board_copy_folders']
             if self.misc_options.get('freestanding_copied_folders'):
                 self.app_copy_folders.extend(self.misc_options['freestanding_copied_folders'])
@@ -90,9 +77,8 @@ class CmakeApp(object):
             self.dest_board_dirname = self.cmake_variables['board']
             if self.cmake_variables.get('core_id'):
                 self.dest_board_dirname += '_' + self.cmake_variables['core_id']
-        else:
-            self.need_copy_board_files = False
-
+            self.output_board_dir = self.output_dir / self.dest_board_dirname
+            
     def _parse_example_yml(self, target_apps=[]):
         '''
         This function was called in init, so be careful with the variables used here.
@@ -159,16 +145,36 @@ class CmakeApp(object):
         if (ide_yml := self.source_dir / 'IDE.yml').exists():
             shutil.copy(ide_yml, self.output_dir / 'IDE.yml')
         self.current_process_file = None
-        new_cmake_content = self.parse_cmake_file(self.list_file)
-        # Force use \n to avoid multiple line breaks in windows
-        open(self.dest_list_file, 'w').write("\n".join(new_cmake_content))
-        
+        if self.need_copy_board_files:
+            self.output_board_dir.mkdir(parents=True, exist_ok=True)
+            if self.app_type == 'main_app':
+                self.parse_variables()
+        self.dest_list_content = self.parse_cmake_file(self.list_file)
+        if not self.need_copy_board_files:
+            # Force use \n to avoid multiple line breaks in windows
+            open(self.dest_list_file, 'w').write("\n".join(self.dest_list_content))
+
+        if self.extra_files:
+            self.copy_extra_files()
+        self.combine_prj_conf()
+        self.update_kconfig_path()
+        if self.is_sysbuild:
+            if self.need_copy_board_files and self.app_type == 'main_app':
+                self.parse_syubuild_variables()
+            self.parse_sysbuild()
+        # Apply replacements defined in example.yml
+        self.apply_replacements()
+
+        if self.need_copy_board_files:
+            self.copy_board_files()
+            open(self.dest_list_file, 'w').write("\n".join(self.dest_list_content))
+
+    def copy_extra_files(self):
         variables = {**self.extra_variables, **self.cmake_variables}
         current_board = self.cmake_variables.get('board')
-
         for entry in self.extra_files:
             if isinstance(entry, str):
-                src_path = self._replace_cmake_variables(entry, variables)
+                src_path = replace_cmake_variables(entry, variables)
                 if not src_path:
                     logger.warning(f"[extra_files] Empty source path in entry: {entry}")
                     continue
@@ -179,7 +185,7 @@ class CmakeApp(object):
                 if self._should_skip_entry(entry, current_board):
                     continue
 
-                src_path = self._replace_cmake_variables(entry.get('source', ''), variables)
+                src_path = replace_cmake_variables(entry.get('source', ''), variables)
                 if not src_path:
                     logger.warning(f"[extra_files] Empty source path in entry: {entry}")
                     continue
@@ -199,18 +205,6 @@ class CmakeApp(object):
                 shutil.copytree(src_file, dest_dir, dirs_exist_ok=True)
             else:
                 logger.warning(f"[extra_files] File or directory not found: {src_file} (from entry: {entry})")
-
-        self.combine_prj_conf()
-        self.update_kconfig_path()
-        if self.is_sysbuild:
-            if self.need_copy_board_files and self.app_type == 'main_app':
-                self.parse_syubuild_variables()
-            self.parse_sysbuild()
-        # Apply replacements defined in example.yml
-        self.apply_replacements()
-
-        if self.need_copy_board_files:
-            self.copy_board_files()
 
     def parse_cmake_file(self, cmake_file, target_funcs=[], add_license=True):
         '''
@@ -306,7 +300,7 @@ class CmakeApp(object):
             open(self.output_dir / f.name, 'w').write(os.linesep.join(kconfig_content))
 
     def parse_syubuild_variables(self):
-        sysbuild_cmd = self.build_cmd(['--cmake-only'], INJECT_BUILD_DIR)
+        sysbuild_cmd = self.build_cmd(['--cmake-only'], INJECT_BUILD_DIR, True)
         result = subprocess.run(sysbuild_cmd, cwd=SDK_ROOT_DIR.as_posix(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
             logger.error(f"Failed to run command: {' '.join(sysbuild_cmd)}")
@@ -324,30 +318,45 @@ class CmakeApp(object):
                 continue
             key = line.split('=')[0]
             self.misc_options['sysbuild_variables'][key] = line.replace(key + '=', '').strip('\'" ')
-        shutil.rmtree(self.misc_options['main_output'] / INJECT_BUILD_DIR, ignore_errors=True)
+        if not self.misc_options.get('debug', False):
+            shutil.rmtree(self.misc_options['main_output'] / INJECT_BUILD_DIR, ignore_errors=True)
 
     def parse_sysbuild(self):
         new_sysbuild_content = self.parse_cmake_file(self.source_dir / 'sysbuild.cmake', ['externalzephyrproject_add', 'externalmcuxproject_add', 'include'])
         open(self.output_dir / 'sysbuild.cmake', 'w').write(os.linesep.join(new_sysbuild_content))
 
-    def copy_board_files(self):
+    def parse_variables(self):
         if not (trace_log := self._get_trace_log()):
             return
-        result, misc_content = self.parse_cmake_trace_log(trace_log)
-        self.parse_cmake_trace_result(result, misc_content)
-        board_prj_conf, force_selected = self.create_board_prj_conf(self.output_dir/'build_tmp/.config', self.output_dir/'build_tmp/.promptless_config', list(result.keys()))
+        self.ps_result, self.misc_content = parse_ps_cmake_trace_log(trace_log)
+        trace_cmake_dir = self.output_dir / INJECT_BUILD_DIR / 'traced_cmakes'
+        trace_cmake_dir.mkdir(parents=True, exist_ok=True)
+        open(tmp_misc_cmake := (trace_cmake_dir / 'tmp_misc.cmake'), 'w').write("\n".join(self.misc_content))
+        # Get all variables
+        self.parse_cmake_file(tmp_misc_cmake)
+        # TODO workaround to fix evkbimxrt1050 examples/sdmmc_examples/sdio_freertos
+        if 'core_id' not in self.cmake_variables:
+            self.cmake_variables['core_id'] = ''
+
+    def copy_board_files(self):
+        if self.app_type != 'main_app':
+            self.parse_variables()
+        if not hasattr(self, 'ps_result'):
+            return
+        self.parse_cmake_trace_result()
+        board_prj_conf, force_selected = self.create_board_prj_conf(self.output_dir/'build_tmp/.config', self.output_dir/'build_tmp/.promptless_config', list(self.ps_result.keys()))
         if force_selected:
             self.create_fake_kconfig(force_selected)
         open(self.output_dir / self.dest_board_dirname / 'prj.conf', 'a', encoding="utf-8").write('\n'.join(board_prj_conf))
         self.update_cmake_file()
-        shutil.rmtree(self.output_dir / INJECT_BUILD_DIR)
+        if not self.misc_options.get('debug', False):
+            shutil.rmtree(self.output_dir / INJECT_BUILD_DIR)
 
     def update_cmake_file(self):
         if self.cmake_variables.get('core_id'):
             append_content = '\ninclude("${board}_${core_id}/board_files.cmake")\n'
         else:
             append_content = '\ninclude(${board}/board_files.cmake)\n'
-        cmake_content = open(self.dest_list_file, 'r', encoding='utf-8').readlines()
         if self.cmake_variables.get('core_id'):
             prj_conf_dirname = '${board}_${core_id}'
         else:
@@ -355,15 +364,14 @@ class CmakeApp(object):
         prepend_content = [f'cmake_path(APPEND conf_file_path ${{CMAKE_CURRENT_LIST_DIR}} {prj_conf_dirname} prj.conf)\n',
                            f'list(APPEND CONF_FILE ${{conf_file_path}})\n']
         insert_index = 0
-        for i, line in enumerate(cmake_content):
+        for i, line in enumerate(self.dest_list_content):
             line = line.strip()
             if line.startswith('#') or line == '' or line.startswith('cmake_minimum_required'):
                 insert_index = i + 1
             else:
                 break
-        cmake_content = cmake_content[:insert_index] + prepend_content + cmake_content[insert_index:]
-        cmake_content.append(append_content)
-        open(self.dest_list_file, 'w', encoding='utf-8').writelines(cmake_content)
+        self.dest_list_content = self.dest_list_content[:insert_index] + prepend_content + self.dest_list_content[insert_index:]
+        self.dest_list_content.append(append_content)
 
     def create_board_prj_conf(self, build_config, promptless_config, ps_list):
         board_prj_conf = []
@@ -424,74 +432,29 @@ class CmakeApp(object):
             return None
         return trace_log
 
-    def parse_cmake_trace_log(self, file_path):
-        result = {}
-        cur_ps = None
-        cur_ps_contnent = []
-        cur_file = None
-        need_pick = False
-        misc_content = []
-
-        def flush():
-            nonlocal need_pick, cur_ps, cur_ps_contnent
-            if need_pick and cur_ps and cur_ps not in PS_BLACK_LIST and cur_ps_contnent:
-                result[cur_ps] = {
-                    'file': Path(cur_file),
-                    'content': cur_ps_contnent
-                }
-            need_pick = False
-            cur_ps_contnent = []
-            cur_ps = None
-
-        with open(file_path, 'r') as file:
-            for line in file:
-                line = line.strip()
-                if not (loc_match := re.search(r'(.+?)\((\d+)\):', line)):
-                    continue
-                path = loc_match.group(1)
-                line_number = int(loc_match.group(2))
-                content = line[loc_match.end():].strip()
-                if content.startswith('mcux_set_variable'):
-                    misc_content.append(content)
-
-                # Chech whether file pointer is changed
-                if not cur_file == path:
-                    flush()
-                    cur_file = path
-
-                if ps_match := re.match(r'if\s*\((CONFIG_MCUX_[^\s]*)\s*\)', content):
-                    flush()
-                    if ps_match := re.match(r'if\s*\((CONFIG_MCUX_PRJSEG_[^\s]*)\s*\)', content):
-                        cur_ps = ps_match.group(1)
-                    continue
-
-                if not cur_ps:
-                    continue
-                cur_ps_contnent.append(content)
-                if content.startswith(('mcux_add_source', 'mcux_add_include')):
-                    need_pick = True
-
-        return result, misc_content
-
-    def parse_cmake_trace_result(self, data, misc_data):
+    def parse_cmake_trace_result(self):
         backup = self.output_dir
         trace_cmake_dir = self.output_dir / INJECT_BUILD_DIR / 'traced_cmakes'
-        trace_cmake_dir.mkdir(parents=True, exist_ok=True)
-        open(tmp_misc_cmake := (trace_cmake_dir / 'tmp_misc.cmake'), 'w').write("\n".join(misc_data))
-        self.parse_cmake_file(tmp_misc_cmake)
-        self.output_dir = self.output_dir / self.dest_board_dirname
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.output_dir = self.output_board_dir
+
         if self.cmake_variables.get('project_board_port_path'):
             self.cmake_variables['project_board_port_path'] = self._replace_cmake_variables(self.cmake_variables['project_board_port_path'])
-        backup_source_dir = self.source_dir
         board_cmake_content = []
-        for _, v in data.items():
+        for _, v in self.ps_result.items():
             self.source_dir = v['file'].parent
             open(tmp_cmake := (trace_cmake_dir / v['file'].name), 'w').write("\n".join(v['content']))
-            board_cmake_content.extend(self.parse_cmake_file(tmp_cmake, add_license=False))
+            with temp_attrs(
+                self,
+                source_dir=v['file'].parent,
+                output_dir=self.output_board_dir,
+                process_include=False,
+                current_list_dir='${SdkRootDirPath}/' + v['file'].parent.relative_to(SDK_ROOT_DIR).as_posix()
+            ):
+                board_cmake_content.extend(self.parse_cmake_file(tmp_cmake, add_license=False))
 
+        board_cmake_content.append("\n# Application reconfig data\n")
+        board_cmake_content.extend(self.board_includes)
         open(self.output_dir / 'board_files.cmake', 'a').write("\n".join(board_cmake_content))
-        self.source_dir = backup_source_dir
         self.output_dir = backup
 
     def build_cmds(self):
@@ -503,10 +466,14 @@ class CmakeApp(object):
             result.append(self.build_cmd([f'-DCONF_FILE={conf_file}']))
         return result
 
-    def build_cmd(self, extra_args=[], build_dir='build'):
+    def build_cmd(self, extra_args=[], build_dir='build', repo=False):
         board_var = self.cmake_variables.get('board', "<board_id>")
+        if repo:
+            source_dir = self.source_dir
+        else:
+            source_dir = self.output_dir
         cmd_list = ['west', 'build', '-b', board_var, '--toolchain', self.cmake_variables['CONFIG_TOOLCHAIN'],
-                    '-p', 'always', self.output_dir.as_posix(),
+                    '-p', 'always', source_dir.as_posix(),
                     '-d', (self.misc_options['main_output']/build_dir).as_posix(),
                     ]
         if self.is_sysbuild:
@@ -520,7 +487,7 @@ class CmakeApp(object):
     def inject_cmd(self):
         board_var = self.cmake_variables.get('board', "<board_id>")
         cmd_list = ['west', 'build', '-b', board_var, '--toolchain', self.cmake_variables['CONFIG_TOOLCHAIN'],
-                    '-p', 'always', self.output_dir.as_posix(),
+                    '-p', 'always', self.source_dir.as_posix(),
                     '-d', (self.output_dir/INJECT_BUILD_DIR).as_posix(),
                     '-DGENERATE_PROMPTLESS_SYMS=y',
                     '--cmake-only'
@@ -550,7 +517,7 @@ class CmakeApp(object):
                     continue
                 if k == 'toolchain':
                     k = 'CONFIG_TOOLCHAIN'
-                self.misc_options['sysbuild_variables'][k] = self._replace_cmake_variables(v, self.misc_options['sysbuild_variables'])
+                self.misc_options['sysbuild_variables'][k] = replace_cmake_variables(v, self.misc_options['sysbuild_variables'])
             linked_variables = self.misc_options['sysbuild_variables']
         else:
             linked_variables = self.cmake_variables
@@ -592,9 +559,23 @@ class CmakeApp(object):
         if inc_path.startswith('..') or '${' not in inc_path:
             inc_path = self.current_list_dir + '/' + inc_path
         o_func.nargs[0] = inc_path
+
         if not self.current_process_file.name == 'sysbuild.cmake':
+            resolve_path = self._process_path(src=inc_path)
+            if self.process_include and self.need_copy_board_files and resolve_path and resolve_path.exists() and any(p in resolve_path.as_posix() for p in self.app_copy_folders):
+                with temp_attrs(
+                    self,
+                    source_dir=resolve_path.parent,
+                    output_dir=self.output_board_dir,
+                    current_list_dir='${SdkRootDirPath}/' + resolve_path.parent.relative_to(SDK_ROOT_DIR).as_posix()
+                ):
+                    include_content = self.parse_cmake_file(resolve_path, add_license=False)
+                if include_content:
+                    include_content.insert(0, '# from ' + o_func.nargs[0])
+                    self.board_includes.extend(include_content)
+                    return f'# processed {o_func.nargs[0]}'
             return o_func
-        inc_path = self._replace_cmake_variables(inc_path, {**self.extra_variables, **self.cmake_variables})
+        inc_path = replace_cmake_variables(inc_path, {**self.extra_variables, **self.cmake_variables})
         if not (inc_path := Path(inc_path)).exists():
             logger.warning(f"Cannot find the include sysbuild path {inc_path.as_posix()}")
             return o_func
@@ -723,36 +704,10 @@ class CmakeApp(object):
             str: The processed path
             None: No need to process the path
         '''
-        try:
-            if src == '/.':
-                # /. may cause permission issue in windows
-                logger.warning("The path '/.' is not safe, please use './' instead.")
-                src = './'
-            s_src = Path(self._replace_cmake_variables(os.path.join(base_path, src)))
-            if '${' in s_src.as_posix():
-                return None
-            if not s_src.is_absolute():
-                s_src = self.source_dir / s_src
-            if any(wildcard in s_src.as_posix() for wildcard in ['*', '?', '[', ']']):
-                result = []
-                for f in glob.glob(s_src.as_posix()):
-                    result.append(Path(f).resolve())
-                return result
-            if (s_src.exists()):
-                return s_src.resolve()
-            else:
-                return None
-        except Exception:
-            return None
+        return process_path(self.source_dir, base_path, src, self.cmake_variables)
 
-    def _replace_cmake_variables(self, ori_str='', var_dict={}):
-        if '${' not in ori_str:
-            return ori_str
-        if not var_dict:
-            var_dict = self.cmake_variables
-        for k, v in var_dict.items():
-            ori_str = re.sub(rf'\$\{{{re.escape(k)}}}', v, ori_str, re.IGNORECASE)
-        return ori_str
+    def _replace_cmake_variables(self, ori_str=''):
+        return replace_cmake_variables(ori_str, self.cmake_variables)
 
     def apply_replacements(self):
         '''

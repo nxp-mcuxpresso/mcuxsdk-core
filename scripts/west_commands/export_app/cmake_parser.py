@@ -34,6 +34,14 @@ RENDER_TEMPLATE = '''
 )
 '''
 
+FUNC_NAME_MAP = {
+    'mcux_add_iar_linker_script': 'mcux_add_linker_script',
+    'mcux_add_mdk_linker_script': 'mcux_add_linker_script',
+    'mcux_add_armgcc_linker_script': 'mcux_add_linker_script',
+    'mcux_add_riscvllvm_linker_script': 'mcux_add_linker_script',
+    'mcux_add_codewarrior_linker_script': 'mcux_add_linker_script',
+}
+
 class PlatformNotSupported(Exception):
     def __init__(self, arch, sys_name, msg=None, *args, **kwargs):
         msg = msg or f"""The tool we used to parse cmake file does not support {arch}_{sys_name}, please contact us."""
