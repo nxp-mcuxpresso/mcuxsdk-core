@@ -1,5 +1,10 @@
 # EDMA (DMA3)
 
+## [2.5.1]
+
+- Bug Fixes
+  - enables the auto stop request feature in API EDMA_ResetChannel
+
 ## [2.5.0]
 
 - Improvements
