@@ -1,5 +1,10 @@
 # SPC
 
+## [2.7.1]
+
+- Improvements
+  - Make configuration structure pointers const in SPC driver API for Higher Power mode
+
 ## [2.7.0]
 
 - Improvements

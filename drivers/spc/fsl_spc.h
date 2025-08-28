@@ -27,8 +27,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.7.0. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
+/*! @brief SPC driver version 2.7.1. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 7, 1))
 /*! @} */
 
 /*! @name Configuration */
@@ -881,7 +881,7 @@ static inline void SPC_DisableHighPowerModeVddCoreGlitchDetect(SPC_Type *base, b
  * @retval #kStatus_SPC_CORELDOVoltageWrong The selected voltage level in high power mode is not allowed.
  * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
-status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base, spc_hp_mode_core_ldo_option_t *option);
+status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_hp_mode_core_ldo_option_t *option);
 
 /*!
  * @brief Configure System LDO regulator in high power mode.
@@ -895,7 +895,7 @@ status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base, spc_hp_mode_
  * @retval #kStatus_SPC_SYSLDOLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
-status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, spc_hp_mode_sys_ldo_option_t *option);
+status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, const spc_hp_mode_sys_ldo_option_t *option);
 
 /*!
  * @brief Configure DCDC regulator in high power mode.
@@ -908,7 +908,7 @@ status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, spc_hp_mod
  * @retval #kStatus_SPC_DCDCLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  * @retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
-status_t SPC_SetHighPowerModeDCDCRegulatorConfig(SPC_Type *base, spc_hp_mode_dcdc_option_t *option);
+status_t SPC_SetHighPowerModeDCDCRegulatorConfig(SPC_Type *base, const spc_hp_mode_dcdc_option_t *option);
 
 /*!
  * @brief Set configuration of regulators in high power mode.
@@ -924,7 +924,7 @@ status_t SPC_SetHighPowerModeDCDCRegulatorConfig(SPC_Type *base, spc_hp_mode_dcd
  * @retval kStatus_SPC_SYSLDOLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  * @retval kStatus_SPC_DCDCLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  */
-status_t SPC_SetHighPowerModeRegulatorsConfig(SPC_Type *base, spc_hp_mode_regulators_config_t *config);
+status_t SPC_SetHighPowerModeRegulatorsConfig(SPC_Type *base, const spc_hp_mode_regulators_config_t *config);
 
 /*!
  * @brief Enable/disable low voltage detect for VDD_CORE in high power mode.

@@ -1608,7 +1608,7 @@ status_t SPC_SetHighPowerModeBandgapModeConfig(SPC_Type *base, spc_bandgap_mode_
  * retval #kStatus_SPC_CORELDOVoltageWrong The selected voltage level in high power mode is not allowed.
  * retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
-status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base, spc_hp_mode_core_ldo_option_t *option)
+status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_hp_mode_core_ldo_option_t *option)
 {
     spc_core_ldo_voltage_level_t preVoltage;
     uint32_t state;
@@ -1691,7 +1691,7 @@ status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base, spc_hp_mode_
  * retval #kStatus_SPC_SYSLDOLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  * retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
-status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, spc_hp_mode_sys_ldo_option_t *option)
+status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, const spc_hp_mode_sys_ldo_option_t *option)
 {
     assert(option != NULL);
 
@@ -1783,7 +1783,7 @@ status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, spc_hp_mod
  * retval #kStatus_SPC_DCDCLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  * retval #kStatus_Timeout Timeout occurs while waiting completion.
  */
-status_t SPC_SetHighPowerModeDCDCRegulatorConfig(SPC_Type *base, spc_hp_mode_dcdc_option_t *option)
+status_t SPC_SetHighPowerModeDCDCRegulatorConfig(SPC_Type *base, const spc_hp_mode_dcdc_option_t *option)
 {
     assert(option != NULL);
 
@@ -1858,7 +1858,7 @@ status_t SPC_SetHighPowerModeDCDCRegulatorConfig(SPC_Type *base, spc_hp_mode_dcd
  * retval kStatus_SPC_SYSLDOLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  * retval kStatus_SPC_DCDCLowDriveStrengthIgnore Set driver strength to Low will be ignored.
  */
-status_t SPC_SetHighPowerModeRegulatorsConfig(SPC_Type *base, spc_hp_mode_regulators_config_t *config)
+status_t SPC_SetHighPowerModeRegulatorsConfig(SPC_Type *base, const spc_hp_mode_regulators_config_t *config)
 {
     assert(config != NULL);
 
