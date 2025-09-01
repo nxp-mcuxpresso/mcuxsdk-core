@@ -1,5 +1,10 @@
 # MCX_CMC
 
+## [2.4.0]
+
+- New features
+  - Update MCX_CMC driver to be compatible with new platforms.
+
 ## [2.3.0]
 
 - Improvements
