@@ -159,8 +159,11 @@ class CmakeApp(object):
         self.combine_prj_conf()
         self.update_kconfig_path()
         if self.is_sysbuild:
-            if self.need_copy_board_files and self.app_type == 'main_app':
-                self.parse_syubuild_variables()
+            if self.app_type == 'main_app':
+                if (sysbuild_confs := self.source_dir / 'sysbuild').exists() and sysbuild_confs.is_dir():
+                    shutil.copytree(sysbuild_confs, self.output_dir / 'sysbuild')
+                if self.need_copy_board_files:
+                    self.parse_syubuild_variables()
             self.parse_sysbuild()
         # Apply replacements defined in example.yml
         self.apply_replacements()
