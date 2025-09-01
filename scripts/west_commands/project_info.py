@@ -111,7 +111,7 @@ class ProjectInfo(WestCommand):
                 board_regex = r".*board:STRING=([^\s]+)"
                 board = self.regex_match_helper(board_regex, cmake_cache)
 
-                device_regex = r".*device:STRING=([^\s]+)"
+                device_regex = r".*-DCPU_([^\s_]+)"
                 device = self.regex_match_helper(device_regex, cmake_cache)
 
                 core_regex = r".*core_id:UNINITIALIZED=([^\s]+)"
@@ -191,7 +191,7 @@ class ProjectInfo(WestCommand):
         within the project root for use by MCUXpresso Config Tools.
         """
         try:
-            self.json_data_raw["schema"] = "https://mcuxpresso.nxp.com/staticdata/mcux/schema/project_info/project_info_schema_1.0.json"
+            self.json_data_raw["$schema"] = "https://mcuxpresso.nxp.com/staticdata/mcux/schema/project_info/project_info_schema_1.0.json"
 
             projects = list()
             projects.append(self.project_info)
