@@ -1,5 +1,10 @@
 # MCX_VBAT
 
+## [2.4.0]
+
+- New features
+  - Update MCX_VBAT driver to be compatible with new platforms.
+
 ## [2.3.1]
 
 - Bug Fixes
