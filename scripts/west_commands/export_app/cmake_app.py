@@ -449,7 +449,6 @@ class CmakeApp(object):
             with temp_attrs(
                 self,
                 source_dir=v['file'].parent,
-                output_dir=self.output_board_dir,
                 process_include=False,
                 current_list_dir='${SdkRootDirPath}/' + v['file'].parent.relative_to(SDK_ROOT_DIR).as_posix()
             ):
