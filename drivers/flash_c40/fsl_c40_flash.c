@@ -39,7 +39,7 @@
 #if defined(__IAR_SYSTEMS_ICC__)
 #define RAMFUNC __ramfunc
 #elif defined(__GNUC__)
-#define RAMFUNC __attribute__((section(".ramfunc"))) __attribute__((__noinline__))
+#define RAMFUNC __attribute__((section("CodeQuickAccess"), __noinline__))
 #else
 #error "Unsupported toolchain"
 #endif
