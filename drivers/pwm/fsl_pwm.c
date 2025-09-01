@@ -315,7 +315,14 @@ status_t PWM_Init(PWM_Type *base, pwm_submodule_t subModule, const pwm_config_t 
 #endif
 
     /* Clear the fault status flags */
+#if defined(FSL_FEATURE_PWM_FAULT_CH_COUNT) && (FSL_FEATURE_PWM_FAULT_CH_COUNT > 1)
+    for (uint16_t i = 0; i < FSL_FEATURE_PWM_FAULT_CH_COUNT; i++)
+    {
+        base->FAULT[i].FSTS |= PWM_FSTS_FFLAG_MASK;
+    }
+#else
     base->FSTS |= PWM_FSTS_FFLAG_MASK;
+#endif
 
     reg = base->SM[subModule].CTRL2;
 
@@ -950,30 +957,49 @@ void PWM_SetupInputCapture(PWM_Type *base,
 }
 
 /*!
- * @brief Sets up the PWM fault input filter.
+ * @brief Sets up the PWM fault channel 0 input filter.
  *
  * @param base                   PWM peripheral base address
  * @param faultInputFilterParams Parameters passed in to set up the fault input filter.
  */
 void PWM_SetupFaultInputFilter(PWM_Type *base, const pwm_fault_input_filter_param_t *faultInputFilterParams)
 {
-    assert(NULL != faultInputFilterParams);
-
-    /* When changing values for fault period from a non-zero value, first write a value of 0 to clear the filter. */
-    if (0U != (base->FFILT & PWM_FFILT_FILT_PER_MASK))
-    {
-        base->FFILT &= ~(uint16_t)(PWM_FFILT_FILT_PER_MASK);
-    }
-
-    base->FFILT = (uint16_t)(PWM_FFILT_FILT_PER(faultInputFilterParams->faultFilterPeriod) |
-                             PWM_FFILT_FILT_CNT(faultInputFilterParams->faultFilterCount) |
-                             PWM_FFILT_GSTR(faultInputFilterParams->faultGlitchStretch ? 1U : 0U));
+    PWM_SetupFaultInputFilterExt(base, kPWM_faultchannel_0, faultInputFilterParams);
 }
 
 /*!
- * brief Sets up the PWM fault protection.
+ * @brief Sets up the PWM fault input filter.
  *
- * PWM has 4 fault inputs.
+ * @param base                   PWM peripheral base address
+ * @param faultChannel           PWM fault channel to configure.
+ * @param faultInputFilterParams Parameters passed in to set up the fault input filter.
+ */
+void PWM_SetupFaultInputFilterExt(PWM_Type *base,
+                                  pwm_fault_channels_t faultChannel,
+                                  const pwm_fault_input_filter_param_t *faultInputFilterParams)
+{
+    assert(NULL != faultInputFilterParams);
+
+#if defined(FSL_FEATURE_PWM_FAULT_CH_COUNT) && (FSL_FEATURE_PWM_FAULT_CH_COUNT > 1)
+    volatile uint16_t *ptrFFILT = &base->FAULT[faultChannel].FFILT;
+#else
+    (void)faultChannel;
+    volatile uint16_t *ptrFFILT = &base->FFILT;
+#endif
+
+    /* When changing values for fault period from a non-zero value, first write a value of 0 to clear the filter. */
+    if (0U != (*ptrFFILT & PWM_FFILT_FILT_PER_MASK))
+    {
+        *ptrFFILT &= ~(uint16_t)(PWM_FFILT_FILT_PER_MASK);
+    }
+
+    *ptrFFILT = PWM_FFILT_FILT_PER(faultInputFilterParams->faultFilterPeriod) |
+                PWM_FFILT_FILT_CNT(faultInputFilterParams->faultFilterCount) |
+                PWM_FFILT_GSTR(faultInputFilterParams->faultGlitchStretch ? 1U : 0U);
+}
+
+/*!
+ * brief Sets up the PWM fault channel 0 protection.
  *
  * param base        PWM peripheral base address
  * param faultNum    PWM fault to configure.
@@ -981,13 +1007,40 @@ void PWM_SetupFaultInputFilter(PWM_Type *base, const pwm_fault_input_filter_para
  */
 void PWM_SetupFaults(PWM_Type *base, pwm_fault_input_t faultNum, const pwm_fault_param_t *faultParams)
 {
+    PWM_SetupFaultsExt(base, kPWM_faultchannel_0, faultNum, faultParams);
+}
+
+/*!
+ * brief Sets up the PWM fault protection.
+ *
+ * param base         PWM peripheral base address
+ * param faultChannel PWM fault channel to configure.
+ * param faultNum     PWM fault to configure.
+ * param faultParams  Pointer to the PWM fault config structure
+ */
+void PWM_SetupFaultsExt(PWM_Type *base,
+                        pwm_fault_channels_t faultChannel,
+                        pwm_fault_input_t faultNum,
+                        const pwm_fault_param_t *faultParams)
+{
     assert(faultParams);
 
     uint16_t reg;
     uint32_t faultMsk = 1UL << (uint32_t)faultNum;
     assert(faultMsk <= 0x8U);
 
-    reg = base->FCTRL;
+#if defined(FSL_FEATURE_PWM_FAULT_CH_COUNT) && (FSL_FEATURE_PWM_FAULT_CH_COUNT > 1)
+    volatile uint16_t *ptrFCTRL = &base->FAULT[faultChannel].FCTRL;
+    volatile uint16_t *ptrFCTRL2 = &base->FAULT[faultChannel].FCTRL2;
+    volatile uint16_t *ptrFSTS = &base->FAULT[faultChannel].FSTS;
+#else
+    (void)faultChannel;
+    volatile uint16_t *ptrFCTRL = &base->FCTRL;
+    volatile uint16_t *ptrFCTRL2 = &base->FCTRL2;
+    volatile uint16_t *ptrFSTS = &base->FSTS;
+#endif
+
+    reg = *ptrFCTRL;
     /* Set the faults level-settting */
     if (faultParams->faultLevel)
     {
@@ -1018,22 +1071,22 @@ void PWM_SetupFaults(PWM_Type *base, pwm_fault_input_t faultNum, const pwm_fault
         /* Use automatic fault clearing */
         reg |= ((uint16_t)faultMsk << PWM_FCTRL_FAUTO_SHIFT);
     }
-    base->FCTRL = reg;
+    *ptrFCTRL = reg;
 
     /* Set the combinational path option */
     if (faultParams->enableCombinationalPath)
     {
         /* Combinational path from the fault input to the PWM output is available */
-        base->FCTRL2 &= ~((uint16_t)faultMsk << PWM_FCTRL2_NOCOMB_SHIFT);
+        *ptrFCTRL2 &= ~((uint16_t)faultMsk << PWM_FCTRL2_NOCOMB_SHIFT);
     }
     else
     {
         /* No combinational path available, only fault filter & latch signal can disable PWM output */
-        base->FCTRL2 |= ((uint16_t)faultMsk << PWM_FCTRL2_NOCOMB_SHIFT);
+        *ptrFCTRL2 |= ((uint16_t)faultMsk << PWM_FCTRL2_NOCOMB_SHIFT);
     }
 
     /* Initially clear both recovery modes */
-    reg = base->FSTS;
+    reg = *ptrFSTS;
     reg &= ~(((uint16_t)faultMsk << PWM_FSTS_FFULL_SHIFT) |
              ((uint16_t)faultMsk << PWM_FSTS_FHALF_SHIFT));
     /* Setup fault recovery */
@@ -1055,7 +1108,7 @@ void PWM_SetupFaults(PWM_Type *base, pwm_fault_input_t faultNum, const pwm_fault
             assert(false);
             break;
     }
-    base->FSTS = reg;
+    *ptrFSTS = reg;
 }
 
 /*!

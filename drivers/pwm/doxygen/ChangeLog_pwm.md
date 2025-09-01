@@ -2,6 +2,10 @@
 
 ## [2.9.1]
 
+- Improvements
+  - Add new API `PWM_SetupFaultsExt` and `PWM_SetupFaultInputFilterExt` to support FlexPWM which has more than one
+    fault input channels.
+  - Support fault 4-7 interrupt and its flag.
 - Bug Fixes
   - Fixed violations of the CERT INT31-C.
 
