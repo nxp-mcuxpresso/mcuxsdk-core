@@ -5,9 +5,6 @@
  */
 
 #include "fsl_i3c.h"
-#if !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
-#include "fsl_reset.h"
-#endif
 #include <stdlib.h>
 #include <string.h>
 
@@ -126,7 +123,7 @@ IRQn_Type const kI3cIrqs[] = I3C_IRQS;
 static clock_ip_name_t const kI3cClocks[] = I3C_CLOCKS;
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-#if !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+#if defined(I3C_RSTS)
 /*! @brief Pointers to I3C resets for each instance. */
 static const reset_ip_name_t kI3cResets[] = I3C_RSTS;
 #endif
@@ -794,7 +791,7 @@ void I3C_GetDefaultConfig(i3c_config_t *config)
 void I3C_Init(I3C_Type *base, const i3c_config_t *config, uint32_t sourceClock_Hz)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) || \
-    !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+    defined(I3C_RSTS)
     uint32_t instance = I3C_GetInstance(base);
 #endif
     uint32_t configValue;
@@ -804,7 +801,7 @@ void I3C_Init(I3C_Type *base, const i3c_config_t *config, uint32_t sourceClock_H
     CLOCK_EnableClock(kI3cClocks[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-#if !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+#if defined(I3C_RSTS)
     /* Reset the I3C module */
     RESET_PeripheralReset(kI3cResets[instance]);
 #endif
@@ -960,7 +957,7 @@ void I3C_MasterGetDefaultConfig(i3c_master_config_t *masterConfig)
 void I3C_MasterInit(I3C_Type *base, const i3c_master_config_t *masterConfig, uint32_t sourceClock_Hz)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) || \
-    !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+    defined(I3C_RSTS)
     uint32_t instance = I3C_GetInstance(base);
 #endif
 
@@ -969,7 +966,7 @@ void I3C_MasterInit(I3C_Type *base, const i3c_master_config_t *masterConfig, uin
     CLOCK_EnableClock(kI3cClocks[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-#if !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+#if defined(I3C_RSTS)
     /* Reset the I3C module */
     RESET_PeripheralReset(kI3cResets[instance]);
 #endif
@@ -1067,7 +1064,7 @@ void I3C_MasterDeinit(I3C_Type *base)
 {
     uint32_t idx = I3C_GetInstance(base);
 
-#if !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+#if defined(I3C_RSTS)
     /* Reset the I3C module */
     RESET_PeripheralReset(kI3cResets[idx]);
 #endif
@@ -2799,7 +2796,7 @@ void I3C_SlaveInit(I3C_Type *base, const i3c_slave_config_t *slaveConfig, uint32
 
     uint32_t configValue;
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) || \
-    !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+    defined(I3C_RSTS)
     uint32_t instance = I3C_GetInstance(base);
 #endif
 
@@ -2808,7 +2805,7 @@ void I3C_SlaveInit(I3C_Type *base, const i3c_slave_config_t *slaveConfig, uint32
     CLOCK_EnableClock(kI3cClocks[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-#if !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+#if defined(I3C_RSTS)
     /* Reset the I3C module */
     RESET_PeripheralReset(kI3cResets[instance]);
 #endif
@@ -2904,7 +2901,7 @@ void I3C_SlaveDeinit(I3C_Type *base)
 {
     uint32_t idx = I3C_GetInstance(base);
 
-#if !(defined(FSL_FEATURE_I3C_HAS_NO_RESET) && FSL_FEATURE_I3C_HAS_NO_RESET)
+#if defined(I3C_RSTS)
     /* Reset the I3C module */
     RESET_PeripheralReset(kI3cResets[idx]);
 #endif
@@ -3614,5 +3611,19 @@ void I3C3_DriverIRQHandler(void);
 void I3C3_DriverIRQHandler(void)
 {
     I3C_CommonIRQHandler(I3C3, 3);
+}
+#endif
+
+#if defined(HSP_I3C) && defined(WAKE_I3C)
+void HSP_I3C_IRQHandler(void);
+void HSP_I3C_IRQHandler(void)
+{
+    I3C_CommonIRQHandler(HSP_I3C, 0);
+}
+
+void WAKE_I3C_IRQHandler(void);
+void WAKE_I3C_IRQHandler(void)
+{
+    I3C_CommonIRQHandler(WAKE_I3C, 1);
 }
 #endif

@@ -4,6 +4,8 @@
 
 - Improvements
   - Fixed Coverity CERT-C violations.
+  - Used I3C_RSTS instead of I3C special feature macro.
+  - Adapted the driver to support new platform.
 
 ## [2.14.2]
 
