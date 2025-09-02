@@ -32,8 +32,8 @@ static const clock_ip_name_t s_ermClocks[] = ERM_CLOCKS;
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if defined(ERM_RSTS_N)
-/*! @brief Pointers to ERM clocks for each instance. */
-static const clock_ip_name_t s_ermResets[] = ERM_RSTS_N;
+/*! @brief Pointers to ERM resets for each instance. */
+static const reset_ip_name_t s_ermResets[] = ERM_RSTS_N;
 #endif
 /*******************************************************************************
  * Code

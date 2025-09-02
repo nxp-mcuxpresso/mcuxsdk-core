@@ -1,5 +1,10 @@
 # ERM
 
+## [2.0.3]
+
+- Bug Fixes
+  - Fixed s_ermResets variable declaration issue.
+
 ## [2.0.2]
 
 - Improvements
