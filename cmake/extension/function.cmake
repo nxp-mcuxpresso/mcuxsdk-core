@@ -2657,3 +2657,49 @@ function(_get_subfolder_file OUTPUT_VAR CURRENT_DIR PATTERN LEVEL)
   endforeach ()
 
 endfunction()
+
+function(mcux_add_config_mex_path)
+  set(single_value BASE_PATH PATH)
+  set(multi_value)
+  cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}" ${ARGN})
+
+  # Validate that PATH is provided
+  if(NOT __PATH)
+    log_error("PATH parameter is required for mcux_add_config_mex_path" ${CMAKE_CURRENT_LIST_FILE})
+    return()
+  endif()
+
+  # Resolve directory path
+  if(__BASE_PATH)
+    set(dir_abs_path ${__BASE_PATH}/${__PATH})
+  else()
+    set(dir_abs_path ${CMAKE_CURRENT_LIST_DIR}/${__PATH})
+  endif()
+
+  file(TO_CMAKE_PATH ${dir_abs_path} dir_abs_path)
+  get_filename_component(dir_abs_path ${dir_abs_path} ABSOLUTE)
+
+  if(NOT IS_DIRECTORY ${dir_abs_path})
+    log_warn("Config MEX directory ${dir_abs_path} does not exist or is not a directory" ${CMAKE_CURRENT_LIST_FILE})
+    return()
+  endif()
+
+  # Non-recursive search for *.mex in the given directory
+  file(GLOB mex_files "${dir_abs_path}/*.mex")
+
+  list(LENGTH mex_files mex_count)
+  if(mex_count EQUAL 0)
+    log_error("No .mex file found in ${dir_abs_path}" ${CMAKE_CURRENT_LIST_FILE})
+    return()
+  endif()
+
+  list(GET mex_files 0 mex_file)
+  if(mex_count GREATER 1)
+    log_warn("Multiple .mex files found in ${dir_abs_path}" ${CMAKE_CURRENT_LIST_FILE})
+  endif()
+
+  # Set cache var to the directory that contains the .mex file
+  get_filename_component(mex_dir "${mex_file}" DIRECTORY)
+  set(MCUXPRESSO_CONFIG_TOOL_MEX_PATH "${mex_dir}" CACHE STRING "Directory containing the MEX file consumed by MCUXpresso Config Tool" FORCE)
+  log_debug("Set MCUXPRESSO_CONFIG_TOOL_MEX_PATH ${mex_dir}" ${CMAKE_CURRENT_LIST_FILE})
+endfunction()
