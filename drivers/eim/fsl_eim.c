@@ -32,8 +32,8 @@ static const clock_ip_name_t s_eimClocks[] = EIM_CLOCKS;
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if defined(EIM_RSTS_N)
-/*! @brief Pointers to EIM clocks for each instance. */
-static const clock_ip_name_t s_eimResets[] = EIM_RSTS_N;
+/*! @brief Pointers to EIM resets for each instance. */
+static const reset_ip_name_t s_eimResets[] = EIM_RSTS_N;
 #endif
 /*******************************************************************************
  * Code

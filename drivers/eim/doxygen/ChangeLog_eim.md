@@ -1,5 +1,10 @@
 # EIM
 
+## [2.0.3]
+
+- Bug Fixes
+  - Fixed s_eimResets variable declaration issue.
+
 ## [2.0.2]
 
 - Improvements

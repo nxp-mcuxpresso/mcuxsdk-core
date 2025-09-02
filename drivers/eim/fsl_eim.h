@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief Driver version. */
-#define FSL_ERM_DRIVER_VERSION (MAKE_VERSION(2U, 0U, 2U))
+#define FSL_ERM_DRIVER_VERSION (MAKE_VERSION(2U, 0U, 3U))
 /*! @} */
 
 /*******************************************************************************
