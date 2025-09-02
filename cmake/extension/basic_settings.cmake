@@ -57,6 +57,10 @@ set(CMAKE_EXE_LINKER_FLAGS
     ""
     CACHE STRING "The Linker flags" FORCE)
 
+set(MCUXPRESSO_CONFIG_TOOL_MEX_PATH
+    ""
+    CACHE STRING "The MEX file location path consumed by MCUXpresso Config Tool" FORCE)
+
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.25.0")
     # Get log level, can be ERROR, WARNING, NOTICE, STATUS (default), VERBOSE, DEBUG, or TRACE.
     # Note it only support CMake >= 3.25. https://cmake.org/cmake/help/latest/command/cmake_language.html#query-message-log-level
