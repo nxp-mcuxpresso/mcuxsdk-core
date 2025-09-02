@@ -2,13 +2,13 @@
   "SPDXID": "SPDXRef-DOCUMENT",
   "spdxVersion": "SPDX-2.3",
   "creationInfo": {
-    "created": "2025-07-12T03:08:31Z",
+    "created": "2025-09-01T12:51:50Z",
     "creators": [
       "Organization: NXP"
     ],
     "licenseListVersion": "3.20"
   },
-  "name": "mcuxsdk-core-v25.09.00-pvw1",
+  "name": "mcuxsdk-core-v25.09.00",
   "dataLicense": "CC0-1.0",
   "hasExtractedLicensingInfos": [
     {
@@ -17,17 +17,22 @@
       "name": "Expat License"
     },
     {
+      "licenseId": "LicenseRef-21bd269c-2674-43d6-9d07-65d77e5a6ea3",
+      "extractedText": "libxml2 License\n===============\n\nExcept where otherwise noted in the source code (e.g. the files hash.c, list.c\nand the trio files, which are covered by a similar licence but with different\nCopyright notices) all the files are:\n\nCopyright (C) 1998-2003 Daniel Veillard. All Rights Reserved.\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \"Software\"), to deal in the\nSoftware without restriction, including without limitation the rights to use,\ncopy, modify, merge, publish, distribute, sublicense, and/or sell copies of the\nSoftware, and to permit persons to whom the Software is furnished to do so,\nsubject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS\nFOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE DANIEL\nVEILLARD BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN\nACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH\nTHE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\nExcept as contained in this notice, the name of Daniel Veillard shall not be used\nin advertising or otherwise to promote the sale, use or other dealings in this\nSoftware without prior written authorization from him.",
+      "name": "libxml2 License"
+    },
+    {
       "licenseId": "LicenseRef-8fb456cc-8c55-4120-8676-8e3baa90c415",
       "extractedText": "License must be obtained from [Company]",
       "name": "Alternative Commercial License Available"
     }
   ],
-  "documentNamespace": "https://nxp.com/spdx/79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+  "documentNamespace": "https://nxp.com/spdx/65d939ca-1f78-4f06-9dc7-1735b2b97445",
   "packages": [
     {
-      "SPDXID": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "SPDXID": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "name": "mcuxsdk-core",
-      "versionInfo": "v25.09.00-pvw1",
+      "versionInfo": "v25.09.00",
       "licenseConcluded": "(BSD-3-Clause)",
       "licenseDeclared": "(BSD-3-Clause)",
       "downloadLocation": "https://github.com/nxp-mcuxpresso/mcuxsdk-core",
@@ -44,7 +49,7 @@
       "licenseDeclared": "Apache-2.0",
       "homepage": "http://addressable.rubyforge.org/",
       "downloadLocation": "NOASSERTION",
-      "originator": "Organization: sporkmonger",
+      "originator": "Organization: opensuse",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
@@ -64,37 +69,13 @@
         },
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:github/sporkmonger/addressable@addressable-2.8.4",
+          "referenceLocator": "pkg:rpm/opensuse/rubygem-addressable@2.8.4-1.1?arch=aarch64",
           "referenceType": "purl"
         },
         {
           "referenceCategory": "OTHER",
-          "referenceLocator": "d0d73059-e95f-4659-a90a-0f01ffeff8d1",
+          "referenceLocator": "df5d64d5-3229-4341-b40d-3772086f78d1",
           "referenceType": "BlackDuck-ComponentOrigin"
-        }
-      ],
-      "filesAnalyzed": false
-    },
-    {
-      "SPDXID": "SPDXRef-package-73962809-6092-40ae-af21-d7b0d60bfdb4",
-      "name": "backend.ai-krunner-static-gnu",
-      "versionInfo": "4.2.0rc1",
-      "licenseConcluded": "MIT",
-      "licenseDeclared": "MIT",
-      "homepage": "https://backend.ai",
-      "downloadLocation": "https://pypi.org/project/backend.ai-krunner-static-gnu/4.2.0rc1",
-      "originator": "Organization: pypi",
-      "supplier": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "6794fa11-b03e-47e9-8f27-630c5c41e47c",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:pypi/backend-ai-krunner-static-gnu@4.2.0rc1",
-          "referenceType": "purl"
         }
       ],
       "filesAnalyzed": false
@@ -111,14 +92,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "4d899462-cb7e-4502-93bd-7754cdbff4be",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:deb/ubuntu/ruby-minitest@5.15.0-1",
           "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "4d899462-cb7e-4502-93bd-7754cdbff4be",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -127,20 +108,31 @@
       "SPDXID": "SPDXRef-package-abdadbb8-fd3d-4cfd-99b5-ddaa6d481ff1",
       "name": "bigdecimal",
       "versionInfo": "3.1.8",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-2-Clause OR Ruby)",
       "licenseDeclared": "(BSD-2-Clause OR Ruby)",
       "homepage": "http://www.ruby-lang.org",
       "downloadLocation": "https://bodhi.fedoraproject.org/updates/rubygem-bigdecimal-3.1.8-22.fc42",
-      "originator": "Organization: bigdecimal",
+      "originator": "Organization: fedora",
       "supplier": "NOASSERTION",
-      "externalRefs": [],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/fedora/rubygem-bigdecimal@3.1.8-22.fc42?arch=x86_64",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "f4451010-4d2d-4aea-b866-42b634861574",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
       "filesAnalyzed": false
     },
     {
       "SPDXID": "SPDXRef-package-d92946db-861f-4940-935d-5a82ab370067",
       "name": "bundler",
       "versionInfo": "2.3.15",
-      "licenseConcluded": "LicenseRef-8fb456cc-8c55-4120-8676-8e3baa90c415",
+      "licenseConcluded": "(LicenseRef-19bd4215-a4d4-4ffe-8e54-fcd9558d4e96 OR LicenseRef-8fb456cc-8c55-4120-8676-8e3baa90c415)",
       "licenseDeclared": "(LicenseRef-19bd4215-a4d4-4ffe-8e54-fcd9558d4e96 OR LicenseRef-8fb456cc-8c55-4120-8676-8e3baa90c415)",
       "homepage": "http://bundler.io",
       "downloadLocation": "http://http.debian.net/debian/pool/main/r/rubygems",
@@ -153,7 +145,7 @@
       "SPDXID": "SPDXRef-package-13d9943f-a899-4ac4-89c4-b8a85352e238",
       "name": "bundler",
       "versionInfo": "2.6.3",
-      "licenseConcluded": "LicenseRef-8fb456cc-8c55-4120-8676-8e3baa90c415",
+      "licenseConcluded": "(LicenseRef-19bd4215-a4d4-4ffe-8e54-fcd9558d4e96 OR LicenseRef-8fb456cc-8c55-4120-8676-8e3baa90c415)",
       "licenseDeclared": "(LicenseRef-19bd4215-a4d4-4ffe-8e54-fcd9558d4e96 OR LicenseRef-8fb456cc-8c55-4120-8676-8e3baa90c415)",
       "homepage": "http://bundler.io",
       "downloadLocation": "http://http.debian.net/debian/pool/main/r/rubygems",
@@ -203,14 +195,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "6f3ca0da-fe87-4d82-b835-8f450a70f86d",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:rpm/fedora/rubygem-deep_merge@1.2.2-3.fc37?arch=noarch",
           "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "6f3ca0da-fe87-4d82-b835-8f450a70f86d",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -240,6 +232,30 @@
       "filesAnalyzed": false
     },
     {
+      "SPDXID": "SPDXRef-package-36894876-b075-45fb-9aca-9dbc8426eb8a",
+      "name": "evolve75's RubyTree",
+      "versionInfo": "2.0.2",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "http://rubytree.rubyforge.org",
+      "downloadLocation": "https://rubygems.org/gems/rubytree/versions/2.0.2",
+      "originator": "Organization: rubygems",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "66861dd3-b130-4298-84b3-2738269a5246",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:gem/rubytree@2.0.2",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
       "SPDXID": "SPDXRef-package-8bf6b91f-7211-4ebe-93e0-21f615f4215c",
       "name": "evolve75's RubyTree",
       "versionInfo": "2.1.0",
@@ -247,9 +263,20 @@
       "licenseDeclared": "BSD-2-Clause",
       "homepage": "http://rubytree.rubyforge.org",
       "downloadLocation": "https://rubygems.org/gems/rubytree/versions/2.1.0",
-      "originator": "Organization: evolve75's RubyTree",
+      "originator": "Organization: rubygems",
       "supplier": "NOASSERTION",
-      "externalRefs": [],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:gem/rubytree@2.1.0",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "a27159da-c0fe-4f8b-a926-1fac64eae441",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
       "filesAnalyzed": false
     },
     {
@@ -263,11 +290,6 @@
       "originator": "Organization: rubygems",
       "supplier": "NOASSERTION",
       "externalRefs": [
-        {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "f67f4765-2696-4f4e-9860-ec59598f1792",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
         {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-ffi:1.15.5:1.el8sat:*:*:*:*:*:*",
@@ -287,6 +309,11 @@
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:gem/ffi@1.15.5-x64-mingw-ucrt",
           "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "f67f4765-2696-4f4e-9860-ec59598f1792",
+          "referenceType": "BlackDuck-ComponentOrigin"
         },
         {
           "referenceCategory": "SECURITY",
@@ -313,14 +340,67 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "c5ad31d5-a606-4775-8281-2a08413271b9",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:deb/debian/ruby-get-process-mem@0.2.5-1",
           "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "c5ad31d5-a606-4775-8281-2a08413271b9",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-4048f2e1-820b-49c4-89d2-bbf03e710684",
+      "name": "Go programming language",
+      "versionInfo": "20240717-snapshot",
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "homepage": "http://golang.org/",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: golang",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:github/golang/go@20240717-snapshot",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "ed19f940-6c6f-4f73-856d-20ac05e123f9",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-40f20a6f-8caa-4810-a404-05179d38c0a0",
+      "name": "grosser's parallel",
+      "versionInfo": "1.23.0",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "homepage": "https://github.com/grosser/parallel",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: opensuse",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-parallel:1.23.0:1.el8sat:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/opensuse/ruby3.2-rubygem-parallel@1.23.0-1.1?arch=x86_64",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "e32ee803-6d24-431b-a747-c82f0bee1c49",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -357,17 +437,17 @@
       "licenseDeclared": "MIT",
       "homepage": "http://github.com/tenderlove/hana",
       "downloadLocation": "https://rubygems.org/gems/hana/versions/1.3.7",
-      "originator": "Organization: rubygems",
+      "originator": "Organization: ubuntu",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:gem/hana@1.3.7",
+          "referenceLocator": "pkg:deb/ubuntu/ruby-hana@1.3.7-1",
           "referenceType": "purl"
         },
         {
           "referenceCategory": "OTHER",
-          "referenceLocator": "b0d6d60c-e611-427d-9044-05670290e901",
+          "referenceLocator": "6a9aa945-a2fa-448e-b086-e8efe5559a0f",
           "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
@@ -386,6 +466,11 @@
       "externalRefs": [
         {
           "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-hashie:5.0.0:1.el8sat:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-hashie:5.0.0:1.el9sat:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         },
@@ -395,14 +480,77 @@
           "referenceType": "purl"
         },
         {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-hashie:5.0.0:1.el8sat:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
           "referenceCategory": "OTHER",
           "referenceLocator": "8087a503-26a3-4f3d-8bcc-08aa4c69843c",
           "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-e10aa733-e2c0-4a33-996f-b8cd780c25b9",
+      "name": "javaselenium",
+      "versionInfo": "selenium-4.28.1-javascript",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "homepage": "https://selenium.dev",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: seleniumhq",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:github/seleniumhq/selenium@selenium-4.28.1-javascript",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "753129dd-1345-4aa0-a88d-021fce13ae57",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-3d925155-667d-4ee9-a6f6-1c04c4ea5b81",
+      "name": "jmhodges's rchardet",
+      "versionInfo": "1.8.0",
+      "licenseConcluded": "LGPL-2.1-only",
+      "licenseDeclared": "LGPL-2.1-only",
+      "homepage": "http://rubyforge.org/projects/rchardet",
+      "downloadLocation": "https://bodhi.fedoraproject.org/updates/rubygem-rchardet-1.8.0-5.fc37",
+      "originator": "Organization: fedora",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/fedora/rubygem-rchardet@1.8.0-5.fc37?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "2372214a-d2cd-4a34-a28f-6beabb06d8f2",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:tfm-rubygem-rchardet:1.8.0:0.1.el7sat:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rchardet:1.8.0:1.el8sat:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rchardet:1.8.0:1.el9sat:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rchardet:1.8.0:0.1.el8sat:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
         }
       ],
       "filesAnalyzed": false
@@ -419,9 +567,9 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "1662b69c-4572-49df-9821-ad5ae93571c2",
-          "referenceType": "BlackDuck-ComponentOrigin"
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:rubygems:json_gem:2.6.3:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
         },
         {
           "referenceCategory": "SECURITY",
@@ -429,19 +577,19 @@
           "referenceType": "cpe23Type"
         },
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:rpm/opensuse/ruby3.1-rubygem-json@2.6.3-1.2?arch=riscv64",
-          "referenceType": "purl"
-        },
-        {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:json_project:json:2.6.3:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         },
         {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:rubygems:json_gem:2.6.3:*:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/opensuse/ruby3.1-rubygem-json@2.6.3-1.3?arch=armv6hl",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "fdd1679a-4367-4474-9514-26222bb38617",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -459,16 +607,6 @@
       "externalRefs": [
         {
           "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:rubygems:json_gem:2.9.0:*:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:rubygems_package:json:2.9.0:*:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:json_project:json:2.9.0:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         },
@@ -476,6 +614,16 @@
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:github/flori/json@v2.9.0",
           "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:rubygems:json_gem:2.9.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:rubygems_package:json:2.9.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
         },
         {
           "referenceCategory": "OTHER",
@@ -518,6 +666,54 @@
           "referenceCategory": "OTHER",
           "referenceLocator": "2aa47c39-017b-4bf7-b03c-3cc173991678",
           "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-550b538b-768b-4244-84ef-4d5a25dcad12",
+      "name": "KPM",
+      "versionInfo": "0.12.1",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "homepage": "http://github.com/killbill/killbill-cloud",
+      "downloadLocation": "https://repo1.maven.org/maven2/org/kill-bill/billing/installer/kpm/0.12.1/",
+      "originator": "Organization: org.kill-bill.billing.installer",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "cf15c76e-4f4b-44c1-bab6-9e59cd47e972",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:maven/org.kill-bill.billing.installer/kpm@0.12.1",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-5e7e665f-0250-4c19-bea8-098815e8e640",
+      "name": "KPM",
+      "versionInfo": "0.12.2",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "homepage": "http://github.com/killbill/killbill-cloud",
+      "downloadLocation": "https://repo1.maven.org/maven2/org/kill-bill/billing/installer/kpm/0.12.2/",
+      "originator": "Organization: org.kill-bill.billing.installer",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "84fc987c-c3ec-4997-801c-fb9c9db66b5c",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:maven/org.kill-bill.billing.installer/kpm@0.12.2",
+          "referenceType": "purl"
         }
       ],
       "filesAnalyzed": false
@@ -578,18 +774,31 @@
       "licenseDeclared": "MIT",
       "homepage": "http://libxml.rubyforge.org/",
       "downloadLocation": "https://rubygems.org/gems/libxml-ruby/versions/4.1.1",
-      "originator": "Organization: rubygems",
+      "originator": "Organization: libxml-ruby",
+      "supplier": "NOASSERTION",
+      "externalRefs": [],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-a2a0c701-aee9-4d68-b569-30f14b1c812e",
+      "name": "libxslt1-dev",
+      "versionInfo": "1.1.39",
+      "licenseConcluded": "(MIT OR LicenseRef-21bd269c-2674-43d6-9d07-65d77e5a6ea3)",
+      "licenseDeclared": "(MIT OR LicenseRef-21bd269c-2674-43d6-9d07-65d77e5a6ea3)",
+      "homepage": "http://xmlsoft.org/xslt/",
+      "downloadLocation": "http://http.debian.net/debian/pool/main/libx/libxslt",
+      "originator": "Organization: debian",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:gem/libxml-ruby@4.1.1-x64-mingw-ucrt",
-          "referenceType": "purl"
+          "referenceCategory": "OTHER",
+          "referenceLocator": "fb415340-3c56-4ff3-9dea-1a1f0a772bf7",
+          "referenceType": "BlackDuck-ComponentOrigin"
         },
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "23857934-990f-4553-843a-c6a6f3e2b6b2",
-          "referenceType": "BlackDuck-ComponentOrigin"
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:deb/debian/libxslt1-dev@1.1.39-0exp1?arch=armel",
+          "referenceType": "purl"
         }
       ],
       "filesAnalyzed": false
@@ -619,7 +828,56 @@
       "filesAnalyzed": false
     },
     {
-      "SPDXID": "SPDXRef-package-20d92844-6955-48f1-ac48-dcf93c0c746a",
+      "SPDXID": "SPDXRef-package-9930d1d4-d39b-4e48-9aa3-9380bab0385d",
+      "name": "ncurses",
+      "versionInfo": "6.4",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "homepage": "http://www.gnu.org/software/ncurses/",
+      "downloadLocation": "http://http.debian.net/debian/pool/main/n/ncurses",
+      "originator": "Organization: anaconda",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:gnu:ncurses:6.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:almalinux_package:ncurses:6.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:almalinux_package:ncurses-base:6.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:conda/ncurses@6.4-h4a02239_0-linux-ppc64le",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "2d516f5d-7470-4daa-8443-94cd9a9a93c2",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:almalinux_package:ncurses-term:6.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:almalinux_package:ncurses-devel:6.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-301f6aff-5416-4c54-9d6c-ccc17f09056a",
       "name": "ncurses",
       "versionInfo": "6.4_p20221231",
       "licenseConcluded": "MIT",
@@ -630,14 +888,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "ab2f2c7e-39ba-4e31-8d84-f15a2f4a0914",
-          "referenceType": "BlackDuck-ComponentOrigin"
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ncurses-terminfo-base@6.4_p20221231-r0?arch=noarch",
+          "referenceType": "purl"
         },
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:apk/alpine/ncurses-terminfo@6.4_p20221231-r0?arch=noarch",
-          "referenceType": "purl"
+          "referenceCategory": "OTHER",
+          "referenceLocator": "f5a038de-e823-405d-89ea-28fe60a18b8c",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -646,22 +904,17 @@
       "SPDXID": "SPDXRef-package-7a8b21cb-c8fa-48a9-ac89-0ccf0390e953",
       "name": "ncurses-term",
       "versionInfo": "6.4",
-      "licenseConcluded": "MIT",
+      "licenseConcluded": "(X11 OR MIT)",
       "licenseDeclared": "(X11 OR MIT)",
       "homepage": "http://invisible-island.net/ncurses/",
       "downloadLocation": "http://http.debian.net/debian/pool/main/n/ncurses",
-      "originator": "Organization: debian",
+      "originator": "Organization: ncurses-term",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:deb/debian/ncurses-term@6.4-2?arch=all",
-          "referenceType": "purl"
-        },
-        {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "71c450f3-8393-498c-adea-591dfcf2dee7",
-          "referenceType": "BlackDuck-ComponentOrigin"
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:ncurses-term:6.4:14.20240127.el10:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
         }
       ],
       "filesAnalyzed": false
@@ -679,22 +932,22 @@
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
-          "referenceLocator": "5d0d295a-ec22-44b8-bfa1-d73ccfaf0f65",
+          "referenceLocator": "e53f8068-6401-4a79-b107-919627849efd",
           "referenceType": "BlackDuck-ComponentOrigin"
         },
         {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:rubygems_package:nokogiri:1.15.3:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:gem/nokogiri@1.15.3-x64-mingw-ucrt",
+          "referenceLocator": "pkg:gem/nokogiri@1.15.3-x86_64-linux",
           "referenceType": "purl"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:nokogiri:nokogiri:1.15.3:*:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:rubygems_package:nokogiri:1.15.3:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         }
       ],
@@ -725,34 +978,10 @@
       "filesAnalyzed": false
     },
     {
-      "SPDXID": "SPDXRef-package-5ac20677-4c0b-4121-92e2-d2851b7dfa8b",
-      "name": "ocra",
-      "versionInfo": "1.3.11",
-      "licenseConcluded": "MIT",
-      "licenseDeclared": "MIT",
-      "homepage": "http://rubyforge.org/projects/ocra/",
-      "downloadLocation": "https://rubygems.org/gems/ocra/versions/1.3.11",
-      "originator": "Organization: rubygems",
-      "supplier": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "0fcd2cc1-8e22-4652-99ff-81b71ce7fca8",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:gem/ocra@1.3.11",
-          "referenceType": "purl"
-        }
-      ],
-      "filesAnalyzed": false
-    },
-    {
       "SPDXID": "SPDXRef-package-68533938-5335-47a6-8d55-c3f9e9a2c706",
       "name": "power_assert",
       "versionInfo": "2.0.1",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-2-Clause OR Ruby)",
       "licenseDeclared": "(BSD-2-Clause OR Ruby)",
       "homepage": "https://github.com/k-tsj/power_assert",
       "downloadLocation": "https://bodhi.fedoraproject.org/updates/rubygem-power_assert-2.0.1-176.fc37",
@@ -789,24 +1018,13 @@
       "SPDXID": "SPDXRef-package-cadf93a7-739f-4f76-a5fa-a50739a446ef",
       "name": "racc",
       "versionInfo": "1.8.1",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-2-Clause OR Ruby)",
       "licenseDeclared": "(BSD-2-Clause OR Ruby)",
       "homepage": "http://i.loveruby.net/en/projects/racc/",
       "downloadLocation": "http://archive.ubuntu.com/ubuntu/ubuntu/pool/universe/r/racc",
-      "originator": "Organization: debian",
+      "originator": "Organization: racc",
       "supplier": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:deb/debian/racc@1.8.1-1?arch=all",
-          "referenceType": "purl"
-        },
-        {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "f90086fd-7935-4210-a6c8-05210d4d3f81",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        }
-      ],
+      "externalRefs": [],
       "filesAnalyzed": false
     },
     {
@@ -821,14 +1039,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:deb/debian/rake@13.0.6-2?arch=all",
+          "referenceType": "purl"
+        },
+        {
           "referenceCategory": "OTHER",
           "referenceLocator": "81661d0e-32f0-4984-9054-1a632c4d1425",
           "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:rubygems_package:rake:13.0.6:*:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
         },
         {
           "referenceCategory": "SECURITY",
@@ -841,9 +1059,9 @@
           "referenceType": "cpe23Type"
         },
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:deb/debian/rake@13.0.6-2?arch=all",
-          "referenceType": "purl"
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:rubygems_package:rake:13.0.6:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
         }
       ],
       "filesAnalyzed": false
@@ -856,7 +1074,7 @@
       "licenseDeclared": "Ruby",
       "homepage": "http://rdoc.rubyforge.org",
       "downloadLocation": "https://bodhi.fedoraproject.org/updates/rubygem-rdoc-6.4.0-169.fc38",
-      "originator": "Organization: RDoc",
+      "originator": "Organization: fedora",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
@@ -865,23 +1083,33 @@
           "referenceType": "cpe23Type"
         },
         {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/fedora/rubygem-rdoc@6.4.0-169.fc38?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rdoc:6.4.0:142.module\\+el8.8.0\\+22637\\+76cde83a:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rdoc:6.4.0:141.module\\+el8.7.0\\+15051\\+29b42f0c:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "858a9308-d701-471d-9c6b-ca820f1abac3",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:dave_thomas:rdoc:6.4.0:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         },
         {
           "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rdoc:6.4.0:143.module\\+el9.3.0\\+21558\\+96b51efd:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:rubygems_package:rdoc:6.4.0:*:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:ruby-lang:rdoc:6.4.0:*:*:*:*:*:*:*",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rdoc:6.4.0:141.1.module\\+el9.2.0\\+22640\\+f1bd3602:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         }
       ],
@@ -912,14 +1140,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:photon_package:ruby:3.1.2:2.ph5:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
+          "referenceCategory": "OTHER",
+          "referenceLocator": "d243cabb-7928-4869-9038-34e72d99af35",
+          "referenceType": "BlackDuck-ComponentOrigin"
         },
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:apk/alpine/ruby-libs@3.1.2-r0?arch=armv7",
-          "referenceType": "purl"
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:photon_package:ruby:3.1.2:6.ph5:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
         },
         {
           "referenceCategory": "SECURITY",
@@ -928,23 +1156,23 @@
         },
         {
           "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:photon_package:ruby:3.1.2:4.ph5:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "d243cabb-7928-4869-9038-34e72d99af35",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
-          "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:photon_package:ruby:3.1.2:3.ph5:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         },
         {
           "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:photon_package:ruby:3.1.2:6.ph5:*:*:*:*:*:*",
+          "referenceLocator": "cpe:2.3:a:photon_package:ruby:3.1.2:4.ph5:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:photon_package:ruby:3.1.2:2.ph5:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-libs@3.1.2-r0?arch=armv7",
+          "referenceType": "purl"
         }
       ],
       "filesAnalyzed": false
@@ -953,22 +1181,150 @@
       "SPDXID": "SPDXRef-package-79425921-1160-424d-91d7-baea2be684ac",
       "name": "Ruby",
       "versionInfo": "3.1.4",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-2-Clause OR Ruby)",
       "licenseDeclared": "(BSD-2-Clause OR Ruby)",
       "homepage": "http://www.ruby-lang.org/",
       "downloadLocation": "NOASSERTION",
-      "originator": "Organization: Ruby",
+      "originator": "Organization: photon",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:yukihiro_matsumoto:ruby:3.1.4:*:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/photon/ruby@3.1.4-9.ph5?arch=aarch64",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "98876fcc-358e-4676-a887-deaae5b6f0de",
+          "referenceType": "BlackDuck-ComponentOrigin"
         },
         {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:ruby-lang:ruby:3.1.4:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:yukihiro_matsumoto:ruby:3.1.4:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-451286ce-98da-4a12-9514-08a5616e8a35",
+      "name": "ruby-addressable",
+      "versionInfo": "2.8.4",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "homepage": "http://addressable.rubyforge.org/",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-addressable@2.8.4-r0?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "370854f0-9bd6-45b7-a369-1dc96bcb8b08",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-76f11cf7-b4f2-4801-82b3-2629c283c1f6",
+      "name": "ruby-bundler",
+      "versionInfo": "2.5.23",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-bundler@2.5.23-r0?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "8b00d689-3ddd-426b-bf35-647a55110092",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-ac1ce4eb-1ef0-46df-b5f6-2c8fc2dd8cb2",
+      "name": "ruby-debug",
+      "versionInfo": "1.6.3",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "ff898636-2459-422f-ab36-a83620dac1b1",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-debug@1.6.3-r0?arch=x86_64",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-09873780-8484-438d-a182-15897dfd02ab",
+      "name": "ruby-drb",
+      "versionInfo": "2.2.1",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "https://github.com/ruby/drb",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-drb@2.2.1-r0?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "d4d4584d-ea77-4ce9-8c08-80f9930677a5",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-a367673b-95f4-42b6-a6e9-21b62ffc8404",
+      "name": "ruby-facade",
+      "versionInfo": "1.2.0",
+      "licenseConcluded": "Artistic-2.0",
+      "licenseDeclared": "Artistic-2.0",
+      "homepage": "https://github.com/djberg96/facade",
+      "downloadLocation": "http://archive.ubuntu.com/ubuntu/ubuntu/pool/universe/r/ruby-facade",
+      "originator": "Organization: ubuntu",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:deb/ubuntu/ruby-facade@1.2.0-1?arch=all",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "8e3016e9-2a96-4e56-b7cf-5ef504b29ab2",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -1005,18 +1361,18 @@
       "licenseDeclared": "MIT",
       "homepage": "https://github.com/seattlerb/minitest",
       "downloadLocation": "NOASSERTION",
-      "originator": "Organization: centos",
+      "originator": "Organization: fedora",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "80242233-6683-4135-9b39-325a60080253",
-          "referenceType": "BlackDuck-ComponentOrigin"
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/fedora/rubygem-minitest@5.15.0-172.fc37?arch=noarch",
+          "referenceType": "purl"
         },
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:rpm/centos/rubygem-minitest@5.15.0-141.module_el8.7.0%2B1180%2B5395fc58?arch=noarch",
-          "referenceType": "purl"
+          "referenceCategory": "OTHER",
+          "referenceLocator": "cf79a7f5-d12f-409e-9530-cc91b5ba7e64",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -1025,7 +1381,7 @@
       "SPDXID": "SPDXRef-package-2e4a2f5f-c4f0-47da-a06c-002a305b7c3e",
       "name": "rubygem-nokogiri",
       "versionInfo": "1.15.4",
-      "licenseConcluded": "Apache-2.0",
+      "licenseConcluded": "(Apache-2.0 AND MIT)",
       "licenseDeclared": "(Apache-2.0 AND MIT)",
       "homepage": "http://nokogiri.rubyforge.org/nokogiri/",
       "downloadLocation": "NOASSERTION",
@@ -1033,14 +1389,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:rpm/opensuse/rubygem-nokogiri@1.15.4-1.1?arch=x86_64",
-          "referenceType": "purl"
-        },
-        {
           "referenceCategory": "OTHER",
           "referenceLocator": "9e31a526-dab5-46cd-a1eb-5e6db0b4dad2",
           "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/opensuse/rubygem-nokogiri@1.15.4-1.1?arch=x86_64",
+          "referenceType": "purl"
         }
       ],
       "filesAnalyzed": false
@@ -1049,7 +1405,7 @@
       "SPDXID": "SPDXRef-package-cb127658-5e34-41ea-8114-17e5650ce23c",
       "name": "rubygem-openssl",
       "versionInfo": "2.2.0",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-3-Clause OR Ruby)",
       "licenseDeclared": "(BSD-3-Clause OR Ruby)",
       "homepage": "http://ruby-lang.org/",
       "downloadLocation": "https://bodhi.fedoraproject.org/updates/rubygem-openssl-2.2.0-144.fc34",
@@ -1070,6 +1426,59 @@
       "filesAnalyzed": false
     },
     {
+      "SPDXID": "SPDXRef-package-563bf6a2-16d8-4701-a119-86d4e02d6b93",
+      "name": "rubygem-psych",
+      "versionInfo": "4.0.4",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "homepage": "http://ruby-lang.org/",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: centos",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/centos/rubygem-psych@4.0.4-142.module_el8%2B980%2Be0c12f63?arch=i686",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "fe0e176e-e9e8-40d6-8b1b-bd26de6d2a6b",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-9ad3fb1a-924d-4af3-a26c-63f5963e75b5",
+      "name": "rubygem-public_suffix",
+      "versionInfo": "5.0.3",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "homepage": "https://simonecarletti.com/code/publicsuffix-ruby",
+      "downloadLocation": "https://access.cdn.redhat.com//content/origin/rpms/rubygem-public_suffix/5.0.3-1.el8sat/noarch/1.el8sat/fd431d51",
+      "originator": "Organization: redhat",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-public_suffix:5.0.3:1.el8sat:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/redhat/rubygem-public_suffix@5.0.3-1.el8sat?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "49bcb2d8-ad53-4d40-b186-0f15c27ed61b",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
       "SPDXID": "SPDXRef-package-4947f6f7-fba1-4b7c-818f-ebb881f79345",
       "name": "rubygem-racc",
       "versionInfo": "1.7.1",
@@ -1077,16 +1486,27 @@
       "licenseDeclared": "BSD-2-Clause",
       "homepage": "https://github.com/tenderlove/racc",
       "downloadLocation": "https://bodhi.fedoraproject.org/updates/rubygem-racc-1.7.1-201.fc39",
-      "originator": "Organization: rubygem-racc",
+      "originator": "Organization: fedora",
       "supplier": "NOASSERTION",
-      "externalRefs": [],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/fedora/rubygem-racc@1.7.1-201.fc39?arch=x86_64",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "c0a4a14a-71af-4a37-9fb2-f9031a2e7ba3",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
       "filesAnalyzed": false
     },
     {
       "SPDXID": "SPDXRef-package-6d2b8310-69bf-4229-8b3b-bd2840a1a307",
       "name": "RubyGems",
       "versionInfo": "3.1.0",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(MIT OR Ruby)",
       "licenseDeclared": "(MIT OR Ruby)",
       "homepage": "http://rubygems.org",
       "downloadLocation": "NOASSERTION",
@@ -1095,12 +1515,12 @@
       "externalRefs": [
         {
           "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:rubyforge:rubygems:3.1.0:*:*:*:*:*:*:*",
+          "referenceLocator": "cpe:2.3:a:rubygems:rubygems:3.1.0:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         },
         {
           "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:rubygems:rubygems:3.1.0:*:*:*:*:*:*:*",
+          "referenceLocator": "cpe:2.3:a:rubyforge:rubygems:3.1.0:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         },
         {
@@ -1115,7 +1535,7 @@
       "SPDXID": "SPDXRef-package-e24445b8-eba7-4ec4-bbec-4245941190f8",
       "name": "rubygem-securerandom",
       "versionInfo": "0.4.0",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-2-Clause AND Ruby)",
       "licenseDeclared": "(BSD-2-Clause AND Ruby)",
       "homepage": "https://github.com/ruby/securerandom",
       "downloadLocation": "NOASSERTION",
@@ -1124,12 +1544,12 @@
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:rpm/opensuse/rubygem-securerandom@0.4.0-1.2?arch=armv6hl",
+          "referenceLocator": "pkg:rpm/opensuse/rubygem-securerandom@0.4.0-1.2?arch=s390x",
           "referenceType": "purl"
         },
         {
           "referenceCategory": "OTHER",
-          "referenceLocator": "cc158ae4-0634-4a5d-9a93-ce23ff1abb16",
+          "referenceLocator": "8229633f-8ab9-44be-82c4-2bbf14707288",
           "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
@@ -1162,9 +1582,19 @@
       "licenseDeclared": "MIT",
       "homepage": "http://www.jointheconversation.org/rubygit/",
       "downloadLocation": "https://rubygems.org/gems/git/versions/1.16.0",
-      "originator": "Organization: Ruby/Git",
+      "originator": "Organization: rubygems",
       "supplier": "NOASSERTION",
       "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:gem/git@1.16.0",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "465dd800-3400-4eb1-a441-0330303d0a43",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
         {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:rubygems_package:git:1.16.0:*:*:*:*:*:*:*",
@@ -1181,18 +1611,390 @@
       "licenseDeclared": "GPL-2.0-only",
       "homepage": "https://github.com/glejeune/Ruby-Graphviz",
       "downloadLocation": "http://http.debian.net/debian/pool/main/r/ruby-graphviz",
-      "originator": "Organization: debian",
+      "originator": "Organization: ubuntu",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
-          "referenceLocator": "a7c877b3-95b0-46af-a6e1-cd56a74cdcfb",
+          "referenceLocator": "f2c60bc5-3d91-4fcb-9834-1cd990c85000",
           "referenceType": "BlackDuck-ComponentOrigin"
         },
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:deb/debian/ruby-graphviz@1.2.5-1",
+          "referenceLocator": "pkg:deb/ubuntu/ruby-graphviz@1.2.5-3",
           "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-de9dd643-0b22-4ff3-8d1d-738da5826482",
+      "name": "ruby/irb",
+      "versionInfo": "1.4.1",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "https://github.com/ruby/irb",
+      "downloadLocation": "https://access.cdn.redhat.com//content/origin/rpms/rubygem-irb/1.4.1-141.module+el9.1.0+15737+76195479/noarch/141.module+el9.1.0+15737+76195479/fd431d51",
+      "originator": "Organization: redhat",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/redhat/rubygem-irb@1.4.1-141.module%2Bel9.1.0%2B15737%2B76195479?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "1da710da-f40d-4ec2-8907-f4b7880a2f94",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-a97ef02d-3a0e-4a95-8048-a8419dcaf5a7",
+      "name": "ruby-matrix",
+      "versionInfo": "0.4.2",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "https://github.com/ruby/matrix",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-matrix@0.4.2-r1?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "c240b4a8-3365-4348-8316-3567a7c5d68e",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-747bdf7d-2836-42b8-8632-33bebfcecc34",
+      "name": "ruby-minitest",
+      "versionInfo": "5.15.0",
+      "licenseConcluded": "Ruby",
+      "licenseDeclared": "Ruby",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "8738b151-596d-4a35-8f6a-75acb0f9e0e0",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-minitest@5.15.0-r0?arch=noarch",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-017a7aad-0b1a-4eed-8b00-51436892f37f",
+      "name": "ruby/net-imap",
+      "versionInfo": "0.2.3",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "https://github.com/ruby/net-imap",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-net-imap@0.2.3-r0?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "92907333-e3b1-4121-b00f-fe71b6197eb9",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-e6f0dd29-de4a-4972-a8b6-8a550cd2e7d9",
+      "name": "ruby-public_suffix",
+      "versionInfo": "5.0.3",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "homepage": "https://simonecarletti.com/code/publicsuffix/",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-public_suffix@5.0.3-r0?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "cf038df7-7c4c-4381-88cb-13fd5c701589",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-9ed4904a-8b1b-4450-9cf7-4fe6c9d25480",
+      "name": "ruby/racc",
+      "versionInfo": "v1.8.1",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "https://github.com/ruby/racc",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-racc@1.8.1-r0?arch=loongarch64",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "a734a9b7-1bbd-4303-b55c-ac5cd3169225",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-a127070a-63c8-4b88-9361-89e56a2e6be7",
+      "name": "ruby-rbs",
+      "versionInfo": "2.7.0",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-rbs@2.7.0-r1?arch=ppc64le",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "83010d91-510a-49e0-bae2-9733bcf94b7c",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-b1b81f96-bcf2-47b7-bc6c-49a2c65d3640",
+      "name": "ruby/rexml",
+      "versionInfo": "3.3.9",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "https://github.com/ruby/rexml",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: rocky",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:ruby:rexml:3.3.9:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:almalinux_package:rubygem-rexml:3.3.9:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:ruby-lang:rexml:3.3.9:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rexml:3.3.9:10.el10_0:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "91f4f0ef-dc53-4ba3-beca-075416b31871",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-rexml:3.3.9:9.el10:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/rocky/rubygem-rexml@3.3.9-4.module%2Bel8.10.0%2B2004%2Bfd6e8d72?arch=noarch",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-8e17e3e5-ce0f-46d4-acb5-1765a36d6766",
+      "name": "ruby-rinda",
+      "versionInfo": "0.2.0",
+      "licenseConcluded": "Ruby",
+      "licenseDeclared": "NOASSERTION",
+      "homepage": "https://github.com/ruby/rinda",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "251d2669-b61a-4511-86e2-6edb939bc250",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-rinda@0.2.0-r0?arch=noarch",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-069009b5-7c65-4be9-a78e-72a13e16e5e9",
+      "name": "ruby-rss-doc",
+      "versionInfo": "0.2.9",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "https://github.com/ruby/rss",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-rss@0.2.9-r0?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "8ebf47c8-5ebe-4e9c-802f-a87f4ebd8239",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-7f40d22c-4b56-45d3-9477-1d2f557964b4",
+      "name": "ruby-test-unit",
+      "versionInfo": "3.5.3",
+      "licenseConcluded": "(Ruby OR PSF-2.0)",
+      "licenseDeclared": "(Ruby OR PSF-2.0)",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "52249619-c9cf-4db7-bac5-669890e64f6a",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-test-unit@3.5.3-r0?arch=noarch",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-306452fe-3a6e-464b-b9a4-b6911623902f",
+      "name": "ruby-typeprof-doc",
+      "versionInfo": "0.21.3",
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: alpine",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:apk/alpine/ruby-typeprof@0.21.3-r0?arch=noarch",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "636f351e-5bea-44c4-af99-93fb256d9547",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-c64abd0e-a42d-41eb-9bd4-dedb13dd86be",
+      "name": "ruby-unf",
+      "versionInfo": "0.1.4",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "http://github.com/knu/ruby-unf",
+      "downloadLocation": "http://archive.ubuntu.com/ubuntu/ubuntu/pool/universe/r/ruby-unf",
+      "originator": "Organization: ubuntu",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:deb/ubuntu/ruby-unf@0.1.4-3",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "e48d543c-25bc-44e1-8432-b5a523024cab",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-e289a4b3-d472-4395-b82b-d57dc0b89167",
+      "name": "RubyZip",
+      "versionInfo": "2.3.2",
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "homepage": "http://sourceforge.net/projects/rubyzip",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: opensuse",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:rubygems_package:rubyzip:2.3.2:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:rubyzip_project:rubyzip:2.3.2:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:rubyzip:rubyzip:2.3.2:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/opensuse/ruby3.1-rubygem-rubyzip@2.3.2-1.9?arch=aarch64",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "e53654e3-f0cd-4ae2-b553-32168a917a73",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -1209,6 +2011,11 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/opensuse/ruby3.1-rubygem-get_process_mem@0.2.7-1.11?arch=i586",
+          "referenceType": "purl"
+        },
+        {
           "referenceCategory": "OTHER",
           "referenceLocator": "c9322b34-0ffe-4207-a514-04ccc89e1e34",
           "referenceType": "BlackDuck-ComponentOrigin"
@@ -1217,11 +2024,6 @@
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-get_process_mem:0.2.7:2.1.el8sat:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:rpm/opensuse/ruby3.1-rubygem-get_process_mem@0.2.7-1.11?arch=i586",
-          "referenceType": "purl"
         }
       ],
       "filesAnalyzed": false
@@ -1230,7 +2032,7 @@
       "SPDXID": "SPDXRef-package-aa6a7abe-585b-4015-83bf-f7614f5efacf",
       "name": "securerandom",
       "versionInfo": "0.2.2",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-2-Clause OR Ruby)",
       "licenseDeclared": "(BSD-2-Clause OR Ruby)",
       "homepage": "https://github.com/ruby/securerandom",
       "downloadLocation": "https://rubygems.org/gems/securerandom/versions/0.2.2",
@@ -1258,18 +2060,18 @@
       "licenseDeclared": "MIT",
       "homepage": "http://sequel.rubyforge.org/",
       "downloadLocation": "NOASSERTION",
-      "originator": "Organization: rubygems",
+      "originator": "Organization: jeremyevans",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "5ee60495-c417-4817-8a17-9d35245794a6",
-          "referenceType": "BlackDuck-ComponentOrigin"
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:github/jeremyevans/sequel@5.87.0",
+          "referenceType": "purl"
         },
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:gem/sequel@5.87.0",
-          "referenceType": "purl"
+          "referenceCategory": "OTHER",
+          "referenceLocator": "f9462dc1-c7dd-4d3c-b4b1-6ec5aab5350a",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -1295,9 +2097,20 @@
       "licenseDeclared": "BSD-3-Clause",
       "homepage": "http://sqlite-ruby.rubyforge.org/sqlite3/",
       "downloadLocation": "https://rubygems.org/gems/sqlite3/versions/1.6.3",
-      "originator": "Organization: sqlite3-ruby",
+      "originator": "Organization: rubygems",
       "supplier": "NOASSERTION",
-      "externalRefs": [],
+      "externalRefs": [
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "0d39834d-6b63-41db-afa3-791767a5c6f4",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:gem/sqlite3@1.6.3-x64-mingw-ucrt",
+          "referenceType": "purl"
+        }
+      ],
       "filesAnalyzed": false
     },
     {
@@ -1312,14 +2125,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "6557aa5d-99f5-4bbd-9bf7-50a1549a9d56",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:rpm/fedora/rubygem-sqlite3@2.5.0-1.fc42?arch=i686",
           "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "6557aa5d-99f5-4bbd-9bf7-50a1549a9d56",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -1328,7 +2141,7 @@
       "SPDXID": "SPDXRef-package-d6c6f20f-bea2-402b-ac34-ac6ee41cfaa2",
       "name": "syslog",
       "versionInfo": "0.2.0",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-2-Clause OR Ruby)",
       "licenseDeclared": "(BSD-2-Clause OR Ruby)",
       "homepage": "https://github.com/ruby/syslog",
       "downloadLocation": "NOASSERTION",
@@ -1356,17 +2169,17 @@
       "licenseDeclared": "Apache-2.0",
       "homepage": "https://github.com/djberg96/sys-proctable",
       "downloadLocation": "https://rubygems.org/gems/sys-proctable/versions/1.3.0",
-      "originator": "Organization: ubuntu",
+      "originator": "Organization: rubygems",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:deb/ubuntu/ruby-sys-proctable@1.3.0-1",
+          "referenceLocator": "pkg:gem/sys-proctable@1.3.0",
           "referenceType": "purl"
         },
         {
           "referenceCategory": "OTHER",
-          "referenceLocator": "e5ecab9a-6563-483e-9627-288ff95694e3",
+          "referenceLocator": "6f5dbc23-2bf8-4530-a7f9-ff068af9ed65",
           "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
@@ -1384,14 +2197,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "f8a7b4d7-0c5f-4264-b7ad-b3a573185db7",
-          "referenceType": "BlackDuck-ComponentOrigin"
-        },
-        {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:rpm/fedora/rubygem-racc-debugsource@1.7.1-201.fc39?arch=aarch64",
           "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "f8a7b4d7-0c5f-4264-b7ad-b3a573185db7",
+          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -1408,14 +2221,14 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:rpm/opensuse/terminfo-base@6.0-19.1?arch=ppc64",
-          "referenceType": "purl"
-        },
-        {
           "referenceCategory": "OTHER",
           "referenceLocator": "ffd2d9fc-964c-4320-bd89-c8812082a6a0",
           "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:rpm/opensuse/terminfo-base@6.0-19.1?arch=ppc64",
+          "referenceType": "purl"
         }
       ],
       "filesAnalyzed": false
@@ -1424,13 +2237,36 @@
       "SPDXID": "SPDXRef-package-6563720d-c6bd-4281-82d2-e107d0176e0a",
       "name": "test-unit",
       "versionInfo": "3.5.3",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-3-Clause OR Ruby OR PSF-2.0)",
       "licenseDeclared": "(BSD-3-Clause OR Ruby OR PSF-2.0)",
       "homepage": "http://test-unit.rubyforge.org/",
       "downloadLocation": "NOASSERTION",
       "originator": "Organization: test-unit",
       "supplier": "NOASSERTION",
       "externalRefs": [],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-bc805ef5-2739-4c10-98ae-98e92df9b790",
+      "name": "Truffleruby-resources",
+      "versionInfo": "23.1.4",
+      "licenseConcluded": "(BSD-2-Clause AND BSD-3-Clause AND MIT AND EPL-2.0)",
+      "licenseDeclared": "(BSD-2-Clause AND BSD-3-Clause AND MIT AND EPL-2.0)",
+      "downloadLocation": "https://repo1.maven.org/maven2/org/graalvm/ruby/ruby-resources/23.1.4/",
+      "originator": "Organization: org.graalvm.ruby",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:maven/org.graalvm.ruby/ruby-resources@23.1.4",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "1a1e66be-0610-4d18-a22b-aa74c8cb901d",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
       "filesAnalyzed": false
     },
     {
@@ -1445,6 +2281,11 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "be278baa-769b-4573-8c16-f67701764ce3",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:rubygems_package:uglifier:3.2.0:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
@@ -1453,11 +2294,6 @@
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:rpm/opensuse/rubygem-uglifier@3.2.0-1.1?arch=s390x",
           "referenceType": "purl"
-        },
-        {
-          "referenceCategory": "OTHER",
-          "referenceLocator": "be278baa-769b-4573-8c16-f67701764ce3",
-          "referenceType": "BlackDuck-ComponentOrigin"
         }
       ],
       "filesAnalyzed": false
@@ -1470,13 +2306,23 @@
       "licenseDeclared": "BSD-2-Clause",
       "homepage": "https://github.com/knu/ruby-unf",
       "downloadLocation": "NOASSERTION",
-      "originator": "Organization: suse",
+      "originator": "Organization: opensuse",
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
-          "referenceLocator": "ffd16066-0874-43d3-a116-1a029afe796f",
+          "referenceLocator": "d721b9a7-0052-4b8a-98db-b693b3ab2b29",
           "referenceType": "BlackDuck-ComponentOrigin"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-unf:0.1.4:1.el8sat:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-unf-debuginfo:0.1.4:4.el7:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
         },
         {
           "referenceCategory": "SECURITY",
@@ -1485,7 +2331,7 @@
         },
         {
           "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:rpm/suse/ruby2.5-rubygem-unf-testsuite@0.1.4-bp154.1.20?arch=aarch64",
+          "referenceLocator": "pkg:rpm/opensuse/ruby3.1-rubygem-unf@0.1.4-1.26?arch=x86_64",
           "referenceType": "purl"
         },
         {
@@ -1496,16 +2342,6 @@
         {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-unf-debuginfo:0.1.4:5.el7:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-unf:0.1.4:1.el8sat:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-unf-debuginfo:0.1.4:4.el7:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
         }
       ],
@@ -1519,9 +2355,19 @@
       "licenseDeclared": "MIT",
       "homepage": "https://github.com/knu/ruby-unf_ext",
       "downloadLocation": "NOASSERTION",
-      "originator": "Organization: unf_ext",
+      "originator": "Organization: rubygems",
       "supplier": "NOASSERTION",
       "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:gem/unf_ext@0.0.8.2-x64-mingw-ucrt",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "f76c54fc-92cb-4e7c-b13e-05051423d9d7",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        },
         {
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:redhat_package:rubygem-unf_ext:0.0.8.2:1.el8sat:*:*:*:*:*:*",
@@ -1544,7 +2390,7 @@
       "SPDXID": "SPDXRef-package-0b1c6868-048d-4850-b32b-a88087c55d8b",
       "name": "yaml",
       "versionInfo": "0.3.0",
-      "licenseConcluded": "Ruby",
+      "licenseConcluded": "(BSD-2-Clause OR Ruby)",
       "licenseDeclared": "(BSD-2-Clause OR Ruby)",
       "homepage": "http://rubygems.org",
       "downloadLocation": "NOASSERTION",
@@ -1576,6 +2422,11 @@
       "supplier": "NOASSERTION",
       "externalRefs": [
         {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:zephyrproject:zephyr:3.6.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceLocator": "pkg:github/zephyrproject-rtos/zephyr@v3.6.0",
           "referenceType": "purl"
@@ -1594,11 +2445,6 @@
           "referenceCategory": "SECURITY",
           "referenceLocator": "cpe:2.3:a:zephyrproject_rtos:zephyr:3.6.0:*:*:*:*:*:*:*",
           "referenceType": "cpe23Type"
-        },
-        {
-          "referenceCategory": "SECURITY",
-          "referenceLocator": "cpe:2.3:a:zephyrproject:zephyr:3.6.0:*:*:*:*:*:*:*",
-          "referenceType": "cpe23Type"
         }
       ],
       "filesAnalyzed": false
@@ -1608,377 +2454,548 @@
     {
       "spdxElementId": "SPDXRef-DOCUMENT",
       "relationshipType": "DESCRIBES",
-      "relatedSpdxElement": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9"
+      "relatedSpdxElement": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-d92946db-861f-4940-935d-5a82ab370067",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-13d9943f-a899-4ac4-89c4-b8a85352e238",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-20d92844-6955-48f1-ac48-dcf93c0c746a",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-cb01ff75-9fb4-433e-b8af-69bfa4e0172c",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-fb2ef1d3-d546-4f80-b8a9-799c576db51f",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-127d7047-940d-4b02-98f8-b9b974e24211",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "relationshipType": "OTHER",
       "relatedSpdxElement": "SPDXRef-package-79425921-1160-424d-91d7-baea2be684ac",
       "comment": "Separate Work"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-ecc735bf-a13b-49bc-801d-f5fd84583d15",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-cadf93a7-739f-4f76-a5fa-a50739a446ef",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-58904556-878d-48d1-b909-f2dd366f5b62",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-248d9c9b-a8b6-4803-8ee2-377a4cf1bbef",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-81074941-b648-4673-b153-765e09faf617",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-abdadbb8-fd3d-4cfd-99b5-ddaa6d481ff1",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-0495b37f-7578-49e9-909d-9178226ac791",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-3c6210fc-cfee-4ab4-b89c-afc2e6714514",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-2b4e2381-6c28-4d63-9d7d-827ea5a66d78",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-91c9816c-41f6-4289-8525-a9bc58302d03",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-d6c6f20f-bea2-402b-ac34-ac6ee41cfaa2",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-a2feaade-0a5a-4e16-a0b5-3667a75a1a88",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-042fa7ff-bff2-4382-be12-3d65687a332e",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-41ccfb62-8a0f-4ef1-8709-07b6ccc8f250",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-34092313-9c46-4fca-b778-6622bad81c45",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-e24445b8-eba7-4ec4-bbec-4245941190f8",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-68533938-5335-47a6-8d55-c3f9e9a2c706",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-4b5cda84-ca10-496b-8e4d-caa82eb7e8cd",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-6d2b8310-69bf-4229-8b3b-bd2840a1a307",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-8c749067-9f2f-4dae-b9ff-efb0418edf70",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-a3a4ca2b-1107-4cf2-a96b-3985d1615774",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-606aa466-c4a3-4e01-8c18-d5e4b1b4e31b",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-73962809-6092-40ae-af21-d7b0d60bfdb4",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-22267777-aaa5-45cb-88ba-dbe802998329",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-8bf6b91f-7211-4ebe-93e0-21f615f4215c",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-9c8eddbb-fa33-483f-a708-d0d085971e55",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-5ac20677-4c0b-4121-92e2-d2851b7dfa8b",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-08e272b2-9076-431d-bfc4-2e11cba3a732",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-e2b079ef-1246-4325-8aa8-ed634b3f8313",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-c8b97be2-60ce-457e-ad54-6adf20405b24",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-4947f6f7-fba1-4b7c-818f-ebb881f79345",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-6563720d-c6bd-4281-82d2-e107d0176e0a",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-56ac436f-1215-4d8b-92c1-4f08664f1c5e",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-6253c30d-f1e3-426f-9104-666a78c95aef",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-8aafb0d3-3364-492c-bd82-96f611117adf",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-e5734cc7-1144-44a5-ba50-d4936beb6f0e",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-cb127658-5e34-41ea-8114-17e5650ce23c",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-3958cf77-3da7-49da-a734-5c5143edb128",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-ba2bdf86-0025-4ca4-949d-b24d93f25452",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-29ac67c6-9330-43e0-b926-ef39b0dd114c",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-2842d147-b520-413d-8996-c6061f6bcc66",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-aa6a7abe-585b-4015-83bf-f7614f5efacf",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-cdd51200-cfb1-4a63-a9e0-71a64db20f40",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-7a8b21cb-c8fa-48a9-ac89-0ccf0390e953",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-36fdd5e6-99bb-49f6-816f-b977c3a075e5",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "relationshipType": "OTHER",
       "relatedSpdxElement": "SPDXRef-package-084dc625-8672-4857-afa0-522f686f1b74",
       "comment": "Separate Work"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-0b1c6868-048d-4850-b32b-a88087c55d8b",
+      "relatedSpdxElement": "SPDXRef-package-127d7047-940d-4b02-98f8-b9b974e24211",
       "comment": "Separate Work"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-149b3b28-d953-4ace-a34c-442d3bdb5e2d",
+      "relatedSpdxElement": "SPDXRef-package-a3a4ca2b-1107-4cf2-a96b-3985d1615774",
       "comment": "Separate Work"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-98fd3132-bf85-44ec-8e5b-9f9134dc023c",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "OTHER",
-      "relatedSpdxElement": "SPDXRef-package-b0ad191e-45f7-433f-b666-3615164a4cc7",
-      "comment": "Separate Work"
-    },
-    {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "relationshipType": "OTHER",
       "relatedSpdxElement": "SPDXRef-package-b8edc202-bb4e-4ce0-8b15-39f63b91d2de",
       "comment": "Separate Work"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-08e272b2-9076-431d-bfc4-2e11cba3a732",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-e6f0dd29-de4a-4972-a8b6-8a550cd2e7d9",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-017a7aad-0b1a-4eed-8b00-51436892f37f",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-22267777-aaa5-45cb-88ba-dbe802998329",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-c8b97be2-60ce-457e-ad54-6adf20405b24",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-6d2b8310-69bf-4229-8b3b-bd2840a1a307",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-e2b079ef-1246-4325-8aa8-ed634b3f8313",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-3c6210fc-cfee-4ab4-b89c-afc2e6714514",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-d92946db-861f-4940-935d-5a82ab370067",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-13d9943f-a899-4ac4-89c4-b8a85352e238",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-7f40d22c-4b56-45d3-9477-1d2f557964b4",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-606aa466-c4a3-4e01-8c18-d5e4b1b4e31b",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-68533938-5335-47a6-8d55-c3f9e9a2c706",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-e24445b8-eba7-4ec4-bbec-4245941190f8",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-a2feaade-0a5a-4e16-a0b5-3667a75a1a88",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-abdadbb8-fd3d-4cfd-99b5-ddaa6d481ff1",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-a2a0c701-aee9-4d68-b569-30f14b1c812e",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-2b4e2381-6c28-4d63-9d7d-827ea5a66d78",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-bc805ef5-2739-4c10-98ae-98e92df9b790",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-a367673b-95f4-42b6-a6e9-21b62ffc8404",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-042fa7ff-bff2-4382-be12-3d65687a332e",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-aa6a7abe-585b-4015-83bf-f7614f5efacf",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-0b1c6868-048d-4850-b32b-a88087c55d8b",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-ba2bdf86-0025-4ca4-949d-b24d93f25452",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-747bdf7d-2836-42b8-8632-33bebfcecc34",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-9ad3fb1a-924d-4af3-a26c-63f5963e75b5",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-34092313-9c46-4fca-b778-6622bad81c45",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-2842d147-b520-413d-8996-c6061f6bcc66",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-a97ef02d-3a0e-4a95-8048-a8419dcaf5a7",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-6563720d-c6bd-4281-82d2-e107d0176e0a",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-91c9816c-41f6-4289-8525-a9bc58302d03",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-package-9069e7c0-e11a-4d17-aa04-153e5fd93c3c"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-069009b5-7c65-4be9-a78e-72a13e16e5e9",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-8bf6b91f-7211-4ebe-93e0-21f615f4215c",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-6253c30d-f1e3-426f-9104-666a78c95aef",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-8e17e3e5-ce0f-46d4-acb5-1765a36d6766",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-4947f6f7-fba1-4b7c-818f-ebb881f79345",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-8aafb0d3-3364-492c-bd82-96f611117adf",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-9c8eddbb-fa33-483f-a708-d0d085971e55",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-4b5cda84-ca10-496b-8e4d-caa82eb7e8cd",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-09873780-8484-438d-a182-15897dfd02ab",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-cdd51200-cfb1-4a63-a9e0-71a64db20f40",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-e5734cc7-1144-44a5-ba50-d4936beb6f0e",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-e289a4b3-d472-4395-b82b-d57dc0b89167",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "relationshipType": "OTHER",
       "relatedSpdxElement": "SPDXRef-package-137bcfb2-dd74-4a01-9a4c-8e9df657db1a",
       "comment": "Separate Work"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
-      "relationshipType": "DYNAMIC_LINK",
-      "relatedSpdxElement": "SPDXRef-package-9069e7c0-e11a-4d17-aa04-153e5fd93c3c"
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-b1b81f96-bcf2-47b7-bc6c-49a2c65d3640",
+      "comment": "Separate Work"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-0495b37f-7578-49e9-909d-9178226ac791",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-cb01ff75-9fb4-433e-b8af-69bfa4e0172c",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-81074941-b648-4673-b153-765e09faf617",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-package-5e7e665f-0250-4c19-bea8-098815e8e640"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-ac1ce4eb-1ef0-46df-b5f6-2c8fc2dd8cb2",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-cb127658-5e34-41ea-8114-17e5650ce23c",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-fb2ef1d3-d546-4f80-b8a9-799c576db51f",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-7a8b21cb-c8fa-48a9-ac89-0ccf0390e953",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "relationshipType": "OTHER",
       "relatedSpdxElement": "SPDXRef-package-594c8530-3cf1-4664-a0d8-7e08da609602",
       "comment": "Separate Work"
     },
     {
-      "spdxElementId": "SPDXRef-package-79234aa1-0a63-4fba-a44a-dcc3f5b794b9",
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-36894876-b075-45fb-9aca-9dbc8426eb8a",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-563bf6a2-16d8-4701-a119-86d4e02d6b93",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-de9dd643-0b22-4ff3-8d1d-738da5826482",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-36fdd5e6-99bb-49f6-816f-b977c3a075e5",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-ecc735bf-a13b-49bc-801d-f5fd84583d15",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-3958cf77-3da7-49da-a734-5c5143edb128",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-3d925155-667d-4ee9-a6f6-1c04c4ea5b81",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-29ac67c6-9330-43e0-b926-ef39b0dd114c",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-301f6aff-5416-4c54-9d6c-ccc17f09056a",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "DYNAMIC_LINK",
+      "relatedSpdxElement": "SPDXRef-package-550b538b-768b-4244-84ef-4d5a25dcad12"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-76f11cf7-b4f2-4801-82b3-2629c283c1f6",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-98fd3132-bf85-44ec-8e5b-9f9134dc023c",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-a127070a-63c8-4b88-9361-89e56a2e6be7",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-package-56ac436f-1215-4d8b-92c1-4f08664f1c5e"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-451286ce-98da-4a12-9514-08a5616e8a35",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-149b3b28-d953-4ace-a34c-442d3bdb5e2d",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-4048f2e1-820b-49c4-89d2-bbf03e710684",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-248d9c9b-a8b6-4803-8ee2-377a4cf1bbef",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-d6c6f20f-bea2-402b-ac34-ac6ee41cfaa2",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-41ccfb62-8a0f-4ef1-8709-07b6ccc8f250",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-8c749067-9f2f-4dae-b9ff-efb0418edf70",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-9ed4904a-8b1b-4450-9cf7-4fe6c9d25480",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-9930d1d4-d39b-4e48-9aa3-9380bab0385d",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-cadf93a7-739f-4f76-a5fa-a50739a446ef",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-306452fe-3a6e-464b-b9a4-b6911623902f",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-40f20a6f-8caa-4810-a404-05179d38c0a0",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-58904556-878d-48d1-b909-f2dd366f5b62",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
       "relationshipType": "OTHER",
       "relatedSpdxElement": "SPDXRef-package-2e4a2f5f-c4f0-47da-a06c-002a305b7c3e",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-c64abd0e-a42d-41eb-9bd4-dedb13dd86be",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-b0ad191e-45f7-433f-b666-3615164a4cc7",
+      "comment": "Separate Work"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-65d939ca-1f78-4f06-9dc7-1735b2b97445",
+      "relationshipType": "OTHER",
+      "relatedSpdxElement": "SPDXRef-package-e10aa733-e2c0-4a33-996f-b8cd780c25b9",
       "comment": "Separate Work"
     }
   ]
