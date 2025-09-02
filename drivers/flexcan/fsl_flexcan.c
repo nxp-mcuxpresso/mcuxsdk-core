@@ -2705,8 +2705,10 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *pRx
 
     volatile uint32_t *mbAddr;
     uint8_t i, j, k, rffn = 0, numMbOccupy;
+#if !defined(NDEBUG)
     uint32_t setupMbIdx = 0;
     uint32_t maxMbIdx = (uint32_t)FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) - 1U;
+#endif
 
     /* Enter Freeze Mode. */
     (void)FLEXCAN_EnterFreezeMode(base);
@@ -2714,8 +2716,10 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *pRx
     if (enable)
     {
         assert(pRxFifoConfig->idFilterNum <= 128U);
+#if !defined(NDEBUG)
         /* Ensure Mailboxes occupied by Legacy RX FIFO not exceed maximum Mailboxes value. */
         assert(pRxFifoConfig->idFilterNum <= (maxMbIdx - 5U) * 4U);
+#endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
 #if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
         if (FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(base) == 1)
@@ -2728,9 +2732,11 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *pRx
 #endif
 #endif
 
+#if !defined(NDEBUG)
         /* Get number of the last Message Buffer. */
         setupMbIdx = (base->MCR & CAN_MCR_MAXMB_MASK) >> CAN_MCR_MAXMB_SHIFT;
         assert(setupMbIdx >= 7U);
+#endif
 
         /* Determine RFFN value. */
         for (i = 0; i <= 0xFU; i++)
@@ -2738,8 +2744,10 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *pRx
             if ((8U * (i + 1U)) >= pRxFifoConfig->idFilterNum)
             {
                 rffn = i;
+#if !defined(NDEBUG)
                 /* Ensure Legacy RX FIFO filters programmed through RFFN not exceed SETUP_MB value. */
                 assert((((int)setupMbIdx - 7) - (2 * (int)rffn)) >= 0);
+#endif
 
                 base->CTRL2 = (base->CTRL2 & ~CAN_CTRL2_RFFN_MASK) | CAN_CTRL2_RFFN(rffn);
                 break;
@@ -2749,8 +2757,10 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *pRx
         /* caculate the Number of Mailboxes occupied by RX Legacy FIFO and the filter. */
         numMbOccupy = 6U + (rffn + 1U) * 2U;
 
+#if !defined(NDEBUG)
         /* Ensure Mailboxes occupied by Legacy RX FIFO not exceed maximum Mailboxes value. */
         assert(numMbOccupy <= (maxMbIdx + 1U));
+#endif
 
         /* Copy ID filter table to Message Buffer Region (Fix MISRA_C-2012 Rule 18.1). */
         j = 0U;
@@ -2809,8 +2819,10 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *pRx
         /* caculate the Number of Mailboxes occupied by RX Legacy FIFO and the filter. */
         numMbOccupy = 6U + (rffn + 1U) * 2U;
 
+#if !defined(NDEBUG)
         /* Ensure Mailboxes occupied by Legacy RX FIFO not exceed maximum Mailboxes value. */
         assert(numMbOccupy <= (maxMbIdx + 1U));
+#endif
 
         /* Disable Rx Message FIFO. */
         base->MCR &= ~CAN_MCR_RFEN_MASK;
