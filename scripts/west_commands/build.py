@@ -94,21 +94,21 @@ def _append_invocation_log(build_dir, line):
         pass
 
 def config_get(option, fallback):
-    return config.get('build', option, fallback=fallback)
+    return config.get('sdk_build', option, fallback=fallback)
 
 def config_getboolean(option, fallback):
-    return config.getboolean('build', option, fallback=fallback)
+    return config.getboolean('sdk_build', option, fallback=fallback)
 
 class AlwaysIfMissing(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values or 'always')
 
-class Build(Forceable):
+class SdkBuild(Forceable):
 
     def __init__(self):
         super().__init__(
-            'build',
+            'sdk_build',
             # Keep this in sync with the string in west-commands.yml.
             'compile a Zephyr application',
             BUILD_DESCRIPTION,
@@ -137,7 +137,7 @@ class Build(Forceable):
         '''The temporary build directory for standalone project generation.'''
 
     def _banner(self, msg):
-        self.inf('-- west build: ' + msg, colorize=True)
+        self.inf('-- west sdk_build: ' + msg, colorize=True)
 
     def do_add_parser(self, parser_adder):
         parser = parser_adder.add_parser(

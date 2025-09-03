@@ -1,11 +1,11 @@
 # Copyright (c) 2018 Open Source Foundries Limited.
 # Copyright 2019 Foundries.io
 # Copyright (c) 2020 Nordic Semiconductor ASA
-# Copyright 2024 NXP
+# Copyright 2024, 2025 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
-'''west "flash" command'''
+'''west "sdk_flash" command'''
 
 from west.commands import WestCommand
 
@@ -13,11 +13,11 @@ from run_common import add_parser_common, do_run_common, get_build_dir
 from build_helpers import load_domains
 
 
-class Flash(WestCommand):
+class SdkFlash(WestCommand):
 
     def __init__(self):
-        super(Flash, self).__init__(
-            'flash',
+        super(SdkFlash, self).__init__(
+            'sdk_flash',
             # Keep this in sync with the string in west-commands.yml.
             'flash and run a binary on a board',
             "Permanently reprogram a board's flash with a new binary.",

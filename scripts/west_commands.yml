@@ -2,24 +2,24 @@
 west-commands:
   - file: scripts/west_commands/build.py
     commands:
-      - name: build
-        class: Build
+      - name: sdk_build
+        class: SdkBuild
         help: compile a mcux application
   - file: scripts/west_commands/flash.py
     commands:
-      - name: flash
-        class: Flash
+      - name: sdk_flash
+        class: SdkFlash
         help: flash and run a binary on a board
   - file: scripts/west_commands/debug.py
     commands:
-      - name: debug
-        class: Debug
+      - name: sdk_debug
+        class: SdkDebug
         help: flash and interactively debug a Zephyr application
-      - name: debugserver
-        class: DebugServer
+      - name: sdk_debugserver
+        class: SdkDebugServer
         help: connect to board and launch a debug server
-      - name: attach
-        class: Attach
+      - name: sdk_attach
+        class: SdkAttach
         help: interactively debug a board
   - file: scripts/west_commands/format.py
     commands:
