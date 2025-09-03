@@ -1,11 +1,11 @@
 # Copyright (c) 2018 Open Source Foundries Limited.
 # Copyright 2019 Foundries.io
 # Copyright (c) 2020 Nordic Semiconductor ASA
-# Copyright 2024 NXP
+# Copyright 2024, 2025 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
-'''west "debug", "debugserver", and "attach" commands.'''
+'''west "sdk_debug", "sdk_debugserver", and "sdk_attach" commands.'''
 
 from textwrap import dedent
 
@@ -14,11 +14,11 @@ from west.commands import WestCommand
 from run_common import add_parser_common, do_run_common
 
 
-class Debug(WestCommand):
+class SdkDebug(WestCommand):
 
     def __init__(self):
-        super(Debug, self).__init__(
-            'debug',
+        super(SdkDebug, self).__init__(
+            'sdk_debug',
             # Keep this in sync with the string in west-commands.yml.
             'flash and interactively debug a Zephyr application',
             dedent('''
@@ -35,11 +35,11 @@ class Debug(WestCommand):
         do_run_common(self, my_args, runner_args)
 
 
-class DebugServer(WestCommand):
+class SdkDebugServer(WestCommand):
 
     def __init__(self):
-        super(DebugServer, self).__init__(
-            'debugserver',
+        super(SdkDebugServer, self).__init__(
+            'sdk_debugserver',
             # Keep this in sync with the string in west-commands.yml.
             'connect to board and launch a debug server',
             dedent('''
@@ -59,14 +59,14 @@ class DebugServer(WestCommand):
         do_run_common(self, my_args, runner_args)
 
 
-class Attach(WestCommand):
+class SdkAttach(WestCommand):
 
     def __init__(self):
-        super(Attach, self).__init__(
-            'attach',
+        super(SdkAttach, self).__init__(
+            'sdk_attach',
             # Keep this in sync with the string in west-commands.yml.
             'interactively debug a board',
-            "Like \"west debug\", but doesn't reflash the program.",
+            "Like \"west sdk_debug\", but doesn't reflash the program.",
             accepts_unknown_args=True)
         self.runner_key = 'debug-runner'  # in runners.yaml
 

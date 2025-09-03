@@ -65,24 +65,24 @@ NO_GUI_TOOLCHAIN = ['armgcc']
 
 # log module is deprecated
 def _banner(msg):
-    log.inf('=== west build: ' + msg, colorize=True)
+    log.inf('=== west sdk_build: ' + msg, colorize=True)
 
 def config_get(option, fallback):
-    return config.get('build', option, fallback=fallback)
+    return config.get('sdk_build', option, fallback=fallback)
 
 def config_getboolean(option, fallback):
-    return config.getboolean('build', option, fallback=fallback)
+    return config.getboolean('sdk_build', option, fallback=fallback)
 
 class AlwaysIfMissing(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values or 'always')
 
-class Build(Forceable):
+class SdkBuild(Forceable):
 
     def __init__(self):
-        super(Build, self).__init__(
-            'build',
+        super(SdkBuild, self).__init__(
+            'sdk_build',
             # Keep this in sync with the string in west-commands.yml.
             'compile a Zephyr application',
             BUILD_DESCRIPTION,
