@@ -1,5 +1,10 @@
 # MCX_SPC
 
+## [2.9.0]
+
+- New Features
+  - Add feature macro to be compatible with some platforms where SPC does not support overdrive voltage.
+
 ## [2.8.1]
 
 - Improvements

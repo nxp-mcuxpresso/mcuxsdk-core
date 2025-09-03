@@ -19,8 +19,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.8.1. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 8, 1))
+/*! @brief SPC driver version 2.9.0. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 9, 0))
 /*! @} */
 
 #define SPC_EVD_CFG_REG_EVDISO_SHIFT   0UL
@@ -252,7 +252,9 @@ typedef enum _spc_core_ldo_voltage_level
                                            please refer to devices' RM for details. */
     kSPC_CoreLDO_MidDriveVoltage  = 0x1U,  /*!< Core LDO VDD regulator regulate to Mid Drive Voltage. */
     kSPC_CoreLDO_NormalVoltage    = 0x2U,  /*!< Core LDO VDD regulator regulate to Normal Voltage. */
+#if !(defined(FSL_FEATURE_MCX_SPC_SUPPORT_OVERDRIVE_VOLTAGE) && (FSL_FEATURE_MCX_SPC_SUPPORT_OVERDRIVE_VOLTAGE==0U))
     kSPC_CoreLDO_OverDriveVoltage = 0x3U,  /*!< Core LDO VDD regulator regulate to overdrive Voltage. */
+#endif
 } spc_core_ldo_voltage_level_t;
 
 /*!
@@ -300,7 +302,9 @@ typedef enum _spc_sram_operate_voltage
 {
     kSPC_sramOperateAt1P0V = 0x1U, /*!< SRAM configured for 1.0V operation. */
     kSPC_sramOperateAt1P1V = 0x2U, /*!< SRAM configured for 1.1V operation. */
+#if !(defined(FSL_FEATURE_MCX_SPC_SUPPORT_OVERDRIVE_VOLTAGE) && (FSL_FEATURE_MCX_SPC_SUPPORT_OVERDRIVE_VOLTAGE==0U))
     kSPC_sramOperateAt1P2V = 0x3U, /*!< SRAM configured for 1.2V operation. */
+#endif
 } spc_sram_operate_voltage_t;
 
 #if !(defined(FSL_FEATURE_MCX_SPC_HAS_NO_GLITCH_DETECT) && FSL_FEATURE_MCX_SPC_HAS_NO_GLITCH_DETECT)
