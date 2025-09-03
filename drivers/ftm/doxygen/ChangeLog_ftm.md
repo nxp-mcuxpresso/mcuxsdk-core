@@ -1,5 +1,10 @@
 # FTM
 
+## [2.7.3]
+
+- Bug Fixes
+  - Fixed violations of the CERT INT30-C INT31-C.
+
 ## [2.7.2]
 
 - Improvements
