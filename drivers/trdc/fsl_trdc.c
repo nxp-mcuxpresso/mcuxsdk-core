@@ -253,6 +253,7 @@ void TRDC_SetNonProcessorDomainAssignment(TRDC_Type *base,
 #if defined(FSL_FEATURE_TRDC_PROCESSOR_MASTER_COUNT) && (FSL_FEATURE_TRDC_PROCESSOR_MASTER_COUNT > 1)
     base->MDA_DFMT1[master].MDA_W_DFMT1[0] = pid._u32 | TRDC_MDA_W_DFMT1_VLD_MASK;
 #else
+    assert(master != 0U);
     base->MDA_W0_DFMT1[master - 1U].MDA_W0_x_DFMT1 = pid._u32 | TRDC_MDA_W0_x_DFMT1_VLD_MASK;
 #endif
 }
