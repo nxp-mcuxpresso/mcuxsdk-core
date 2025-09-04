@@ -242,6 +242,11 @@ uint32_t LPSPI_GetInstance(LPSPI_Type *base)
     uint8_t instance = 0;
 
     /* Find the instance index from base address mappings. */
+    /*
+     * $Branch Coverage Justification$
+     * (instance >= ARRAY_SIZE(s_lpspiBases)) not covered. The peripheral base
+     * address is always valid and checked by assert.
+     */
     for (instance = 0; instance < ARRAY_SIZE(s_lpspiBases); instance++)
     {
         if (MSDK_REG_SECURE_ADDR(s_lpspiBases[instance]) == MSDK_REG_SECURE_ADDR(base))
@@ -1004,6 +1009,10 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
                 }
                 else
                 {
+                    /*
+                     * $Branch Coverage Justification$
+                     * $ref fsl_lpspi_c_ref_2$
+                     */
                     if (!LPSPI_WaitTxFifoEmpty(base))
                     {
                         return false;
@@ -1188,16 +1197,16 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
     assert(transfer != NULL);
 
     /* Check that LPSPI is not busy.*/
-    /*
-     * $Branch Coverage Justification$
-     * MBF state setting and clearing is done by hardware, the state is too fast to be overwritten.(will improve)
-     */
     if ((LPSPI_GetStatusFlags(base) & (uint32_t)kLPSPI_ModuleBusyFlag) != 0U)
     {
         return kStatus_LPSPI_Busy;
     }
 
     /* Check the SR[MBF] again - workaround for ERR010655 */
+    /*
+     * $Branch Coverage Justification$
+     * Depends on errata.
+     */
     if ((LPSPI_GetStatusFlags(base) & (uint32_t)kLPSPI_ModuleBusyFlag) != 0U)
     {
         return kStatus_LPSPI_Busy;
@@ -1527,6 +1536,10 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
          */
         base->TCR = LPSPI_GetTcr(base) | LPSPI_TCR_TXMSK_MASK;
         handle->txRemainingByteCount -= (uint32_t)handle->bytesPerFrame;
+        /*
+         * $Branch Coverage Justification$
+         * $ref fsl_lpspi_c_ref_2$
+         */
         if (!LPSPI_WaitTxFifoEmpty(base))
         {
             return kStatus_LPSPI_Timeout;
@@ -1817,6 +1830,10 @@ void LPSPI_MasterTransferHandleIRQ(LPSPI_Type *base, lpspi_master_handle_t *hand
             }
             else
             {
+                /*
+                 * $Branch Coverage Justification$
+                 * $ref fsl_lpspi_c_ref_2$
+                 */
                 if (!LPSPI_WaitTxFifoEmpty(base))
                 {
                     return;
@@ -2023,7 +2040,7 @@ status_t LPSPI_SlaveTransferNonBlocking(LPSPI_Type *base, lpspi_slave_handle_t *
     /*TCR is also shared the FIFO, so wait for TCR written.*/
     /*
      * $Branch Coverage Justification$
-     * $ref fsl_lpspi_c_ref_3$
+     * $ref fsl_lpspi_c_ref_2$
      */
     if (!LPSPI_WaitTxFifoEmpty(base))
     {
