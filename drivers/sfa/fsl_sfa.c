@@ -976,13 +976,13 @@ void SFA0_DriverIRQHandler(void)
 #endif
 
 #if defined(RF_SFA)
-/*
- * $Line Coverage Justification$
- * RF_SFA is not accessable in CM33 domain.
- */
 void RF_SFA_DriverIRQHandler(void);
 void RF_SFA_DriverIRQHandler(void)
 {
+    /*
+     * $Line Coverage Justification$
+     * RF_SFA is not accessable in CM33 domain.
+     */
     SFA_CommonIRQHandler(RF_SFA);
 }
 #endif
