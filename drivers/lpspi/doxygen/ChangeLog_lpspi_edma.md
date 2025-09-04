@@ -1,5 +1,10 @@
 # LPSPI_EDMA
 
+## [2.4.9]
+
+- Improvements
+  - Removed unused code from LPSPI_SeparateEdmaReadData().
+
 ## [2.4.8]
 
 - Improvements

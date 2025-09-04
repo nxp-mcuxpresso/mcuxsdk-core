@@ -14,6 +14,12 @@
  * $Justification fsl_lpspi_edma_c_ref_1$
  * The default branch cannot be executed in any circumstances, it is only added to avoid MISRA violation.
  *
+ * $Justification fsl_lpspi_edma_c_ref_2$
+ * Depends on configuration of macro SPI_RETRY_TIMES.
+ *
+ * $Justification fsl_lpspi_edma_c_ref_3$
+ * The fifosize is determined by the hardware.
+ *
  */
 /***********************************************************************************************************************
  * Definitions
@@ -28,7 +34,7 @@
 #define LPSPI_ALIGN_TCD_SIZE_MASK (sizeof(edma_tcd_t) - 1U)
 
 /*!
- * @brief Structure definition for dspi_master_edma_private_handle_t. The structure is private.
+ * @brief Structure definition for lpspi_master_edma_private_handle_t. The structure is private.
  */
 typedef struct _lpspi_master_edma_private_handle
 {
@@ -37,7 +43,7 @@ typedef struct _lpspi_master_edma_private_handle
 } lpspi_master_edma_private_handle_t;
 
 /*!
- * @brief Structure definition for dspi_slave_edma_private_handle_t. The structure is private.
+ * @brief Structure definition for lpspi_slave_edma_private_handle_t. The structure is private.
  */
 typedef struct _lpspi_slave_edma_private_handle
 {
@@ -120,19 +126,6 @@ static void LPSPI_SeparateEdmaReadData(uint8_t *rxData, uint32_t readData, uint3
                 *rxData = (uint8_t)(readData >> 24);
                 ++rxData;
             }
-            break;
-
-        case 4:
-
-            *rxData = (uint8_t)readData;
-            ++rxData;
-            *rxData = (uint8_t)(readData >> 8);
-            ++rxData;
-            *rxData = (uint8_t)(readData >> 16);
-            ++rxData;
-            *rxData = (uint8_t)(readData >> 24);
-            ++rxData;
-
             break;
 
         default:
@@ -239,6 +232,10 @@ status_t LPSPI_MasterTransferPrepareEDMALite(LPSPI_Type *base, lpspi_master_edma
     handle->isByteSwap          = isByteSwap;
     handle->isThereExtraRxBytes = false;
 
+    /*
+     * $Branch Coverage Justification$
+     * $ref fsl_lpspi_edma_c_ref_3$
+     */
     if (handle->fifoSize >= 1U)
     {
         LPSPI_SetFifoWatermarks(base, handle->fifoSize - 1U, 0U);
@@ -633,9 +630,13 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
     if (handle->isMultiDMATransmit)
     {
         transferConfigTx.majorLoopCounts = handle->dataBytesEveryTime;
+        /*
+         * $Branch Coverage Justification$
+         * Pcs-continuous mode is not supported in Multi DMA transfer.
+         */
         if (handle->isPcsContinuous)
         {
-            /* Pcs-continue mode is not supported in Multi DMA.
+            /* Pcs-continuous mode is not supported in Multi DMA.
                Please use no-continue mode and use GPIO control CS pin*/
             LPSPI_SetPCSContinous(base, false);
             assert(false);
@@ -985,6 +986,10 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
     handle->isByteSwap          = isByteSwap;
     handle->isThereExtraRxBytes = false;
 
+    /*
+     * $Branch Coverage Justification$
+     * $ref fsl_lpspi_edma_c_ref_3$
+     */
     if (handle->fifoSize >= 1U)
     {
         LPSPI_SetFifoWatermarks(base, handle->fifoSize - 1U, 0U);
@@ -1008,6 +1013,10 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
 
     if (transfer->txData == NULL)
     {
+        /*
+         * $Branch Coverage Justification$
+         * $ref fsl_lpspi_edma_c_ref_2$
+         */
         if (!LPSPI_WaitTxFifoEmpty(base))
         {
             return kStatus_LPSPI_Error;
@@ -1108,7 +1117,7 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
 
         transferConfigRx.majorLoopCounts = handle->readRegRemainingTimes;
 
-        /* Store the initially configured eDMA minor byte transfer count into the DSPI handle */
+        /* Store the initially configured eDMA minor byte transfer count into the LPSPI handle */
         handle->nbytes = (uint8_t)transferConfigRx.minorLoopBytes;
 
         EDMA_SetTransferConfig(handle->edmaRxRegToRxDataHandle->base, handle->edmaRxRegToRxDataHandle->channel,
@@ -1263,11 +1272,6 @@ static void EDMA_LpspiSlaveCallback(edma_handle_t *edmaHandle,
         callbackStatus = kStatus_LPSPI_Error;
     }
 
-    /*
-     * $Branch Coverage Justification$
-     * When there are extra bytes, the slave will not receive the extra bytes,The while here will not stop.(will
-     * improve)
-     */
     if (lpspiEdmaPrivateHandle->handle->isThereExtraRxBytes)
     {
 #if SPI_RETRY_TIMES
