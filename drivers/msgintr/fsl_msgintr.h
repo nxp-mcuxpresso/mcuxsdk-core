@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -62,7 +62,7 @@ static inline uint32_t MSGINTR_GetIntrSelectAddr(MSGINTR_Type *base, uint8_t cha
 {
     assert(channel < FSL_MSGINTR_CHANNEL_NUM);
 
-    return (uint32_t)(&base->MSI[channel].MSIIR);
+    return (uint32_t)(uintptr_t)(&base->MSI[channel].MSIIR);
 }
 
 #if defined(__cplusplus)
