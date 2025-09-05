@@ -322,7 +322,7 @@ static status_t EP_SISetup(ep_handle_t *handle,
  */
 static status_t EP_MSIXSetEntryTable(ep_handle_t *handle, const ep_config_t *config)
 {
-    uint32_t *msixTable  = (uint32_t *)(uintptr_t)handle->hw.msixTable;
+    __IO uint32_t *msixTable  = (uint32_t *)(uintptr_t)handle->hw.msixTable;
     uint32_t *entryTable = (uint32_t *)(uintptr_t)config->msixEntry;
     uint8_t siNum        = getSiNum(handle->cfg.si);
     uint8_t msixNum;
