@@ -116,6 +116,9 @@ class ProjectInfo(WestCommand):
 
                 core_regex = r".*core_id:UNINITIALIZED=([^\s]+)"
                 core = self.regex_match_helper(core_regex, cmake_cache)
+
+                outpath_regex = r".*MCUXPRESSO_CONFIG_TOOL_MEX_PATH:STRING=([^\s]+)"
+                outpath = self.regex_match_helper(outpath_regex, cmake_cache)
                 
                 self.project_info = {
                     "projectRootPath": project_path,
@@ -126,6 +129,9 @@ class ProjectInfo(WestCommand):
 
                 if core:
                     self.project_info["core"] = core
+
+                if outpath:
+                    self.project_info["outputPath"] = outpath
 
                 return True
             
@@ -163,16 +169,12 @@ class ProjectInfo(WestCommand):
                 compile_commands = json.load(f)
 
             include_paths = set()
-            file_paths = set()
 
             for command in compile_commands:
                 includes = re.findall(r'-I([^\s]+)', command['command'])
                 include_paths.update(includes)
-
-                file_paths.add(command['file'])
                 
             self.project_info["includes"] = list(include_paths)
-            self.project_info["files"] = list(file_paths)
 
         except FileNotFoundError:
             log.err(f"Compile commands file not found at {compile_commands_path}")
@@ -182,6 +184,48 @@ class ProjectInfo(WestCommand):
             return False
 
         return True
+    
+    def parse_source_list(self):
+        source_list_path = self.find_source_list_file()
+        try:
+            with open(source_list_path, 'r') as f:
+                source_list_content = f.read().strip()
+            
+            file_paths = [path.strip() for path in source_list_content.split(";") if path.strip()]
+
+            files = set()
+
+            for file_path in file_paths:
+                if file_path.lower().endswith('.c'):
+                    files.add(file_path)
+                elif file_path.lower().endswith('.h'):
+                    files.add(file_path)
+
+            self.project_info["files"] = list(file_paths)
+
+        except FileNotFoundError:
+            log.err(f"Source list file not found at {source_list_path}")
+            return False
+        
+        return True
+    
+    def find_source_list_file(self):
+        
+        source_list_regex = r"^(?!.*exclude).*source_list\.txt$"
+        build_path = os.path.join(self.output_dir, self.build_dir)
+
+        try:
+            for filename in os.listdir(build_path):
+                if re.match(source_list_regex, filename):
+                    source_list_path = os.path.join(build_path, filename)                    
+                    return source_list_path
+                
+        except FileNotFoundError:
+            log.err(f"Build directory not found: {build_path}")
+            return None
+        
+        log.err("No source_list.txt file found")
+        return None
 
     def create_json_file(self):
         """
@@ -277,6 +321,12 @@ class ProjectInfo(WestCommand):
             return
         
         status = self.parse_compile_commands()
+        if not status:
+            log.err("Build data parsing failed: terminating project info extraction")
+            self.delete_temp_build_file()
+            return
+        
+        status = self.parse_source_list()
         if not status:
             log.err("Build data parsing failed: terminating project info extraction")
             self.delete_temp_build_file()
