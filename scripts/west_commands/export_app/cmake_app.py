@@ -453,7 +453,9 @@ class CmakeApp(object):
                 current_list_dir='${SdkRootDirPath}/' + v['file'].parent.relative_to(SDK_ROOT_DIR).as_posix()
             ):
                 board_cmake_content.extend(self.parse_cmake_file(tmp_cmake, add_license=False))
-
+        if mex_file := next((f for f in os.listdir(self.output_dir) if f.endswith(".mex")), None):
+            add_mex_statement = f"mcux_add_config_mex_path( PATH ./ )"
+            board_cmake_content.append(add_mex_statement)
         board_cmake_content.append("\n# Application reconfig data\n")
         board_cmake_content.extend(self.board_includes)
         open(self.output_dir / 'board_files.cmake', 'a').write("\n".join(board_cmake_content))
