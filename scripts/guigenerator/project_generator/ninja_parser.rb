@@ -613,7 +613,13 @@ class NinjaParser
       if relative_path.start_with?('..')
         # for path from other project, need extra '..' in path, because the project file is in <build_dir>/toolchain folder
         if path_from_other_project && ENV['SYSBUILD']
-          path = File.join('..', relative_path)
+          # if the file exists in repo, but not in build folder, it will be copied to standalone project folder, so use the path relative to project root path
+          # for example: examples/_boards/evkmimxrt685/dsp_examples/mu_interrupt/hifi4/binary/dsp_text_release.bin
+          if File.exist?(abs_path) && Utils.path_inside?(abs_path, ENV['SdkRootDirPath']) && Utils.path_inside?(abs_path, File.join(@outdir, '..')) == false
+            path = Pathname.new(abs_path).relative_path_from(ENV['SdkRootDirPath']).to_s
+          else
+            path = File.join('..', relative_path)
+          end
         else
           # if the path is for project itself, because all the file is in toolchain folder, and the folder structure is same
           # as repo, we can intercept the rest of REPO_ROOT_PATH from abs_path
@@ -771,8 +777,9 @@ class NinjaParser
               content.sub!(result[ 0 ], ' $<TARGET_FILE:${MCUX_SDK_PROJECT_NAME}>')
               result = content.match(pattern)
             end
-            # translate cmake to ${CMAKE_COMMAND}
-            pattern = /\s\S+bin[\/\\]cmake(\.exe)?/
+            # translate cmake to ${CMAKE_COMMAND}, if starts with quote, indicates there is space in path
+            # Use [^"]* to match any character except quote before cmake executor
+            pattern = /\s"[^"]*bin[\/\\]cmake(\.exe)?"|\s\S+bin[\/\\]cmake(\.exe)?/
             result = content.match(pattern)
             while(result)
               content.sub!(result[ 0 ], ' ${CMAKE_COMMAND}')

@@ -619,7 +619,7 @@ module SDKGenerator
         # mcux process the following attributes in a different way. It regards them just as file with different types.
         return if tool_key == 'mcux'
         return unless source.safe_key? 'attribute'
-
+        source['source'] = File.join(source['package_path'], File.basename(source['source'])) if source.safe_key?('package_path') && ENV['standalone']
         file_supported_targets = if source.safe_key?('targets')
                                    source['targets'].split(/\s+/) & project_info[:all_targets]
                                  else
