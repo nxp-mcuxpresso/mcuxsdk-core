@@ -1,5 +1,13 @@
 # NETC
 
+## [2.10.3]
+
+- New Features
+  - Supported rrt member in netc_tb_ipf_cfge_t.
+  - Moved timer reference clock definition to soc to support i.MX95/i.MX943.
+- Bug Fixes
+  - Got right size of TX timestamp response frame.
+
 ## [2.10.2]
 
 - Bug Fixes
