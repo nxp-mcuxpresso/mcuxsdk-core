@@ -211,15 +211,26 @@ macro(project project_name)
       log_debug("full_project_port_path: ${full_project_port_path}")
 
       # Search the full_project_board_port_path to see if there is a .mex file.
-      file(GLOB_RECURSE mex_files "${full_project_board_port_path}/*.mex")
+      cmake_path(APPEND mex_file_search_path ${SdkRootDirPath} ${project_board_port_path})
+      file(GLOB_RECURSE mex_files "${mex_file_search_path}/*.mex")
       list(LENGTH mex_files mex_count)
       if(mex_count EQUAL 0)
-        log_debug("No .mex file found in ${dir_abs_path}" ${CMAKE_CURRENT_LIST_FILE})
+        log_debug("No .mex file found in ${mex_file_search_path}" ${CMAKE_CURRENT_LIST_FILE})
+        if(DEFINED MCUXPRESSO_CONFIG_TOOL_MEX_PATH)
+          unset(MCUXPRESSO_CONFIG_TOOL_MEX_PATH CACHE)
+          log_debug("Cleared MCUXPRESSO_CONFIG_TOOL_MEX_PATH" ${CMAKE_CURRENT_LIST_FILE})
+        endif()
       else()
         list(GET mex_files 0 mex_file)
         if(mex_count GREATER 1)
-          log_warn("Multiple .mex files found in ${dir_abs_path}" ${CMAKE_CURRENT_LIST_FILE})
+          log_warn("Multiple .mex files found in ${mex_file_search_path}" ${CMAKE_CURRENT_LIST_FILE})
         endif()
+
+        # Re-configure when mex changes
+        set_property(
+          DIRECTORY
+          APPEND
+          PROPERTY CMAKE_CONFIGURE_DEPENDS ${mex_files})
 
         get_filename_component(mex_dir "${mex_file}" DIRECTORY)
         set(MCUXPRESSO_CONFIG_TOOL_MEX_PATH "${mex_dir}" CACHE STRING "Directory containing the MEX file consumed by MCUXpresso Config Tool" FORCE)

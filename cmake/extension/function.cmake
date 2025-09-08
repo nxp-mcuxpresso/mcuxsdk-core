@@ -2680,7 +2680,11 @@ function(mcux_add_config_mex_path)
   get_filename_component(dir_abs_path ${dir_abs_path} ABSOLUTE)
 
   if(NOT IS_DIRECTORY ${dir_abs_path})
-    log_warn("Config MEX directory ${dir_abs_path} does not exist or is not a directory" ${CMAKE_CURRENT_LIST_FILE})
+    if(DEFINED MCUXPRESSO_CONFIG_TOOL_MEX_PATH)
+      unset(MCUXPRESSO_CONFIG_TOOL_MEX_PATH CACHE)
+      log_debug("Cleared MCUXPRESSO_CONFIG_TOOL_MEX_PATH (not a directory)" ${CMAKE_CURRENT_LIST_FILE})
+      log_warn("Config MEX directory ${dir_abs_path} does not exist or is not a directory" ${CMAKE_CURRENT_LIST_FILE})
+    endif()
     return()
   endif()
 
@@ -2697,6 +2701,9 @@ function(mcux_add_config_mex_path)
   if(mex_count GREATER 1)
     log_warn("Multiple .mex files found in ${dir_abs_path}" ${CMAKE_CURRENT_LIST_FILE})
   endif()
+
+  # Re-configure when mex changes in this directory
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${mex_files})
 
   # Set cache var to the directory that contains the .mex file
   get_filename_component(mex_dir "${mex_file}" DIRECTORY)
