@@ -1,5 +1,15 @@
 # Export App
 
+## [25.12.00]
+
+- New Features
+  - If user input board/core variable, the extension will run a cmake configuration step to get accurate cmake trace result. This may use more time to finish the export process, but it would be more accurate.
+  - Support `include`, `mcux_project_remove_source`, `mcux_add_xxx_linker_script` commands.
+  - Add option `--debug` to enable debug log output.
+- Improvements
+  - Refactor the cmake trace logic to support more complex sdk examples.
+  - Improve output structure.
+
 ## [25.09.00]
 
 - New Features

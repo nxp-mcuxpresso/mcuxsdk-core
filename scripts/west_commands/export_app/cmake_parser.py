@@ -6,6 +6,7 @@ import yaml
 import platform
 import logging
 import subprocess
+from functools import lru_cache
 from pathlib import Path
 from jinja2 import Template
 from requests.structures import CaseInsensitiveDict
@@ -121,7 +122,7 @@ def cmake_statement(func):
 class CMakeFunction(object):
     def __init__(self, raw):
         self.raw = raw
-        self.name = raw['original_name']
+        self.name = (raw.get('original_name') or raw.get('cmd')).lower()
         self.nargs = []
         self.single_args = CaseInsensitiveDict()
         self.multi_args = CaseInsensitiveDict()
@@ -129,12 +130,17 @@ class CMakeFunction(object):
 
     def _parse(self):
         cur_arg = None
-        if self.raw['original_name'].lower() not in ExtensionMap._extensions:
-            raise KeyError(f'Cannot find {self.raw["original_name"].lower()} in extensions.yml')
-        options, single_args, multi_args = ExtensionMap.get_raw_args(self.raw['original_name'].lower())
+        if self.name not in ExtensionMap._extensions:
+            raise KeyError(f'Cannot find {self.name} in extensions.yml')
+        options, single_args, multi_args = ExtensionMap.get_raw_args(self.name)
 
         for cm_arg in self.raw['args']:
-            cm_val = cm_arg['value']
+            if isinstance(cm_arg, str):
+                cm_val = cm_arg
+            elif isinstance(cm_arg, dict) and 'value' in cm_arg:
+                cm_val = cm_arg['value']
+            else:
+                continue
             if cm_val in options:
                 self.nargs.append(cm_val)
                 continue
@@ -167,6 +173,10 @@ class CMakeFunction(object):
             if not self.multi_args[key]:
                 del self.multi_args[key]
 
+    def to_cmake(self, template=RENDER_TEMPLATE):
+        template = Template(template)
+        return template.render(func=self)
+
 class ExtensionMap(object):
     CM_VAL_MAP = {
         'HAS_DSP': 'DSP',
@@ -192,6 +202,15 @@ class ExtensionMap(object):
         return result
 
     _extensions = extensions.__func__()
+
+    @classmethod
+    @lru_cache(maxsize=1)
+    def source_related_extensions(cls):
+        result = {}
+        for k, v in cls._extensions.items():
+            if 'BASE_PATH' in v.get('single_value', []):
+                result[k] = v
+        return result
 
     @classmethod
     def get_raw_args(cls, func_name):

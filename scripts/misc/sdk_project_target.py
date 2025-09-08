@@ -13,11 +13,14 @@ sdk_root_dir = os.path.abspath(os.path.join(script_dir, '..', '..')).replace('\\
 
 from misc import *
 
+INTERNAL_MODULE_PATH = 'examples_int/scripts/list_project'
 SCHEMA_DIR = 'scripts/data_schema'
 EXAMPLE_YML_SCHEMA = 'example_description_schema.json'
 DEFINITION_YAL_SCHEMA = 'definitions_schema.json'
 
 SUPPORTED_TOOLCHAINS = ['armgcc', 'iar', 'mdk', 'xcc', 'xtensa', 'codewarrior', 'riscvllvm']
+
+logger = logging.getLogger(__name__)
 
 class MCUXProjectData(object):
     def __init__(self):
@@ -213,7 +216,7 @@ class MCUXAppTargets(object):
     def config_internal_data(cls):
         # Try get internal data
         try:
-            if not os.path.isdir(internal_module := os.path.join(sdk_root_dir, 'examples_int/scripts/list_project')):
+            if not os.path.isdir(internal_module := os.path.join(sdk_root_dir, INTERNAL_MODULE_PATH)):
                 raise FileNotFoundError
             sys.path.append(internal_module)
             from list_project_mod import IntMCUXAppTargets
@@ -256,22 +259,22 @@ class MCUXAppTargets(object):
             cls.DEVICES_FILTER = [item for item in devices_filter if not item.startswith('e@')]
             cls.DEVICES_EXCLUDE_FILTER = [item[2:] for item in devices_filter if item.startswith('e@')]
 
-        mcux_debug(f'Create Filters')
-        mcux_debug(f'  Toolchains Include: ' + ', '.join(cls.TOOLCHAINS_FILTER))
-        mcux_debug(f'  Toolchains Exclude: ' + ', '.join(cls.TOOLCHAINS_EXCLUDE_FILTER))
-        mcux_debug(f'  Boards Include: ' + ', '.join(cls.BOARDS_FILTER))
-        mcux_debug(f'  Boards Exclude: ' + ', '.join(cls.BOARDS_EXCLUDE_FILTER))
-        mcux_debug(f'  Devices Include: ' + ', '.join(cls.DEVICES_FILTER))
-        mcux_debug(f'  Devices Exclude: ' + ', '.join(cls.DEVICES_EXCLUDE_FILTER))
-        mcux_debug(f'  Shields Include: ' + ', '.join(cls.SHIELDS_FILTER))
-        mcux_debug(f'  Shields Exclude: ' + ', '.join(cls.SHIELDS_EXCLUDE_FILTER))
-        mcux_debug(f'  Targets Include: ' + ', '.join(cls.TARGETS_FILTER))
-        mcux_debug(f'  Targets Exclude: ' + ', '.join(cls.TARGETS_EXCLUDE_FILTER))
+        logger.debug(f'Create Filters')
+        logger.debug(f'  Toolchains Include: ' + ', '.join(cls.TOOLCHAINS_FILTER))
+        logger.debug(f'  Toolchains Exclude: ' + ', '.join(cls.TOOLCHAINS_EXCLUDE_FILTER))
+        logger.debug(f'  Boards Include: ' + ', '.join(cls.BOARDS_FILTER))
+        logger.debug(f'  Boards Exclude: ' + ', '.join(cls.BOARDS_EXCLUDE_FILTER))
+        logger.debug(f'  Devices Include: ' + ', '.join(cls.DEVICES_FILTER))
+        logger.debug(f'  Devices Exclude: ' + ', '.join(cls.DEVICES_EXCLUDE_FILTER))
+        logger.debug(f'  Shields Include: ' + ', '.join(cls.SHIELDS_FILTER))
+        logger.debug(f'  Shields Exclude: ' + ', '.join(cls.SHIELDS_EXCLUDE_FILTER))
+        logger.debug(f'  Targets Include: ' + ', '.join(cls.TARGETS_FILTER))
+        logger.debug(f'  Targets Exclude: ' + ', '.join(cls.TARGETS_EXCLUDE_FILTER))
 
     def inject_target(self, target_str: str):
         match = re.match(r'(?P<prefix>[+-]?)(?P<toolchain>[a-z]+)@(?P<target>.+)', target_str)
         if not match:
-            mcux_debug(f"Invalid target {target_str}")
+            logger.debug(f"Invalid target {target_str}")
             return None
         action = match.group('prefix')
         toolchain = match.group('toolchain')
@@ -351,16 +354,16 @@ class MCUXAppTargets(object):
         else:
             ret = True
         if not ret:
-            # mcux_debug(f'Filtered out {input_string} by include')
+            # logger.debug(f'Filtered out {input_string} by include')
             return False
         # Continue to filter for the exclude if not filtered out by the include filter
         if exclude_filter_list:
             for filter in exclude_filter_list:
                 if filter.startswith('r@') and re.search(filter[2:], input_string):
-                    # mcux_debug(f'Filtered out {input_string} by exclude')
+                    # logger.debug(f'Filtered out {input_string} by exclude')
                     return False
                 elif filter == input_string:
-                    # mcux_debug(f'Filtered out {input_string} by exclude')
+                    # logger.debug(f'Filtered out {input_string} by exclude')
                     return False
         return True
 
@@ -381,7 +384,6 @@ class MCUXAppTargets(object):
 
     def get_app_targets(self, app_example_file: str, is_pick_one_target_for_app=False, validate=False) -> list:
         apps = []
-        
         # Determine the directory of the example file
         app_dir_path = Path(app_example_file).resolve().parent
         try:
@@ -396,27 +398,28 @@ class MCUXAppTargets(object):
             self._validate_example_data(app_example_file, example_data)
 
         if not example_data:
-            mcux_error(f"Invalid example file {app_example_file}")
+            logger.error(f"Invalid example file {app_example_file}")
             return apps
 
         app_shared_content = {}
         for app_name, app_data in example_data.items():
             if app_data.get('skip_build', False):
                 continue
+            query_internal = False if app_data.get('section-type', '') == 'freestanding_application' else True
             # Only example.yml shall only have one application
             if (app_data.get('section-type', '') == 'application') and not app_shared_content:
                 if (app_toolchains := app_data.get('contents', {}).get('toolchains', [])):
                     app_shared_content['toolchains'] = app_toolchains
-            if (boards_data := app_data.get('boards', {})):
-                self.get_instance_targets(app_dir, apps, app_name, app_data, boards_data, is_pick_one_target_for_app, 'board', app_shared_content)
-            elif (devices_data := app_data.get('devices', {})):
-                self.get_instance_targets(app_dir, apps, app_name, app_data, devices_data, is_pick_one_target_for_app, 'device', app_shared_content)
+            if app_data.get('boards'):
+                self.get_instance_targets(app_dir, apps, app_name, app_data, app_data['boards'], is_pick_one_target_for_app, 'board', app_shared_content, query_internal)
+            elif app_data.get('devices'):
+                self.get_instance_targets(app_dir, apps, app_name, app_data, app_data['devices'], is_pick_one_target_for_app, 'device', app_shared_content, query_internal)
 
         return apps
 
-    def get_instance_targets(self, app_dir, apps, app_name, app_data, instance_data, is_pick_one_target_for_app=False, instance_type='board', app_shared_content={}):
+    def get_instance_targets(self, app_dir, apps, app_name, app_data, instance_data, is_pick_one_target_for_app=False, instance_type='board', app_shared_content={}, query_interal=True):
         assert(instance_type in ['board', 'device'])
-        if app_name in MCUXAppTargets.INT_EXAMPLE_DATA:
+        if query_interal and app_name in MCUXAppTargets.INT_EXAMPLE_DATA:
             instance_data = { **instance_data, **MCUXAppTargets.INT_EXAMPLE_DATA[app_name] }
         use_sysbuild = app_data.get('use_sysbuild', False)
 
@@ -476,7 +479,7 @@ class MCUXAppTargets(object):
         try:
             js.Draft7Validator(example_schema, resolver=resolver).validate(example_data)
         except js.ValidationError as e:
-            mcux_error(example_yml + ': ' + e.message)
+            logger.error(example_yml + ': ' + e.message)
 
 class MCUXRepoProjects(object):
 
@@ -525,23 +528,23 @@ class MCUXRepoProjects(object):
                 pass
             expanded_example_files_filtered.append(example_file)
 
-        # mcux_debug(f"Searching app targets in {example_file_pattern}")
+        # logger.debug(f"Searching app targets in {example_file_pattern}")
         for example_file in expanded_example_files_filtered:
             #print(example_file)
-            mcux_debug(f"Found example file {example_file}")
+            logger.debug(f"Found example file {example_file}")
             app_target_op = MCUXAppTargets()
             matched_apps.extend(app_target_op.get_app_targets(example_file, is_pick_one_target_for_app, validate))
-        mcux_debug(f"Found {len(matched_apps)} matched apps in total")
+        logger.debug(f"Found {len(matched_apps)} matched apps in total")
 
         return matched_apps
 
     def dump_to_file(self, export_file, apps):
         if export_file and export_file.endswith('.json'):
             mcux_write_json(export_file, [item.as_dict() for item in apps], is_create_dir=True)
-            mcux_small_banner(f"Exported {len(apps)} matched apps to {export_file}")
+            logger.info(f"-- Exported {len(apps)} matched apps to {export_file}")
         elif export_file and export_file.endswith('.yml'):
             mcux_write_yaml(export_file, [item.as_dict() for item in apps], is_create_dir=True)
-            mcux_small_banner(f"Exported {len(apps)} matched apps to {export_file}")
+            logger.info(f"-- Exported {len(apps)} matched apps to {export_file}")
         elif export_file and export_file.endswith('.robot'):
             with open(export_file, 'w') as file:
                 # Write Settings
@@ -563,11 +566,11 @@ class MCUXRepoProjects(object):
                     file.write('    Log    ${{app_result.stderr}}\n')
                     file.write('    Should Be Equal As Integers    ${{app_result.rc}}    0\n\n')
         else:
-            mcux_error(f"Invalid export file {export_file}")
+            logger.error(f"Invalid export file {export_file}")
 
     def pretty_print_apps(self, apps):
         for idx, app in enumerate(apps):
-            mcux_info(f"[{idx+1:4}][{app.build_cmd}]")
+            logger.info(f"[{idx+1:4}][{app.build_cmd}]")
 
     def silent_print_apps(self, apps):
         for app in apps:

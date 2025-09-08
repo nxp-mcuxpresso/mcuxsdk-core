@@ -41,6 +41,9 @@ mapping:
           build_dir:
             required: true
             type: str
+          source_dir:
+            required: false
+            type: str
   flash_order:
     required: false
     type: seq

@@ -23,6 +23,7 @@
                     "description": "Identify project type, it could be application or library.",
                     "enum": [
                         "application",
+                        "freestanding_application",
                         "library"
                     ]
                 },

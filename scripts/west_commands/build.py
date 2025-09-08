@@ -173,7 +173,6 @@ class Build(Forceable):
         group.add_argument('--hint', action='store_true', default=False, help='Execute external assistant command like'
                                                                               'west list_project')
         group.add_argument('-nsc','--no_sanity_check', dest='no_sanity_check', action='store_true', default=False, help='Skip sanity check')
-        group.add_argument('--trace-dir', default=[], action="append", help='Use with cmake option "--trace", only filter result with expected location. Do not use with "--trace-expand"')
         group = parser.add_mutually_exclusive_group()
         group.add_argument('--sysbuild', action='store_true',
                            help='''create multi domain build system''')
@@ -741,25 +740,7 @@ class Build(Forceable):
         # Translate CUSTOM_BOARD_ROOT to absolute path
         final_cmake_args = self._translate_custom_board_path(final_cmake_args)
 
-        if not self.args.trace_dir:
-            run_cmake(final_cmake_args, dry_run=self.args.dry_run)
-            return
-
-        if '--trace' not in final_cmake_args:
-            self.dbg('As user use "--trace-dir" argument without any trace command to cmake, added "--trace".')
-            final_cmake_args.append('--trace')
-        if '--trace-expand' in final_cmake_args:
-            self.wrn('Remove "--trace-expand" as the result cannot be filtered.')
-            final_cmake_args.remove("--trace-expand")
-        final_cmake_args.extend(['--trace-redirect', trace_log_path := os.path.join(self.build_dir, 'trace.log')])
         run_cmake(final_cmake_args, dry_run=self.args.dry_run)
-        expected_lines = []
-        filter_patterns = [d.strip('\'"') for d in self.args.trace_dir]
-        from export_app.cmake_trace_parser import filter_trace_log
-        expected_lines = filter_trace_log(trace_log_path, filter_patterns)
-        with open(trace_log_path := os.path.join(self.build_dir, 'trace.log'), 'w') as f:
-            f.writelines(expected_lines)
-        self.inf(f"Trace will be written to {trace_log_path}")
 
     def _run_pristine(self):
         self.banner('making build dir {} pristine'.format(self.build_dir))

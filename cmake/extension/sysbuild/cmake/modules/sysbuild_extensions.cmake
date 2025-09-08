@@ -585,6 +585,13 @@ function(ExternalZephyrProject_Cmake)
   # get log level
   cmake_language(GET_MESSAGE_LOG_LEVEL cur_log_level)
 
+  # Set cmake command options for sysbuild
+  set(CMAKE_SYSBUILD_OPTIONS "" CACHE STRING "Extra sysbuild options for inner cmake")
+  set(_sys_opts "")
+  foreach(_o IN LISTS CMAKE_SYSBUILD_OPTIONS)
+    string(CONFIGURE "${_o}" _o_expanded)
+    list(APPEND _sys_opts "${_o_expanded}")
+  endforeach()
   execute_process(
     COMMAND ${CMAKE_COMMAND}
       -G${CMAKE_GENERATOR}
@@ -595,6 +602,7 @@ function(ExternalZephyrProject_Cmake)
       -B${BINARY_DIR}
       -S${SOURCE_DIR}
       --log-level=${cur_log_level}
+      ${_sys_opts}
     RESULT_VARIABLE   return_val
     WORKING_DIRECTORY ${BINARY_DIR}
   )

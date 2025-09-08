@@ -9,8 +9,8 @@ import logging
 from pathlib import Path
 from west.commands import WestCommand
 from west.configuration import config
-from export_app.cmake_app import CmakeApp
 from export_app.cmake_parser import cmparser
+from export_app.misc import AppType, SharedOptions, AppOptions
 
 SCRIPT_DIR = Path(__file__).parent.parent
 sys.path.append(SCRIPT_DIR.as_posix())
@@ -78,27 +78,48 @@ class ExportApp(WestCommand):
         self._parse_remainder(remainder)
         self._sanity_precheck()
         self._app_precheck()
-        self.entry_app = CmakeApp(self.source_dir, self.output_dir, self.cmake_variables, self.extra_variables, 'main_app', self.misc_options)
-        self.entry_app.run()
+        entry_app_opts = AppOptions(
+            app_type=AppType.main_app,
+            source_dir=self.shared_options.source_dir,
+            output_dir=self.shared_options.output_dir,
+            cmake_opts=self.shared_options.cmake_opts,
+            cmake_variables=self.shared_options.cmake_variables
+        )
+        self.shared_options.output_dir.mkdir(parents=True, exist_ok=True)
+        if 'sysbuild.cmake' in os.listdir(self.shared_options.source_dir):
+            entry_app_opts.output_dir = self.shared_options.output_dir / self.shared_options.source_dir.name
+        if not self.shared_options.board:
+            from export_app.cmake_app import CmakeApp
+            self.entry_app = CmakeApp(self.shared_options, entry_app_opts)
+        else:
+            from export_app.cmake_trace_app import CmakeTraceApp
+            self.entry_app = CmakeTraceApp(self.shared_options, entry_app_opts)
+        if not self.entry_app.run():
+            self.die('Failed to create the freestanding project, please check previous logs.')
         self.banner(f'Successfully create the freestanding project, see {self.entry_app.dest_list_file}.')
         if self.args.build:
             self.banner('Start building the project')
-            for l_cmd in self.entry_app.build_cmds():
-                ret = self.run_subprocess(l_cmd, cwd=SDK_ROOT_DIR.as_posix())
-                print(' '.join(l_cmd))
+            ret = self.run_subprocess(self.entry_app.build_cmd(), cwd=SDK_ROOT_DIR.as_posix())
+            print(' '.join(self.entry_app.build_cmd()))
             if ret.returncode != 0:
                 self.die("Build Failed!", exit_code=ret.returncode)
         else:
             self.banner('you can use following command to build it.')
-            for l_cmd in self.entry_app.build_cmds():
-                print(' '.join(l_cmd))
+            print(' '.join(self.entry_app.build_cmd()))
+        self.banner('To see all build configurations, please run:')
+        print(f'west list_project -p {self.entry_app.output_dir.as_posix()}')
 
     def _parse_remainder(self, remainder):
         self.args.source_dir = None
         self.args.cmake_opts = None
-        self.cmake_variables = {'CONFIG_TOOLCHAIN': self.args.toolchain}
+        self.cmake_variables = {}
         if self.args.board:
             self.cmake_variables['board'] = self.args.board
+        if self.args.toolchain:
+            self.cmake_variables['CONFIG_TOOLCHAIN'] = self.args.toolchain
+
+        if not remainder:
+            return
 
         try:
             # Only one source_dir is allowed, as the first positional arg
@@ -145,46 +166,49 @@ class ExportApp(WestCommand):
 
         self.source_dir = Path(app).resolve()
         self.output_dir = Path(out).resolve()
-        if config.get('export_app', 'clean_output_dir', fallback=False) and self.output_dir.exists():
+        if config.getboolean('export_app', 'clean_output_dir', fallback=False) and self.output_dir.exists():
             self.dbg('Clean output directory first...')
             shutil.rmtree(self.output_dir)
 
     def _app_precheck(self):
         sdk_project_target.MCUXAppTargets.config_internal_data()
         op = sdk_project_target.MCUXRepoProjects()
-        self.board = self.args.board
-        self.extra_variables = {}
-        self.misc_options = {
-            'main_output': self.output_dir,
-            'cmake_opts': self.args.cmake_opts,
-            'debug': self.args.debug,
-        }
-        if not self.board:
-            if self.args.build:
+        self.shared_options = SharedOptions(
+            source_dir=self.source_dir,
+            output_dir=self.output_dir,
+            cmake_opts=self.args.cmake_opts,
+            cmake_variables=self.cmake_variables,
+            build=self.args.build,
+            debug=self.args.debug,
+            board=self.args.board,
+            board_core = self.args.board,
+            board_copy_folders=self.args.board_copy_folders,
+            default_trace_folders=[Path(self.manifest.topdir).as_posix()]
+        )
+
+        if not self.shared_options.board:
+            if self.shared_options.build:
                 self.wrn("--build is only valid when you specify board/core")
-                self.args.build = False
-            if self.args.board_copy_folders:
+                self.shared_options.build = False
+            if self.shared_options.board_copy_folders:
                 self.wrn('--bf is only valid when you specify board/core')
             return
         if 'core_id' in self.cmake_variables:
-            self.core_id = self.cmake_variables['core_id']
-        # Hardcode for board_root
-        self.extra_variables['board_root'] = self.source_dir.relative_to(SDK_ROOT_DIR).parts[0] + '/_boards'
-        board_core = self.board
-        if self.core_id:
-            board_core = board_core + '@' + self.core_id
-        matched_app = op.search_app_targets(app_path=self.source_dir.as_posix(), board_cores_filter=[board_core])
+            self.shared_options.core_id = self.cmake_variables['core_id']
+            self.shared_options.board_core = self.shared_options.board + '@' + self.shared_options.core_id
+        # NOTE: default board root is now <example_root>/_boards
+        self.shared_options.cmake_variables['board_root'] = self.source_dir.relative_to(SDK_ROOT_DIR).parts[0] + '/_boards'
+        matched_app = op.search_app_targets(app_path=self.source_dir.as_posix(), board_cores_filter=[self.shared_options.board_core])
         target_apps = list(set([app.name for app in matched_app]))
         self.check_force(matched_app,
                          f'Cannot find any app match your input, please ensure following command can get a valid output\
-                          {os.linesep}west list_project -p {self.source_dir} -b {board_core}')
-        self.misc_options['target_apps'] = target_apps
-        if self.args.board_copy_folders:
-            self.misc_options['board_copy_folders'] = self.args.board_copy_folders
+                          {os.linesep}west list_project -p {self.source_dir} -b {self.shared_options.board_core}')
+        self.shared_options.target_apps = target_apps
 
     def _setup_logging(self, debug):
         if debug:
             logging.getLogger("export_app").setLevel(logging.DEBUG)
+            logging.getLogger("misc.sdk_project_target").setLevel(logging.INFO)
             level = logging.DEBUG
         else:
             level = logging.INFO

@@ -129,6 +129,9 @@ mcux_add_linker_symbol:
 mcux_remove_linker_symbol:
   single_value: SYMBOLS
   multi_value: TARGETS
+mcux_project_remove_source:
+  single_value: BASE_PATH CONFIG PREINCLUDE EXCLUDE HIDDEN
+  multi_value: SOURCES PREINCLUDE_TYPE ${MCUX_SOURCE_CONDITION}
 externalmcuxproject_add:
   single_value: ${SYSBUILD_SINGLE_VALUE}
 externalzephyrproject_add:

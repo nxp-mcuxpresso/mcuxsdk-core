@@ -16,7 +16,7 @@ sys.path.append(os.path.join(script_dir))
 from misc import *
 from misc import sdk_project_target
 # import misc
-
+logger = logging.getLogger(__name__)
 LIST_PROJECT_USAGE = '''
 Example:
     west list_project -p examples/driver_examples/lpuart/interrupt -o test.yml

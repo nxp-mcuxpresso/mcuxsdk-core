@@ -81,8 +81,7 @@ def main():
         # check_assigned_choice_values(kconf)
 
     if args.generate_promptless_syms:
-        promptless_syms = [sym.config_string for sym in kconf.unique_defined_syms if promptless(sym)]
-        open(os.path.join(args.header_out_dir, '.promptless_config'), 'w').writelines(promptless_syms)
+        dump_extra_info(kconf, args.header_out_dir)
 
     if kconf.syms.get('WARN_DEPRECATED', kconf.y).tri_value == 2:
         check_deprecated(kconf)
@@ -112,6 +111,38 @@ def main():
     # write generated headers into a file
     write_header(kconf, args.kconfig_header_list_out)
 
+
+def dump_extra_info(kconf, output_dir):
+    def y_selecting_sym(sym):
+        if [si for si in split_expr(sym.rev_dep, OR) if expr_value(si) == 2]:
+            return True
+        if [si for si in split_expr(sym.weak_rev_dep, OR) if expr_value(si) == 2]:
+            return True
+        return False
+    force_selected_ps = []
+    promptless_syms = []
+    from kconfiglib import expr_str, MENU
+    for sym in kconf.unique_defined_syms:
+        if promptless(sym):
+            promptless_syms.append(sym.kconfig.config_prefix+sym.name)
+        elif sym.name.startswith('MCUX_PRJSEG') and y_selecting_sym(sym):
+            force_selected_ps.append(sym.kconfig.config_prefix+sym.name)
+
+        # for n in sym.nodes:
+        #     print(f"{n.filename}:{n.linenr}")
+        #     print("  if/depends:", expr_str(n.dep))
+
+        #     if n.prompt:
+        #         print("  prompt if:", expr_str(n.prompt[1]))
+
+        #     p = n.parent
+
+        #     if p.item == MENU and p.visibility is not None and p.visibility is not kconf.y:
+        #         print(p.filename, p.linenr)
+        #         print("  menu visible if:", expr_str(p.visibility))
+
+    open(os.path.join(output_dir, '.promptless_config'), 'w').write('\n'.join(promptless_syms))
+    open(os.path.join(output_dir, '.force_selected_ps'), 'w').write('\n'.join(force_selected_ps))
 
 def check_no_promptless_assign(kconf):
     # Checks that no promptless symbols are assigned
