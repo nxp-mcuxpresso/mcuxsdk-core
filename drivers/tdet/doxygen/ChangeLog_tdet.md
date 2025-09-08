@@ -1,5 +1,9 @@
 # TDET
 
+## [2.3.0]
+
+- Added enum for TIF10.
+
 ## [2.2.0]
 
 - Added support for chips without active tamper pins.
