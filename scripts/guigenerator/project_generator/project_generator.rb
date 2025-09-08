@@ -11,7 +11,7 @@ require_relative '../utils/utils'
 require 'rubygems'
 
 PACKAGE_YML_PATH = 'yml_data/shared/misc/package.yml'
-SCRIPT_SUPPORTED_TOOLCHAIN = %w[iar mdk armgcc xtensa codewarrior]
+SCRIPT_SUPPORTED_TOOLCHAIN = %w[iar mdk armgcc xtensa codewarrior riscvllvm]
 CMAKE_LOG_LEVEL_MAP = { 'TRACE' => Logger::DEBUG,
                         'DEBUG' => Logger::DEBUG,
                         'VERBOSE' => Logger::INFO,

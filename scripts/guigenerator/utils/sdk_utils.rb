@@ -154,7 +154,7 @@ module SDKGenerator
                                .parent.parent.parent.parent.parent.parent.to_s + '/pack/'
     ENTRANCE_SCRIPT_PATH = 'bin/generator/sdk_generator/src'
     SW_COMPONENTS_MIR_PATH = 'MIR/marketing_data/1.0/sw_components'
-    SUPPORTED_TOOLCHAINS = %w[iar mdk armgcc mcux xtensa xcc codewarrior].freeze
+    SUPPORTED_TOOLCHAINS = %w[iar mdk armgcc mcux xtensa xcc riscvllvm codewarrior].freeze
     CMSIS_SUPPORTED_TOOLCHAINS = %w[iar mdk armgcc].freeze
     DEFAULT_TOOLCHAINS = %w[iar mdk armgcc mcux].freeze
     CMSIS_DEFAULT_TOOLCHAINS = %w[iar mdk armgcc].freeze
@@ -298,7 +298,8 @@ module SDKGenerator
         'xtensa' => 'xcc',
         'xcc' => 'xcc',
         'armds' => 'armclang',
-        'codewarrior' => 'mwcc56800e'
+        'codewarrior' => 'mwcc56800e',
+        'riscvllvm' => 'riscvllvm'
       }
       type_map[toolchain]
     end
@@ -342,6 +343,7 @@ module SDKGenerator
         'armgcc' => 'CMake',
         'xtensa' => 'Xtensa',
         'xcc' => 'Xcc',
+        'riscvllvm' => 'CMake',
         'codewarrior' => 'CodeWarrior'
       }
       if type_map.key? toolchain

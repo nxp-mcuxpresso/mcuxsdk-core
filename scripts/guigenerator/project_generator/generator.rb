@@ -197,6 +197,8 @@ module SDKGenerator
         project_info[:core_id] = core_id                = project_data[tool_key]['document']['core_id']
 
         project_info[:compilers]               = project_data[tool_key]['document']['compilers'] || SUPPORTED_COMPILERS
+        project_info[:tool_key]               = tool_key
+        project_info[:compiler]               = get_datatable_compilers(tool_key)
         project_info[:pname] = pname          = project_data[tool_key]['document']['name']
         project_info[:project_tag]           = project_data['project_tag']
         project_info[:internal]                = project_data[tool_key].key?('internal') && project_data[tool_key]['internal'].to_s == 'true' ? true : false
@@ -215,9 +217,7 @@ module SDKGenerator
                                                    "#{pname}.uvprojx"
                                                  when 'armds'
                                                    '.project'
-                                                 when 'armgcc'
-                                                   'CMakeLists.txt'
-                                                 when 'xcc'
+                                                 when 'armgcc', 'xcc', 'riscvllvm'
                                                    'CMakeLists.txt'
                                                  when 'mcux'
                                                    "#{pname}.xml"
@@ -298,7 +298,7 @@ module SDKGenerator
 
         # Get all targets for cmake
         # Get targets for source do not have targets tag.
-        project_instance.targets(project_info[:all_targets]) if %w[armgcc xcc].include? tool_key
+        project_instance.targets(project_info[:all_targets]) if %w[armgcc xcc riscvllvm].include? tool_key
         # Clear project first, armgcc need to get all targets then clear!
         project_instance.clear!
         # init output dir for each target
@@ -338,7 +338,7 @@ module SDKGenerator
           add_project_settings(project_instance, target, content, tool_key, project_info, project_data)
         end
         # armgcc specific settings
-        add_armgcc_misc_settings(project_instance, project_info) if tool_key == 'armgcc'
+        add_armgcc_misc_settings(project_instance, project_info) if %w[armgcc riscvllvm].include? tool_key
 
         # armds launcher need core info
         project_instance.add_core_info(corename, core_device_id) if tool_key == 'armds'
@@ -510,7 +510,7 @@ module SDKGenerator
       def filter_source(source, project_info, tool_key, project_data)
         return false if source.nil? || source.empty?
         # The doc file like readme cannot be set to the armgcc cmakelist
-        return false if %w[armgcc xcc xtensa].include?(tool_key) && source['type'] == 'doc'
+        return false if %w[armgcc xcc riscvllvm xtensa].include?(tool_key) && source['type'] == 'doc'
         # CMakeLists.txt does not record files from software component
         return false if source.safe_key?('meta-component') && tool_key == 'armgcc'
         # won't copy sources which has 'hidden: true' attribute
@@ -874,7 +874,7 @@ module SDKGenerator
         # Add c compiler define
         if content.key?('cc-define')
           content['cc-define']&.each do |define_name, define_value|
-            if %w[armgcc mdk mcux armds xcc codewarrior].include?(tool_key)
+            if %w[armgcc mdk mcux armds xcc riscvllvm codewarrior].include?(tool_key)
               if define_value && define_value.class == String && define_value.match(/\"(.*)\"/)
                 define_value = '\\"' + Regexp.last_match(1) + '\\"' unless tool_key == 'mcux'
                 define_value = '\'' + define_value + '\''
@@ -892,7 +892,7 @@ module SDKGenerator
         # Add assembler macros
         if content.key?('as-define')
           content['as-define']&.each do |define_name, define_value|
-            if %w[armgcc mdk mcux armds xcc codewarrior].include?(tool_key)
+            if %w[armgcc mdk mcux armds xcc riscvllvm codewarrior].include?(tool_key)
               if define_value && define_value.class == String && define_value.match(/\"(.*)\"/)
                 define_value = '\\"' + Regexp.last_match(1) + '\\"' unless tool_key == 'mcux'
                 define_value = '\'' + define_value + '\''

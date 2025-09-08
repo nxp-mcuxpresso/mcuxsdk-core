@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 include_guard(GLOBAL)
 set(GUI_PROJECT_SUPPORTED_TOOLCHAIN "iar" "mdk" "xtensa" "codewarrior")
-set(STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN "armgcc" "iar" "mdk" "xtensa" "codewarrior")
+set(STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN "armgcc" "iar" "mdk" "xtensa" "codewarrior" "riscvllvm")
 
 mcux_get_property(IDE_YML_LIST INTERFACE_IDE_YML_LIST)
 string(REPLACE ";" " " IDE_YML_LIST "${IDE_YML_LIST}")
@@ -133,7 +133,7 @@ add_custom_target(
 else ()
     add_custom_target(
             standalone_project
-            COMMAND ${CMAKE_COMMAND} -E echo "Program has stopped without project generation. Please check if ruby is installed. If not, you can refer ${ruby_install_link}. And please make sure the specified toolchain is one of ${GUI_PROJECT_SUPPORTED_TOOLCHAIN}."
+            COMMAND ${CMAKE_COMMAND} -E echo "Program has stopped without project generation. Please check if ruby is installed. If not, you can refer ${ruby_install_link}. And please make sure the specified toolchain is one of ${STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN}."
             VERBATIM)
 endif ()
 

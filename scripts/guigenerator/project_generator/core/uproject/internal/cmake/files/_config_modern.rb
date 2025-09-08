@@ -17,6 +17,7 @@ module Internal
                            cr_newlib_semihost cr_newlib_nohost cr_newlib_none cr_semihost cr_semihost_nf cr_semihost_mb cr_semihost_mb_nf cr_nohost_nf
                           ].freeze
     GCC_DEFAULT_SYS_LIBRARIES = %w[m c gcc nosys].freeze
+    RISCVLLVM_DEFAULT_SYS_LIBRARIES = %w[m c nosys].freeze
 
     class ConfigFileModern < Internal::CMake::ConfigFile
 
@@ -358,7 +359,12 @@ module Internal
 
         if @build_type == "app"
           if @sys_link_lib.empty?
-            @sys_link_lib = GCC_DEFAULT_SYS_LIBRARIES
+            case @config_info['CONFIG_COMPILER']
+            when 'gcc'
+              @sys_link_lib = GCC_DEFAULT_SYS_LIBRARIES
+            when 'riscvllvm'
+              @sys_link_lib = RISCVLLVM_DEFAULT_SYS_LIBRARIES
+            end
           end
           @config_cmakelists.puts "IF(NOT DEFINED TARGET_LINK_SYSTEM_LIBRARIES)  \n"
           @config_cmakelists.puts "    SET(TARGET_LINK_SYSTEM_LIBRARIES \"#{@sys_link_lib.map{|item|"-l#{item}"}.join(' ')}\")  \n"
@@ -705,6 +711,8 @@ module Internal
       end
 
       def add_hardware_info(project_info)
+        @config_info['CONFIG_TOOLCHAIN'] = project_info[:tool_key]
+        @config_info['CONFIG_COMPILER'] = project_info[:compiler]
         @config_info['CONFIG_CORE'] = project_info[:corename]
         @config_info['CONFIG_DEVICE'] = project_info[:platform_devices_soc_name]
         @config_info['CONFIG_BOARD'] = project_info[:board]

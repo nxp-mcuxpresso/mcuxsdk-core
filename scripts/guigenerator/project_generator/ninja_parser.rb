@@ -11,7 +11,7 @@ require_relative '../utils/sdk_utils'
 class NinjaParser
   include SDKGenerator::SDKUtils
   REPO_ROOT_PATH = File.expand_path(File.join(File.dirname(__FILE__), '../../..'))
-  NO_GUI_TEMPLATE_TOOLCHAIN = %w[armgcc xcc xclang]
+  NO_GUI_TEMPLATE_TOOLCHAIN = %w[armgcc xcc xclang riscvllvm]
   CUSTOM_COMMAND_IGNORE_LIST = %w[pristine menuconfig guiconfig hardenconfig guiproject
     standalone_project manifest flash debug debugserver attach usage ram_report rom_report
     footprint] 
@@ -150,7 +150,8 @@ class NinjaParser
       'mcux' => 'gcc',
       'armds' => 'arm',
       'codewarrior' => 'mwcc56800e',
-      'xtensa' => 'xcc'
+      'xtensa' => 'xcc',
+      'riscvllvm' => 'riscvllvm'
     }
     type_map[toolchain]
   end
@@ -736,65 +737,71 @@ class NinjaParser
         if content.match(/\S+?.elf/) && content.match(/\S+(.bin|.srec|.hex)/) && content.match(/(-Obinary|--bin|-Osrec|--srec|--m32|-Oihex|--ihex|--i32)/) && !content.include?("python")
           bin_file = File.basename(content.match(/\S+\.(bin|srec|hex)/)[0])
           @data[@name]['contents']['configuration']['tools'][@toolchain]['binary-file'] = bin_file
-          break
-        else
-          # cd . means no postbuild cmd
-          if content == 'cd .' || content == ':'
-            break
-          elsif @toolchain == 'iar'
-            if ENV['project_type']  == 'LIBRARY'
-              pattern = /\s\S+lib#{@name}\.a/
-            else
-              pattern = /\s\S+#{@name}\.elf/
-            end
-            result = content.match(pattern)
-            while(result)
-              content.sub!(result[ 0 ], ' $TARGET_PATH$')
-              result = content.match(pattern)
-            end
-          elsif @toolchain == 'mdk'
-            if ENV['project_type']  == 'LIBRARY'
-               pattern = /\s\S+lib#{@name}\.a/
-               result = content.match(pattern)
-               while(result)
-                content.sub!(result[ 0 ], ' $p/#L')
-                result = content.match(pattern)
-              end
-            else
-              pattern = /--bincombined\s\S+#{@name}\.elf/
-              result = content.match(pattern)
-              content.sub!(result[ 0 ], '--bincombined $p/#L') if result
-            end
-          elsif @toolchain == 'armgcc'
-            # translate project elf/lib to $<TARGET_FILE:${MCUX_SDK_PROJECT_NAME}>
-            if ENV['project_type']  == 'LIBRARY'
-              pattern = /\s\S+lib#{@name}\.a/
-            else
-              pattern = /\s\S+#{@name}\.elf/
-            end
-            result = content.match(pattern)
-            while(result)
-              content.sub!(result[ 0 ], ' $<TARGET_FILE:${MCUX_SDK_PROJECT_NAME}>')
-              result = content.match(pattern)
-            end
-            # translate cmake to ${CMAKE_COMMAND}, if starts with quote, indicates there is space in path
-            # Use [^"]* to match any character except quote before cmake executor
-            pattern = /\s"[^"]*bin[\/\\]cmake(\.exe)?"|\s\S+bin[\/\\]cmake(\.exe)?/
-            result = content.match(pattern)
-            while(result)
-              content.sub!(result[ 0 ], ' ${CMAKE_COMMAND}')
-              result = content.match(pattern)
-            end
-          end
-          cmd_list = translate_path_in_build_cmd(content)
 
-          if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
-            @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = cmd_list
+          # If there is copy command after binary convert, need to keep it in postbuild command
+          unless content.include?("-E copy")
+            break
           else
-            @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = cmd_list
+            content = content.split("#{bin_file} &&")[-1].strip
           end
-          break
         end
+        
+        # cd . means no postbuild cmd
+        if content == 'cd .' || content == ':'
+          break
+        elsif @toolchain == 'iar'
+          if ENV['project_type']  == 'LIBRARY'
+            pattern = /\s\S+lib#{@name}\.a/
+          else
+            pattern = /\s\S+#{@name}\.elf/
+          end
+          result = content.match(pattern)
+          while(result)
+            content.sub!(result[ 0 ], ' $TARGET_PATH$')
+            result = content.match(pattern)
+          end
+        elsif @toolchain == 'mdk'
+          if ENV['project_type']  == 'LIBRARY'
+              pattern = /\s\S+lib#{@name}\.a/
+              result = content.match(pattern)
+              while(result)
+              content.sub!(result[ 0 ], ' $p/#L')
+              result = content.match(pattern)
+            end
+          else
+            pattern = /--bincombined\s\S+#{@name}\.elf/
+            result = content.match(pattern)
+            content.sub!(result[ 0 ], '--bincombined $p/#L') if result
+          end
+        elsif %w[armgcc riscvllvm].include? @toolchain
+          # translate project elf/lib to $<TARGET_FILE:${MCUX_SDK_PROJECT_NAME}>
+          if ENV['project_type']  == 'LIBRARY'
+            pattern = /\s\S+lib#{@name}\.a/
+          else
+            pattern = /\s\S+#{@name}\.elf/
+          end
+          result = content.match(pattern)
+          while(result)
+            content.sub!(result[ 0 ], ' $<TARGET_FILE:${MCUX_SDK_PROJECT_NAME}>')
+            result = content.match(pattern)
+          end
+          # translate cmake to ${CMAKE_COMMAND}, if starts with quote, indicates there is space in path
+          # Use [^"]* to match any character except quote before cmake executor
+          pattern = /\s"[^"]*bin[\/\\]cmake(\.exe)?"|\s\S+bin[\/\\]cmake(\.exe)?/
+          result = content.match(pattern)
+          while(result)
+            content.sub!(result[ 0 ], ' ${CMAKE_COMMAND}')
+            result = content.match(pattern)
+          end
+        end
+        cmd_list = translate_path_in_build_cmd(content)
+
+        if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
+          @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = cmd_list
+        else
+          @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = cmd_list
+        end
+        break
       end
     end
   end
