@@ -14,10 +14,15 @@ Implementation file for ARM API compatible FFT functions on CE
 #include "fsl_ce_transform.h"
 
 /*!
- * brief FFT Implementation API to be compatible with CM33 FFT API.
+ * brief CMSIS-compatible FFT implementation using ZV2117 backend.
+ *
+ * details This API is designed to be compatible with the ARM CM33 FFT interface.
+ * It delegates the FFT computation to the ZV2117 CE module.
  * Please refer to CM33 documentation for details.
  *
- * Note: This API only support float32 FFTs.
+ * return Command execution status.
+ * 
+ * note This API only support float32 FFTs.
  */
 void ce_arm_cfft_f32(
     const arm_cfft_instance_f32 *S, float *p1, uint8_t ifftFlag, uint8_t bitReverseFlag, float *pOut, float *pScratch)
