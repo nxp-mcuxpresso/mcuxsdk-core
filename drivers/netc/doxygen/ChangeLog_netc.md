@@ -22,11 +22,13 @@
 ## [2.10.0]
 
 - Bug Fixes
-  - Fixed structures used for time gate control list and stream gate request commands memset.
+  - Fixed structures used for time gate control list and stream gate request
+commands memset.
 - New Features
   - Added public API to query table entry in Frame Modification Table.
 - Improvements
-  - Removed calls to memset/memcpy in the transmit path.
+  - Optimized NETC Transmit functions: cached configuration in driver handle instead of accessing directly device
+    registers at each packet transmit, and removed calls to memset/memcpy in the transmit path.
 
 ## [2.9.1]
 
