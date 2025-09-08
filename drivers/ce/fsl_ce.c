@@ -19,9 +19,9 @@ Implementation file for CE wrapper/driver functions on ARM
 #endif
 
 /*!
- * brief Initialize the CE.
+ * brief Initializes the CE.
  *
- * param ceCopyImage The information about the CE image to copy.
+ * param [in] ceCopyImage The information about the CE image to copy.
  */
 void CE_Init(ce_copy_image_t *ceCopyImage)
 {
@@ -59,9 +59,9 @@ void CE_Init(ce_copy_image_t *ceCopyImage)
 }
 
 /*!
- * brief install CE firmware by given image info
+ * brief Installs CE firmware by given image info
  *
- * param ceCopyImage The information about the CE image to copy.
+ * param [in] ceCopyImage The information about the CE image to copy.
  */
 void CE_InstallFirmware(ce_copy_image_t *ceCopyImage)
 {
@@ -84,11 +84,10 @@ void CE_InstallFirmware(ce_copy_image_t *ceCopyImage)
 }
 
 /*!
- * brief Initialize the CE.
+ * brief Initializes the CE.
  *
- * This function is similar with CE_Init, the difference is this function
- * does not install the firmware, the firmware could be installed using
- * CE_InstallFirmware.
+ * details This function is similar to CE_Init, but it does not install
+ * the firmware, the firmware can be installed using CE_InstallFirmware.
  */
 void CE_InitWithoutFirmware(void)
 {

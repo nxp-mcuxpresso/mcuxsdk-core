@@ -13,8 +13,8 @@ Implementation file for CE wrapper/driver functions on ARM
 #include "fsl_ce_cmd.h"
 
 /*!
- * brief Execute command in command queue
- *
+ * brief Executes commands in the command queue.
+ * 
  * return Command execution status.
  */
 int32_t CE_ExecCmd(void)
@@ -25,8 +25,12 @@ int32_t CE_ExecCmd(void)
 }
 
 /*!
- * brief Simple echo test cmd
+ * brief Sends a basic command to verify that ZV2117 is operational
+ * and that the command interface is functioning properly.
  *
+ * details This function passes through the command processing interface
+ * and returns a success status.
+ * 
  * return Command execution status.
  */
 int32_t CE_NullCmd(void)
@@ -48,14 +52,15 @@ int32_t CE_NullCmd(void)
 }
 
 /*!
- * brief Copies one memory buffer to another
+ * brief Copies data between buffers in the ZV2117 memory section.
  *
- * Copies one memory buffer to another. Copy is in units of words. Any data type
- * can be used.
+ * details Copies a specified number of 32-bit words from the source
+ * to the destination buffer. Both buffers must reside in the ZV2117
+ * data memory section.
  *
- * param pDst Pointer to destination buffer
- * param pSrc Pointer to source buffer
- * param N    Number of words to copy
+ * param [out] pDst Pointer to destination buffer
+ * param [in]  pSrc Pointer to source buffer
+ * param [in]  N    Number of 32-bit words to copy
  *
  * return Command execution status.
  */

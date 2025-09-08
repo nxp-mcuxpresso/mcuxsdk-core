@@ -13,20 +13,23 @@ Implementation file for CE wrapper/driver FFT functions on ARM
 #include "fsl_ce_cmd.h"
 
 /*!
- * brief Calculates the FFT for complex 16-bit floating point data.
+ * brief Computes the FFT of complex-valued 16-bit floating point data.
  *
- * Computes N-point FFT of a complex 16-bit floating point data stream.
- * N must be a power of 2. Minimum N=16. Maximum N = 16384.
+ * details Performs an N-point Fast Fourier Transform (FFT) on
+ * a complex-valued float16 input stream. The FFT size N must be a power of 2,
+ * with valid range: 16 ≤ N ≤ 16384.
  *
- * Data precision and format is as defined by the argument type (except float*
- * is used for float16 data type as well to denote the pointer value)
- *
- * param pY Pointer to buffer for FFT output
- * param pX Pointer to buffer for FFT input
- * param pScratch Pointer to scratch buffer. Must be equal to or greater than size of the output buffer
- * param log2N log2(N), where N is the FFT size
+ * param [out] pY       Pointer to the FFT output buffer (complex-valued float16 data).
+ * param [in]  pX       Pointer to the FFT input buffer (complex-valued float16 data).
+ * param [in]  pScratch Pointer to a scratch buffer (at least N × 4 bytes).
+ * param [in]  log2N    Base-2 logarithm of the FFT size N.
  *
  * return Command execution status.
+ *
+ * note
+ * - Data precision and format follow the argument types.
+ * - `float*` is used to represent float16 pointers.
+ * - The input, output and scratch buffers must be separately allocated and non-overlapping.
  */
 int32_t CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
@@ -57,17 +60,20 @@ int32_t CE_TransformCFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2
 }
 
 /*!
- * brief Calculates the FFT for complex 32-bit floating point data.
+ * brief Computes the FFT of complex-valued 32-bit floating point data.
  *
- * Computes N-point FFT of a complex 32-bit floating point data stream.
- * N must be a power of 2. Minimum N=32. Maximum N = 16384.
+ * details Performs an N-point Fast Fourier Transform (FFT) on
+ * a complex-valued float32 input stream. The FFT size N must be a power of 2,
+ * with valid range: 32 ≤ N ≤ 16384.
  *
- * param pY Pointer to FFT output (complex float32 data)
- * param pX Pointer to FFT input (complex float32 data)
- * param pScratch Pointer to a scratch buffer (minimum size N*8 bytes)
- * param log2N log2(N) where N is the FFT size
+ * param [out] pY       Pointer to the FFT output buffer (complex-valued float32).
+ * param [in]  pX       Pointer to the FFT input buffer (complex-valued float32).
+ * param [in]  pScratch Pointer to a scratch buffer (at least N × 8 bytes).
+ * param [in]  log2N    Base-2 logarithm of the FFT size N.
  *
  * return Command execution status.
+ *
+ * note The input, output and scratch buffers must be separately allocated and non-overlapping.
  */
 int32_t CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
@@ -98,20 +104,23 @@ int32_t CE_TransformCFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2
 }
 
 /*!
- * brief Calculates the IFFT for complex 16-bit floating point data.
+ * brief Computes the IFFT of complex-valued 16-bit floating point data.
  *
- * Computes N-point IFFT of a complex 16-bit floating point data stream.
- * N must be a power of 2. Minimum N=16. Maximum N = 16384.
- *
- * Data precision and format is as defined by the argument type (except float*
- * is used for float16 data type as well to denote the pointer value)
- *
- * param pY Pointer to buffer for IFFT output
- * param pX Pointer to buffer for IFFT input
- * param pScratch Pointer to scratch buffer. Must be equal to or greater than size of the output buffer
- * param log2N log2(N), where N is the IFFT size
+ * details Performs an N-point Inverse Fast Fourier Transform (IFFT) on
+ * a complex-valued float16 input stream. The IFFT size N must be a power of 2,
+ * with valid range: 16 ≤ N ≤ 16384.
+ * 
+ * param [out] pY       Pointer to the IFFT output buffer (complex-valued float16).
+ * param [in]  pX       Pointer to the IFFT input buffer (complex-valued float16).
+ * param [in]  pScratch Pointer to a scratch buffer (at least N × 4 bytes).
+ * param [in]  log2N    Base-2 logarithm of the IFFT size N.
  *
  * return Command execution status.
+ *
+ * note
+ * - Data precision and format follow the argument types.
+ * - `float*` is used to represent float16 pointers.
+ * - The input, output and scratch buffers must be separately allocated and non-overlapping.
  */
 int32_t CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
@@ -142,17 +151,21 @@ int32_t CE_TransformIFFT_F16(float *pY, float *pX, float *pScratch, int32_t log2
 }
 
 /*!
- * brief Calculates the IFFT for complex 32-bit floating point data.
+ * brief Computes the IFFT of complex-valued 32-bit floating point data.
  *
- * Computes N-point IFFT of a complex 16-bit floating point data stream.
- * N must be a power of 2. Minimum N=16. Maximum N = 16384.
+ * 
+ * details Performs an N-point Inverse Fast Fourier Transform (IFFT) on
+ * a complex-valued float32 input stream. The IFFT size N must be a power of 2,
+ * with valid range: 32 ≤ N ≤ 16384.
  *
- * param pY Pointer to buffer for IFFT output
- * param pX Pointer to buffer for IFFT input
- * param pScratch Pointer to scratch buffer. Must be equal to or greater than size of the output buffer
- * param log2N log2(N), where N is the IFFT size
+ * param [out] pY       Pointer to the IFFT output buffer (complex-valued float32).
+ * param [in]  pX       Pointer to the IFFT input buffer (complex-valued float32).
+ * param [in]  pScratch Pointer to a scratch buffer (at least N × 8 bytes).
+ * param [in]  log2N    Base-2 logarithm of the IFFT size N.
  *
  * return Command execution status.
+ *
+ * note The input, output and scratch buffers must be separately allocated and non-overlapping.
  */
 int32_t CE_TransformIFFT_F32(float *pY, float *pX, float *pScratch, int32_t log2N)
 {
