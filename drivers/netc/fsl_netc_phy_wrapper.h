@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 NXP
+ * Copyright 2023, 2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,8 +10,8 @@
 #include "fsl_common.h"
 #include "fsl_netc_mdio.h"
 
-#define getPhyReg(reg) ((uint16_t)(((uint32_t)(reg) >> 1U) & 0xFFFFU))
-#define getPhyDev(reg) ((uint8_t)(((uint32_t)(reg) >> 17U) & 0x1FU))
+#define getPhyReg(reg) ((uint16_t)(((uintptr_t)(reg) >> 1U) & 0xFFFFU))
+#define getPhyDev(reg) ((uint8_t)(((uintptr_t)(reg) >> 17U) & 0x1FU))
 
 /*!
  * @brief ENET_PHY modes supported
