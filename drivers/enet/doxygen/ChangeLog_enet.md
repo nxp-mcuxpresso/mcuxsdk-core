@@ -1,5 +1,10 @@
 # ENET
 
+## [2.10.0]
+
+- New Features
+  - Added function ENET_Ptp1588GetChannelCaptureValue to read last captured time from PTP 1588 timer.
+
 ## [2.9.3]
 
 - Bug Fixes
