@@ -11,8 +11,8 @@
 #include "fsl_netc_mdio.h"
 
 /*! @brief Functions for mapped general register address  */
-#define getPhyReg(reg) ((uint16_t)(((uint32_t)(reg) >> 1U) & 0xFFFFU))
-#define getPhyDev(reg) ((uint8_t)(((uint32_t)(reg) >> 17U) & 0x1FU))
+#define getPhyReg(reg) ((uint16_t)(((uintptr_t)(reg) >> 1U) & 0xFFFFU))
+#define getPhyDev(reg) ((uint8_t)(((uintptr_t)(reg) >> 17U) & 0x1FU))
 
 /*! @brief MAC ADAPTER */
 #define REG_MAC_ADAPTER_LOCK_PHY   0x200U
