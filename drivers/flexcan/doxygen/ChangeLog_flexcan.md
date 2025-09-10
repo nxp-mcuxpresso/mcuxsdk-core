@@ -4,6 +4,7 @@
 
 - Improvements
   - Make API `FLEXCAN_GetFDMailboxOffset` public.
+  - Add API `FLEXCAN_SetMbID` and `FLEXCAN_SetFDMbID` to configure Message Buffer ID individually.
 - Bug Fixes
   - Fixed violations of the CERT INT30-C INT31-C.
   - Fixed violations of the CERT ARR30-C.

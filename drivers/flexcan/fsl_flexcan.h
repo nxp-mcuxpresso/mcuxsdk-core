@@ -1470,6 +1470,18 @@ void FLEXCAN_SetTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable);
  */
 void FLEXCAN_SetRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_config_t *pRxMbConfig, bool enable);
 
+/*!
+ * @brief Configures a FlexCAN Message Buffer identifier.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param mbIdx The Message Buffer index.
+ * @param id CAN Message Buffer Identifier, should use FLEXCAN_ID_EXT() or FLEXCAN_ID_STD() macro.
+ */
+static inline void FLEXCAN_SetMbID(CAN_Type *base, uint8_t mbIdx, uint32_t id)
+{
+    base->MB[mbIdx].ID = id;
+}
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * @brief Configures a FlexCAN transmit message buffer.
@@ -1499,6 +1511,22 @@ void FLEXCAN_SetFDTxMbConfig(CAN_Type *base, uint8_t mbIdx, bool enable);
  *               - false: Disable Rx Message Buffer.
  */
 void FLEXCAN_SetFDRxMbConfig(CAN_Type *base, uint8_t mbIdx, const flexcan_rx_mb_config_t *pRxMbConfig, bool enable);
+
+/*!
+ * @brief Configures a FlexCAN Message Buffer identifier.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param mbIdx The Message Buffer index.
+ * @param id CAN Message Buffer Identifier, should use FLEXCAN_ID_EXT() or FLEXCAN_ID_STD() macro.
+ */
+static inline void FLEXCAN_SetFDMbID(CAN_Type *base, uint8_t mbIdx, uint32_t id)
+{
+    volatile uint32_t *mbAddr = &(base->MB[0].CS);
+    uint32_t offset;
+
+    offset = FLEXCAN_GetFDMailboxOffset(base, mbIdx);
+    mbAddr[offset + 1U] = id;
+}
 #endif
 
 /*!
