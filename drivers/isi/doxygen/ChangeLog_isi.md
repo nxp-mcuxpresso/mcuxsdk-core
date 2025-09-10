@@ -1,5 +1,11 @@
 # ISI
 
+## [2.2.5]
+
+- Update to adapter head file
+  - ISI interface have some channel, head file have been updated to support it,
+    modified driver to compatible this changes.
+
 ## [2.2.4]
 
 - Bug Fixes
