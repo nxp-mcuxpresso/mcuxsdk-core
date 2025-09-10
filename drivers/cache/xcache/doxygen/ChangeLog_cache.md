@@ -1,5 +1,10 @@
 # CACHE XCACHE
 
+## [2.0.4]
+
+- Improvements
+  - Add memory barrier when enabling/disabling cache.
+
 ## [2.0.3]
 
 - Bug Fixes

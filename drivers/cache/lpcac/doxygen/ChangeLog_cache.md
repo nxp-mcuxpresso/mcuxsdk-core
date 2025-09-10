@@ -1,5 +1,10 @@
 # CACHE LPCAC
 
+## [2.1.2]
+
+- Improvements
+  - Add memory barrier when enabling/disabling cache.
+
 ## [2.1.1]
 
 - Bug Fixes

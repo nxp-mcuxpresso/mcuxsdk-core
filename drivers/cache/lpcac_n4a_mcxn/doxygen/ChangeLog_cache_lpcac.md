@@ -1,9 +1,15 @@
 # CACHE LPCAC
 
+## [2.2.1]
+
+- Improvements
+  - Add memory barrier when enabling/disabling cache.
+
 ## [2.2.0]
+
 - Improvements
   - Used new add macros FSL_FEATURE_SYSCON_HAS_LPCAC_CTRL_PARITY_MISS_EN_BIT and FSL_FEATURE_SYSCON_HAS_LPCAC_CTRL_PARITY_FAULT_EN_BIT to
-  support some platforms which PARITY_MISS_EN and PARITY_FAULT_EN bit may be reserved.
+    support some platforms which PARITY_MISS_EN and PARITY_FAULT_EN bit may be reserved.
 
 ## [2.1.1]
 

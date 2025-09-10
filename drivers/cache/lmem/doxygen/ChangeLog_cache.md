@@ -1,6 +1,12 @@
 # CACHE LMEM
 
 ## [2.1.0]
+
+- Improvements
+  - Add memory barrier when enabling/disabling cache.
+
+## [2.1.0]
+
 - Improvements
   - Added new feature macro to support some device do not support PCCCR[ENWRBUF] bit field.
 

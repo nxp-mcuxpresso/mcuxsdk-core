@@ -1,5 +1,10 @@
 # CACHE64
 
+## [2.0.12]
+
+- Improvements
+  - Add memory barrier when enabling/disabling cache.
+
 ## [2.0.11]
 
 - Bug Fixes
