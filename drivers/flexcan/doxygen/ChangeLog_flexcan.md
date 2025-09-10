@@ -2,6 +2,8 @@
 
 ## [2.14.5]
 
+- Improvements
+  - Make API `FLEXCAN_GetFDMailboxOffset` public.
 - Bug Fixes
   - Fixed violations of the CERT INT30-C INT31-C.
   - Fixed violations of the CERT ARR30-C.

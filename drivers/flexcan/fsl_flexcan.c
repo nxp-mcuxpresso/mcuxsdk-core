@@ -244,21 +244,6 @@ static void FLEXCAN_GetSegments(CAN_Type *base,
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
- * @brief Get Mailbox offset number by dword.
- *
- * This function gets the offset number of the specified mailbox.
- * Mailbox is not consecutive between memory regions when payload is not 8 bytes
- * so need to calculate the specified mailbox address.
- * For example, in the first memory region, MB[0].CS address is 0x4002_4080. For 32 bytes
- * payload frame, the second mailbox is ((1/12)*512 + 1%12*40)/4 = 10, meaning 10 dword
- * after the 0x4002_4080, which is actually the address of mailbox MB[1].CS.
- *
- * @param base FlexCAN peripheral base address.
- * @param mbIdx Mailbox index.
- */
-static uint32_t FLEXCAN_GetFDMailboxOffset(CAN_Type *base, uint8_t mbIdx);
-
-/*!
  * @brief Calculates the segment values for a single bit time for CAN FD data phase.
  *
  * This function use to calculates the CAN FD data phase segment values which will be set in CFDCBT/EDCBT
@@ -468,6 +453,50 @@ bool FLEXCAN_IsInstanceHasFDMode(CAN_Type *base)
         (void)FLEXCAN_ExitFreezeMode(base);
         return true;
     }
+}
+
+/*!
+ * brief Get Mailbox offset number by dword.
+ *
+ * This function gets the offset number of the specified mailbox.
+ * Mailbox is not consecutive between memory regions when payload is not 8 bytes
+ * so need to calculate the specified mailbox address.
+ * For example, in the first memory region, MB[0].CS address is 0x4002_4080. For 32 bytes
+ * payload frame, the second mailbox is ((1/12)*512 + 1%12*40)/4 = 10, meaning 10 dword
+ * after the 0x4002_4080, which is actually the address of mailbox MB[1].CS.
+ *
+ * param base FlexCAN peripheral base address.
+ * param mbIdx Mailbox index.
+ * return Mailbox address offset in word.
+ */
+uint32_t FLEXCAN_GetFDMailboxOffset(CAN_Type *base, uint8_t mbIdx)
+{
+    uint32_t offset   = 0;
+    uint32_t dataSize = (base->FDCTRL & CAN_FDCTRL_MBDSR0_MASK) >> CAN_FDCTRL_MBDSR0_SHIFT;
+
+    switch (dataSize)
+    {
+        case (uint32_t)kFLEXCAN_8BperMB:
+            offset = (((uint32_t)mbIdx / 32U) * 512U + ((uint32_t)mbIdx % 32U) * 16U);
+            break;
+        case (uint32_t)kFLEXCAN_16BperMB:
+            offset = (((uint32_t)mbIdx / 21U) * 512U + ((uint32_t)mbIdx % 21U) * 24U);
+            break;
+        case (uint32_t)kFLEXCAN_32BperMB:
+            offset = (((uint32_t)mbIdx / 12U) * 512U + ((uint32_t)mbIdx % 12U) * 40U);
+            break;
+        case (uint32_t)kFLEXCAN_64BperMB:
+            offset = (((uint32_t)mbIdx / 7U) * 512U + ((uint32_t)mbIdx % 7U) * 72U);
+            break;
+        default:
+            /* All the cases have been listed above, the default clause should not be reached. */
+            assert(false);
+            break;
+    }
+
+    /* To get the dword aligned offset, need to divide by 4. */
+    offset = offset / 4U;
+    return offset;
 }
 #endif
 
@@ -2063,45 +2092,6 @@ bool FLEXCAN_CalculateImprovedTimingValues(CAN_Type *base,
 }
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
-/*!
- * brief Get Mailbox offset number by dword.
- *
- * This function gets the offset number of the specified mailbox.
- * Mailbox is not consecutive between memory regions when payload is not 8 bytes
- * so need to calculate the specified mailbox address.
- * For example, in the first memory region, MB[0].CS address is 0x4002_4080. For 32 bytes
- * payload frame, the second mailbox is ((1/12)*512 + 1%12*40)/4 = 10, meaning 10 dword
- * after the 0x4002_4080, which is actually the address of mailbox MB[1].CS.
- *
- * param base FlexCAN peripheral base address.
- * param mbIdx Mailbox index.
- */
-static uint32_t FLEXCAN_GetFDMailboxOffset(CAN_Type *base, uint8_t mbIdx)
-{
-    uint32_t offset   = 0;
-    uint32_t dataSize = (base->FDCTRL & CAN_FDCTRL_MBDSR0_MASK) >> CAN_FDCTRL_MBDSR0_SHIFT;
-    if (dataSize == (uint32_t)kFLEXCAN_8BperMB)
-    {
-        offset = (((uint32_t)mbIdx / 32U) * 512U + ((uint32_t)mbIdx % 32U) * 16U);
-    }
-    else if (dataSize == (uint32_t)kFLEXCAN_16BperMB)
-    {
-        offset = (((uint32_t)mbIdx / 21U) * 512U + ((uint32_t)mbIdx % 21U) * 24U);
-    }
-    else if (dataSize == (uint32_t)kFLEXCAN_32BperMB)
-    {
-        offset = (((uint32_t)mbIdx / 12U) * 512U + ((uint32_t)mbIdx % 12U) * 40U);
-    }
-    else
-    {
-        offset = (((uint32_t)mbIdx / 7U) * 512U + ((uint32_t)mbIdx % 7U) * 72U);
-    }
-
-    /* To get the dword aligned offset, need to divide by 4. */
-    offset = offset / 4U;
-    return offset;
-}
-
 /*!
  * brief Calculates the segment values for a single bit time for CAN FD data phase.
  *

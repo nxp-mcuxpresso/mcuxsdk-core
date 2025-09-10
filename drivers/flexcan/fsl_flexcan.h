@@ -1147,6 +1147,22 @@ extern "C" {
  * @return return TRUE if instance support CAN FD mode, FALSE if instance only support classic CAN (2.0) mode.
  */
 bool FLEXCAN_IsInstanceHasFDMode(CAN_Type *base);
+
+/*!
+ * @brief Get Mailbox offset number by dword.
+ *
+ * This function gets the offset number of the specified mailbox.
+ * Mailbox is not consecutive between memory regions when payload is not 8 bytes
+ * so need to calculate the specified mailbox address.
+ * For example, in the first memory region, MB[0].CS address is 0x4002_4080. For 32 bytes
+ * payload frame, the second mailbox is ((1/12)*512 + 1%12*40)/4 = 10, meaning 10 dword
+ * after the 0x4002_4080, which is actually the address of mailbox MB[1].CS.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param mbIdx Mailbox index.
+ * @return Mailbox address offset in word.
+ */
+uint32_t FLEXCAN_GetFDMailboxOffset(CAN_Type *base, uint8_t mbIdx);
 #endif
 
 /*!
