@@ -1,5 +1,9 @@
 # PUFv3
 
+## [2.0.4]
+
+- Fix warning.
+
 ## [2.0.3]
 
 - Update for various PUF CTRL wrapper.
