@@ -163,10 +163,15 @@ typedef enum _smartdma_flexio_qspi_api
     kSMARTDMA_FLEXIO_QSPI_DMA_NIBBLE_BYTE_SWAP = 0U,
 } smartdma_flexio_qspi_api_t;
 
+#ifndef FLEXIO_QSPI_BUF_T
+#define FLEXIO_QSPI_BUF_T
 /*!
  * @brief Parameter for FlexIO QSPI
+ *
+ * The structure _flexio_qspi_buf is defined in fsl_flexio_qspi.h
  */
 typedef struct _flexio_qspi_buf flexio_qspi_buf_t;
+#endif
 
 typedef struct _smartdma_flexio_qspi_param
 {

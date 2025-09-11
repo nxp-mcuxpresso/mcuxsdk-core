@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if(CONFIG_MCUX_COMPONENT_driver.smartdma)
-    mcux_component_version(2.13.2)
+    mcux_component_version(2.13.3)
 
     mcux_add_source(
         SOURCES
@@ -17,7 +17,7 @@ if(CONFIG_MCUX_COMPONENT_driver.smartdma)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.smartdma_rt500)
-    mcux_component_version(2.12.0)
+    mcux_component_version(2.13.3)
 
     mcux_add_source(
         SOURCES
@@ -30,7 +30,7 @@ if(CONFIG_MCUX_COMPONENT_driver.smartdma_rt500)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.smartdma_mcxn)
-    mcux_component_version(2.12.0)
+    mcux_component_version(2.13.3)
 
     mcux_add_source(
         SOURCES
@@ -43,7 +43,7 @@ if(CONFIG_MCUX_COMPONENT_driver.smartdma_mcxn)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.smartdma_mcxa)
-    mcux_component_version(2.13.2)
+    mcux_component_version(2.13.3)
 
     mcux_add_source(
         SOURCES

@@ -41,7 +41,7 @@
 /*! @name Driver version */
 /*@{*/
 /*! @brief SMARTDMA driver version */
-#define FSL_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 13, 2))
+#define FSL_SMARTDMA_DRIVER_VERSION (MAKE_VERSION(2, 13, 3))
 /*@}*/
 
 /*! @brief Callback function prototype for the smartdma driver. */

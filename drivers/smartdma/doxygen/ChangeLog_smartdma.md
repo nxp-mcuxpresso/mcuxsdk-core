@@ -1,5 +1,10 @@
 # SMARTDMA
 
+## [2.13.3]
+
+- Bug Fixes
+  - Fix RT500 FlexIO QSPI MDK build warning.
+
 ## [2.13.2]
 
 - Other Changes

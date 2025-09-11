@@ -1,5 +1,10 @@
 # FLEXIO_QSPI_SMARTDMA
 
+## [2.0.2]
+
+- Bug Fixes
+  - Fix FlexIO QSPI MDK build warning
+
 ## [2.0.1]
 
 - Improvements
