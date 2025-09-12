@@ -268,6 +268,8 @@ elseif (NOT NO_DEFAULT_CONFIG)
         # for external board with CUSTOM_BOARD_ROOT
         foreach(
           f
+          ${SdkRootDirPath}/examples/prj.conf
+          ${CUSTOM_BOARD_ROOT}/prj.conf
           ${CUSTOM_BOARD_ROOT}/${board}/prj.conf)
           if(EXISTS ${f})
             list(APPEND merge_config_files ${f})
@@ -303,6 +305,8 @@ elseif (NOT NO_DEFAULT_CONFIG)
         # for external board with CUSTOM_BOARD_ROOT
         foreach(
           f
+          ${SdkRootDirPath}/examples/prj.conf
+          ${CUSTOM_BOARD_ROOT}/prj.conf
           ${CUSTOM_BOARD_ROOT}/${board}/prj.conf
           ${CUSTOM_BOARD_ROOT}/${board}/${core_id}/prj.conf)
           if(EXISTS ${f})
