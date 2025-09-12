@@ -25,8 +25,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief smm driver version 2.1.0. */
-#define FSL_SMM_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
+/*! @brief smm driver version 2.1.1. */
+#define FSL_SMM_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
 /*@}*/
 
 /*!
@@ -592,7 +592,7 @@ static inline void SMM_UpdateDeepSleepCounter(SMM_Type *base, uint16_t value)
  */
 static inline uint16_t SMM_ReadDeepSleepCounter(SMM_Type *base)
 {
-    return (uint16_t)(base->DPSLP_COUNT);
+    return (uint16_t)((base->DPSLP_COUNT) & SMM_DPSLP_COUNT_DPSLP_CNT_MASK);
 }
 
 /*!
@@ -605,7 +605,7 @@ static inline void SMM_EnableInterrupts(SMM_Type *base, uint32_t masks)
 {
     uint32_t tmp32 = base->STAT;
 
-    tmp32 &= ~(kSMM_AllSupportedInts);
+    tmp32 &= (uint32_t)(~(kSMM_AllSupportedInts));
     base->STAT = (tmp32 | (masks & kSMM_AllSupportedInts));
 }
 
@@ -619,7 +619,7 @@ static inline void SMM_DisableInterrupts(SMM_Type *base, uint32_t masks)
 {
     uint32_t tmp32 = base->STAT;
 
-     tmp32 &= ~(kSMM_AllSupportedInts);
+     tmp32 &= (uint32_t)(~(kSMM_AllSupportedInts));
     base->STAT = tmp32 & (~(masks & kSMM_AllSupportedInts));
 }
 

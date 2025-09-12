@@ -45,7 +45,7 @@ void SMM_SetExtInterruptConfig(SMM_Type *base, const smm_ext_int_config_t *ptrCo
     uint32_t tmp32 = 0UL;
 
     tmp32 = (base->CNFG) & ~(SMM_CNFG_EXT_INTP_POL_MASK | SMM_CNFG_EXT_INTP_MASK_MASK);
-    tmp32 |= SMM_CNFG_EXT_INTP_MASK(ptrConfig->maskExtIntPin) | SMM_CNFG_EXT_INTP_POL(ptrConfig->extIntPolarity);
+    tmp32 |= (ptrConfig->maskExtIntPin ? SMM_CNFG_EXT_INTP_MASK_MASK : 0UL) | SMM_CNFG_EXT_INTP_POL(ptrConfig->extIntPolarity);
 
     base->CNFG = tmp32;
 }

@@ -1,5 +1,10 @@
 # SMM
 
+## [2.1.1]
+
+- Bug Fixes
+    - Fixed violation of CERT INT31-C
+
 ## [2.1.0]
 
 - New Features
