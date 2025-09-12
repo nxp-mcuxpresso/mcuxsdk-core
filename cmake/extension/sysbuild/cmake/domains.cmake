@@ -18,4 +18,18 @@ foreach(image ${IMAGES_FLASHING_ORDER})
   set(domains_yaml "${domains_yaml}$<${flash_cond}:\n  - ${image}>")
 endforeach()
 set(domains_yaml "${domains_yaml}\n${BUILD_ORDER_CONTENT}")
+
+set(domains_yaml "${domains_yaml}\nname_mapping:")
+foreach(image ${IMAGES})
+  if(TARGET ${image}_cache)
+    get_property(tmp_name TARGET ${image}_cache PROPERTY CMAKE_PROJECT_NAME)
+    set(domains_yaml "${domains_yaml}\n  ${image}: ${tmp_name}")
+  else()
+    message(WARNING
+    "domains.yaml:name_mapping: CMAKE_PROJECT_NAME is not found in CMakeCache.txt, use image name instead."
+    )
+    set(domains_yaml "${domains_yaml}\n  ${image}: ${image}")
+  endif()
+endforeach()
+
 file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/domains.yaml CONTENT "${domains_yaml}")

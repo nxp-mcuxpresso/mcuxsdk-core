@@ -51,6 +51,14 @@ mapping:
     type: seq
     sequence:
       - type: str
+  name_mapping:
+    required: false
+    type: map
+    allowempty: False
+    mapping:
+      regex;(\S+):
+        type: str
+        required: true
 '''
 
 schema = yaml.safe_load(DOMAINS_SCHEMA)
