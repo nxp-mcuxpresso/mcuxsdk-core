@@ -638,11 +638,16 @@ status_t FTM_UpdatePwmDutycycle(FTM_Type *base,
     {
         return kStatus_OutOfRange;
     }
+
     if (dutyCyclePercent == 100U)
     {
         /* For 100% duty cycle */
         assert(mod < 0xFFFFFFFFU);
         cnv = mod + 1U;
+    }
+    else if (dutyCyclePercent == 0U)
+    {
+        cnv = 0U;
     }
     else
     {
