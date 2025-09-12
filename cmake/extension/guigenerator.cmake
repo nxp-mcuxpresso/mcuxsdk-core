@@ -78,6 +78,19 @@ if(NOT DEFINED SB_CONF_FILE)
     list(APPEND COMMON_ENV_SETTINGS ${_VARIABLE_FROM_CMAKE})
 endif ()
 
+set(TMP_COMMON_ENV_SETTINGS)
+foreach(item IN LISTS COMMON_ENV_SETTINGS)
+    string(REGEX MATCH "^([^=]+)=$" match_result "${item}")
+    if(match_result)
+        # if item like A=，transfer to A='', otherwise ruby can not get it from environmenrt variable
+        list(APPEND TMP_COMMON_ENV_SETTINGS "${CMAKE_MATCH_1}=''")
+    else()
+        list(APPEND TMP_COMMON_ENV_SETTINGS "${item}")
+    endif()
+endforeach()
+
+set(COMMON_ENV_SETTINGS ${TMP_COMMON_ENV_SETTINGS}) 
+
 set(PROJECT_GENERATOR
     ${SdkRootDirPath}/scripts/guigenerator/project_generator/project_generator.rb
 )
