@@ -103,14 +103,14 @@ static uint32_t EDMA_GetInstance(DMA_Type *base)
      * (instance >= ARRAY_SIZE(s_edmaBases)) not covered.
      * $ref edma_c_edma_1$.
      */
-    for (instance = 0; instance < ARRAY_SIZE(s_edmaBases); instance++)
+    for (instance = 0; instance < ARRAY_SIZE(s_edmaBases); instance++) /* GCOVR_EXCL_BR_LINE */
     {
         /*
          * $Branch Coverage Justification$
          * (s_edmaBases[instance] != base) not covered.
          * $ref edma_c_ref_1$.
          */
-        if (MSDK_REG_SECURE_ADDR(s_edmaBases[instance]) == MSDK_REG_SECURE_ADDR(base))
+        if (MSDK_REG_SECURE_ADDR(s_edmaBases[instance]) == MSDK_REG_SECURE_ADDR(base)) /* GCOVR_EXCL_BR_LINE */
         {
             break;
         }
@@ -1202,13 +1202,13 @@ status_t EDMA_SubmitTransfer(edma_handle_t *handle, const edma_transfer_config_t
                  * (tcdRegs->DLAST_SGA == temp) not covered.
                  * $ref edma_c_ref_2$.
                  */
-                if (tcdRegs->DLAST_SGA == temp)
+                if (tcdRegs->DLAST_SGA == temp) /* GCOVR_EXCL_BR_LINE */
                 {
                     /*
                      * $Line Coverage Justification$
                      * $ref edma_c_ref_2$.
                      */
-                    return kStatus_Success;
+                    return kStatus_Success; /* GCOVR_EXCL_LINE */
                 }
                 /*
                     If go to this, means the previous transfer finished, and the DONE
@@ -1284,7 +1284,7 @@ void EDMA_StartTransfer(edma_handle_t *handle)
                  * $ref edma_c_ref_3$.
                  */
                 if ((!((handle->base->CH[handle->channel].CH_CSR & DMA_CH_CSR_DONE_MASK) != 0U)) ||
-                    ((tcdRegs->CSR & DMA_TCD_CSR_ESG_MASK) != 0u))
+                    ((tcdRegs->CSR & DMA_TCD_CSR_ESG_MASK) != 0u)) /* GCOVR_EXCL_BR_LINE */
                 {
                     /*
                         Re-enable channel request must be as soon as possible, so must put
@@ -1415,7 +1415,7 @@ void EDMA_HandleIRQ(edma_handle_t *handle)
              * (sga_index != 0U) not covered.
              * $ref edma_c_ref_4$.
              */
-            new_header = sga_index != 0U ? (uint8_t)sga_index - 1U : (uint8_t)handle->tcdSize - 1U;
+            new_header = sga_index != 0U ? (uint8_t)sga_index - 1U : (uint8_t)handle->tcdSize - 1U; /* GCOVR_EXCL_BR_LINE */
         }
         /* Calculate the number of finished TCDs */
         if (new_header == (uint8_t)handle->header)
@@ -1447,7 +1447,7 @@ void EDMA_HandleIRQ(edma_handle_t *handle)
              * (transfer_done) not covered. Test unfeasible,
              * The transfer_done will be false when (new_header == (uint8_t)handle->header) is false.
              */
-            if (transfer_done)
+            if (transfer_done) /* GCOVR_EXCL_BR_LINE */
             {
                 handle->base->CH[handle->channel].CH_CSR |= DMA_CH_CSR_DONE_MASK;
             }
@@ -1530,7 +1530,7 @@ void DMA0_DriverIRQHandler(void)
              * (EDMA_GetChannelStatusFlags(DMA0, i) & (uint32_t)kEDMA_InterruptFlag) == 0U) not covered. Test
              * unfeasible, the Reference interrupt flag state is too short to catch.
              */
-            if ((EDMA_GetChannelStatusFlags(DMA0, i) & (uint32_t)kEDMA_InterruptFlag) != 0U)
+            if ((EDMA_GetChannelStatusFlags(DMA0, i) & (uint32_t)kEDMA_InterruptFlag) != 0U) /* GCOVR_EXCL_BR_LINE */
             {
                 EDMA_HandleIRQ(s_EDMAHandle[prevChannel + i]);
             }

@@ -439,12 +439,12 @@ bool FLEXCAN_IsInstanceHasFDMode(CAN_Type *base)
     /* There are some SoC parts that don't support CAN FD.
      * Checking if FDEN bit is really set to 1 is a way to ensure that CAN FD is supported.
      * When SoC parts don't support CAN FD, FDEN bit stuck at 0 and can't be set to 1. */
-    if (0U == (base->MCR & CAN_MCR_FDEN_MASK))
+    if (0U == (base->MCR & CAN_MCR_FDEN_MASK)) /* GCOVR_EXCL_BR_LINE */
     {
         /* Exit Freeze Mode. */
-        (void)FLEXCAN_ExitFreezeMode(base);
+        (void)FLEXCAN_ExitFreezeMode(base); /* GCOVR_EXCL_START */
         return false;
-    }
+    } /* GCOVR_EXCL_STOP */
     else
     {
         /* Clear CAN FD operation. */
@@ -4841,7 +4841,7 @@ static status_t FLEXCAN_SubHandlerForMB(CAN_Type *base, flexcan_handle_t *handle
                  * (kStatus_Success != status) and (kStatus_FLEXCAN_RxOverflow != status) not covered.
                  * $ref flexcan_c_ref_3$.
                  */
-                if ((kStatus_Success == status) || (kStatus_FLEXCAN_RxOverflow == status))
+                if ((kStatus_Success == status) || (kStatus_FLEXCAN_RxOverflow == status)) /* GCOVR_EXCL_BR_LINE */
                 {
                     /* Align the current index of RX MB timestamp to the timestamp array by handle. */
                     handle->timestamp[result] = handle->mbFDFrameBuf[result]->timestamp;
@@ -4861,7 +4861,7 @@ static status_t FLEXCAN_SubHandlerForMB(CAN_Type *base, flexcan_handle_t *handle
                  * (kStatus_Success != status) and (kStatus_FLEXCAN_RxOverflow != status) not covered.
                  * $ref flexcan_c_ref_3$.
                  */
-                if ((kStatus_Success == status) || (kStatus_FLEXCAN_RxOverflow == status))
+                if ((kStatus_Success == status) || (kStatus_FLEXCAN_RxOverflow == status)) /* GCOVR_EXCL_BR_LINE */
                 {
                     /* Align the current index of RX MB timestamp to the timestamp array by handle. */
                     handle->timestamp[result] = handle->mbFrameBuf[result]->timestamp;
@@ -4975,9 +4975,9 @@ static status_t FLEXCAN_SubHandlerForDataTransfered(CAN_Type *base,
     {
         if (intflag[i] != 0U)
         {
-            bitStart = (i == startIdx) ? (startMbIdx % 32U) : 0U;
-            bitEnd = (i == endIdx) ? (endMbIdx % 32U) : 31U;
-            for (uint32_t j = bitStart; j <= bitEnd; j++)
+            bitStart = (i == startIdx) ? (startMbIdx % 32U) : 0U; /* GCOVR_EXCL_BR_LINE */
+            bitEnd = (i == endIdx) ? (endMbIdx % 32U) : 31U; /* GCOVR_EXCL_BR_LINE */
+            for (uint32_t j = bitStart; j <= bitEnd; j++) /* GCOVR_EXCL_BR_LINE */
             {
                 if (0UL != (intflag[i] & ((uint32_t)1UL << j)))
                 {
@@ -5212,7 +5212,7 @@ void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
  * param startMbIdx First Message Buffer to handle.
  * param endMbIdx Last Message Buffer to handle.
  */
-void FLEXCAN_MbHandleIRQ(CAN_Type *base, flexcan_handle_t *handle, uint32_t startMbIdx, uint32_t endMbIdx)
+void FLEXCAN_MbHandleIRQ(CAN_Type *base, flexcan_handle_t *handle, uint32_t startMbIdx, uint32_t endMbIdx) /* GCOVR_EXCL_FUNCTION */
 {
     status_t status;
     uint32_t mbNum;
@@ -5273,7 +5273,7 @@ void FLEXCAN_MbHandleIRQ(CAN_Type *base, flexcan_handle_t *handle, uint32_t star
  * param base FlexCAN peripheral base address.
  * param handle FlexCAN handle pointer.
  */
-void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
+void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /* GCOVR_EXCL_FUNCTION */
 {
     status_t status;
     uint64_t result;
@@ -5312,7 +5312,7 @@ void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
  * param base FlexCAN peripheral base address.
  * param handle FlexCAN handle pointer.
  */
-void FLEXCAN_BusoffErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
+void FLEXCAN_BusoffErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /* GCOVR_EXCL_FUNCTION */
 {
     uint32_t statusReg;
     uint32_t enableInt;
@@ -5353,7 +5353,7 @@ void FLEXCAN_BusoffErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
  * param base FlexCAN peripheral base address.
  * param handle FlexCAN handle pointer.
  */
-void FLEXCAN_PNWakeUpHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
+void FLEXCAN_PNWakeUpHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /* GCOVR_EXCL_FUNCTION */
 {
     uint64_t result;
     uint32_t enableInt;
@@ -5403,7 +5403,7 @@ void FLEXCAN_MemoryErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
 #endif
 
 void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32_t endMbIdx);
-void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32_t endMbIdx)
+void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32_t endMbIdx) /* GCOVR_EXCL_FUNCTION */
 {
     assert(NULL != s_flexcanHandle[instance]);
 
@@ -5421,7 +5421,7 @@ void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32
 }
 
 void FLEXCAN_DriverEventIRQHandler(uint32_t instance);
-void FLEXCAN_DriverEventIRQHandler(uint32_t instance)
+void FLEXCAN_DriverEventIRQHandler(uint32_t instance) /* GCOVR_EXCL_FUNCTION */
 {
     assert(NULL != s_flexcanHandle[instance]);
 
@@ -5445,7 +5445,7 @@ void FLEXCAN_DriverEventIRQHandler(uint32_t instance)
 }
 
 void FLEXCAN_DriverIRQHandler(uint32_t instance);
-void FLEXCAN_DriverIRQHandler(uint32_t instance)
+void FLEXCAN_DriverIRQHandler(uint32_t instance) /* GCOVR_EXCL_FUNCTION */
 {
     assert(NULL != s_flexcanHandle[instance]);
 

@@ -94,14 +94,14 @@ static uint32_t LPADC_GetInstance(ADC_Type *base)
      * (instance >= ARRAY_SIZE(s_lpadcBases)) not covered. The peripheral base
      * address is always valid and checked by assert.
      */
-    for (instance = 0; instance < ARRAY_SIZE(s_lpadcBases); instance++)
+    for (instance = 0; instance < ARRAY_SIZE(s_lpadcBases); instance++) /* GCOVR_EXCL_BR_LINE */
     {
         /*
          * $Branch Coverage Justification$
          * (s_lpadcBases[instance] != base) not covered. The peripheral base
          * address is always valid and checked by assert.
          */
-        if (MSDK_REG_SECURE_ADDR(s_lpadcBases[instance]) == MSDK_REG_SECURE_ADDR(base))
+        if (MSDK_REG_SECURE_ADDR(s_lpadcBases[instance]) == MSDK_REG_SECURE_ADDR(base)) /* GCOVR_EXCL_BR_LINE */
         {
             break;
         }
@@ -590,7 +590,7 @@ void LPADC_SetConvCommandConfig(ADC_Type *base, uint32_t commandId, const lpadc_
      * $Branch Coverage Justification$
      * For some chips, the LPADC command compare function is always supported.
      */
-    if ((kLPADC_HardwareCompareDisabled != config->hardwareCompareMode) && (commandId < ADC_CV_COUNT))
+    if ((kLPADC_HardwareCompareDisabled != config->hardwareCompareMode) && (commandId < ADC_CV_COUNT)) /* GCOVR_EXCL_BR_LINE */
     {
         /* Set CV register. */
         base->CV[commandId] = (ADC_CV_CVH(config->hardwareCompareValueHigh)    /* Compare value high. */
@@ -1094,7 +1094,7 @@ status_t LPADC_SetCalibrationValue(ADC_Type *base, const lpadc_calibration_value
      * while ((base->STAT & ADC_STAT_CAL_RDY_MASK) == ADC_STAT_CAL_RDY_MASK) not covered. Test unfeasible,
      * the calibration ready state is too short not to catch.
      */
-    while (ADC_STAT_CAL_RDY_MASK != (base->STAT & ADC_STAT_CAL_RDY_MASK))
+    while (ADC_STAT_CAL_RDY_MASK != (base->STAT & ADC_STAT_CAL_RDY_MASK)) /* GCOVR_EXCL_BR_LINE */
     {
 #if LPADC_CALIBRATION_READY_TIMEOUT
         if ((--timeout) == 0U)

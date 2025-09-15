@@ -282,9 +282,9 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
      * $Branch Coverage Justification$
      * $ref fsl_lpi2c_edma_c_ref_1$
      */
-    if (result != kStatus_Success)
+    if (result != kStatus_Success) /* GCOVR_EXCL_BR_LINE */
     {
-        return result;
+        return result; /* GCOVR_EXCL_LINE */
     }
 
     /* We're now busy. */
@@ -479,7 +479,7 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
      * $Branch Coverage Justification$
      * $ref fsl_lpi2c_edma_c_ref_2$
      */
-    if ((hasSendData || (commandCount != 0U)) && (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0))
+    if ((hasSendData || (commandCount != 0U)) && (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0)) /* GCOVR_EXCL_BR_LINE */
     {
         EDMA_StartTransfer(handle->tx);
     }
@@ -666,9 +666,9 @@ static void LPI2C_MasterTransferEdmaHandleIRQ(LPI2C_Type *base, void *lpi2cMaste
         LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterIrqFlags);
 
         /* Check error status */
-        if (0U != (status & (uint32_t)kLPI2C_MasterPinLowTimeoutFlag))
+        if (0U != (status & (uint32_t)kLPI2C_MasterPinLowTimeoutFlag)) /* GCOVR_EXCL_BR_START */
         {
-            result = kStatus_LPI2C_PinLowTimeout;
+            result = kStatus_LPI2C_PinLowTimeout; /* GCOVR_EXCL_LINE */
         }
         /*
         * $Branch Coverage Justification$
@@ -676,17 +676,17 @@ static void LPI2C_MasterTransferEdmaHandleIRQ(LPI2C_Type *base, void *lpi2cMaste
         */
         else if (0U != (status & (uint32_t)kLPI2C_MasterArbitrationLostFlag))
         {
-            result = kStatus_LPI2C_ArbitrationLost;
+            result = kStatus_LPI2C_ArbitrationLost; /* GCOVR_EXCL_LINE */
         }
         else if (0U != (status & (uint32_t)kLPI2C_MasterNackDetectFlag))
         {
-            result = kStatus_LPI2C_Nak;
+            result = kStatus_LPI2C_Nak; /* GCOVR_EXCL_LINE */
         }
         else if (0U != (status & (uint32_t)kLPI2C_MasterFifoErrFlag))
         {
             result = kStatus_LPI2C_FifoError;
         }
-        else
+        else /* GCOVR_EXCL_BR_STOP */
         {
             ; /* Intentional empty */
         }

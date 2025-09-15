@@ -1919,7 +1919,7 @@ static inline uint8_t SPC_GetExternalDomainsStatus(SPC_Type *base)
  */
 static inline void SPC_EnableCoreLDORegulator(SPC_Type *base, bool enable)
 {
-    if (enable)
+    if (enable) /* GCOVR_EXCL_BR_LINE */
     {
         base->CNTRL |= SPC_CNTRL_CORELDO_EN_MASK;
     }
@@ -1929,7 +1929,7 @@ static inline void SPC_EnableCoreLDORegulator(SPC_Type *base, bool enable)
          * $Branch Coverage Justification$
          * If CORE_LDO is disabled, all RAMs data will powered off.
          */
-        base->CNTRL &= ~SPC_CNTRL_CORELDO_EN_MASK;
+        base->CNTRL &= ~SPC_CNTRL_CORELDO_EN_MASK; /* GCOVR_EXCL_LINE */
     }
 }
 
@@ -2109,7 +2109,7 @@ status_t SPC_SetLowPowerModeSystemLDORegulatorConfig(SPC_Type *base, const spc_l
  */
 static inline void SPC_EnableDCDCRegulator(SPC_Type *base, bool enable)
 {
-    if (enable)
+    if (enable) /* GCOVR_EXCL_BR_LINE */
     {
         base->CNTRL |= SPC_CNTRL_DCDC_EN_MASK;
     }
@@ -2119,7 +2119,7 @@ static inline void SPC_EnableDCDCRegulator(SPC_Type *base, bool enable)
          * $Branch Coverage Justification$
          * If DCDC is disabled, all RAMs data will powered off.
          */
-        base->CNTRL &= ~SPC_CNTRL_DCDC_EN_MASK;
+        base->CNTRL &= ~SPC_CNTRL_DCDC_EN_MASK; /* GCOVR_EXCL_LINE */
     }
 }
 

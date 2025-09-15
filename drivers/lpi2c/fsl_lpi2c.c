@@ -330,7 +330,7 @@ status_t LPI2C_MasterCheckAndClearError(LPI2C_Type *base, uint32_t status)
          * Before that, the state was stripped of other attributes, and it only contained the four brother flags.(will
          * improve)
          */
-        else if (0U != (status & (uint32_t)kLPI2C_MasterFifoErrFlag))
+        else if (0U != (status & (uint32_t)kLPI2C_MasterFifoErrFlag)) /* GCOVR_EXCL_BR_LINE */
         {
             result = kStatus_LPI2C_FifoError;
         }
@@ -427,9 +427,9 @@ status_t LPI2C_CheckForBusyBus(LPI2C_Type *base)
      * $Branch Coverage Justification$
      * $ref fsl_lpi2c_c_ref_2$
      */
-    if ((0U != (status & (uint32_t)kLPI2C_MasterBusBusyFlag)) && (0U == (status & (uint32_t)kLPI2C_MasterBusyFlag)))
+    if ((0U != (status & (uint32_t)kLPI2C_MasterBusBusyFlag)) && (0U == (status & (uint32_t)kLPI2C_MasterBusyFlag))) /* GCOVR_EXCL_BR_LINE */
     {
-        ret = kStatus_LPI2C_Busy;
+        ret = kStatus_LPI2C_Busy; /* GCOVR_EXCL_LINE */
     }
 
     return ret;
@@ -800,7 +800,7 @@ status_t LPI2C_MasterStart(LPI2C_Type *base, uint8_t address, lpi2c_direction_t 
      * $Branch Coverage Justification$
      * $ref fsl_lpi2c_c_ref_2$
      */
-    if (kStatus_Success == result)
+    if (kStatus_Success == result) /* GCOVR_EXCL_BR_LINE */
     {
         /* Clear all flags. */
         LPI2C_MasterClearStatusFlags(base, (uint32_t)kLPI2C_MasterClearFlags);
@@ -1061,7 +1061,7 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
      * $Branch Coverage Justification$
      * $ref fsl_lpi2c_c_ref_2$
      */
-    if (kStatus_Success == result)
+    if (kStatus_Success == result) /* GCOVR_EXCL_BR_LINE */
     {
         /* Clear all flags. */
         LPI2C_MasterClearStatusFlags(base, (uint32_t)kLPI2C_MasterClearFlags);
@@ -1134,7 +1134,7 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
              * $Branch Coverage Justification$
              * Errors cannot be simulated by software during transmission.(will improve)
              */
-            if (kStatus_Success == result)
+            if (kStatus_Success == result) /* GCOVR_EXCL_BR_LINE */
             {
                 if ((transfer->flags & (uint32_t)kLPI2C_TransferNoStopFlag) == 0U)
                 {
@@ -1263,9 +1263,9 @@ static status_t LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
                      * $Branch Coverage Justification$
                      * The transmission commands will not exceed FIFO SIZE.(will improve)
                      */
-                    while ((size_t)FSL_FEATURE_LPI2C_FIFO_SIZEn(base) == stateParams->txCount)
+                    while ((size_t)FSL_FEATURE_LPI2C_FIFO_SIZEn(base) == stateParams->txCount) /* GCOVR_EXCL_BR_LINE */
                     {
-                        LPI2C_MasterGetFifoCounts(base, NULL, &stateParams->txCount);
+                        LPI2C_MasterGetFifoCounts(base, NULL, &stateParams->txCount); /* GCOVR_EXCL_LINE */
 
 #if I2C_RETRY_TIMES != 0U
                         if (--waitTimes == 0U)
@@ -1485,7 +1485,7 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
              * $Branch Coverage Justification$
              * $ref fsl_lpi2c_c_ref_1$
              */
-            switch (handle->state)
+            switch (handle->state) /* GCOVR_EXCL_BR_LINE */
             {
                 case (uint8_t)kSendCommandState:
                     result = LPI2C_TransferStateMachineSendCommand(base, handle, &stateParams);
@@ -1506,10 +1506,10 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
                 case (uint8_t)kWaitForCompletionState:
                     LPI2C_TransferStateMachineWaitState(base, handle, &stateParams, isDone);
                     break;
-                default:
+                default: /* GCOVR_EXCL_START */
                     assert(false);
                     break;
-            }
+            } /* GCOVR_EXCL_STOP */
 
             if (result != kStatus_Success)
             {
@@ -1994,11 +1994,11 @@ static status_t LPI2C_SlaveCheckAndClearError(LPI2C_Type *base, uint32_t flags)
          * $Branch Coverage Justification$
          * It is hard to simulate bitError in automation test environment, need interference on bus.(will improve)
          */
-        if (0U != (flags & (uint32_t)kLPI2C_SlaveBitErrFlag))
+        if (0U != (flags & (uint32_t)kLPI2C_SlaveBitErrFlag)) /* GCOVR_EXCL_BR_LINE */
         {
-            result = kStatus_LPI2C_BitError;
+            result = kStatus_LPI2C_BitError; /* GCOVR_EXCL_LINE */
         }
-        else if (0U != (flags & (uint32_t)kLPI2C_SlaveFifoErrFlag))
+        else if (0U != (flags & (uint32_t)kLPI2C_SlaveFifoErrFlag)) /* GCOVR_EXCL_BR_LINE */
         {
             result = kStatus_LPI2C_FifoError;
         }
@@ -2092,7 +2092,7 @@ status_t LPI2C_SlaveSend(LPI2C_Type *base, void *txBuff, size_t txSize, size_t *
          * $Branch Coverage Justification$
          * $ref fsl_lpi2c_c_ref_3$
          */
-        if ((0U != (flags & ((uint32_t)kLPI2C_SlaveStopDetectFlag | (uint32_t)kLPI2C_SlaveRepeatedStartDetectFlag))) &&
+        if ((0U != (flags & ((uint32_t)kLPI2C_SlaveStopDetectFlag | (uint32_t)kLPI2C_SlaveRepeatedStartDetectFlag))) && /* GCOVR_EXCL_BR_LINE */
             (remaining != 0U))
         {
             LPI2C_SlaveClearStatusFlags(
@@ -2183,7 +2183,7 @@ status_t LPI2C_SlaveReceive(LPI2C_Type *base, void *rxBuff, size_t rxSize, size_
          * $Branch Coverage Justification$
          * $ref fsl_lpi2c_c_ref_3$
          */
-        if ((0U != (flags & ((uint32_t)kLPI2C_SlaveStopDetectFlag | (uint32_t)kLPI2C_SlaveRepeatedStartDetectFlag))) &&
+        if ((0U != (flags & ((uint32_t)kLPI2C_SlaveStopDetectFlag | (uint32_t)kLPI2C_SlaveRepeatedStartDetectFlag))) && /* GCOVR_EXCL_BR_LINE */
             (remaining != 0U))
         {
             LPI2C_SlaveClearStatusFlags(
@@ -2300,9 +2300,9 @@ status_t LPI2C_SlaveTransferNonBlocking(LPI2C_Type *base, lpi2c_slave_handle_t *
          * $Branch Coverage Justification$
          * $ref fsl_lpi2c_c_ref_2$
          */
-        if ((0U != (status & (uint32_t)kLPI2C_SlaveBusBusyFlag)) && (0U == (status & (uint32_t)kLPI2C_SlaveBusyFlag)))
+        if ((0U != (status & (uint32_t)kLPI2C_SlaveBusBusyFlag)) && (0U == (status & (uint32_t)kLPI2C_SlaveBusyFlag))) /* GCOVR_EXCL_BR_LINE */
         {
-            result = kStatus_LPI2C_Busy;
+            result = kStatus_LPI2C_Busy; /* GCOVR_EXCL_LINE */
         }
     }
 
