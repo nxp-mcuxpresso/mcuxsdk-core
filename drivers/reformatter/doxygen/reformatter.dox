@@ -1,0 +1,9 @@
+/*!
+@defgroup reformatter REFORMATTER: Pixel reformatter
+@details The MCUXpresso SDK provides a driver for the REFORMATTER module of MCUXpresso SDK devices.
+
+The Pixel Reformatter(REFORMATTER) does conversion between the following blocks:
+1. MIPI CSI-2 to ISI Pixel Link interface
+2. ISI Pixel Link interface to DCIF PDI interface
+
+*/
