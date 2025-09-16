@@ -1,0 +1,29 @@
+/*!
+@defgroup igf IGF: Input Glitch Filter
+@details The MCUXpresso SDK provides a driver for the Input Glitch Filter (IGF)
+module available on supported MCUXpresso SDK devices.
+
+# Function groups {#IGFFunc}
+
+The IGF driver supports configuration and control of glitch filtering on input signals.
+
+## Initialization and Deinitialization {#IGFInit}
+The function IGF_Init() initializes the IGF module and enables its clock.
+The function IGF_Deinit() disables the IGF module and its clock.
+
+## Default Configuration {#IGFDefault}
+The function IGF_GetDefaultConfig() provides a default configuration structure
+for the IGF module.
+
+## Configuration {#IGFConfig}
+The function IGF_SetIgfConfig() sets the IGF configuration for a specified channel.
+Users can configure filter behavior, prescaler, thresholds, and polarity.
+
+## Enable & Disable Filter {#IGFEnable}
+The function IGF_Enable() enables or disables the glitch filter for a specified channel.
+
+## Status {#IGFStatus}
+The function IGF_GetStatusFlags() retrieves the status flags from the IGF module.
+The function IGF_ClearStatusFlags() clears specified status flags.
+
+*/
