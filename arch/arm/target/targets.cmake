@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -11,6 +11,7 @@ mcux_add_iar_configuration(
             flexspi_nor_sdram_debug
             flexspi_nor_hyperram_debug
             sdram_debug
+            psram_debug
             sdram_txt_debug
             hyperram_debug
             hyperram_txt_debug
@@ -28,6 +29,7 @@ mcux_add_iar_configuration(
             flexspi_nor_sdram_release
             flexspi_nor_hyperram_release
             sdram_release
+            psram_release
             sdram_txt_release
             hyperram_release
             hyperram_txt_release
@@ -44,6 +46,7 @@ mcux_add_mdk_configuration(
             flexspi_nor_sdram_debug
             flexspi_nor_hyperram_debug
             sdram_debug
+            psram_debug
             sdram_txt_debug
             hyperram_debug
             hyperram_txt_debug
@@ -61,6 +64,7 @@ mcux_add_mdk_configuration(
             flexspi_nor_sdram_release
             flexspi_nor_hyperram_release
             sdram_release
+            psram_release
             sdram_txt_release
             hyperram_release
             hyperram_txt_release
@@ -77,6 +81,7 @@ mcux_add_armgcc_configuration(
             flexspi_nor_sdram_debug
             flexspi_nor_hyperram_debug
             sdram_debug
+            psram_debug
             sdram_txt_debug
             hyperram_debug
             hyperram_txt_debug
@@ -95,6 +100,7 @@ mcux_add_armgcc_configuration(
             flexspi_nor_sdram_release
             flexspi_nor_hyperram_release
             sdram_release
+            psram_release
             sdram_txt_release
             hyperram_release
             hyperram_txt_release
