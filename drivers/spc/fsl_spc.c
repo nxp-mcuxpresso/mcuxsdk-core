@@ -164,13 +164,19 @@ status_t SPC_SetActiveModeBandgapModeConfig(SPC_Type *base, spc_bandgap_mode_t m
          * $ref spc_c_ref_1$.
          */
         /* The bandgap mode must be enabled if any regulators' drive strength set as Normal. */
-        if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_SYSLDO_VDD_DS_MASK) ==
-                SPC_ACTIVE_CFG_SYSLDO_VDD_DS(kSPC_SysLDO_NormalDriveStrength) ||
-            (base->ACTIVE_CFG & SPC_ACTIVE_CFG_DCDC_VDD_DS_MASK) ==
-                SPC_ACTIVE_CFG_DCDC_VDD_DS(kSPC_DCDC_NormalDriveStrength))
+        if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_DCDC_VDD_DS_MASK) ==
+            SPC_ACTIVE_CFG_DCDC_VDD_DS(kSPC_DCDC_NormalDriveStrength))
         {
             return kStatus_SPC_BandgapModeWrong;
         }
+
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
+        if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_SYSLDO_VDD_DS_MASK) ==
+            SPC_ACTIVE_CFG_SYSLDO_VDD_DS(kSPC_SysLDO_NormalDriveStrength))
+        {
+            return kStatus_SPC_BandgapModeWrong;
+        }
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
 
         /* state of GLITCH_DETECT_DISABLE will be ignored if bandgap is disabled. */
         if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_GLITCH_DETECT_DISABLE_MASK) == 0UL)
@@ -263,13 +269,20 @@ status_t SPC_SetLowPowerModeBandgapmodeConfig(SPC_Type *base, spc_bandgap_mode_t
          */
         /* The bandgap mode must be enabled if any regulators' drive strength set as Normal. */
         if (((base->LP_CFG & SPC_LP_CFG_DCDC_VDD_DS_MASK) == SPC_LP_CFG_DCDC_VDD_DS(kSPC_DCDC_NormalDriveStrength)) ||
-            ((base->LP_CFG & SPC_LP_CFG_SYSLDO_VDD_DS_MASK) ==
-             SPC_LP_CFG_SYSLDO_VDD_DS(kSPC_SysLDO_NormalDriveStrength)) ||
             ((base->LP_CFG & SPC_LP_CFG_CORELDO_VDD_DS_MASK) ==
              SPC_LP_CFG_CORELDO_VDD_DS(kSPC_CoreLDO_NormalDriveStrength)))
         {
             return kStatus_SPC_BandgapModeWrong;
         }
+
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
+        if ((((base->LP_CFG & SPC_LP_CFG_SYSLDO_VDD_DS_MASK) ==
+             SPC_LP_CFG_SYSLDO_VDD_DS(kSPC_SysLDO_NormalDriveStrength))))
+        {
+            return kStatus_SPC_BandgapModeWrong;
+        }
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
+
 
         /* state of GLITCH_DETECT_DISABLE will be ignored if bandgap is disabled. */
         if ((base->LP_CFG & SPC_LP_CFG_GLITCH_DETECT_DISABLE_MASK) == 0UL)
@@ -427,6 +440,7 @@ status_t SPC_EnableLowPowerModeCoreLowVoltageDetect(SPC_Type *base, bool enable)
     return status;
 }
 
+#if (defined(FSL_FEATURE_SPC_HAS_VDD_SYS) && FSL_FEATURE_SPC_HAS_VDD_SYS)
 /*!
  * @brief Set system VDD Low-voltage level selection.
  *
@@ -600,6 +614,8 @@ status_t SPC_EnableLowPowerModeSystemLowVoltageDetect(SPC_Type *base, bool enabl
     return status;
 }
 
+#endif /* FSL_FEATURE_SPC_HAS_VDD_SYS */
+
 /*!
  * brief Set IO VDD Low-Voltage level selection.
  *
@@ -615,7 +631,11 @@ void SPC_SetIOVDDLowVoltageLevel(SPC_Type *base, spc_low_voltage_level_select_t 
 
     reg = base->VD_IO_CFG;
 
-    base->VD_IO_CFG &= ~(SPC_VD_IO_CFG_LVDRE_MASK | SPC_VD_IO_CFG_LVDIE_MASK | SPC_VD_IO_CFG_LVSEL_MASK);
+    base->VD_IO_CFG &= ~(SPC_VD_IO_CFG_LVSEL_MASK
+#if (defined(SPC_VD_IO_CFG_LVDRE_MASK) && defined(SPC_VD_IO_CFG_LVDIE_MASK))
+                         | SPC_VD_IO_CFG_LVDRE_MASK | SPC_VD_IO_CFG_LVDIE_MASK
+#endif
+    );
     reg |= SPC_VD_IO_CFG_LVSEL(level);
 
     base->VD_IO_CFG = reg;
@@ -642,12 +662,23 @@ void SPC_SetIOVoltageDetectConfig(SPC_Type *base, const spc_io_voltage_detect_co
     SPC_SetIOVDDLowVoltageLevel(base, config->level);
 
     reg = base->VD_IO_CFG;
-    reg &= ~(SPC_VD_IO_CFG_LVDRE_MASK | SPC_VD_IO_CFG_LVDIE_MASK | SPC_VD_IO_CFG_HVDRE_MASK | SPC_VD_IO_CFG_HVDIE_MASK);
+    reg &= ~(
+#if (defined(SPC_VD_IO_CFG_LVDRE_MASK))
+        SPC_VD_IO_CFG_LVDRE_MASK |
+#endif
+#if (defined(SPC_VD_IO_CFG_LVDIE_MASK))
+        SPC_VD_IO_CFG_LVDIE_MASK |
+#endif
+        SPC_VD_IO_CFG_HVDRE_MASK | SPC_VD_IO_CFG_HVDIE_MASK);
 
     reg |= (config->option.HVDInterruptEnable) ? SPC_VD_IO_CFG_HVDIE(1U) : SPC_VD_IO_CFG_HVDIE(0U);
+#if defined(SPC_VD_IO_CFG_LVDIE_MASK)
     reg |= (config->option.LVDInterruptEnable) ? SPC_VD_IO_CFG_LVDIE(1U) : SPC_VD_IO_CFG_LVDIE(0U);
+#endif
     reg |= (config->option.HVDResetEnable) ? SPC_VD_IO_CFG_HVDRE(1U) : SPC_VD_IO_CFG_HVDRE(0U);
+#if defined(SPC_VD_IO_CFG_LVDRE_MASK)
     reg |= (config->option.LVDResetEnable) ? SPC_VD_IO_CFG_LVDRE(1U) : SPC_VD_IO_CFG_LVDRE(0U);
+#endif
 
     base->VD_IO_CFG = reg;
 }
@@ -966,6 +997,7 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_low
     return kStatus_Success;
 }
 
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
 /*!
  * brief Configs System LDO VDD Regulator in Active mode.
  *
@@ -1146,6 +1178,7 @@ status_t SPC_SetLowPowerModeSystemLDORegulatorConfig(SPC_Type *base, const spc_l
 
     return kStatus_Success;
 }
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
 
 /*!
  * brief Configs DCDC VDD Regulator in Active mode.
@@ -1319,6 +1352,7 @@ status_t SPC_SetLowPowerModeDCDCRegulatorConfig(SPC_Type *base, const spc_lowpow
     return kStatus_Success;
 }
 
+#if (defined(FSL_FEATURE_SPC_HAS_DCDC_BURST_CFG) && FSL_FEATURE_SPC_HAS_DCDC_BURST_CFG)
 /*!
  * brief Config DCDC Burst options
  *
@@ -1391,6 +1425,7 @@ void SPC_SetDCDCRefreshCount(SPC_Type *base, uint16_t count)
 
     base->DCDC_BURST_CFG = reg;
 }
+#endif /* FSL_FEATURE_SPC_HAS_DCDC_BURST_CFG */
 
 /*!
  * brief Configs regulators in Active mode.
@@ -1436,14 +1471,18 @@ status_t SPC_SetActiveModeRegulatorsConfig(SPC_Type *base, const spc_active_mode
                 }
 #endif
             }
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
             status = SPC_SetActiveModeSystemLDORegulatorConfig(base, &config->SysLDOOption);
+#endif
             if (status == kStatus_Success)
             {
                 status = SPC_SetActiveModeBandgapModeConfig(base, config->bandgapMode);
+#if (defined(FSL_FEATURE_SPC_HAS_LPBUFF) && FSL_FEATURE_SPC_HAS_LPBUFF)
                 if (status == kStatus_Success)
                 {
                     SPC_EnableActiveModeCMPBandgapBuffer(base, config->lpBuff);
                 }
+#endif /* FSL_FEATURE_SPC_HAS_LPBUFF */
             }
         }
     }
@@ -1476,7 +1515,9 @@ status_t SPC_SetLowPowerModeRegulatorsConfig(SPC_Type *base, const spc_lowpower_
     status = SPC_SetLowPowerModeCoreLDORegulatorConfig(base, &config->CoreLDOOption);
     if (status == kStatus_Success)
     {
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
         status = SPC_SetLowPowerModeSystemLDORegulatorConfig(base, &config->SysLDOOption);
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
         if (status == kStatus_Success)
         {
             status = SPC_SetLowPowerModeDCDCRegulatorConfig(base, &config->DCDCOption);
@@ -1485,7 +1526,9 @@ status_t SPC_SetLowPowerModeRegulatorsConfig(SPC_Type *base, const spc_lowpower_
                 status = SPC_SetLowPowerModeBandgapmodeConfig(base, config->bandgapMode);
                 if (status == kStatus_Success)
                 {
+#if (defined(FSL_FEATURE_SPC_HAS_LPBUFF) && FSL_FEATURE_SPC_HAS_LPBUFF)
                     SPC_EnableLowPowerModeCMPBandgapBufferMode(base, config->lpBuff);
+#endif /* FSL_FEATURE_SPC_HAS_LPBUFF */
                     SPC_EnableLowPowerModeLowPowerIREF(base, config->lpIREF);
                     SPC_EnableLowPowerModeCoreVDDInternalVoltageScaling(base, config->CoreIVS);
                 }
@@ -1562,12 +1605,18 @@ status_t SPC_SetHighPowerModeBandgapModeConfig(SPC_Type *base, spc_bandgap_mode_
         }
 
         /* The bandgap mode must be enabled if any regulators' drive strength set as Normal. */
-        if (((base->HP_CFG & SPC_HP_CFG_SYSLDO_VDD_DS_MASK) ==
-             SPC_HP_CFG_SYSLDO_VDD_DS(kSPC_SysLDO_NormalDriveStrength)) ||
-            ((base->HP_CFG & SPC_HP_CFG_DCDC_VDD_DS_MASK) == SPC_HP_CFG_DCDC_VDD_DS(kSPC_DCDC_NormalDriveStrength)))
+        if (((base->HP_CFG & SPC_HP_CFG_DCDC_VDD_DS_MASK) == SPC_HP_CFG_DCDC_VDD_DS(kSPC_DCDC_NormalDriveStrength)))
         {
             return kStatus_SPC_BandgapModeWrong;
         }
+
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
+        if (((base->HP_CFG & SPC_HP_CFG_SYSLDO_VDD_DS_MASK) ==
+             SPC_HP_CFG_SYSLDO_VDD_DS(kSPC_SysLDO_NormalDriveStrength)))
+        {
+            return kStatus_SPC_BandgapModeWrong;
+        }
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
 
         /*
          * $Branch Coverage Justification$
@@ -1679,6 +1728,7 @@ status_t SPC_SetHighPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_hp
     return kStatus_Success;
 }
 
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
 /*!
  * brief Configure System LDO regulator in high power mode.
  *
@@ -1771,6 +1821,7 @@ status_t SPC_SetHighPowerModeSystemLDORegulatorConfig(SPC_Type *base, const spc_
 
     return kStatus_Success;
 }
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
 
 /*!
  * brief Configure DCDC regulator in high power mode.
@@ -1870,14 +1921,18 @@ status_t SPC_SetHighPowerModeRegulatorsConfig(SPC_Type *base, const spc_hp_mode_
         status = SPC_SetHighPowerModeDCDCRegulatorConfig(base, &config->DCDCOption);
         if (status == kStatus_Success)
         {
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
             status = SPC_SetHighPowerModeSystemLDORegulatorConfig(base, &config->SysLDOOption);
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
             if (status == kStatus_Success)
             {
                 status = SPC_SetHighPowerModeBandgapModeConfig(base, config->bandgapMode);
+#if (defined(FSL_FEATURE_SPC_HAS_LPBUFF) && FSL_FEATURE_SPC_HAS_LPBUFF)
                 if (status == kStatus_Success)
                 {
                     SPC_EnableHighPowerModeCMPBandgapBuffer(base, config->lpBuff);
                 }
+#endif /* FSL_FEATURE_SPC_HAS_LPBUFF */
             }
         }
     }

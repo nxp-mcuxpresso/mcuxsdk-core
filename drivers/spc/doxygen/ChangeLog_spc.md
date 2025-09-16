@@ -1,5 +1,10 @@
 # SPC
 
+## [2.8.0]
+
+- Improvements
+  - Added feature macros to support some platforms which do not have system LDO, VDD_SYS, DCDC_BURST_CFG.
+
 ## [2.7.1]
 
 - Improvements
