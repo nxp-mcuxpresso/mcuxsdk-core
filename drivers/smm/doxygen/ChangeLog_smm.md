@@ -3,7 +3,11 @@
 ## [2.1.1]
 
 - Bug Fixes
-    - Fixed violation of CERT INT31-C
+    - Fixed violation of CERT INT31-C.
+    - Added a workaround for an issue where the `SMM->STAT` register was incorrectly mapped
+
+- Improvements
+    - Refined comments throughout the `fsl_smm.h` header file to improve clarity and consistency.
 
 ## [2.1.0]
 
