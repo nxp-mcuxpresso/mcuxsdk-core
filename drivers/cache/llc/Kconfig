@@ -1,0 +1,22 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.cache_llc
+    bool
+    default y if MCUX_HW_IP_DriverType_LLC
+
+config MCUX_COMPONENT_driver.cache_llc
+    bool "cache_llc"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.cache_llc
+
+if MCUX_COMPONENT_driver.cache_llc
+
+    config LLC_MAINTENANCE_TIMEOUT
+        int "LLC maintenance operation timeout"
+        default 1000
+        help
+          Timeout value for LLC maintenance operations.
+
+endif

@@ -1,0 +1,85 @@
+/*!
+@defgroup llcache Last Level Cache (LLC) Driver
+@details The MCUXpresso SDK provides a peripheral driver for the on-chip Last Level Cache (LLC).
+                 This driver configures and controls the LLC, performs cache maintenance, and exposes
+                 optional features such as scratchpad, way partitioning, cache-attribute overrides,
+                 error reporting, interrupt handling, and a performance monitor.
+
+@note Reserved-bit safety: all register writes in this driver use field masks and
+            read-modify-write sequences to avoid modifying reserved or unused bits. Reads
+            mask and return only documented fields.
+
+@section llc_features Features
+- 128-byte cache line (see capabilities via ::LLC_GetCapabilities)
+- Cache enable/disable for lookup and fill (::LLC_EnableCache, ::LLC_DisableCache)
+- Cache maintenance (invalidate/flush) by all, by set/way, by address, and by ranges
+- Optional scratchpad mode configured per-way (::LLC_ConfigScratchpad)
+- Optional way partitioning by agent (::LLC_ConfigWayPartition)
+- Optional cache attribute override for AXI read/write (::LLC_SetCacheOverride)
+- Error detection and status reporting (::LLC_EnableErrorDetection, ::LLC_GetErrorStatus)
+- Interrupt mask/status and event flags (::LLC_EnableInterrupts, ::LLC_DisableInterrupts,
+    ::LLC_GetEnabledInterrupts, ::LLC_GetStatusFlags, ::LLC_ClearStatusFlags)
+- Performance monitor with counters and thresholds (::LLC_InitPerformanceMonitor,
+    ::LLC_StartPerformanceMonitor, ::LLC_StopPerformanceMonitor, ::LLC_ResetPerformanceCounters,
+    ::LLC_GetPerformanceCounters)
+
+@section llc_config Configuration
+- ::LLC_GetDefaultConfig initializes a ::llc_config_t with safe defaults.
+- ::LLC_Init applies the configuration, initializes tag/data arrays, and enables cache.
+- ::LLC_GetVersion fills ::llc_version_info_t with {major, minor, patch}.
+- ::LLC_GetCapabilities fills ::llc_feature_capability_t (cacheLineSize, axiDataWidth,
+    freeRun capability, performance counter width).
+
+The ::llc_config_t provides:
+- enableErrorDetection: enable error detection logic.
+- enableWriteAllocPartial: enable partial write allocation when supported.
+- enableReadAllocPartial: present in the API; application should check device support.
+- scratchpadConfig: optional ::llc_scratchpad_config_t.
+
+@section llc_maintenance Cache Maintenance
+- ::LLC_InvalidateCache: invalidate all valid entries (flush valid entries operation).
+- ::LLC_InvalidateCacheBySetWay: invalidate a specific set/way.
+- ::LLC_InvalidateCacheByAddress: invalidate the line at the given address.
+- ::LLC_InvalidateCacheByAddressRange: invalidate a range of lines starting at address.
+- ::LLC_InvalidateCacheBySetWayRange: invalidate a range over set/way space.
+
+All maintenance operations program documented location registers and start the operation
+via the maintenance control register; completion is polled with a timeout.
+
+@section llc_scratchpad Scratchpad
+Configure a portion of LLC as scratchpad memory:
+- ::LLC_ConfigScratchpad accepts ::llc_scratchpad_config_t {enable, numWays, baseAddress, size}.
+- The baseAddress is aligned to a cache line; numWays/size are provided as actual values
+    (driver encodes them as minus-one per hardware definition).
+
+@section llc_way_partition Way Partitioning
+Restrict agents to specific ways of the cache:
+- ::LLC_ConfigWayPartition(index, ::llc_way_partition_config_t) programs agentId validity and
+    way enable vector for one of up to 8 partition control sets.
+
+@section llc_override Cache Attribute Override
+Control AxCACHE attributes per channel:
+- ::LLC_SetCacheOverride(type, overrideValue) supports write, read, or disable. The value is the
+    AxCACHE encoding applied to the respective AXI channel when enabled.
+
+@section llc_error Error Management and Interrupts
+- ::LLC_EnableErrorDetection(errorType, enable) controls correctable and uncorrectable
+    detectors (memory and protocol).
+- ::LLC_GetErrorStatus fills ::llc_error_status_t with valid flags, types, info, and locations.
+- ::LLC_EnableInterrupts / ::LLC_DisableInterrupts take a mask of ::llc_interrupt_enable_t.
+- ::LLC_GetEnabledInterrupts returns the current interrupt enable mask.
+- Status flags are read via ::LLC_GetStatusFlags and cleared with ::LLC_ClearStatusFlags using
+    a mask of ::llc_status_flags_t.
+
+@section llc_perf Performance Monitor
+- ::LLC_InitPerformanceMonitor configures enable mode, optional hardware trigger, duration, and
+    RTT/WTT thresholds (valid threshold range 0..7).
+- ::LLC_StartPerformanceMonitor and ::LLC_StopPerformanceMonitor control the monitor.
+- ::LLC_ResetPerformanceCounters resets all counters.
+- ::LLC_GetPerformanceCounters reads the set of traffic and hit/beat counters
+    into ::llc_performance_counters_t.
+
+@section llc_barriers Memory Barriers
+The driver uses the ::LLCACHE_BARRIER macro around control sequences to enforce DSB/ISB ordering
+when enabling/disabling cache lookup/fill and before/after maintenance operations as needed.
+*/

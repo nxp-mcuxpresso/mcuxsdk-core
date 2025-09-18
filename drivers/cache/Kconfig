@@ -13,7 +13,7 @@ config MCUX_PRJSEG_driver.cache
     select MCUX_COMPONENT_driver.cache_lmem if MCUX_HAS_COMPONENT_driver.cache_lmem
     select MCUX_COMPONENT_driver.cache_armv7_m7 if MCUX_HAS_COMPONENT_driver.cache_armv7_m7
     select MCUX_COMPONENT_driver.cache_lpcac_n4a_mcxn if MCUX_HAS_COMPONENT_driver.cache_lpcac_n4a_mcxn
-
+    select MCUX_COMPONENT_driver.cache_llcache if MCUX_HAS_COMPONENT_driver.cache_llcache
 
 config MCUX_PRJSEG_driver.flash_cache
     bool "flash cache"
