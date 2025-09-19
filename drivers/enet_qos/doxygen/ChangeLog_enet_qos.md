@@ -1,5 +1,10 @@
 # ENET_QOS
 
+## [2.7.1]
+
+- Bug Fixes
+  - Fixed writing after DMA_CH array on platforms with smaller number of channels (EMAC).
+
 ## [2.7.0]
 
 - New features

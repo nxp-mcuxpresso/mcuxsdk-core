@@ -42,6 +42,7 @@
 #define ENET_QOS_RXBUFF_IGNORELSB_BITS (2U)
 #endif /* ENET_QOS_RXBUFF_IGNORELSB_BITS */
 
+#define ENET_QOS_DMA_CH_COUNT EMAC_DMA_CH_COUNT
 #define ENET_QOS_DMA_CHX_INT_EN_TXSE_MASK EMAC_DMA_CHX_INT_EN_TXSE_MASK
 #define ENET_QOS_DMA_CHX_INT_EN_RBUE_MASK EMAC_DMA_CHX_INT_EN_RBUE_MASK
 #define ENET_QOS_DMA_CHX_INT_EN_RSE_MASK EMAC_DMA_CHX_INT_EN_RSE_MASK
@@ -216,7 +217,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief Defines the driver version. */
-#define FSL_ENET_QOS_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
+#define FSL_ENET_QOS_DRIVER_VERSION (MAKE_VERSION(2, 7, 1))
 /*! @} */
 
 /*! @name Control and status region bit masks of the receive buffer descriptor. */
@@ -295,7 +296,7 @@
 /*! @name Defines some Ethernet parameters. */
 /*! @{ */
 #ifndef ENET_QOS_RING_NUM_MAX
-#define ENET_QOS_RING_NUM_MAX (5U)          /*!< The Maximum number of tx/rx descriptor rings. */
+#define ENET_QOS_RING_NUM_MAX ENET_QOS_DMA_CH_COUNT /*!< The Maximum number of tx/rx descriptor rings. */
 #endif
 #define ENET_QOS_FRAME_MAX_FRAMELEN (1518U) /*!< Default maximum Ethernet frame size. */
 #define ENET_QOS_FCS_LEN            (4U)    /*!< Ethernet FCS length. */
