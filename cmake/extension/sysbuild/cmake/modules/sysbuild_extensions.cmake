@@ -606,8 +606,8 @@ function(ExternalZephyrProject_Cmake)
     )
   endif()
 
-  # Create GUI project for IAR/MDK automatically when invoking sysbuild
-  if (${${ZCMAKE_APPLICATION}_toolchain} MATCHES "iar|mdk|xtensa|armgcc" AND FOUND_RUBY_EXECUTABLE)
+  # Execute guigenerator scripts for all toolchains automatically when invoking sysbuild
+  if (${${ZCMAKE_APPLICATION}_toolchain} MATCHES "iar|mdk|xtensa|armgcc|riscvllvm" AND FOUND_RUBY_EXECUTABLE)
     
     # Create standalone project if user add "-t standalone_project" in command
     # Otherwise create GUI project
