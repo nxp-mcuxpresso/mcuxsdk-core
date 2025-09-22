@@ -18,7 +18,7 @@
           <Vendor>NXP</Vendor>
           <PackID>NXP.MCXL255_DFP.25.06.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
-          <Cpu>CPUTYPE("Cortex-M33") FPU3(SFPU)  DSP</Cpu>
+          <Cpu>CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
           <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD14000000 -FC2000 -FN1 -FF0MCXL255X -FS00 -FL080000 -FP0($$Device:MCXL255VDF$devices/MCXL255/arm/MCXL25X.FLM))</FlashDriverDll>
@@ -393,7 +393,7 @@
           <Vendor>NXP</Vendor>
           <PackID>NXP.MCXL255_DFP.25.06.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
-          <Cpu>IRAM(0x10000000,0x020000) IRAM2(0x20000000,0x6000) IROM(0x03000000,0x2000) IROM2(0x13000000,0x2000) XRAM(0x04000000,0x2000) XRAM2(0x14000000,0x2000) XRAM3(0x04002000,0x1000) XROM(0x00000000,0x020000) CPUTYPE("Cortex-M33") CLOCK(12000000) ELITTLE</Cpu>
+          <Cpu>CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
           <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD14000000 -FC2000 -FN1 -FF0MCXL25X -FS00 -FL080000 -FP0($$Device:MCXL255VDF$devices/MCXL255/arm/MCXL25X.FLM))</FlashDriverDll>
