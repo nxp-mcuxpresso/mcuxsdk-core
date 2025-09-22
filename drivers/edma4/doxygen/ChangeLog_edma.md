@@ -4,6 +4,8 @@
 
 - Improvements
   - Add condition to fix build warnings(array subscript 4 is above array bounds of 'edma_handle_t *[4][64]')
+- Bug Fixes
+  - Fixed the EDMA header index retrieval error caused by done bit calculation mistake issue.
 
 ## [2.10.6]
 

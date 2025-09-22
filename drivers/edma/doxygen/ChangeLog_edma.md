@@ -1,5 +1,10 @@
 # EDMA
 
+## [2.4.6]
+
+- Bug Fixes
+  - Fixed the EDMA header index retrieval error caused by done bit calculation mistake issue.
+
 ## [2.4.5]
 
 - Bug Fixes

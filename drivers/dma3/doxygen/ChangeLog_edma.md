@@ -1,5 +1,10 @@
 # EDMA (DMA3)
 
+## [2.5.2]
+
+- Bug Fixes
+  - Fixed the EDMA header index retrieval error caused by done bit calculation mistake issue.
+
 ## [2.5.1]
 
 - Bug Fixes
