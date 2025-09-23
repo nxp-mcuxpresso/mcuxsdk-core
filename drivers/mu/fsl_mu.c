@@ -25,9 +25,13 @@
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*! @brief Pointers to mu clocks for each instance. */
 static const clock_ip_name_t s_muClocks[] = MU_CLOCKS;
+#endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) || \
+    defined(MU_RESETS_ARRAY)
 /*! @brief Pointers to mu bases for each instance. */
 static MU_Type *const s_muBases[] = MU_BASE_PTRS;
-#endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+#endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL || MU_RESETS_ARRAY */
 
 #if defined(MU_RESETS_ARRAY)
 /* Reset array */
@@ -37,7 +41,8 @@ static const reset_ip_name_t s_muResets[] = MU_RESETS_ARRAY;
 /******************************************************************************
  * Code
  *****************************************************************************/
-#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) || \
+    defined(MU_RESETS_ARRAY)
 static uint32_t MU_GetInstance(MU_Type *base)
 {
     uint32_t instance;
@@ -62,7 +67,7 @@ static uint32_t MU_GetInstance(MU_Type *base)
 
     return instance;
 }
-#endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+#endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL || MU_RESETS_ARRAY */
 
 /*!
  * brief Initializes the MU module.
@@ -73,12 +78,17 @@ static uint32_t MU_GetInstance(MU_Type *base)
  */
 void MU_Init(MU_Type *base)
 {
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) || \
+    defined(MU_RESETS_ARRAY)
+    uint32_t instance = MU_GetInstance(base);
+#endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL || MU_RESETS_ARRAY */
+
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
-    (void)CLOCK_EnableClock(s_muClocks[MU_GetInstance(base)]);
+    (void)CLOCK_EnableClock(s_muClocks[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if defined(MU_RESETS_ARRAY)
-    RESET_ReleasePeripheralReset(s_muResets[MU_GetInstance(base)]);
+    RESET_ReleasePeripheralReset(s_muResets[instance]);
 #endif
 }
 
