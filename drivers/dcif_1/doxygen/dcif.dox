@@ -1,0 +1,10 @@
+/*!
+@defgroup dcif DCIF: Display control Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Display control Interface
+
+The DCIF supports multiple layers of input, each layer supports programmable plane size
+and position, background color and alpha blend/Porter-duff blend, with RGB/compressed
+input formats, and layer 1 and 2 also supports indexed/YUV input; supports 3 types of output
+interface,  Parallel RGB(DPI), Display Bus Interface(DBI), and tx packet interface.
+
+*/
