@@ -1,5 +1,10 @@
 # EDMA
 
+## [2.10.7]
+
+- Improvements
+  - Add condition to fix build warnings(array subscript 4 is above array bounds of 'edma_handle_t *[4][64]')
+
 ## [2.10.6]
 
 - Improvements
