@@ -1,0 +1,13 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.mipi_dsi_split_1
+    bool
+    default y if MCUX_HW_IP_DriverType_MIPI_DSI_SPLIT_1
+
+config MCUX_COMPONENT_driver.mipi_dsi_split_1
+    bool "mipi_dsi_split_1"
+    select MCUX_COMPONENT_driver.common
+    select MCUX_COMPONENT_driver.mipi_dsi_soc
+    depends on MCUX_HAS_COMPONENT_driver.mipi_dsi_split_1

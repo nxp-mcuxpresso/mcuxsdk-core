@@ -1,0 +1,82 @@
+/*!
+@defgroup mipi_dsi MIPI_DSI: MIPI DSI Host Controller
+@details The MCUXpresso SDK provides a peripheral driver for the MIPI DSI
+
+The MIPI DSI driver supports both video mode and command mode. For both modes,
+first call @ref DSI_Init and @ref DSI_InitDphy to initialize the module and enable
+the D-PHY. The DSI driver provides function @ref DSI_GetDphyDefaultConfig to help
+with the D-PHY timing parameter calculation. With the input txHsBitClk frequency
+and txEscClk frequency, the function can generate the timing parameters based
+on the D-PHY specification. The user can use the parameter directly, or change
+ them according to the special device.\n
+
+For the command mode, DSI driver provides polling method and interrupt method for
+the data transfer. At the same time, there are also small functional APIs so that
+user can construct them for their special purpose.\n
+
+When the peripheral is configured through command mode, the video mode can
+be started by @ref DSI_SetDpiConfig.
+
+# Command mode data transfer {#MIPIDSICmd}
+
+DSI driver provides polling method and interrupt method for the command mode
+data transfer, they are @ref DSI_TransferBlocking and @ref DSI_TransferNonBlocking.
+The transfer is specified by the structure @ref dsi_transfer_t.
+
+There are two ways to construct the @ref dsi_transfer_t.
+
+ 1. Include the DSC command in TX data array. In this case, the DSC command
+    is the first byte of TX data array. The parameter @p sendDscCmd is set to false,
+    the @p dscCmd is not used.
+
+ 2. The DSC command in not in TX data array, but specified by parameter @p dscCmd.
+    In this case, the parameter @p sendDscCmd is set to true, the @p dscCmd is the DSC
+    command to send. The TX data array is sent after @p dscCmd.
+
+There is an example that send DSC command set_column_address (0x2A). The two
+methods are actually the same.\n
+
+Method 1: Include DSC command in TX data array.
+
+@code
+    dsi_transfer_t dsiXfer = {0};
+    uint8_t txData[4];
+
+    dsiXfer.virtualChannel = 0;
+    dsiXfer.txDataType     = kDSI_TxDataDcsLongWr;
+    dsiXfer.txDataSize     = 4;
+    dsiXfer.txData         = txData;
+    dsiXfer.sendDscCmd     = false;
+    dsiXfer.dscCmd         = 0; /* Not used. */
+
+    txData[0] = 0x2A;
+    txData[1] = (startX >> 8U) & 0xFFU;
+    txData[2] = startX & 0xFFU;
+    txData[3] = (endX >> 8U) & 0xFFU;
+    txData[4] = endX & 0xFFU;
+
+    DSI_TransferBlocking(MIPI_DSI, &dsiXfer);
+@endcode
+
+Method 2: Don't include DSC command in TX data array.
+
+@code
+    dsi_transfer_t dsiXfer = {0};
+    uint8_t txData[5];
+
+    dsiXfer.virtualChannel = 0;
+    dsiXfer.txDataType     = kDSI_TxDataDcsLongWr;
+    dsiXfer.txDataSize     = 5;
+    dsiXfer.txData         = txData;
+    dsiXfer.sendDscCmd     = true;
+    dsiXfer.dscCmd         = 0x2A;
+
+    txData[0] = (startX >> 8U) & 0xFFU;
+    txData[1] = startX & 0xFFU;
+    txData[2] = (endX >> 8U) & 0xFFU;
+    txData[3] = endX & 0xFFU;
+
+    DSI_TransferBlocking(MIPI_DSI, &dsiXfer);
+@endcode
+
+*/
