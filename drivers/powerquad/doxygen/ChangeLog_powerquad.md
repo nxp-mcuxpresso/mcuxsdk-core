@@ -1,5 +1,10 @@
 # POWERQUAD
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fixed CERT-C issues.
+
 ## [2.2.0]
 
 - New Features
