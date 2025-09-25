@@ -22,7 +22,7 @@ from .misc import (
     AppOptions,
     match_target,
 )
-from .misc import is_header_file, timeit_if, is_subpath, ADD_LINKER_CMD_PATTERN
+from .misc import is_header_file, timeit_if, is_subpath, is_git_tracked, ADD_LINKER_CMD_PATTERN
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class CmakeTraceApp(CmakeApp):
             ).as_posix()
         else:
             self.example_root = (SDK_ROOT_DIR / "examples").as_posix()
-        if self.options.cmake_variables.get("core_id"):
+        if self.shared_options.core_id and self.options.cmake_variables.get("core_id"):
             self.dest_board_dirname += "_" + self.options.cmake_variables["core_id"]
         self.output_board_dir = self.output_dir / self.dest_board_dirname
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -284,8 +284,7 @@ class CmakeTraceApp(CmakeApp):
     def analyze_sysbuild(self, result):
         sysbuild_trace = result["sysbuild"]
         sysbuild_cmakes = {}
-        target_file = None
-        source_sysbuild_cmake = None
+        sysbuild_path_map = {}
         for j in sysbuild_trace:
             try:
                 p_file, g_frame, cmd, args = (
@@ -297,12 +296,20 @@ class CmakeTraceApp(CmakeApp):
             except KeyError:
                 continue
             if cmd == 'include':
-                source_sysbuild_cmake = p_file
-                target_file = Path(args[0]).resolve().as_posix()
+                inc_path = Path(args[0]).resolve().as_posix()
+                if p_file not in sysbuild_cmakes:
+                    if p_file not in self.file_cache:
+                        self.file_cache[p_file] = open(p_file, "r").readlines()
+                    if not any(inc_path == t.get('file') for t in sysbuild_trace):
+                        self._write_raw(j, sysbuild_cmakes.setdefault(p_file, []))
+                if p_file not in sysbuild_path_map:
+                    sysbuild_path_map[p_file] = []
+                sysbuild_path_map[p_file].append(inc_path)
                 continue
-            if target_file and p_file != target_file:
-                continue
-            key = source_sysbuild_cmake or p_file
+            if any(parent :=[k for k, v in sysbuild_path_map.items() if p_file in v]):
+                key = parent[0]
+            else:
+                key = p_file
             if key not in sysbuild_cmakes:
                 sysbuild_cmakes[key] = []
             if cmd in ["externalzephyrproject_add", "externalmcuxproject_add"]:
@@ -436,7 +443,10 @@ class CmakeTraceApp(CmakeApp):
         if cmd in ["mcux_add_include", "mcux_add_source"]:
             self.app_receiver[cmd].append(j)
         elif ADD_LINKER_CMD_PATTERN.match(cmd):
-            self.trace_mcux_add_linker_script(j)
+            if not (ret := self.trace_mcux_add_linker_script(j, self.app_receiver['output_dir'])):
+                self._write_raw(j, self.app_receiver["result"])
+            else:
+                self.app_receiver["result"].append(ret)
         elif cmd == "include":
             path = Path(args[0])
             if not path.is_absolute():
@@ -502,7 +512,10 @@ class CmakeTraceApp(CmakeApp):
         if cmd in ["mcux_add_include", "mcux_add_source"]:
             self.trace_receiver[cmd].append(j)
         elif ADD_LINKER_CMD_PATTERN.match(cmd):
-            self.trace_mcux_add_linker_script(j)
+            if not (ret := self.trace_mcux_add_linker_script(j, self.trace_receiver['output_dir'])):
+                self._write_raw(j, self.trace_receiver["result"])
+            else:
+                self.trace_receiver["result"].append(ret)
         elif cmd == "include":
             path = Path(args[0]).resolve()
             if not path.is_absolute():
@@ -732,7 +745,7 @@ class CmakeTraceApp(CmakeApp):
                     target_dir = self.headers_map[r_source.parent.as_posix()]
                 if r_source_str in self.sources_map:
                     logger.debug(f"Skip already processed source file {r_source_str}")
-                    if not simple_src:
+                    if simple_src:
                         continue
                 if r_source.name in self.preinclude_files:
                     continue
@@ -783,7 +796,7 @@ class CmakeTraceApp(CmakeApp):
                 failed_includes.append(inc)
                 continue
             r_include_str = r_include.as_posix()
-            if r_include_str in self.headers_map:
+            if r_include_str in self.processed_headers:
                 continue
             self.headers_map[r_include_str] = get_target_include_path(r_include_str)
             (output_dir / self.headers_map[r_include_str]).mkdir(
@@ -807,14 +820,16 @@ class CmakeTraceApp(CmakeApp):
                         )
             if self.headers_map[r_include_str] in self.processed_headers:
                 continue
-            self.processed_headers.append(self.headers_map[r_include_str])
+            # for examples/edgefast_bluetooth_examples/wifi_cli_over_ble_wu
+            if "TARGET_FILES" not in parsed_func.multi_args:
+                self.processed_headers.append(self.headers_map[r_include_str])
             includes.append(self.headers_map[r_include_str])
 
         return self._finalize_cmake_args(
             parsed_func, cur_dir, includes, failed_includes, "INCLUDES"
         )
 
-    def trace_mcux_add_linker_script(self, j):
+    def trace_mcux_add_linker_script(self, j, output_dir):
         parsed_func = CMakeFunction(j)
         cur_dir = Path(j["file"]).parent
         base_path = (
@@ -822,23 +837,23 @@ class CmakeTraceApp(CmakeApp):
         )
         if not (linker := self._resolve_src_path(cur_dir, base_path, Path(parsed_func.single_args["LINKER"]))):
             logger.warning(f'{j["file"]}: Cannot resolve linker script path {parsed_func.single_args["LINKER"]}')
-            return
+            return None
         linker = linker[0]
         linker_str = linker.as_posix()
         if not linker.exists():
-            logger.warning(f'{j["file"]}: Cannot find source file {linker_str}')
-            return
+            # Linker file maybe generated during build
+            logger.debug(f'{j["file"]}: Cannot find linker file {linker_str}')
+            return None
+        if not is_git_tracked(linker_str):
+            # For generated linker script, do not copy
+            return None
         if parsed_func.single_args.get("BASE_PATH"):
             del parsed_func.single_args["BASE_PATH"]
         parsed_func.single_args["LINKER"] = f"src/{linker.name}"
-        if is_subpath(linker, self.board_root):
-            target_linker = self.output_board_dir / "src" / linker.name
-            self.trace_receiver["result"].append(parsed_func)
-        else:
-            target_linker = self.output_dir / "src" / linker.name
-            self.app_receiver["result"].append(parsed_func)
+        target_linker = output_dir / "src" / linker.name
         target_linker.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(linker, target_linker)
+        return parsed_func
 
     def trace_mcux_project_remove_source(self, j):
         parsed_func = CMakeFunction(j)
@@ -989,7 +1004,7 @@ class CmakeTraceApp(CmakeApp):
             open(dest_kconfig, "w", encoding="utf-8").write("\n".join(result) + "\n")
 
     def update_cmake_file(self):
-        if self.options.cmake_variables.get("core_id"):
+        if self.shared_options.core_id:
             prj_conf_dirname = "${board}_${core_id}"
             append_content = '\ninclude("${board}_${core_id}/board_files.cmake")\n'
         else:

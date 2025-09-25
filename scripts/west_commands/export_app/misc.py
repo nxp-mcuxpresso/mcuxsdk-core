@@ -9,6 +9,7 @@ import glob
 import datetime
 import time
 import inspect
+import subprocess
 from functools import wraps
 from pathlib import Path
 from datetime import datetime
@@ -42,7 +43,8 @@ CONFIG_BLACK_LIST = [
     'CONFIG_MCUX_PRJSEG_module.board.lvgl'
 ]
 
-HEADER_EXTS = {'.h', '.hpp', '.hh', '.hxx', '.inc', '.bin'}
+# examples/eiq_examples/tflm_label_image_ext_mem: tflite
+HEADER_EXTS = {'.h', '.hpp', '.hh', '.hxx', '.inc', '.bin', '.tflite'}
 
 ADD_LINKER_CMD_PATTERN = re.compile(
     r"^mcux_add_(.*)_linker_script$"
@@ -75,6 +77,17 @@ def is_subpath(child: Path, parent: Path) -> bool:
         return True
     except ValueError:
         return False
+
+def is_git_tracked(path: str) -> bool:
+    p = os.path.abspath(path)
+    cwd = os.path.dirname(p) or "."
+    name = os.path.basename(p)
+    r = subprocess.run(
+        ["git", "-C", cwd, "ls-files", "--error-unmatch", "--", name],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    return r.returncode == 0
 
 class AppType(Enum):
     main_app = 'main_app'
