@@ -1,5 +1,10 @@
 # COMMON
 
+## [2.6.1]
+
+- Improvements
+  - Support Cortex M23.
+
 ## [2.6.0]
 
 - Bug Fixes
