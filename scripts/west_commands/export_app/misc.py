@@ -22,41 +22,40 @@ logger = logging.getLogger(__name__)
 
 _SENTINEL = object()
 
-LICENSE_HEAD = f'''
+LICENSE_HEAD = f"""
 # Copyright {datetime.now().year} NXP
 #
 # SPDX-License-Identifier: Apache-2.0
-'''
+"""
 
 CONFIG_CHOICE_MAP = {
-    'CONFIG_MCUX_PRJSEG_module.board.clock': 'CONFIG_MCUX_PRJSEG_module.board.clock_customize_folder',
-    'CONFIG_MCUX_PRJSEG_module.board.pinmux': 'CONFIG_MCUX_PRJSEG_module.board.pinmux_customize_folder',
-    r"CONFIG_MCUX_PRJSEG_module.use_.*_peripheral": 'CONFIG_MCUX_PRJSEG_module.use_customize_peripheral',
-    r'CONFIG_MCUX_PRJSEG_project.hw_(core|app|project)': 'CONFIG_MCUX_PRJSEG_project.hw_app_customize_folder'
+    "CONFIG_MCUX_PRJSEG_module.board.clock": "CONFIG_MCUX_PRJSEG_module.board.clock_customize_folder",
+    "CONFIG_MCUX_PRJSEG_module.board.pinmux": "CONFIG_MCUX_PRJSEG_module.board.pinmux_customize_folder",
+    r"CONFIG_MCUX_PRJSEG_module.use_.*_peripheral": "CONFIG_MCUX_PRJSEG_module.use_customize_peripheral",
+    r"CONFIG_MCUX_PRJSEG_project.hw_(core|app|project)": "CONFIG_MCUX_PRJSEG_project.hw_app_customize_folder",
 }
 
 CONFIG_BLACK_LIST = [
-    'CONFIG_MCUX_PRJSEG_config.arm.shared',
-    'CONFIG_MCUX_PRJSEG_module.board.suite',
-    'CONFIG_MCUX_PRJSEG_module.device.suite',
+    "CONFIG_MCUX_PRJSEG_config.arm.shared",
+    "CONFIG_MCUX_PRJSEG_module.board.suite",
+    "CONFIG_MCUX_PRJSEG_module.device.suite",
     # Hardcode for ps which have valid kconfig variables
-    'CONFIG_MCUX_PRJSEG_module.board.lvgl'
+    "CONFIG_MCUX_PRJSEG_module.board.lvgl",
 ]
 
 # examples/eiq_examples/tflm_label_image_ext_mem: tflite
-HEADER_EXTS = {'.h', '.hpp', '.hh', '.hxx', '.inc', '.bin', '.tflite'}
+HEADER_EXTS = {".h", ".hpp", ".hh", ".hxx", ".inc", ".bin", ".tflite"}
 
-ADD_LINKER_CMD_PATTERN = re.compile(
-    r"^mcux_add_(.*)_linker_script$"
-)
+ADD_LINKER_CMD_PATTERN = re.compile(r"^mcux_add_(.*)_linker_script$")
 
 
 def is_header_file(path: Union[str, Path]) -> bool:
     """Return True if the file path looks like a C/C++ header or shall be put into include dir."""
     return Path(path).suffix.lower() in HEADER_EXTS
 
+
 def match_target(s, patterns):
-    '''
+    """
     Check if string s matches any pattern in patterns
 
     Args:
@@ -64,7 +63,7 @@ def match_target(s, patterns):
         patterns (list): List of patterns to be matched, can be exact string or regex
     Returns:
         bool: True if s matches any pattern in patterns, False otherwise
-    '''
+    """
     for pat in patterns:
         if s == pat or re.search(pat, s):
             return True
@@ -78,6 +77,7 @@ def is_subpath(child: Path, parent: Path) -> bool:
     except ValueError:
         return False
 
+
 def is_git_tracked(path: str) -> bool:
     p = os.path.abspath(path)
     cwd = os.path.dirname(p) or "."
@@ -89,9 +89,11 @@ def is_git_tracked(path: str) -> bool:
     )
     return r.returncode == 0
 
+
 class AppType(Enum):
-    main_app = 'main_app'
-    linked_app = 'linked_app'
+    main_app = "main_app"
+    linked_app = "linked_app"
+
 
 @dataclass
 class AppOptions:
@@ -102,6 +104,7 @@ class AppOptions:
     cmake_variables: Dict[str, str] = None
     name: Optional[str] = None
     trace_data: dict = None
+
 
 @dataclass
 class SharedOptions:
@@ -120,6 +123,7 @@ class SharedOptions:
     default_trace_folders: List[str] = field(default_factory=list)
 
     domains: Dict[str, str] = field(default_factory=dict)
+
 
 @contextmanager
 def temp_attrs(obj, **updates):
@@ -140,13 +144,14 @@ def temp_attrs(obj, **updates):
             else:
                 setattr(obj, k, old)
 
-def replace_cmake_variables(ori_str: str = '', var_dict: Optional[Dict[str, str]] = None) -> str:
+
+def replace_cmake_variables(ori_str: str = "", var_dict: Optional[Dict[str, str]] = None) -> str:
     """Replace ${VAR} occurrences in ori_str with values from var_dict (case-insensitive)."""
     if not ori_str:
         return ori_str
     if not var_dict:
         return ori_str
-    if '${' not in ori_str:
+    if "${" not in ori_str:
         return ori_str
     new_str = ori_str
     for k, v in var_dict.items():
@@ -155,7 +160,10 @@ def replace_cmake_variables(ori_str: str = '', var_dict: Optional[Dict[str, str]
         new_str = pattern.sub(str(v), new_str)
     return new_str
 
-def process_path(source_dir: Path, base_path: str = '', src: str = '', variables: Optional[Dict[str, str]] = None) -> Union[None, Path, List[Path]]:
+
+def process_path(
+    source_dir: Path, base_path: str = "", src: str = "", variables: Optional[Dict[str, str]] = None
+) -> Union[None, Path, List[Path]]:
     """
     Resolve a possibly relative, templated, or globbed path against source_dir.
 
@@ -166,17 +174,17 @@ def process_path(source_dir: Path, base_path: str = '', src: str = '', variables
     """
     variables = variables or {}
     try:
-        if src == '/.':
+        if src == "/.":
             # '/.' may cause permission issues in Windows; normalize to './'
             logger.warning("The path '/.' is not safe, please use './' instead.")
-            src = './'
-        s_src = Path(replace_cmake_variables(os.path.join(base_path or '', src), variables))
-        if '${' in s_src.as_posix():
+            src = "./"
+        s_src = Path(replace_cmake_variables(os.path.join(base_path or "", src), variables))
+        if "${" in s_src.as_posix():
             return None
         if not s_src.is_absolute():
             s_src = source_dir / s_src
         # Glob expansion
-        if any(wildcard in s_src.as_posix() for wildcard in ['*', '?', '[', ']']):
+        if any(wildcard in s_src.as_posix() for wildcard in ["*", "?", "[", "]"]):
             result: List[Path] = []
             for f in glob.glob(s_src.as_posix()):
                 result.append(Path(f).resolve())
@@ -187,9 +195,10 @@ def process_path(source_dir: Path, base_path: str = '', src: str = '', variables
     except Exception:
         return None
 
+
 def should_skip_entry(entry: dict, current_board: Optional[str]) -> bool:
     """Return True if an entry with optional 'board' selector should be skipped."""
-    board_condition = entry.get('board')
+    board_condition = entry.get("board")
     if board_condition:
         if isinstance(board_condition, str):
             return board_condition != current_board
@@ -197,12 +206,14 @@ def should_skip_entry(entry: dict, current_board: Optional[str]) -> bool:
             return current_board not in board_condition
     return False
 
-def timeit_if(attr='profile_enabled', flag_fn=None):
+
+def timeit_if(attr="profile_enabled", flag_fn=None):
     """
     Decorator: profile only if enabled.
     - attr: attribute name on self or class, e.g., 'profile_enabled'
     - flag_fn: optional callable (args, kwargs) -> bool to decide dynamically
     """
+
     def deco(func):
         is_coro = inspect.iscoroutinefunction(func)
 
@@ -236,10 +247,12 @@ def timeit_if(attr='profile_enabled', flag_fn=None):
                 print(f"{func.__qualname__} took {time.perf_counter() - t:.6f}s")
 
         return aw if is_coro else sw
+
     return deco
 
+
 @contextmanager
-def timeit_block(enabled, label='block'):
+def timeit_block(enabled, label="block"):
     """Context manager to profile arbitrary code blocks when enabled is True."""
     if not enabled:
         yield

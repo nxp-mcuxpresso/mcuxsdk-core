@@ -16,10 +16,6 @@ from .misc import replace_cmake_variables, process_path, should_skip_entry
 
 logger = logging.getLogger(__name__)
 
-class NoNeedProcess(Exception):
-    pass
-
-
 def opt_debug(args, kwargs):
     o = args[0] if args else None
     return bool(getattr(getattr(o, 'shared_options', None), 'debug', False))
@@ -31,6 +27,9 @@ def parse_prj_conf(path):
             continue
         result[conf[0]] = conf[1]
     return result
+
+class NoNeedProcess(Exception):
+    pass
 
 class CmakeApp(object):
     def __init__(self, shared_options: SharedOptions, app_options: AppOptions):

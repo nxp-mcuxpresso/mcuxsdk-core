@@ -62,9 +62,7 @@ class CmakeTraceApp(CmakeApp):
         self.dest_board_dirname = self.options.cmake_variables["board"]
         self.all_sources = {}
         if is_subpath(self.source_dir, SDK_ROOT_DIR):
-            self.example_root = (
-                SDK_ROOT_DIR / self.source_dir.relative_to(SDK_ROOT_DIR).parts[0]
-            ).as_posix()
+            self.example_root = (SDK_ROOT_DIR / self.source_dir.relative_to(SDK_ROOT_DIR).parts[0]).as_posix()
         else:
             self.example_root = (SDK_ROOT_DIR / "examples").as_posix()
         if self.shared_options.core_id and self.options.cmake_variables.get("core_id"):
@@ -109,28 +107,21 @@ class CmakeTraceApp(CmakeApp):
                 self.options.trace_data = result[self.app_id]
 
             if self.is_sysbuild or self.options.app_type == AppType.linked_app:
-                self.build_dir = Path(
-                    self.shared_options.domains[self.app_id]["build_dir"]
-                )
+                self.build_dir = Path(self.shared_options.domains[self.app_id]["build_dir"])
             else:
                 self.build_dir = self.shared_options.output_dir / INJECT_BUILD_DIR
-            self.board_root = Path(
-                self.options.cmake_variables["SdkRootDirPath"]
-            ) / Path(self.options.cmake_variables.get("board_root", "examples/_boards"))
+            self.board_root = Path(self.options.cmake_variables["SdkRootDirPath"]) / Path(
+                self.options.cmake_variables.get("board_root", "examples/_boards")
+            )
             self.y_selecting_ps = []
             if (force_selected_ps := self.build_dir / ".force_selected_ps").exists():
                 self.y_selecting_ps = open(force_selected_ps, "r").read().splitlines()
-            self.preinclude_files = [
-                os.path.basename(f)
-                for f in glob.glob(f"{self.build_dir.as_posix()}/*.h")
-            ]
+            self.preinclude_files = [os.path.basename(f) for f in glob.glob(f"{self.build_dir.as_posix()}/*.h")]
             self.analyze_trace_json(self.app_id, self.options.trace_data)
             self.dump_result()
             self.combine_prj_conf()
             if not self.shared_options.debug:
-                shutil.rmtree(
-                    self.options.output_dir / INJECT_BUILD_DIR, ignore_errors=True
-                )
+                shutil.rmtree(self.options.output_dir / INJECT_BUILD_DIR, ignore_errors=True)
         except Exception as e:
             if self.shared_options.debug:
                 print(e)
@@ -202,27 +193,15 @@ class CmakeTraceApp(CmakeApp):
             logger.error(f"Failed to run inject command: {' '.join(self.inject_cmd)}")
             print(status.stderr.decode("utf-8"))
             return None
-        if not (
-            trace_json_path := self.shared_options.output_dir
-            / INJECT_BUILD_DIR
-            / INJECT_TRACE_FILE
-        ).exists():
-            logger.error(
-                f"Cannot find the trace file {trace_json_path.as_posix()}, something must be wrong."
-            )
+        if not (trace_json_path := self.shared_options.output_dir / INJECT_BUILD_DIR / INJECT_TRACE_FILE).exists():
+            logger.error(f"Cannot find the trace file {trace_json_path.as_posix()}, something must be wrong.")
             return None
         if self.is_sysbuild:
             result["sysbuild"] = self.filter_trace_json(trace_json_path)
-            domains = yaml.safe_load(
-                open(self.shared_options.output_dir / INJECT_BUILD_DIR / "domains.yaml")
-            )
+            domains = yaml.safe_load(open(self.shared_options.output_dir / INJECT_BUILD_DIR / "domains.yaml"))
             for domain in domains.get("domains", {}):
-                result[domain["name"]] = self.filter_trace_json(
-                    Path(domain["build_dir"]) / INJECT_TRACE_FILE
-                )
-                if (
-                    src := Path(domain["source_dir"]).resolve().as_posix()
-                ) == self.source_dir.as_posix():
+                result[domain["name"]] = self.filter_trace_json(Path(domain["build_dir"]) / INJECT_TRACE_FILE)
+                if (src := Path(domain["source_dir"]).resolve().as_posix()) == self.source_dir.as_posix():
                     self.app_id = domain["name"]
                 domain["source_dir"] = src
                 self.shared_options.domains[domain["name"]] = domain
@@ -267,13 +246,10 @@ class CmakeTraceApp(CmakeApp):
                 if check_path(p_file):
                     del j_line["time"]
                     if (
-                        j_line.get("cmd")
-                        in ["mcux_set_variable", "set", "mcux_set_list"]
+                        j_line.get("cmd") in ["mcux_set_variable", "set", "mcux_set_list"]
                         and len(j_line.get("args", [])) >= 2
                     ):
-                        self.options.cmake_variables[j_line["args"][0]] = j_line[
-                            "args"
-                        ][1]
+                        self.options.cmake_variables[j_line["args"][0]] = j_line["args"][1]
                     filtered_result.append(j_line)
         if self.shared_options.debug:
             with open(trace_json_path.parent / "trace_filtered.json", "w") as f:
@@ -295,18 +271,18 @@ class CmakeTraceApp(CmakeApp):
                 )
             except KeyError:
                 continue
-            if cmd == 'include':
+            if cmd == "include":
                 inc_path = Path(args[0]).resolve().as_posix()
                 if p_file not in sysbuild_cmakes:
                     if p_file not in self.file_cache:
                         self.file_cache[p_file] = open(p_file, "r").readlines()
-                    if not any(inc_path == t.get('file') for t in sysbuild_trace):
+                    if not any(inc_path == t.get("file") for t in sysbuild_trace):
                         self._write_raw(j, sysbuild_cmakes.setdefault(p_file, []))
                 if p_file not in sysbuild_path_map:
                     sysbuild_path_map[p_file] = []
                 sysbuild_path_map[p_file].append(inc_path)
                 continue
-            if any(parent :=[k for k, v in sysbuild_path_map.items() if p_file in v]):
+            if any(parent := [k for k, v in sysbuild_path_map.items() if p_file in v]):
                 key = parent[0]
             else:
                 key = p_file
@@ -318,14 +294,13 @@ class CmakeTraceApp(CmakeApp):
                 # examples/wireless_examples/zigbee/router/freertos/sysbuild.cmake
                 if cmd == "if":
                     continue
-                if p_file not in  self.file_cache:
+                if p_file not in self.file_cache:
                     self.file_cache[p_file] = open(p_file, "r").readlines()
                 self._write_raw(j, sysbuild_cmakes[key])
         for k, v in sysbuild_cmakes.items():
             if not v:
                 continue
-            self.write_cmake_file(self.shared_options.output_dir / Path(k).parent.name / Path(k).name, v
-            )
+            self.write_cmake_file(self.shared_options.output_dir / Path(k).parent.name / Path(k).name, v)
 
     # Internal helper to write raw lines while normalizing ${CMAKE_CURRENT_LIST_DIR}
     def _write_raw(self, j, result_list):
@@ -351,17 +326,14 @@ class CmakeTraceApp(CmakeApp):
                     continue
                 raw[i] = line.replace(
                     "${CMAKE_CURRENT_LIST_DIR}",
-                    "${SdkRootDirPath}/"
-                    + Path(j["file"]).parent.relative_to(SDK_ROOT_DIR).as_posix(),
+                    "${SdkRootDirPath}/" + Path(j["file"]).parent.relative_to(SDK_ROOT_DIR).as_posix(),
                 )
             result_list.extend(raw)
             result_list.append("\n")
         except Exception:
             if self.shared_options.debug:
                 traceback.print_exc()
-            logger.error(
-                f"Failed to write line {j.get('line')} of file {j.get('file')}"
-            )
+            logger.error(f"Failed to write line {j.get('line')} of file {j.get('file')}")
 
     def check_include_path(self, path):
         if any([path.startswith(p) for p in BYPASS_DIRS]):
@@ -371,9 +343,7 @@ class CmakeTraceApp(CmakeApp):
             path.endswith("reconfig.cmake") or not path.startswith(self.example_root)
         ):
             return False
-        if self.shared_options.board_copy_folders and not match_target(
-            path, self.shared_options.board_copy_folders
-        ):
+        if self.shared_options.board_copy_folders and not match_target(path, self.shared_options.board_copy_folders):
             return False
         return True
 
@@ -407,20 +377,14 @@ class CmakeTraceApp(CmakeApp):
                 if self.app_receiver["skip_file"] != p_file:
                     self.app_receiver["skip_line"] = 0
                     self.app_receiver["skip_file"] = None
-                if (
-                    self.app_receiver["skip_line"]
-                    and j["line"] < self.app_receiver["skip_line"]
-                ):
+                if self.app_receiver["skip_line"] and j["line"] < self.app_receiver["skip_line"]:
                     continue
                 self.process_app_context(i, j, trace_data)
             else:
                 if self.trace_receiver["skip_file"] != p_file:
                     self.trace_receiver["skip_line"] = 0
                     self.trace_receiver["skip_file"] = None
-                if (
-                    self.trace_receiver["skip_line"]
-                    and j["line"] < self.trace_receiver["skip_line"]
-                ):
+                if self.trace_receiver["skip_line"] and j["line"] < self.trace_receiver["skip_line"]:
                     continue
                 self.process_trace_context(i, j, trace_data)
 
@@ -443,7 +407,7 @@ class CmakeTraceApp(CmakeApp):
         if cmd in ["mcux_add_include", "mcux_add_source"]:
             self.app_receiver[cmd].append(j)
         elif ADD_LINKER_CMD_PATTERN.match(cmd):
-            if not (ret := self.trace_mcux_add_linker_script(j, self.app_receiver['output_dir'])):
+            if not (ret := self.trace_mcux_add_linker_script(j, self.app_receiver["output_dir"])):
                 self._write_raw(j, self.app_receiver["result"])
             else:
                 self.app_receiver["result"].append(ret)
@@ -465,22 +429,16 @@ class CmakeTraceApp(CmakeApp):
         elif hasattr(self, f"trace_{cmd}"):
             self.app_receiver["result"].extend(getattr(self, f"trace_{cmd}")(j))
         elif cmd == "if":
-            if (
-                trace_data[i + 1].get("cmd") == "if"
-                or trace_data[i + 1].get("file") != p_file
-            ):
+            if trace_data[i + 1].get("cmd") == "if" or trace_data[i + 1].get("file") != p_file:
                 return
             self.app_receiver["skip_line"] = self.write_raw_if(
                 self.file_cache[p_file], self.app_receiver["result"], j["line"]
             )
             self.app_receiver["skip_file"] = p_file
-        elif (
-            cmd in ExtensionMap.source_related_extensions() and "BASE_PATH" not in args
-        ):
+        elif cmd in ExtensionMap.source_related_extensions() and "BASE_PATH" not in args:
             j["args"][:0] = [
                 "BASE_PATH",
-                "${SdkRootDirPath}/"
-                + (Path(p_file).parent).relative_to(SDK_ROOT_DIR).as_posix(),
+                "${SdkRootDirPath}/" + (Path(p_file).parent).relative_to(SDK_ROOT_DIR).as_posix(),
             ]
             self.app_receiver["result"].append(CMakeFunction(j))
         else:
@@ -496,9 +454,7 @@ class CmakeTraceApp(CmakeApp):
             self.trace_receiver["cur_ps"] = None
             if args[0].startswith("CONFIG_MCUX_PRJSEG_"):
                 if args[0] in self.y_selecting_ps:
-                    logger.error(
-                        f"{args[0]} is y-selected by other symbols, so it will not be processed."
-                    )
+                    logger.error(f"{args[0]} is y-selected by other symbols, so it will not be processed.")
                 elif args[0].startswith("CONFIG_MCUX_PRJSEG_module.board.wireless"):
                     pass
                 elif args[0] in CONFIG_BLACK_LIST:
@@ -507,12 +463,12 @@ class CmakeTraceApp(CmakeApp):
                     self.trace_receiver["cur_ps"] = args[0]
                     self.trace_receiver["cur_ps_file"] = p_file
             return
-        if not (self.trace_receiver["cur_ps"] or p_file.endswith('reconfig.cmake')):
+        if not (self.trace_receiver["cur_ps"] or p_file.endswith("reconfig.cmake")):
             return
         if cmd in ["mcux_add_include", "mcux_add_source"]:
             self.trace_receiver[cmd].append(j)
         elif ADD_LINKER_CMD_PATTERN.match(cmd):
-            if not (ret := self.trace_mcux_add_linker_script(j, self.trace_receiver['output_dir'])):
+            if not (ret := self.trace_mcux_add_linker_script(j, self.trace_receiver["output_dir"])):
                 self._write_raw(j, self.trace_receiver["result"])
             else:
                 self.trace_receiver["result"].append(ret)
@@ -528,27 +484,24 @@ class CmakeTraceApp(CmakeApp):
         elif hasattr(self, f"trace_{cmd}"):
             self.trace_receiver["result"].extend(getattr(self, f"trace_{cmd}")(j))
         elif cmd == "if":
-            if (
-                trace_data[i + 1].get("cmd") == "if"
-                or trace_data[i + 1].get("file") != p_file
-            ):
+            if trace_data[i + 1].get("cmd") == "if" or trace_data[i + 1].get("file") != p_file:
                 return
             self.trace_receiver["skip_line"] = self.write_raw_if(
                 self.file_cache[p_file], self.trace_receiver["result"], j["line"]
             )
             self.trace_receiver["skip_file"] = p_file
-        elif (
-            cmd in ExtensionMap.source_related_extensions() and "BASE_PATH" not in args
-        ):
+        elif cmd in ExtensionMap.source_related_extensions() and "BASE_PATH" not in args:
             j["args"][:0] = [
                 "BASE_PATH",
-                "${SdkRootDirPath}/"
-                + (Path(p_file).parent).relative_to(SDK_ROOT_DIR).as_posix(),
+                "${SdkRootDirPath}/" + (Path(p_file).parent).relative_to(SDK_ROOT_DIR).as_posix(),
             ]
             self.trace_receiver["result"].append(CMakeFunction(j))
         else:
             self._write_raw(j, self.trace_receiver["result"])
-        if p_file == self.trace_receiver["cur_ps_file"] and self.trace_receiver["cur_ps"] not in self.trace_receiver["ps_list"]:
+        if (
+            p_file == self.trace_receiver["cur_ps_file"]
+            and self.trace_receiver["cur_ps"] not in self.trace_receiver["ps_list"]
+        ):
             logger.debug(f"Add processed ps {self.trace_receiver['cur_ps']} from {p_file}")
             self.trace_receiver["ps_list"].append(self.trace_receiver["cur_ps"])
 
@@ -568,13 +521,11 @@ class CmakeTraceApp(CmakeApp):
             )
             if force_selected:
                 self.update_app_kconfig(force_selected)
-            open(
-                self.trace_receiver["output_dir"] / "prj.conf", "a", encoding="utf-8"
-            ).write("\n".join(board_prj_conf))
+            open(self.trace_receiver["output_dir"] / "prj.conf", "a", encoding="utf-8").write(
+                "\n".join(board_prj_conf)
+            )
             self.update_cmake_file()
-        self.write_cmake_file(
-            self.output_dir / "CMakeLists.txt", self.app_receiver["result"]
-        )
+        self.write_cmake_file(self.output_dir / "CMakeLists.txt", self.app_receiver["result"])
 
     def create_cmake_file(self, context):
         context["output_dir"].mkdir(parents=True, exist_ok=True)
@@ -609,9 +560,7 @@ class CmakeTraceApp(CmakeApp):
         parsed_func = CMakeFunction(j)
         cur_dir = Path(j["file"]).parent
         base_path = (
-            Path(parsed_func.single_args.get("BASE_PATH"))
-            if parsed_func.single_args.get("BASE_PATH")
-            else None
+            Path(parsed_func.single_args.get("BASE_PATH")) if parsed_func.single_args.get("BASE_PATH") else None
         )
         r_sources = list(
             set(
@@ -631,9 +580,7 @@ class CmakeTraceApp(CmakeApp):
             if j["file"] not in self.all_sources[r_source_str]:
                 self.all_sources[r_source_str].append(j["file"])
 
-    def _resolve_include_path(
-        self, cur_dir: Path, base_path: Union[Path, None], path: Path
-    ) -> Path:
+    def _resolve_include_path(self, cur_dir: Path, base_path: Union[Path, None], path: Path) -> Path:
         r_path = cur_dir / path
         if base_path:
             r_path = base_path / path
@@ -641,9 +588,7 @@ class CmakeTraceApp(CmakeApp):
             r_path = path
         return r_path.resolve()
 
-    def _resolve_src_path(
-        self, cur_dir: Path, base_path: Union[Path, None], path: Path
-    ) -> Path:
+    def _resolve_src_path(self, cur_dir: Path, base_path: Union[Path, None], path: Path) -> Path:
         result = []
         r_path = cur_dir / path
         if base_path:
@@ -661,9 +606,7 @@ class CmakeTraceApp(CmakeApp):
     def _in_output_dir(self, path: Path) -> bool:
         return is_subpath(path, self.shared_options.output_dir)
 
-    def _finalize_cmake_args(
-        self, parsed_func, cur_dir, success_items, failed_items, key
-    ):
+    def _finalize_cmake_args(self, parsed_func, cur_dir, success_items, failed_items, key):
         ret = []
         if success_items:
             success_func = copy.deepcopy(parsed_func)
@@ -675,9 +618,9 @@ class CmakeTraceApp(CmakeApp):
             failed_func = copy.deepcopy(parsed_func)
             if not failed_func.single_args.get("BASE_PATH"):
                 failed_func.single_args["BASE_PATH"] = cur_dir.as_posix()
-            failed_func.single_args["BASE_PATH"] = failed_func.single_args[
-                "BASE_PATH"
-            ].replace(SDK_ROOT_DIR.as_posix(), "${SdkRootDirPath}")
+            failed_func.single_args["BASE_PATH"] = failed_func.single_args["BASE_PATH"].replace(
+                SDK_ROOT_DIR.as_posix(), "${SdkRootDirPath}"
+            )
             failed_func.multi_args[key] = sorted(failed_items)
             ret.append(failed_func)
         return ret
@@ -717,13 +660,9 @@ class CmakeTraceApp(CmakeApp):
         failed_sources = []
         sources = []
         cur_dir = Path(j["file"]).parent
-        base_path = (
-            Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
-        )
+        base_path = Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
 
-        simple_src = set(parsed_func.single_args) <= {"BASE_PATH"} and set(
-            parsed_func.multi_args
-        ) == {"SOURCES"}
+        simple_src = set(parsed_func.single_args) <= {"BASE_PATH"} and set(parsed_func.multi_args) == {"SOURCES"}
         for s in parsed_func.multi_args.get("SOURCES", []):
             for r_source in self._resolve_src_path(cur_dir, base_path, Path(s)):
                 if self._in_output_dir(r_source):
@@ -738,10 +677,7 @@ class CmakeTraceApp(CmakeApp):
                     logger.debug(f"Skip removed source file {r_source_str}")
                     continue
                 target_dir = "include" if is_header_file(r_source) else "src"
-                if (
-                    target_dir == "include"
-                    and r_source.parent.as_posix() in self.headers_map
-                ):
+                if target_dir == "include" and r_source.parent.as_posix() in self.headers_map:
                     target_dir = self.headers_map[r_source.parent.as_posix()]
                 if r_source_str in self.sources_map:
                     logger.debug(f"Skip already processed source file {r_source_str}")
@@ -750,28 +686,20 @@ class CmakeTraceApp(CmakeApp):
                 if r_source.name in self.preinclude_files:
                     continue
                 target_src = output_dir / target_dir / r_source.name
-                if target_src.exists() and r_source.name.endswith(('.S', '.s')):
+                if target_src.exists() and r_source.name.endswith((".S", ".s")):
                     target_src = output_dir / target_dir / r_source.parent.name / r_source.name
                 self.sources_map[r_source_str] = target_src
-                self.sources_map[r_source_str].parent.mkdir(
-                    parents=True, exist_ok=True
-                )
+                self.sources_map[r_source_str].parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(r_source, self.sources_map[r_source_str])
-                sources.append(
-                    self.sources_map[r_source_str].relative_to(output_dir).as_posix()
-                )
+                sources.append(self.sources_map[r_source_str].relative_to(output_dir).as_posix())
 
-        return self._finalize_cmake_args(
-            parsed_func, cur_dir, sources, failed_sources, "SOURCES"
-        )
+        return self._finalize_cmake_args(parsed_func, cur_dir, sources, failed_sources, "SOURCES")
 
     def trace_mcux_add_include(self, j, output_dir):
         parsed_func = CMakeFunction(j)
         failed_includes = []
         includes = []
-        simple_inc = set(parsed_func.single_args) <= {"BASE_PATH"} and set(
-            parsed_func.multi_args
-        ) == {"INCLUDES"}
+        simple_inc = set(parsed_func.single_args) <= {"BASE_PATH"} and set(parsed_func.multi_args) == {"INCLUDES"}
 
         def get_target_include_path(inc):
             if simple_inc:
@@ -785,9 +713,7 @@ class CmakeTraceApp(CmakeApp):
             return f"include/{key}"
 
         cur_dir = Path(j["file"]).parent
-        base_path = (
-            Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
-        )
+        base_path = Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
         for inc in parsed_func.multi_args.get("INCLUDES", []):
             r_include = self._resolve_include_path(cur_dir, base_path, Path(inc))
             if self._in_output_dir(r_include):
@@ -799,19 +725,13 @@ class CmakeTraceApp(CmakeApp):
             if r_include_str in self.processed_headers:
                 continue
             self.headers_map[r_include_str] = get_target_include_path(r_include_str)
-            (output_dir / self.headers_map[r_include_str]).mkdir(
-                parents=True, exist_ok=True
-            )
+            (output_dir / self.headers_map[r_include_str]).mkdir(parents=True, exist_ok=True)
             # Formal sdk example shall record all header files through mcux_add_source
             for item in r_include.iterdir():
                 if item.is_file() and is_header_file(item.as_posix()) and item.name not in self.preinclude_files:
-                    target_header = (
-                        output_dir / self.headers_map[r_include_str] / item.name
-                    )
+                    target_header = output_dir / self.headers_map[r_include_str] / item.name
                     if target_header.exists():
-                        logger.warning(
-                            f"{j['file']}: {item.name} already exists, skip copying."
-                        )
+                        logger.warning(f"{j['file']}: {item.name} already exists, skip copying.")
                     else:
                         logger.debug(f"Copy header file {item.as_posix()}")
                         shutil.copy(
@@ -825,16 +745,12 @@ class CmakeTraceApp(CmakeApp):
                 self.processed_headers.append(self.headers_map[r_include_str])
             includes.append(self.headers_map[r_include_str])
 
-        return self._finalize_cmake_args(
-            parsed_func, cur_dir, includes, failed_includes, "INCLUDES"
-        )
+        return self._finalize_cmake_args(parsed_func, cur_dir, includes, failed_includes, "INCLUDES")
 
     def trace_mcux_add_linker_script(self, j, output_dir):
         parsed_func = CMakeFunction(j)
         cur_dir = Path(j["file"]).parent
-        base_path = (
-            Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
-        )
+        base_path = Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
         if not (linker := self._resolve_src_path(cur_dir, base_path, Path(parsed_func.single_args["LINKER"]))):
             logger.warning(f'{j["file"]}: Cannot resolve linker script path {parsed_func.single_args["LINKER"]}')
             return None
@@ -858,9 +774,7 @@ class CmakeTraceApp(CmakeApp):
     def trace_mcux_project_remove_source(self, j):
         parsed_func = CMakeFunction(j)
         cur_dir = Path(j["file"]).parent
-        base_path = (
-            Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
-        )
+        base_path = Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
         r_sources = list(
             set(
                 [
@@ -913,12 +827,8 @@ class CmakeTraceApp(CmakeApp):
                 sysbuild_app_options.cmake_variables[k] = v
         sysbuild_app = CmakeTraceApp(self.shared_options, sysbuild_app_options)
         if not sysbuild_app.run():
-            logger.fatal(
-                f"Failed to process linked app {sysbuild_app_options.name} in sysbuild.cmake"
-            )
-        parsed_func.single_args["SOURCE_DIR"] = "/".join(
-            ["${APP_DIR}", "..", source_dir.name]
-        )
+            logger.fatal(f"Failed to process linked app {sysbuild_app_options.name} in sysbuild.cmake")
+        parsed_func.single_args["SOURCE_DIR"] = "/".join(["${APP_DIR}", "..", source_dir.name])
         return parsed_func
 
     def create_board_prj_conf(self, build_dir, ps_list):
@@ -942,14 +852,8 @@ class CmakeTraceApp(CmakeApp):
         force_selected = []
 
         try:
-            promptless_syms = (
-                open(promptless_config := build_dir / ".promptless_config", "r")
-                .read()
-                .splitlines()
-            )
-            raw_config = (
-                open(build_config := build_dir / ".config", "r").read().splitlines()
-            )
+            promptless_syms = open(promptless_config := build_dir / ".promptless_config", "r").read().splitlines()
+            raw_config = open(build_config := build_dir / ".config", "r").read().splitlines()
         except Exception as e:
             logger.fatal(
                 f"Cannot read build config files {build_config.as_posix()} or {promptless_config.as_posix()}, error: {e}"
@@ -958,9 +862,7 @@ class CmakeTraceApp(CmakeApp):
 
         for c in raw_config:
             # Middleware may cause Kconfig build issues
-            if not (
-                match_result := re.match(r"CONFIG_MCUX_(COMPONENT|PRJSEG)[^=]+", c)
-            ):
+            if not (match_result := re.match(r"CONFIG_MCUX_(COMPONENT|PRJSEG)[^=]+", c)):
                 continue
             if (item := match_result.group(0)) in promptless_syms:
                 force_selected.append(item[7:])
@@ -996,9 +898,7 @@ class CmakeTraceApp(CmakeApp):
         ]
         result.extend([f"    select {item}" for item in force_selected])
         if (dest_kconfig := self.output_dir / "Kconfig").exists():
-            open(dest_kconfig, "a", encoding="utf-8").write(
-                "\n" + "\n".join(result) + "\n"
-            )
+            open(dest_kconfig, "a", encoding="utf-8").write("\n" + "\n".join(result) + "\n")
         else:
             result.insert(0, 'rsource "${SdkRootDirPath}/Kconfig.mcuxpresso"')
             open(dest_kconfig, "w", encoding="utf-8").write("\n".join(result) + "\n")
@@ -1017,18 +917,12 @@ class CmakeTraceApp(CmakeApp):
         insert_index = 0
         for i, line in enumerate(self.app_receiver["result"]):
             line = line.strip()
-            if (
-                line.startswith("#")
-                or line == ""
-                or line.startswith("cmake_minimum_required")
-            ):
+            if line.startswith("#") or line == "" or line.startswith("cmake_minimum_required"):
                 insert_index = i + 1
             else:
                 break
         self.app_receiver["result"] = (
-            self.app_receiver["result"][:insert_index]
-            + prepend_content
-            + self.app_receiver["result"][insert_index:]
+            self.app_receiver["result"][:insert_index] + prepend_content + self.app_receiver["result"][insert_index:]
         )
         self.app_receiver["result"].append(append_content)
 
