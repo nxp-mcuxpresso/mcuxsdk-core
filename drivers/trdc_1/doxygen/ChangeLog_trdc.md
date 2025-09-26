@@ -1,5 +1,10 @@
 # TRDC
 
+## [2.2.2]
+
+- Improvements
+  - Update APIs to check whether the memory access configuration can be updated.
+
 ## [2.2.1]
 
 - Bug Fixes:
