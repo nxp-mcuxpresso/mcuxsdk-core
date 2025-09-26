@@ -162,13 +162,13 @@ class CmakeApp(object):
             if self.need_copy_board_files and self.app_type == 'main_app':
                 self.parse_syubuild_variables()
             self.parse_sysbuild()
-        # Apply replacements defined in example.yml
-        self.apply_replacements()
-
+        
         if self.need_copy_board_files:
             self.copy_board_files()
             open(self.dest_list_file, 'w').write("\n".join(self.dest_list_content))
 
+        # Apply replacements defined in example.yml after the board copy process
+        self.apply_replacements()
     def copy_extra_files(self):
         variables = {**self.extra_variables, **self.cmake_variables}
         current_board = self.cmake_variables.get('board')
