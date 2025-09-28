@@ -11,8 +11,6 @@
 #define FSL_COMPONENT_ID "platform.drivers.smartdma_rt500"
 #endif
 
-#if defined(MIMXRT533S_SERIES) || defined(MIMXRT555S_SERIES) || defined(MIMXRT595S_cm33_SERIES)
-
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -2546,5 +2544,3 @@ void SDMA_IRQHandler(void)
 {
     SMARTDMA_HandleIRQ();
 }
-
-#endif

@@ -1,5 +1,11 @@
 # SMARTDMA
 
+## [2.14.0]
+
+- Improvements
+  - Refine the device specific firmware selection method, use device
+    Kconfig symbol to select.
+
 ## [2.13.3]
 
 - Bug Fixes

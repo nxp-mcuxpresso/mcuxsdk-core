@@ -18,6 +18,12 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+/*! @name Driver version */
+/*@{*/
+/*! @brief SMARTDMA driver version */
+#define FSL_SMARTDMA_MCXA_DRIVER_VERSION (MAKE_VERSION(2, 13, 3))
+/*@}*/
+
 /*! @brief The firmware used for display. */
 extern const uint8_t s_smartdmaDisplayFirmware[];
 

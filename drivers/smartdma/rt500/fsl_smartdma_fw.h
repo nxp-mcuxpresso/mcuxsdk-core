@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 NXP
+ * Copyright 2019-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -19,6 +19,12 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+/*! @name Driver version */
+/*@{*/
+/*! @brief SMARTDMA driver version */
+#define FSL_SMARTDMA_RT500_DRIVER_VERSION (MAKE_VERSION(2, 13, 3))
+/*@}*/
+
 #define SMARTDMA_DISPLAY_MIPI_AND_FLEXIO 0
 #define SMARTDMA_DISPLAY_MIPI_ONLY       1
 #define SMARTDMA_DISPLAY_FLEXIO_ONLY     2

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 NXP
+ * Copyright 2019-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -19,6 +19,12 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+/*! @name Driver version */
+/*@{*/
+/*! @brief SMARTDMA driver version */
+#define FSL_SMARTDMA_MCXN_DRIVER_VERSION (MAKE_VERSION(2, 13, 3))
+/*@}*/
+
 #if defined(MCXN236_SERIES) || defined(MCXN235_SERIES)
 #define SMARTDMA_USE_FLEXIO_SHIFTER_DMA 1
 #endif

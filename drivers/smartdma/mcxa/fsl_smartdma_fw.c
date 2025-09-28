@@ -11,11 +11,6 @@
 #define FSL_COMPONENT_ID "platform.drivers.smartdma_mcxa"
 #endif
 
-#if defined(MCXA175_SERIES) || defined(MCXA176_SERIES) || defined(MCXA185_SERIES) || defined(MCXA186_SERIES) || \
-    defined(MCXA255_SERIES) || defined(MCXA256_SERIES) || defined(MCXA265_SERIES) || defined(MCXA266_SERIES) || \
-    defined(MCXA345_SERIES) || defined(MCXA346_SERIES) || defined(MCXA355_SERIES) || defined(MCXA356_SERIES) || \
-    defined(MCXA365_SERIES) || defined(MCXA366_SERIES) || defined(MCXA343_SERIES) || defined(MCXA344_SERIES)
-
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -274,5 +269,3 @@ void SMARTDMA_IRQHandler(void)
 {
     SMARTDMA_HandleIRQ();
 }
-
-#endif

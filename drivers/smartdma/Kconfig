@@ -6,34 +6,22 @@ config MCUX_HAS_COMPONENT_driver.smartdma
     bool
     default y if MCUX_HW_IP_DriverType_SMARTDMA
 
+config MCUX_COMPONENT_driver.smartdma_rt500
+    bool
+    depends on MCUX_HW_IP_DriverType_SMARTDMA_RT500
+
+config MCUX_COMPONENT_driver.smartdma_mcxn
+    bool
+    depends on MCUX_HW_IP_DriverType_SMARTDMA_MCXN
+
+config MCUX_COMPONENT_driver.smartdma_mcxa
+    bool
+    depends on MCUX_HW_IP_DriverType_SMARTDMA_MCXA
+
 config MCUX_COMPONENT_driver.smartdma
     bool "smartdma"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.smartdma
-
-config MCUX_COMPONENT_driver.smartdma_rt500
-    bool
-    default y if MCUX_COMPONENT_driver.smartdma && (MCUX_HW_DEVICE_ID_MIMXRT533S || \
-				MCUX_HW_DEVICE_ID_MIMXRT555S || MCUX_HW_DEVICE_ID_MIMXRT595S)
-
-config MCUX_COMPONENT_driver.smartdma_mcxn
-    bool
-    default y if MCUX_COMPONENT_driver.smartdma && (MCUX_HW_DEVICE_ID_MCXN235 || \
-				MCUX_HW_DEVICE_ID_MCXN236 || MCUX_HW_DEVICE_ID_MCXN247 || \
-				MCUX_HW_DEVICE_ID_MCXN526 || MCUX_HW_DEVICE_ID_MCXN527 || \
-				MCUX_HW_DEVICE_ID_MCXN536 || MCUX_HW_DEVICE_ID_MCXN537 || \
-				MCUX_HW_DEVICE_ID_MCXN546 || MCUX_HW_DEVICE_ID_MCXN547 || \
-				MCUX_HW_DEVICE_ID_MCXN556S || MCUX_HW_DEVICE_ID_MCXN946|| \
-				MCUX_HW_DEVICE_ID_MCXN947)
-
-config MCUX_COMPONENT_driver.smartdma_mcxa
-    bool
-    default y if MCUX_COMPONENT_driver.smartdma && ( \
-			MCUX_HW_DEVICE_ID_MCXA175 || MCUX_HW_DEVICE_ID_MCXA176 || \
-			MCUX_HW_DEVICE_ID_MCXA185 || MCUX_HW_DEVICE_ID_MCXA186 || \
-			MCUX_HW_DEVICE_ID_MCXA255 || MCUX_HW_DEVICE_ID_MCXA256 || \
-			MCUX_HW_DEVICE_ID_MCXA265 || MCUX_HW_DEVICE_ID_MCXA266 || \
-			MCUX_HW_DEVICE_ID_MCXA345 || MCUX_HW_DEVICE_ID_MCXA346 || \
-			MCUX_HW_DEVICE_ID_MCXA355 || MCUX_HW_DEVICE_ID_MCXA356 || \
-			MCUX_HW_DEVICE_ID_MCXA365 || MCUX_HW_DEVICE_ID_MCXA366 || \
-            MCUX_HW_DEVICE_ID_MCXA343 || MCUX_HW_DEVICE_ID_MCXA344) 
+    select MCUX_COMPONENT_driver.smartdma_rt500 if MCUX_HW_IP_DriverType_SMARTDMA_RT500
+    select MCUX_COMPONENT_driver.smartdma_mcxn if MCUX_HW_IP_DriverType_SMARTDMA_MCXN
+    select MCUX_COMPONENT_driver.smartdma_mcxa if MCUX_HW_IP_DriverType_SMARTDMA_MCXA
