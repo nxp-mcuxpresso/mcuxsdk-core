@@ -1,0 +1,10 @@
+/*!
+@defgroup flexio_endat2p2 Endat2p2 encoder Driver
+@ingroup flexio
+@details The MCUXpresso SDK provides a driver for the Endat2p2 interface function using Flexible I/O
+        module of MCUXpresso SDK devices.
+
+# Typical use case {#MotorControl}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/digital_encoder/flexio_endat2p2
+*/

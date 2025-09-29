@@ -1,0 +1,12 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.flexio_endat2p2
+    bool
+    default y if MCUX_HW_IP_DriverType_FLEXIO_ENDAT2P2
+
+config MCUX_COMPONENT_driver.flexio_endat2p2
+    bool "flexio_endat2.2"
+    select MCUX_COMPONENT_driver.flexio
+    depends on MCUX_HAS_COMPONENT_driver.flexio_endat2p2
