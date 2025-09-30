@@ -870,7 +870,7 @@ void arm_fir_f32(const arm_fir_instance_f32 *S, const float32_t *pSrc, float32_t
     assert(NULL != S);
     assert(NULL != pSrc);
     assert(NULL != pDst);
-    assert((blockSize <= UINT16_MAX) && (S->numTaps <= UINT16_MAX));
+    assert(blockSize <= UINT16_MAX);
 
     uint32_t curOffset;
     PQ_SET_F32_CONFIG;
@@ -896,7 +896,7 @@ void arm_fir_q31(const arm_fir_instance_q31 *S, const q31_t *pSrc, q31_t *pDst, 
     assert(NULL != S);
     assert(NULL != pSrc);
     assert(NULL != pDst);
-    assert((blockSize <= UINT16_MAX) && (S->numTaps <= UINT16_MAX));
+    assert(blockSize <= UINT16_MAX);
 
     uint32_t curOffset;
     PQ_SET_Q31_CONFIG;
@@ -922,7 +922,7 @@ void arm_fir_q15(const arm_fir_instance_q15 *S, const q15_t *pSrc, q15_t *pDst, 
     assert(NULL != S);
     assert(NULL != pSrc);
     assert(NULL != pDst);
-    assert((blockSize <= UINT16_MAX) && (S->numTaps <= UINT16_MAX));
+    assert(blockSize <= UINT16_MAX);
 
     uint32_t curOffset;
 
