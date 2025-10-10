@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -11,7 +11,9 @@
 # PACKAGE_VERSION_COMPATIBLE if the current version is >= requested version.
 # The variable CVF_VERSION must be set before calling configure_file().
 
-set(PACKAGE_VERSION "3.0.0")
+include("${CMAKE_CURRENT_LIST_DIR}/McuxSDKVersion.cmake")
+
+set(PACKAGE_VERSION "${MCUXSDK_MAIN_VERSION}")
 
 if (PACKAGE_FIND_VERSION_RANGE)
   # Package version must be in the requested version range
