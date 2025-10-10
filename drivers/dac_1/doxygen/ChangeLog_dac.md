@@ -1,5 +1,12 @@
 # DAC
 
+## [2.1.3]
+
+- Improvements
+  - 'dac_config_t' already contains a member 'enableOpampBuffer',
+    but it is not used. This update uses 'enableOpampBuffer' to
+    control the configuration of GCR[BUF_EN].
+
 ## [2.1.2]
 
 - Improvements
