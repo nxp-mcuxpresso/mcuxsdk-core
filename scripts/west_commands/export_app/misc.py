@@ -44,7 +44,7 @@ CONFIG_BLACK_LIST = [
 ]
 
 # examples/eiq_examples/tflm_label_image_ext_mem: tflite
-HEADER_EXTS = {".h", ".hpp", ".hh", ".hxx", ".inc", ".bin", ".tflite"}
+HEADER_EXTS = {".h", ".hpp", ".hh", ".hxx", ".inc", ".bin", ".tflite", ".mex"}
 
 ADD_LINKER_CMD_PATTERN = re.compile(r"^mcux_add_(.*)_linker_script$")
 

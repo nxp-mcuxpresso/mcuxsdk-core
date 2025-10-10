@@ -101,7 +101,8 @@ class CmakeTraceApp(CmakeApp):
         try:
             self.process_misc_files()
             if self.options.app_type == AppType.main_app:
-                result = self.get_trace_result()
+                if not (result := self.get_trace_result()):
+                    return False
                 if self.is_sysbuild:
                     self.analyze_sysbuild(result)
                 self.options.trace_data = result[self.app_id]
@@ -120,6 +121,8 @@ class CmakeTraceApp(CmakeApp):
             self.analyze_trace_json(self.app_id, self.options.trace_data)
             self.dump_result()
             self.combine_prj_conf()
+            if self.replacements:
+                self.apply_replacements(self.replacements)
             if not self.shared_options.debug:
                 shutil.rmtree(self.options.output_dir / INJECT_BUILD_DIR, ignore_errors=True)
         except Exception as e:
@@ -429,6 +432,8 @@ class CmakeTraceApp(CmakeApp):
         elif hasattr(self, f"trace_{cmd}"):
             self.app_receiver["result"].extend(getattr(self, f"trace_{cmd}")(j))
         elif cmd == "if":
+            if i == len(trace_data) - 1:
+                return
             if trace_data[i + 1].get("cmd") == "if" or trace_data[i + 1].get("file") != p_file:
                 return
             self.app_receiver["skip_line"] = self.write_raw_if(
@@ -510,6 +515,9 @@ class CmakeTraceApp(CmakeApp):
         self.create_cmake_file(self.app_receiver)
         if self.shared_options.board_copy_folders:
             self.create_cmake_file(self.trace_receiver)
+            if mex_file := next((f for f in os.listdir(self.output_board_dir) if f.endswith(".mex")), None):
+                add_mex_statement = f"mcux_add_config_mex_path( PATH ./ )"
+                self.trace_receiver["result"].append(add_mex_statement)
             self.write_cmake_file(
                 self.output_dir / self.dest_board_dirname / "board_files.cmake",
                 self.trace_receiver["result"],
@@ -729,14 +737,17 @@ class CmakeTraceApp(CmakeApp):
             # Formal sdk example shall record all header files through mcux_add_source
             for item in r_include.iterdir():
                 if item.is_file() and is_header_file(item.as_posix()) and item.name not in self.preinclude_files:
-                    target_header = output_dir / self.headers_map[r_include_str] / item.name
+                    if item.name.endswith(".mex"):
+                        target_header = output_dir / item.name
+                    else:
+                        target_header = output_dir / self.headers_map[r_include_str] / item.name
                     if target_header.exists():
                         logger.warning(f"{j['file']}: {item.name} already exists, skip copying.")
                     else:
                         logger.debug(f"Copy header file {item.as_posix()}")
                         shutil.copy(
                             item,
-                            output_dir / self.headers_map[r_include_str] / item.name,
+                            target_header,
                         )
             if self.headers_map[r_include_str] in self.processed_headers:
                 continue

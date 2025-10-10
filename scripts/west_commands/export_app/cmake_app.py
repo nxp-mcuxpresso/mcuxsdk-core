@@ -52,6 +52,7 @@ class CmakeApp(object):
             'CMAKE_CURRENT_LIST_DIR': self.source_dir.as_posix(),
             'CMAKE_CURRENT_SOURCE_DIR': self.source_dir.as_posix()
         })
+        self.replacements = None
 
     def run(self):
         logger.debug("Export shared freestanding example.")
@@ -66,6 +67,8 @@ class CmakeApp(object):
             self.update_kconfig_path()
             if self.is_sysbuild:
                 self.parse_sysbuild()
+            if self.replacements:
+                self.apply_replacements(self.replacements)
         except Exception as e:
             if self.shared_options.debug:
                 print(e)
@@ -88,8 +91,7 @@ class CmakeApp(object):
         if extra_files:
             self.copy_extra_files(extra_files)
         if replacements:
-            # Apply replacements defined in example.yml
-            self.apply_replacements(replacements)
+            self.replacements = replacements
 
     def process_example_yml(self, target_apps=[]):
         custom_conf_files = []
