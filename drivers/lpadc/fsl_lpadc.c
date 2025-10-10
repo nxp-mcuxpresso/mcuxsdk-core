@@ -261,7 +261,7 @@ void LPADC_Init(ADC_Type *base, const lpadc_config_t *config)
  * This function initializes the converter configuration structure with an available settings. The default values are:
  * code
  *   config->enableInDozeMode        = true;
- *   config->conversionAverageMode   = kLPADC_ConversionAverage1;
+ *   config->conversionAverageMode   = kLPADC_ConversionAverageMax - 1; //Set calibration average mode to max by default.
  *   config->enableAnalogPreliminary = false;
  *   config->powerUpDelay            = 0x80;
  *   config->referenceVoltageSource  = kLPADC_ReferenceVoltageAlt1;
@@ -288,8 +288,11 @@ void LPADC_GetDefaultConfig(lpadc_config_t *config)
 #endif /* FSL_FEATURE_LPADC_HAS_CFG_VREF1RNG */
     config->enableInDozeMode = true;
 #if defined(FSL_FEATURE_LPADC_HAS_CTRL_CAL_AVGS) && FSL_FEATURE_LPADC_HAS_CTRL_CAL_AVGS
-    /* Set calibration average mode. */
-    config->conversionAverageMode = kLPADC_ConversionAverage1;
+    /* Set calibration average mode to max by default,
+     * kLPADC_ConversionAverage128 for 3 bit width.
+     * kLPADC_ConversionAverage1024 fot 4 bit width.
+     */
+    config->conversionAverageMode = kLPADC_ConversionAverageMax - 1;
 #endif /* FSL_FEATURE_LPADC_HAS_CTRL_CAL_AVGS */
     config->enableAnalogPreliminary = false;
     config->powerUpDelay            = 0x80;

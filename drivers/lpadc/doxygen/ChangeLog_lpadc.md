@@ -1,5 +1,12 @@
 # LPADC
 
+## [2.9.4]
+
+- Improvements
+  - Update LPADC_GetDefaultConfig, change default conversionAverageMode value to:
+    kLPADC_ConversionAverage128 for 3 bit width.
+    kLPADC_ConversionAverage1024 for 4 bit width.
+
 ## [2.9.3]
 
 - Improvements
