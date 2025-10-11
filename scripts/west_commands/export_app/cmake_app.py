@@ -269,6 +269,8 @@ class CmakeApp(object):
             for i, line in enumerate(kconfig_content):
                 if not 'source' in line:
                     continue
+                if 'SdkRootDirPath' in line:
+                    continue
                 line = self.replace_var(line, ['SdkRootDirPath'])
                 prefix_id = re.search(r'[ro]*source\s*', line).group(0)
                 rel_kconfig_path = line.replace(prefix_id, '').replace('"', '').replace("'", '').strip()
