@@ -19,6 +19,9 @@
  * $Justification fsl_lpi2c_edma_c_ref_2$
  * FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(X) is a constant.
  *
+ * $Justification fsl_lpi2c_edma_c_ref_3$
+ * Depends on FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn
+ *
  */
 
 /*******************************************************************************
@@ -453,6 +456,11 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
             handle->remainingCommand = commandCount - minCommandCount;
             handle->commandIndex = maxTxFifo;
         }
+
+        /*
+         * $Branch Coverage Justification$
+         * $ref fsl_lpi2c_edma_c_ref_3$
+         */
         if(handle->remainingCommand > 0)
         {
             handle->enableTxReadyFlag = true;
@@ -631,6 +639,11 @@ static void LPI2C_MasterTransferEdmaHandleIRQ(LPI2C_Type *base, void *lpi2cMaste
     lpi2c_master_edma_handle_t *handle = (lpi2c_master_edma_handle_t *)lpi2cMasterEdmaHandle;
     uint32_t status                    = LPI2C_MasterGetStatusFlags(base);
     status_t result                    = kStatus_Success;
+
+    /*
+     * $Branch Coverage Justification$
+     * $ref fsl_lpi2c_edma_c_ref_3$
+     */
     if(0U != (status & (uint32_t)kLPI2C_MasterTxReadyFlag))
     {
         if(handle->remainingCommand > 0)
@@ -666,23 +679,23 @@ static void LPI2C_MasterTransferEdmaHandleIRQ(LPI2C_Type *base, void *lpi2cMaste
         LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterIrqFlags);
 
         /* Check error status */
-        if (0U != (status & (uint32_t)kLPI2C_MasterPinLowTimeoutFlag)) /* GCOVR_EXCL_BR_START */
+        if (0U != (status & (uint32_t)kLPI2C_MasterPinLowTimeoutFlag))
         {
-            result = kStatus_LPI2C_PinLowTimeout; /* GCOVR_EXCL_LINE */
+            result = kStatus_LPI2C_PinLowTimeout;
         }
-        /*
-        * $Branch Coverage Justification$
-        * $ref fsl_lpi2c_edma_c_ref_1$
-        */
         else if (0U != (status & (uint32_t)kLPI2C_MasterArbitrationLostFlag))
         {
-            result = kStatus_LPI2C_ArbitrationLost; /* GCOVR_EXCL_LINE */
+            result = kStatus_LPI2C_ArbitrationLost;
         }
         else if (0U != (status & (uint32_t)kLPI2C_MasterNackDetectFlag))
         {
-            result = kStatus_LPI2C_Nak; /* GCOVR_EXCL_LINE */
+            result = kStatus_LPI2C_Nak;
         }
-        else if (0U != (status & (uint32_t)kLPI2C_MasterFifoErrFlag))
+        /*
+         * $Branch Coverage Justification$
+         * Check of last possible flag - shouldn't be false
+         */
+        else if (0U != (status & (uint32_t)kLPI2C_MasterFifoErrFlag)) /* GCOVR_EXCL_BR_START */
         {
             result = kStatus_LPI2C_FifoError;
         }

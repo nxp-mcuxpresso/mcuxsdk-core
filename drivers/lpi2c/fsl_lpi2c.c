@@ -242,6 +242,11 @@ static const reset_ip_name_t s_lpi2cResets[] = LPI2C_RESETS_ARRAY;
 uint32_t LPI2C_GetInstance(LPI2C_Type *base)
 {
     uint32_t instance;
+    /*
+     * $Branch Coverage Justification$
+     * (instance >= ARRAY_SIZE(kLpi2cBases)) not covered. The peripheral base
+     * address is always valid and checked by assert.
+     */
     for (instance = 0U; instance < ARRAY_SIZE(kLpi2cBases); ++instance)
     {
         if (MSDK_REG_SECURE_ADDR(kLpi2cBases[instance]) == MSDK_REG_SECURE_ADDR(base))
@@ -1511,9 +1516,13 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
                     break;
             } /* GCOVR_EXCL_STOP */
 
-            if (result != kStatus_Success)
+            /*
+             * $Branch Coverage Justification$
+             * Depends on configuration of I2C_RETRY_TIMES
+             */
+            if (result != kStatus_Success) /* GCOVR_EXCL_BR_LINE */
             {
-                break;
+                break; /* GCOVR_EXCL_LINE */
             }
         }
     }
