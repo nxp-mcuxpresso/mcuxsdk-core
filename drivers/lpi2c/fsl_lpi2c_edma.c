@@ -644,7 +644,7 @@ static void LPI2C_MasterTransferEdmaHandleIRQ(LPI2C_Type *base, void *lpi2cMaste
      * $Branch Coverage Justification$
      * $ref fsl_lpi2c_edma_c_ref_3$
      */
-    if(0U != (status & (uint32_t)kLPI2C_MasterTxReadyFlag))
+    if((0U != (LPI2C_MasterGetEnabledInterrupts(base) & kLPI2C_MasterTxReadyFlag)) && (0U != (status & (uint32_t)kLPI2C_MasterTxReadyFlag)))
     {
         if(handle->remainingCommand > 0)
         {
