@@ -1,5 +1,11 @@
 # ENET_QOS
 
+## [2.7.2]
+
+- Bug Fixes
+  - Not disabling ENET_QOS_ConfigureRxParser function when compiled for EMAC,
+    as the MTL_RXP_INDIRECT_ACC_DATA register is writeable now.
+
 ## [2.7.1]
 
 - Bug Fixes
