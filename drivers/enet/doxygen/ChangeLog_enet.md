@@ -1,5 +1,10 @@
 # ENET
 
+## [2.10.1]
+
+- Bug Fixes
+  - Fixed WAKEUP interrupt not being handled.
+
 ## [2.10.0]
 
 - New Features
