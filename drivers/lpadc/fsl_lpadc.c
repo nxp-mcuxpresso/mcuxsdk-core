@@ -292,7 +292,7 @@ void LPADC_GetDefaultConfig(lpadc_config_t *config)
      * kLPADC_ConversionAverage128 for 3 bit width.
      * kLPADC_ConversionAverage1024 fot 4 bit width.
      */
-    config->conversionAverageMode = kLPADC_ConversionAverageMax - 1;
+    config->conversionAverageMode = (lpadc_conversion_average_mode_t)(kLPADC_ConversionAverageMax - 1);
 #endif /* FSL_FEATURE_LPADC_HAS_CTRL_CAL_AVGS */
     config->enableAnalogPreliminary = false;
     config->powerUpDelay            = 0x80;
@@ -1033,7 +1033,7 @@ void LPADC_GetCalibrationValue(ADC_Type *base, lpadc_calibration_value_t *ptrCal
 #endif /* FSL_FEATURE_LPADC_HAS_CTRL_CAL_REQ */
 
     ptrCalibrationValue->gainCalibrationResultA = (uint16_t)(base->GCR[0] & ADC_GCR_GCALR_MASK);
-#if (defined(FSL_FEATURE_LPADC_FIFO_COUNT) && (FSL_FEATURE_LPADC_FIFO_COUNT == 2U))
+#if (defined(FSL_FEATURE_LPADC_FIFO_COUNT) && (FSL_FEATURE_LPADC_FIFO_COUNT == 2))
     ptrCalibrationValue->gainCalibrationResultB = (uint16_t)(base->GCR[1] & ADC_GCR_GCALR_MASK);
 #endif /* FSL_FEATURE_LPADC_FIFO_COUNT */
 
