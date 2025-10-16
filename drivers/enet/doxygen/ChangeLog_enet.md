@@ -1,5 +1,13 @@
 # ENET
 
+## [2.11.0]
+
+- New Features
+  - Added function ENET_Ptp1588JumpTimer which adjusts the ENET PTP 1588 timer by jumping
+    a relative time difference. Compared to ENET_Ptp1588SetTimer, this function yields
+    more accurate results when the relative time difference between the PTP clock and
+    the target clock is known.
+
 ## [2.10.1]
 
 - Bug Fixes
