@@ -282,6 +282,9 @@ macro(project project_name)
     include(${SdkRootDirPath}/cmake/extension/kconfig.cmake)
   endif ()
 
+  # generate version header
+  include(${SdkRootDirPath}/cmake/extension/mcux_version_header.cmake)
+
   # run / debug support
   include(${SdkRootDirPath}/cmake/extension/run.cmake)
 

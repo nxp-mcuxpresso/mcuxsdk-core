@@ -11,7 +11,7 @@
 # PACKAGE_VERSION_COMPATIBLE if the current version is >= requested version.
 # The variable CVF_VERSION must be set before calling configure_file().
 
-include("${CMAKE_CURRENT_LIST_DIR}/McuxSDKVersion.cmake")
+include(${SdkRootDirPath}/cmake/extension/mcux_version.cmake)
 
 set(PACKAGE_VERSION "${MCUXSDK_MAIN_VERSION}")
 
