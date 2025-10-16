@@ -1,5 +1,16 @@
 # XSPI
 
+## [2.6.0]
+
+- Improvements
+  - Added feature macro support for devices with reserved register bit fields to 
+    improve compatibility across different device variants.
+    - FSL_FEATURE_XSPI_HAS_DQS_LAT_EN
+    - FSL_FEATURE_XSPI_HAS_END_CFG
+    - FSL_FEATURE_XSPI_HAS_DOZE_MODE
+  - Enhanced register access handling using conditional compilation to accommodate hardware differences.
+  - Added supports of MAIN_XSPI0_DriverIRQHandler() and MAIN_XSPI1_DriverIRQHandler.
+
 ## [2.5.2]
 
 - Improvements

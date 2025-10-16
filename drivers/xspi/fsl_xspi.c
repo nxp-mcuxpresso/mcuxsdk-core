@@ -159,8 +159,14 @@ static const clock_ip_name_t s_xspi_cache64Clocks[] = CACHE64_CLOCKS;
 #endif /* defined(CACHE64_CTRL0_BASE) */
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
+#if defined(XSPI_RSTS)
+#define XSPI_RESETS_ARRAY XSPI_RSTS
+#endif
+
+#if defined(XSPI_RESETS_ARRAY)
 /*! brief Pointers to XSPI resets for each instance. */
 static const reset_ip_name_t s_xspiResets[] = XSPI_RSTS;
+#endif
 
 static uint32_t s_tgSfarsRegOffset[]     = XSPI_TGSFARS_REG_OFFSET;
 static uint32_t s_tgIpcrsRegOffset[]     = XSPI_TGIPCRS_REG_OFFSET;
@@ -442,8 +448,11 @@ void XSPI_Init(XSPI_Type *base, const xspi_config_t *ptrConfig)
     /* Enable the xspi clock */
     (void)CLOCK_EnableClock(s_xspiClock[XSPI_GetInstance(base)]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
+#if defined(XSPI_RESETS_ARRAY)
     /* Reset the XSPI module */
     RESET_ReleasePeripheralReset(s_xspiResets[XSPI_GetInstance(base)]);
+#endif
 
     /* Reset SFM, AHB domain and TG queue. */
     XSPI_SoftwareReset(base);
@@ -463,9 +472,13 @@ void XSPI_Init(XSPI_Type *base, const xspi_config_t *ptrConfig)
         base->FR = tmp32;
     }
 
+#if (defined(FSL_FEATURE_XSPI_HAS_DOZE_MODE) && FSL_FEATURE_XSPI_HAS_DOZE_MODE)
     XSPI_EnableDozeMode(base, ptrConfig->enableDoze);
+#endif /* FSL_FEATURE_XSPI_HAS_DOZE_MODE */
 
+#if (defined(FSL_FEATURE_XSPI_HAS_END_CFG) && FSL_FEATURE_XSPI_HAS_END_CFG)
     base->MCR = ((base->MCR) & (~XSPI_MCR_END_CFG_MASK)) | XSPI_MCR_END_CFG(ptrConfig->byteOrder);
+#endif /* FSL_FEATURE_XSPI_HAS_END_CFG */
 
     if (ptrConfig->ptrAhbAccessConfig != NULL)
     {
@@ -493,8 +506,13 @@ void XSPI_GetDefaultConfig(xspi_config_t *ptrConfig)
 {
     assert(ptrConfig != NULL);
 
+#if (defined(FSL_FEATURE_XSPI_HAS_END_CFG) && FSL_FEATURE_XSPI_HAS_END_CFG)
     ptrConfig->byteOrder  = kXSPI_64BitLE;
+#endif /* FSL_FEATURE_XSPI_HAS_END_CFG */
+
+#if (defined(FSL_FEATURE_XSPI_HAS_DOZE_MODE) && FSL_FEATURE_XSPI_HAS_DOZE_MODE)
     ptrConfig->enableDoze = false;
+#endif /* FSL_FEATURE_XSPI_HAS_DOZE_MODE */
 
     if (ptrConfig->ptrAhbAccessConfig != NULL)
     {
@@ -961,15 +979,23 @@ status_t XSPI_SetDeviceConfig(XSPI_Type *base, xspi_device_config_t *devConfig)
         base->SFAD[0][i] = s_xspiAmbaBase[instance] + XSPI_SFAD_TPAD(devConfig->deviceSize[i]);
     }
 
+#if (defined(FSL_FEATURE_XSPI_HAS_DQS_LAT_EN) && FSL_FEATURE_XSPI_HAS_DQS_LAT_EN)
     uint32_t tmp32 = (base->MCR) & ~(XSPI_MCR_DQS_FA_SEL_MASK | XSPI_MCR_DQS_EN_MASK | XSPI_MCR_DQS_LAT_EN_MASK);
+#else
+    uint32_t tmp32 = (base->MCR) & ~(XSPI_MCR_DQS_FA_SEL_MASK | XSPI_MCR_DQS_EN_MASK);
+#endif /* FSL_FEATURE_XSPI_HAS_DQS_LAT_EN */
 
     if ((devConfig->sampleClkConfig.sampleClkSource == kXSPI_SampleClkFromDqsPadLoopback) ||
         (devConfig->sampleClkConfig.sampleClkSource == kXSPI_SampleClkFromExternalDQS))
     {
         tmp32 |= XSPI_MCR_DQS_EN_MASK;
     }
+#if (defined(FSL_FEATURE_XSPI_HAS_DQS_LAT_EN) && FSL_FEATURE_XSPI_HAS_DQS_LAT_EN)
     tmp32 |= XSPI_MCR_DQS_LAT_EN(devConfig->sampleClkConfig.enableDQSLatency) |
              XSPI_MCR_DQS_FA_SEL((uint32_t)(devConfig->sampleClkConfig.sampleClkSource) & 0x3UL);
+#else
+    tmp32 |= XSPI_MCR_DQS_FA_SEL((uint32_t)(devConfig->sampleClkConfig.sampleClkSource) & 0x3UL);
+#endif /* FSL_FEATURE_XSPI_HAS_DQS_LAT_EN */
     base->MCR = tmp32;
 
     base->SMPR &= ~(XSPI_SMPR_FSPHS_MASK | XSPI_SMPR_FSDLY_MASK);
@@ -2964,6 +2990,25 @@ void XSPI2_DriverIRQHandler(void)
     SDK_ISR_EXIT_BARRIER;
 }
 #endif /* defined(XSPI2) */
+
+#if defined(MAIN_XSPI_0)
+void MAIN_XSPI0_DriverIRQHandler(void);
+void MAIN_XSPI0_DriverIRQHandler(void)
+{
+    XSPI_CommonIRQHandler(MAIN_XSPI_0, s_xspiHandle[0]);
+    SDK_ISR_EXIT_BARRIER;
+}
+#endif /* defined(MAIN_XSPI_0) */
+
+#if defined(MAIN_XSPI_1)
+void MAIN_XSPI1_DriverIRQHandler(void);
+void MAIN_XSPI1_DriverIRQHandler(void)
+{
+    XSPI_CommonIRQHandler(MAIN_XSPI_1, s_xspiHandle[1]);
+    SDK_ISR_EXIT_BARRIER;
+}
+#endif /* defined(MAIN_XSPI_1) */
+
 #endif /* defined(FSL_DRIVER_TRANSFER_DOUBLE_WEAK_IRQ) && FSL_DRIVER_TRANSFER_DOUBLE_WEAK_IRQ */
 
 #if defined(CACHE64_CTRL0_BASE)

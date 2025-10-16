@@ -481,7 +481,9 @@ typedef struct _xspi_data_learning_config
 typedef struct _xspi_sample_clk_config
 {
     xspi_sample_clk_source_t sampleClkSource; /*!< Specify the sample clock source. */
+#if (defined(FSL_FEATURE_XSPI_HAS_DQS_LAT_EN) && FSL_FEATURE_XSPI_HAS_DQS_LAT_EN)
     bool enableDQSLatency;                    /*!< Enable DQS latency or not. */
+#endif /* FSL_FEATURE_XSPI_HAS_DQS_LAT_EN */
     xspi_dll_config_t dllConfig; /*!< Specify the DLL configuration, to improve data accuracy, please adjust
                                      DLL settings based on specific use.  */
 } xspi_sample_clk_config_t;
@@ -974,6 +976,7 @@ typedef enum _xspi_otfad_prefetch_boundary
 
 /**************************** XSPI Controller Structures and Enumerations Start *********************************/
 
+#if (defined(FSL_FEATURE_XSPI_HAS_END_CFG) && FSL_FEATURE_XSPI_HAS_END_CFG)
 /*! @brief Byte ordering endianness. */
 typedef enum _xspi_byte_order
 {
@@ -982,11 +985,14 @@ typedef enum _xspi_byte_order
     kXSPI_32BitBE = 0x2U, /*!< 32 bit big endian*/
     kXSPI_64BitLE = 0x3U, /*!< 64 bit little endian*/
 } xspi_byte_order_t;
+#endif /* FSL_FEATURE_XSPI_HAS_END_CFG */
 
 /*! @brief XSPI configuration structure. */
 typedef struct _xspi_config
 {
+#if (defined(FSL_FEATURE_XSPI_HAS_END_CFG) && FSL_FEATURE_XSPI_HAS_END_CFG)
     xspi_byte_order_t byteOrder;                  /*!< Byte ordering endianness*/
+#endif /* FSL_FEATURE_XSPI_HAS_END_CFG */
     bool enableDoze;                              /*!< Enable/disable doze mode support. */
     xspi_ahb_access_config_t *ptrAhbAccessConfig; /*!< Pointer to AHB access configuration,
                                                   can be NULL is AHB access is not used. */
@@ -1105,10 +1111,12 @@ static inline void XSPI_SetOTFADPrefetchBoundary(XSPI_Type *base, xspi_otfad_pre
  * @name XSPI Controller Low-Level Inferfaces
  */
 
+#if (defined(FSL_FEATURE_XSPI_HAS_END_CFG) && FSL_FEATURE_XSPI_HAS_END_CFG)
 static inline void XSPI_UpdateByteOrder(XSPI_Type *base, xspi_byte_order_t byteOrder)
 {
     base->MCR = ((base->MCR) & (~XSPI_MCR_END_CFG_MASK)) | XSPI_MCR_END_CFG(byteOrder);
 }
+#endif /* FSL_FEATURE_XSPI_HAS_END_CFG */
 
 /*!
  * @brief Enable or disable the XSPI module.
@@ -1235,6 +1243,7 @@ static inline void XSPI_EnableVariableLatency(XSPI_Type *base, bool enable)
     }
 }
 
+#if (defined(FSL_FEATURE_XSPI_HAS_DOZE_MODE) && FSL_FEATURE_XSPI_HAS_DOZE_MODE)
 /*!
  * @brief Enable/disable Doze mode for XSPI controller.
  *
@@ -1256,6 +1265,7 @@ static inline void XSPI_EnableDozeMode(XSPI_Type *base, bool enable)
         base->MCR &= ~XSPI_MCR_DOZE_MASK;
     }
 }
+#endif /* FSL_FEATURE_XSPI_HAS_DOZE_MODE */
 
 /*!
  * @brief Specify the logic level of the XSPI IOFA[3] and IOFA[2] output in the inactive state.
