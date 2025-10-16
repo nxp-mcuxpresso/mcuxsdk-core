@@ -243,7 +243,7 @@ static void I3C_SetEDMATcd(i3c_master_edma_handle_t *handle,
 #if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
     EDMA_TcdSetTransferConfigExt(edmaBase, &s_edma_tcd[instance][tcdIdx], xferConfig, edmaTcd);
 #else
-    EDMA_TcdSetTransferConfig(&s_edma_tcd[tcdIdx], xferConfig, edmaTcd);
+    EDMA_TcdSetTransferConfig(&s_edma_tcd[instance][tcdIdx], xferConfig, edmaTcd);
 #endif
 
     if (isEndTcd)

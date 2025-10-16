@@ -1,5 +1,10 @@
 # I3C_EDMA
 
+## [2.2.12]
+
+- Bug Fixes
+  - Fixed the issue that EDMA transfer configuration use wrong parameter.
+
 ## [2.2.11]
 
 - Improvements
