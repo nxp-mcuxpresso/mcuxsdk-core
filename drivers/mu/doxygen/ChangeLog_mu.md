@@ -1,5 +1,10 @@
 # MU
 
+## [2.3.1]
+
+- Bug Fixes
+  - Fixed FSL_FEATURE_MU_HAS_RESET_DEASSERT_INT macro use.
+
 ## [2.3.0]
 
 - New Features
