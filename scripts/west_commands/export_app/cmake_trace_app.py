@@ -968,9 +968,8 @@ class CmakeTraceApp(CmakeApp):
         ]
         if self.is_sysbuild:
             cmd_list.append("--sysbuild")
-        cmd_list.append("--")
-        if self.shared_options.core_id:
-            cmd_list.append(f"-Dcore_id={self.shared_options.core_id}")
+        if self.shared_options.cmake_opts:
+            cmd_list.extend(self.shared_options.cmake_opts)
         trace_parameters = deepcopy(TRACE_OPTIONS)
         trace_parameters[-1] = trace_parameters[-1].replace(
             "${BINARY_DIR}",
