@@ -20,8 +20,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief VBAT driver version 2.4.0. */
-#define FSL_VBAT_DRIVER_VERSION (MAKE_VERSION(2, 4, 0))
+/*! @brief VBAT driver version 2.5.0. */
+#define FSL_VBAT_DRIVER_VERSION (MAKE_VERSION(2, 5, 0))
 /*@}*/
 
 #if !defined(VBAT_LDORAMC_RET_MASK)
@@ -543,9 +543,11 @@ static inline void VBAT_EnableCrystalOsc32k(VBAT_Type *base, bool enable)
 #if !(defined(FSL_FEATURE_MCX_VBAT_HAS_B_SIDE_REG) && (FSL_FEATURE_MCX_VBAT_HAS_B_SIDE_REG==0U))
         base->OSCCTLB &= ~VBAT_OSCCTLA_OSC_EN_MASK;
 #endif
+#if (defined(FSL_FEATURE_MCX_VBAT_HAS_STATUS_REG) && FSL_FEATURE_MCX_VBAT_HAS_STATUS_REG)
         /* Polling status register to check clock is ready. */
         while ((base->STATUSA & VBAT_STATUSA_OSC_RDY_MASK) == 0UL)
         {}
+#endif
     }
     else
     {
