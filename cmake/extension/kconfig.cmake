@@ -121,7 +121,7 @@ function(mcux_load_prjconf prjconf_dir conf_name)
     # "TZ" means that TRUSTZONE is supported
     set(CONFIG_MCUX_HW_SAU "TZ")
     set(CONFIG_MCUX_HW_SAU "TZ" PARENT_SCOPE)
-  endif()  
+  endif()
 
   set(components
       ${components}
@@ -219,12 +219,14 @@ if(SYSBUILD)
   # load sysbuild project config file in sysbuild folder automatically for sysbuild project
   # Similar to Zephyr: https://docs.zephyrproject.org/latest/build/sysbuild/index.html#sysbuild-file-suffix-support
   zephyr_get(SYSBUILD_EXTRA_CONF_FILE SYSBUILD LOCAL VAR EXTRA_CONF_FILE MERGE REVERSE)
-  
+
   if(SYSBUILD_EXTRA_CONF_FILE)
     string(CONFIGURE "${SYSBUILD_EXTRA_CONF_FILE}" SYSBUILD_EXTRA_CONF_FILE_EXPANDED)
     string(REPLACE " " ";" SYSBUILD_EXTRA_CONF_FILE_AS_LIST "${SYSBUILD_EXTRA_CONF_FILE_EXPANDED}")
   endif()
 endif()
+
+set(_cfg_prj_conf_dir "")
 
 if(DEFINED SB_CONF_FILE)
   list(APPEND merge_config_files ${BOARD_DEFCONFIG})
@@ -262,7 +264,7 @@ elseif (NOT NO_DEFAULT_CONFIG)
         list(APPEND merge_config_files ${f})
       endif()
     endforeach()
-    
+
     if (DEFINED board)
       if (DEFINED CUSTOM_BOARD_ROOT AND NOT CUSTOM_BOARD_ROOT STREQUAL "")
         # for external board with CUSTOM_BOARD_ROOT
@@ -299,7 +301,7 @@ elseif (NOT NO_DEFAULT_CONFIG)
         list(APPEND merge_config_files ${f})
       endif()
     endforeach()
-      
+
     if (DEFINED board)
       if (DEFINED CUSTOM_BOARD_ROOT AND NOT CUSTOM_BOARD_ROOT STREQUAL "")
         # for external board with CUSTOM_BOARD_ROOT
@@ -327,7 +329,6 @@ elseif (NOT NO_DEFAULT_CONFIG)
       endif()
     endif()
   endif()
-  string(FIND "${APPLICATION_SOURCE_DIR}" "${SdkRootDirPath}" is_repo_app)
   if (DEFINED project_board_port_path OR DEFINED project_device_port_path)
     if (is_repo_app STREQUAL 0)
       get_target_source_in_sub_folders(${APPLICATION_SOURCE_DIR} ${EXAMPLE_FOLDER} "prj.conf")
@@ -335,19 +336,44 @@ elseif (NOT NO_DEFAULT_CONFIG)
     else()
       list(APPEND merge_config_files ${APPLICATION_SOURCE_DIR}/prj.conf)
     endif()
-      
+
     list(APPEND merge_config_files ${SYSBUILD_EXTRA_CONF_FILE_AS_LIST})
 
     if ((NOT DEFINED CUSTOM_BOARD_ROOT) OR (DEFINED CUSTOM_BOARD_ROOT AND CUSTOM_BOARD_ROOT STREQUAL ""))
       get_target_source_in_sub_folders(${full_project_port_path} "${board_device_folder}" "prj.conf")
       list(APPEND merge_config_files ${GET_TARGET_SOURCE_IN_SUB_FOLDERS_OUTPUT})
+      if (is_repo_app STREQUAL 0)
+        set(_cfg_prj_conf_dir "${full_project_port_path}")
+      endif()
     endif()
   else()
     if (EXISTS ${APPLICATION_SOURCE_DIR}/prj.conf)
       list(APPEND merge_config_files ${APPLICATION_SOURCE_DIR}/prj.conf)
+      set(_cfg_prj_conf_dir "${APPLICATION_SOURCE_DIR}")
     endif()
     list(APPEND merge_config_files ${SYSBUILD_EXTRA_CONF_FILE_AS_LIST})
   endif()
+
+  # fallback to current source dir if _cfg_prj_conf_dir is not set
+  if("${_cfg_prj_conf_dir}" STREQUAL "")
+    set(_cfg_prj_conf_dir "${APPLICATION_SOURCE_DIR}")
+  endif()
+
+  log_status("Final prj.conf dir is ${_cfg_prj_conf_dir}")
+
+  # Resolve target file path (respect cache if user set it)
+  if(DEFINED MCUXPRESSO_CONFIG_TOOL_EDIT_PRJ_FILE_PATH
+      AND NOT "${MCUXPRESSO_CONFIG_TOOL_EDIT_PRJ_FILE_PATH}" STREQUAL "")
+    set(_cfg_prj_conf_dir "${MCUXPRESSO_CONFIG_TOOL_EDIT_PRJ_FILE_PATH}")
+  else()
+    # use the prj.conf dir found above
+    set(MCUXPRESSO_CONFIG_TOOL_EDIT_PRJ_FILE_PATH
+        "${_cfg_prj_conf_dir}/prj.conf"
+        CACHE FILEPATH "Path to Config Tool edit prj.conf file")
+  endif()
+
+  # Also register the exact file for changes (once it exists)
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_cfg_prj_conf_dir}")
 endif()
  
 # if CUSTOM_PRJ_CONF_PATHS is not empty, append it to merge_config_files

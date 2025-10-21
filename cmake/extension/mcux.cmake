@@ -63,7 +63,7 @@ macro(project project_name)
 
   # clean SdkRootDirPath
   get_filename_component(SdkRootDirPath "${SdkRootDirPath}" ABSOLUTE)
-    
+
   # unset variable to avoid side effect by sysbuild beacuse it has been set in
   # sysbuild.cmake
   unset(APPLICATION_SOURCE_DIR)
@@ -105,6 +105,8 @@ macro(project project_name)
     set(EXAMPLE_FOLDER "examples")
   endif()
 
+  string(FIND "${APPLICATION_SOURCE_DIR}" "${SdkRootDirPath}" is_repo_app)
+
   # If using find_package McuxSDK
   if (MCUX_SDK_CMAKE_PACKAGE)
     # declare CMake project
@@ -132,7 +134,7 @@ macro(project project_name)
       WORKING_DIRECTORY ${APPLICATION_BINARY_DIR}
     )
     target_sources(app PRIVATE ${APPLICATION_BINARY_DIR}/${dummy_file})
-    
+
     if (__CUSTOM_LINKER)
       remove_defined_linker()
     endif()
@@ -226,13 +228,13 @@ macro(project project_name)
           if(mex_count GREATER 1)
             log_warn("Multiple .mex files found in ${mex_file_search_path}" ${CMAKE_CURRENT_LIST_FILE})
           endif()
-  
+
           # Re-configure when mex changes
           set_property(
             DIRECTORY
             APPEND
             PROPERTY CMAKE_CONFIGURE_DEPENDS ${mex_files})
-  
+
           get_filename_component(mex_dir "${mex_file}" DIRECTORY)
           set(MCUXPRESSO_CONFIG_TOOL_MEX_PATH "${mex_dir}" CACHE STRING "Directory containing the MEX file consumed by MCUXpresso Config Tool" FORCE)
           log_debug("Set MCUXPRESSO_CONFIG_TOOL_MEX_PATH ${mex_dir}" ${CMAKE_CURRENT_LIST_FILE})
@@ -280,7 +282,9 @@ macro(project project_name)
 
     # kconfig process
     include(${SdkRootDirPath}/cmake/extension/kconfig.cmake)
-  endif ()
+  endif()
+
+  _mcux_compute_config_tool_generated_path()
 
   # generate version header
   include(${SdkRootDirPath}/cmake/extension/mcux_version_header.cmake)
@@ -341,4 +345,53 @@ macro(clear_default_added_compiler_flags)
   set(CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE_UPPER_CASE} "")
   set(CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE_UPPER_CASE} "")
   set(CMAKE_EXE_LINKER_FLAGS_${CMAKE_BUILD_TYPE_UPPER_CASE} "")
+endmacro()
+
+macro(_mcux_compute_config_tool_generated_path)
+  # Resolve target file path (respect cache if user set it)
+  if(DEFINED MCUXPRESSO_CONFIG_TOOL_GENERATED_CMAKE_FILE_PATH
+     AND NOT "${MCUXPRESSO_CONFIG_TOOL_GENERATED_CMAKE_FILE_PATH}" STREQUAL "")
+    set(_cfg_gen_file "${MCUXPRESSO_CONFIG_TOOL_GENERATED_CMAKE_FILE_PATH}")
+  else()
+    if(is_repo_app LESS 0)
+      set(_cfg_gen_dir "${CMAKE_CURRENT_LIST_DIR}")
+      if(DEFINED board)
+        if(DEFINED core_id)
+          cmake_path(APPEND _cfg_gen_dir "${board}_${core_id}")
+        else()
+          cmake_path(APPEND _cfg_gen_dir "${board}")
+        endif()
+      endif()
+    elseif(DEFINED full_project_port_path AND NOT "${full_project_port_path}" STREQUAL "")
+      set(_cfg_gen_dir "${full_project_port_path}")
+    else()
+      set(_cfg_gen_dir "${CMAKE_CURRENT_LIST_DIR}")
+      if(DEFINED board)
+        if(DEFINED core_id)
+          cmake_path(APPEND _cfg_gen_dir "${board}_${core_id}")
+        else()
+          cmake_path(APPEND _cfg_gen_dir "${board}")
+        endif()
+      endif()
+    endif()
+    set(_cfg_gen_file "${_cfg_gen_dir}/cfg_tools_generated.cmake")
+    set(MCUXPRESSO_CONFIG_TOOL_GENERATED_CMAKE_FILE_PATH
+        "${_cfg_gen_file}"
+        CACHE FILEPATH "Path to Config Tool generated CMake file")
+  endif()
+
+  # Derive directory to watch
+  get_filename_component(_cfg_gen_dir "${_cfg_gen_file}" DIRECTORY)
+
+  # Also register the exact file for changes (once it exists)
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_cfg_gen_dir}")
+
+  # Include only if present
+  if(EXISTS "${_cfg_gen_file}")
+    include("${_cfg_gen_file}" OPTIONAL)
+    log_status("Included Config Tool generated CMake: ${_cfg_gen_file}")
+  endif()
+
+  unset(_cfg_gen_dir)
+  unset(_cfg_gen_file)
 endmacro()
