@@ -1,5 +1,10 @@
 # MU
 
+## [2.8.1]
+
+- Bug Fixes
+  - Avoid incorrect MU_BUSY_POLL_COUNT macro use.
+
 ## [2.8.0]
 
 - New Features

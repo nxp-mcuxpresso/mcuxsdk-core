@@ -22,7 +22,7 @@
  * @{
  */
 /*! @brief MU driver version. */
-#define FSL_MU_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
+#define FSL_MU_DRIVER_VERSION (MAKE_VERSION(2, 8, 1))
 /*! @} */
 
 #define MU_CORE_INTR(intr) ((uint32_t)(intr) << 0U)
@@ -483,7 +483,7 @@ static inline uint32_t MU_ReceiveMsgNonBlocking(MU_Type *base, uint32_t regIndex
  * @brief Blocks to receive a message with timeout protection.
  *
  * This function waits until the RX register is full and receives the message.
- * If MU_BUSY_POLL_COUNT is defined and non-zero, the function will timeout
+ * If MU1_BUSY_POLL_COUNT is defined and non-zero, the function will timeout
  * after the specified number of polling iterations and return kStatus_Timeout.
  *
  * This function provides the same blocking behavior as MU_ReceiveMsg() but
