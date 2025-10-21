@@ -1,5 +1,14 @@
 # MCX_SPC
 
+## [2.10.0]
+
+- New Features
+  - Add feature macro to be compatible with some platforms where SPC does not support:
+    1. Has no SC register SPC_LP_REQ bitfield.
+    2. Has no SC register SPC_LP_MODE bitfield.
+    3. Has no PD_STATUS register.
+    4. Has no SRAMCTL register.
+
 ## [2.9.1]
 
 - Improvements

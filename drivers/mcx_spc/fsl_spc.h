@@ -19,8 +19,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.9.1. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 9, 1))
+/*! @brief SPC driver version 2.10.0. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 10, 0))
 /*! @} */
 
 #define SPC_EVD_CFG_REG_EVDISO_SHIFT   0UL
@@ -562,6 +562,7 @@ static inline bool SPC_GetBusyStatusFlag(SPC_Type *base)
     return ((base->SC & SPC_SC_BUSY_MASK) != 0UL);
 }
 
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_SC_SPC_LP_REQ_BIT ) && (FSL_FEATURE_MCX_SPC_HAS_SC_SPC_LP_REQ_BIT ==0U))
 /*!
  * @brief Checks system low power request.
  *
@@ -588,7 +589,9 @@ static inline void SPC_ClearLowPowerRequest(SPC_Type *base)
 {
     base->SC |= SPC_SC_SPC_LP_REQ_MASK;
 }
+#endif /* FSL_FEATURE_MCX_SPC_HAS_SC_SPC_LP_REQ_BIT  */
 
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_SC_SPC_LP_MODE_BIT) && (FSL_FEATURE_MCX_SPC_HAS_SC_SPC_LP_MODE_BIT==0U))
 /*!
  * @brief Check the last low-power mode that the power domain requested
  *
@@ -600,6 +603,7 @@ static inline spc_power_domain_low_power_mode_t SPC_GetRequestedLowPowerMode(SPC
 {
     return (spc_power_domain_low_power_mode_t)(uint32_t)((base->SC & SPC_SC_SPC_LP_MODE_MASK) >> SPC_SC_SPC_LP_MODE_SHIFT);
 }
+#endif /* FSL_FEATURE_MCX_SPC_HAS_SC_SPC_LP_MODE_BIT */
 
 #if (defined(FSL_FEATURE_MCX_SPC_HAS_SWITCH_STATE_BIT) && FSL_FEATURE_MCX_SPC_HAS_SWITCH_STATE_BIT)
 /*!
@@ -644,6 +648,7 @@ static inline bool SPC_CheckPowerDomainLowPowerRequest(SPC_Type *base, spc_power
 }
 #endif /* FSL_FEATURE_MCX_SPC_HAS_PD_STATUS_PWR_REQ_STATUS_BIT */
 
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_PD_STATUS_REG) && (FSL_FEATURE_MCX_SPC_HAS_PD_STATUS_REG == 0U))
 /*!
  * @brief Clears selected power domain's low power request flag.
  *
@@ -655,6 +660,7 @@ static inline void SPC_ClearPowerDomainLowPowerRequestFlag(SPC_Type *base, spc_p
     assert((uint8_t)powerDomainId < SPC_PD_STATUS_COUNT);
     base->PD_STATUS[(uint8_t)powerDomainId] |= SPC_PD_STATUS_PD_LP_REQ_MASK;
 }
+#endif /* FSL_FEATURE_MCX_SPC_HAS_PD_STATUS_REG */
 
 /*! @} */
 
