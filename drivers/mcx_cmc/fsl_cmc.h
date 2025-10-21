@@ -16,8 +16,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*@{*/
-/*! @brief CMC driver version 2.4.0. */
-#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 4, 0))
+/*! @brief CMC driver version 2.5.0. */
+#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 5, 0))
 /* @} */
 
 #if (defined(FSL_FEATURE_MCX_CMC_HAS_BSR_SCR_BIT) && FSL_FEATURE_MCX_CMC_HAS_BSR_SCR_BIT)
@@ -98,7 +98,9 @@ enum _cmc_system_reset_interrupt_enable
 #if defined(CMC_SRIE_WDOG1_MASK)
     kCMC_Watchdog1ResetInterruptEnable = CMC_SRIE_WDOG1_MASK,          /*!< Watchdog 1 reset interrupt enable. */
 #endif
+#if defined(CMC_SRIE_CDOG0_MASK)
     kCMC_CodeWatchDog0ResetInterruptEnable = CMC_SRIE_CDOG0_MASK, /*!< Code watchdog 0 reset interrupt enable. */
+#endif
 #if defined(CMC_SRIE_CDOG1_MASK)
     kCMC_CodeWatchDog1ResetInterruptEnable = CMC_SRIE_CDOG1_MASK, /*!< Code watchdog 1 reset interrupt enable. */
 #endif                                                            /* CMC_SRIE_CDOG1_MASK */
@@ -136,7 +138,9 @@ enum _cmc_system_reset_interrupt_flag
 #if defined(CMC_SRIF_WDOG1_MASK)
     kCMC_Watchdog1ResetInterruptFlag = CMC_SRIF_WDOG1_MASK,  /*!< Watchdog 1 Reset interrupt flag. */
 #endif
+#if defined(CMC_SRIF_CDOG0_MASK)
     kCMC_CodeWatchdog0ResetInterruptFlag = CMC_SRIF_CDOG0_MASK,      /*!< Code watchdog0 reset interrupt flag. */
+#endif
 #if defined(CMC_SRIF_CDOG1_MASK)
     kCMC_CodeWatchdog1ResetInterruptFlag = CMC_SRIF_CDOG1_MASK,      /*!< Code watchdog1 reset interrupt flag. */
 #endif                                                               /* CMC_SRIF_CDOG1_MASK */
@@ -226,7 +230,9 @@ enum _cmc_system_reset_sources
 #if defined(CMC_SRS_WDOG1_MASK)
     kCMC_Watchdog1Reset = CMC_SRS_WDOG1_MASK,  /*!< The reset caused by the WatchDog 1 timeout. */
 #endif
+#if defined(CMC_SRS_CDOG0_MASK)
     kCMC_CodeWatchDog0Reset = CMC_SRS_CDOG0_MASK,      /*!< The reset caused by the code watchdog0 fault. */
+#endif
 #if defined(CMC_SRS_CDOG1_MASK)
     kCMC_CodeWatchDog1Reset = CMC_SRS_CDOG1_MASK,      /*!< The reset caused by the code watchdog1 fault. */
 #endif                                                 /* CMC_SRS_CDOG1_MASK */
