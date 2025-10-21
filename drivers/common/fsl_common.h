@@ -215,6 +215,7 @@ enum _status_groups
     kStatusGroup_ELA_CSEC       = 174, /*!< Group number for ELA_CSEC status codes. */
     kStatusGroup_FLEXIO_T_FORMAT= 175, /*!< Group number for T-format status codes. */
     kStatusGroup_FLEXIO_A_FORMAT= 176, /*!< Group number for A-format status codes. */
+    kStatusGroup_LPC_QSPI       = 177, /*!< Group number for LPC QSPI status codes. */
 };
 
 /*! \public
