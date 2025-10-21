@@ -1,5 +1,10 @@
 # EDMA
 
+## [2.4.7]
+
+- Bug Fixes
+  - Fixed coverity MSG issues with CERT INT31-C compliance.
+
 ## [2.4.6]
 
 - Bug Fixes

@@ -135,8 +135,10 @@ void EDMA_Init(DMA_Type *base, const edma_config_t *config)
     /* Configure EDMA peripheral according to the configuration structure. */
     tmpreg = base->CR;
     tmpreg &= ~(DMA_CR_ERCA_MASK | DMA_CR_HOE_MASK | DMA_CR_CLM_MASK | DMA_CR_EDBG_MASK);
-    tmpreg |= (DMA_CR_ERCA(config->enableRoundRobinArbitration) | DMA_CR_HOE(config->enableHaltOnError) |
-               DMA_CR_CLM(config->enableContinuousLinkMode) | DMA_CR_EDBG(config->enableDebugMode) | DMA_CR_EMLM(1U));
+    tmpreg |= ((config->enableRoundRobinArbitration ? DMA_CR_ERCA_MASK : 0UL) |
+               (config->enableHaltOnError ? DMA_CR_HOE_MASK : 0UL) |
+               (config->enableContinuousLinkMode ? DMA_CR_CLM_MASK : 0UL) |
+               (config->enableContinuousLinkMode ? DMA_CR_CLM_MASK : 0UL) | DMA_CR_EMLM(1U));
     base->CR = tmpreg;
 }
 
