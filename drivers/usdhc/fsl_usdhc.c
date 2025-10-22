@@ -2105,6 +2105,9 @@ void USDHC_EnableStandardTuning(USDHC_Type *base, uint32_t tuningStartTap, uint3
         tuningCtrl &= ~(USDHC_TUNING_CTRL_TUNING_START_TAP_MASK | USDHC_TUNING_CTRL_TUNING_STEP_MASK);
         tuningCtrl |= (USDHC_TUNING_CTRL_TUNING_START_TAP(tuningStartTap) | USDHC_TUNING_CTRL_TUNING_STEP(step) |
                        USDHC_TUNING_CTRL_STD_TUNING_EN_MASK);
+#if defined(USDHC_TUNING_CTRL_DIS_CMD_CHK_FOR_STD_TUNING_MASK)
+        tuningCtrl |= USDHC_TUNING_CTRL_DIS_CMD_CHK_FOR_STD_TUNING(1);
+#endif
         base->TUNING_CTRL = tuningCtrl;
 
         /* excute tuning */

@@ -1,5 +1,10 @@
 # USDHC
 
+## [2.8.7]
+
+- Bug Fixes
+  - Disabled CMD error check for standard tuning per RM.
+
 ## [2.8.6]
 
 - Bug Fixes
