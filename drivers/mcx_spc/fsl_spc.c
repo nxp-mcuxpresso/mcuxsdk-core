@@ -833,13 +833,7 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
     }
 
     /* Check input parameters. */
-    /*  1. Bandgap must not be disabled. */
-    if (SPC_GetActiveModeBandgapMode(base) == kSPC_BandgapDisabled)
-    {
-        return kStatus_SPC_BandgapModeWrong;
-    }
-
-    /*  2. To set to low drive strength, all LVDs/HVDs must be disabled previously. */
+    /*  To set to low drive strength, all LVDs/HVDs must be disabled previously. */
     if ((SPC_GetActiveModeVoltageDetectStatus(base) != 0UL) &&
         (option->CoreLDODriveStrength == kSPC_CoreLDO_LowDriveStrength))
     {

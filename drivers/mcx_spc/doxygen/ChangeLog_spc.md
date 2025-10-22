@@ -1,5 +1,12 @@
 # MCX_SPC
 
+## [2.9.1]
+
+- Improvements
+  - There is no need to ensure that the bandgap is enabled before setting the active mode core LDO
+    regulator drive strength and voltage level, because the hardware will automatically turn on the
+    bandgap function if it is required by the hardware when configuring the LDO.
+
 ## [2.9.0]
 
 - New Features
