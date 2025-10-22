@@ -1,5 +1,10 @@
 # GPIO
 
+## [2.0.7]
+
+- Bug Fixes
+  - Fixed coverity MSG issues with CERT INT30-C compliance.
+
 ## [2.0.6]
 
 - Bug Fixes
