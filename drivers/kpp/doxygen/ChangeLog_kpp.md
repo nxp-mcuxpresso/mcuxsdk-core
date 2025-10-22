@@ -1,5 +1,10 @@
 # KPP
 
+## [2.1.1]
+
+- Bug Fixes
+  - Fixed coverity MSG issues with CERT INT30-C, CERT ARR30-C compliance.
+
 ## [2.1.0]
 
 - Improvements
