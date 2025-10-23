@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -19,6 +19,9 @@ from misc import sdk_project_target
 logger = logging.getLogger(__name__)
 LIST_PROJECT_USAGE = '''
 Example:
+Get all examples under current directory:
+    west list_project
+Get examples with filters:
     west list_project -p examples/driver_examples/lpuart/interrupt -o test.yml
 
 Data Source
@@ -70,7 +73,7 @@ class ListProject(WestCommand):
             self.name, help=self.help, description=self.description, usage=LIST_PROJECT_USAGE
         )
 
-        parser.add_argument('-p', '--app_path',     action="append", type=str, required=True, default=[],
+        parser.add_argument('-p', '--app_path',     action="append", type=str, default=[],
                                                     help= 'Path regex to match examples.yml in its dir or child-dirs. -p pathA -p pathB. Glob pattern match. -p example/driver_examples/** to match all driver_exmaples.  Note in shell, wrap them by ", otherwise it will be parsed shell itself.')
         parser.add_argument('-b', '--board',        nargs='+', action="extend", type=str, default=[],
                                                     help='boards to build, default to include all boards. -b frdmk22f evkmimxrt1170@cm7')
@@ -99,7 +102,11 @@ class ListProject(WestCommand):
         output_format = args.list_format or config_get('list_format', 'cmd')
         is_validate_example_yml = args.validate or config_getboolean('validate', False)
         match_cases = []
-        for app_path in args.app_path:
+        app_paths = args.app_path 
+        if not app_paths:
+            app_paths = [os.getcwd()]
+            print("No app_path given, will recursively search current directory, it may take a long time... ")
+        for app_path in app_paths:
             match_cases.extend(
                 op.search_app_targets(
                     app_path=app_path,

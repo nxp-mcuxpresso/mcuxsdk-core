@@ -393,7 +393,11 @@ class MCUXAppTargets(object):
             # If the example is outside the SDK, use the absolute path
             app_dir = str(app_dir_path)
 
-        example_data = mcux_read_yaml(app_example_file)
+        try:
+            example_data = mcux_read_yaml(app_example_file)
+        except Exception as e:
+            print(f"{app_example_file} is not a valid YAML file: {e}")
+            return apps
         if validate:
             self._validate_example_data(app_example_file, example_data)
 
@@ -403,6 +407,8 @@ class MCUXAppTargets(object):
 
         app_shared_content = {}
         for app_name, app_data in example_data.items():
+            if not (isinstance(app_data, dict) and app_data.get('section-type')):
+                continue
             if app_data.get('skip_build', False):
                 continue
             query_internal = False if app_data.get('section-type', '') == 'freestanding_application' else True
