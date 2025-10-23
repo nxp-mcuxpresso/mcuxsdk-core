@@ -923,13 +923,15 @@ static status_t FLEXCAN_Reset(CAN_Type *base)
     base->CTRL1 = CAN_CTRL1_SMP_MASK;
     base->CTRL2 = CAN_CTRL2_TASD(0x16) | CAN_CTRL2_RRS_MASK | CAN_CTRL2_EACEN_MASK;
 
+    /* Initialize memory for all FlexCAN RAM in order to have the parity bits in memory properly updated. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
     /* Enable unrestricted write access to FlexCAN memory. */
     base->CTRL2 |= CAN_CTRL2_WRMFRZ_MASK;
-    /* Do memory initialization for all FlexCAN RAM in order to have the parity bits in memory properly
-       updated. */
+    /* Initialize Legacy RX FIFO Information register. */
     *(volatile uint32_t *)CAN_INIT_RXFIR = 0x0U;
+    /* Initialize Message Buffer, ID Mask and CAN SMB memory. */
     flexcan_memset(CAN_INIT_MEMORY_BASE_1, 0, CAN_INIT_MEMORY_SIZE_1);
+    /* Initialize Enhanced Rx FIFO, High Resolution Timestamp and CAN FD SMB memory. */
     flexcan_memset(CAN_INIT_MEMORY_BASE_2, 0, CAN_INIT_MEMORY_SIZE_2);
     /* Disable unrestricted write access to FlexCAN memory. */
     base->CTRL2 &= ~CAN_CTRL2_WRMFRZ_MASK;
