@@ -1,5 +1,10 @@
 # FLEXSPI
 
+## [2.8.1]
+
+- Improvements
+  - Updated the LUT configuration parameter checking with flexible way to adapt different Socs.
+
 ## [2.8.0]
 - Bug Fixes
   - Introduced the **disableAhbReadResume** field in the flexspi_config_t structure to provide control over
