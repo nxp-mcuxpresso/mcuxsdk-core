@@ -1,5 +1,11 @@
 # EIM
 
+## [2.0.4]
+
+- Improvements
+  - Change eim_memory_channel_t to uint32_t.
+  - Support channel number 16-23.
+
 ## [2.0.3]
 
 - Bug Fixes

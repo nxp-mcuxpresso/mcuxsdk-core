@@ -5,6 +5,8 @@
 The Error Injection Module (EIM) is mainly used for diagnostic purposes and enables you to induce artificial errors on error-checking mechanisms of a system.
 It provides a method for diagnostic coverage of internal memories (for example, system RAM, cache RAMs, and peripheral memories).
 
+Note the driver now only supports invert data bit of bytes 0-3 for both check and data mask.
+
 This example code shows how to show error injection using the EIM driver.
 
 Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/eim*/
