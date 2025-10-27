@@ -832,6 +832,7 @@ void EDMA_ClearChannelStatusFlags(DMA_Type *base, uint32_t channel, uint32_t mas
 /*! @} */
 /*!
  * @name eDMA Transactional Operation
+ * @{
  */
 
 /*!
