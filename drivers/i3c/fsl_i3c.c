@@ -2655,8 +2655,6 @@ status_t I3C_MasterTransferGetCount(I3C_Type *base, i3c_master_handle_t *handle,
  *
  * param base The I3C peripheral base address.
  * param handle Pointer to the I3C master driver handle.
- * retval #kStatus_Success A transaction was successfully aborted.
- * retval #kStatus_I3C_Idle There is not a non-blocking transaction currently in progress.
  */
 void I3C_MasterTransferAbort(I3C_Type *base, i3c_master_handle_t *handle)
 {
@@ -3277,8 +3275,6 @@ status_t I3C_SlaveTransferGetCount(I3C_Type *base, i3c_slave_handle_t *handle, s
  * note This API could be called at any time to stop slave for handling the bus events.
  * param base The I3C peripheral base address.
  * param handle Pointer to #i3c_slave_handle_t structure which stores the transfer state.
- * retval #kStatus_Success
- * retval #kStatus_I3C_Idle
  */
 void I3C_SlaveTransferAbort(I3C_Type *base, i3c_slave_handle_t *handle)
 {
