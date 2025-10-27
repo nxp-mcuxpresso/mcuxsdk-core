@@ -1,5 +1,13 @@
 # WUU
 
+## [2.4.1]
+
+- Improvements
+  - The semantics of `kWUU_FilterActiveDSPD` and `kWUU_ExternalPinActiveDSPD` are not
+    clear enough, because on some platforms it's not 'DSPD' (deep sleep, power down) but
+    PDDPD (power down, deep power down). We deprecate them and will use the more generic
+    `kWUU_FilterActiveLowLeakage` and `kWUU_ExternalPinActiveLowLeakage` in the future.
+
 ## [2.4.0]
 
 - New Features
