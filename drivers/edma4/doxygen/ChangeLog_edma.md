@@ -1,5 +1,11 @@
 # EDMA
 
+## [2.10.8]
+
+- Bug Fixes
+  - Fixed coverity issues with CERT INT30-C, CERT INT31-C compliance.
+  - Fixed incorrect enabling of preemption capability issue.
+
 ## [2.10.7]
 
 - Improvements

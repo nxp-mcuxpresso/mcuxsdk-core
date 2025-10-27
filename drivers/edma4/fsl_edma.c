@@ -187,22 +187,22 @@ void EDMA_Init(EDMA_Type *base, const edma_config_t *config)
     /* Configure EDMA peripheral according to the configuration structure. */
     tmpreg = EDMA_CORE_BASE(base)->CR;
     tmpreg &= ~(DMA_CR_ERCA_MASK | DMA_CR_HOE_MASK | DMA_CR_CLM_MASK | DMA_CR_EDBG_MASK);
-    tmpreg |= (DMA_CR_ERCA(config->enableRoundRobinArbitration) | DMA_CR_HOE(config->enableHaltOnError) |
-               DMA_CR_CLM(config->enableContinuousLinkMode) | DMA_CR_EDBG(config->enableDebugMode) | DMA_CR_EMLM(1U));
+    tmpreg |= (DMA_CR_ERCA((config->enableRoundRobinArbitration ? 1U : 0U)) | DMA_CR_HOE((config->enableHaltOnError ? 1U : 0U)) |
+               DMA_CR_CLM((config->enableContinuousLinkMode ? 1U : 0U)) | DMA_CR_EDBG((config->enableDebugMode ? 1U : 0U)) | DMA_CR_EMLM(1U));
     EDMA_CORE_BASE(base)->CR = tmpreg;
 #else
     tmpreg = EDMA_MP_BASE(base)->MP_CSR;
 #if defined FSL_FEATURE_EDMA_HAS_GLOBAL_MASTER_ID_REPLICATION && FSL_FEATURE_EDMA_HAS_GLOBAL_MASTER_ID_REPLICATION
     tmpreg = (tmpreg & ~(DMA_CORE_MP_CSR_HAE_MASK | DMA_CORE_MP_CSR_ERCA_MASK | DMA_CORE_MP_CSR_EDBG_MASK | DMA_CORE_MP_CSR_GCLC_MASK |
                          DMA_CORE_MP_CSR_GMRC_MASK | DMA_CORE_MP_CSR_HALT_MASK)) |
-             DMA_CORE_MP_CSR_GMRC(config->enableMasterIdReplication) | DMA_CORE_MP_CSR_HAE(config->enableHaltOnError) |
-             DMA_CORE_MP_CSR_ERCA(config->enableRoundRobinArbitration) | DMA_CORE_MP_CSR_EDBG(config->enableDebugMode) |
-             DMA_CORE_MP_CSR_GCLC(config->enableGlobalChannelLink);
+             DMA_CORE_MP_CSR_GMRC((config->enableMasterIdReplication ? 1U : 0U)) | DMA_CORE_MP_CSR_HAE((config->enableHaltOnError ? 1U : 0U)) |
+             DMA_CORE_MP_CSR_ERCA((config->enableRoundRobinArbitration ? 1U : 0U)) | DMA_CORE_MP_CSR_EDBG((config->enableDebugMode ? 1U : 0U)) |
+             DMA_CORE_MP_CSR_GCLC((config->enableGlobalChannelLink ? 1U : 0U));
 #else
     tmpreg = (tmpreg & ~(DMA_CORE_MP_CSR_HAE_MASK | DMA_CORE_MP_CSR_ERCA_MASK | DMA_CORE_MP_CSR_EDBG_MASK | DMA_CORE_MP_CSR_GCLC_MASK |
                          DMA_CORE_MP_CSR_HALT_MASK)) |
-             DMA_CORE_MP_CSR_HAE(config->enableHaltOnError) | DMA_CORE_MP_CSR_ERCA(config->enableRoundRobinArbitration) |
-             DMA_CORE_MP_CSR_EDBG(config->enableDebugMode) | DMA_CORE_MP_CSR_GCLC(config->enableGlobalChannelLink);
+             DMA_CORE_MP_CSR_HAE((config->enableHaltOnError ? 1U : 0U)) | DMA_CORE_MP_CSR_ERCA((config->enableRoundRobinArbitration ? 1U : 0U)) |
+             DMA_CORE_MP_CSR_EDBG((config->enableDebugMode ? 1U : 0U)) | DMA_CORE_MP_CSR_GCLC((config->enableGlobalChannelLink ? 1U : 0U));
 #endif
     EDMA_MP_BASE(base)->MP_CSR = tmpreg;
 
@@ -419,8 +419,9 @@ void EDMA_SetMinorOffsetConfig(EDMA_Type *base, uint32_t channel, const edma_min
     tmpreg = EDMA_TCD_NBYTES(EDMA_TCD_BASE(base, channel), EDMA_TCD_TYPE(base));
     tmpreg &= ~(DMA_NBYTES_MLOFFYES_SMLOE_MASK | DMA_NBYTES_MLOFFYES_DMLOE_MASK | DMA_NBYTES_MLOFFYES_MLOFF_MASK);
     tmpreg |=
-        (DMA_NBYTES_MLOFFYES_SMLOE(config->enableSrcMinorOffset) |
-         DMA_NBYTES_MLOFFYES_DMLOE(config->enableDestMinorOffset) | DMA_NBYTES_MLOFFYES_MLOFF(config->minorOffset));
+        ((config->enableSrcMinorOffset ? DMA_NBYTES_MLOFFYES_SMLOE_MASK : 0UL) |
+         (config->enableDestMinorOffset ? DMA_NBYTES_MLOFFYES_DMLOE_MASK : 0UL) |
+        DMA_NBYTES_MLOFFYES_MLOFF(config->minorOffset));
     EDMA_TCD_NBYTES(EDMA_TCD_BASE(base, channel), EDMA_TCD_TYPE(base)) = tmpreg;
 }
 
@@ -468,8 +469,8 @@ void EDMA_SetChannelPreemptionConfig(EDMA_Type *base, uint32_t channel, const ed
         (DMA_DCHPRI0_DPA((true == tmpEnablePreemptAbility ? 0U : 1U)) |
          DMA_DCHPRI0_ECP((true == tmpEnablchannelPreemption ? 1U : 0U)) | DMA_DCHPRI0_CHPRI(tmpChannelPriority));
 #else
-    EDMA_CHANNEL_BASE(base, channel)->CH_PRI = DMA_CH_PRI_ECP(tmpEnablchannelPreemption) |
-                                               DMA_CH_PRI_DPA(tmpEnablePreemptAbility) |
+    EDMA_CHANNEL_BASE(base, channel)->CH_PRI = DMA_CH_PRI_ECP((true == tmpEnablchannelPreemption ? 1U : 0U)) |
+                                               DMA_CH_PRI_DPA((true == tmpEnablePreemptAbility ? 0U : 1U)) |
                                                DMA_CH_PRI_APL(tmpChannelPriority);
 #endif
 }
@@ -673,8 +674,8 @@ void EDMA_ConfigChannelSoftwareTCDExt(EDMA_Type *base, edma_tcd_t *tcd, const ed
     {
         EDMA_TCD_NBYTES(tcd, EDMA_TCD_TYPE(base)) = DMA_NBYTES_MLOFFYES_NBYTES(transfer->minorLoopBytes) |
                                                    DMA_NBYTES_MLOFFYES_MLOFF(transfer->minorLoopOffset) |
-                                                   DMA_NBYTES_MLOFFYES_DMLOE(transfer->enableDstMinorLoopOffset) |
-                                                   DMA_NBYTES_MLOFFYES_SMLOE(transfer->enableSrcMinorLoopOffset);
+                                                   (transfer->enableDstMinorLoopOffset ? DMA_NBYTES_MLOFFYES_DMLOE_MASK : 0UL) |
+                                                   (transfer->enableSrcMinorLoopOffset ? DMA_NBYTES_MLOFFYES_SMLOE_MASK : 0UL);
     }
     else
     {
@@ -763,8 +764,9 @@ void EDMA_TcdSetMinorOffsetConfigExt(EDMA_Type *base, edma_tcd_t *tcd, const edm
     tmpreg = EDMA_TCD_NBYTES(tcd, EDMA_TCD_TYPE(base)) &
              ~(DMA_NBYTES_MLOFFYES_SMLOE_MASK | DMA_NBYTES_MLOFFYES_DMLOE_MASK | DMA_NBYTES_MLOFFYES_MLOFF_MASK);
     tmpreg |=
-        (DMA_NBYTES_MLOFFYES_SMLOE(config->enableSrcMinorOffset) |
-         DMA_NBYTES_MLOFFYES_DMLOE(config->enableDestMinorOffset) | DMA_NBYTES_MLOFFYES_MLOFF(config->minorOffset));
+        ((config->enableSrcMinorOffset ? DMA_NBYTES_MLOFFYES_SMLOE_MASK : 0UL) |
+         (config->enableDestMinorOffset ? DMA_NBYTES_MLOFFYES_DMLOE_MASK : 0UL) |
+        DMA_NBYTES_MLOFFYES_MLOFF(config->minorOffset));
     EDMA_TCD_NBYTES(tcd, EDMA_TCD_TYPE(base)) = tmpreg;
 }
 
@@ -1044,8 +1046,8 @@ void EDMA_ConfigChannelSoftwareTCD(edma_tcd_t *tcd, const edma_transfer_config_t
     {
         EDMA_TCD_NBYTES(tcd, kEDMA_EDMA4Flag) = DMA_NBYTES_MLOFFYES_NBYTES(transfer->minorLoopBytes) |
                                                 DMA_NBYTES_MLOFFYES_MLOFF(transfer->minorLoopOffset) |
-                                                DMA_NBYTES_MLOFFYES_DMLOE(transfer->enableDstMinorLoopOffset) |
-                                                DMA_NBYTES_MLOFFYES_SMLOE(transfer->enableSrcMinorLoopOffset);
+                                                (transfer->enableDstMinorLoopOffset ? DMA_NBYTES_MLOFFYES_DMLOE_MASK : 0UL) |
+                                                (transfer->enableSrcMinorLoopOffset ? DMA_NBYTES_MLOFFYES_SMLOE_MASK : 0UL);
     }
     else
     {
@@ -1135,8 +1137,9 @@ void EDMA_TcdSetMinorOffsetConfig(edma_tcd_t *tcd, const edma_minor_offset_confi
     tmpreg = EDMA_TCD_NBYTES(tcd, kEDMA_EDMA4Flag) &
              ~(DMA_NBYTES_MLOFFYES_SMLOE_MASK | DMA_NBYTES_MLOFFYES_DMLOE_MASK | DMA_NBYTES_MLOFFYES_MLOFF_MASK);
     tmpreg |=
-        (DMA_NBYTES_MLOFFYES_SMLOE(config->enableSrcMinorOffset) |
-         DMA_NBYTES_MLOFFYES_DMLOE(config->enableDestMinorOffset) | DMA_NBYTES_MLOFFYES_MLOFF(config->minorOffset));
+        ((config->enableSrcMinorOffset ? DMA_NBYTES_MLOFFYES_SMLOE_MASK : 0UL) |
+         (config->enableDestMinorOffset ? DMA_NBYTES_MLOFFYES_DMLOE_MASK : 0UL) |
+        DMA_NBYTES_MLOFFYES_MLOFF(config->minorOffset));
     EDMA_TCD_NBYTES(tcd, kEDMA_EDMA4Flag) = tmpreg;
 }
 
