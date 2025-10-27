@@ -1,5 +1,11 @@
 # XSPI
 
+## [2.5.2]
+
+- Improvements
+  - Fixed an issue with incorrect cache range address calculation. It caused issue when the cache operation size
+    is equal to a multiple of the cache line size + 1.
+
 ## [2.5.1]
 
 - Improvements
