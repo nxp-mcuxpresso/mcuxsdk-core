@@ -1,5 +1,10 @@
 # LPIT
 
+## [2.1.3]
+
+- Bug Fixes
+  - Fixed doxygen generation warnings.
+
 ## [2.1.2]
 
 - Bug Fixes
