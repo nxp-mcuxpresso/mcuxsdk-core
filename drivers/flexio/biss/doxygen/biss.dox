@@ -1,0 +1,10 @@
+/*!
+@defgroup flexio_biss FlexIO BiSS Driver
+@details The MCUXpresso SDK provides a peripheral driver for the Digital
+Encoder BiSS module of MCUXpresso SDK devices.
+The BiSS interface is a digital interface for sensors and actuators.
+
+This section describes the programming interface of the BiSS driver.
+The BiSS driver provides functional interfaces for the user to configure
+BiSS encoder and get the data from it.
+*/
