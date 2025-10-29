@@ -1,5 +1,10 @@
 # VREF
 
+## [2.4.1]
+
+- Improvements
+  - Improve doxygen documentation.
+
 ## [2.4.0]
 
 - Improvements

@@ -1,32 +1,87 @@
 /*!
 @defgroup vref VREF: Voltage Reference Driver
-@details The MCUXpresso SDK provides a peripheral driver for the Crossbar Voltage Reference (VREF) block of MCUXpresso SDK devices.
+@details
+The MCUXpresso SDK provides a peripheral driver for the on-chip Voltage Reference (VREF) block.
+The VREF can be used to provide a reference voltage to external devices, or internally by
+analog peripherals such as ADC, DAC, or CMP.
 
+@{
 
-The VREF can be used in applications to provide a reference voltage to external devices, or used internally in the
-device as a reference to analog peripherals (such as the ADC, DAC, or CMP). The Voltage Reference (VREF) can supply an
-accurate voltage output that can be trimmed in 0.5*(1/Kf)(Kf means the feedback factor of buf21) mV steps. The voltage
-reference has 3 operating modes that provide different levels of supply rejection and power consumption.
+## Overview
 
-## Initialization and deinitialization {#VrefInit}
+The VREF can supply an accurate voltage output that can be trimmed in fine steps.
+In bandgap-trim mode, the step size is approximately 0.5 × (1/Kf) mV (Kf is the feedback factor of BUF21).
+The module supports three operating modes that trade off supply rejection and power consumption:
 
-To configure the VREF driver, configure vref_config_t structure in one of two ways.
-    1. Use the VREF_GetDefaultConfig() function.
-    2. Set the parameter in the vref_config_t structure.
+- Bandgap only (standby)
+- Low-power buffer
+- High-power buffer
 
-To initialize the VREF driver, call the VREF_Init() function and pass a pointer to
- the vref_config_t structure.
+## Initialization and de-initialization {#VrefInit}
 
-To de-initialize the VREF driver, call the VREF_Deinit() function.
+Configure a `vref_config_t` in either of the following ways:
 
-## Trim functions (#VrefTrim)
+1. Call `VREF_GetDefaultConfig()` and then modify fields as needed.
+2. Manually fill the `vref_config_t` structure.
 
-The function VREF_SetTrimVal() can trim the bandgap or output voltage and the function VREF_GetTrimVal() can read
-the trim value.
+Initialize and de-initialize the driver using:
 
-# Typical use case and example {#VrefExample}
+@code{.c}
+vref_config_t cfg;
+VREF_GetDefaultConfig(&cfg);
+cfg.bufferMode = kVREF_ModeHighPowerBuffer; /* Example override */
+VREF_Init(VREF, &cfg);
 
-This example shows how to generate a reference voltage by using the VREF module.
+/* ... application ... */
 
-Refer to the driver examples codes located at <SDK_ROOT>/boards/<BOARD>/driver_examples/vref_1
+VREF_Deinit(VREF);
+@endcode
+
+## Trim functions {#VrefTrim}
+
+Use the following APIs to trim and read back trim values:
+
+- `VREF_SetVrefTrimVal()` / `VREF_GetVrefTrimVal()` – trim/read the accurate ~1.0 V bandgap reference.
+- `VREF_SetTrim21Val()` / `VREF_GetTrim21Val()` – when the 2.1 V buffered output (BUF21) is enabled,
+  trim/read the buffered VREF output from 1.0 V to 2.1 V in steps (if supported by the device).
+
+@note When BUF21 is enabled, `UTRIM[TRIM2V1]` is typically valid in the range 0b0000–0b1011 to trim from 1.0 V to 2.1 V.
+Other values may revert the output to the default (1.0 V). Consult the SoC reference manual for device-specific limits.
+
+## Typical use case and example {#VrefExample}
+
+Generate a reference voltage using the VREF module:
+
+@code{.c}
+vref_config_t cfg;
+VREF_GetDefaultConfig(&cfg);
+cfg.bufferMode = kVREF_ModeLowPowerBuffer;
+VREF_Init(VREF, &cfg);
+
+/* Optionally adjust bandgap trim (step size is SoC-dependent) */
+VREF_SetVrefTrimVal(VREF, 0x08U);
+
+/* When supported, enable buffered 2.1 V path and trim */
+VREF_SetTrim21Val(VREF, 0x04U);
+
+/* ... use VREF ... */
+
+VREF_Deinit(VREF);
+@endcode
+
+### Related APIs
+
+- @ref VREF_Init
+- @ref VREF_Deinit
+- @ref VREF_GetDefaultConfig
+- @ref VREF_SetVrefTrimVal
+- @ref VREF_GetVrefTrimVal
+- @ref VREF_SetTrim21Val
+- @ref VREF_GetTrim21Val
+
+### References
+
+- Driver examples: `<SDK_ROOT>/boards/<BOARD>/driver_examples/vref_1`
+
+@}
 */

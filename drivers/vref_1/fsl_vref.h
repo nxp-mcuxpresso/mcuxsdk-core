@@ -1,6 +1,5 @@
 /*
- * Copyright 2019-2024 NXP
- * All rights reserved.
+ * Copyright 2019-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,7 +20,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_VREF_DRIVER_VERSION (MAKE_VERSION(2, 4, 0)) /*!< Version 2.4.0. */
+#define FSL_VREF_DRIVER_VERSION (MAKE_VERSION(2, 4, 1)) /*!< Version 2.4.0. */
 /*! @} */
 
 /*! @brief VREF buffer modes. */
@@ -67,7 +66,7 @@ extern "C" {
  * and how to call the VREF_Init function by passing in these parameters.
  * @code
  *    vref_config_t vrefConfig;
- *    VREF_GetDefaultConfig(VREF, &vrefConfig);
+ *    VREF_GetDefaultConfig(&vrefConfig);
  *    vrefConfig.bufferMode = kVREF_ModeHighPowerBuffer;
  *    VREF_Init(VREF, &vrefConfig);
  * @endcode
@@ -84,7 +83,7 @@ void VREF_Init(VREF_Type *base, const vref_config_t *config);
  * This is an example.
  * @code
  *    vref_config_t vrefUserConfig;
- *    VREF_GetDefaultConfig(VREF, &vrefUserConfig);
+ *    VREF_GetDefaultConfig(&vrefUserConfig);
  *    VREF_Init(VREF, &vrefUserConfig);
  *    ...
  *    VREF_Deinit(VREF);
@@ -187,7 +186,8 @@ static inline void VREF_SetTestUlockValue(VREF_Type *base, uint16_t value)
  */
 static inline uint16_t VREF_GetTestUlockValue(VREF_Type *base)
 {
-    return (uint16_t)(base->TEST_UNLOCK & VREF_TEST_UNLOCK_TEST_UNLOCK_VALUE_MASK >> VREF_TEST_UNLOCK_TEST_UNLOCK_VALUE_SHIFT);
+    return (uint16_t)(((base->TEST_UNLOCK & VREF_TEST_UNLOCK_TEST_UNLOCK_VALUE_MASK) >>
+                       VREF_TEST_UNLOCK_TEST_UNLOCK_VALUE_SHIFT));
 }
 
 /*!
