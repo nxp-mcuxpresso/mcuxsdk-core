@@ -76,6 +76,18 @@ after callling `arm_fir_xxx(&fir, inputData, outputData, 32)`, the output data i
 in outputData[0:31]. The new input data must be saved from inputData[32], then call
 `arm_fir_xxx(&fir, &inputData[32], &outputData[32], 32)` for incremental calculation.
 
+There are two ways to use these CMSIS DSP compatible APIs, take API `arm_cos_f32` as an example:
+1. If you want do use PowerQuad implementation instead of CMSIS DSP implementation,
+and don't want to change your existing code, you can define macro
+`CONFIG_PQ_ARM_COS_F32` to 0 or don't define it at all. PowerQuad
+implementation will replace the original CMSIS DSP implementation.
+This is the default behavior.
+2. If you want to use PowerQuad implemention together with CMSIS DSP implementation,
+please define macro `CONFIG_PQ_ARM_COS_F32` to 1, and include this header.
+Then you can use `pq_arm_cos_f32` to call PowerQuad implementation,
+
+Each CMSIS DSP API has a macro to control the behavior.
+
 The PowerQuad consists of several internal computation engines: Transform engine, Transcendental 
 function engine, Trigonometry function engine, Dual biquad IIR filter engine, Matrix accelerator engine,
 FIR filter engine, CORDIC engine.

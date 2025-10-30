@@ -20,3 +20,255 @@ config MCUX_COMPONENT_driver.powerquad_cmsis
     select MCUX_COMPONENT_driver.powerquad
     select MCUX_COMPONENT_CMSIS_DSP_Include
     depends on MCUX_HAS_COMPONENT_driver.powerquad_cmsis
+
+if MCUX_COMPONENT_driver.powerquad_cmsis
+
+    menu "Use PowerQuad CMSIS DSP API with prefix pq_"
+
+    config PQ_ARM_COS_F32
+        bool "pq_arm_cos_f32"
+        help
+          Use API name pq_arm_cos_f32 instead of arm_cos_f32
+
+    config PQ_ARM_COS_Q31
+        bool "pq_arm_cos_q31"
+        help
+          Use API name pq_arm_cos_q31 instead of arm_cos_q31
+
+    config PQ_ARM_COS_Q15
+        bool "pq_arm_cos_q15"
+        help
+          Use API name pq_arm_cos_q15 instead of arm_cos_q15
+
+    config PQ_ARM_SIN_F32
+        bool "pq_arm_sin_f32"
+        help
+          Use API name pq_arm_sin_f32 instead of arm_sin_f32
+
+    config PQ_ARM_SIN_Q31
+        bool "pq_arm_sin_q31"
+        help
+          Use API name pq_arm_sin_q31 instead of arm_sin_q31
+
+    config PQ_ARM_SIN_Q15
+        bool "pq_arm_sin_q15"
+        help
+          Use API name pq_arm_sin_q15 instead of arm_sin_q15
+
+    config PQ_ARM_SQRT_Q31
+        bool "pq_arm_sqrt_q31"
+        help
+          Use API name pq_arm_sqrt_q31 instead of arm_sqrt_q31
+
+    config PQ_ARM_SQRT_Q15
+        bool "pq_arm_sqrt_q15"
+        help
+          Use API name pq_arm_sqrt_q15 instead of arm_sqrt_q15
+
+    config PQ_ARM_CFFT_Q31
+        bool "pq_arm_cfft_q31"
+        help
+          Use API name pq_arm_cfft_q31 instead of arm_cfft_q31
+
+    config PQ_ARM_CFFT_Q15
+        bool "pq_arm_cfft_q15"
+        help
+          Use API name pq_arm_cfft_q15 instead of arm_cfft_q15
+
+    config PQ_ARM_RFFT_INIT_Q31
+        bool "pq_arm_rfft_init_q31"
+        help
+          Use API name pq_arm_rfft_init_q31 instead of arm_rfft_init_q31
+
+    config PQ_ARM_RFFT_Q31
+        bool "pq_arm_rfft_q31"
+        help
+          Use API name pq_arm_rfft_q31 instead of arm_rfft_q31
+
+    config PQ_ARM_RFFT_INIT_Q15
+        bool "pq_arm_rfft_init_q15"
+        help
+          Use API name pq_arm_rfft_init_q15 instead of arm_rfft_init_q15
+
+    config PQ_ARM_RFFT_Q15
+        bool "pq_arm_rfft_q15"
+        help
+          Use API name pq_arm_rfft_q15 instead of arm_rfft_q15
+
+    config PQ_ARM_DCT4_INIT_Q31
+        bool "pq_arm_dct4_init_q31"
+        help
+          Use API name pq_arm_dct4_init_q31 instead of arm_dct4_init_q31
+
+    config PQ_ARM_DCT4_Q31
+        bool "pq_arm_dct4_q31"
+        help
+          Use API name pq_arm_dct4_q31 instead of arm_dct4_q31
+
+    config PQ_ARM_DCT4_INIT_Q15
+        bool "pq_arm_dct4_init_q15"
+        help
+          Use API name pq_arm_dct4_init_q15 instead of arm_dct4_init_q15
+
+    config PQ_ARM_DCT4_Q15
+        bool "pq_arm_dct4_q15"
+        help
+          Use API name pq_arm_dct4_q15 instead of arm_dct4_q15
+
+    config PQ_ARM_FIR_INIT_F32
+        bool "pq_arm_fir_init_f32"
+        help
+          Use API name pq_arm_fir_init_f32 instead of arm_fir_init_f32
+
+    config PQ_ARM_FIR_INIT_Q31
+        bool "pq_arm_fir_init_q31"
+        help
+          Use API name pq_arm_fir_init_q31 instead of arm_fir_init_q31
+
+    config PQ_ARM_FIR_INIT_Q15
+        bool "pq_arm_fir_init_q15"
+        help
+          Use API name pq_arm_fir_init_q15 instead of arm_fir_init_q15
+
+    config PQ_ARM_FIR_F32
+        bool "pq_arm_fir_f32"
+        help
+          Use API name pq_arm_fir_f32 instead of arm_fir_f32
+
+    config PQ_ARM_FIR_Q31
+        bool "pq_arm_fir_q31"
+        help
+          Use API name pq_arm_fir_q31 instead of arm_fir_q31
+
+    config PQ_ARM_FIR_Q15
+        bool "pq_arm_fir_q15"
+        help
+          Use API name pq_arm_fir_q15 instead of arm_fir_q15
+
+    config PQ_ARM_CONV_F32
+        bool "pq_arm_conv_f32"
+        help
+          Use API name pq_arm_conv_f32 instead of arm_conv_f32
+
+    config PQ_ARM_CONV_Q31
+        bool "pq_arm_conv_q31"
+        help
+          Use API name pq_arm_conv_q31 instead of arm_conv_q31
+
+    config PQ_ARM_CONV_Q15
+        bool "pq_arm_conv_q15"
+        help
+          Use API name pq_arm_conv_q15 instead of arm_conv_q15
+
+    config PQ_ARM_CORRELATE_F32
+        bool "pq_arm_correlate_f32"
+        help
+          Use API name pq_arm_correlate_f32 instead of arm_correlate_f32
+
+    config PQ_ARM_CORRELATE_Q31
+        bool "pq_arm_correlate_q31"
+        help
+          Use API name pq_arm_correlate_q31 instead of arm_correlate_q31
+
+    config PQ_ARM_CORRELATE_Q15
+        bool "pq_arm_correlate_q15"
+        help
+          Use API name pq_arm_correlate_q15 instead of arm_correlate_q15
+
+    config PQ_ARM_MAT_INIT_F32
+        bool "pq_arm_mat_init_f32"
+        help
+          Use API name pq_arm_mat_init_f32 instead of arm_mat_init_f32
+
+    config PQ_ARM_MAT_INIT_Q31
+        bool "pq_arm_mat_init_q31"
+        help
+          Use API name pq_arm_mat_init_q31 instead of arm_mat_init_q31
+
+    config PQ_ARM_MAT_INIT_Q15
+        bool "pq_arm_mat_init_q15"
+        help
+          Use API name pq_arm_mat_init_q15 instead of arm_mat_init_q15
+
+    config PQ_ARM_MAT_ADD_F32
+        bool "pq_arm_mat_add_f32"
+        help
+          Use API name pq_arm_mat_add_f32 instead of arm_mat_add_f32
+
+    config PQ_ARM_MAT_ADD_Q31
+        bool "pq_arm_mat_add_q31"
+        help
+          Use API name pq_arm_mat_add_q31 instead of arm_mat_add_q31
+
+    config PQ_ARM_MAT_ADD_Q15
+        bool "pq_arm_mat_add_q15"
+        help
+          Use API name pq_arm_mat_add_q15 instead of arm_mat_add_q15
+
+    config PQ_ARM_MAT_SUB_F32
+        bool "pq_arm_mat_sub_f32"
+        help
+          Use API name pq_arm_mat_sub_f32 instead of arm_mat_sub_f32
+
+    config PQ_ARM_MAT_SUB_Q31
+        bool "pq_arm_mat_sub_q31"
+        help
+          Use API name pq_arm_mat_sub_q31 instead of arm_mat_sub_q31
+
+    config PQ_ARM_MAT_SUB_Q15
+        bool "pq_arm_mat_sub_q15"
+        help
+          Use API name pq_arm_mat_sub_q15 instead of arm_mat_sub_q15
+
+    config PQ_ARM_MAT_MULT_F32
+        bool "pq_arm_mat_mult_f32"
+        help
+          Use API name pq_arm_mat_mult_f32 instead of arm_mat_mult_f32
+
+    config PQ_ARM_MAT_MULT_Q31
+        bool "pq_arm_mat_mult_q31"
+        help
+          Use API name pq_arm_mat_mult_q31 instead of arm_mat_mult_q31
+
+    config PQ_ARM_MAT_MULT_Q15
+        bool "pq_arm_mat_mult_q15"
+        help
+          Use API name pq_arm_mat_mult_q15 instead of arm_mat_mult_q15
+
+    config PQ_ARM_MAT_INVERSE_F32
+        bool "pq_arm_mat_inverse_f32"
+        help
+          Use API name pq_arm_mat_inverse_f32 instead of arm_mat_inverse_f32
+
+    config PQ_ARM_MAT_TRANS_F32
+        bool "pq_arm_mat_trans_f32"
+        help
+          Use API name pq_arm_mat_trans_f32 instead of arm_mat_trans_f32
+
+    config PQ_ARM_MAT_TRANS_Q31
+        bool "pq_arm_mat_trans_q31"
+        help
+          Use API name pq_arm_mat_trans_q31 instead of arm_mat_trans_q31
+
+    config PQ_ARM_MAT_TRANS_Q15
+        bool "pq_arm_mat_trans_q15"
+        help
+          Use API name pq_arm_mat_trans_q15 instead of arm_mat_trans_q15
+
+    config PQ_ARM_MAT_SCALE_F32
+        bool "pq_arm_mat_scale_f32"
+        help
+          Use API name pq_arm_mat_scale_f32 instead of arm_mat_scale_f32
+
+    config PQ_ARM_MAT_SCALE_Q31
+        bool "pq_arm_mat_scale_q31"
+        help
+          Use API name pq_arm_mat_scale_q31 instead of arm_mat_scale_q31
+
+    config PQ_ARM_MAT_SCALE_Q15
+        bool "pq_arm_mat_scale_q15"
+        help
+          Use API name pq_arm_mat_scale_q15 instead of arm_mat_scale_q15
+
+    endmenu
+endif
