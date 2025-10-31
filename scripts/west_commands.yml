@@ -55,4 +55,9 @@ west-commands:
     commands:
       - name: cfg_project_info
         class: ProjectInfo
-        help: Extract project info
+        help: Extract project information
+  - file: scripts/west_commands/cfg_resolve.py
+    commands:
+      - name: cfg_resolve
+        class: CfgResolve
+        help: Configure project based on CFG Tools requirements
