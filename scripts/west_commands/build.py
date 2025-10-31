@@ -12,6 +12,8 @@ import yaml
 import hashlib
 import shutil
 import re
+import datetime
+import ctypes
 
 from west import log
 from west.configuration import config
@@ -66,6 +68,32 @@ NO_GUI_TOOLCHAIN = ['armgcc']
 # log module is deprecated
 def _banner(msg):
     log.inf('=== west build: ' + msg, colorize=True)
+
+# Capture the full command line used to invoke this process
+def _get_full_cmdline():
+    # Exact raw command line on Windows
+    if os.name == 'nt':
+        try:
+            ctypes.windll.kernel32.GetCommandLineW.restype = ctypes.c_wchar_p
+            return ctypes.windll.kernel32.GetCommandLineW()
+        except Exception:
+            pass
+    # Portable fallback (quotes/escapes as needed)
+    try:
+        return shlex.join([sys.executable] + sys.argv)
+    except Exception:
+        return ' '.join([sys.executable] + sys.argv)
+
+def _append_invocation_log(build_dir, line):
+    try:
+        os.makedirs(build_dir, exist_ok=True)
+        log_path = os.path.join(build_dir, 'west_build_invocations.txt')
+        ts = datetime.datetime.now().isoformat(timespec='seconds')
+        with open(log_path, 'a', encoding='utf-8') as f:
+            f.write(f'[{ts}] {line}\n')
+    except Exception:
+        # Best-effort; ignore logging failures
+        pass
 
 def config_get(option, fallback):
     return config.get('build', option, fallback=fallback)
@@ -165,8 +193,8 @@ class Build(Forceable):
                            undefined''')
         group.add_argument('--toolchain', dest='toolchain', action='store',
                            default='armgcc', help='Specify toolchain')
-        group.add_argument('--compiler', dest='compiler', action='store', help='Specify compiler. Compiler must follow toolchain.')        
-        group.add_argument('--config', dest='config', action='store', 
+        group.add_argument('--compiler', dest='compiler', action='store', help='Specify compiler. Compiler must follow toolchain.')
+        group.add_argument('--config', dest='config', action='store',
                            default=None, help='SDK build config type')
         group.add_argument('-k', '--kit', action='store', help='Kit id')
         group.add_argument('--shield', action='store', help='')
@@ -251,6 +279,10 @@ class Build(Forceable):
                     self.run_cmake = True
         else:
             self.run_cmake = True
+
+        # Log this west build invocation in the binary directory
+        _append_invocation_log(self.build_dir, _get_full_cmdline())
+
         self.source_dir = self._find_source_dir()
         self._sanity_check()
 
@@ -712,7 +744,7 @@ class Build(Forceable):
             elif self.args.toolchain == 'mdk':
                 if self.args.compiler not in ['armcc', 'armclang']:
                     log.die(f'compiler {self.args.compiler} not supported with toolchain mdk')
-            
+
             extra_args['CONFIG_COMPILER'] = self.args.compiler
 
         for k,v in extra_args.items():
@@ -867,7 +899,7 @@ class Build(Forceable):
         # TODO : Improve generator script to remove this workaround
         # For windows OS, standalone_project can't be created on different disk drive because there is no way to
         # calculate relative path for paths from different disk drive. But this is a must-have step for current generator scripts.
-        # So if you specifiy a build folder from different disk drive, we will first create prjoject in a temporary folder which 
+        # So if you specifiy a build folder from different disk drive, we will first create prjoject in a temporary folder which
         # is in the same disk drive as the repo folder, and finally copy the project to user specify folder.
 
         user_build_drive = os.path.splitdrive(build_dir)[0].lower()
