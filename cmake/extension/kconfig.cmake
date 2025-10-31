@@ -359,8 +359,6 @@ elseif (NOT NO_DEFAULT_CONFIG)
     set(_cfg_prj_conf_dir "${APPLICATION_SOURCE_DIR}")
   endif()
 
-  log_status("Final prj.conf dir is ${_cfg_prj_conf_dir}")
-
   # Resolve target file path (respect cache if user set it)
   if(DEFINED MCUXPRESSO_CONFIG_TOOL_EDIT_PRJ_FILE_PATH
       AND NOT "${MCUXPRESSO_CONFIG_TOOL_EDIT_PRJ_FILE_PATH}" STREQUAL "")
@@ -372,10 +370,12 @@ elseif (NOT NO_DEFAULT_CONFIG)
         CACHE FILEPATH "Path to Config Tool edit prj.conf file")
   endif()
 
+  file(TO_CMAKE_PATH "${_cfg_prj_conf_dir}" _cfg_prj_conf_dir)
+  string(REGEX REPLACE "/+$" "" _cfg_prj_conf_dir "${_cfg_prj_conf_dir}")
   # Also register the exact file for changes (once it exists)
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_cfg_prj_conf_dir}")
 endif()
- 
+
 # if CUSTOM_PRJ_CONF_PATHS is not empty, append it to merge_config_files
 if(CUSTOM_PRJ_CONF_PATHS)
   foreach(path ${CUSTOM_PRJ_CONF_PATHS})
