@@ -1,0 +1,6 @@
+/*!
+
+@defgroup dsc_flash_fmu : Flash driver for DSC FMU IP
+@details This driver implements means for flash erase and write on DSC devices with FMU IP
+
+*/

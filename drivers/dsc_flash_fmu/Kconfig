@@ -1,0 +1,35 @@
+# Copyright 2026 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.dsc_flash_fmu
+    bool
+    default y if MCUX_HW_IP_DriverType_DSC_FMU && !(MCUX_HAS_COMPONENT_driver.dsc_flash_romapi)
+
+config MCUX_COMPONENT_driver.dsc_flash_fmu
+    bool "dsc_flash_fmu"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.dsc_flash_fmu
+
+if MCUX_COMPONENT_driver.dsc_flash_fmu
+    config FLASH_COMMAND_COMPLETE_TIMEOUT
+        int "Max loops to wait for flash command operations (0 means wait forever)"
+        default 0
+        help
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+    config FLASH_WRITE_ENABLE_TIMEOUT
+        int "Max loops to wait for flash program-erase write enable (0 means wait forever)"
+        default 0
+        help
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+    config FLASH_PROGRAM_ERASE_READY_TIMEOUT
+        int "Max loops to wait for flash program-erase ready (0 means wait forever)"
+        default 0
+        help
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+endif
