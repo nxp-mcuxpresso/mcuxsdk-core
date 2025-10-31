@@ -10,6 +10,12 @@
 
 #include "fsl_common.h"
 
+#if defined(CONFIG_FLASH_DRIVER_EXECUTES_FROM_RAM) && (CONFIG_FLASH_DRIVER_EXECUTES_FROM_RAM == 1)
+  #define RAMFUNC MCUX_RAMFUNC
+#else
+  #define RAMFUNC
+#endif
+
 /*!
  * @addtogroup xspi
  * @{
@@ -20,7 +26,7 @@
  ******************************************************************************/
 
 /*! @name Driver version */
-#define FSL_XSPI_DRIVER_VERSION (MAKE_VERSION(2, 5, 2))
+#define FSL_XSPI_DRIVER_VERSION (MAKE_VERSION(2, 6, 1))
 /*@{*/
 
 /*! @brief Formula to form XSPI instructions in LUT table. */
@@ -1105,7 +1111,7 @@ void XSPI_UpdateLUT(XSPI_Type *base, uint8_t index, const uint32_t *cmd, uint8_t
  * @param base XSPI peripheral base address.
  * @param boundary Prefetch boundary to set, in type of @ref xspi_otfad_prefetch_boundary_t.
  */
-static inline void XSPI_SetOTFADPrefetchBoundary(XSPI_Type *base, xspi_otfad_prefetch_boundary_t boundary)
+RAMFUNC static inline void XSPI_SetOTFADPrefetchBoundary(XSPI_Type *base, xspi_otfad_prefetch_boundary_t boundary)
 {
     base->SPTRCLR = (base->SPTRCLR & (~XSPI_SPTRCLR_OTFAD_BNDRY_MASK)) | XSPI_SPTRCLR_OTFAD_BNDRY(boundary);
 }
@@ -1116,7 +1122,7 @@ static inline void XSPI_SetOTFADPrefetchBoundary(XSPI_Type *base, xspi_otfad_pre
  */
 
 #if (defined(FSL_FEATURE_XSPI_HAS_END_CFG) && FSL_FEATURE_XSPI_HAS_END_CFG)
-static inline void XSPI_UpdateByteOrder(XSPI_Type *base, xspi_byte_order_t byteOrder)
+RAMFUNC static inline void XSPI_UpdateByteOrder(XSPI_Type *base, xspi_byte_order_t byteOrder)
 {
     base->MCR = ((base->MCR) & (~XSPI_MCR_END_CFG_MASK)) | XSPI_MCR_END_CFG(byteOrder);
 }
@@ -1128,7 +1134,7 @@ static inline void XSPI_UpdateByteOrder(XSPI_Type *base, xspi_byte_order_t byteO
  * @param base XSPI peripheral base address.
  * @param enable true means enable XSPI, false means disable.
  */
-static inline void XSPI_EnableModule(XSPI_Type *base, bool enable)
+RAMFUNC static inline void XSPI_EnableModule(XSPI_Type *base, bool enable)
 {
     if (enable)
     {
@@ -1148,7 +1154,7 @@ static inline void XSPI_EnableModule(XSPI_Type *base, bool enable)
  * @retval true XSPI module is enabled.
  * @retval false XSPI module is disabled.
  */
-static inline bool XSPI_CheckModuleEnabled(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckModuleEnabled(XSPI_Type *base)
 {
     return ((base->MCR & XSPI_MCR_MDIS_MASK) == 0UL);
 }
@@ -1167,7 +1173,7 @@ void XSPI_ResetSfmAndAhbDomain(XSPI_Type *base);
  *
  * @param base XSPI peripheral base address.
  */
-static inline void XSPI_ResetTgQueue(XSPI_Type *base)
+RAMFUNC static inline void XSPI_ResetTgQueue(XSPI_Type *base)
 {
     base->MCR |= XSPI_MCR_IPS_TG_RST_MASK;
 }
@@ -1177,7 +1183,7 @@ static inline void XSPI_ResetTgQueue(XSPI_Type *base)
  *
  * @param base XSPI peripheral base address.
  */
-static inline void XSPI_SoftwareReset(XSPI_Type *base)
+RAMFUNC static inline void XSPI_SoftwareReset(XSPI_Type *base)
 {
     XSPI_ResetTgQueue(base);
     XSPI_ResetSfmAndAhbDomain(base);
@@ -1191,7 +1197,7 @@ static inline void XSPI_SoftwareReset(XSPI_Type *base)
  * @retval false Write access to listed registers is not locked.
  * @retval true Write access to listed registers is locked.
  */
-static inline bool XSPI_CheckGlobalConfigLocked(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckGlobalConfigLocked(XSPI_Type *base)
 {
     return (bool)((base->MGC & XSPI_MGC_GCLCK_MASK) != 0UL);
 }
@@ -1235,7 +1241,7 @@ status_t XSPI_UpdateDeviceAddrMode(XSPI_Type *base, xspi_device_addr_mode_t addr
             - \b true Enable variable latency;
             - \b false Disable variable latency.
  */
-static inline void XSPI_EnableVariableLatency(XSPI_Type *base, bool enable)
+RAMFUNC static inline void XSPI_EnableVariableLatency(XSPI_Type *base, bool enable)
 {
     if (enable)
     {
@@ -1258,7 +1264,7 @@ static inline void XSPI_EnableVariableLatency(XSPI_Type *base, bool enable)
  *          - \b true Enable Doze mode;
  *          - \b false Disable Doze mode.
  */
-static inline void XSPI_EnableDozeMode(XSPI_Type *base, bool enable)
+RAMFUNC static inline void XSPI_EnableDozeMode(XSPI_Type *base, bool enable)
 {
     if (enable)
     {
@@ -1280,7 +1286,7 @@ static inline void XSPI_EnableDozeMode(XSPI_Type *base, bool enable)
  *          - \b false Output logic 0;
  *          - \b true Output logic 1.
  */
-static inline void XSPI_SetSignalOutputValue(XSPI_Type *base, uint32_t signalMask, bool outputLogic)
+RAMFUNC static inline void XSPI_SetSignalOutputValue(XSPI_Type *base, uint32_t signalMask, bool outputLogic)
 {
     bool moduleEnabled = false;
 
@@ -1317,7 +1323,7 @@ static inline void XSPI_SetSignalOutputValue(XSPI_Type *base, uint32_t signalMas
  *           - \b true Enable inverted serial clock output;
  *           - \b false Disable inverted serial clock output.
  */
-static inline void XSPI_EnableInvertedSerialClockOutput(XSPI_Type *base, bool enable)
+RAMFUNC static inline void XSPI_EnableInvertedSerialClockOutput(XSPI_Type *base, bool enable)
 {
     bool moduleEnabled = false;
 
@@ -1375,7 +1381,7 @@ status_t XSPI_SetDataLearningConfig(XSPI_Type *base, xspi_data_learning_config_t
  * @retval true Data learning has failed.
  * @retval false Data learning not fail.
  */
-static inline bool XSPI_CheckDataLearningFailure(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckDataLearningFailure(XSPI_Type *base)
 {
     return (bool)((base->DLSR_F[0] & XSPI_DLSR_F_DLPFF_MASK) == XSPI_DLSR_F_DLPFF_MASK);
 }
@@ -1387,7 +1393,7 @@ static inline bool XSPI_CheckDataLearningFailure(XSPI_Type *base)
  * @param[out] posEdgeMatch Pointer to the memory to store positive edge match signature.
  * @param[out] negEdgeMatch Pointer to the memory to store negative edge match signature.
  */
-static inline void XSPI_GetDataLearningEdgeMatchSignature(XSPI_Type *base, uint8_t *posEdgeMatch, uint8_t *negEdgeMatch)
+RAMFUNC static inline void XSPI_GetDataLearningEdgeMatchSignature(XSPI_Type *base, uint8_t *posEdgeMatch, uint8_t *negEdgeMatch)
 {
     uint32_t tmp32 = base->DLSR_F[0];
 
@@ -1426,7 +1432,7 @@ status_t XSPI_SetDeviceConfig(XSPI_Type *base, xspi_device_config_t *devConfig);
  * @param base XSPI peripheral base address.
  * @param mask XSPI interrupt source, should be the OR'ed value of @ref xspi_interrupt_enable_t.
  */
-static inline void XSPI_EnableInterrupts(XSPI_Type *base, uint64_t mask)
+RAMFUNC static inline void XSPI_EnableInterrupts(XSPI_Type *base, uint64_t mask)
 {
     base->INT_EN |= ((mask >> 32UL) & 0xFFFFFFFFUL);
     base->RSER |= ((uint32_t)mask & 0xFFFFFFFFUL);
@@ -1438,7 +1444,7 @@ static inline void XSPI_EnableInterrupts(XSPI_Type *base, uint64_t mask)
  * @param base XSPI peripheral base address.
  * @param mask XSPI interrupt source, should be the OR'ed value of @ref xspi_interrupt_enable_t.
  */
-static inline void XSPI_DisableInterrupts(XSPI_Type *base, uint64_t mask)
+RAMFUNC static inline void XSPI_DisableInterrupts(XSPI_Type *base, uint64_t mask)
 {
     base->INT_EN &= ~((mask >> 32UL) & 0xFFFFFFFFUL);
     base->RSER &= ~((uint32_t)mask & 0xFFFFFFFFUL);
@@ -1455,7 +1461,7 @@ static inline void XSPI_DisableInterrupts(XSPI_Type *base, uint64_t mask)
  * @param[in] base XSPI peripheral base address.
  * @param[in] enable Enable flag for transmit DMA request. Pass true for enable, false for disable.
  */
-static inline void XSPI_EnableTxDMA(XSPI_Type *base, bool enable)
+RAMFUNC static inline void XSPI_EnableTxDMA(XSPI_Type *base, bool enable)
 {
     if (enable)
     {
@@ -1473,7 +1479,7 @@ static inline void XSPI_EnableTxDMA(XSPI_Type *base, bool enable)
  * @param[in] base XSPI peripheral base address.
  * @param[in] enable Enable flag for receive DMA request. Pass true for enable, false for disable.
  */
-static inline void XSPI_EnableRxDMA(XSPI_Type *base, bool enable)
+RAMFUNC static inline void XSPI_EnableRxDMA(XSPI_Type *base, bool enable)
 {
     if (enable)
     {
@@ -1492,7 +1498,7 @@ static inline void XSPI_EnableRxDMA(XSPI_Type *base, bool enable)
  *
  * @return The tx fifo address.
  */
-static inline uint32_t XSPI_GetTxFifoAddress(XSPI_Type *base)
+RAMFUNC static inline uint32_t XSPI_GetTxFifoAddress(XSPI_Type *base)
 {
     return (uint32_t)&base->TBDR;
 }
@@ -1504,7 +1510,7 @@ static inline uint32_t XSPI_GetTxFifoAddress(XSPI_Type *base)
  *
  * @return The rx fifo address.
  */
-static inline uint32_t XSPI_GetRxFifoAddress(XSPI_Type *base)
+RAMFUNC static inline uint32_t XSPI_GetRxFifoAddress(XSPI_Type *base)
 {
     return (uint32_t)&base->RBDR[0];
 }
@@ -1523,7 +1529,7 @@ static inline uint32_t XSPI_GetRxFifoAddress(XSPI_Type *base)
  *
  * @return All asserted error status flags, should be the OR'ed value of @ref XSPI_GetErrorStatusFlags.
  */
-static inline uint32_t XSPI_GetErrorStatusFlags(XSPI_Type *base)
+RAMFUNC static inline uint32_t XSPI_GetErrorStatusFlags(XSPI_Type *base)
 {
     return base->ERRSTAT;
 }
@@ -1534,7 +1540,7 @@ static inline uint32_t XSPI_GetErrorStatusFlags(XSPI_Type *base)
  * @param base SPC peripheral base address.
  * @param flags Error flags to clear, the OR'ed value of @ref XSPI_GetErrorStatusFlags.
  */
-static inline void XSPI_ClearErrorStatusFlags(XSPI_Type *base, uint32_t flags)
+RAMFUNC static inline void XSPI_ClearErrorStatusFlags(XSPI_Type *base, uint32_t flags)
 {
     base->ERRSTAT = flags;
 }
@@ -1548,7 +1554,7 @@ static inline void XSPI_ClearErrorStatusFlags(XSPI_Type *base, uint32_t flags)
  *
  * @return interrupt status flag, use status flag to AND #xspi_flags_t could get the related status.
  */
-static inline uint32_t XSPI_GetInterruptStatusFlags(XSPI_Type *base)
+RAMFUNC static inline uint32_t XSPI_GetInterruptStatusFlags(XSPI_Type *base)
 {
     return base->ERRSTAT;
 }
@@ -1562,7 +1568,7 @@ static inline uint32_t XSPI_GetInterruptStatusFlags(XSPI_Type *base)
  * @retval true Ip request granted.
  * @retval false Ip reqest not granted.
  */
-static inline bool XSPI_CheckIpRequestGranted(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckIpRequestGranted(XSPI_Type *base)
 {
     return (bool)((base->ERRSTAT & XSPI_ERRSTAT_ARB_WIN_MASK) != 0UL);
 }
@@ -1574,7 +1580,7 @@ static inline bool XSPI_CheckIpRequestGranted(XSPI_Type *base)
  * @retval true Bus is idle.
  * @retval false Bus is busy.
  */
-static inline bool XSPI_GetBusIdleStatus(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_GetBusIdleStatus(XSPI_Type *base)
 {
     return (bool)(XSPI_SR_BUSY_MASK != (base->SR & XSPI_SR_BUSY_MASK));
 }
@@ -1587,7 +1593,7 @@ static inline bool XSPI_GetBusIdleStatus(XSPI_Type *base)
  * @retval true AHB read access is requested or is ongoing.
  * @retval false AHB read access is not requested and is not ongoing.
  */
-static inline bool XSPI_CheckAhbReadAccessAsserted(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckAhbReadAccessAsserted(XSPI_Type *base)
 {
     return (bool)((base->SR & XSPI_SR_AHB_ACC_MASK) != 0UL);
 }
@@ -1600,7 +1606,7 @@ static inline bool XSPI_CheckAhbReadAccessAsserted(XSPI_Type *base)
  * @retval true AHB read access is requested or is ongoing.
  * @retval false AHB read access is not requested and is not ongoing.
  */
-static inline bool XSPI_CheckAhbWriteAccessAsserted(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckAhbWriteAccessAsserted(XSPI_Type *base)
 {
     return (bool)((base->SR & XSPI_SR_AWRACC_MASK) != 0UL);
 }
@@ -1613,7 +1619,7 @@ static inline bool XSPI_CheckAhbWriteAccessAsserted(XSPI_Type *base)
  * @return The assert flags about SFM command execution and arbitration,
  *  should be the OR'ed value of @ref xspi_cmd_execution_arbitration_flag_t.
  */
-static inline uint32_t XSPI_GetCmdExecutionArbitrationStatusFlags(XSPI_Type *base)
+RAMFUNC static inline uint32_t XSPI_GetCmdExecutionArbitrationStatusFlags(XSPI_Type *base)
 {
     return (base->FR);
 }
@@ -1624,7 +1630,7 @@ static inline uint32_t XSPI_GetCmdExecutionArbitrationStatusFlags(XSPI_Type *bas
  * @param[in] base XSPI peripheral base address.
  * @param[in] flags The mask of flags to clear, should be the OR'ed value of @ref xspi_cmd_execution_arbitration_flag_t.
  */
-static inline void XSPI_ClearCmdExecutionArbitrationStatusFlags(XSPI_Type *base, uint32_t flags)
+RAMFUNC static inline void XSPI_ClearCmdExecutionArbitrationStatusFlags(XSPI_Type *base, uint32_t flags)
 {
     base->FR = flags;
 }
@@ -1642,7 +1648,7 @@ static inline void XSPI_ClearCmdExecutionArbitrationStatusFlags(XSPI_Type *base,
  * @param[in] txFifo Pass true to reset TX FIFO.
  * @param[in] rxFifo Pass true to reset RX FIFO.
  */
-static inline void XSPI_ResetTxRxBuffer(XSPI_Type *base, bool txFifo, bool rxFifo)
+RAMFUNC static inline void XSPI_ResetTxRxBuffer(XSPI_Type *base, bool txFifo, bool rxFifo)
 {
     if (txFifo)
     {
@@ -1659,7 +1665,7 @@ static inline void XSPI_ResetTxRxBuffer(XSPI_Type *base, bool txFifo, bool rxFif
  *
  * @param[in] base XSPI peripheral base address.
  */
-static inline void XSPI_ClearTxBuffer(XSPI_Type *base)
+RAMFUNC static inline void XSPI_ClearTxBuffer(XSPI_Type *base)
 {
     base->MCR |= XSPI_MCR_CLR_TXF_MASK;
 
@@ -1680,7 +1686,7 @@ static inline void XSPI_ClearTxBuffer(XSPI_Type *base)
  * multiple of 4 bytes.
  * @retval kStatus_Success Successful to update watermark.
  */
-status_t XSPI_UpdateTxBufferWaterMark(XSPI_Type *base, uint32_t waterMark);
+RAMFUNC status_t XSPI_UpdateTxBufferWaterMark(XSPI_Type *base, uint32_t waterMark);
 
 /*!
  * @brief Check if IP manager can write to TX buffer.
@@ -1690,7 +1696,7 @@ status_t XSPI_UpdateTxBufferWaterMark(XSPI_Type *base, uint32_t waterMark);
  * @retval true Tx buffer lock is open.
  * @retval false Tx buffer lock is not open.
  */
-static inline bool XSPI_CheckTxBuffLockOpen(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckTxBuffLockOpen(XSPI_Type *base)
 {
     return (bool)((base->FSMSTAT & XSPI_FSMSTAT_STATE_MASK) == XSPI_FSMSTAT_STATE(1UL));
 }
@@ -1701,7 +1707,7 @@ static inline bool XSPI_CheckTxBuffLockOpen(XSPI_Type *base)
  * @param[in] base XSPI peripheral base address
  * @param[in] data The data bytes to send.
  */
-static inline void XSPI_WriteTxBuffer(XSPI_Type *base, uint32_t data)
+RAMFUNC static inline void XSPI_WriteTxBuffer(XSPI_Type *base, uint32_t data)
 {
     base->TBDR = data;
 }
@@ -1711,7 +1717,7 @@ static inline void XSPI_WriteTxBuffer(XSPI_Type *base, uint32_t data)
  *
  * @param[in] base XSPI peripheral base address.
  */
-static inline void XSPI_ClearRxBuffer(XSPI_Type *base)
+RAMFUNC static inline void XSPI_ClearRxBuffer(XSPI_Type *base)
 {
     base->MCR |= XSPI_MCR_CLR_RXF_MASK;
 
@@ -1729,7 +1735,7 @@ static inline void XSPI_ClearRxBuffer(XSPI_Type *base)
  *
  * @return The data in the FIFO.
  */
-static inline uint32_t XSPI_ReadRxBuffer(XSPI_Type *base, uint8_t fifoIndex)
+RAMFUNC static inline uint32_t XSPI_ReadRxBuffer(XSPI_Type *base, uint8_t fifoIndex)
 {
     return base->RBDR[fifoIndex];
 }
@@ -1741,7 +1747,7 @@ static inline uint32_t XSPI_ReadRxBuffer(XSPI_Type *base, uint8_t fifoIndex)
  *
  * @param[in] base XSPI peripheral base address.
  */
-static inline void XSPI_TriggerRxBufferPopEvent(XSPI_Type *base)
+RAMFUNC static inline void XSPI_TriggerRxBufferPopEvent(XSPI_Type *base)
 {
     base->FR = XSPI_FR_RBDF_MASK;
 }
@@ -1776,7 +1782,7 @@ status_t XSPI_UpdateRxBufferWaterMark(XSPI_Type *base, uint32_t waterMark);
  * @retval true The RX buffer watermark has been excceded.
  * @retval false The RX buffer watermark has not been exceeded.
  */
-static inline bool XSPI_CheckRxBufferWaterMarkExceed(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckRxBufferWaterMarkExceed(XSPI_Type *base)
 {
     return (bool)((base->FR & XSPI_FR_RBDF_MASK) == XSPI_FR_RBDF_MASK);
 }
@@ -1788,7 +1794,7 @@ static inline bool XSPI_CheckRxBufferWaterMarkExceed(XSPI_Type *base)
  *
  * @return The available counts if bytes in RX buffer.
  */
-static inline uint32_t XSPI_GetRxBufferAvailableBytesCount(XSPI_Type *base)
+RAMFUNC static inline uint32_t XSPI_GetRxBufferAvailableBytesCount(XSPI_Type *base)
 {
     return ((base->RBSR & XSPI_RBSR_RDBFL_MASK) >> XSPI_RBSR_RDBFL_SHIFT) * 4UL;
 }
@@ -1800,7 +1806,7 @@ static inline uint32_t XSPI_GetRxBufferAvailableBytesCount(XSPI_Type *base)
  *
  * @return Counts of removed bytes.
  */
-static inline uint32_t XSPI_GetRxBufferRemovedBytesCount(XSPI_Type *base)
+RAMFUNC static inline uint32_t XSPI_GetRxBufferRemovedBytesCount(XSPI_Type *base)
 {
     return ((base->RBSR & XSPI_RBSR_RDCTR_MASK) >> XSPI_RBSR_RDCTR_SHIFT) * 4UL;
 }
@@ -1833,7 +1839,7 @@ void XSPI_UpdateSFPConfig(XSPI_Type *base,
  * @retval false SFP FRAD check is disabled.
  * @retval true SFP FRAD check is enabled for IP write access.
  */
-static inline bool XSPI_CheckSFPFradEnabled(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckSFPFradEnabled(XSPI_Type *base)
 {
     return (bool)((base->MGC & XSPI_MGC_GVLDFRAD_MASK) != 0UL);
 }
@@ -1904,7 +1910,7 @@ void XSPI_UnlockIpAccessArbitration(XSPI_Type *base, xspi_target_group_t tgId);
  * @retval false The Access triggered by IP bus is not asserted.
  * @retval true The Access triggered by IP bus is asserted.
  */
-static inline bool XSPI_CheckIPAccessAsserted(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckIPAccessAsserted(XSPI_Type *base)
 {
     return (bool)((base->SR & XSPI_SR_IP_ACC_MASK) != 0UL);
 }
@@ -1914,7 +1920,7 @@ static inline bool XSPI_CheckIPAccessAsserted(XSPI_Type *base)
  *
  * @param[in] base XSPI peripheral base address.
  */
-static inline void XSPI_ClearIPAccessSeqPointer(XSPI_Type *base)
+RAMFUNC static inline void XSPI_ClearIPAccessSeqPointer(XSPI_Type *base)
 {
     base->SPTRCLR |= XSPI_SPTRCLR_IPPTRC_MASK;
 }
@@ -1944,7 +1950,7 @@ status_t XSPI_UpdateIPAccessTimeoutCounter(XSPI_Type *base, uint32_t countValue)
  * @retval true The IP access is granted arbitration.
  * @retval false No IP access is queued.
  */
-static inline bool XSPI_CheckIPAccessGranted(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckIPAccessGranted(XSPI_Type *base)
 {
     return (bool)((base->FSMSTAT & XSPI_FSMSTAT_VLD_MASK) != 0UL);
 }
@@ -1957,7 +1963,7 @@ static inline bool XSPI_CheckIPAccessGranted(XSPI_Type *base)
  * @retval true The IP write access is granted arbitration.
  * @retval false No IP write access is queued.
  */
-static inline bool XSPI_CheckIpWriteTriggered(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckIpWriteTriggered(XSPI_Type *base)
 {
     return (bool)((base->FSMSTAT & XSPI_FSMSTAT_STATE_MASK) == XSPI_FSMSTAT_STATE(2U));
 }
@@ -1970,7 +1976,7 @@ static inline bool XSPI_CheckIpWriteTriggered(XSPI_Type *base)
  * @retval true The IP read access is granted arbitration.
  * @retval false No IP read access is queued.
  */
-static inline bool XSPI_CheckIpReadTriggered(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckIpReadTriggered(XSPI_Type *base)
 {
     return (bool)((base->FSMSTAT & XSPI_FSMSTAT_STATE_MASK) == XSPI_FSMSTAT_STATE(3U));
 }
@@ -1985,7 +1991,7 @@ static inline bool XSPI_CheckIpReadTriggered(XSPI_Type *base)
  * @retval true Valid, the IPS transfer is granted arbitration or execution.
  * @retval false Not valid, no IPS transfer is queued.
  */
-static inline bool XSPI_CheckFSMValid(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckFSMValid(XSPI_Type *base)
 {
     return (bool)((base->FSMSTAT & XSPI_FSMSTAT_VLD_MASK) != 0UL);
 }
@@ -2159,7 +2165,7 @@ void XSPI_TransferAbort(XSPI_Type *base, xspi_handle_t *handle);
  *
  * @param[in] base XSPI peripheral base address.
  */
-static inline void XSPI_ClearAhbBuffer(XSPI_Type *base)
+RAMFUNC static inline void XSPI_ClearAhbBuffer(XSPI_Type *base)
 {
     base->SPTRCLR |= XSPI_SPTRCLR_ABRT_CLR_MASK;
     while ((base->SPTRCLR & XSPI_SPTRCLR_ABRT_CLR_MASK) != 0UL)
@@ -2233,7 +2239,7 @@ xspi_ahb_sub_buffer_status_t XSPI_GetAhbSubBufferStatus(XSPI_Type *base, uint8_t
  *
  * @param[in] base XSPI peripheral base address.
  */
-static inline void XSPI_StartAhbBufferPerfMonitor(XSPI_Type *base)
+RAMFUNC static inline void XSPI_StartAhbBufferPerfMonitor(XSPI_Type *base)
 {
     base->AHB_PERF_CTRL |= XSPI_AHB_PERF_CTRL_CNTSTART_MASK;
 }
@@ -2253,7 +2259,7 @@ void XSPI_EnableAhbBufferPerfMonitor(XSPI_Type *base, uint8_t ahbBufferId, uint8
  * @param[in] base XSPI peripheral base address.
  * @param[in] ahbBufferId Specify the selected AHB buffer.
  */
-static inline void XSPI_DisableAhbBufferPerfMonitor(XSPI_Type *base, uint8_t ahbBufferId)
+RAMFUNC static inline void XSPI_DisableAhbBufferPerfMonitor(XSPI_Type *base, uint8_t ahbBufferId)
 {
     base->AHB_PERF_CTRL &= (uint32_t)(~(uint32_t)(XSPI_AHB_PERF_CTRL_BUF0_EN_MASK << (uint32_t)(ahbBufferId)));
 }
@@ -2263,7 +2269,7 @@ static inline void XSPI_DisableAhbBufferPerfMonitor(XSPI_Type *base, uint8_t ahb
  *
  * @param[in] base XSPI peripheral base address.
  */
-static inline void XSPI_StopAhbBufferPerfMonitor(XSPI_Type *base)
+RAMFUNC static inline void XSPI_StopAhbBufferPerfMonitor(XSPI_Type *base)
 {
     base->AHB_PERF_CTRL |= XSPI_AHB_PERF_CTRL_CNTSTP_MASK;
 }
@@ -2275,7 +2281,7 @@ static inline void XSPI_StopAhbBufferPerfMonitor(XSPI_Type *base)
  * @param[in] ahbBufferId Specify AHB buffer Id.
  * @param[out] ptrPerfMonitorResult Pointer to the variable to store selected AHB buffer's performance monitor result.
  */
-static inline void XSPI_GetAhbBufferPerfMonitorResult(XSPI_Type *base,
+RAMFUNC static inline void XSPI_GetAhbBufferPerfMonitorResult(XSPI_Type *base,
                                                       uint8_t ahbBufferId,
                                                       xspi_ahbBuffer_perf_monitor_result_t *ptrPerfMonitorResult)
 {
@@ -2294,7 +2300,7 @@ static inline void XSPI_GetAhbBufferPerfMonitorResult(XSPI_Type *base,
  * @retval false AHB buffer performance monitor timeout counter is not overflow.
  * @retval true AHB buffer performance monitor timeout counter is overflow.
  */
-static inline bool XSPI_CheckAhbBufferPerfMonitorTimeCounterOverflow(XSPI_Type *base)
+RAMFUNC static inline bool XSPI_CheckAhbBufferPerfMonitorTimeCounterOverflow(XSPI_Type *base)
 {
     return (bool)((base->AHB_PERF_CTRL & XSPI_AHB_PERF_CTRL_TCNTO_MASK) != 0UL);
 }
@@ -2308,7 +2314,7 @@ static inline bool XSPI_CheckAhbBufferPerfMonitorTimeCounterOverflow(XSPI_Type *
  * @retval false Overflow not detected.
  * @retval true Overflow is detected.
  */
-static inline bool XSPI_CheckAhbBufferPerfMonitorHitOverflow(XSPI_Type *base, uint8_t ahbBufferId)
+RAMFUNC static inline bool XSPI_CheckAhbBufferPerfMonitorHitOverflow(XSPI_Type *base, uint8_t ahbBufferId)
 {
     return (bool)((base->AHB_PERF_CTRL & (XSPI_AHB_PERF_CTRL_BUF0_HIT_OVF_MASK << (uint32_t)ahbBufferId)) != 0UL);
 }
@@ -2322,7 +2328,7 @@ static inline bool XSPI_CheckAhbBufferPerfMonitorHitOverflow(XSPI_Type *base, ui
  * @retval false Overflow not detected.
  * @retval true Overflow is detected.
  */
-static inline bool XSPI_CheckAhbBufferPerfMonitorMissOverflow(XSPI_Type *base, uint8_t ahbBufferId)
+RAMFUNC static inline bool XSPI_CheckAhbBufferPerfMonitorMissOverflow(XSPI_Type *base, uint8_t ahbBufferId)
 {
     return (bool)((base->AHB_PERF_CTRL & ((uint32_t)XSPI_AHB_PERF_CTRL_BUF0_MISS_OVF_MASK << (uint32_t)ahbBufferId)) != 0UL);
 }
@@ -2334,7 +2340,7 @@ static inline bool XSPI_CheckAhbBufferPerfMonitorMissOverflow(XSPI_Type *base, u
  *
  * @return The value of time counter, in AHB clock cycles, since the performance monitor was running.
  */
-static inline uint32_t XSPI_GetAhbBufferPerfMonitorTimeCounter(XSPI_Type *base)
+RAMFUNC static inline uint32_t XSPI_GetAhbBufferPerfMonitorTimeCounter(XSPI_Type *base)
 {
     return base->AHB_PERF_TIME_CNT;
 }
@@ -2455,7 +2461,7 @@ xspi_ahb_read_error_info_t XSPI_ReturnAhbReadErrorInfo(XSPI_Type *base);
  *
  * @param[in] base XSPI peripheral base address.
  */
-static inline void XSPI_ClearAhbAccessSeqPointer(XSPI_Type *base)
+RAMFUNC static inline void XSPI_ClearAhbAccessSeqPointer(XSPI_Type *base)
 {
     base->SPTRCLR |= XSPI_SPTRCLR_BFPTRC_MASK;
 }
@@ -2477,7 +2483,7 @@ void XSPI_GetAhbRequestSuspendInfo(XSPI_Type *base, xspi_ahb_request_suspend_inf
  *               - \b false Disable AHB read prefetch;
  *               - \b true Enable AHB read prefetch.
  */
-static inline void XSPI_EnableAhbReadPrefetch(XSPI_Type *base, bool enable)
+RAMFUNC static inline void XSPI_EnableAhbReadPrefetch(XSPI_Type *base, bool enable)
 {
     if (enable)
     {
@@ -2575,7 +2581,7 @@ status_t XSPI_SetAhbReadStatusRegSeqId(XSPI_Type *base, uint8_t seqId);
  *
  * @return The status regsiter value of external device.
  */
-static inline uint16_t XSPI_GetSFMStatusRegValue(XSPI_Type *base)
+RAMFUNC static inline uint16_t XSPI_GetSFMStatusRegValue(XSPI_Type *base)
 {
     while ((base->PPW_RDSR & XSPI_PPW_RDSR_VALID_MASK) == 0UL)
     {
@@ -2704,7 +2710,7 @@ void XSPI_Cache64_CleanInvalidateByRange(uint32_t address, size_t size);
  * @param base CACHE64_CTRL peripheral base address.
  * @param enable Specify whether all cacheable spaces to write through are forced,
  */
-static inline void XSPI_Cache64_ForceWriteThrough(CACHE64_CTRL_Type *base, bool enable)
+RAMFUNC static inline void XSPI_Cache64_ForceWriteThrough(CACHE64_CTRL_Type *base, bool enable)
 {
     if (enable)
     {
@@ -2722,7 +2728,7 @@ static inline void XSPI_Cache64_ForceWriteThrough(CACHE64_CTRL_Type *base, bool 
  * @param base CACHE64_CTRL peripheral base address.
  * @param enable Specify whether force no allocation on cache misses.
  */
-static inline void XSPI_Cache64_ForceNoAllocation(CACHE64_CTRL_Type *base, bool enable)
+RAMFUNC static inline void XSPI_Cache64_ForceNoAllocation(CACHE64_CTRL_Type *base, bool enable)
 {
     if (enable)
     {

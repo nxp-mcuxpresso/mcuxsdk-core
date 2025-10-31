@@ -183,7 +183,7 @@ volatile uint32_t g_programFlashSize = 0UL;
  * Code
  ******************************************************************************/
 
-static uint8_t XSPI_GetPPWBFromPageSize(uint32_t pageSize)
+RAMFUNC static uint8_t XSPI_GetPPWBFromPageSize(uint32_t pageSize)
 {
     uint8_t ppwbValue = 0U;
 
@@ -234,7 +234,7 @@ static uint8_t XSPI_GetPPWBFromPageSize(uint32_t pageSize)
     return ppwbValue;
 }
 
-static status_t XSPI_StartIpReadNonBlocking(XSPI_Type *base, xspi_handle_t *handle, uint32_t dataSize)
+RAMFUNC static status_t XSPI_StartIpReadNonBlocking(XSPI_Type *base, xspi_handle_t *handle, uint32_t dataSize)
 {
     uint32_t rxBufferWaterMark = 0UL;
     uint32_t transferSize = 0UL;
@@ -297,7 +297,7 @@ static status_t XSPI_StartIpReadNonBlocking(XSPI_Type *base, xspi_handle_t *hand
     return status;
 }
 
-static status_t XSPI_StartIpWriteNonBlocking(XSPI_Type *base, xspi_handle_t *handle, uint32_t dataSize)
+RAMFUNC static status_t XSPI_StartIpWriteNonBlocking(XSPI_Type *base, xspi_handle_t *handle, uint32_t dataSize)
 {
     status_t status = kStatus_Success;
     uint32_t transferSize = 0UL;
@@ -342,7 +342,7 @@ static status_t XSPI_StartIpWriteNonBlocking(XSPI_Type *base, xspi_handle_t *han
  *
  * param base XSPI base pointer.
  */
-uint32_t XSPI_GetInstance(XSPI_Type *base)
+RAMFUNC uint32_t XSPI_GetInstance(XSPI_Type *base)
 {
     uint32_t instance;
 
@@ -366,7 +366,7 @@ uint32_t XSPI_GetInstance(XSPI_Type *base)
  * param base XSPI base pointer.
  * param status interrupt status.
  */
-status_t XSPI_CheckAndClearError(XSPI_Type *base, uint32_t status)
+RAMFUNC status_t XSPI_CheckAndClearError(XSPI_Type *base, uint32_t status)
 {
     status_t result = kStatus_Success;
 
@@ -440,7 +440,7 @@ status_t XSPI_CheckAndClearError(XSPI_Type *base, uint32_t status)
  * param config XSPI configure structure.
  */
 
-void XSPI_Init(XSPI_Type *base, const xspi_config_t *ptrConfig)
+RAMFUNC void XSPI_Init(XSPI_Type *base, const xspi_config_t *ptrConfig)
 {
     uint32_t tmp32 = 0UL;
 
@@ -502,7 +502,7 @@ void XSPI_Init(XSPI_Type *base, const xspi_config_t *ptrConfig)
  * param devconfig Flash configuration parameters.
 
  */
-void XSPI_GetDefaultConfig(xspi_config_t *ptrConfig)
+RAMFUNC void XSPI_GetDefaultConfig(xspi_config_t *ptrConfig)
 {
     assert(ptrConfig != NULL);
 
@@ -566,7 +566,7 @@ void XSPI_GetDefaultConfig(xspi_config_t *ptrConfig)
  * Clears the XSPI state and  XSPI module registers.
  * param base XSPI peripheral base address.
  */
-void XSPI_Deinit(XSPI_Type *base)
+RAMFUNC void XSPI_Deinit(XSPI_Type *base)
 {
     XSPI_EnableModule(base, false);
     /* Reset peripheral. */
@@ -582,7 +582,7 @@ void XSPI_Deinit(XSPI_Type *base)
  * param cmd Command sequence array.
  * param count Number of instruction-operand pairs.
  */
-void XSPI_UpdateLUT(XSPI_Type *base, uint8_t index, const uint32_t *cmd, uint8_t count)
+RAMFUNC void XSPI_UpdateLUT(XSPI_Type *base, uint8_t index, const uint32_t *cmd, uint8_t count)
 {
     assert(index < 80U);
 
@@ -619,7 +619,7 @@ void XSPI_UpdateLUT(XSPI_Type *base, uint8_t index, const uint32_t *cmd, uint8_t
  *
  * param base XSPI peripheral base address.
  */
-void XSPI_ResetSfmAndAhbDomain(XSPI_Type *base)
+RAMFUNC void XSPI_ResetSfmAndAhbDomain(XSPI_Type *base)
 {
     /* XSPI module must be enabled, before assert reset to domains. */
     XSPI_EnableModule(base, true);
@@ -649,7 +649,7 @@ void XSPI_ResetSfmAndAhbDomain(XSPI_Type *base)
  * param base XSPI peripheral base address.
  * param x16Mode Specify X16 mode.
  */
-void XSPI_SetHyperBusX16Mode(XSPI_Type *base, xspi_hyper_bus_x16_mode_t x16Mode)
+RAMFUNC void XSPI_SetHyperBusX16Mode(XSPI_Type *base, xspi_hyper_bus_x16_mode_t x16Mode)
 {
     bool isEnabled = false;
 
@@ -676,7 +676,7 @@ void XSPI_SetHyperBusX16Mode(XSPI_Type *base, xspi_hyper_bus_x16_mode_t x16Mode)
  * param[in] enableX16Mode X16 mode is enabled or not.
  * param[in] xspiRootClk The frequency of xspi root clock, the unit is Hz.
  */
-void XSPI_UpdateDllValue(XSPI_Type *base, xspi_dll_config_t *ptrDllConfig,
+RAMFUNC void XSPI_UpdateDllValue(XSPI_Type *base, xspi_dll_config_t *ptrDllConfig,
                         bool enableDDR, bool enableX16Mode, uint32_t xspiRootClk)
 {
     uint32_t offsetDelayElementCount = 0UL;
@@ -790,7 +790,7 @@ void XSPI_UpdateDllValue(XSPI_Type *base, xspi_dll_config_t *ptrDllConfig,
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail to set data learning configuration due to AHB write access asserted.
  * retval kStatus_Success  Successfully to set Data learning configurations.
  */
-status_t XSPI_SetDataLearningConfig(XSPI_Type *base, xspi_data_learning_config_t *ptrDataLearningConfig)
+RAMFUNC status_t XSPI_SetDataLearningConfig(XSPI_Type *base, xspi_data_learning_config_t *ptrDataLearningConfig)
 {
     assert(ptrDataLearningConfig != NULL);
 
@@ -829,7 +829,7 @@ status_t XSPI_SetDataLearningConfig(XSPI_Type *base, xspi_data_learning_config_t
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail to update address mode due to AHB write access asserted.
  * retval kStatus_Success  Successfully to update address mode.
  */
-status_t XSPI_UpdateDeviceAddrMode(XSPI_Type *base, xspi_device_addr_mode_t addrMode)
+RAMFUNC status_t XSPI_UpdateDeviceAddrMode(XSPI_Type *base, xspi_device_addr_mode_t addrMode)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -874,7 +874,7 @@ status_t XSPI_UpdateDeviceAddrMode(XSPI_Type *base, xspi_device_addr_mode_t addr
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail to set device configuration due to AHB write access asserted.
  * retval kStatus_Success  Successfully to set device configurations.
  */
-status_t XSPI_SetDeviceConfig(XSPI_Type *base, xspi_device_config_t *devConfig)
+RAMFUNC status_t XSPI_SetDeviceConfig(XSPI_Type *base, xspi_device_config_t *devConfig)
 {
     assert(devConfig != NULL);
 
@@ -1046,7 +1046,7 @@ status_t XSPI_SetDeviceConfig(XSPI_Type *base, xspi_device_config_t *devConfig)
  * multiple of 4 bytes.
  * retval kStatus_Success Successful to update watermark.
  */
-status_t XSPI_UpdateRxBufferWaterMark(XSPI_Type *base, uint32_t waterMark)
+RAMFUNC status_t XSPI_UpdateRxBufferWaterMark(XSPI_Type *base, uint32_t waterMark)
 {
     assert(waterMark != 0UL);
     assert(waterMark <= 256UL);
@@ -1077,7 +1077,7 @@ status_t XSPI_UpdateRxBufferWaterMark(XSPI_Type *base, uint32_t waterMark)
  * multiple of 4 bytes.
  * retval kStatus_Success Successful to update watermark.
  */
-status_t XSPI_UpdateTxBufferWaterMark(XSPI_Type *base, uint32_t waterMark)
+RAMFUNC status_t XSPI_UpdateTxBufferWaterMark(XSPI_Type *base, uint32_t waterMark)
 {
     assert(waterMark != 0UL);
     if (XSPI_CheckIPAccessAsserted(base))
@@ -1102,7 +1102,7 @@ status_t XSPI_UpdateTxBufferWaterMark(XSPI_Type *base, uint32_t waterMark)
  * param[in] ealMode Specify the exclusive access lock mode.
  * param[in] fradId Specify the frad.
  */
-void XSPI_SetSFPFradEALMode(XSPI_Type *base, xspi_exclusive_access_lock_mode_t ealMode, uint8_t fradId)
+RAMFUNC void XSPI_SetSFPFradEALMode(XSPI_Type *base, xspi_exclusive_access_lock_mode_t ealMode, uint8_t fradId)
 {
     uint32_t fradWord3RegOffset[] = XSPI_FRAD_WORD3_REG_OFFSET_ARRAY;
 
@@ -1139,7 +1139,7 @@ void XSPI_SetSFPFradEALMode(XSPI_Type *base, xspi_exclusive_access_lock_mode_t e
  * param[in] ptrMdadConfig Pointer to the SFP MDAD configuration.
  * param[in] ptrFradConfig Pointer to the SFP FRAD configuration.
  */
-void XSPI_UpdateSFPConfig(XSPI_Type *base,
+RAMFUNC void XSPI_UpdateSFPConfig(XSPI_Type *base,
                           xspi_sfp_mdad_config_t *ptrSfpMdadConfig,
                           xspi_sfp_frad_config_t *ptrSfpFradConfig)
 {
@@ -1230,7 +1230,7 @@ void XSPI_UpdateSFPConfig(XSPI_Type *base,
  * param[out] ptrInfo Pointer to the variable in type of ref xspi_frad_transaction_info_t to store information.
  * param[in] fradId Specify the frad Id.
  */
-void XSPI_GetFradLastTransactionsInfo(XSPI_Type *base, xspi_frad_transaction_info_t *ptrInfo, uint8_t fradId)
+RAMFUNC void XSPI_GetFradLastTransactionsInfo(XSPI_Type *base, xspi_frad_transaction_info_t *ptrInfo, uint8_t fradId)
 {
     uint32_t fradWord4RegOffset[] = XSPI_FRAD_WORD4_REG_OFFSET_ARRAY;
     uint32_t fradWord5RegOffset[] = XSPI_FRAD_WORD5_REG_OFFSET_ARRAY;
@@ -1258,7 +1258,7 @@ void XSPI_GetFradLastTransactionsInfo(XSPI_Type *base, xspi_frad_transaction_inf
  * retval kStatus_XSPI_RegWriteLocked Write operation to related register is locked.
  * retval kStatus_Success Success to update timeout counter.
  */
-status_t XSPI_UpdateSFPArbitrationLockTimeoutCounter(XSPI_Type *base, uint32_t countValue)
+RAMFUNC status_t XSPI_UpdateSFPArbitrationLockTimeoutCounter(XSPI_Type *base, uint32_t countValue)
 {
     if (XSPI_CheckGlobalConfigLocked(base))
     {
@@ -1284,7 +1284,7 @@ status_t XSPI_UpdateSFPArbitrationLockTimeoutCounter(XSPI_Type *base, uint32_t c
  * retval kStatus_XSPI_RegWriteLocked Write operation to related register is locked.
  * retval kStatus_Success Success to update timeout counter.
  */
-status_t XSPI_UpdateIPAccessTimeoutCounter(XSPI_Type *base, uint32_t countValue)
+RAMFUNC status_t XSPI_UpdateIPAccessTimeoutCounter(XSPI_Type *base, uint32_t countValue)
 {
     if (XSPI_CheckGlobalConfigLocked(base))
     {
@@ -1304,7 +1304,7 @@ status_t XSPI_UpdateIPAccessTimeoutCounter(XSPI_Type *base, uint32_t countValue)
  *
  * return The details of MDAD error reason, in type of ref xspi_mdad_error_reason_t.
  */
-xspi_mdad_error_reason_t XSPI_GetMdadErrorReason(XSPI_Type *base, xspi_target_group_t tgId)
+RAMFUNC xspi_mdad_error_reason_t XSPI_GetMdadErrorReason(XSPI_Type *base, xspi_target_group_t tgId)
 {
     uint8_t tmp8 = 0U;
 
@@ -1327,7 +1327,7 @@ xspi_mdad_error_reason_t XSPI_GetMdadErrorReason(XSPI_Type *base, xspi_target_gr
  * param[in] base XSPI peripheral base address.
  * param[in] tgId Specify the target group to clear address write status.
  */
-void XSPI_ClearTgAddrWriteStatus(XSPI_Type *base, xspi_target_group_t tgId)
+RAMFUNC void XSPI_ClearTgAddrWriteStatus(XSPI_Type *base, xspi_target_group_t tgId)
 {
     uint32_t tgSfarsRegAddr = (uint32_t)base + (uint32_t)s_tgSfarsRegOffset[(uint8_t)(tgId)];
 
@@ -1342,7 +1342,7 @@ void XSPI_ClearTgAddrWriteStatus(XSPI_Type *base, xspi_target_group_t tgId)
  * param[out] ptrStatus Pointer to the variable in type of ref xspi_tg_add_write_status_t
                         to store address write status.
  */
-void XSPI_GetTgAddrWriteStatus(XSPI_Type *base, xspi_target_group_t tgId, xspi_tg_add_write_status_t *ptrStatus)
+RAMFUNC void XSPI_GetTgAddrWriteStatus(XSPI_Type *base, xspi_target_group_t tgId, xspi_tg_add_write_status_t *ptrStatus)
 {
     uint32_t tgSfarsRegAddr = (uint32_t)base + (uint32_t)s_tgSfarsRegOffset[(uint8_t)(tgId)];
     uint32_t tmp32          = (*(uint32_t *)tgSfarsRegAddr);
@@ -1358,7 +1358,7 @@ void XSPI_GetTgAddrWriteStatus(XSPI_Type *base, xspi_target_group_t tgId, xspi_t
  * param[in] base XSPI peripheral base address.
  * param[in] tgId Specify the target group.
  */
-void XSPI_UnlockIpAccessArbitration(XSPI_Type *base, xspi_target_group_t tgId)
+RAMFUNC void XSPI_UnlockIpAccessArbitration(XSPI_Type *base, xspi_target_group_t tgId)
 {
     uint32_t tgIpcrRegOffset[] = XSPI_TGIPCRS_REG_OFFSET;
     uint32_t tgIpcrRegAddr     = (uint32_t)base + tgIpcrRegOffset[(uint8_t)tgId];
@@ -1380,7 +1380,7 @@ void XSPI_UnlockIpAccessArbitration(XSPI_Type *base, xspi_target_group_t tgId)
  * retval kStatus_XSPI_IpAccessIPCRInvalid Wrong seqindex or bytesize input.
  * retval kStatus_Success Success to start Ip access.
  */
-status_t XSPI_StartIpAccess(
+RAMFUNC status_t XSPI_StartIpAccess(
     XSPI_Type *base, uint32_t addr, uint8_t seqIndex, size_t byteSize, xspi_target_group_t tgId, bool lockArbitration)
 {
     uint32_t tgSfarsRegAddr     = (uint32_t)base + (uint32_t)s_tgSfarsRegOffset[(uint8_t)tgId];
@@ -1455,7 +1455,7 @@ status_t XSPI_StartIpAccess(
  * retval kStatus_XSPI_IpAccessIPCRInvalid Invalid to set IPCR register.
  * retval kStatus_XSPI_IpAccessAddrSettingInvalid Invalid to set SFAR register.
  */
-status_t XSPI_StartIpAccessNonBlocking(XSPI_Type *base, uint32_t addr, uint8_t seqIndex,
+RAMFUNC status_t XSPI_StartIpAccessNonBlocking(XSPI_Type *base, uint32_t addr, uint8_t seqIndex,
                                         size_t byteSize, xspi_target_group_t tgId, bool lockArbitration)
 {
     uint32_t tgSfarsRegAddr     = (uint32_t)base + (uint32_t)s_tgSfarsRegOffset[(uint8_t)tgId];
@@ -1533,7 +1533,7 @@ status_t XSPI_StartIpAccessNonBlocking(XSPI_Type *base, uint32_t addr, uint8_t s
  * retval kStatus_XSPI_RegWriteLocked Write operation to related register is locked.
  * retval kStatus_Success Success to update timeout counter.
  */
-status_t XSPI_SetIpAccessConfig(XSPI_Type *base, xspi_ip_access_config_t *ptrIpAccessConfig)
+RAMFUNC status_t XSPI_SetIpAccessConfig(XSPI_Type *base, xspi_ip_access_config_t *ptrIpAccessConfig)
 {
     assert(ptrIpAccessConfig != NULL);
 
@@ -1562,7 +1562,7 @@ status_t XSPI_SetIpAccessConfig(XSPI_Type *base, xspi_ip_access_config_t *ptrIpA
  * retval kStatus_XSPI_IpCommandSequenceError IP command sequence error detected
  * retval kStatus_XSPI_IpCommandGrantTimeout IP command grant timeout detected
  */
-status_t XSPI_WriteBlocking(XSPI_Type *base, uint8_t *buffer, size_t size)
+RAMFUNC status_t XSPI_WriteBlocking(XSPI_Type *base, uint8_t *buffer, size_t size)
 {
     status_t result = kStatus_Success;
     uint32_t i      = 0;
@@ -1637,7 +1637,7 @@ status_t XSPI_WriteBlocking(XSPI_Type *base, uint8_t *buffer, size_t size)
  * retval kStatus_XSPI_IpCommandSequenceError IP command sequence error detected
  * retval kStatus_XSPI_IpCommandGrantTimeout IP command grant timeout detected
  */
-status_t XSPI_ReadBlocking(XSPI_Type *base, uint8_t *buffer, size_t size)
+RAMFUNC status_t XSPI_ReadBlocking(XSPI_Type *base, uint8_t *buffer, size_t size)
 {
     assert(size <= XSPI_IP_RX_BUFFER_SIZE);
 
@@ -1748,7 +1748,7 @@ status_t XSPI_ReadBlocking(XSPI_Type *base, uint8_t *buffer, size_t size)
  * retval kStatus_XSPI_IpCommandSequenceError IP command sequence error detected
  * retval kStatus_XSPI_IpCommandGrantTimeout IP command grant timeout detected
  */
-status_t XSPI_TransferBlocking(XSPI_Type *base, xspi_transfer_t *xfer)
+RAMFUNC status_t XSPI_TransferBlocking(XSPI_Type *base, xspi_transfer_t *xfer)
 {
     status_t status    = kStatus_Success;
     uint32_t dataSize  = xfer->dataSize;
@@ -1891,7 +1891,7 @@ status_t XSPI_TransferBlocking(XSPI_Type *base, xspi_transfer_t *xfer)
  * param callback pointer to user callback function.
  * param userData user parameter passed to the callback function.
  */
-void XSPI_TransferCreateHandle(XSPI_Type *base,
+RAMFUNC void XSPI_TransferCreateHandle(XSPI_Type *base,
                                xspi_handle_t *handle,
                                xspi_transfer_callback_t callback,
                                void *userData)
@@ -1931,7 +1931,7 @@ void XSPI_TransferCreateHandle(XSPI_Type *base,
  * retval kStatus_Success Successfully start the data transmission.
  * retval kStatus_XSPI_Busy Previous transmission still not finished.
  */
-status_t XSPI_TransferNonBlocking(XSPI_Type *base, xspi_handle_t *handle, xspi_transfer_t *xfer)
+RAMFUNC status_t XSPI_TransferNonBlocking(XSPI_Type *base, xspi_handle_t *handle, xspi_transfer_t *xfer)
 {
     status_t status = kStatus_Success;
     uint32_t instance = XSPI_GetInstance(base);
@@ -1993,7 +1993,7 @@ status_t XSPI_TransferNonBlocking(XSPI_Type *base, xspi_handle_t *handle, xspi_t
  * retval kStatus_InvalidArgument count is Invalid.
  * retval kStatus_Success Successfully return the count.
  */
-status_t XSPI_TransferGetCount(XSPI_Type *base, xspi_handle_t *handle, size_t *count)
+RAMFUNC status_t XSPI_TransferGetCount(XSPI_Type *base, xspi_handle_t *handle, size_t *count)
 {
     assert(NULL != handle);
 
@@ -2020,7 +2020,7 @@ status_t XSPI_TransferGetCount(XSPI_Type *base, xspi_handle_t *handle, size_t *c
  * param base XSPI peripheral base address.
  * param handle pointer to xspi_handle_t structure which stores the transfer state
  */
-void XSPI_TransferAbort(XSPI_Type *base, xspi_handle_t *handle)
+RAMFUNC void XSPI_TransferAbort(XSPI_Type *base, xspi_handle_t *handle)
 {
     assert(NULL != handle);
 
@@ -2058,7 +2058,7 @@ void XSPI_TransferAbort(XSPI_Type *base, xspi_handle_t *handle)
  * retval kStatus_XSPI_RegWriteLocked Fail due to write operation to related registers is locked.
  * retval kStatus_Success Success to set AHB access boundary.
  */
-status_t XSPI_SetAhbAccessBoundary(XSPI_Type *base, xspi_ahb_alignment_t alignment)
+RAMFUNC status_t XSPI_SetAhbAccessBoundary(XSPI_Type *base, xspi_ahb_alignment_t alignment)
 {
 #if defined(XSPI_BFGENCR_ALIGN_MASK)
     if (XSPI_CheckAhbReadAccessAsserted(base))
@@ -2092,7 +2092,7 @@ status_t XSPI_SetAhbAccessBoundary(XSPI_Type *base, xspi_ahb_alignment_t alignme
  * retval kStatus_XSPI_RegWriteLocked Fail due to write operation to related registers is locked.
  * retval kStatus_Success Success to set AHB read sequence Id.
  */
-status_t XSPI_SetAhbReadDataSeqId(XSPI_Type *base, uint8_t seqId)
+RAMFUNC status_t XSPI_SetAhbReadDataSeqId(XSPI_Type *base, uint8_t seqId)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2124,7 +2124,7 @@ status_t XSPI_SetAhbReadDataSeqId(XSPI_Type *base, uint8_t seqId)
  * retval kStatus_XSPI_RegWriteLocked Fail due to write operation to related registers is locked.
  * retval kStatus_Success Success to set AHB write sequence Id.
  */
-status_t XSPI_SetAhbWriteDataSeqId(XSPI_Type *base, uint8_t seqId)
+RAMFUNC status_t XSPI_SetAhbWriteDataSeqId(XSPI_Type *base, uint8_t seqId)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2158,7 +2158,7 @@ status_t XSPI_SetAhbWriteDataSeqId(XSPI_Type *base, uint8_t seqId)
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail due to an AHB write access already asserted.
  * retval kStatus_Success Success to set AHB buffer configurations.
  */
-status_t XSPI_SetAhbBufferConfig(XSPI_Type *base,
+RAMFUNC status_t XSPI_SetAhbBufferConfig(XSPI_Type *base,
                                  xspi_ahbBuffer_config_t *ptrBuffer0Config,
                                  xspi_ahbBuffer_config_t *ptrBuffer1Config,
                                  xspi_ahbBuffer_config_t *ptrBuffer2Config,
@@ -2271,7 +2271,7 @@ status_t XSPI_SetAhbBufferConfig(XSPI_Type *base,
  * retval kStatus_XSPI_RegWriteLocked Fail due to write operation to related registers is locked.
  * retval kStatus_Success Success to set AHB access split size.
  */
-status_t XSPI_SetAhbAccessSplitSize(XSPI_Type *base, xspi_ahb_split_size_t ahbSplitSize)
+RAMFUNC status_t XSPI_SetAhbAccessSplitSize(XSPI_Type *base, xspi_ahb_split_size_t ahbSplitSize)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2314,7 +2314,7 @@ status_t XSPI_SetAhbAccessSplitSize(XSPI_Type *base, xspi_ahb_split_size_t ahbSp
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail due to an AHB write access already asserted
  * retval kStatus_Success Success to set AHB HREADY timeout value.
  */
-status_t XSPI_UpdateAhbHreadyTimeOutValue(XSPI_Type *base, uint16_t timeoutValue)
+RAMFUNC status_t XSPI_UpdateAhbHreadyTimeOutValue(XSPI_Type *base, uint16_t timeoutValue)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2346,7 +2346,7 @@ status_t XSPI_UpdateAhbHreadyTimeOutValue(XSPI_Type *base, uint16_t timeoutValue
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail due to an AHB write access already asserted
  * retval kStatus_Success Success to set AHB HREADY timeout value.
  */
-status_t XSPI_SetAhbErrorPayload(XSPI_Type *base, uint32_t highPayload, uint32_t lowPayload)
+RAMFUNC status_t XSPI_SetAhbErrorPayload(XSPI_Type *base, uint32_t highPayload, uint32_t lowPayload)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2371,7 +2371,7 @@ status_t XSPI_SetAhbErrorPayload(XSPI_Type *base, uint32_t highPayload, uint32_t
  *
  * return Latest AHB read error information, in type of xspi_ahb_read_error_info_t.
  */
-xspi_ahb_read_error_info_t XSPI_ReturnAhbReadErrorInfo(XSPI_Type *base)
+RAMFUNC xspi_ahb_read_error_info_t XSPI_ReturnAhbReadErrorInfo(XSPI_Type *base)
 {
     xspi_ahb_read_error_info_t errorInfo;
 
@@ -2388,7 +2388,7 @@ xspi_ahb_read_error_info_t XSPI_ReturnAhbReadErrorInfo(XSPI_Type *base)
  * param[out] ptrSuspendInfo Contain latest suspend info, the value may be 0xFF if the item is invalid in current
  * suspend state.
  */
-void XSPI_GetAhbRequestSuspendInfo(XSPI_Type *base, xspi_ahb_request_suspend_info_t *ptrSuspendInfo)
+RAMFUNC void XSPI_GetAhbRequestSuspendInfo(XSPI_Type *base, xspi_ahb_request_suspend_info_t *ptrSuspendInfo)
 {
     uint32_t tmp32 = 0UL;
 
@@ -2424,7 +2424,7 @@ void XSPI_GetAhbRequestSuspendInfo(XSPI_Type *base, xspi_ahb_request_suspend_inf
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail due to an AHB write access already asserted.
  * retval kStatus_Success Successfully to enable/disable AHB buffer write flush.
  */
-status_t XSPI_EnableAhbBufferWriteFlush(XSPI_Type *base, bool enable)
+RAMFUNC status_t XSPI_EnableAhbBufferWriteFlush(XSPI_Type *base, bool enable)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2484,7 +2484,7 @@ status_t XSPI_EnableAhbBufferWriteFlush(XSPI_Type *base, bool enable)
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail due to an AHB write access already asserted
  * retval kStatus_Success Success to set related registers..
  */
-status_t XSPI_BlockAccessAfterAhbWrite(XSPI_Type *base, bool blockSequentWrite, bool blockRead)
+RAMFUNC status_t XSPI_BlockAccessAfterAhbWrite(XSPI_Type *base, bool blockSequentWrite, bool blockRead)
 {
     uint32_t tmp32 = 0UL;
 
@@ -2520,7 +2520,7 @@ status_t XSPI_BlockAccessAfterAhbWrite(XSPI_Type *base, bool blockSequentWrite, 
  * retval kStatus_XSPI_RegWriteLocked Fail due to write operation to related registers is locked.
  * retval kStatus_Success Success to set PPW flag clear policy.
  */
-status_t XSPI_SelectPPWFlagClearPolicy(XSPI_Type *base, xspi_ppw_flag_clear_policy_t policy)
+RAMFUNC status_t XSPI_SelectPPWFlagClearPolicy(XSPI_Type *base, xspi_ppw_flag_clear_policy_t policy)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2560,7 +2560,7 @@ status_t XSPI_SelectPPWFlagClearPolicy(XSPI_Type *base, xspi_ppw_flag_clear_poli
  * retval kStatus_XSPI_PageProgramWaitFlagAsserted Page program wait flag already asserted.
  * retval kStatus_Success Successfully to update page wait timeout counter.
  */
-status_t XSPI_UpdatePageWaitTimeCounter(XSPI_Type *base, uint32_t countValue)
+RAMFUNC status_t XSPI_UpdatePageWaitTimeCounter(XSPI_Type *base, uint32_t countValue)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2595,7 +2595,7 @@ status_t XSPI_UpdatePageWaitTimeCounter(XSPI_Type *base, uint32_t countValue)
  * retval kStatus_XSPI_RegWriteLocked Fail due to write operation to related registers is locked.
  * retval kStatus_Success Success to set AHB read status register sequence Id.
  */
-status_t XSPI_SetAhbReadStatusRegSeqId(XSPI_Type *base, uint8_t seqId)
+RAMFUNC status_t XSPI_SetAhbReadStatusRegSeqId(XSPI_Type *base, uint8_t seqId)
 {
     if (XSPI_CheckAhbReadAccessAsserted(base))
     {
@@ -2628,7 +2628,7 @@ status_t XSPI_SetAhbReadStatusRegSeqId(XSPI_Type *base, uint8_t seqId)
  * retval kStatus_XSPI_PageProgramWaitFlagAsserted Page program wait flag already asserted.
  * retval kStatus_Success Successfully to set status register information.
  */
-status_t XSPI_SetSFMStatusRegInfo(XSPI_Type *base, xspi_device_status_reg_info_t *ptrStatusRegInfo)
+RAMFUNC status_t XSPI_SetSFMStatusRegInfo(XSPI_Type *base, xspi_device_status_reg_info_t *ptrStatusRegInfo)
 {
     assert(ptrStatusRegInfo != NULL);
 
@@ -2674,7 +2674,7 @@ status_t XSPI_SetSFMStatusRegInfo(XSPI_Type *base, xspi_device_status_reg_info_t
  * retval kStatus_XSPI_AhbWriteAccessAsserted Fail due to an AHB write access already asserted.
  * retval kStatus_Success Success to set AHB buffer size.
  */
-status_t XSPI_UpdateAhbBufferSize(
+RAMFUNC status_t XSPI_UpdateAhbBufferSize(
     XSPI_Type *base, uint16_t buf0Size, uint16_t buf1Size, uint16_t buf2Size, uint16_t buf3Size)
 {
     /* The total size of AHB buffer is 4KB. */
@@ -2710,7 +2710,7 @@ status_t XSPI_UpdateAhbBufferSize(
  *
  * return Current status of selected AHB sub buffer, in type of ref xspi_ahb_sub_buffer_status_t.
  */
-xspi_ahb_sub_buffer_status_t XSPI_GetAhbSubBufferStatus(XSPI_Type *base, uint8_t ahbBufferId, uint8_t subBufferId)
+RAMFUNC xspi_ahb_sub_buffer_status_t XSPI_GetAhbSubBufferStatus(XSPI_Type *base, uint8_t ahbBufferId, uint8_t subBufferId)
 {
     uint32_t tmp32 = 0UL;
     uint32_t shift = 8UL * (uint32_t)ahbBufferId + 2UL * (uint32_t)subBufferId;
@@ -2727,7 +2727,7 @@ xspi_ahb_sub_buffer_status_t XSPI_GetAhbSubBufferStatus(XSPI_Type *base, uint8_t
  * param[in] ahbBufferId Specify the selected AHB buffer.
  * param[in] subBufferId Specify the selected sub-buffer.
  */
-void XSPI_EnableAhbBufferPerfMonitor(XSPI_Type *base, uint8_t ahbBufferId, uint8_t subBufferId)
+RAMFUNC void XSPI_EnableAhbBufferPerfMonitor(XSPI_Type *base, uint8_t ahbBufferId, uint8_t subBufferId)
 {
     uint32_t tmp32 = 0UL;
 
@@ -2754,7 +2754,7 @@ void XSPI_EnableAhbBufferPerfMonitor(XSPI_Type *base, uint8_t ahbBufferId, uint8
  * retval kStatus_XSPI_RegWriteLocked Fail due to write operation to related registers is locked.
  * retval kStatus_Success Success to set AHB read status register sequence Id.
  */
-status_t XSPI_SetAhbAccessConfig(XSPI_Type *base, xspi_ahb_access_config_t *ptrAhbAccessConfig)
+RAMFUNC status_t XSPI_SetAhbAccessConfig(XSPI_Type *base, xspi_ahb_access_config_t *ptrAhbAccessConfig)
 {
     assert(ptrAhbAccessConfig != NULL);
 
@@ -2847,7 +2847,7 @@ status_t XSPI_EnableAhbWriteTerminate(XSPI_Type *base, bool enable)
 /***************************** AHB Access Control Functional Interfaces End ********************************/
 
 #if defined(FSL_DRIVER_TRANSFER_DOUBLE_WEAK_IRQ) && FSL_DRIVER_TRANSFER_DOUBLE_WEAK_IRQ
-static void XSPI_CommonIRQHandler(XSPI_Type *base, xspi_handle_t *handle)
+RAMFUNC static void XSPI_CommonIRQHandler(XSPI_Type *base, xspi_handle_t *handle)
 {
     uint32_t errFlags = XSPI_GetErrorStatusFlags(base);
     uint32_t flags = XSPI_GetCmdExecutionArbitrationStatusFlags(base);
@@ -3008,8 +3008,8 @@ static void XSPI_CommonIRQHandler(XSPI_Type *base, xspi_handle_t *handle)
 }
 
 #if defined(XSPI0)
-void XSPI0_DriverIRQHandler(void);
-void XSPI0_DriverIRQHandler(void)
+RAMFUNC void XSPI0_DriverIRQHandler(void);
+RAMFUNC void XSPI0_DriverIRQHandler(void)
 {
     XSPI_CommonIRQHandler(XSPI0, s_xspiHandle[0]);
     SDK_ISR_EXIT_BARRIER;
@@ -3017,8 +3017,8 @@ void XSPI0_DriverIRQHandler(void)
 #endif /* defined(XSPI0) */
 
 #if defined(XSPI1)
-void XSPI1_DriverIRQHandler(void);
-void XSPI1_DriverIRQHandler(void)
+RAMFUNC void XSPI1_DriverIRQHandler(void);
+RAMFUNC void XSPI1_DriverIRQHandler(void)
 {
     XSPI_CommonIRQHandler(XSPI1, s_xspiHandle[1]);
     SDK_ISR_EXIT_BARRIER;
@@ -3026,8 +3026,8 @@ void XSPI1_DriverIRQHandler(void)
 #endif /* defined(XSPI1) */
 
 #if defined(XSPI2)
-void XSPI2_DriverIRQHandler(void);
-void XSPI2_DriverIRQHandler(void)
+RAMFUNC void XSPI2_DriverIRQHandler(void);
+RAMFUNC void XSPI2_DriverIRQHandler(void)
 {
     XSPI_CommonIRQHandler(XSPI2, s_xspiHandle[2]);
     SDK_ISR_EXIT_BARRIER;
@@ -3056,7 +3056,7 @@ void MAIN_XSPI1_DriverIRQHandler(void)
 
 #if defined(CACHE64_CTRL0_BASE)
 
-static uint32_t XSPI_Cache64_GetInstanceByAddr(uint32_t address)
+RAMFUNC static uint32_t XSPI_Cache64_GetInstanceByAddr(uint32_t address)
 {
     uint32_t i = 0UL;
     uint32_t phyMemBase[] = CACHE64_CTRL_PHYMEM_BASES;
@@ -3082,7 +3082,7 @@ static uint32_t XSPI_Cache64_GetInstanceByAddr(uint32_t address)
  *
  * param base CACHE64_CTRL peripheral base address.
  */
-void XSPI_Cache64_EnableCache(CACHE64_CTRL_Type *base)
+RAMFUNC void XSPI_Cache64_EnableCache(CACHE64_CTRL_Type *base)
 {
     /* if CACHE is not enabled */
     if ((base->CCR & CACHE64_CTRL_CCR_ENCACHE_MASK) == 0x00U)
@@ -3100,7 +3100,7 @@ void XSPI_Cache64_EnableCache(CACHE64_CTRL_Type *base)
  *
  * param base CACHE64_CTRL peripheral base address.
  */
-void XSPI_Cache64_DisableCache(CACHE64_CTRL_Type *base)
+RAMFUNC void XSPI_Cache64_DisableCache(CACHE64_CTRL_Type *base)
 {
     /* if CACHE is enabled */
     if ((base->CCR & CACHE64_CTRL_CCR_ENCACHE_MASK) != 0x00U)
@@ -3118,7 +3118,7 @@ void XSPI_Cache64_DisableCache(CACHE64_CTRL_Type *base)
  *
  * param base CACHE64_CTRL peripheral base address.
  */
-void XSPI_Cache64_InvalidateCache(CACHE64_CTRL_Type *base)
+RAMFUNC void XSPI_Cache64_InvalidateCache(CACHE64_CTRL_Type *base)
 {
     /* Invalidate all lines in both ways and initiate the cache command. */
     base->CCR |= CACHE64_CTRL_CCR_INVW0_MASK | CACHE64_CTRL_CCR_INVW1_MASK | CACHE64_CTRL_CCR_GO_MASK;
@@ -3138,7 +3138,7 @@ void XSPI_Cache64_InvalidateCache(CACHE64_CTRL_Type *base)
  * param address The value of start physical address.
  * param size Size of data in unit of byte.
  */
-void XSPI_Cache64_InvalidateCacheByRange(uint32_t address, size_t size)
+RAMFUNC void XSPI_Cache64_InvalidateCacheByRange(uint32_t address, size_t size)
 {
     if (size > 0UL)
     {
@@ -3184,7 +3184,7 @@ void XSPI_Cache64_InvalidateCacheByRange(uint32_t address, size_t size)
  *
  * param base CACHE64_CTRL peripheral base address.
  */
-void XSPI_Cache64_CleanCache(CACHE64_CTRL_Type *base)
+RAMFUNC void XSPI_Cache64_CleanCache(CACHE64_CTRL_Type *base)
 {
     /* Enable the to push all modified lines. */
     base->CCR |= CACHE64_CTRL_CCR_PUSHW0_MASK | CACHE64_CTRL_CCR_PUSHW1_MASK | CACHE64_CTRL_CCR_GO_MASK;
@@ -3204,7 +3204,7 @@ void XSPI_Cache64_CleanCache(CACHE64_CTRL_Type *base)
  * param address The value of start physical address.
  * param size Size of data in unit of byte.
  */
-void XSPI_Cache64_CleanCacheByRange(uint32_t address, size_t size)
+RAMFUNC void XSPI_Cache64_CleanCacheByRange(uint32_t address, size_t size)
 {
     if (size > 0UL)
     {
@@ -3250,7 +3250,7 @@ void XSPI_Cache64_CleanCacheByRange(uint32_t address, size_t size)
  *
  * param base CACHE64_CTRL peripheral base address.
  */
-void XSPI_Cache64_CleanInvalidateCache(CACHE64_CTRL_Type *base)
+RAMFUNC void XSPI_Cache64_CleanInvalidateCache(CACHE64_CTRL_Type *base)
 {
     /* Push and invalidate all. */
     base->CCR |= CACHE64_CTRL_CCR_PUSHW0_MASK | CACHE64_CTRL_CCR_PUSHW1_MASK | CACHE64_CTRL_CCR_INVW0_MASK |
@@ -3272,7 +3272,7 @@ void XSPI_Cache64_CleanInvalidateCache(CACHE64_CTRL_Type *base)
  * param address The value of start physical address.
  * param size Size of data in unit of byte.
  */
-void XSPI_Cache64_CleanInvalidateByRange(uint32_t address, size_t size)
+RAMFUNC void XSPI_Cache64_CleanInvalidateByRange(uint32_t address, size_t size)
 {
     if (size > 0UL)
     {
@@ -3320,7 +3320,7 @@ void XSPI_Cache64_CleanInvalidateByRange(uint32_t address, size_t size)
  *
  * return uint32_t The data of input physical address stored in cache.
  */
-uint32_t XSPI_Cache64_ReadCache(uint32_t address)
+RAMFUNC uint32_t XSPI_Cache64_ReadCache(uint32_t address)
 {
     CACHE64_CTRL_Type *const s_xspi_cache64ctrlBases[] = CACHE64_CTRL_BASE_PTRS;
     uint32_t instance = XSPI_Cache64_GetInstanceByAddr(address);
@@ -3338,7 +3338,7 @@ uint32_t XSPI_Cache64_ReadCache(uint32_t address)
 #endif /* defined(CACHE64_CTRL0_BASE) */
 
 #if (defined(FSL_FEATURE_SOC_CACHE64_POLSEL_COUNT) && (FSL_FEATURE_SOC_CACHE64_POLSEL_COUNT > 0))
-static uint32_t XSPI_Cache64_GetPolselInstance(CACHE64_POLSEL_Type *base)
+RAMFUNC static uint32_t XSPI_Cache64_GetPolselInstance(CACHE64_POLSEL_Type *base)
 {
     uint32_t i;
     CACHE64_POLSEL_Type *const xspi_cache64polselBases[] = CACHE64_POLSEL_BASE_PTRS;
@@ -3362,7 +3362,7 @@ static uint32_t XSPI_Cache64_GetPolselInstance(CACHE64_POLSEL_Type *base)
  * param base CACHE64_POLSEL peripheral base address.
  * param config Pointer to the structure xspi_cache64_region_config_t.
  */
-void XSPI_Cache64_SetRegionConfig(CACHE64_POLSEL_Type *base, xspi_cache64_region_config_t *config)
+RAMFUNC void XSPI_Cache64_SetRegionConfig(CACHE64_POLSEL_Type *base, xspi_cache64_region_config_t *config)
 {
     assert(config != NULL);
 

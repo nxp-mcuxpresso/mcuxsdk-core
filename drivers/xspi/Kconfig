@@ -22,3 +22,9 @@ config MCUX_COMPONENT_driver.xspi
     bool "xspi"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.xspi
+
+config FLASH_DRIVER_EXECUTES_FROM_RAM
+    bool "Enable flash driver execution from RAM"
+    default n
+    help
+      Enable config if the flash driver is to be placed in RAM and requires RAMFUNC attributes.
