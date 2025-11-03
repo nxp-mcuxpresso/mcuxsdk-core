@@ -58,7 +58,7 @@ class CfgResolve(WestCommand):
         parser.add_argument('source_dir', help="source directory for project")
         parser.add_argument('-D', action='append', dest='cmake_defines', help="CMake defines in format key=value (e.g., -Dcore_id=cm33)")
 
-        parser.add_argument('--no_prj_update', action='store_true', help='Calls cfg_project_info to update project_info.json with newly chenged data')
+        parser.add_argument('--no_prj_update', action='store_true', help='Disable call of cfg_project_info to update project_info.json with newly changed data')
         parser.add_argument('--no_src_add', action='store_true', help='Disable adding of source files into project configuration during resolve')
         parser.add_argument('--no_src_rem', action='store_true', help='Disable removing of source files from project configuration during resolve')
         parser.add_argument('--no_incl_add', action='store_true', help='Disable adding of include paths into project configuration during resolve')
@@ -66,6 +66,42 @@ class CfgResolve(WestCommand):
         parser.add_argument('--no_json_rename', action='store_true', help='Disable renaming of requirement JSON file after processing')
 
         return parser
+
+    def _relativize_paths(self, paths):
+        """
+        Convert absolute paths to relative paths based on the CMake file directory.
+        
+        Args:
+            paths_list (list): List of file/directory paths to relativize
+            
+        Returns:
+            list: List of paths relativized to the CMake file directory
+        """
+        if not self.cmake_file_path:
+            self._exit_with_error("CMake file path not set. Cannot relativize paths.")
+        
+        cmake_dir = os.path.dirname(os.path.abspath(self.cmake_file_path))
+        relativized_paths = []
+        
+        for path in paths:
+            try:
+                if not os.path.isabs(path):
+                    abs_path = os.path.abspath(os.path.join(self.project_root, path))
+                else:
+                    abs_path = os.path.abspath(path)
+                
+                rel_path = os.path.relpath(abs_path, cmake_dir)
+                
+                # Normalize path separators for CMake
+                rel_path = rel_path.replace('\\', '/')
+                
+                relativized_paths.append(rel_path)
+                
+            except (ValueError, OSError) as e:
+                log.wrn(f"Could not relativize path '{path}': {e}. Using original path.")
+                relativized_paths.append(path)
+        
+        return relativized_paths
 
     def _run_poject_update(self):
         cmd_args = ["west", "cfg_project_info", "-b", self.args.board, self.args.source_dir]
@@ -258,6 +294,8 @@ class CfgResolve(WestCommand):
             return
 
         try:
+            includes_to_add = self._relativize_paths(includes_to_add)
+
             if self._check_for_duplicate_block(includes_to_add, 'includes'):
                 includes_to_add = self._extract_unique_list(includes_to_add, self.cmake_includes)
             
@@ -289,6 +327,8 @@ class CfgResolve(WestCommand):
             return
 
         try:
+            sources_to_add = self._relativize_paths(sources_to_add)
+
             if self._check_for_duplicate_block(sources_to_add, 'sources'):
                 sources_to_add = self._extract_unique_list(sources_to_add, self.cmake_sources)
         
@@ -319,6 +359,8 @@ class CfgResolve(WestCommand):
             return
         
         try:
+            files_to_remove = self._relativize_paths(files_to_remove)
+
             if self._check_for_duplicate_block(files_to_remove, 'remove_sources'):
                 files_to_remove = self._extract_unique_list(files_to_remove, self.cmake_remove_sources)
             
