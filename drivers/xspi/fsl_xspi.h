@@ -470,7 +470,7 @@ typedef enum _xspi_data_learning_pad_select
  */
 typedef struct _xspi_data_learning_config
 {
-    uint32_t pattern;                            /*!< Pre-defiend pattern to match. */
+    uint32_t pattern;                            /*!< Pre-defined pattern to match. */
     bool deviceSupported;                        /*!< Specify if external device support data learning feature. */
     xspi_data_learning_pad_select_t padSelected; /*!< Used to select pad which use for pattern matching IO. */
 } xspi_data_learning_config_t;
@@ -930,6 +930,10 @@ typedef struct _xspi_ahb_access_config
         uint32_t highPayload; /*!< High 32bit error payload. */
         uint32_t lowPayload;  /*!< Low 32bit error payload. */
     } ahbErrorPayload;
+#if (defined(FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT) && FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT)
+    bool enableWriteTerminate; /*!< True to enable an AHB transaction can terminate the ongoing AHB read-prefetch,
+                                    in default it is enabled. */
+#endif /* FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT */
 } xspi_ahb_access_config_t;
 
 /*!
@@ -2498,7 +2502,7 @@ static inline void XSPI_EnableAhbReadPrefetch(XSPI_Type *base, bool enable)
  * access to the external memory are blocked. And the internal "page wait time" counter
  * starts(Invoke XSPI_UpdatePageWaitTimeCounter to update counter value). After this counter
  * reaches the value, a read is triggered by the XSPI module to read external device's
- * status register(The seq id should be pre-defiend by XSPI_SetAhbReadStatusRegSeqId),
+ * status register(The seq id should be pre-defined by XSPI_SetAhbReadStatusRegSeqId),
  * and the value is stored in the XSPI internal regsiter. And there are two
  * options(Invoke XSPI_SelectPPWFlagClearPolicy to select) to clear the asserted page program wait flag.
  *      1. Automatic cleared by XSPI hardware;
@@ -2593,6 +2597,19 @@ static inline uint16_t XSPI_GetSFMStatusRegValue(XSPI_Type *base)
  */
 status_t XSPI_SetSFMStatusRegInfo(XSPI_Type *base, xspi_device_status_reg_info_t *ptrStatusRegInfo);
 
+#if (defined(FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT) && FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT)
+/*!
+ * @brief Enable or disable AHB write terminate functionality.
+ *
+ * @param base XSPI peripheral base address.
+ * @param enable True to enable AHB write terminate, false to disable.
+ *
+ * @retval kStatus_XSPI_AhbReadAccessAsserted Fail due to an AHB read access already asserted
+ * @retval kStatus_XSPI_AhbWriteAccessAsserted Fail due to an AHB write access already asserted
+ * @retval kStatus_Success Success to enable/disable AHB write terminate functionality.
+ */
+status_t XSPI_EnableAhbWriteTerminate(XSPI_Type *base, bool enable);
+#endif /* FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT */
 /*! @} */
 
 /*!

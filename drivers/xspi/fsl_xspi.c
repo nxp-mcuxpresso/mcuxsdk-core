@@ -521,6 +521,9 @@ void XSPI_GetDefaultConfig(xspi_config_t *ptrConfig)
         ptrConfig->ptrAhbAccessConfig->ahbErrorPayload.highPayload = 0UL;
         ptrConfig->ptrAhbAccessConfig->ahbErrorPayload.lowPayload  = 0UL;
         ptrConfig->ptrAhbAccessConfig->ahbSplitSize                = kXSPI_AhbSplitSizeDisabled;
+#if (defined(FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT) && FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT)
+        ptrConfig->ptrAhbAccessConfig->enableWriteTerminate = true;
+#endif /* FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT */
 
         for (uint8_t i = 0U; i < XSPI_BUFCR_COUNT; i++)
         {
@@ -2463,7 +2466,7 @@ status_t XSPI_EnableAhbBufferWriteFlush(XSPI_Type *base, bool enable)
  * access to the external memory are blocked. And the internal "page wait time" counter
  * starts(Invoke XSPI_UpdatePageWaitTimeCounter to update counter value). After this counter
  * reaches the value, a read is triggered by the XSPI module to read external device's
- * status register(The seq id should be pre-defiend by XSPI_SetAhbReadStatusRegSeqId),
+ * status register(The seq id should be pre-defined by XSPI_SetAhbReadStatusRegSeqId),
  * and the value is stored in the XSPI internal regsiter. And there are two
  * options(Invoke XSPI_SelectPPWFlagClearPolicy to select) to clear the asserted page program wait flag.
  *      1. Automatic cleared by XSPI hardware;
@@ -2793,6 +2796,10 @@ status_t XSPI_SetAhbAccessConfig(XSPI_Type *base, xspi_ahb_access_config_t *ptrA
                         XSPI_BFGENCR_SEQID_WR(ptrAhbAccessConfig->ptrAhbWriteConfig->AWRSeqIndex) |
                         XSPI_BFGENCR_SEQID_WR_EN_MASK |
                         XSPI_BFGENCR_SEQID_RDSR(ptrAhbAccessConfig->ptrAhbWriteConfig->ARDSRSeqIndex);
+
+#if (defined(FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT) && FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT)
+        (void)XSPI_EnableAhbWriteTerminate(base, config->enableWriteTerminate);
+#endif /* FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT */
     }
 
     (void)XSPI_SetAhbErrorPayload(base, ptrAhbAccessConfig->ahbErrorPayload.highPayload,
@@ -2800,6 +2807,42 @@ status_t XSPI_SetAhbAccessConfig(XSPI_Type *base, xspi_ahb_access_config_t *ptrA
 
     return kStatus_Success;
 }
+
+#if (defined(FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT) && FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT)
+/*!
+ * brief Enable or disable AHB write terminate functionality.
+ *
+ * param base XSPI peripheral base address.
+ * param enable True to enable AHB write terminate, false to disable.
+ *
+ * retval kStatus_XSPI_AhbReadAccessAsserted Fail due to an AHB read access already asserted
+ * retval kStatus_XSPI_AhbWriteAccessAsserted Fail due to an AHB write access already asserted
+ * retval kStatus_Success Success to enable/disable AHB write terminate functionality.
+ */
+status_t XSPI_EnableAhbWriteTerminate(XSPI_Type *base, bool enable)
+{
+    if (XSPI_CheckAhbReadAccessAsserted(base))
+    {
+        return kStatus_XSPI_AhbReadAccessAsserted;
+    }
+
+    if (XSPI_CheckAhbWriteAccessAsserted(base))
+    {
+        return kStatus_XSPI_AhbWriteAccessAsserted;
+    }
+
+    if (enable)
+    {
+        base->BFGENCR |= XSPI_BFGENCR_WRTER_EN_MASK;
+    }
+    else
+    {
+        base->BFGENCR &= ~XSPI_BFGENCR_WRTER_EN_MASK;
+    }
+
+    return kStatus_Success;
+}
+#endif /* FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT */
 
 /***************************** AHB Access Control Functional Interfaces End ********************************/
 

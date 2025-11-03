@@ -11,6 +11,11 @@
   - Enhanced register access handling using conditional compilation to accommodate hardware differences.
   - Added supports of MAIN_XSPI0_DriverIRQHandler() and MAIN_XSPI1_DriverIRQHandler.
 
+- New Features
+  - Added AHB write terminate functionality support for devices with FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT.
+    - New API: XSPI_EnableAhbWriteTerminate() to control AHB write termination of read-prefetch operations.
+    - New configuration field: enableWriteTerminate in xspi_ahb_access_config_t structure.
+
 ## [2.5.2]
 
 - Improvements
