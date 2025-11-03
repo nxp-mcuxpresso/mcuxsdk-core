@@ -1,5 +1,10 @@
 # CACHE64
 
+## [2.0.13]
+
+- Bug Fixes
+  - Fix issue in CACHE64_InvalidateCacheByRange(), CACHE64_CleanCacheByRange() and CACHE64_CleanInvalidateCacheByRange() functions to avoid cleaning/invalidation less cache lines than expected.
+
 ## [2.0.12]
 
 - Improvements
