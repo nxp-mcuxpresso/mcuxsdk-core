@@ -68,9 +68,18 @@ uint32_t FLEXIO_GetInstance(FLEXIO_Type *base)
     uint32_t instance;
 
     /* Find the instance index from base address mappings. */
-    for (instance = 0; instance < ARRAY_SIZE(s_flexioBases); instance++)
+    /*
+     * $Branch Coverage Justification$
+     * (instance >= ARRAY_SIZE(s_flexioBases)) not covered. The peripheral base
+     * address is always valid and checked by assert.
+     */
+    for (instance = 0; instance < ARRAY_SIZE(s_flexioBases); instance++) /* GCOVR_EXCL_BR_LINE */
     {
-        if (MSDK_REG_SECURE_ADDR(s_flexioBases[instance]) == MSDK_REG_SECURE_ADDR(base))
+        /*
+         * $Branch Coverage Justification$
+         * false branch not covered - depends on count of peripheral instances
+         */
+        if (MSDK_REG_SECURE_ADDR(s_flexioBases[instance]) == MSDK_REG_SECURE_ADDR(base)) /* GCOVR_EXCL_BR_LINE */
         {
             break;
         }
