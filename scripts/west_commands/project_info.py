@@ -19,6 +19,7 @@ import re
 import json
 import os
 import shutil
+import sys
 
 from west import log
 from west.commands import WestCommand
@@ -51,6 +52,7 @@ class ProjectInfo(WestCommand):
         parser.add_argument('-b', '--board', help='board for which to create the project info file')
         parser.add_argument('source_dir', help="source directory for project")
         parser.add_argument('-D', action='append', dest='cmake_defines', help="CMake defines in format key=value (e.g., -Dcore_id=cm33)")
+        parser.add_argument("--no_tmp_delete", action="store_true", help="Disables deletion of temporary build file. Used for debugging")
 
         return parser
     
@@ -104,27 +106,50 @@ class ProjectInfo(WestCommand):
             if cmake_cache:
                 project_path_regex = r".*APPLICATION_SOURCE_DIR:PATH=([^\s]+)"
                 project_path = self.regex_match_helper(project_path_regex, cmake_cache)
+                if not project_path:
+                    log.err("Project root path not found in CMakeCache.txt")
+                    return False
 
                 project_name_regex = r".*CMAKE_PROJECT_NAME:STATIC=([^\s]+)"
                 project_name = self.regex_match_helper(project_name_regex, cmake_cache)
+                if not project_name:
+                    log.err("Project name not found in CMakeCache.txt")
+                    return False
 
                 board_regex = r".*board:STRING=([^\s]+)"
                 board = self.regex_match_helper(board_regex, cmake_cache)
 
                 device_regex = r".*-DCPU_([^\s_]+)"
                 device = self.regex_match_helper(device_regex, cmake_cache)
+                if not device:
+                    log.err("Device package not found in CMakeCache.txt")
+                    return False
 
                 core_regex = r".*core_id:UNINITIALIZED=([^\s]+)"
                 core = self.regex_match_helper(core_regex, cmake_cache)
 
                 outpath_regex = r".*MCUXPRESSO_CONFIG_TOOL_MEX_PATH:STRING=([^\s]+)"
                 outpath = self.regex_match_helper(outpath_regex, cmake_cache)
+
+                cmake_regex = r".*MCUXPRESSO_CONFIG_TOOL_GENERATED_CMAKE_FILE_PATH:FILEPATH=([^\s]+)"
+                cmake_file_path = self.regex_match_helper(cmake_regex, cmake_cache)
+                if not cmake_file_path:
+                    log.err("Generated CMake file path not found in CMakeCache.txt")
+                    return False
+                
+                prj_regex = r".*MCUXPRESSO_CONFIG_TOOL_EDIT_PRJ_FILE_PATH:FILEPATH=([^\s]+)"
+                prj_file_path = self.regex_match_helper(prj_regex, cmake_cache)
+                if not prj_file_path:
+                    log.err("Generated project edit file path not found in CMakeCache.txt")
+                    return False
                 
                 self.project_info = {
                     "projectRootPath": project_path,
                     "name": project_name,
                     "device_package": device,
                     "board": board,
+                    "source_generated_cmake_file_path": cmake_file_path,
+                    "component_edit_prj_file_path": prj_file_path
                 }
 
                 if core:
@@ -209,6 +234,39 @@ class ProjectInfo(WestCommand):
         
         return True
     
+    def parse_config_file(self):
+        """
+        Parse configuration file to extract components in project.
+        Attempts to find and read .config file.
+        Updates the project_info dictionary with the components.
+
+        Returns:
+            bool: True if parsing is successful, False otherwise
+        """
+        try:
+            config_file_path = os.path.join(self.output_dir, self.build_dir, ".config")
+
+            with open(config_file_path, 'r') as f:
+                config_content = f.read().strip()
+
+            component_regex = r"(?<=CONFIG_MCUX_COMPONENT_)(.*?)(?==y)"
+            match_components = re.findall(component_regex, config_content, re.MULTILINE)
+
+            components = []
+
+            for component in match_components:
+                component_dict = {
+                    "kconfig_id": component
+                }
+                components.append(component_dict)
+
+            self.project_info["components"] = components
+            return True
+        
+        except FileNotFoundError:
+            log.err(f"Configuration file not found at {config_file_path}")
+            return False
+            
     def find_source_list_file(self):
         
         source_list_regex = r"^(?!.*exclude).*source_list\.txt$"
@@ -310,7 +368,7 @@ class ProjectInfo(WestCommand):
         if not status:
             log.err("Build command failed: terminating project info extraction")
             self.delete_temp_build_file()
-            return
+            sys.exit(-1)
 
         log.inf("\n=== Creating project_info.json file from build output: ", colorize=True)
 
@@ -318,27 +376,34 @@ class ProjectInfo(WestCommand):
         if not status:
             log.err("Build data parsing failed: terminating project info extraction")
             self.delete_temp_build_file()
-            return
+            sys.exit(-1)
         
         status = self.parse_compile_commands()
         if not status:
             log.err("Build data parsing failed: terminating project info extraction")
             self.delete_temp_build_file()
-            return
+            sys.exit(-1)
         
         status = self.parse_source_list()
         if not status:
             log.err("Build data parsing failed: terminating project info extraction")
             self.delete_temp_build_file()
-            return
+            sys.exit(-1)
+        
+        status = self.parse_config_file()
+        if not status:
+            log.err("Parsing configuration file failed: terminating project info extraction")
+            self.delete_temp_build_file()
+            sys.exit(-1)
         
         status = self.create_json_file()
         if not status:
             log.err("Creating project_info.json failed: terminating project info extraction")
             self.delete_temp_build_file()
-            return
+            sys.exit(-1)
         
-        self.delete_temp_build_file()
+        if (not args.no_tmp_delete):
+            self.delete_temp_build_file()
 
         log.inf("Project info extraction completed successfully!\n")
         log.inf(f"Output file: {os.path.join(os.path.abspath(self.output_dir), 'project_info.json')}")
