@@ -619,6 +619,25 @@ _Pragma("diag_suppress=Pm120")
 #else
 #error Toolchain not supported.
 #endif /* defined(__ICCARM__) */
+
+/*!
+ * @def MCUX_RAMFUNC
+ * Function attribute to place function in RAM. For example, to place
+ * function my_func in ram, use like:
+ * @code
+ * MCUX_RAMFUNC my_func
+ * @endcode
+ */
+#if (defined(__ICCARM__))
+#define MCUX_RAMFUNC __ramfunc
+#elif (defined(__CC_ARM) || defined(__ARMCC_VERSION))
+#define MCUX_RAMFUNC __attribute__((noinline)) __attribute__((section(".ramfunc")))
+#elif (defined(__GNUC__)) || defined(DOXYGEN_OUTPUT)
+#define MCUX_RAMFUNC __attribute__((noinline)) __attribute__((long_call, section(".ramfunc")))
+#else
+#error Toolchain not supported.
+#endif /* defined(__ICCARM__) */
+
 /*! @} */
 
 /*!
