@@ -359,7 +359,7 @@ static inline void PORT_SecletPortVoltageRange(PORT_Type *base, port_voltage_ran
  */
 static inline void PORT_SetPinConfig(PORT_Type *base, uint32_t pin, const port_pin_config_t *config)
 {
-    assert(config);
+    assert(NULL != config);
     uint32_t addr                = (uint32_t)&base->PCR[pin];
     *(volatile uint16_t *)(addr) = *((const uint16_t *)(const void *)config);
 }
@@ -388,7 +388,7 @@ static inline void PORT_SetPinConfig(PORT_Type *base, uint32_t pin, const port_p
  */
 static inline void PORT_SetMultiplePinsConfig(PORT_Type *base, uint32_t mask, const port_pin_config_t *config)
 {
-    assert(config);
+    assert(NULL != config);
 
     uint16_t pcrl = *((const uint16_t *)(const void *)config);
 
@@ -427,7 +427,7 @@ static inline void PORT_SetMultiplePinsConfig(PORT_Type *base, uint32_t mask, co
  */
 static inline void PORT_SetMultipleInterruptPinsConfig(PORT_Type *base, uint32_t mask, port_interrupt_t config)
 {
-    assert(config);
+    assert(NULL != config);
 
     if (0U != ((uint32_t)mask & 0xffffU))
     {
@@ -497,7 +497,7 @@ static inline void PORT_EnablePinsDigitalFilter(PORT_Type *base, uint32_t mask, 
  */
 static inline void PORT_SetDigitalFilterConfig(PORT_Type *base, const port_digital_filter_config_t *config)
 {
-    assert(config);
+    assert(NULL != config);
 
     base->DFCR = PORT_DFCR_CS(config->clockSource);
     base->DFWR = PORT_DFWR_FILT(config->digitalFilterWidth);
