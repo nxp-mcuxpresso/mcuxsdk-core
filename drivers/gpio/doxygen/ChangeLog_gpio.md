@@ -1,5 +1,9 @@
 # GPIO
 
+## [2.8.3]
+- Bug Fixes
+  - Fixed violations of the MISRA C-2012 Rule 10.1, 5.7.
+
 ## [2.8.2]
 - Bug Fixes
   - Fixed COVERITY issue that GPIO_GetInstance could return clock array overflow values ​​due to GPIO base and clock being out of sync.
