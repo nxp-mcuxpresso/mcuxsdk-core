@@ -561,7 +561,7 @@ class CfgResolve(WestCommand):
                     project_root_match = False
 
                 board_match = project.get("board") == args.board
-                core_match = not self.core_id or self.core_id == project.get("core_id")
+                core_match = not self.core_id or self.core_id == project.get("core")
 
                 if not project_root_match or not board_match or not core_match:
                     mismatch_reasons = []
