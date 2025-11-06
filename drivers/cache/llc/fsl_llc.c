@@ -1123,9 +1123,9 @@ status_t LLC_GetPerformanceCounters(LLC_Type *base, llc_performance_counters_t *
 void CMPT_LLC_DriverIRQHandler(void);
 void CMPT_LLC_DriverIRQHandler(void)
 {
-    uint32_t interrupt_flags = LLC_GetStatusFlags(CMPT_LLC);
+    uint32_t interrupt_flags = LLC_GetStatusFlags(CMPT__LLC);
 
-    LLC_ClearStatusFlags(CMPT_LLC, interrupt_flags);
+    LLC_ClearStatusFlags(CMPT__LLC, interrupt_flags);
 
     if ((s_LLCCallback != NULL) && (interrupt_flags != 0U))
     {

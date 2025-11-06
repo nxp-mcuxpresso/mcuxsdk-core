@@ -3610,16 +3610,16 @@ void I3C3_DriverIRQHandler(void)
 }
 #endif
 
-#if defined(HSP_I3C) && defined(WAKE_I3C)
+#if defined(HSP__I3C) && defined(WAKE__I3C)
 void HSP_I3C_IRQHandler(void);
 void HSP_I3C_IRQHandler(void)
 {
-    I3C_CommonIRQHandler(HSP_I3C, 0);
+    I3C_CommonIRQHandler(HSP__I3C, 0);
 }
 
 void WAKE_I3C_IRQHandler(void);
 void WAKE_I3C_IRQHandler(void)
 {
-    I3C_CommonIRQHandler(WAKE_I3C, 1);
+    I3C_CommonIRQHandler(WAKE__I3C, 1);
 }
 #endif

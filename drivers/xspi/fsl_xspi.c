@@ -3034,20 +3034,20 @@ void XSPI2_DriverIRQHandler(void)
 }
 #endif /* defined(XSPI2) */
 
-#if defined(MAIN_XSPI_0)
+#if defined(MAIN__XSPI0)
 void MAIN_XSPI0_DriverIRQHandler(void);
 void MAIN_XSPI0_DriverIRQHandler(void)
 {
-    XSPI_CommonIRQHandler(MAIN_XSPI_0, s_xspiHandle[0]);
+    XSPI_CommonIRQHandler(MAIN__XSPI0, s_xspiHandle[0]);
     SDK_ISR_EXIT_BARRIER;
 }
 #endif /* defined(MAIN_XSPI_0) */
 
-#if defined(MAIN_XSPI_1)
+#if defined(MAIN__XSPI1)
 void MAIN_XSPI1_DriverIRQHandler(void);
 void MAIN_XSPI1_DriverIRQHandler(void)
 {
-    XSPI_CommonIRQHandler(MAIN_XSPI_1, s_xspiHandle[1]);
+    XSPI_CommonIRQHandler(MAIN__XSPI1, s_xspiHandle[1]);
     SDK_ISR_EXIT_BARRIER;
 }
 #endif /* defined(MAIN_XSPI_1) */
