@@ -29,7 +29,7 @@ static void FLEXSPI_SLV_Memset(void *src, uint8_t value, size_t length);
 static FLEXSPI_SLV_Type *const s_flexspiSlvBases[] = FLEXSPI_SLV_BASE_PTRS;
 
 /*! @brief Pointers to Flexspi Follower IRQ number for each instance. */
-static const IRQn_Type s_flexspiSlvIrqs[] = {FLEXSPI_SLV_IRQn};
+static const IRQn_Type s_flexspiSlvIrqs[] = FLEXSPI_SLV_IRQS;
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /* Clock name array */
