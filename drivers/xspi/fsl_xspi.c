@@ -2798,7 +2798,7 @@ status_t XSPI_SetAhbAccessConfig(XSPI_Type *base, xspi_ahb_access_config_t *ptrA
                         XSPI_BFGENCR_SEQID_RDSR(ptrAhbAccessConfig->ptrAhbWriteConfig->ARDSRSeqIndex);
 
 #if (defined(FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT) && FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT)
-        (void)XSPI_EnableAhbWriteTerminate(base, config->enableWriteTerminate);
+        (void)XSPI_EnableAhbWriteTerminate(base, ptrAhbAccessConfig->enableWriteTerminate);
 #endif /* FSL_FEATURE_XSPI_HAS_WRTER_EN_BIT */
     }
 
