@@ -33,6 +33,11 @@ endif()
 # Dynamic copyright year
 string(TIMESTAMP _copyright_year "%Y")
 
+# Remove leading zeros in MCUXSDK_VERSION_MAJOR, MCUXSDK_VERSION_MINOR, in case of
+# violating MISRA C 2012 rule 7.1: Octal constrains shall not be used.
+math(EXPR MCUXSDK_VERSION_MAJOR_NUM "${MCUXSDK_VERSION_MAJOR}")
+math(EXPR MCUXSDK_VERSION_MINOR_NUM "${MCUXSDK_VERSION_MINOR}")
+
 file(
   WRITE "${_ver_hdr}"
   "/*\n * Copyright ${_copyright_year} NXP\n *\n * SPDX-License-Identifier: BSD-3-Clause\n */\n
@@ -40,8 +45,8 @@ file(
 #define MCUXSDK_VERSION_H_
 
 #define MCUXSDK_VERSION_YEAR      ${MCUXSDK_VERSION_YEAR}
-#define MCUXSDK_VERSION_MAJOR     ${MCUXSDK_VERSION_MAJOR}
-#define MCUXSDK_VERSION_MINOR     ${MCUXSDK_VERSION_MINOR}
+#define MCUXSDK_VERSION_MAJOR     ${MCUXSDK_VERSION_MAJOR_NUM}
+#define MCUXSDK_VERSION_MINOR     ${MCUXSDK_VERSION_MINOR_NUM}
 ${_pvw_define}
 
 #define MCUXSDK_VERSION_NUM       (MCUXSDK_VERSION_YEAR * 10000 + MCUXSDK_VERSION_MAJOR * 100 + MCUXSDK_VERSION_MINOR)
