@@ -1042,6 +1042,10 @@ static inline edma_transfer_size_t EDMA_GetTransferSize(uint32_t width)
         case 64U:
             transferSize = kEDMA_TransferSize64Bytes;
             break;
+        default:
+            /* All the cases have been listed above, the default clause should not be reached. */
+            assert(false);
+            break;
     }
     
     return transferSize;

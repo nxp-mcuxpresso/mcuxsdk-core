@@ -271,7 +271,7 @@ void EDMA_ResetChannel(DMA_Type *base, uint32_t channel)
     base->CH[channel].CH_ES |= DMA_CH_ES_ERR_MASK;
     base->CH[channel].CH_CSR |= DMA_CH_CSR_DONE_MASK;
 
-    EDMA_TcdReset((edma_tcd_t *)((uint32_t)&base->CH[channel] + 0x00000020));
+    EDMA_TcdReset((edma_tcd_t *)((uint32_t)&base->CH[channel] + 0x00000020U));
 }
 
 /*!
@@ -870,7 +870,7 @@ void EDMA_CreateHandle(edma_handle_t *handle, DMA_Type *base, uint32_t channel)
        CSR will be 0. Because in order to suit EDMA busy check mechanism in
        EDMA_SubmitTransfer, CSR must be set 0.
     */
-    tcdRegs = (edma_tcd_t *)((uint32_t)&handle->base->CH[handle->channel] + 0x00000020);
+    tcdRegs = (edma_tcd_t *)((uint32_t)&handle->base->CH[handle->channel] + 0x00000020U);
     tcdRegs->SADDR = 0;
     tcdRegs->SOFF = 0;
     tcdRegs->ATTR = 0;
