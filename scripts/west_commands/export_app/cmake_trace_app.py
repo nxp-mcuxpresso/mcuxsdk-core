@@ -920,7 +920,7 @@ class CmakeTraceApp(CmakeApp):
             trace_cmake = "\ninclude(${board}/board_files.cmake)\n"
         prepend_content = [
             f"cmake_path(APPEND conf_file_path ${{CMAKE_CURRENT_LIST_DIR}} {self.cmake_trace_dir} prj.conf)\n",
-            f"list(APPEND CONF_FILE ${{conf_file_path}})\n",
+            f"set(CONF_FILE ${{conf_file_path}} ${{CONF_FILE}})\n",
         ]
         insert_index = 0
         for i, line in enumerate(self.app_receiver["result"]):
