@@ -501,16 +501,17 @@ class NinjaParser
     end
     if result
       path = result[1].tr('\\', '/').split(REPO_ROOT_PATH)[-1].sub('/', '')
-      @data[@name]['contents']['modules']['demo']['files'].push({
-                                                                  'source' => path,
-                                                                  'attribute' => 'linker-file',
-                                                                  'toolchains' => @toolchain,
-                                                                  'targets' => @config,
-                                                                  'type' => 'linker',
-                                                                  'project_path' => File.dirname(path),
-                                                                  'repo_path' => File.dirname(path),
-                                                                  'package_path' => File.dirname(path)
-                                                                })
+      tmp = { 'source' => path,
+              'attribute' => 'linker-file',
+              'toolchains' => @toolchain,
+              'targets' => @config,
+              'type' => 'linker',
+              'project_path' => File.dirname(path),
+              'repo_path' => File.dirname(path),
+              'package_path' => File.dirname(path)
+            }
+      tmp['generated'] = true unless File.exist?(result[1])
+      @data[@name]['contents']['modules']['demo']['files'].push(tmp)
       all_flags.sub!(result[ 0 ], '')
     end
     all_flags
@@ -853,14 +854,25 @@ class NinjaParser
         next if CUSTOM_COMMAND_IGNORE_LIST.include? File.basename(result[1].strip)
         # If the file is recorded in @non_existent_files, which means it does not exist,
         # need to parse the command for file generation
-        next unless @non_existent_files.include? File.join(@outdir, result[1].strip)
+        if !@non_existent_files.include? File.join(@outdir, result[1].strip)
+          if !result[1].include?('preprocess_linker_file')
+            next
+          end
+        end
+        
         content = @content[index+3].strip
-        # Find the command and ensure the command is for file generation
-        if content.include?('COMMAND = ') &&  @content[index+4].strip.include?("DESC = Generating ")
+        # Find the command
+        if content.include?('COMMAND = ')
           cmd = content.split('COMMAND = ')[-1]
-          cmd = translate_path_in_build_cmd(cmd)
-          generated_file = @content[index+4].split(" Generating ")[1].split(', ').map {|file| File.join(get_tool_rootdir(@toolchain), file)}
-          cmd_list << {'file'=> generated_file.join(' ').chomp, 'command' => cmd.join(' && ').chomp}
+          # handle the command for file generation
+          if @content[index+4].strip.include?("DESC = Generating ")
+            cmd = translate_path_in_build_cmd(cmd)
+            generated_file = @content[index+4].split(" Generating ")[1].split(', ').map {|file| File.join(get_tool_rootdir(@toolchain), file)}
+            cmd_list << {'file'=> generated_file.join(' ').chomp, 'command' => cmd.join(' && ').chomp}
+          elsif result[1].include?('preprocess_linker_file')
+            # special handling for linker file generation command
+            parse_linker_bat_file(cmd, cmd_list)
+          end
         end
       end
     end
@@ -885,6 +897,47 @@ class NinjaParser
         @data[@name]['contents']['configuration']['tools'][@toolchain]['prebuild'] ||= []
         @data[@name]['contents']['configuration']['tools'][@toolchain]['prebuild'].push(cmd['command'])
       end
+    end
+  end
+
+  def parse_linker_bat_file(cmd, cmd_list)
+    bat_file_path = nil
+    if cmd.match(/\S+preprocess_linker_file-\S+\.bat/)
+      bat_file = cmd.match(/(\S+preprocess_linker_file-\S+\.bat)/)[1]
+      bat_file_path = File.join(ENV['build_dir'], bat_file).tr('\\', '/')
+    end
+  
+    # read the .bat file to get the generated linker file
+    if bat_file_path && File.exist?(bat_file_path)
+      pattern = /(.*\.(ld|icf|scf)).*.*\|\|/
+      file = File.open(bat_file_path, 'rb')
+      bat_content = file.readlines
+      generated_file = nil
+      bat_content.each_with_index do |bat_line, index|
+        result = bat_line.match(pattern)
+        if result
+          cmd = translate_path_in_build_cmd(result[1].tr("\\", '/').tr(';', ' '))
+          generated_file = if @toolchain == 'iar'
+            result[1].split(/\s+/)[-2]
+          else
+            result[1].split(/\s+/)[-1].delete_suffix('"').delete_suffix("'")
+          end
+          break
+        end
+      end
+
+      if generated_file
+        cmd_list << {'file'=> File.join(get_tool_rootdir(@toolchain), File.basename(generated_file)), 'command' => cmd.join(' && ').chomp}   
+      end
+    else
+      generated_file = if @toolchain == 'iar'
+            cmd.split(/\s+/)[-2]
+          else
+            cmd.split(/\s+/)[-1].delete_suffix('"').delete_suffix("'")
+          end
+
+      cmd = translate_path_in_build_cmd(cmd.split('&&')[-1].strip)
+      cmd_list << {'file'=> File.join(get_tool_rootdir(@toolchain), File.basename(generated_file)), 'command' => cmd.join(' && ').chomp}
     end
   end
 

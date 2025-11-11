@@ -127,21 +127,24 @@ module SDKGenerator
           set_data.each do |section_name, section_data|
             section_data['contents']['modules']&.each do |name, content|
               content['files'].each_with_index do |file, index|
-                if File.exist?(File.join(@generator_options[:input_dir], file['source']))
+                if File.exist?(File.join(@generator_options[:input_dir], file['source'])) ||
+                  (file['attribute'] == 'linker-file' && file['generated'])
                   src_path = File.join(@generator_options[:input_dir], file['source'])
                   relative_path = Pathname.new(src_path).relative_path_from(Pathname.new(@generator_options[:output_dir])).to_s
                   if relative_path.start_with?('..')
                     dest_path = File.join(@generator_options[:output_dir], toolchain, file['package_path'] || file['repo_path'], File.basename(file['source']))
-                    FileUtils.cp_f(src_path, dest_path) unless File.exist?(dest_path)
+                    FileUtils.cp_f(src_path, dest_path) if (!File.exist?(dest_path)) && (!file['generated'])
                   else
                     # if the file is in build dir, copy it to build dir/toolchain folder
                     dest_path = File.join(@generator_options[:output_dir],toolchain, relative_path)
-                    FileUtils.cp_f(src_path, dest_path) unless File.exist?(dest_path)
+                    FileUtils.cp_f(src_path, dest_path) if (!File.exist?(dest_path)) && (!file['generated'])
                     content['files'][index] = {
                       'source' => relative_path,
                       'package_path' => File.dirname(relative_path),
                       'project_path' => File.dirname(relative_path)
                     }
+                    content['files'][index]['attribute'] = file['attribute'] if file['attribute']
+                    content['files'][index]['generated'] = file['generated'] if file['generated']
                   end
                 end
               end
