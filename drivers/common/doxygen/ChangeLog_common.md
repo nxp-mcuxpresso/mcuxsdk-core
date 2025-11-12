@@ -1,5 +1,10 @@
 # COMMON
 
+## [2.6.2]
+
+- Bug Fixes
+  - Fixed violations of MISRA C-2012 rule for implicit conversions in boolean contexts
+
 ## [2.6.1]
 
 - Improvements
