@@ -20,8 +20,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief FTM driver version 2.7.1. */
-#define FSL_FTM_DRIVER_VERSION (MAKE_VERSION(2, 7, 3))
+/*! @brief FTM driver version 2.7.4. */
+#define FSL_FTM_DRIVER_VERSION (MAKE_VERSION(2, 7, 4))
 /*! @} */
 
 /*!
