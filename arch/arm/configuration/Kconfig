@@ -1,10 +1,20 @@
-# Copyright 2024 NXP
+# Copyright 2024-2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_PRJSEG_config.arm.warn_as_error
+    bool
+
+config MCUX_PRJSEG_config.arm.suppress.warn_as_error
+    bool "Disable warnings-as-errors"
+    default n
+    help
+        Turn off warn as error globally for ARM project segment.
 
 config MCUX_PRJSEG_config.arm.shared
     bool
     imply MCUX_COMPONENT_utilities.misc_utilities
+    imply MCUX_PRJSEG_config.arm.warn_as_error if !MCUX_PRJSEG_config.arm.suppress.warn_as_error
 
 config MCUX_PRJSEG_config.kinetis.shared
     bool
