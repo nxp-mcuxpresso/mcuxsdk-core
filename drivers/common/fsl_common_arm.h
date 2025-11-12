@@ -606,19 +606,7 @@ _Pragma("diag_suppress=Pm120")
 /*!
  * @name Ram Function
  * @{
- *
- * @def RAMFUNCTION_SECTION_CODE(func)
- * Place function in ram.
  */
-#if (defined(__ICCARM__))
-#define RAMFUNCTION_SECTION_CODE(func) func @"RamFunction"
-#elif (defined(__CC_ARM) || defined(__ARMCC_VERSION))
-#define RAMFUNCTION_SECTION_CODE(func) __attribute__((section("RamFunction"))) func
-#elif (defined(__GNUC__)) || defined(DOXYGEN_OUTPUT)
-#define RAMFUNCTION_SECTION_CODE(func) __attribute__((section("RamFunction"))) func
-#else
-#error Toolchain not supported.
-#endif /* defined(__ICCARM__) */
 
 /*!
  * @def MCUX_RAMFUNC
@@ -637,6 +625,12 @@ _Pragma("diag_suppress=Pm120")
 #else
 #error Toolchain not supported.
 #endif /* defined(__ICCARM__) */
+
+/*!
+ * @def RAMFUNCTION_SECTION_CODE(func)
+ * Place function in ram.
+ */
+#define RAMFUNCTION_SECTION_CODE(func) MCUX_RAMFUNC func
 
 /*! @} */
 
