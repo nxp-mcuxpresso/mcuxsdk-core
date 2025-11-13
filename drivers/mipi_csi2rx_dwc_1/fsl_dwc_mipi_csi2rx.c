@@ -19,10 +19,8 @@
 #ifndef FSL_COMPONENT_ID
 #define FSL_COMPONENT_ID "platform.drivers.dwc_mipi_csi2rx_1"
 #endif
-
-#define DWC_MIPI_CSI2_DATA_IDS1(vc, dt)            (uint32_t)(0x3FU)&(dt) << (uint32_t)(0x8U)*(vc)
-#define DWC_MIPI_CSI2_DATA_IDS_VC1(vc)             (uint32_t)(0xFU)&(vc) << (uint32_t)(0x8U)*(vc)
-
+#define DWC_MIPI_CSI2_DATA_IDS1(vc, dt)            (((uint32_t)(0x3FU) & (dt)) << ((uint32_t)(0x8U) * (vc)))
+#define DWC_MIPI_CSI2_DATA_IDS_VC1(vc)             (((uint32_t)(0xFU) & (vc)) << ((uint32_t)(0x8U) * (vc)))
 #define DWC_MIPI_CSI2_INT_MSK_PHY_FATAL_MASK            (uint32_t)(0xFU)
 #define DWC_MIPI_CSI2_INT_MSK_PKT_FATAL_MASK            (uint32_t)(0x3U)
 #define DWC_MIPI_CSI2_INT_MSK_PHY_MASK                  (uint32_t)(0xF000FU)
