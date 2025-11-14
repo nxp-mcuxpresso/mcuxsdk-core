@@ -21,6 +21,7 @@ import os
 import shutil
 import sys
 
+
 from west import log
 from west.commands import WestCommand
 
@@ -31,6 +32,7 @@ This command exports project specific information and configuration details,
 and stores them in project_info.json which is then used in MCUXpresso Config Tools.
 '''
 
+JSON_SCHEMA_LINK = "https://mcuxpresso.nxp.com/staticdata/mcux/schema/project_info/project_info_schema_2.0.json"
 class ProjectInfo(WestCommand):
     """
     West command class for extracting and exporting MCUXpresso SDK project information.
@@ -56,6 +58,16 @@ class ProjectInfo(WestCommand):
 
         return parser
     
+    def handle_errors_main(self, status):
+        """
+        Handles potential errors during project information extraction.
+        """
+        if not status:
+            log.err("Terminating project info extraction")
+            if (not self.args.no_tmp_delete):
+                self.delete_temp_build_file()
+            sys.exit(-1)
+
     def run_build_command(self):
         """
         Execute a temporary CMake-only build to generate project configuration files.
@@ -293,7 +305,7 @@ class ProjectInfo(WestCommand):
         within the project root for use by MCUXpresso Config Tools.
         """
         try:
-            self.json_data_raw["$schema"] = "https://mcuxpresso.nxp.com/staticdata/mcux/schema/project_info/project_info_schema_1.0.json"
+            self.json_data_raw["$schema"] = JSON_SCHEMA_LINK
 
             projects = list()
             projects.append(self.project_info)
@@ -337,7 +349,6 @@ class ProjectInfo(WestCommand):
         """
         Main execution method for the project-info west command.
         """
-
         log.inf("=== Starting project info extraction: ", colorize=True)
         log.inf(f"Source directory: {args.source_dir}")
         log.inf(f"Board: {args.board}")
@@ -363,44 +374,28 @@ class ProjectInfo(WestCommand):
         if not folder_exist:
             log.err(f"Could not create output directory: {self.output_dir}")
 
-
+        #Ensure deleted build dir
+        self.delete_temp_build_file()
+        
         status = self.run_build_command()
-        if not status:
-            log.err("Build command failed: terminating project info extraction")
-            self.delete_temp_build_file()
-            sys.exit(-1)
+        self.handle_errors_main(status)
 
         log.inf("\n=== Creating project_info.json file from build output: ", colorize=True)
 
         status = self.parse_build_output()
-        if not status:
-            log.err("Build data parsing failed: terminating project info extraction")
-            self.delete_temp_build_file()
-            sys.exit(-1)
+        self.handle_errors_main(status)
         
         status = self.parse_compile_commands()
-        if not status:
-            log.err("Build data parsing failed: terminating project info extraction")
-            self.delete_temp_build_file()
-            sys.exit(-1)
+        self.handle_errors_main(status)
         
         status = self.parse_source_list()
-        if not status:
-            log.err("Build data parsing failed: terminating project info extraction")
-            self.delete_temp_build_file()
-            sys.exit(-1)
+        self.handle_errors_main(status)
         
         status = self.parse_config_file()
-        if not status:
-            log.err("Parsing configuration file failed: terminating project info extraction")
-            self.delete_temp_build_file()
-            sys.exit(-1)
+        self.handle_errors_main(status)
         
         status = self.create_json_file()
-        if not status:
-            log.err("Creating project_info.json failed: terminating project info extraction")
-            self.delete_temp_build_file()
-            sys.exit(-1)
+        self.handle_errors_main(status)
         
         if (not args.no_tmp_delete):
             self.delete_temp_build_file()
