@@ -1,5 +1,10 @@
 # CACHE ARMv7-M7
 
+## [2.0.5]
+
+- Bug Fixes
+  - Fixed cache operations to handle zero size and overflow in invalidate/clean functions
+
 ## [2.0.4]
 
 - Bug Fixes
