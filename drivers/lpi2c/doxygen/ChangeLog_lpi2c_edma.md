@@ -1,5 +1,10 @@
 # LPI2C_EDMA
 
+## [2.4.6]
+
+- Bug Fixes
+  - Fixed static analysis identified issues.
+
 ## [2.4.5]
 
 - Improvements

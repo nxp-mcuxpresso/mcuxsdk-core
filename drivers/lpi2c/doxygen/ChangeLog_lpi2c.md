@@ -1,5 +1,10 @@
 # LPI2C
 
+## [2.6.3]
+
+- Bug Fixes
+  - Fixed static analysis identified issues.
+
 ## [2.6.2]
 
 - Improvements
