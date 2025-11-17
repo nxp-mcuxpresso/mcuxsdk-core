@@ -131,7 +131,7 @@ void FLEXIO_Init(FLEXIO_Type *base, const flexio_config_t *userConfig)
     ctrlReg |= (FLEXIO_CTRL_DBGE(userConfig->enableInDebug ? 1U : 0U) | FLEXIO_CTRL_FASTACC(userConfig->enableFastAccess ? 1U : 0U) |
                 FLEXIO_CTRL_FLEXEN(userConfig->enableFlexio ? 1U : 0U));
 #if !(defined(FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT) && (FSL_FEATURE_FLEXIO_HAS_DOZE_MODE_SUPPORT == 0))
-    if (!userConfig->enableInDoze ? 1U : 0U)
+    if (!userConfig->enableInDoze)
     {
         ctrlReg |= FLEXIO_CTRL_DOZEN_MASK;
     }
