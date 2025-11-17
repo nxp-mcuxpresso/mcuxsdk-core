@@ -427,8 +427,6 @@ static inline void PORT_SetMultiplePinsConfig(PORT_Type *base, uint32_t mask, co
  */
 static inline void PORT_SetMultipleInterruptPinsConfig(PORT_Type *base, uint32_t mask, port_interrupt_t config)
 {
-    assert(NULL != config);
-
     if (0U != ((uint32_t)mask & 0xffffU))
     {
         base->GICLR = ((uint32_t)config << 16U) | ((uint32_t)mask & 0xffffU);
