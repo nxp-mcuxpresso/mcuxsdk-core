@@ -273,6 +273,8 @@ class CfgResolve(WestCommand):
         """
         processed_json_path = self.require_json_path.replace(".json", ".json.processed")
         try:
+            if os.path.exists(processed_json_path):
+                os.remove(processed_json_path)
             os.rename(self.require_json_path, processed_json_path)
         except OSError as e:
             self._exit_with_error(f"Failed to rename processed JSON file: {self.require_json_path} - {e}")
