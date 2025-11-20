@@ -1111,7 +1111,10 @@ void XSPI_UpdateLUT(XSPI_Type *base, uint8_t index, const uint32_t *cmd, uint8_t
  * @param base XSPI peripheral base address.
  * @param boundary Prefetch boundary to set, in type of @ref xspi_otfad_prefetch_boundary_t.
  */
-void XSPI_SetOTFADPrefetchBoundary(XSPI_Type *base, xspi_otfad_prefetch_boundary_t boundary);
+RAMFUNC static inline void XSPI_SetOTFADPrefetchBoundary(XSPI_Type *base, xspi_otfad_prefetch_boundary_t boundary)
+{
+    base->SPTRCLR = (base->SPTRCLR & (~XSPI_SPTRCLR_OTFAD_BNDRY_MASK)) | XSPI_SPTRCLR_OTFAD_BNDRY(boundary);
+}
 /* @} */
 
 /*!
@@ -1131,7 +1134,17 @@ RAMFUNC static inline void XSPI_UpdateByteOrder(XSPI_Type *base, xspi_byte_order
  * @param base XSPI peripheral base address.
  * @param enable true means enable XSPI, false means disable.
  */
-void XSPI_EnableModule(XSPI_Type *base, bool enable);
+RAMFUNC static inline void XSPI_EnableModule(XSPI_Type *base, bool enable)
+{
+    if (enable)
+    {
+        base->MCR &= ~XSPI_MCR_MDIS_MASK;
+    }
+    else
+    {
+        base->MCR |= XSPI_MCR_MDIS_MASK;
+    }
+}
 
 /*!
  * @brief Check if the XSPI module is enabled.
@@ -1141,7 +1154,10 @@ void XSPI_EnableModule(XSPI_Type *base, bool enable);
  * @retval true XSPI module is enabled.
  * @retval false XSPI module is disabled.
  */
-bool XSPI_CheckModuleEnabled(XSPI_Type *base);
+RAMFUNC static inline bool XSPI_CheckModuleEnabled(XSPI_Type *base)
+{
+    return ((base->MCR & XSPI_MCR_MDIS_MASK) == 0UL);
+}
 
 /*!
  * @brief Reset Serial flash memory domain and AHB domain at the same time.
@@ -1157,14 +1173,21 @@ void XSPI_ResetSfmAndAhbDomain(XSPI_Type *base);
  *
  * @param base XSPI peripheral base address.
  */
-void XSPI_ResetTgQueue(XSPI_Type *base);
+RAMFUNC static inline void XSPI_ResetTgQueue(XSPI_Type *base)
+{
+    base->MCR |= XSPI_MCR_IPS_TG_RST_MASK;
+}
 
 /*!
  * @brief Software reset  flash memory domain, AHB domain, and Target group at the same time.
  *
  * @param base XSPI peripheral base address.
  */
-void XSPI_SoftwareReset(XSPI_Type *base);
+RAMFUNC static inline void XSPI_SoftwareReset(XSPI_Type *base)
+{
+    XSPI_ResetTgQueue(base);
+    XSPI_ResetSfmAndAhbDomain(base);
+}
 
 /*!
  * @brief Check if write access to registers(MGC, MRC, MTO, SFP_ARB_TIMEOUT, SFP_LUT_ENn, LUTn, BFGENCR) is locked.
@@ -1218,7 +1241,17 @@ status_t XSPI_UpdateDeviceAddrMode(XSPI_Type *base, xspi_device_addr_mode_t addr
             - \b true Enable variable latency;
             - \b false Disable variable latency.
  */
-void XSPI_EnableVariableLatency(XSPI_Type *base, bool enable);
+RAMFUNC static inline void XSPI_EnableVariableLatency(XSPI_Type *base, bool enable)
+{
+    if (enable)
+    {
+        base->MCR |= XSPI_MCR_VAR_LAT_EN_MASK;
+    }
+    else
+    {
+        base->MCR &= ~XSPI_MCR_VAR_LAT_EN_MASK;
+    }
+}
 
 #if (defined(FSL_FEATURE_XSPI_HAS_DOZE_MODE) && FSL_FEATURE_XSPI_HAS_DOZE_MODE)
 /*!
@@ -1231,7 +1264,17 @@ void XSPI_EnableVariableLatency(XSPI_Type *base, bool enable);
  *          - \b true Enable Doze mode;
  *          - \b false Disable Doze mode.
  */
-void XSPI_EnableDozeMode(XSPI_Type *base, bool enable);
+RAMFUNC static inline void XSPI_EnableDozeMode(XSPI_Type *base, bool enable)
+{
+    if (enable)
+    {
+        base->MCR |= XSPI_MCR_DOZE_MASK;
+    }
+    else
+    {
+        base->MCR &= ~XSPI_MCR_DOZE_MASK;
+    }
+}
 #endif /* FSL_FEATURE_XSPI_HAS_DOZE_MODE */
 
 /*!
@@ -1530,15 +1573,17 @@ RAMFUNC static inline bool XSPI_CheckIpRequestGranted(XSPI_Type *base)
     return (bool)((base->ERRSTAT & XSPI_ERRSTAT_ARB_WIN_MASK) != 0UL);
 }
 
-/*! 
- * @brief Return whether the bus is idle.
+/*! @brief Return whether the bus is idle.
  *
  * @param[in] base XSPI peripheral base address.
  *
  * @retval true Bus is idle.
  * @retval false Bus is busy.
  */
-bool XSPI_GetBusIdleStatus(XSPI_Type *base);
+RAMFUNC static inline bool XSPI_GetBusIdleStatus(XSPI_Type *base)
+{
+    return (bool)(XSPI_SR_BUSY_MASK != (base->SR & XSPI_SR_BUSY_MASK));
+}
 
 /*!
  * @brief Check if AHB read access has been requested or is ongoing.
@@ -1548,7 +1593,10 @@ bool XSPI_GetBusIdleStatus(XSPI_Type *base);
  * @retval true AHB read access is requested or is ongoing.
  * @retval false AHB read access is not requested and is not ongoing.
  */
-bool XSPI_CheckAhbReadAccessAsserted(XSPI_Type *base);
+RAMFUNC static inline bool XSPI_CheckAhbReadAccessAsserted(XSPI_Type *base)
+{
+    return (bool)((base->SR & XSPI_SR_AHB_ACC_MASK) != 0UL);
+}
 
 /*!
  * @brief Check if AHB write access has been requested or is ongoing.
@@ -1558,7 +1606,10 @@ bool XSPI_CheckAhbReadAccessAsserted(XSPI_Type *base);
  * @retval true AHB read access is requested or is ongoing.
  * @retval false AHB read access is not requested and is not ongoing.
  */
-bool XSPI_CheckAhbWriteAccessAsserted(XSPI_Type *base);
+RAMFUNC static inline bool XSPI_CheckAhbWriteAccessAsserted(XSPI_Type *base)
+{
+    return (bool)((base->SR & XSPI_SR_AWRACC_MASK) != 0UL);
+}
 
 /*!
  * @brief Get asserted flags about SFM command execution and arbitration.
@@ -1614,7 +1665,15 @@ RAMFUNC static inline void XSPI_ResetTxRxBuffer(XSPI_Type *base, bool txFifo, bo
  *
  * @param[in] base XSPI peripheral base address.
  */
-void XSPI_ClearTxBuffer(XSPI_Type *base);
+RAMFUNC static inline void XSPI_ClearTxBuffer(XSPI_Type *base)
+{
+    base->MCR |= XSPI_MCR_CLR_TXF_MASK;
+
+    for (uint8_t i = 0U; i < 10U; i++)
+    {
+        __NOP();
+    }
+}
 
 /*!
  * @brief Update watermark for TX buffer.
@@ -1658,7 +1717,15 @@ RAMFUNC static inline void XSPI_WriteTxBuffer(XSPI_Type *base, uint32_t data)
  *
  * @param[in] base XSPI peripheral base address.
  */
-void XSPI_ClearRxBuffer(XSPI_Type *base);
+RAMFUNC static inline void XSPI_ClearRxBuffer(XSPI_Type *base)
+{
+    base->MCR |= XSPI_MCR_CLR_RXF_MASK;
+
+    for (uint8_t i = 0U; i < 10U; i++)
+    {
+        __NOP();
+    }
+}
 
 /*!
  * @brief Receive data from IPX RX FIFO.
@@ -1843,7 +1910,10 @@ void XSPI_UnlockIpAccessArbitration(XSPI_Type *base, xspi_target_group_t tgId);
  * @retval false The Access triggered by IP bus is not asserted.
  * @retval true The Access triggered by IP bus is asserted.
  */
-bool XSPI_CheckIPAccessAsserted(XSPI_Type *base);
+RAMFUNC static inline bool XSPI_CheckIPAccessAsserted(XSPI_Type *base)
+{
+    return (bool)((base->SR & XSPI_SR_IP_ACC_MASK) != 0UL);
+}
 
 /*!
  * @brief Clear Ip access sequence pointer.
@@ -2095,7 +2165,13 @@ void XSPI_TransferAbort(XSPI_Type *base, xspi_handle_t *handle);
  *
  * @param[in] base XSPI peripheral base address.
  */
-void XSPI_ClearAhbBuffer(XSPI_Type *base);
+RAMFUNC static inline void XSPI_ClearAhbBuffer(XSPI_Type *base)
+{
+    base->SPTRCLR |= XSPI_SPTRCLR_ABRT_CLR_MASK;
+    while ((base->SPTRCLR & XSPI_SPTRCLR_ABRT_CLR_MASK) != 0UL)
+    {
+    }
+}
 
 /*!
  * @brief Enable/disable the clearing of AHB read prefetch buffers when the same flash address is written by an
