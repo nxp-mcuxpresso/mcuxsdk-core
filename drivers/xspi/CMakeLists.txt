@@ -18,4 +18,8 @@ if(CONFIG_MCUX_COMPONENT_driver.xspi)
 
     mcux_add_include(INCLUDES .)
 
+    mcux_add_armgcc_configuration(
+        CC "-Wno-error=attributes"
+        CX "-Wno-error=attributes"
+    )
 endif()
