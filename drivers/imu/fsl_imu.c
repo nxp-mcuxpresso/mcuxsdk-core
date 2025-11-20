@@ -171,7 +171,7 @@ int32_t IMU_SendMsgsBlocking(imu_link_t link, const uint32_t *msgs, int32_t msgC
 #endif
         }
 
-        if (0 <= ret)
+        if (0L <= ret)
         {
             IMU_WR_MSG(link, *msgs);
         }
@@ -449,7 +449,7 @@ int32_t IMU_SendMsgPtrBlocking(imu_link_t link, uint32_t msgPtr, bool lockSendFi
 #endif
         }
 
-        if (0 == ret)
+        if (0L == ret)
         {
             if (lockSendFifo)
             {
