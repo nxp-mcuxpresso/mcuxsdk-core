@@ -1,5 +1,10 @@
 # USDHC
 
+## [2.8.8]
+
+- Bug Fixes
+  - Fixed build issue with armgcc O3.
+
 ## [2.8.7]
 
 - Bug Fixes

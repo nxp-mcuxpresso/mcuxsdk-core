@@ -846,15 +846,19 @@ void USDHC_Init(USDHC_Type *base, const usdhc_config_t *config)
     assert(config->writeBurstLen <= 16U);
 #endif
     uint32_t proctl, sysctl, wml;
+#if (!(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)) || \
+    ((defined(FSL_FEATURE_USDHC_HAS_RESET) && FSL_FEATURE_USDHC_HAS_RESET))
+    uint32_t instance = USDHC_GetInstance(base);
+#endif
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Enable USDHC clock. */
-    CLOCK_EnableClock(s_usdhcClock[USDHC_GetInstance(base)]);
+    CLOCK_EnableClock(s_usdhcClock[instance]);
 #endif
 
 #if (defined(FSL_FEATURE_USDHC_HAS_RESET) && FSL_FEATURE_USDHC_HAS_RESET)
     /* Reset the USDHC module */
-    RESET_PeripheralReset(s_usdhcResets[USDHC_GetInstance(base)]);
+    RESET_PeripheralReset(s_usdhcResets[instance]);
 #endif
 
     /* Reset ALL USDHC. */
@@ -908,8 +912,10 @@ void USDHC_Init(USDHC_Type *base, const usdhc_config_t *config)
 void USDHC_Deinit(USDHC_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+    uint32_t instance = USDHC_GetInstance(base);
+
     /* Disable clock. */
-    CLOCK_DisableClock(s_usdhcClock[USDHC_GetInstance(base)]);
+    CLOCK_DisableClock(s_usdhcClock[instance]);
 #endif
 }
 
@@ -2421,6 +2427,7 @@ void USDHC_TransferCreateHandle(USDHC_Type *base,
 {
     assert(handle != NULL);
     assert(callback != NULL);
+    uint32_t instance = USDHC_GetInstance(base);
 
     /* Zero the handle. */
     (void)memset(handle, 0, sizeof(*handle));
@@ -2435,12 +2442,12 @@ void USDHC_TransferCreateHandle(USDHC_Type *base,
     handle->userData                  = userData;
 
     /* Save the handle in global variables to support the double weak mechanism. */
-    s_usdhcHandle[USDHC_GetInstance(base)] = handle;
+    s_usdhcHandle[instance] = handle;
 
     /* save IRQ handler */
     s_usdhcIsr = USDHC_TransferHandleIRQ;
 
-    (void)EnableIRQ(s_usdhcIRQ[USDHC_GetInstance(base)]);
+    (void)EnableIRQ(s_usdhcIRQ[instance]);
 }
 
 /*!
