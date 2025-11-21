@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -152,25 +152,27 @@ status_t GDET_IsolateOn(GDET_Type *base)
 
     instance = GDET_GetInstance(base);
 #if  defined(SYSCON_GDET_CTRL_GDET_ISO_SW_MASK) || defined(SYSCON0_GDET_CTRL_GDET_ISO_SW_MASK)
-    if (instance < 2u)
+    /* GDET0 */
+    if (instance == 0u)
     {
-        syscon_tmp = SYSCON0->GDET_CTRL[instance] & ~(SYSCON_GDET_ISOLATION_SW_MASK);
+        syscon_tmp = SYSCON0->GDET_CTRL[0u] & ~(SYSCON_GDET_ISOLATION_SW_MASK);
         syscon_tmp |= ISOLATE_ON;
-        SYSCON0->GDET_CTRL[instance] = syscon_tmp;
+        SYSCON0->GDET_CTRL[0u] = syscon_tmp;
 
-        if ((SYSCON0->GDET_CTRL[instance] & SYSCON_GDET_ISOLATION_SW_MASK) != ISOLATE_ON)
+        if ((SYSCON0->GDET_CTRL[0u] & SYSCON_GDET_ISOLATION_SW_MASK) != ISOLATE_ON)
         {
             return kStatus_Fail;
         }
     }
 #elif defined(SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK)
-    if (instance >= 2u && instance < 4u)
+    /* GDET3*/
+    if (instance == 3u)
     {
-        syscon_tmp = SYSCON3->GDET_CTRL[instance - 2u] & ~(SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK);
+        syscon_tmp = SYSCON3->GDET_CTRL[0u] & ~(SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK);
         syscon_tmp |= ISOLATE_ON;
-        SYSCON3->GDET_CTRL[instance - 2u] = syscon_tmp;
+        SYSCON3->GDET_CTRL[0u] = syscon_tmp;
 
-        if ((SYSCON3->GDET_CTRL[instance - 2u] & SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK) != ISOLATE_ON)
+        if ((SYSCON3->GDET_CTRL[0u] & SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK) != ISOLATE_ON)
         {
             return kStatus_Fail;
         }
@@ -200,25 +202,25 @@ status_t GDET_IsolateOff(GDET_Type *base)
 
     instance = GDET_GetInstance(base);
 #if  defined(SYSCON_GDET_CTRL_GDET_ISO_SW_MASK) || defined(SYSCON0_GDET_CTRL_GDET_ISO_SW_MASK)
-    if (instance < 2u)
+    if (instance == 0u)
     {
-        syscon_tmp = SYSCON0->GDET_CTRL[instance] & ~(SYSCON_GDET_ISOLATION_SW_MASK);
+        syscon_tmp = SYSCON0->GDET_CTRL[0u] & ~(SYSCON_GDET_ISOLATION_SW_MASK);
         syscon_tmp |= ISOLATE_OFF;
-        SYSCON0->GDET_CTRL[instance] = syscon_tmp;
+        SYSCON0->GDET_CTRL[0u] = syscon_tmp;
 
-        if ((SYSCON0->GDET_CTRL[instance] & SYSCON_GDET_ISOLATION_SW_MASK) != ISOLATE_OFF)
+        if ((SYSCON0->GDET_CTRL[0u] & SYSCON_GDET_ISOLATION_SW_MASK) != ISOLATE_OFF)
         {
             return kStatus_Fail;
         }
     }
 #elif defined(SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK)
-    if (instance >= 2u && instance < 4u)
+    if (instance == 3u)
     {
-        syscon_tmp = SYSCON3->GDET_CTRL[instance - 2u] & ~(SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK);
+        syscon_tmp = SYSCON3->GDET_CTRL[0u] & ~(SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK);
         syscon_tmp |= ISOLATE_OFF;
-        SYSCON3->GDET_CTRL[instance - 2u] = syscon_tmp;
+        SYSCON3->GDET_CTRL[0u] = syscon_tmp;
 
-        if ((SYSCON3->GDET_CTRL[instance - 2u] & SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK) != ISOLATE_OFF)
+        if ((SYSCON3->GDET_CTRL[0u] & SYSCON3_GDET_CTRL_GDET_ISO_SW_MASK) != ISOLATE_OFF)
         {
             return kStatus_Fail;
         }
