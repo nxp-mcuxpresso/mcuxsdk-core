@@ -4,6 +4,7 @@
 
 - Improvements
   - Support for macro to place functions in RAM. Functions of file needs to be place in RAM while using XSPI1 for RT700.
+  - Support added to place variables in RAM. Its required when code from ram is using these variables.
 
 ## [2.6.0]
 

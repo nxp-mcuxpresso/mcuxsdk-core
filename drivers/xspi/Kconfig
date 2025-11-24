@@ -28,3 +28,9 @@ config FLASH_DRIVER_EXECUTES_FROM_RAM
     default n
     help
       Enable config if the flash driver is to be placed in RAM and requires RAMFUNC attributes.
+
+config ENABLE_QUICKACCESS_SECTION_IN_XSPI_DRIVER
+    bool "Enable placement of XSPI driver local variables in RAM"
+    default y if FLASH_DRIVER_EXECUTES_FROM_RAM
+    help
+      Enable config to enable placement of required local variables in RAM by using QUICKACCESS section.

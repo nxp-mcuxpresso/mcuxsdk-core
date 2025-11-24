@@ -16,6 +16,11 @@
   #define RAMFUNC
 #endif
 
+#if defined(CONFIG_ENABLE_QUICKACCESS_SECTION_IN_XSPI_DRIVER) && (CONFIG_ENABLE_QUICKACCESS_SECTION_IN_XSPI_DRIVER == 1)
+  #define RAMVARIABLE AT_QUICKACCESS_SECTION_DATA
+#else
+  #define RAMVARIABLE(var) var
+#endif
 /*!
  * @addtogroup xspi
  * @{

@@ -139,7 +139,7 @@ static XSPI_Type *const s_xspiBases[] = XSPI_BASE_PTRS;
 static const IRQn_Type s_xspiIrqs[] = XSPI_IRQS;
 
 /*! brief Pointers to xspi amba base for each instance. */
-static uint32_t s_xspiAmbaBase[] = XSPI_AMBA_BASES;
+RAMVARIABLE (static uint32_t s_xspiAmbaBase[]) = XSPI_AMBA_BASES;
 
 static xspi_transfer_t *s_xspiTransfer[ARRAY_SIZE(s_xspiBases)];
 
@@ -168,11 +168,11 @@ static const clock_ip_name_t s_xspi_cache64Clocks[] = CACHE64_CLOCKS;
 static const reset_ip_name_t s_xspiResets[] = XSPI_RSTS;
 #endif
 
-static uint32_t s_tgSfarsRegOffset[]     = XSPI_TGSFARS_REG_OFFSET;
-static uint32_t s_tgIpcrsRegOffset[]     = XSPI_TGIPCRS_REG_OFFSET;
-static uint32_t s_sfpTgIpcrRegOffset[]   = XSPI_SFP_TG_IPCR_REG_OFFSET;
-static uint32_t s_sfpTgIpSfarRegOffset[] = XSPI_SFP_TG_SFAR_REG_OFFSET;
-static uint32_t s_tgMdadRegOffset[]      = XSPI_TG_MDAD_REG_OFFSET_ARRAY;
+RAMVARIABLE (static uint32_t s_tgSfarsRegOffset[])    = XSPI_TGSFARS_REG_OFFSET;
+RAMVARIABLE (static uint32_t s_tgIpcrsRegOffset[])     = XSPI_TGIPCRS_REG_OFFSET;
+RAMVARIABLE (static uint32_t s_sfpTgIpcrRegOffset[])   = XSPI_SFP_TG_IPCR_REG_OFFSET;
+RAMVARIABLE (static uint32_t s_sfpTgIpSfarRegOffset[]) = XSPI_SFP_TG_SFAR_REG_OFFSET;
+RAMVARIABLE (static uint32_t s_tgMdadRegOffset[])     = XSPI_TG_MDAD_REG_OFFSET_ARRAY;
 
 volatile bool g_IpAccessIpcrFail = false;
 volatile bool g_IpAccessSfarFail = false;
