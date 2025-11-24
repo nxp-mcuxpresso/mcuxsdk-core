@@ -768,7 +768,7 @@ void LPI2C_MasterSetBaudRate(LPI2C_Type *base, uint32_t sourceClock_Hz, uint32_t
     }
 
     uint32_t clk_bdr = sourceClock_Hz / baudRate_Hz;
-    assert(clk_bdr <= ((uint32_t)UINT8_MAX * 2U));
+    assert((clk_bdr / bestDivider) <= ((uint32_t)UINT8_MAX * 2U));
     assert((clk_bdr / (uint32_t)bestDivider) >= 4U);
     /* Calculate DATAVD and SETHOLD.
        To meet the timing requirement of I2C spec for standard mode, fast mode and fast mode plus: */
