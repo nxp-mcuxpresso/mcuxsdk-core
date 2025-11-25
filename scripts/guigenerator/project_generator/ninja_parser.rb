@@ -509,7 +509,7 @@ class NinjaParser
       result = nil
     end
     if result
-      path = result[1].tr('\\', '/').split(REPO_ROOT_PATH)[-1].sub('/', '')
+      path = get_relative_path(REPO_ROOT_PATH, result[1].tr('\\', '/'))
       tmp = { 'source' => path,
               'attribute' => 'linker-file',
               'toolchains' => @toolchain,
