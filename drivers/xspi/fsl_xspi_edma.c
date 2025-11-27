@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 NXP
+ * Copyright 2023-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -63,6 +63,8 @@ static uint8_t XSPI_CalculatePower(uint8_t value)
     uint8_t power = 0;
     while (value >> 1 != 0U)
     {
+        /* INT30-C: Prevent unsigned integer overflow */
+        assert(power < UINT8_MAX);
         power++;
         value = value >> 1;
     }
@@ -181,7 +183,10 @@ status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_tra
 
     if ((xfer->cmdType == kXSPI_Write) || (xfer->cmdType == kXSPI_Config))
     {
-        power          = XSPI_CalculatePower(4U * handle->count);
+        /* INT31-C: Validate before narrowing conversion */
+        uint32_t temp = 4U * handle->count;
+        assert(temp <= UINT8_MAX);
+        power          = XSPI_CalculatePower((uint8_t)temp);
         handle->nbytes = xfer->dataSize;
         /* Prepare transfer. */
         EDMA_PrepareTransfer(&xferConfig, xfer->data, (uint32_t)handle->nsize,
@@ -224,7 +229,10 @@ status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_tra
             return status;
         }
         XSPI_ClearRxBuffer(base);
-        handle->count = (uint8_t)(base->RBCT) + 1U;
+        /* INT31-C: Validate before narrowing conversion */
+        uint32_t countTemp = (uint8_t)(base->RBCT) + 1U;
+        assert(countTemp <= UINT8_MAX);
+        handle->count = (uint8_t)countTemp;
 
         if (xfer->dataSize < 4U * (uint32_t)handle->count)
         {
@@ -241,7 +249,10 @@ status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_tra
             handle->nbytes = (4UL * handle->count);
         }
 
-        power = XSPI_CalculatePower(4U * handle->count);
+        /* INT31-C: Validate before narrowing conversion */
+        uint32_t powerTemp = 4U * handle->count;
+        assert(powerTemp <= UINT8_MAX);
+        power = XSPI_CalculatePower((uint8_t)powerTemp);
 
         /* Prepare transfer. */
         EDMA_PrepareTransfer(&xferConfig, (void *)(uint32_t *)XSPI_GetRxFifoAddress(base), (uint32_t)handle->nsize,
