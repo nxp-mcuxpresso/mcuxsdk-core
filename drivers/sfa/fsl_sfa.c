@@ -302,16 +302,27 @@ static uint32_t SFA_Mode0Calculate(SFA_Type *base, uint32_t refFrequency)
 {
     uint64_t frequency;
     uint8_t prediv;
+    uint32_t cutCounter, refEndCount, refStartCount;
 
     prediv    = SFA_GetCUTPredivide(base);
-    frequency = ((uint64_t)SFA_GetCUTCounter(base) - 1ULL) * (uint64_t)refFrequency;
-    frequency += (((uint64_t)SFA_GetREFEndCount(base) - (uint64_t)SFA_GetREFStartCount(base))) >> 1;
-    frequency /= ((uint64_t)SFA_GetREFEndCount(base) - (uint64_t)SFA_GetREFStartCount(base));
+    cutCounter = SFA_GetCUTCounter(base);
+    refEndCount = SFA_GetREFEndCount(base);
+    refStartCount = SFA_GetREFStartCount(base);
+    /* INT30-C: Prevent unsigned integer underflow in subtraction */
+    assert(cutCounter > 0U);
+    assert(refEndCount >= refStartCount);
+    frequency = ((uint64_t)cutCounter - 1ULL) * (uint64_t)refFrequency;
+    frequency += (((uint64_t)refEndCount - (uint64_t)refStartCount)) >> 1;
+    frequency /= ((uint64_t)refEndCount - (uint64_t)refStartCount);
     if (prediv > 1U)
     {
         /* If the cut predivide is provided. */
+        /* INT30-C: Prevent multiplication overflow */
+        assert(frequency == 0ULL || prediv <= UINT64_MAX / frequency);
         frequency *= prediv;
     }
+    /* INT31-C: Validate before narrowing conversion */
+    assert(frequency <= UINT32_MAX);
     return (uint32_t)frequency;
 }
 
@@ -319,15 +330,23 @@ static uint32_t SFA_Mode1Calculate(SFA_Type *base, uint32_t refFrequency)
 {
     uint64_t frequency;
     uint8_t prediv;
+    uint32_t cutCounter;
 
     prediv    = SFA_GetCUTPredivide(base);
-    frequency = ((uint64_t)SFA_GetCUTCounter(base) - 1ULL) * (uint64_t)refFrequency;
+    cutCounter = SFA_GetCUTCounter(base);
+    /* INT30-C: Prevent unsigned integer underflow in subtraction */
+    assert(cutCounter > 0U);
+    frequency = ((uint64_t)cutCounter - 1ULL) * (uint64_t)refFrequency;
     frequency /= (uint64_t)SFA_GetREFTargetCount(base);
     if (prediv > 1U)
     {
         /* If the cut predivide is provided. */
+        /* INT30-C: Prevent multiplication overflow */
+        assert(frequency == 0ULL || prediv <= UINT64_MAX / frequency);
         frequency *= prediv;
     }
+    /* INT31-C: Validate before narrowing conversion */
+    assert(frequency <= UINT32_MAX);
     return (uint32_t)frequency;
 }
 
@@ -335,9 +354,14 @@ static uint32_t SFA_Mode2Mode3Calculate(SFA_Type *base)
 {
     uint32_t count;
     uint8_t prediv;
+    uint32_t refEndCount, refStartCount;
 
     prediv = SFA_GetCUTPredivide(base);
-    count  = SFA_GetREFEndCount(base) - SFA_GetREFStartCount(base);
+    refEndCount = SFA_GetREFEndCount(base);
+    refStartCount = SFA_GetREFStartCount(base);
+    /* INT30-C: Prevent unsigned integer underflow in subtraction */
+    assert(refEndCount >= refStartCount);
+    count  = refEndCount - refStartCount;
     if (prediv > 1U)
     {
         /* If the cut predivide is provided. */

@@ -21,8 +21,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SFA driver version 2.1.4 */
-#define FSL_SFA_DRIVER_VERSION (MAKE_VERSION(2, 1, 4))
+/*! @brief SFA driver version 2.1.5 */
+#define FSL_SFA_DRIVER_VERSION (MAKE_VERSION(2, 1, 5))
 /*! @} */
 
 /*! @name Configuration
