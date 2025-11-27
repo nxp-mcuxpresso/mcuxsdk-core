@@ -3205,6 +3205,7 @@ RAMFUNC static void XSPI_CommonIRQHandler(XSPI_Type *base, xspi_handle_t *handle
         handle->dataSize -= rxDataSize;
         while (rxDataSize != 0UL)
         {
+            assert(rxBufferWaterMark <= 64UL); /* INT30-C */
             if (rxDataSize >= 4UL * rxBufferWaterMark)
             {
 #if (defined(FSL_FEATURE_XSPI_HAS_EENV) && FSL_FEATURE_XSPI_HAS_EENV)

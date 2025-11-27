@@ -14,6 +14,16 @@
   - Support for macro to place functions in RAM. Functions of file needs to be place in RAM while using XSPI1 for RT700.
   - Support added to place variables in RAM. Its required when code from ram is using these variables.
 
+- Bug Fixes
+  - Add explicit boolean to integer conversions (? 1UL : 0UL) for enable flags in DLL configuration, 
+    data learning, device config, and AHB buffer settings.
+  - Add assertions to prevent unsigned integer overflow in address increment operations.
+  - Add assertions to prevent unsigned integer underflow in size subtraction operations.
+  - Add safe type conversion with temporary variables for uint64_t to uint32_t operations in interrupt mask handling.
+  - Add bounds checking for array access and enum value validation.
+  - Add assertions for narrowing conversions in byte extraction operations.
+  - Follow INT30-C and INT31-C CERT coding standards for safe integer operations.
+
 ## [2.6.0]
 
 - Improvements
