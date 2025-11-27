@@ -27,8 +27,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.8.0. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 8, 0))
+/*! @brief SPC driver version 2.8.1. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 8, 1))
 /*! @} */
 
 /*! @name Configuration */

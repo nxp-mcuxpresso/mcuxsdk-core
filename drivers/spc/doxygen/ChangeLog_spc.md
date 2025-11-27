@@ -1,5 +1,14 @@
 # SPC
 
+## [2.8.1]
+
+- Bug Fixes
+  - Add explicit boolean to integer conversions (? 1U : 0U) for enable flags in DCDC burst configuration.
+  - Add explicit boolean to integer conversions (? 1U : 0U) for reset and interrupt 
+    enable flags in VDD core glitch detector.
+  - Follow INT31-C CERT coding standard for safe boolean to unsigned long conversions.
+
+
 ## [2.8.0]
 
 - Improvements
