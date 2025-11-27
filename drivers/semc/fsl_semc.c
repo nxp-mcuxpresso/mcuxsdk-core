@@ -195,6 +195,8 @@ static status_t SEMC_CovertMemorySize(uint32_t size_kbytes, uint8_t *sizeConvert
         memsize        = size_kbytes / 8U;
         while (memsize != 0x00U)
         {
+            /* INT30-C: Prevent unsigned integer overflow in increment */
+            assert(*sizeConverted < UINT8_MAX);
             memsize >>= 1U;
             (*sizeConverted)++;
         }
@@ -214,6 +216,8 @@ static uint8_t SEMC_ConvertTiming(uint32_t time_ns, uint32_t clkSrc_Hz)
     /* Using ps for high resolution */
     tClk_ps = 1000000U / clkSrc_Hz;
 
+    /* INT30-C: Prevent unsigned integer overflow in multiplication */
+    assert(time_ns <= UINT32_MAX / 1000U);
     while (tClk_ps * clockCycles < time_ns * 1000U)
     {
         clockCycles++;
@@ -428,7 +432,10 @@ status_t SEMC_ConfigureSDRAM(SEMC_Type *base, semc_sdram_cs_t cs, semc_sdram_con
     uint8_t memsize;
     uint8_t times;
     status_t result   = kStatus_Success;
-    uint16_t prescale = (uint16_t)(config->tPrescalePeriod_Ns / 16U / (1000000000U / clkSrc_Hz));
+    /* INT31-C: Validate before narrowing conversion to uint16_t */
+    uint32_t prescale_temp = config->tPrescalePeriod_Ns / 16U / (1000000000U / clkSrc_Hz);
+    assert(prescale_temp <= UINT16_MAX);
+    uint16_t prescale = (uint16_t)prescale_temp;
     uint32_t refresh;
     uint32_t urgentRef;
     uint32_t idle;
@@ -617,7 +624,8 @@ status_t SEMC_ConfigureNAND(SEMC_Type *base, semc_nand_config_t *config, uint32_
     }
 
     base->NANDCR0 = SEMC_NANDCR0_PS(config->portSize) | SEMC_NANDCR0_BL(config->burstLen) |
-                    SEMC_NANDCR0_EDO(config->edoModeEnabled) | SEMC_NANDCR0_COL(config->columnAddrBitNum);
+                    /* INT31-C: Use conditional expression for bool to integer conversion */
+                    SEMC_NANDCR0_EDO(config->edoModeEnabled ? 1U : 0U) | SEMC_NANDCR0_COL(config->columnAddrBitNum);
 
     timing = SEMC_NANDCR1_CES(SEMC_ConvertTiming(config->timingConfig->tCeSetup_Ns, clkSrc_Hz));
     timing |= SEMC_NANDCR1_CEH(SEMC_ConvertTiming(config->timingConfig->tCeHold_Ns, clkSrc_Hz));
@@ -958,7 +966,8 @@ status_t SEMC_ConfigureSRAMWithChipSelection(SEMC_Type *base,
                       SEMC_SRAMCR0_SYNCEN(config->syncMode) |
 #endif /* FSL_FEATURE_SEMC_HAS_SRAM_SYNCEN */
 #if defined(FSL_FEATURE_SEMC_HAS_SRAM_WAITEN) && (FSL_FEATURE_SEMC_HAS_SRAM_WAITEN)
-                      SEMC_SRAMCR0_WAITEN(waitEnable) |
+                      /* INT31-C: Use conditional expression for bool to integer conversion */
+                      SEMC_SRAMCR0_WAITEN(waitEnable ? 1U : 0U) |
 #endif /* FSL_FEATURE_SEMC_HAS_SRAM_WAITEN */
 #if defined(FSL_FEATURE_SEMC_HAS_SRAM_WAITSP) && (FSL_FEATURE_SEMC_HAS_SRAM_WAITSP)
                       SEMC_SRAMCR0_WAITSP(waitSample) |
@@ -1375,7 +1384,10 @@ status_t SEMC_IPCommandNorRead(SEMC_Type *base, uint32_t address, uint8_t *data,
 
     uint32_t tempData = 0;
     status_t result   = kStatus_Success;
-    uint8_t dataSize  = (uint8_t)base->NORCR0 & SEMC_NORCR0_PS_MASK;
+    /* INT31-C: Validate before narrowing conversion to uint8_t */
+    uint32_t dataSize_temp = base->NORCR0 & SEMC_NORCR0_PS_MASK;
+    assert(dataSize_temp <= UINT8_MAX);
+    uint8_t dataSize = (uint8_t)dataSize_temp;
 
     /* Configure IP command data size. */
     (void)SEMC_ConfigureIPCommand(base, SEMC_IPCOMMANDDATASIZEBYTEMAX);
@@ -1422,7 +1434,10 @@ status_t SEMC_IPCommandNorWrite(SEMC_Type *base, uint32_t address, uint8_t *data
 
     uint32_t tempData = 0;
     status_t result   = kStatus_Success;
-    uint8_t dataSize  = (uint8_t)base->NORCR0 & SEMC_NORCR0_PS_MASK;
+    /* INT31-C: Validate before narrowing conversion to uint8_t */
+    uint32_t dataSize_temp = base->NORCR0 & SEMC_NORCR0_PS_MASK;
+    assert(dataSize_temp <= UINT8_MAX);
+    uint8_t dataSize = (uint8_t)dataSize_temp;
 
     /* Write command built */
     while (size_bytes >= SEMC_IPCOMMANDDATASIZEBYTEMAX)
