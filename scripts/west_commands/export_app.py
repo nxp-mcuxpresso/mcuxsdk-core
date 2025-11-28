@@ -60,8 +60,6 @@ class ExportApp(WestCommand):
             description=self.description,
             usage=USAGE)
         parser.add_argument('-b', '--board', nargs=None, default=None, help="board id like mimxrt700evk")
-        parser.add_argument('--toolchain', dest='toolchain', action='store',
-                           default='armgcc', help='Specify toolchain')
         parser.add_argument('-o', '--output-dir', default=None,
                             help='output directory to hold the freestanding project')
         parser.add_argument('--bf', dest='board_copy_folders', action=BoardCopyFolderAction, nargs='*',
@@ -115,8 +113,6 @@ class ExportApp(WestCommand):
         self.cmake_variables = {}
         if self.args.board:
             self.cmake_variables['board'] = self.args.board
-        if self.args.toolchain:
-            self.cmake_variables['CONFIG_TOOLCHAIN'] = self.args.toolchain
 
         if not remainder:
             return

@@ -130,7 +130,7 @@ class CmakeTraceApp(CmakeApp):
             if self.replacements:
                 self.apply_replacements(self.replacements)
             if not self.shared_options.debug:
-                shutil.rmtree(self.options.output_dir / INJECT_BUILD_DIR, ignore_errors=True)
+                shutil.rmtree(self.shared_options.output_dir / INJECT_BUILD_DIR, ignore_errors=True)
         except Exception as e:
             if self.shared_options.debug:
                 print(e)
