@@ -1,6 +1,5 @@
 /*
- * Copyright 2022-2024 NXP
- * All rights reserved.
+ * Copyright 2022-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -1457,6 +1456,36 @@ void EDMA_ClearChannelStatusFlags(EDMA_Type *base, uint32_t channel, uint32_t ma
 }
 
 /*!
+ * brief Initialize all fields to 0 for the TCD structure.
+ *
+ * This function initialize all fields for this TCD structure to 0.
+ *
+ * param base eDMA peripheral base address.
+ * param tcd Pointer to the TCD structure.
+ */
+void EDMA_TcdInit(EDMA_Type *base, edma_tcd_t *tcdRegs)
+{
+    assert(tcdRegs != NULL);
+
+   /*
+       Reset TCD registers to zero. Unlike the EDMA_TcdReset(DREQ will be set),
+       CSR will be 0. Because in order to suit EDMA busy check mechanism in
+       EDMA_SubmitTransfer, CSR must be set 0.
+    */
+    EDMA_TCD_SADDR(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
+    EDMA_TCD_SOFF(tcdRegs, EDMA_TCD_TYPE(base))      = 0;
+    EDMA_TCD_ATTR(tcdRegs, EDMA_TCD_TYPE(base))      = 0;
+    EDMA_TCD_NBYTES(tcdRegs, EDMA_TCD_TYPE(base))    = 0;
+    EDMA_TCD_SLAST(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
+    EDMA_TCD_DADDR(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
+    EDMA_TCD_DOFF(tcdRegs, EDMA_TCD_TYPE(base))      = 0;
+    EDMA_TCD_CITER(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
+    EDMA_TCD_DLAST_SGA(tcdRegs, EDMA_TCD_TYPE(base)) = 0;
+    EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(base))       = 0;
+    EDMA_TCD_BITER(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
+}
+
+/*!
  * brief Creates the eDMA handle.
  *
  * This function is called if using the transactional API for eDMA. This function
@@ -1477,7 +1506,6 @@ status_t EDMA_CreateHandle(edma_handle_t *handle, EDMA_Type *base, uint32_t chan
     assert(channel < (uint32_t)FSL_FEATURE_EDMA_INSTANCE_CHANNELn(base));
 
     uint32_t edmaInstance;
-    edma_tcd_t *tcdRegs;
 
     /* Zero the handle */
     (void)memset(handle, 0, sizeof(*handle));
@@ -1495,25 +1523,10 @@ status_t EDMA_CreateHandle(edma_handle_t *handle, EDMA_Type *base, uint32_t chan
     handle->tcdBase     = EDMA_TCD_BASE(base, channel);
     handle->channelBase = EDMA_CHANNEL_BASE(base, channel);
     handle->base        = base;
+
     DMA_CLEAR_INT_STATUS(base, channel);
 
-    /*
-       Reset TCD registers to zero. Unlike the EDMA_TcdReset(DREQ will be set),
-       CSR will be 0. Because in order to suit EDMA busy check mechanism in
-       EDMA_SubmitTransfer, CSR must be set 0.
-    */
-    tcdRegs                                         = handle->tcdBase;
-    EDMA_TCD_SADDR(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
-    EDMA_TCD_SOFF(tcdRegs, EDMA_TCD_TYPE(base))      = 0;
-    EDMA_TCD_ATTR(tcdRegs, EDMA_TCD_TYPE(base))      = 0;
-    EDMA_TCD_NBYTES(tcdRegs, EDMA_TCD_TYPE(base))    = 0;
-    EDMA_TCD_SLAST(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
-    EDMA_TCD_DADDR(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
-    EDMA_TCD_DOFF(tcdRegs, EDMA_TCD_TYPE(base))      = 0;
-    EDMA_TCD_CITER(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
-    EDMA_TCD_DLAST_SGA(tcdRegs, EDMA_TCD_TYPE(base)) = 0;
-    EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(base))       = 0;
-    EDMA_TCD_BITER(tcdRegs, EDMA_TCD_TYPE(base))     = 0;
+    EDMA_TcdInit(base, handle->tcdBase);
 
     /* Enable NVIC interrupt */
     (void)EnableIRQ(s_edmaIRQNumber[edmaInstance][channel]);

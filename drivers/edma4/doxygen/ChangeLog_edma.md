@@ -1,5 +1,11 @@
 # EDMA
 
+## [2.10.9]
+
+- Bug Fixes
+  - Add new api EDMA_TcdInit to avoid destroying code logic
+    by reordering blocks in the toolchain.
+
 ## [2.10.8]
 
 - Bug Fixes
