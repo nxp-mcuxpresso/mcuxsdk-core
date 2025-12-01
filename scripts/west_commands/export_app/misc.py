@@ -90,6 +90,25 @@ def is_git_tracked(path: str) -> bool:
     return r.returncode == 0
 
 
+def upper_drive(path: Union[str, Path]) -> Union[str, Path]:
+    """
+    Normalize a path so that on Windows the drive letter is uppercase.
+    On other platforms, return the original normalized path.
+    """
+    if os.name != "nt":
+        return path
+
+    def update(s):
+        if len(s) >= 2 and s[1] == ":" and s[0].isalpha():
+            return s[0].upper() + s[1:]
+        return s
+
+    if isinstance(path, Path):
+        return Path(update(path.as_posix()))
+    else:  # str
+        return update(path)
+
+
 class AppType(Enum):
     main_app = "main_app"
     linked_app = "linked_app"

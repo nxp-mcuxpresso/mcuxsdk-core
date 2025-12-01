@@ -10,7 +10,8 @@ from functools import lru_cache
 from pathlib import Path
 from jinja2 import Template
 from requests.structures import CaseInsensitiveDict
-SCRIPT_DIR = Path(__file__).parent.parent.parent
+from .misc import upper_drive
+SCRIPT_DIR = upper_drive(Path(__file__).parent.parent.parent)
 SDK_ROOT_DIR = SCRIPT_DIR.parent
 logger = logging.getLogger(__name__)
 

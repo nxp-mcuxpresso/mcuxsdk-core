@@ -129,7 +129,7 @@ class CmakeTraceApp(CmakeApp):
             self.combine_prj_conf()
             if self.replacements:
                 self.apply_replacements(self.replacements)
-            if not self.shared_options.debug:
+            if self.options.app_type == AppType.main_app and not self.shared_options.debug:
                 shutil.rmtree(self.shared_options.output_dir / INJECT_BUILD_DIR, ignore_errors=True)
         except Exception as e:
             if self.shared_options.debug:
@@ -209,9 +209,9 @@ class CmakeTraceApp(CmakeApp):
             result["sysbuild"] = self.filter_trace_json(trace_json_path)
             domains = yaml.safe_load(open(self.shared_options.output_dir / INJECT_BUILD_DIR / "domains.yaml"))
             for domain in domains.get("domains", {}):
-                result[domain["name"]] = self.filter_trace_json(Path(domain["build_dir"]) / INJECT_TRACE_FILE)
                 if (src := Path(domain["source_dir"]).resolve().as_posix()) == self.source_dir.as_posix():
                     self.app_id = domain["name"]
+                result[domain["name"]] = self.filter_trace_json(Path(domain["build_dir"]) / INJECT_TRACE_FILE, src)
                 domain["source_dir"] = src
                 self.shared_options.domains[domain["name"]] = domain
         else:
@@ -220,16 +220,17 @@ class CmakeTraceApp(CmakeApp):
         return result
 
     @timeit_if(flag_fn=opt_debug)
-    def filter_trace_json(self, trace_json_path):
+    def filter_trace_json(self, trace_json_path, app_dir=None):
         bypass_dirs = [
             (SDK_ROOT_DIR / "cmake").as_posix(),
             (SDK_ROOT_DIR / "CMakeLists.txt").as_posix(),
             trace_json_path.parent.as_posix(),
         ]
 
+        src_dir = app_dir or self.source_dir.as_posix()
         def check_path(path):
             # TODO bypass sysbuild example source dir
-            if path.startswith(self.source_dir.as_posix()):
+            if path.startswith(src_dir):
                 return True
             if self.shared_options.default_trace_folders and not any(
                 [path.startswith(p) for p in self.shared_options.default_trace_folders]

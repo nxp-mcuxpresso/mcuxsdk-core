@@ -9,6 +9,7 @@
 - Improvements
   - Refactor the cmake trace logic to support more complex sdk examples.
   - Improve output structure.
+  - Normalize Windows drive case in path.
 
 ## [25.09.00]
 

@@ -10,7 +10,7 @@ from pathlib import Path
 from west.commands import WestCommand
 from west.configuration import config
 from export_app.cmake_parser import cmparser
-from export_app.misc import AppType, SharedOptions, AppOptions
+from export_app.misc import AppType, SharedOptions, AppOptions, upper_drive
 
 SCRIPT_DIR = Path(__file__).parent.parent
 sys.path.append(SCRIPT_DIR.as_posix())
@@ -160,8 +160,8 @@ class ExportApp(WestCommand):
         if (os.path.isdir(out)) and (len(os.listdir(out)) != 0):
             self.wrn(f"Output directory: {out} is not empty.")
 
-        self.source_dir = Path(app).resolve()
-        self.output_dir = Path(out).resolve()
+        self.source_dir = upper_drive(Path(app).resolve())
+        self.output_dir = upper_drive(Path(out).resolve())
         if config.getboolean('export_app', 'clean_output_dir', fallback=False) and self.output_dir.exists():
             self.dbg('Clean output directory first...')
             shutil.rmtree(self.output_dir)
@@ -179,7 +179,7 @@ class ExportApp(WestCommand):
             board=self.args.board,
             board_core = self.args.board,
             board_copy_folders=self.args.board_copy_folders,
-            default_trace_folders=[Path(self.manifest.topdir).as_posix()]
+            default_trace_folders=[upper_drive(Path(self.manifest.topdir).as_posix())]
         )
 
         if not self.shared_options.board:
