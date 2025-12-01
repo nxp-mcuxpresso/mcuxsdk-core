@@ -1,5 +1,10 @@
 # CRC
 
+## [2.0.5]
+
+- Bug fix:
+  - Fix CERT-C issue with boolean-to-unsigned integer conversion.
+
 ## [2.0.4]
 
 - Improvements

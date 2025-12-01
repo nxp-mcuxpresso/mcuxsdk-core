@@ -150,9 +150,12 @@ static void CRC_ConfigureAndStart(CRC_Type *base, const crc_module_config_t *con
 {
     uint32_t crcControl;
 
+    /* explicit conversion from bool to unsigned integer */
+    uint32_t complementChecksum = (true == config->complementChecksum) ? 1U : 0U;
+
     /* pre-compute value for CRC control registger based on user configuraton without WAS field */
     crcControl = 0U | CRC_CTRL_TOT(config->writeTranspose) | CRC_CTRL_TOTR(config->readTranspose) |
-                 CRC_CTRL_FXOR(config->complementChecksum) | CRC_CTRL_TCRC(config->crcBits);
+                 CRC_CTRL_FXOR(complementChecksum) | CRC_CTRL_TCRC(config->crcBits);
 
     /* make sure the control register is clear - WAS is deasserted, and protocol is set */
     base->CTRL = crcControl;

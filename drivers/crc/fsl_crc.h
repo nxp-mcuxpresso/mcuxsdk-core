@@ -22,15 +22,18 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief CRC driver version. Version 2.0.4.
+/*! @brief CRC driver version. Version 2.0.5.
  *
- * Current version: 2.0.4
+ * Current version: 2.0.5
  *
  * Change log:
+
+ * - Version 2.0.5
+ *   - Fix CERT-C issue with boolean-to-unsigned integer conversion.
  *
  * - Version 2.0.4
  *   - Release peripheral from reset if necessary in init function.
- * 
+ *
  * - Version 2.0.3
  *   - Fix MISRA issues
  *
@@ -40,7 +43,7 @@
  * - Version 2.0.1
  *   - move DATA and DATALL macro definition from header file to source file
  */
-#define FSL_CRC_DRIVER_VERSION (MAKE_VERSION(2, 0, 4))
+#define FSL_CRC_DRIVER_VERSION (MAKE_VERSION(2, 0, 5))
 /*! @} */
 
 #ifndef CRC_DRIVER_CUSTOM_DEFAULTS
