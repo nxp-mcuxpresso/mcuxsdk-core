@@ -165,16 +165,13 @@ int32_t IMU_SendMsgsBlocking(imu_link_t link, const uint32_t *msgs, int32_t msgC
 #if IMU_BUSY_POLL_COUNT
             if ((--poll_count) == 0u)
             {
-                ret = IMU_ERR_TIMEOUT;
+                return IMU_ERR_TIMEOUT;
                 break;
             }
 #endif
         }
 
-        if (0L <= ret)
-        {
-            IMU_WR_MSG(link, *msgs);
-        }
+        IMU_WR_MSG(link, *msgs);
     }
 
     return ret;
@@ -443,21 +440,17 @@ int32_t IMU_SendMsgPtrBlocking(imu_link_t link, uint32_t msgPtr, bool lockSendFi
 #if IMU_BUSY_POLL_COUNT
             if ((--poll_count) == 0u)
             {
-                ret = IMU_ERR_TIMEOUT;
-                break;
+                return IMU_ERR_TIMEOUT;
             }
 #endif
         }
 
-        if (0L == ret)
+        if (lockSendFifo)
         {
-            if (lockSendFifo)
-            {
-                IMU_LOCK_TX_FIFO(link);
-            }
-
-            IMU_WR_MSG(link, msgPtr);
+            IMU_LOCK_TX_FIFO(link);
         }
+
+        IMU_WR_MSG(link, msgPtr);
     }
 
     return ret;

@@ -1,5 +1,10 @@
 # IMU
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fix MISRA C-2012 Rule 14.3 violations.
+
 ## [2.2.0]
 
 - New Features
