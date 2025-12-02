@@ -299,7 +299,13 @@ class NinjaParser
                 end
               else
                 begin
-                  include_path = Pathname.new(_flag[1]).relative_path_from(Pathname.new(REPO_ROOT_PATH)).cleanpath.to_s
+                  if ENV['standalone'] == 'true'
+                    # Use path relative to output dir for standalone project if the file is out of the repo
+                    include_path = Pathname.new(_flag[1]).relative_path_from(Pathname.new(File.join(@outdir, @toolchain))).to_s
+                  else
+                    # Use relative path for GUI project
+                    include_path = Pathname.new(_flag[1]).relative_path_from(Pathname.new(REPO_ROOT_PATH)).cleanpath.to_s
+                  end
                 rescue StandardError => e
                   raise "Get relative path error: Can't get relative path from #{REPO_ROOT_PATH} to #{_flag[1]}, please make sure the destination path is in the same disk for Windows"
                 end
@@ -412,6 +418,9 @@ class NinjaParser
       file_path = file_path.split("#{@name}.dir/")[1]
       base_path = ENV['APPLICATION_SOURCE_DIR'].split(REPO_ROOT_PATH)[-1].sub('/', '')
       file_path = File.join(base_path, file_path)
+    elsif Utils.path_inside?(file_path, File.join(@outdir, "../")) && File.dirname(file_path) != @outdir
+      # Special handling for ${APPLICATION_BINARY_DIR}/.. paths
+      file_path = Pathname.new(file_full_path).relative_path_from(Pathname.new(File.join(@outdir, @toolchain))).to_s
     else
       file_path = get_relative_path(REPO_ROOT_PATH, file_path)
     end
@@ -654,6 +663,10 @@ class NinjaParser
     cmd_list = content.split(" && ")
     cmd_list.each_with_index do |cmd_item, index|
       cmd_list[index] = nil if cmd_item.match(/(cmd.exe|cd)[\s\S]+[\/\\]#{File.basename(@outdir)}"?$/)
+      # Add space between -I and path to handle path separately
+      if cmd_list[index] && cmd_list[index].match(/\s-I\S+/)
+        cmd_list[index] = cmd_list[index].sub(/\s-I/, ' -I ')
+      end
       cmd_list[index] = remove_last_quote_if_odd(cmd_list[index])
     end
     cmd_list =cmd_list.compact.join(' && ').split(' ')
@@ -717,6 +730,17 @@ class NinjaParser
         # cd . means no cmd
         break if content == 'cd .' || content == ':'
         cmd_list = translate_path_in_build_cmd(content)
+        cmd_list.each_with_index do |cmd_str, index|
+          # translate cmake to ${CMAKE_COMMAND}, if starts with quote, indicates there is space in path
+          # Use [^"]* to match any character except quote before cmake executor
+          pattern = /"?[^"]*[\/\\]cmake(\.exe)?"|\s*\S+[\/\\]cmake(\.exe)?/
+          result = cmd_str.match(pattern)
+          while(result)
+            cmd_list[index] = cmd_str.sub(result[ 0 ], ' ${CMAKE_COMMAND}')
+            result = cmd_str.match(cmd_list[index])
+          end
+        end
+
         @logger.debug( "Parse prebuild command: #{cmd_list.join(' ')}")
         if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
           @data[@name]['contents']['configuration']['tools'][@toolchain]['prebuild'] = cmd_list
