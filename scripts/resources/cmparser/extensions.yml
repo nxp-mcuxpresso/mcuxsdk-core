@@ -80,32 +80,32 @@ mcux_remove_codewarrior_configuration:
 mcux_add_codewarrior_sys_include:
   multi_value: TARGETS SYS_SEARCH_PATH SYS_PATH_RECURSIVELY
 mcux_add_iar_linker_script:
-  single_value: LINKER BASE_PATH
-  multi_value: TARGETS
+  single_value: LINKER BASE_PATH PROCESSED_LINKER PREPROCESSED
+  multi_value: TARGETS INCLUDES PARAMETERS
 mcux_remove_iar_linker_script:
   single_value: LINKER BASE_PATH
   multi_value: TARGETS
 mcux_add_mdk_linker_script:
-  single_value: LINKER BASE_PATH
-  multi_value: TARGETS
+  single_value: LINKER BASE_PATH PROCESSED_LINKER PREPROCESSED
+  multi_value: TARGETS INCLUDES PARAMETERS
 mcux_remove_mdk_linker_script:
   single_value: LINKER BASE_PATH
   multi_value: TARGETS
 mcux_add_armgcc_linker_script:
-  single_value: LINKER BASE_PATH
-  multi_value: TARGETS
+  single_value: LINKER BASE_PATH PROCESSED_LINKER PREPROCESSED
+  multi_value: TARGETS INCLUDES PARAMETERS
 mcux_remove_armgcc_linker_script:
   single_value: LINKER BASE_PATH
   multi_value: TARGETS
 mcux_add_riscvllvm_linker_script:
-  single_value: LINKER BASE_PATH
-  multi_value: TARGETS
+  single_value: LINKER BASE_PATH PROCESSED_LINKER PREPROCESSED
+  multi_value: TARGETS INCLUDES PARAMETERS
 mcux_remove_riscvllvm_linker_script:
   single_value: LINKER BASE_PATH
   multi_value: TARGETS
 mcux_add_codewarrior_linker_script:
-  single_value: LINKER BASE_PATH
-  multi_value: TARGETS
+  single_value: LINKER BASE_PATH PROCESSED_LINKER PREPROCESSED
+  multi_value: TARGETS INCLUDES PARAMETERS
 mcux_remove_codewarrior_linker_script:
   single_value: LINKER BASE_PATH
   multi_value: TARGETS

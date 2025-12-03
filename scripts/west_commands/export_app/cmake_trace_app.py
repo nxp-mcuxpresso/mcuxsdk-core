@@ -59,6 +59,8 @@ class CmakeTraceApp(CmakeApp):
         self.processed_files = []
         self.headers_map = {}
         self.sources_map = {}
+        # files in mcux_add_include, need to be copied after all mcux_add_source
+        self.opt_headers_map = {}
         self.recorded_headers = []
         self.recorded_source_dirs = []
         self.dest_board_dirname = self.options.cmake_variables["board"]
@@ -120,16 +122,21 @@ class CmakeTraceApp(CmakeApp):
             self.board_root = Path(self.options.cmake_variables["SdkRootDirPath"]) / Path(
                 self.options.cmake_variables.get("board_root", "examples/_boards")
             )
-            self.y_selecting_ps = []
-            if (force_selected_ps := self.build_dir / ".force_selected_ps").exists():
-                self.y_selecting_ps = open(force_selected_ps, "r").read().splitlines()
+            try:
+                self.promptless_syms = open(promptless_config := self.build_dir / ".promptless_config", "r").read().splitlines()
+                self.y_selecting_ps = open(force_selected_ps := self.build_dir / ".force_selected_ps", "r").read().splitlines()
+            except Exception:
+                self.promptless_syms = []
+                self.y_selecting_ps = []
             self.preinclude_files = [os.path.basename(f) for f in glob.glob(f"{self.build_dir.as_posix()}/*.h")]
             self.analyze_trace_json(self.app_id, self.options.trace_data)
             self.dump_result()
             self.combine_prj_conf()
             if self.replacements:
                 self.apply_replacements(self.replacements)
-            if self.options.app_type == AppType.main_app and not self.shared_options.debug:
+            if self.shared_options.debug:
+                self._dump_debug_info()
+            elif self.options.app_type == AppType.main_app:
                 shutil.rmtree(self.shared_options.output_dir / INJECT_BUILD_DIR, ignore_errors=True)
         except Exception as e:
             if self.shared_options.debug:
@@ -137,6 +144,40 @@ class CmakeTraceApp(CmakeApp):
                 traceback.print_exc()
             return False
         return True
+
+    def _dump_debug_info(self):
+        '''
+        Dump important instance variables for debug
+        '''
+        debug_info_yml = self.shared_options.output_dir / INJECT_BUILD_DIR / f"{self.app_id}_export_app_debug.yml"
+
+        debug_data = {
+            'app_id': self.app_id,
+            'source_dir': str(self.source_dir),
+            'build_dir': str(self.build_dir),
+            'board_root': str(self.board_root),
+            'source_list_file': str(self.source_list_file),
+            'is_sysbuild': self.is_sysbuild,
+            'y_selecting_ps': self.y_selecting_ps,
+            'headers': self.headers_map,
+            'preinclude_files': self.preinclude_files,
+            'sources': {k: v.relative_to(self.shared_options.output_dir).as_posix() for k, v in self.sources_map.items()},
+            'project_remove_sources': self.project_remove_sources,
+            'options': {
+                'name': self.options.name,
+                'app_type': str(self.options.app_type),
+                'cmake_variables': self.options.cmake_variables,
+            },
+            'shared_options': {
+                'output_dir': str(self.shared_options.output_dir),
+                'core_id': self.shared_options.core_id,
+                'debug': self.shared_options.debug,
+                'domains': self.shared_options.domains,
+            }
+        }
+        with open(debug_info_yml, 'w') as f:
+            yaml.dump(debug_data, f, default_flow_style=False, sort_keys=False)
+        logger.debug(f"Debug info dumped to {debug_info_yml}")
 
     def process_example_yml(self, target_apps=[]):
         """
@@ -400,6 +441,19 @@ class CmakeTraceApp(CmakeApp):
                     continue
                 self.process_trace_context(i, j, trace_data)
 
+        # Copy optional header files
+        for item, target_header in self.opt_headers_map.items():
+            if target_header.exists() or item.as_posix() in self.sources_map:
+                logger.debug(f"{j['file']}: {item.name} already exists, skip copying.")
+            else:
+                logger.debug(f"Copy header file {item.as_posix()}")
+                target_header.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(
+                    item,
+                    target_header,
+                )
+
+
     def write_raw_if(self, content, receiver, line):
         receiver.append(content[line - 1])
         compansated_endif = 1
@@ -469,9 +523,9 @@ class CmakeTraceApp(CmakeApp):
             self.trace_receiver["cur_ps"] = None
             if args[0].startswith("CONFIG_MCUX_PRJSEG_"):
                 if args[0] in self.y_selecting_ps:
-                    logger.error(f"{args[0]} is y-selected by other symbols, so it will not be processed.")
-                # elif args[0].startswith("CONFIG_MCUX_PRJSEG_module.board.wireless"):
-                #     pass
+                    logger.warning(f"{args[0]} is y-selected by other symbols, so it will not be processed.")
+                elif args[0] in self.promptless_syms:
+                    logger.warning(f"{args[0]} is a promptless symbol, so it will not be processed.")
                 elif args[0] in CONFIG_BLACK_LIST:
                     pass
                 else:
@@ -679,14 +733,15 @@ class CmakeTraceApp(CmakeApp):
             for r_source in self._resolve_src_path(cur_dir, base_path, Path(s)):
                 if self._in_output_dir(r_source):
                     return 0
-                if not r_source.exists():
-                    continue
                 r_source_str = r_source.as_posix()
+                if not r_source.exists():
+                    logger.debug(f"Skip not exist source file {r_source_str}")
+                    continue
                 if not self.check_multiple_declare_source(r_source_str, j["file"]):
-                    logger.debug(f"Skip out of tree source file {r_source_str}")
+                    logger.debug(f"Skip multi-declared source file {r_source_str}")
                     continue
                 if r_source_str in self.project_remove_sources:
-                    logger.debug(f"Skip removed source file {r_source_str}")
+                    logger.debug(f"Skip project removed source file {r_source_str}")
                     continue
                 target_dir = self.get_target_path(r_source.parent)
                 if is_header_file(r_source):
@@ -698,10 +753,12 @@ class CmakeTraceApp(CmakeApp):
                     logger.debug(f"Skip already processed source file {r_source_str}")
                     if simple_src:
                         continue
-                if r_source.name in self.preinclude_files:
-                    continue
+                # FIXME improve preinclude file process
+                # if r_source.name in self.preinclude_files:
+                #     logger.debug(f"Skip preinclude source file {r_source_str}")
+                #     continue
                 target_src = output_dir / target_dir / r_source.name
-                if target_src.exists() and r_source.name.endswith((".S", ".s")):
+                if target_src.exists() and r_source_str not in self.sources_map and r_source.name.endswith((".S", ".s")):
                     target_src = output_dir / target_dir / r_source.parent.name / r_source.name
                 self.recorded_source_dirs.append(target_src.relative_to(self.output_dir).parent.as_posix())
                 self.sources_map[r_source_str] = target_src
@@ -735,22 +792,15 @@ class CmakeTraceApp(CmakeApp):
                 target_dir = self.headers_map[r_include_str]
             else:
                 target_dir = self.headers_map[r_include_str] = self.get_target_path(r_include)
-            (output_dir / target_dir).mkdir(parents=True, exist_ok=True)
-            # Formal sdk example shall record all header files through mcux_add_source
+            # NOTE Formal sdk example shall record all header files through mcux_add_source
             for item in r_include.iterdir():
                 if item.is_file() and is_header_file(item.as_posix()) and item.name not in self.preinclude_files:
                     if item.name.endswith(".mex"):
                         target_header = output_dir / item.name
                     else:
                         target_header = output_dir / self.headers_map[r_include_str] / item.name
-                    if target_header.exists():
-                        logger.debug(f"{j['file']}: {item.name} already exists, skip copying.")
-                    else:
-                        logger.debug(f"Copy header file {item.as_posix()}")
-                        shutil.copy(
-                            item,
-                            target_header,
-                        )
+                    self.opt_headers_map[item] = target_header
+
 
             # if self.headers_map[r_include_str] in self.processed_headers:
             #     continue
@@ -781,6 +831,9 @@ class CmakeTraceApp(CmakeApp):
             # For generated linker script, do not copy
             return None
         if parsed_func.single_args.get("BASE_PATH"):
+            for i, v in enumerate(parsed_func.multi_args.get('INCLUDES', [])):
+                parsed_func.multi_args["INCLUDES"][i] = parsed_func.single_args["BASE_PATH"].\
+                    replace(SDK_ROOT_DIR.as_posix(), "${SdkRootDirPath}") + '/' + v
             del parsed_func.single_args["BASE_PATH"]
         parsed_func.single_args["LINKER"] = f"{linker.name}"
         target_linker = output_dir / linker.name
@@ -789,9 +842,9 @@ class CmakeTraceApp(CmakeApp):
         return parsed_func
 
     def trace_mcux_project_remove_source(self, j, preprocess=False):
-        if not preprocess:
-            return []
         parsed_func = CMakeFunction(j)
+        if not preprocess:
+            return [parsed_func]
         cur_dir = Path(j["file"]).parent
         base_path = Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
         r_sources = list(
@@ -902,8 +955,9 @@ class CmakeTraceApp(CmakeApp):
         Args:
             force_selected (list): List of symbols to be force selected
         """
+        # Replace '-' with '_' in macro to avoid: ISO C99 requires whitespace after the macro name
         result = [
-            f"config CUSTOM_APP_{self.app_id.upper()}",
+            f"config CUSTOM_APP_{self.app_id.upper().replace('-', '_')}",
             "    bool",
             "    default y",
         ]

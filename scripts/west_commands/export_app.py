@@ -19,7 +19,7 @@ from misc import sdk_project_target
 _ARG_SEPARATOR = '--'
 SDK_ROOT_DIR = SCRIPT_DIR.parent
 DOC_URL = 'https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/sdk/example_development.html#freestanding-examples'
-DEFAULT_BOARD_FOLDERS=[f"{SDK_ROOT_DIR.name}/examples/"]
+DEFAULT_BOARD_FOLDERS=[f"{SDK_ROOT_DIR.name}/examples/", f"{SDK_ROOT_DIR.name}/examples_int/"]
 
 USAGE = f'''\
 west export_app [-h] [source_dir] [-b board_id] [-DCMAKE_VAR=VAL] [-o OUTPUT_DIR] [--build]

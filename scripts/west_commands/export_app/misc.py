@@ -25,7 +25,7 @@ _SENTINEL = object()
 LICENSE_HEAD = f"""
 # Copyright {datetime.now().year} NXP
 #
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BSD-3-Clause
 """
 
 CONFIG_CHOICE_MAP = {
