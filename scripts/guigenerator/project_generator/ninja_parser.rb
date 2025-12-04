@@ -769,6 +769,16 @@ class NinjaParser
           else
             content = content.split("#{bin_file} &&")[-1].strip
           end
+        elsif content.match(/\s*(CMakeFiles\S+post-build.bat)\s\d+/)
+          # If post build command is too long for Windows, it wiil be saved in post-build.bat file
+          # need to read and parse it
+          post_build_bat = content.match(/\s*(CMakeFiles\S+post-build.bat)\s\d+/)[1]
+          post_build_bat = File.join(@outdir, post_build_bat)
+          if File.exist?(post_build_bat)
+            # Read and parse the post-build.bat file
+            parse_postbuild_bat_file(bat_file_path)
+            break
+          end
         end
         
         # cd . means no postbuild cmd
@@ -829,6 +839,51 @@ class NinjaParser
         break
       end
     end
+  end
+
+  def parse_postbuild_bat_file(bat_file_path)
+    bat_content = File.readlines(bat_file_path)
+    cmd_list = []
+    bat_content.each_with_index do |bat_line, index|
+      # Skip batch control lines
+      next if bat_line.match(/^@echo off/)
+      next if bat_line.match(/^cd \/D/)
+      next if bat_line.match(/^\(set FAIL_LINE=/)
+      next if bat_line.match(/^goto :/)
+      next if bat_line.match(/^:ABORT/)
+      next if bat_line.match(/^set ERROR_CODE=/)
+      next if bat_line.match(/^exit \/b/)
+      next if bat_line.strip.empty?
+      
+      # Extract the actual command (remove error handling)
+      if bat_line.match(/\|\|\s*\(set FAIL_LINE=\d+&\s*goto :ABORT\)/)
+        command = bat_line.split(/\|\|/).first.strip
+      else
+        command = bat_line.strip
+      end
+      
+      translated_cmd = translate_path_in_build_cmd(command)
+      cmd_list << translated_cmd.join(' && ') if translated_cmd && !translated_cmd.empty?
+    end
+
+    cmd_list&.each do |cmd|
+      if @toolchain == 'armgcc'
+        @data[@name]['contents']['configuration']['tools'][@toolchain]['cmake_command'] ||= []
+        raw_command =  <<~HEREDOC
+          add_custom_command(
+            TARGET
+            ${MCUX_SDK_PROJECT_NAME}
+            POST_BUILD
+            COMMAND
+            #{cmd}
+          )
+        HEREDOC
+        @data[@name]['contents']['configuration']['tools'][@toolchain]['cmake_command'].push(raw_command)
+      else
+        @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] ||= []
+        @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'].push(cmd.chomp)
+      end
+    end  
   end
 
   def parse_precompile
