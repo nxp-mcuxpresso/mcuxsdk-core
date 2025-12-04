@@ -106,11 +106,12 @@ status_t ELEMU_mu_hal_receive_data_wait(ELEMU_Type *mu, uint8_t regid, uint32_t 
     status_t ret         = 0;
     while ((mu->RSR & mask) == 0u)
     {
-        if (--wait == 0u)
+        if (wait == 0u)
         {
             ret = kStatus_ELEMU_RequestTimeout;
             break;
         }
+        wait--;
     }
     if (ret != kStatus_ELEMU_RequestTimeout)
     {
@@ -359,6 +360,12 @@ status_t ELEMU_mu_read_message(ELEMU_Type *mu, uint32_t *buf, uint8_t *size, uin
             ELEMU_mu_hal_receive_data(mu, rx_reg_idx, (uint32_t *)(uintptr_t)&msg->header);
             msg_size = msg->header.size;
             rx_reg_idx++;
+
+            /* prevent wrap on `msg_size + 1u` */
+            if (((uint8_t)UINT8_MAX) - msg_size < 1u)
+            {
+                return kStatus_OutOfRange;
+            }
             *size = msg_size + 1u;
         }
         else
