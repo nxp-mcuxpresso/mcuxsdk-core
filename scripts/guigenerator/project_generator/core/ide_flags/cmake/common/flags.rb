@@ -15,7 +15,20 @@ module CMake
       # consuming interface
       include Internal::FlagsInterface
 
+      # add ${ProjDirPath} prefix to armgcc standalone project
+      # because vscode plugin may run command from different directory
+      def preprocess_cmd_line(line)
+        pattern = /\s*(-include)\s+(\S+)\s*/
+        # Process all matches in the line
+        line.gsub(pattern) do |match|
+          prefix = $1
+          include_file = $2
+          " #{prefix} #{File.join('${ProjDirPath}', include_file)} "
+        end
+      end
+
       def analyze_asflags(target, line)
+        line = preprocess_cmd_line(line)
         lists = line.split()
         lists.each do |v|
           @file.add_as_flags(target, v)
@@ -23,6 +36,7 @@ module CMake
       end
 
       def analyze_ccflags(target, line)
+        line = preprocess_cmd_line(line)
         lists = line.split()
         lists.each do |v|
           @file.add_cc_flags(target, v)
@@ -30,6 +44,7 @@ module CMake
       end
 
       def analyze_cxflags(target, line)
+        line = preprocess_cmd_line(line)
         lists = line.split()
         lists.each do |v|
           @file.add_cxx_flags(target, v)
