@@ -1098,7 +1098,14 @@ static inline bool _SDK_AtomicLocalCompareAndSet1Byte(volatile uint8_t *addr, ui
         s_actual = __LDREXB(addr);
         if (s_actual != expected)
         {
+            /* Workaround for CMSIS 6.1 Issue #264(https://github.com/ARM-software/CMSIS_6/issues/264). */
+#if (defined(__ICCARM__) && (__CM_CMSIS_VERSION  == 0x60001UL))
+          {
+            __ASM volatile("CLREX" ::: "memory");
+          }
+#else
             __CLREX();
+#endif
             return false;
         }
     } while (0U != (__STREXB((newValue), (addr))));
@@ -1116,7 +1123,14 @@ static inline bool _SDK_AtomicLocalCompareAndSet2Byte(volatile uint16_t *addr, u
         s_actual = __LDREXH(addr);
         if (s_actual != expected)
         {
+            /* Workaround for CMSIS 6.1 Issue #264(https://github.com/ARM-software/CMSIS_6/issues/264). */
+#if (defined(__ICCARM__) && (__CM_CMSIS_VERSION  == 0x60001UL))
+          {
+            __ASM volatile("CLREX" ::: "memory");
+          }
+#else
             __CLREX();
+#endif
             return false;
         }
     } while (0U != (__STREXH((newValue), (addr))));
@@ -1133,7 +1147,14 @@ static inline bool _SDK_AtomicLocalCompareAndSet4Byte(volatile uint32_t *addr, u
         s_actual = __LDREXW(addr);
         if (s_actual != expected)
         {
+            /* Workaround for CMSIS 6.1 Issue #264(https://github.com/ARM-software/CMSIS_6/issues/264). */
+#if (defined(__ICCARM__) && (__CM_CMSIS_VERSION  == 0x60001UL))
+          {
+            __ASM volatile("CLREX" ::: "memory");
+          }
+#else
             __CLREX();
+#endif
             return false;
         }
     } while (0U != (__STREXW((newValue), (addr))));

@@ -1,5 +1,9 @@
 # COMMON
 
+## [2.6.3]
+- Bug Fixes
+  - Fixed build issue of CMSIS PACK BSP example caused by CMSIS 6.1 issue.
+
 ## [2.6.2]
 
 - Bug Fixes
