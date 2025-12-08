@@ -742,8 +742,8 @@ void FLEXSPI_UpdateAhbBuffersSettings(FLEXSPI_Type *base, flexspi_ahbBuffers_ctr
 void FLEXSPI_UpdateLUT(FLEXSPI_Type *base, uint32_t index, const uint32_t *cmd, uint32_t count)
 {
     /* INT30-C: Prevent unsigned integer overflow */
+    assert(count <= FLEXSPI_LUT_COUNT);
     assert(index <= FLEXSPI_LUT_COUNT - count);
-    assert(index + count <= FLEXSPI_LUT_COUNT);
 
     uint32_t i = 0UL;
     volatile uint32_t *lutBase;

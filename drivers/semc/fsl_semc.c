@@ -195,8 +195,6 @@ static status_t SEMC_CovertMemorySize(uint32_t size_kbytes, uint8_t *sizeConvert
         memsize        = size_kbytes / 8U;
         while (memsize != 0x00U)
         {
-            /* INT30-C: Prevent unsigned integer overflow in increment */
-            assert(*sizeConverted < UINT8_MAX);
             memsize >>= 1U;
             (*sizeConverted)++;
         }

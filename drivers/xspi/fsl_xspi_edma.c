@@ -58,7 +58,7 @@ static void XSPI_TransferEDMACallback(edma_handle_t *handle, void *param, bool t
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static uint8_t XSPI_CalculatePower(uint8_t value)
+static uint8_t XSPI_CalculatePower(uint32_t value)
 {
     uint8_t power = 0;
     while (value >> 1 != 0U)
@@ -160,7 +160,6 @@ void XSPI_TransferUpdateSizeEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xs
  */
 status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_transfer_t *xfer)
 {
-    //    uint32_t configValue = 0;
     status_t status = kStatus_Success;
     edma_transfer_config_t xferConfig;
     uint32_t instance = XSPI_GetInstance(base);
@@ -183,10 +182,7 @@ status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_tra
 
     if ((xfer->cmdType == kXSPI_Write) || (xfer->cmdType == kXSPI_Config))
     {
-        /* INT31-C: Validate before narrowing conversion */
-        uint32_t temp = 4U * handle->count;
-        assert(temp <= UINT8_MAX);
-        power          = XSPI_CalculatePower((uint8_t)temp);
+        power          = XSPI_CalculatePower(4U * handle->count);
         handle->nbytes = xfer->dataSize;
         /* Prepare transfer. */
         EDMA_PrepareTransfer(&xferConfig, xfer->data, (uint32_t)handle->nsize,
@@ -229,10 +225,7 @@ status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_tra
             return status;
         }
         XSPI_ClearRxBuffer(base);
-        /* INT31-C: Validate before narrowing conversion */
-        uint32_t countTemp = (uint8_t)(base->RBCT) + 1U;
-        assert(countTemp <= UINT8_MAX);
-        handle->count = (uint8_t)countTemp;
+        handle->count = (uint8_t)((base->RBCT) & XSPI_RBCT_WMRK_MASK) + 1U;
 
         if (xfer->dataSize < 4U * (uint32_t)handle->count)
         {
@@ -249,10 +242,7 @@ status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_tra
             handle->nbytes = (4UL * handle->count);
         }
 
-        /* INT31-C: Validate before narrowing conversion */
-        uint32_t powerTemp = 4U * handle->count;
-        assert(powerTemp <= UINT8_MAX);
-        power = XSPI_CalculatePower((uint8_t)powerTemp);
+        power = XSPI_CalculatePower(4U * handle->count);
 
         /* Prepare transfer. */
         EDMA_PrepareTransfer(&xferConfig, (void *)(uint32_t *)XSPI_GetRxFifoAddress(base), (uint32_t)handle->nsize,
