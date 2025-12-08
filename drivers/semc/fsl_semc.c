@@ -125,7 +125,7 @@ static status_t SEMC_CovertMemorySize(uint32_t size_kbytes, uint8_t *sizeConvert
  * @param clkSrc_Hz SEMC clock source frequency.
  * @return The changed internal clock cycle.
  */
-static uint8_t SEMC_ConvertTiming(uint32_t time_ns, uint32_t clkSrc_Hz);
+static uint8_t SEMC_ConvertTiming(uint8_t time_ns, uint32_t clkSrc_Hz);
 
 /*!
  * @brief Configure IP command.
@@ -205,7 +205,7 @@ static status_t SEMC_CovertMemorySize(uint32_t size_kbytes, uint8_t *sizeConvert
     return status;
 }
 
-static uint8_t SEMC_ConvertTiming(uint32_t time_ns, uint32_t clkSrc_Hz)
+static uint8_t SEMC_ConvertTiming(uint8_t time_ns, uint32_t clkSrc_Hz)
 {
     assert(clkSrc_Hz != 0x00U);
 
@@ -216,9 +216,7 @@ static uint8_t SEMC_ConvertTiming(uint32_t time_ns, uint32_t clkSrc_Hz)
     /* Using ps for high resolution */
     tClk_ps = 1000000U / clkSrc_Hz;
 
-    /* INT30-C: Prevent unsigned integer overflow in multiplication */
-    assert(time_ns <= UINT32_MAX / 1000U);
-    while (tClk_ps * clockCycles < time_ns * 1000U)
+    while (clockCycles < (time_ns * 1000U) / tClk_ps)
     {
         clockCycles++;
     }
