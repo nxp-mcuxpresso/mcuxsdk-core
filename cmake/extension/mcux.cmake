@@ -284,6 +284,7 @@ macro(project project_name)
     include(${SdkRootDirPath}/cmake/extension/kconfig.cmake)
   endif()
 
+  _mcux_get_config_tool_component_map_id()
   _mcux_compute_config_tool_generated_path()
 
   # generate version header
@@ -345,6 +346,30 @@ macro(clear_default_added_compiler_flags)
   set(CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE_UPPER_CASE} "")
   set(CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE_UPPER_CASE} "")
   set(CMAKE_EXE_LINKER_FLAGS_${CMAKE_BUILD_TYPE_UPPER_CASE} "")
+endmacro()
+
+macro(_mcux_get_config_tool_component_map_id)
+  if(DEFINED MCUXPRESSO_CONFIG_TOOL_COMPONENT_ID_MAP_PATH
+     AND NOT "${MCUXPRESSO_CONFIG_TOOL_COMPONENT_ID_MAP_PATH}" STREQUAL "")
+    set(_component_map_path "${MCUXPRESSO_CONFIG_TOOL_COMPONENT_ID_MAP_PATH}")
+  else()
+    set(_component_map_path "${SdkRootDirPath}/tool_data/misc/component_id_map.yml")
+    if(EXISTS "${_component_map_path}")
+      set(MCUXPRESSO_CONFIG_TOOL_COMPONENT_ID_MAP_PATH
+          "${_component_map_path}"
+          CACHE FILEPATH "Path to Config Tool component id map file")
+    else()
+      unset(_component_map_path)
+    endif()
+  endif()
+
+  if(DEFINED _component_map_path)
+    file(TO_CMAKE_PATH "${_component_map_path}" _component_map_path)
+    string(REGEX REPLACE "/+$" "" _component_map_path "${_component_map_path}")
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_component_map_path}")
+
+    unset(_component_map_path)
+  endif()
 endmacro()
 
 macro(_mcux_compute_config_tool_generated_path)
