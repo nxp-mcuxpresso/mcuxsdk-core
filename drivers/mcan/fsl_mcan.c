@@ -174,6 +174,76 @@ static uint32_t MCAN_GetRxBufferElementAddress(CAN_Type *base, uint8_t idx);
  */
 static uint32_t MCAN_GetTxBufferElementAddress(CAN_Type *base, uint8_t idx);
 
+/*!
+ * @brief Configure standard ID filter.
+ *
+ * @param base MCAN peripheral base address.
+ * @param config Pointer to standard filter configuration.
+ * @param addrOffset Pointer to current address offset.
+ * @return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigStdFilter(CAN_Type *base, const mcan_frame_filter_config_t *config, uint32_t *addrOffset);
+
+/*!
+ * @brief Configure extended ID filter.
+ *
+ * @param base MCAN peripheral base address.
+ * @param config Pointer to extended filter configuration.
+ * @param addrOffset Pointer to current address offset.
+ * @return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigExtFilter(CAN_Type *base, const mcan_frame_filter_config_t *config, uint32_t *addrOffset);
+
+/*!
+ * @brief Configure Rx FIFO 0.
+ *
+ * @param base MCAN peripheral base address.
+ * @param config Pointer to Rx FIFO 0 configuration.
+ * @param addrOffset Pointer to current address offset.
+ * @return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigRxFifo0(CAN_Type *base, const mcan_rx_fifo_config_t *config, uint32_t *addrOffset);
+
+/*!
+ * @brief Configure Rx FIFO 1.
+ *
+ * @param base MCAN peripheral base address.
+ * @param config Pointer to Rx FIFO 1 configuration.
+ * @param addrOffset Pointer to current address offset.
+ * @return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigRxFifo1(CAN_Type *base, const mcan_rx_fifo_config_t *config, uint32_t *addrOffset);
+
+/*!
+ * @brief Configure Rx Buffer.
+ *
+ * @param base MCAN peripheral base address.
+ * @param config Pointer to Rx Buffer configuration.
+ * @param addrOffset Pointer to current address offset.
+ * @return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigRxBuffer(CAN_Type *base, const mcan_rx_buffer_config_t *config, uint32_t *addrOffset);
+
+/*!
+ * @brief Configure Tx Event FIFO.
+ *
+ * @param base MCAN peripheral base address.
+ * @param config Pointer to Tx Event FIFO configuration.
+ * @param addrOffset Pointer to current address offset.
+ * @return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigTxEventFifo(CAN_Type *base, const mcan_tx_fifo_config_t *config, uint32_t *addrOffset);
+
+/*!
+ * @brief Configure Tx Buffer.
+ *
+ * @param base MCAN peripheral base address.
+ * @param config Pointer to Tx Buffer configuration.
+ * @param addrOffset Current address offset.
+ * @return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigTxBuffer(CAN_Type *base, const mcan_tx_buffer_config_t *config, uint32_t addrOffset);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -1369,6 +1439,181 @@ void MCAN_SetTxBufferConfig(CAN_Type *base, const mcan_tx_buffer_config_t *confi
 }
 
 /*!
+ * brief Configure standard ID filter.
+ *
+ * param base MCAN peripheral base address.
+ * param config Pointer to standard filter configuration.
+ * param addrOffset Pointer to current address offset.
+ * return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigStdFilter(CAN_Type *base, const mcan_frame_filter_config_t *config, uint32_t *addrOffset)
+{
+    if ((config->idFormat == kMCAN_FrameIDStandard) && (0U == (config->address % 4U)))
+    {
+        *addrOffset = config->listSize * 4U;
+        MCAN_SetFilterConfig(base, config);
+        return kStatus_Success;
+    }
+    else
+    {
+        return kStatus_Fail;
+    }
+}
+
+/*!
+ * brief Configure extended ID filter.
+ *
+ * param base MCAN peripheral base address.
+ * param config Pointer to extended filter configuration.
+ * param addrOffset Pointer to current address offset.
+ * return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigExtFilter(CAN_Type *base, const mcan_frame_filter_config_t *config, uint32_t *addrOffset)
+{
+    if ((config->idFormat == kMCAN_FrameIDExtend) && (config->address >= *addrOffset) &&
+        (0U == (config->address % 4U)))
+    {
+        *addrOffset = config->address + config->listSize * 8U;
+        MCAN_SetFilterConfig(base, config);
+        return kStatus_Success;
+    }
+    else
+    {
+        return kStatus_Fail;
+    }
+}
+
+/*!
+ * brief Configure Rx FIFO 0.
+ *
+ * param base MCAN peripheral base address.
+ * param config Pointer to Rx FIFO 0 configuration.
+ * param addrOffset Pointer to current address offset.
+ * return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigRxFifo0(CAN_Type *base, const mcan_rx_fifo_config_t *config, uint32_t *addrOffset)
+{
+    uint32_t eSize;
+    
+    eSize = ((uint32_t)config->datafieldSize < 5U) ?
+                ((uint32_t)config->datafieldSize + 4U) :
+                ((uint32_t)config->datafieldSize * 4U - 10U);
+    assert(eSize <= 18U);
+
+    if ((config->address >= *addrOffset) && (0U == (config->address % 4U)))
+    {
+        *addrOffset = config->address + config->elementSize * eSize * 4U;
+        MCAN_SetRxFifo0Config(base, config);
+        return kStatus_Success;
+    }
+    else
+    {
+        return kStatus_Fail;
+    }
+}
+
+/*!
+ * brief Configure Rx FIFO 1.
+ *
+ * param base MCAN peripheral base address.
+ * param config Pointer to Rx FIFO 1 configuration.
+ * param addrOffset Pointer to current address offset.
+ * return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigRxFifo1(CAN_Type *base, const mcan_rx_fifo_config_t *config, uint32_t *addrOffset)
+{
+    uint32_t eSize;
+    
+    eSize = ((uint32_t)config->datafieldSize < 5U) ?
+                ((uint32_t)config->datafieldSize + 4U) :
+                ((uint32_t)config->datafieldSize * 4U - 10U);
+    assert(eSize <= 18U);
+
+    if ((config->address >= *addrOffset) && (0U == (config->address % 4U)))
+    {
+        *addrOffset = config->address + config->elementSize * eSize * 4U;
+        MCAN_SetRxFifo1Config(base, config);
+        return kStatus_Success;
+    }
+    else
+    {
+        return kStatus_Fail;
+    }
+}
+
+/*!
+ * brief Configure Rx Buffer.
+ *
+ * param base MCAN peripheral base address.
+ * param config Pointer to Rx Buffer configuration.
+ * param addrOffset Pointer to current address offset.
+ * return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigRxBuffer(CAN_Type *base, const mcan_rx_buffer_config_t *config, uint32_t *addrOffset)
+{
+    uint32_t eSize;
+    
+    eSize = ((uint32_t)config->datafieldSize < 5U) ?
+                ((uint32_t)config->datafieldSize + 4U) :
+                ((uint32_t)config->datafieldSize * 4U - 10U);
+    assert(eSize <= 18U);
+
+    if ((config->address >= *addrOffset) && (0U == (config->address % 4U)))
+    {
+        *addrOffset = config->address + 64U * eSize * 4U;
+        MCAN_SetRxBufferConfig(base, config);
+        return kStatus_Success;
+    }
+    else
+    {
+        return kStatus_Fail;
+    }
+}
+
+/*!
+ * brief Configure Tx Event FIFO.
+ *
+ * param base MCAN peripheral base address.
+ * param config Pointer to Tx Event FIFO configuration.
+ * param addrOffset Pointer to current address offset.
+ * return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigTxEventFifo(CAN_Type *base, const mcan_tx_fifo_config_t *config, uint32_t *addrOffset)
+{
+    if ((config->address >= *addrOffset) && (0U == (config->address % 4U)))
+    {
+        *addrOffset = config->address + config->elementSize * 8U;
+        MCAN_SetTxEventFifoConfig(base, config);
+        return kStatus_Success;
+    }
+    else
+    {
+        return kStatus_Fail;
+    }
+}
+
+/*!
+ * brief Configure Tx Buffer.
+ *
+ * param base MCAN peripheral base address.
+ * param config Pointer to Tx Buffer configuration.
+ * param addrOffset Current address offset.
+ * return kStatus_Success if configuration succeeds, kStatus_Fail otherwise.
+ */
+static status_t MCAN_ConfigTxBuffer(CAN_Type *base, const mcan_tx_buffer_config_t *config, uint32_t addrOffset)
+{
+    if ((config->address < addrOffset) || (0U != (config->address % 4U)))
+    {
+        return kStatus_Fail;
+    }
+    else
+    {
+        MCAN_SetTxBufferConfig(base, config);
+        return kStatus_Success;
+    }
+}
+
+/*!
  * brief Set Message RAM related configuration.
  *
  * note This function include Standard/extended ID filter, Rx FIFO 0/1, Rx buffer, Tx event FIFO and Tx buffer
@@ -1381,10 +1626,10 @@ void MCAN_SetTxBufferConfig(CAN_Type *base, const mcan_tx_buffer_config_t *confi
 status_t MCAN_SetMessageRamConfig(CAN_Type *base, const mcan_memory_config_t *config)
 {
     uint32_t temp   = 0U;
-    uint32_t eSize  = 0U;
     status_t result = kStatus_Success;
 
     MCAN_EnterInitialMode(base);
+
     if (0U == (config->baseAddr % 4096U))
     {
         MCAN_SetMsgRAMBase(base, config->baseAddr);
@@ -1393,105 +1638,36 @@ status_t MCAN_SetMessageRamConfig(CAN_Type *base, const mcan_memory_config_t *co
     {
         result = kStatus_Fail;
     }
+
     if ((config->stdFilterCfg != NULL) && (kStatus_Success == result))
     {
-        if ((config->stdFilterCfg->idFormat == kMCAN_FrameIDStandard) && (0U == (config->stdFilterCfg->address % 4U)))
-        {
-            temp = config->stdFilterCfg->listSize * 4U;
-            MCAN_SetFilterConfig(base, config->stdFilterCfg);
-        }
-        else
-        {
-            result = kStatus_Fail;
-        }
+        result = MCAN_ConfigStdFilter(base, config->stdFilterCfg, &temp);
     }
     if ((config->extFilterCfg != NULL) && (kStatus_Success == result))
     {
-        if ((config->extFilterCfg->idFormat == kMCAN_FrameIDExtend) && (config->extFilterCfg->address >= temp) &&
-            (0U == (config->extFilterCfg->address % 4U)))
-        {
-            temp = config->extFilterCfg->address + config->extFilterCfg->listSize * 8U;
-            MCAN_SetFilterConfig(base, config->extFilterCfg);
-        }
-        else
-        {
-            result = kStatus_Fail;
-        }
+        result = MCAN_ConfigExtFilter(base, config->extFilterCfg, &temp);
     }
     if ((config->rxFifo0Cfg != NULL) && (kStatus_Success == result))
     {
-        eSize = ((uint32_t)config->rxFifo0Cfg->datafieldSize < 5U) ?
-                    ((uint32_t)config->rxFifo0Cfg->datafieldSize + 4U) :
-                    ((uint32_t)config->rxFifo0Cfg->datafieldSize * 4U - 10U);
-        assert(eSize <= 18U);
-
-        if ((config->rxFifo0Cfg->address >= temp) && (0U == (config->rxFifo0Cfg->address % 4U)))
-        {
-            temp = config->rxFifo0Cfg->address + config->rxFifo0Cfg->elementSize * eSize * 4U;
-            MCAN_SetRxFifo0Config(base, config->rxFifo0Cfg);
-        }
-        else
-        {
-            result = kStatus_Fail;
-        }
+        result = MCAN_ConfigRxFifo0(base, config->rxFifo0Cfg, &temp);
     }
     if ((config->rxFifo1Cfg != NULL) && (kStatus_Success == result))
     {
-        eSize = ((uint32_t)config->rxFifo1Cfg->datafieldSize < 5U) ?
-                    ((uint32_t)config->rxFifo1Cfg->datafieldSize + 4U) :
-                    ((uint32_t)config->rxFifo1Cfg->datafieldSize * 4U - 10U);
-        assert(eSize <= 18U);
-
-        if ((config->rxFifo1Cfg->address >= temp) && (0U == (config->rxFifo1Cfg->address % 4U)))
-        {
-            temp = config->rxFifo1Cfg->address + config->rxFifo1Cfg->elementSize * eSize * 4U;
-            MCAN_SetRxFifo1Config(base, config->rxFifo1Cfg);
-        }
-        else
-        {
-            result = kStatus_Fail;
-        }
+        result = MCAN_ConfigRxFifo1(base, config->rxFifo1Cfg, &temp);
     }
     if ((config->rxBufferCfg != NULL) && (kStatus_Success == result))
     {
-        eSize = ((uint32_t)config->rxBufferCfg->datafieldSize < 5U) ?
-                    ((uint32_t)config->rxBufferCfg->datafieldSize + 4U) :
-                    ((uint32_t)config->rxBufferCfg->datafieldSize * 4U - 10U);
-        assert(eSize <= 18U);
-
-        if ((config->rxBufferCfg->address >= temp) && (0U == (config->rxBufferCfg->address % 4U)))
-        {
-            temp = config->rxBufferCfg->address + 64U * eSize * 4U;
-            MCAN_SetRxBufferConfig(base, config->rxBufferCfg);
-        }
-        else
-        {
-            result = kStatus_Fail;
-        }
+        result = MCAN_ConfigRxBuffer(base, config->rxBufferCfg, &temp);
     }
     if ((config->txFifoCfg != NULL) && (kStatus_Success == result))
     {
-        if ((config->txFifoCfg->address >= temp) && (0U == (config->txFifoCfg->address % 4U)))
-        {
-            temp = config->txFifoCfg->address + config->txFifoCfg->elementSize * 8U;
-            MCAN_SetTxEventFifoConfig(base, config->txFifoCfg);
-        }
-        else
-        {
-            result = kStatus_Fail;
-        }
+        result = MCAN_ConfigTxEventFifo(base, config->txFifoCfg, &temp);
     }
     if ((config->txBufferCfg != NULL) && (kStatus_Success == result))
     {
-        if ((config->txBufferCfg->address < temp) || (0U != (config->txBufferCfg->address % 4U)))
-        {
-            result = kStatus_Fail;
-        }
-        else
-        {
-            MCAN_SetTxBufferConfig(base, config->txBufferCfg);
-        }
+        result = MCAN_ConfigTxBuffer(base, config->txBufferCfg, temp);
     }
+
     MCAN_EnterNormalMode(base);
 
     return result;
