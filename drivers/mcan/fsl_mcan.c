@@ -442,12 +442,12 @@ static void MCAN_FDCalculateSegments(uint32_t tqNum, mcan_timing_config_t *pconf
 
     if (seg1Temp > MAX_DTSEG1)
     {
-        pconfig->dataseg2 = (uint8_t)(tqNum - MAX_DTSEG1 - 3U);
+        pconfig->dataseg2 = (uint8_t)((tqNum - MAX_DTSEG1 - 3U) & 0xFFU);
         pconfig->dataseg1 = MAX_DTSEG1;
     }
     else
     {
-        pconfig->dataseg1 = (uint8_t)seg1Temp;
+        pconfig->dataseg1 = (uint8_t)(seg1Temp & 0xFFU);
     }
 
     /* sjw is the minimum value of phaseSeg1 and phaseSeg2. */
@@ -487,7 +487,7 @@ static void MCAN_FDGetSegments(uint32_t baudRateFD, uint32_t tqNum, mcan_timing_
         ideal_sp = IDEAL_DATA_SP_4;
     }
     /* distribute time quanta. */
-    pconfig->dataseg2 = (uint8_t)(tqNum - (tqNum * ideal_sp) / (uint32_t)IDEAL_SP_FACTOR - 1U);
+    pconfig->dataseg2 = (uint8_t)((tqNum - (tqNum * ideal_sp) / (uint32_t)IDEAL_SP_FACTOR - 1U) & 0xFFU);
 
     MCAN_FDCalculateSegments(tqNum, pconfig);
 }
@@ -530,14 +530,14 @@ static bool MCAN_CalculateImprovedNominalTimingValues(uint32_t baudRate,
                       should change a divisible baud rate. */
         }
 
-        configTemp.preDivider = (uint16_t)(sourceClock_Hz / clk - 1U);
+        configTemp.preDivider = (uint16_t)((sourceClock_Hz / clk - 1U) & 0xFFFFU);
         if (configTemp.preDivider > MAX_NBRP)
         {
             break; /* The frequency of source clock is too large or the baud rate is too small, the pre-divider could
                       not handle it. */
         }
         /* Calculates the best timing configuration under current tqNum. */
-        configTemp.seg2 = (uint8_t)(tqNum - (tqNum * IDEAL_NOMINAL_SP) / (uint32_t)IDEAL_SP_FACTOR - 1U);
+        configTemp.seg2 = (uint8_t)((tqNum - (tqNum * IDEAL_NOMINAL_SP) / (uint32_t)IDEAL_SP_FACTOR - 1U) & 0xFFU);
 
         if (configTemp.seg2 > MAX_NTSEG2)
         {
@@ -548,12 +548,12 @@ static bool MCAN_CalculateImprovedNominalTimingValues(uint32_t baudRate,
 
         if (seg1Temp > MAX_NTSEG1)
         {
-            configTemp.seg2 = (uint8_t)(tqNum - MAX_NTSEG1 - 3U);
+            configTemp.seg2 = (uint8_t)((tqNum - MAX_NTSEG1 - 3U) & 0xFFU);
             configTemp.seg1 = MAX_NTSEG1;
         }
         else
         {
-            configTemp.seg1 = (uint8_t)seg1Temp;
+            configTemp.seg1 = (uint8_t)(seg1Temp & 0xFFU);
         }
 
         /* sjw is the minimum value of phaseSeg1 and phaseSeg2. */
@@ -620,7 +620,7 @@ bool MCAN_FDCalculateImprovedTimingValues(uint32_t baudRate,
                     continue; /* Non-supporting: the frequency of clock source is not divisible by target bit rate. */
                 }
 
-                pconfig->datapreDivider = (uint16_t)(sourceClock_Hz / clk - 1U);
+                pconfig->datapreDivider = (uint16_t)((sourceClock_Hz / clk - 1U) & 0xFFFFU);
 
                 if (pconfig->datapreDivider > MAX_DBRP)
                 {
@@ -707,7 +707,7 @@ static void MCAN_FDGetSpecifiedSegments(uint32_t ideal_sp, uint32_t tqNum, mcan_
         tqTemp = tqNum - 1U;
     }
 
-    pconfig->dataseg2 = (uint8_t)(tqNum - tqTemp - 1U);
+    pconfig->dataseg2 = (uint8_t)((tqNum - tqTemp - 1U) & 0xFFU);
 
     MCAN_FDCalculateSegments(tqNum, pconfig);
 }
@@ -783,7 +783,7 @@ bool MCAN_FDCalculateSpecifiedTimingValues(uint32_t sourceClock_Hz,
                     continue; /* Non-supporting: the frequency of clock source is not divisible by target bit rate. */
                 }
 
-                pconfig->datapreDivider = (uint16_t)(sourceClock_Hz / clk - 1U);
+                pconfig->datapreDivider = (uint16_t)((sourceClock_Hz / clk - 1U) & 0xFFFFU);
                 if (pconfig->datapreDivider > MAX_DBRP)
                 {
                     break; /* The frequency of source clock is too large or the bit rate is too small, the pre-divider
@@ -939,12 +939,12 @@ static void MCAN_CalculateSegments(uint32_t tqNum, mcan_timing_config_t *pconfig
 
     if (seg1Temp > MAX_NTSEG1)
     {
-        pconfig->seg2 = (uint8_t)(tqNum - MAX_NTSEG1 - 3U);
+        pconfig->seg2 = (uint8_t)((tqNum - MAX_NTSEG1 - 3U) & 0xFFU);
         pconfig->seg1 = MAX_NTSEG1;
     }
     else
     {
-        pconfig->seg1 = (uint8_t)seg1Temp;
+        pconfig->seg1 = (uint8_t)(seg1Temp & 0xFFU);
     }
 
     /* sjw is the minimum value of phaseSeg1 and phaseSeg2. */
@@ -981,7 +981,7 @@ static void MCAN_GetSegments(uint32_t baudRate, uint32_t tqNum, mcan_timing_conf
     }
 
     /* distribute time quanta. */
-    pconfig->seg2 = (uint8_t)(tqNum - (tqNum * ideal_sp) / (uint32_t)IDEAL_SP_FACTOR - 1U);
+    pconfig->seg2 = (uint8_t)((tqNum - (tqNum * ideal_sp) / (uint32_t)IDEAL_SP_FACTOR - 1U) & 0xFFU);
 
     MCAN_CalculateSegments(tqNum, pconfig);
 }
@@ -1020,7 +1020,7 @@ bool MCAN_CalculateImprovedTimingValues(uint32_t baudRate, uint32_t sourceClock_
                       should change a divisible baud rate. */
         }
 
-        configTemp.preDivider = (uint16_t)(sourceClock_Hz / clk - 1U);
+        configTemp.preDivider = (uint16_t)((sourceClock_Hz / clk - 1U) & 0xFFFFU);
         if (configTemp.preDivider > MAX_NBRP)
         {
             break; /* The frequency of source clock is too large or the baud rate is too small, the pre-divider could
@@ -1065,7 +1065,7 @@ static void MCAN_GetSpecifiedSegments(uint32_t ideal_sp, uint32_t tqNum, mcan_ti
         tqTemp = tqNum - 1U;
     }
 
-    pconfig->seg2 = (uint8_t)(tqNum - tqTemp - 1U);
+    pconfig->seg2 = (uint8_t)((tqNum - tqTemp - 1U) & 0xFFU);
 
     MCAN_CalculateSegments(tqNum, pconfig);
 }
@@ -1109,6 +1109,8 @@ bool MCAN_CalculateSpecifiedTimingValues(uint32_t sourceClock_Hz,
     bool fgRet                      = false;
     uint32_t spOld                  = 0;
     uint32_t spNew                  = 0;
+    uint32_t spDiff                 = 0;
+    uint32_t spOldDiff              = 0;
     uint64_t propDealy              = 0;
     uint64_t tqPropDealy            = 0;
     mcan_timing_config_t configTemp = {0};
@@ -1141,7 +1143,7 @@ bool MCAN_CalculateSpecifiedTimingValues(uint32_t sourceClock_Hz,
                       should change a divisible baud rate. */
         }
 
-        configTemp.preDivider = (uint16_t)(sourceClock_Hz / clk - 1U);
+        configTemp.preDivider = (uint16_t)((sourceClock_Hz / clk - 1U) & 0xFFFFU);
         if (configTemp.preDivider > MAX_NBRP)
         {
             break; /* The frequency of source clock is too large or the baud rate is too small, the pre-divider could
@@ -1162,7 +1164,16 @@ bool MCAN_CalculateSpecifiedTimingValues(uint32_t sourceClock_Hz,
             fgRet = true;
             break;
         }
-        else if (abs((int)spNew - (int)pParamConfig->nominalSP) < abs((int)spOld - (int)pParamConfig->nominalSP))
+
+        /* INT31-C & INT30-C: Use unsigned arithmetic instead of signed cast */
+        spDiff = (spNew >= pParamConfig->nominalSP) ? 
+                 (spNew - pParamConfig->nominalSP) : 
+                 (pParamConfig->nominalSP - spNew);
+        spOldDiff = (spOld >= pParamConfig->nominalSP) ? 
+                    (spOld - pParamConfig->nominalSP) : 
+                    (pParamConfig->nominalSP - spOld);
+
+        if (spDiff < spOldDiff)
         {
             pconfig->preDivider = configTemp.preDivider;
             pconfig->rJumpwidth = configTemp.rJumpwidth;
