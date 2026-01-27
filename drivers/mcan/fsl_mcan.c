@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022 NXP
+ * Copyright 2016-2022, 2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1346,6 +1346,8 @@ void MCAN_SetTxEventFifoConfig(CAN_Type *base, const mcan_tx_fifo_config_t *conf
  */
 void MCAN_SetTxBufferConfig(CAN_Type *base, const mcan_tx_buffer_config_t *config)
 {
+    assert(config->fqSize <= 32U);
+    assert(config->dedicatedSize <= 32U);
     assert((config->dedicatedSize + config->fqSize) <= 32U);
 
     /* Set Tx Buffer start address, size, fifo/queue mode. */
@@ -1410,6 +1412,8 @@ status_t MCAN_SetMessageRamConfig(CAN_Type *base, const mcan_memory_config_t *co
         eSize = ((uint32_t)config->rxFifo0Cfg->datafieldSize < 5U) ?
                     ((uint32_t)config->rxFifo0Cfg->datafieldSize + 4U) :
                     ((uint32_t)config->rxFifo0Cfg->datafieldSize * 4U - 10U);
+        assert(eSize <= 18U);
+
         if ((config->rxFifo0Cfg->address >= temp) && (0U == (config->rxFifo0Cfg->address % 4U)))
         {
             temp = config->rxFifo0Cfg->address + config->rxFifo0Cfg->elementSize * eSize * 4U;
@@ -1425,6 +1429,8 @@ status_t MCAN_SetMessageRamConfig(CAN_Type *base, const mcan_memory_config_t *co
         eSize = ((uint32_t)config->rxFifo1Cfg->datafieldSize < 5U) ?
                     ((uint32_t)config->rxFifo1Cfg->datafieldSize + 4U) :
                     ((uint32_t)config->rxFifo1Cfg->datafieldSize * 4U - 10U);
+        assert(eSize <= 18U);
+
         if ((config->rxFifo1Cfg->address >= temp) && (0U == (config->rxFifo1Cfg->address % 4U)))
         {
             temp = config->rxFifo1Cfg->address + config->rxFifo1Cfg->elementSize * eSize * 4U;
@@ -1440,6 +1446,8 @@ status_t MCAN_SetMessageRamConfig(CAN_Type *base, const mcan_memory_config_t *co
         eSize = ((uint32_t)config->rxBufferCfg->datafieldSize < 5U) ?
                     ((uint32_t)config->rxBufferCfg->datafieldSize + 4U) :
                     ((uint32_t)config->rxBufferCfg->datafieldSize * 4U - 10U);
+        assert(eSize <= 18U);
+
         if ((config->rxBufferCfg->address >= temp) && (0U == (config->rxBufferCfg->address % 4U)))
         {
             temp = config->rxBufferCfg->address + 64U * eSize * 4U;

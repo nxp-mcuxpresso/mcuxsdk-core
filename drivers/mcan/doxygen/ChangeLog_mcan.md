@@ -1,5 +1,10 @@
 # MCAN
 
+## [2.4.3]
+
+- Bug Fixes
+  - Fixed violations of the CERT INT30-C INT31-C.
+
 ## [2.4.2]
 
 - Bug Fixes
