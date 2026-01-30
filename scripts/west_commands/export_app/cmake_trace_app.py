@@ -1,4 +1,4 @@
-# Copyright 2025 NXP
+# Copyright 2025-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -8,6 +8,7 @@ import json
 import yaml
 import copy
 import glob
+import re
 from functools import cached_property
 from pathlib import Path
 from typing import Union
@@ -182,6 +183,94 @@ class CmakeTraceApp(CmakeApp):
         with open(debug_info_yml, 'w') as f:
             yaml.dump(debug_data, f, default_flow_style=False, sort_keys=False)
         logger.debug(f"Debug info dumped to {debug_info_yml}")
+
+    def update_readme_paths(self):
+        readme_path = self.output_dir / 'readme.md'
+        if not readme_path.exists():
+            return
+        
+        current_board = self.options.cmake_variables.get('board')
+        if not current_board:
+            logger.warning("No board specified, skipping readme update")
+            return
+        
+        with open(readme_path, 'r') as f:
+            lines = f.readlines()
+        
+        updated_lines = []
+        in_boards_section = False
+        board_readme_path = None
+        
+        for i, line in enumerate(lines):
+            # Check if we found the "## Supported Boards" section
+            if '## Supported Boards' in line:
+                in_boards_section = True
+                updated_lines.append(line)
+                continue
+            
+            # Check if we're still in the Supported Boards section
+            if in_boards_section and line.startswith('##'):
+                in_boards_section = False
+
+            # Filter board entries - only keep the current board
+            if in_boards_section and line.strip().startswith('-'):
+                # Extract board ID from the line (e.g., "- [BOARD-NAME](...)")
+                if current_board in line.lower() or current_board.replace('_', '') in line.lower():
+                    # Extract board name and replace link with anchor
+                    match = re.search(r'-\s*\[(.*?)\]\((.*?)\)', line)
+                    if match:
+                        board_name = match.group(1)
+                        board_readme_rel_path = match.group(2)
+                        board_readme_path = self.source_dir / board_readme_rel_path
+                        
+                        # Replace link with anchor to board-specific section
+                        updated_line = f'- [{board_name}](#board-specific-information-for-{current_board})\n'
+                        updated_lines.append(updated_line)
+                continue
+
+            # Replace any number of ../ before _boards with example_root/ in other lines
+            if '_boards' in line:
+                line = re.sub(r'(\.\./)+_boards', 'example_root/_boards', line)
+            
+            updated_lines.append(line)
+        
+        # Merge board-specific readme if found
+        if board_readme_path and board_readme_path.exists():
+            updated_lines.append('\n---\n\n')
+            updated_lines.append(f'## Board-Specific Information for {current_board}\n\n')
+            
+            with open(board_readme_path, 'r') as f:
+                board_lines = f.readlines()
+            
+            # Convert Setext-style headers to ATX-style (## format)
+            i = 0
+            while i < len(board_lines):
+                line = board_lines[i]
+                
+                # Check if next line is a Setext underline
+                if i + 1 < len(board_lines):
+                    next_line = board_lines[i + 1]
+                    
+                    # H1: ===== -> ###
+                    if next_line.strip() and all(c == '=' for c in next_line.strip()):
+                        updated_lines.append(f'### {line}')
+                        i += 2  # Skip the underline
+                        continue
+                    
+                    # H2: ----- -> ####
+                    elif next_line.strip() and all(c == '-' for c in next_line.strip()):
+                        updated_lines.append(f'#### {line}')
+                        i += 2  # Skip the underline
+                        continue
+                
+                # Keep other lines as-is
+                updated_lines.append(line)
+                i += 1
+        
+        with open(readme_path, 'w') as f:
+            f.writelines(updated_lines)
+        
+        logger.debug(f"Updated readme.md for board {current_board}")
 
     def process_example_yml(self, target_apps=[]):
         """

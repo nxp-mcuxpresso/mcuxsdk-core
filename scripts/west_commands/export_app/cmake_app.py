@@ -1,4 +1,4 @@
-# Copyright 2025 NXP
+# Copyright 2025-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -8,6 +8,7 @@ import logging
 import yaml
 import shutil
 import re
+import textwrap
 from copy import deepcopy
 from pathlib import Path
 from .cmake_parser import *
@@ -88,10 +89,57 @@ class CmakeApp(object):
             shutil.copy(conf_file, self.output_dir / conf_file.name)
         if (ide_yml := self.source_dir / 'IDE.yml').exists():
             shutil.copy(ide_yml, self.output_dir / 'IDE.yml')
+        for md_file in self.source_dir.glob('*.md'):
+            shutil.copy(md_file, self.output_dir / md_file.name)
+        try:
+            self.update_readme_paths()
+        except Exception:
+            # Bypass all exceptions from readme update
+            pass
+
         if extra_files:
             self.copy_extra_files(extra_files)
         if replacements:
             self.replacements = replacements
+
+    def update_readme_paths(self):
+        '''
+        Update the readme.md file to replace relative paths with example_root variable
+        and add a note under ## Supported Boards section
+        '''
+        readme_path = self.output_dir / 'readme.md'
+        if not readme_path.exists():
+            return
+        
+        with open(readme_path, 'r') as f:
+            lines = f.readlines()
+        
+        updated_lines = []
+        supported_boards_found = False
+        note_added = False
+        
+        for line in lines:
+            if '## Supported Boards' in line:
+                supported_boards_found = True
+                updated_lines.append(line)
+                continue
+            
+            # Add note after "## Supported Boards" if not already added
+            if supported_boards_found and not note_added and line.strip():
+                updated_lines.append(textwrap.dedent('''\
+                        \n**NOTE: For freestanding samples, the link below may not work. \
+Please switch to edit mode and replace example_root with the real path**\n\n
+                        '''))
+                note_added = True
+            
+            # Replace ../_boards with example_root/_boards
+            if '_boards' in line:
+                line = re.sub(r'(\.\./)+_boards', 'example_root/_boards', line)
+            
+            updated_lines.append(line)
+        
+        with open(readme_path, 'w') as f:
+            f.writelines(updated_lines)
 
     def process_example_yml(self, target_apps=[]):
         custom_conf_files = []

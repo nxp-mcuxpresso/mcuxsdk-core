@@ -1,5 +1,9 @@
 # Export App
 
+## [26.03.00]
+- New Features
+  - Support copy example readme.md to output directory. If using `--bf`, it will automatically merge the copied board readme file.
+
 ## [25.12.00]
 
 - New Features
