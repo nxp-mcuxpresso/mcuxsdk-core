@@ -2617,6 +2617,10 @@ static void LPI2C_CommonIRQHandler(LPI2C_Type *base, uint32_t instance)
     SDK_ISR_EXIT_BARRIER;
 }
 
+/*
+ * $Branch Coverage Justification$
+ * Usage of LPI2C_DriverIRQHandler is device specific.
+ */
 void LPI2C_DriverIRQHandler(uint32_t instance)
 {
     if (instance < ARRAY_SIZE(kLpi2cBases))
