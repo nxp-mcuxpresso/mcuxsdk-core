@@ -19,8 +19,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.11.0. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 11, 0))
+/*! @brief SPC driver version 2.12.0. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 12, 0))
 /*! @} */
 
 #define SPC_EVD_CFG_REG_EVDISO_SHIFT   0UL
@@ -118,6 +118,7 @@ enum _spc_analog_module_control
 {
     kSPC_controlVref       = 1UL << 0UL,  /*!< Enable/disable VREF in active or low-power modes. */
     kSPC_controlUsb3vDet   = 1UL << 1UL,  /*!< Enable/disable USB3V_Det in active or low-power modes. */
+    kSPC_controlVbat       = 1UL << 2UL,  /*!< Enable/disable VBAT in active or low-power modes. */
     kSPC_controlDac0       = 1UL << 4UL,  /*!< Enable/disable DAC0 in active or low-power modes. */
     kSPC_controlDac1       = 1UL << 5UL,  /*!< Enable/disable DAC1 in active or low-power modes.  */
     kSPC_controlDac2       = 1UL << 6UL,  /*!< Enable/disable DAC2 in active or low-power modes. */
@@ -125,6 +126,7 @@ enum _spc_analog_module_control
     kSPC_controlOpamp1     = 1UL << 9UL,  /*!< Enable/disable OPAMP1 in active or low-power modes. */
     kSPC_controlOpamp2     = 1UL << 10UL, /*!< Enable/disable OPAMP2 in active or low-power modes. */
     kSPC_controlOpamp3     = 1UL << 11UL, /*!< Enable/disable OPAMP3 in active or low-power modes. */
+    kSPC_controlTsi0       = 1UL << 12UL, /*!< Enable/disable TSI0 in active or low-power modes. */
     kSPC_controlCmp0       = 1UL << 16UL, /*!< Enable/disable CMP0 in active or low-power modes. */
     kSPC_controlCmp1       = 1UL << 17UL, /*!< Enable/disable CMP1 in active or low-power modes. */
     kSPC_controlCmp2       = 1UL << 18UL, /*!< Enable/disable CMP2 in active or low-power modes. */
