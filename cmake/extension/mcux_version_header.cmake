@@ -1,5 +1,5 @@
 #
-# Copyright 2025 NXP
+# Copyright 2025-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -38,8 +38,9 @@ string(TIMESTAMP _copyright_year "%Y")
 math(EXPR MCUXSDK_VERSION_MAJOR_NUM "${MCUXSDK_VERSION_MAJOR}")
 math(EXPR MCUXSDK_VERSION_MINOR_NUM "${MCUXSDK_VERSION_MINOR}")
 
+set(_ver_hdr_in "${CMAKE_CURRENT_BINARY_DIR}/mcuxsdk_version.h.in")
 file(
-  WRITE "${_ver_hdr}"
+  WRITE "${_ver_hdr_in}"
   "/*\n * Copyright ${_copyright_year} NXP\n *\n * SPDX-License-Identifier: BSD-3-Clause\n */\n
 #ifndef MCUXSDK_VERSION_H_
 #define MCUXSDK_VERSION_H_
@@ -54,6 +55,9 @@ ${_pvw_define}
 
 #endif /* MCUXSDK_VERSION_H_ */
 ")
+
+configure_file("${_ver_hdr_in}" "${_ver_hdr}" COPYONLY)
+file(REMOVE "${_ver_hdr_in}")
 
 # Add as preinclude (same pattern as kconfig.cmake)
 if(COMMAND mcux_add_source)
@@ -75,4 +79,5 @@ endif()
 # Cleanup locals
 unset(_ver_dir)
 unset(_ver_hdr)
+unset(_ver_hdr_in)
 unset(_pvw_define)
