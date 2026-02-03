@@ -80,6 +80,7 @@ menu "Middleware"
     osource "middleware/mstp-lib/Kconfig"
 	osource "middleware/safety_iec60730b/Kconfig"
     osource "firmware/edgelock/Kconfig"
+    osource "middleware/neo_isp/isp_sdk/build/mcuxsdk/Kconfig"
 endmenu
 
 # RTOS config
