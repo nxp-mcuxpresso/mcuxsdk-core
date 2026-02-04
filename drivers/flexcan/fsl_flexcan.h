@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexCAN driver version. */
-#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 15, 0))
+#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 15, 1))
 /*! @} */
 
 #if !(defined(FLEXCAN_WAIT_TIMEOUT) && FLEXCAN_WAIT_TIMEOUT)
@@ -48,6 +48,17 @@
 #define FLEXCAN_MODULE_TIMEOUT CONFIG_FLEXCAN_MODULE_TIMEOUT
 #else
 #define FLEXCAN_MODULE_TIMEOUT 0     /* Wait forever until FlexCAN register access complete. */
+#endif
+#endif
+
+/*!
+ * @brief Max loops to wait for FlexCAN RX Message Buffer busy.
+ */
+#ifndef FLEXCAN_MB_BUSY_TIMEOUT
+#ifdef CONFIG_FLEXCAN_MB_BUSY_TIMEOUT
+#define FLEXCAN_MB_BUSY_TIMEOUT CONFIG_FLEXCAN_MB_BUSY_TIMEOUT
+#else
+#define FLEXCAN_MB_BUSY_TIMEOUT 0     /* Wait forever until FlexCAN RX Message Buffer busy. */
 #endif
 #endif
 
@@ -2230,7 +2241,8 @@ status_t FLEXCAN_WriteTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_frame_t 
  * @param pRxFrame Pointer to CAN message frame structure for reception.
  * @retval kStatus_Success            - Rx Message Buffer is full and has been read successfully.
  * @retval kStatus_FLEXCAN_RxOverflow - Rx Message Buffer is already overflowed and has been read successfully.
- * @retval kStatus_Fail               - Rx Message Buffer is empty.
+ * @retval kStatus_Fail               - Rx Message Buffer is empty or inactive.
+ * @retval kStatus_Timeout            - Timeout when wait for Rx Message Buffer busy.
  */
 status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFrame);
 
@@ -2263,7 +2275,8 @@ status_t FLEXCAN_WriteFDTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_fd_fra
  * @param pRxFrame Pointer to CAN FD message frame structure for reception.
  * @retval kStatus_Success            - Rx Message Buffer is full and has been read successfully.
  * @retval kStatus_FLEXCAN_RxOverflow - Rx Message Buffer is already overflowed and has been read successfully.
- * @retval kStatus_Fail               - Rx Message Buffer is empty.
+ * @retval kStatus_Fail               - Rx Message Buffer is empty or inactive.
+ * @retval kStatus_Timeout            - Timeout when wait for Rx Message Buffer busy.
  */
 status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *pRxFrame);
 #endif

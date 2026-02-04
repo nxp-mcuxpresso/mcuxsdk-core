@@ -1,5 +1,12 @@
 # FLEXCAN
 
+## [2.15.1]
+
+- Improvements
+  - Wait for RX Message Buffer busy state cleared before reading in following APIs.
+    - `FLEXCAN_ReadRxMb`
+    - `FLEXCAN_ReadFDRxMb`
+
 ## [2.15.0]
 
 - Improvements

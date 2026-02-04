@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -157,10 +157,10 @@ enum _flexcan_state
 enum _flexcan_mb_code_rx
 {
     kFLEXCAN_RxMbInactive = 0x0, /*!< MB is not active.*/
+    kFLEXCAN_RxMbBusy     = 0x1, /*!< FlexCAN is updating the contents of the MB, The CPU must not access the MB.*/
     kFLEXCAN_RxMbFull     = 0x2, /*!< MB is full.*/
     kFLEXCAN_RxMbEmpty    = 0x4, /*!< MB is active and empty.*/
     kFLEXCAN_RxMbOverrun  = 0x6, /*!< MB is overwritten into a full buffer.*/
-    kFLEXCAN_RxMbBusy     = 0x8, /*!< FlexCAN is updating the contents of the MB, The CPU must not access the MB.*/
     kFLEXCAN_RxMbRanswer  = 0xA, /*!< A frame was configured to recognize a Remote Request Frame and transmit a
                                       Response Frame in return.*/
     kFLEXCAN_RxMbNotUsed = 0xF,  /*!< Not used.*/
@@ -3196,7 +3196,8 @@ status_t FLEXCAN_WriteTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_frame_t 
  * param pRxFrame Pointer to CAN message frame structure for reception.
  * retval kStatus_Success            - Rx Message Buffer is full and has been read successfully.
  * retval kStatus_FLEXCAN_RxOverflow - Rx Message Buffer is already overflowed and has been read successfully.
- * retval kStatus_Fail               - Rx Message Buffer is empty.
+ * retval kStatus_Fail               - Rx Message Buffer is empty or inactive.
+ * retval kStatus_Timeout            - Timeout when wait for Rx Message Buffer busy.
  */
 status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFrame)
 {
@@ -3213,6 +3214,9 @@ status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFra
     uint32_t word1_temp;
     uint32_t rx_code;
     status_t status;
+#if FLEXCAN_MB_BUSY_TIMEOUT
+    uint32_t timeout = FLEXCAN_MB_BUSY_TIMEOUT;
+#endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ERRATA_050443) && FSL_FEATURE_FLEXCAN_HAS_ERRATA_050443)
     uint32_t primask;
@@ -3224,7 +3228,17 @@ status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFra
     }
 #endif
     /* Read CS field of Rx Message Buffer to lock Message Buffer. */
-    cs_temp = base->MB[mbIdx].CS;
+    do
+    {
+#if FLEXCAN_MB_BUSY_TIMEOUT
+        if (timeout-- == 0U)
+        {
+            return kStatus_Timeout;
+        }
+#endif
+        cs_temp = base->MB[mbIdx].CS;
+    } while (0U != (((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT) & (uint32_t)kFLEXCAN_RxMbBusy));
+
     /* Get Rx Message Buffer Code field. */
     rx_code = (cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT;
 
@@ -3389,7 +3403,8 @@ status_t FLEXCAN_WriteFDTxMb(CAN_Type *base, uint8_t mbIdx, const flexcan_fd_fra
  * param pRxFrame Pointer to CAN FD message frame structure for reception.
  * retval kStatus_Success            - Rx Message Buffer is full and has been read successfully.
  * retval kStatus_FLEXCAN_RxOverflow - Rx Message Buffer is already overflowed and has been read successfully.
- * retval kStatus_Fail               - Rx Message Buffer is empty.
+ * retval kStatus_Fail               - Rx Message Buffer is empty or inactive.
+ * retval kStatus_Timeout            - Timeout when wait for Rx Message Buffer busy.
  */
 status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *pRxFrame)
 {
@@ -3410,6 +3425,9 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
     uint32_t payload_dword;
     volatile uint32_t *mbAddr = &(base->MB[0].CS);
     uint32_t offset           = FLEXCAN_GetFDMailboxOffset(base, mbIdx);
+#if FLEXCAN_MB_BUSY_TIMEOUT
+    uint32_t timeout = FLEXCAN_MB_BUSY_TIMEOUT;
+#endif
 
     /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64 Bytes payload. */
     payload_dword = 1UL << (dataSize + 1U);
@@ -3429,7 +3447,16 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
 #endif
 #endif
     /* Read CS field of Rx Message Buffer to lock Message Buffer. */
-    cs_temp = mbAddr[offset];
+    do
+    {
+#if FLEXCAN_MB_BUSY_TIMEOUT
+        if (timeout-- == 0U)
+        {
+            return kStatus_Timeout;
+        }
+#endif
+        cs_temp = mbAddr[offset];
+    } while (0U != (((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT) & (uint32_t)kFLEXCAN_RxMbBusy));
 
     /* Get Rx Message Buffer Code field. */
     rx_code = (uint8_t)((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT);

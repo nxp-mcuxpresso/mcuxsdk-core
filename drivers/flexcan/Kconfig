@@ -1,4 +1,4 @@
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -40,5 +40,14 @@ if MCUX_COMPONENT_driver.flexcan
             This is the maximum number of loops to wait for flexcan register access complete.
             Timeout includes waiting for Freeze Mode Acknowledge, Low-Power Mode Acknowledge, Soft Reset,
             CBT and FDCBT register write complete.
+            If set to 0, it will wait indefinitely until the register write complete.
+endif
+
+if MCUX_COMPONENT_driver.flexcan
+    config FLEXCAN_MB_BUSY_TIMEOUT
+        int "Max loops to wait for FlexCAN RX Message Buffer busy (0 means wait forever)"
+        default 0
+        help
+            This is the maximum number of loops to wait for FlexCAN RX Message Buffer busy.
             If set to 0, it will wait indefinitely until the register write complete.
 endif
