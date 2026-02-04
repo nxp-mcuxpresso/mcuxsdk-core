@@ -6,6 +6,7 @@
   - Wait for RX Message Buffer busy state cleared before reading in following APIs.
     - `FLEXCAN_ReadRxMb`
     - `FLEXCAN_ReadFDRxMb`
+  - Simplify RX Message Buffer handling sequence in interrupt handler `FLEXCAN_SubHandlerForMB`.
 
 ## [2.15.0]
 

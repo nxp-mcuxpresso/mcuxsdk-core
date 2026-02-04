@@ -18,8 +18,8 @@
  * FDEN bit exists on platform which FlexCAN instances have CANFD mode, so code will not take if branch.
  * 
  * $Justification flexcan_c_ref_3$
- * In IRQ handle function CODE field of message buffer must be FULL or OVERRUN, because message buffer has
- * received a frame successfully after move-in process, so code will not take else branch.
+ * It is very hard to reproduce RX Message Buffer code as busy state in code coverage test. 
+ * So code will always take equal to 0 branch.
  * 
  * $Justification flexcan_c_ref_4$
  * On platform with 32 message buffers, startMbIdx is 0, endMbIdx is 31, startIdx and endIdx must be 0,
@@ -3227,6 +3227,11 @@ status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFra
         primask = DisableGlobalIRQ();
     }
 #endif
+    /*
+     * $Branch Coverage Justification$
+     * (0U != (((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT) & (uint32_t)kFLEXCAN_RxMbBusy)) not covered.
+     * $ref flexcan_c_ref_3$.
+     */
     /* Read CS field of Rx Message Buffer to lock Message Buffer. */
     do
     {
@@ -3237,7 +3242,7 @@ status_t FLEXCAN_ReadRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_frame_t *pRxFra
         }
 #endif
         cs_temp = base->MB[mbIdx].CS;
-    } while (0U != (((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT) & (uint32_t)kFLEXCAN_RxMbBusy));
+    } while (0U != (((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT) & (uint32_t)kFLEXCAN_RxMbBusy));/* GCOVR_EXCL_BR_LINE */
 
     /* Get Rx Message Buffer Code field. */
     rx_code = (cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT;
@@ -3446,6 +3451,11 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
     }
 #endif
 #endif
+    /*
+     * $Branch Coverage Justification$
+     * (0U != (((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT) & (uint32_t)kFLEXCAN_RxMbBusy)) not covered.
+     * $ref flexcan_c_ref_3$.
+     */
     /* Read CS field of Rx Message Buffer to lock Message Buffer. */
     do
     {
@@ -3456,7 +3466,7 @@ status_t FLEXCAN_ReadFDRxMb(CAN_Type *base, uint8_t mbIdx, flexcan_fd_frame_t *p
         }
 #endif
         cs_temp = mbAddr[offset];
-    } while (0U != (((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT) & (uint32_t)kFLEXCAN_RxMbBusy));
+    } while (0U != (((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT) & (uint32_t)kFLEXCAN_RxMbBusy));/* GCOVR_EXCL_BR_LINE */
 
     /* Get Rx Message Buffer Code field. */
     rx_code = (uint8_t)((cs_temp & CAN_CS_CODE_MASK) >> CAN_CS_CODE_SHIFT);
@@ -5142,50 +5152,30 @@ static status_t FLEXCAN_SubHandlerForMB(CAN_Type *base, flexcan_handle_t *handle
             if (0U != (base->MCR & CAN_MCR_FDEN_MASK))
             {
                 status = FLEXCAN_ReadFDRxMb(base, (uint8_t)result, handle->mbFDFrameBuf[result]);
-                /*
-                 * $Branch Coverage Justification$
-                 * (kStatus_Success != status) and (kStatus_FLEXCAN_RxOverflow != status) not covered.
-                 * $ref flexcan_c_ref_3$.
-                 */
-                if ((kStatus_Success == status) || (kStatus_FLEXCAN_RxOverflow == status)) /* GCOVR_EXCL_BR_LINE */
-                {
-                    /* Align the current index of RX MB timestamp to the timestamp array by handle. */
-                    handle->timestamp[result] = handle->mbFDFrameBuf[result]->timestamp;
 
-                    if (kStatus_Success == status)
-                    {
-                        status = kStatus_FLEXCAN_RxIdle;
-                    }
-                }
-            }
-            else
-#endif
-            {
-                status = FLEXCAN_ReadRxMb(base, (uint8_t)result, handle->mbFrameBuf[result]);
-                /*
-                 * $Branch Coverage Justification$
-                 * (kStatus_Success != status) and (kStatus_FLEXCAN_RxOverflow != status) not covered.
-                 * $ref flexcan_c_ref_3$.
-                 */
-                if ((kStatus_Success == status) || (kStatus_FLEXCAN_RxOverflow == status)) /* GCOVR_EXCL_BR_LINE */
-                {
-                    /* Align the current index of RX MB timestamp to the timestamp array by handle. */
-                    handle->timestamp[result] = handle->mbFrameBuf[result]->timestamp;
+                /* Align the current index of RX MB timestamp to the timestamp array by handle. */
+                handle->timestamp[result] = handle->mbFDFrameBuf[result]->timestamp;
 
-                    if (kStatus_Success == status)
-                    {
-                        status = kStatus_FLEXCAN_RxIdle;
-                    }
+                if (kStatus_Success == status)
+                {
+                    status = kStatus_FLEXCAN_RxIdle;
                 }
-            }
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
-            if (0U != (base->MCR & CAN_MCR_FDEN_MASK))
-            {
+
                 FLEXCAN_TransferFDAbortReceive(base, handle, (uint8_t)result);
             }
             else
 #endif
             {
+                status = FLEXCAN_ReadRxMb(base, (uint8_t)result, handle->mbFrameBuf[result]);
+
+                /* Align the current index of RX MB timestamp to the timestamp array by handle. */
+                handle->timestamp[result] = handle->mbFrameBuf[result]->timestamp;
+
+                if (kStatus_Success == status)
+                {
+                    status = kStatus_FLEXCAN_RxIdle;
+                }
+
                 FLEXCAN_TransferAbortReceive(base, handle, (uint8_t)result);
             }
             break;
