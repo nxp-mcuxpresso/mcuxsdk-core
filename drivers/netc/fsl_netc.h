@@ -227,7 +227,6 @@ typedef enum _netc_tx_ext_flags
  */
 /*! @brief Get SI information from netc_hw_si_idx_t. */
 #define getSiInstance(si) ((uint8_t)((uint16_t)(si) >> 8U))          /*!< The ENETC instance of this SI. */
-#define getSiNum(si)      ((uint8_t)(((uint16_t)(si) >> 4U) & 0xFU)) /*!< The SI number in the ENETC. */
 #define getSiIdx(si)      ((uint8_t)((uint16_t)(si) & 0xFU))         /*!< The actaul index in the netc_hw_si_idx_t. */
 
 /*! @brief ENETC index enumerator */
@@ -4083,6 +4082,21 @@ extern "C" {
 /*******************************************************************************
  * API
  ******************************************************************************/
+
+/*!
+ * @brief Get SI number in the ENETC from netc_hw_si_idx_t.
+ *
+ * @param si
+ * @return uint8_t
+ */
+static inline uint8_t getSiNum(uint16_t si)
+{
+    uint8_t num = (si >> 4U) & 0xFU;
+
+    assert(num < NETC_ENETC_NUM_SI_COUNT);
+
+    return num;
+}
 
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
 /*!
