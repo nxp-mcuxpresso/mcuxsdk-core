@@ -134,9 +134,8 @@ status_t NETC_CmdBDRInit(netc_cbdr_hw_t *base, const netc_cmd_bdr_config_t *conf
     }
     else
     {
-        /* Map function only supports 32-bit now, so here limit 32-bit first */
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-        address = MEMORY_ConvertMemoryMapAddress((uintptr_t)config->bdBase, kMEMORY_Local2DMA);
+        address = NETC_ConvertMemoryMapAddress((uintptr_t)config->bdBase, kMEMORY_Local2DMA);
 #else
         address = (uintptr_t)config->bdBase;
 #endif
@@ -206,7 +205,7 @@ status_t NETC_CmdBDSendCommand(netc_cbdr_hw_t *base,
                 cbd->req.version = 0x2;
                 cbd->req.npf     = 1;
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-                cbd->req.addr = (uintptr_t)MEMORY_ConvertMemoryMapAddress((uint32_t)cbd->req.addr, kMEMORY_Local2DMA);
+                cbd->req.addr = NETC_ConvertMemoryMapAddress(cbd->req.addr, kMEMORY_Local2DMA);
 #endif
             }
         }

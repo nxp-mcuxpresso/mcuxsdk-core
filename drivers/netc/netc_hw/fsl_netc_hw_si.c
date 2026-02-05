@@ -13,10 +13,9 @@ status_t NETC_SIConfigTxBDR(ENETC_SI_Type *base, uint8_t ring, const netc_tx_bdr
     /* Set the MSIX entry index triggered when interrupt occurs. */
     base->SIMSITRVR[ring] = bdrConfig->msixEntryIdx;
 
-    /* Map function only supports 32-bit now, so here limit 32-bit first */
     address = (uintptr_t)bdrConfig->bdArray;
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-    address = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)address, kMEMORY_Local2DMA);
+    address = NETC_ConvertMemoryMapAddress(address, kMEMORY_Local2DMA);
 #endif
 
     /* Set the tx descriptor start/tail pointer, shall be word aligned. */
@@ -53,10 +52,9 @@ status_t NETC_SIConfigRxBDR(ENETC_SI_Type *base, uint8_t ring, const netc_rx_bdr
     /* Set the MSIX entry index triggered when interrupt occurs. */
     base->SIMSIRRVR[ring] = bdrConfig->msixEntryIdx;
 
-    /* Map function only supports 32-bit now, so here limit 32-bit first */
     address = (uintptr_t)bdrConfig->bdArray;
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-    address = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)address, kMEMORY_Local2DMA);
+    address = NETC_ConvertMemoryMapAddress(address, kMEMORY_Local2DMA);
 #endif
 
     /* Set the Rx descriptor address, shall be word aligned. */
@@ -113,7 +111,7 @@ status_t NETC_SIPsiSetRxBuffer(ENETC_SI_Type *base, netc_vsi_number_t vsi, uint6
     bool addrAlign;
 
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-    address = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)address, kMEMORY_Local2DMA);
+    address = NETC_ConvertMemoryMapAddress(address, kMEMORY_Local2DMA);
 #endif
     addrAlign = (address & 0x3FU) == 0U;
     if (addrAlign)
@@ -143,7 +141,7 @@ status_t NETC_SIPsiGetRxMsg(ENETC_SI_Type *base, netc_vsi_number_t vsi, netc_psi
         addrL   = base->PSI_A.VSI_NUM[vsiIdx].PSIVMSGRCVAR0 & ENETC_SI_PSIVMSGRCVAR0_ADDRL_MASK;
         address = ((uint64_t)addrH << 32U) + addrL;
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-        address = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)address, kMEMORY_DMA2Local);
+        address = NETC_ConvertMemoryMapAddress(address, kMEMORY_DMA2Local);
 #endif
         msgInfo->msgBuff = (uint8_t *)(uintptr_t)address;
         msgSize          = (uint8_t)(base->PSI_A.VSI_NUM[vsiIdx].PSIVMSGRCVAR0 & ENETC_SI_PSIVMSGRCVAR0_MSIZE_MASK);
@@ -184,7 +182,7 @@ status_t NETC_SIVsiSendMsg(ENETC_SI_Type *base, uint64_t msgAddr, uint32_t msgLe
     else
     {
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-        address = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)address, kMEMORY_Local2DMA);
+        address = NETC_ConvertMemoryMapAddress(address, kMEMORY_Local2DMA);
 #endif
         addrAlign = (address & 0x3FU) == 0U;
         lenAlign  = (msgLen & 0x1FU) == 0U;

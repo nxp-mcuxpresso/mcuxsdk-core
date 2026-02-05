@@ -4084,6 +4084,26 @@ extern "C" {
  * API
  ******************************************************************************/
 
+#if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
+/*!
+ * @brief Convert address between local memory and DMA. Maximum address size can be 64-bit.
+ *
+ * @param addr
+ * @param direction
+ * @return uint64_t
+ */
+static inline uint64_t NETC_ConvertMemoryMapAddress(uint64_t addr, mem_direction_t direction)
+{
+#if UINTPTR_MAX == UINT32_MAX
+    return (uint64_t)MEMORY_ConvertMemoryMapAddress((uint32_t)(addr & 0xffffffffU), direction);
+#elif UINTPTR_MAX == UINT64_MAX
+    return MEMORY_ConvertMemoryMapAddress(addr, direction);
+#else
+#error "Unsupported pointer size"
+#endif
+}
+#endif
+
 #if defined(__cplusplus)
 }
 #endif

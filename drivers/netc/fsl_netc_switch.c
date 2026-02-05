@@ -677,7 +677,7 @@ status_t SWT_ManagementTxRxConfig(swt_handle_t *handle, ep_handle_t *epHandle, c
             }
 
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-            buffAddr = MEMORY_ConvertMemoryMapAddress((uintptr_t)buffAddr, kMEMORY_Local2DMA);
+            buffAddr = NETC_ConvertMemoryMapAddress(buffAddr, kMEMORY_Local2DMA);
 #endif
             rxDesc->standard.addr = buffAddr;
             rxDesc++;
@@ -904,7 +904,7 @@ status_t SWT_GetTimestampRefResp(swt_handle_t *handle, swt_tsr_resp_t *tsr)
         index     = rxBdRing->extendDesc ? (rxBdRing->index / 2U) : rxBdRing->index;
         rxDmaBuff = rxBdRing->buffArray[index];
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-        rxDmaBuff = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)rxDmaBuff, kMEMORY_Local2DMA);
+        rxDmaBuff = NETC_ConvertMemoryMapAddress(rxDmaBuff, kMEMORY_Local2DMA);
 #endif
         rxDesc->standard.addr = rxDmaBuff;
         /* Updates the receive buffer descriptors flags, only clear necessary field. */

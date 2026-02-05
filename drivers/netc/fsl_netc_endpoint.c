@@ -158,7 +158,7 @@ static status_t EP_RxBufferAllocAll(ep_handle_t *handle, const ep_config_t *conf
             }
 
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-            buffAddr = MEMORY_ConvertMemoryMapAddress((uintptr_t)buffAddr, kMEMORY_Local2DMA);
+            buffAddr = NETC_ConvertMemoryMapAddress(buffAddr, kMEMORY_Local2DMA);
 #endif
             rxDesc->standard.addr = buffAddr;
             rxDesc++;
@@ -826,8 +826,7 @@ status_t EP_SendFrameCommon(ep_handle_t *handle,
             txDesTemp = &txBdRing->bdBase[txBdRing->producerIndex];
             NETC_ClearTxDescriptor(txDesTemp);
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-            address =
-                (uintptr_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)(uint8_t *)txBuff->buffer, kMEMORY_Local2DMA);
+            address = NETC_ConvertMemoryMapAddress((uintptr_t)(uint8_t *)txBuff->buffer, kMEMORY_Local2DMA);
 #else
             address = (uintptr_t)(uint32_t *)txBuff->buffer;
 #endif
@@ -1226,7 +1225,7 @@ void EP_DropFrame(ep_handle_t *handle, netc_rx_bdr_t *rxBdRing, uint8_t ring)
         index     = rxBdRing->extendDesc ? (rxBdRing->index / 2U) : rxBdRing->index;
         rxDmaBuff = rxBdRing->buffArray[index];
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-        rxDmaBuff = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)rxDmaBuff, kMEMORY_Local2DMA);
+        rxDmaBuff = NETC_ConvertMemoryMapAddress(rxDmaBuff, kMEMORY_Local2DMA);
 #endif
         rxDesc->standard.addr = rxDmaBuff;
 
@@ -1308,7 +1307,7 @@ status_t EP_ReceiveFrameCopyCommon(ep_handle_t *handle,
             index     = rxBdRing->extendDesc ? (rxBdRing->index / 2U) : rxBdRing->index;
             rxDmaBuff = rxBdRing->buffArray[index];
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-            rxDmaBuff = (uintptr_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)rxDmaBuff, kMEMORY_Local2DMA);
+            rxDmaBuff = NETC_ConvertMemoryMapAddress(rxDmaBuff, kMEMORY_Local2DMA);
 #endif
             rxDesc->standard.addr = rxDmaBuff;
 
@@ -1408,7 +1407,7 @@ status_t EP_ReceiveFrameCommon(ep_handle_t *handle,
 
         rxDmaBuff = (uint64_t)(uintptr_t)(uint8_t *)newBuff;
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-        rxDmaBuff = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)rxDmaBuff, kMEMORY_Local2DMA);
+        rxDmaBuff = NETC_ConvertMemoryMapAddress(rxDmaBuff, kMEMORY_Local2DMA);
 #endif
         rxDesc->standard.addr = rxDmaBuff;
 

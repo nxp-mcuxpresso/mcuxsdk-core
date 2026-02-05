@@ -1061,7 +1061,7 @@ status_t EP_PsiRxMsg(ep_handle_t *handle, netc_vsi_number_t vsi, netc_psi_rx_msg
         addrL   = base->PSI_A.VSI_NUM[vsiIdx].PSIVMSGRCVAR0 & ENETC_SI_PSIVMSGRCVAR0_ADDRL_MASK;
         address = ((uint64_t)addrH << 32U) + addrL;
 #if defined(FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET) && FSL_FEATURE_MEMORY_HAS_ADDRESS_OFFSET
-        address = (uint64_t)MEMORY_ConvertMemoryMapAddress((uintptr_t)address, kMEMORY_DMA2Local);
+        address = NETC_ConvertMemoryMapAddress(address, kMEMORY_DMA2Local);
 #endif
         msgInfo->msgBuff = (uint8_t *)(uintptr_t)address;
         msgSize          = (uint8_t)(base->PSI_A.VSI_NUM[vsiIdx].PSIVMSGRCVAR0 & ENETC_SI_PSIVMSGRCVAR0_MSIZE_MASK);
