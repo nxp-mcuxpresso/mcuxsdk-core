@@ -4,6 +4,7 @@
 
 - New Feature
   - Added support to enable transmitter RTS and configure transmitter RTS polarity.
+  - Added support to enable Transmit Data Inversion.
 
 ## [2.10.0]
 

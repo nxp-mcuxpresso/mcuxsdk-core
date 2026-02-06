@@ -278,6 +278,7 @@ typedef struct _lpuart_config
 #if defined(FSL_FEATURE_LPUART_HAS_CTRL_SWAP) && FSL_FEATURE_LPUART_HAS_CTRL_SWAP
     bool swapTxdRxd;                          /*!< Swap TXD and RXD pins */
 #endif
+    bool inverseTxd;                          /*!< Transmit Data Inversion - Setting true reverses the polarity of the transmitted data output */
 } lpuart_config_t;
 
 /*! @brief LPUART transfer structure. */

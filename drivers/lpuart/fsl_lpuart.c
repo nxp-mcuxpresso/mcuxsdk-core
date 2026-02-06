@@ -488,7 +488,7 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
         base->BAUD &= ~LPUART_BAUD_M10_MASK;
 
         temp = base->CTRL & ~(LPUART_CTRL_PE_MASK | LPUART_CTRL_PT_MASK | LPUART_CTRL_M_MASK | LPUART_CTRL_ILT_MASK |
-                              LPUART_CTRL_IDLECFG_MASK);
+                              LPUART_CTRL_IDLECFG_MASK | LPUART_CTRL_TXINV_MASK);
 
         temp |= (uint8_t)config->parityMode | LPUART_CTRL_IDLECFG(config->rxIdleConfig) |
                 LPUART_CTRL_ILT(config->rxIdleType);
@@ -524,6 +524,10 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
             temp &= ~LPUART_CTRL_SWAP_MASK;
         }
 #endif
+        if (config->inverseTxd == true)
+        {
+            temp |= LPUART_CTRL_TXINV_MASK;
+        }
 
         base->CTRL = temp;
 
@@ -757,6 +761,7 @@ void LPUART_GetDefaultConfig(lpuart_config_t *config)
 #if defined(FSL_FEATURE_LPUART_HAS_CTRL_SWAP) && FSL_FEATURE_LPUART_HAS_CTRL_SWAP
     config->swapTxdRxd   = false;
 #endif
+    config->inverseTxd = false;
 }
 
 /*!
