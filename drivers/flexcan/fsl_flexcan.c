@@ -1155,19 +1155,15 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
 #endif
 
 #if defined(CAN_CTRL1_CLKSRC_MASK)
-#if (defined(FSL_FEATURE_FLEXCAN_SUPPORT_ENGINE_CLK_SEL_REMOVE) && FSL_FEATURE_FLEXCAN_SUPPORT_ENGINE_CLK_SEL_REMOVE)
-    if (0 == FSL_FEATURE_FLEXCAN_INSTANCE_SUPPORT_ENGINE_CLK_SEL_REMOVEn(base))
-#endif /* FSL_FEATURE_FLEXCAN_SUPPORT_ENGINE_CLK_SEL_REMOVE */
-    {
-        /* Disable FlexCAN Module. */
-        (void)FLEXCAN_Enable(base, false);
+    /* Disable FlexCAN Module. */
+    (void)FLEXCAN_Enable(base, false);
 
-        /* Protocol-Engine clock source selection, This bit must be set
-         * when FlexCAN Module in Disable Mode.
-         */
-        base->CTRL1 = (kFLEXCAN_ClkSrc0 == pConfig->clkSrc) ? (base->CTRL1 & ~CAN_CTRL1_CLKSRC_MASK) :
-                                                              (base->CTRL1 | CAN_CTRL1_CLKSRC_MASK);
-    }
+    /* Protocol-Engine clock source selection, This bit must be set
+     * when FlexCAN Module in Disable Mode.
+     */
+    base->CTRL1 = (kFLEXCAN_ClkSrc0 == pConfig->clkSrc) ? (base->CTRL1 & ~CAN_CTRL1_CLKSRC_MASK) :
+                                                          (base->CTRL1 | CAN_CTRL1_CLKSRC_MASK);
+
 #endif /* CAN_CTRL1_CLKSRC_MASK */
 
     /* Enable FlexCAN Module for configuration. */

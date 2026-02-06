@@ -10,6 +10,7 @@
   - Aligned watermark comparison logic between `FLEXCAN_EnhancedRxFifoHandleIRQ` and
     `FLEXCAN_TransferReceiveEnhancedFifoNonBlocking` for consistency.
   - Fixed `Ehanced` typo issue.
+  - Remove redundant feature macro for FlexCAN engine clock selection in `FLEXCAN_Init`.
 - Bug Fixes
   - Fixed Enhanced Rx FIFO filter configuration assertion `idFilterPairNum` in `FLEXCAN_SetEnhancedRxFifoConfig`.
 
