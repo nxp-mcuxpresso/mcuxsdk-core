@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2022, 2025 NXP
+ * Copyright 2016-2022, 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -571,7 +571,22 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
         {
             /* Enable the receiver RTS(request-to-send) function. */
             base->MODIR |= LPUART_MODIR_RXRTSE_MASK;
+
+            /* NOTE: Do not set both RXRTSE and TXRTSE */
+            assert(false == config->enableTxRTS);
         }
+        else
+        {
+            if (true == config->enableTxRTS)
+            {
+                /* Enable the transmitter RTS(request-to-send) function */
+                base->MODIR |= LPUART_MODIR_TXRTSE_MASK;
+
+                /* Set the transmitter RTS(request-to-send) polarity */
+                base->MODIR |= LPUART_MODIR_TXRTSPOL(config->txRtsPolarity);
+            }
+        }
+
         if (true == config->enableTxCTS)
         {
             /* Enable the CTS(clear-to-send) function. */
@@ -726,9 +741,11 @@ void LPUART_GetDefaultConfig(lpuart_config_t *config)
 #endif
 #if defined(FSL_FEATURE_LPUART_HAS_MODEM_SUPPORT) && FSL_FEATURE_LPUART_HAS_MODEM_SUPPORT
     config->enableRxRTS = false;
+    config->enableTxRTS = false;
     config->enableTxCTS = false;
     config->txCtsConfig = kLPUART_CtsSampleAtStart;
     config->txCtsSource = kLPUART_CtsSourcePin;
+    config->txRtsPolarity = kLPUART_RtsPolarityLow;
 #if defined(FSL_FEATURE_LPUART_HAS_MODIR_RTSWATER) && FSL_FEATURE_LPUART_HAS_MODIR_RTSWATER
     config->rtsWatermark = 0U;
 #endif

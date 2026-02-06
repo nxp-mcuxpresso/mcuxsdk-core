@@ -1,5 +1,10 @@
 # LPUART
 
+## [2.11.0]
+
+- New Feature
+  - Added support to enable transmitter RTS and configure transmitter RTS polarity.
+
 ## [2.10.0]
 
 - New Feature
