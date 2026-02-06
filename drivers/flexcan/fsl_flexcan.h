@@ -1080,7 +1080,7 @@ typedef struct _flexcan_fifo_transfer
     flexcan_fd_frame_t *framefd; /*!< The buffer of CAN Message to be received from Enhanced Rx FIFO. */
 #endif
     flexcan_frame_t *frame; /*!< The buffer of CAN Message to be received from Legacy Rx FIFO. */
-    size_t frameNum;        /*!< Number of CAN Message need to be received from Legacy or Ehanced Rx FIFO. */
+    size_t frameNum;        /*!< Depth of CAN Message receive array of Legacy or Enhanced Rx FIFO. */
 } flexcan_fifo_transfer_t;
 
 /*! @brief FlexCAN handle structure definition. */
@@ -1122,10 +1122,10 @@ struct _flexcan_handle
 #endif
     flexcan_frame_t *volatile rxFifoFrameBuf; /*!< The buffer for received CAN data from Legacy Rx FIFO. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-    flexcan_fd_frame_t *volatile rxFifoFDFrameBuf; /*!< The buffer for received CAN FD data from Ehanced Rx FIFO. */
+    flexcan_fd_frame_t *volatile rxFifoFDFrameBuf; /*!< The buffer for received CAN FD data from Enhanced Rx FIFO. */
 #endif
-    size_t rxFifoFrameNum; /*!< The number of CAN messages remaining to be received from Legacy or Ehanced Rx FIFO. */
-    size_t rxFifoTransferTotalNum; /*!< Total CAN Message number need to be received from Legacy or Ehanced Rx FIFO. */
+    size_t rxFifoFrameNum; /*!< The number of CAN messages remaining to be received from Legacy or Enhanced Rx FIFO. */
+    size_t rxFifoTransferTotalNum; /*!< Total CAN Message number need to be received from Legacy or Enhanced Rx FIFO. */
     volatile uint8_t mbState[CAN_WORD1_COUNT];    /*!< Message Buffer transfer state. */
     volatile uint8_t rxFifoState;                 /*!< Rx FIFO transfer state. */
     volatile uint32_t timestamp[CAN_WORD1_COUNT]; /*!< Mailbox transfer timestamp. */
@@ -2573,7 +2573,7 @@ status_t FLEXCAN_TransferReceiveFifoNonBlocking(CAN_Type *base,
                                                 flexcan_fifo_transfer_t *pFifoXfer);
 
 /*!
- * @brief Gets the Legacy Rx Fifo transfer status during a interrupt non-blocking receive.
+ * @brief Gets the Rx Fifo transfer status during a interrupt non-blocking receive.
  *
  * @param base FlexCAN peripheral base address.
  * @param handle FlexCAN handle pointer.
@@ -2712,12 +2712,12 @@ void FLEXCAN_MbHandleIRQ(CAN_Type *base, flexcan_handle_t *handle, uint32_t star
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
 /*!
- * @brief FlexCAN Ehanced Rx FIFO IRQ handle function.
+ * @brief FlexCAN Enhanced Rx FIFO IRQ handle function.
  *
  * @param base FlexCAN peripheral base address.
  * @param handle FlexCAN handle pointer.
  */
-void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle);
+void FLEXCAN_EnhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle);
 #endif
 
 /*!

@@ -297,15 +297,15 @@ static status_t FLEXCAN_SubHandlerForDataTransfered(CAN_Type *base,
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
 /*!
- * @brief Sub Handler Ehanced Rx FIFO event
+ * @brief Sub Handler Enhanced Rx FIFO event
  *
  * @param base FlexCAN peripheral base address.
  * @param handle FlexCAN handle pointer.
  * @param flags FlexCAN interrupt flags.
  *
- * @return the status after handle Ehanced Rx FIFO event.
+ * @return the status after handle Enhanced Rx FIFO event.
  */
-static status_t FLEXCAN_SubHandlerForEhancedRxFifo(CAN_Type *base, flexcan_handle_t *handle, uint64_t flags);
+static status_t FLEXCAN_SubHandlerForEnhancedRxFifo(CAN_Type *base, flexcan_handle_t *handle, uint64_t flags);
 #endif
 
 /*******************************************************************************
@@ -370,7 +370,7 @@ static flexcan_isr_t s_flexcanMemoryErrorErrorIsr = (flexcan_isr_t)DefaultISR;
 #endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-static flexcan_isr_t s_flexcanEhancedRxFifoIsr = (flexcan_isr_t)DefaultISR;
+static flexcan_isr_t s_flexcanEnhancedRxFifoIsr = (flexcan_isr_t)DefaultISR;
 #endif
 #else
 static flexcan_isr_t s_flexcanIsr;
@@ -385,7 +385,7 @@ static flexcan_isr_t s_flexcanMemoryErrorErrorIsr;
 #endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-static flexcan_isr_t s_flexcanEhancedRxFifoIsr;
+static flexcan_isr_t s_flexcanEnhancedRxFifoIsr;
 #endif
 #endif
 
@@ -2906,7 +2906,7 @@ void FLEXCAN_SetEnhancedRxFifoConfig(CAN_Type *base, const flexcan_enhanced_rx_f
     {
         /* Each pair of filter elements occupies 2 words and can consist of one extended ID filter element or two
          * standard ID filter elements. */
-        assert((((uint32_t)pConfig->idFilterPairNum * 2UL) <
+        assert((((uint32_t)pConfig->idFilterPairNum * 2UL) <=
                 (uint32_t)FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO_FILTER_MAX_NUMBER) &&
                (pConfig->extendIdFilterNum <= pConfig->idFilterPairNum) && (0UL != pConfig->idFilterPairNum));
 
@@ -4036,7 +4036,7 @@ void FLEXCAN_TransferCreateHandle(CAN_Type *base,
 #endif
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
-    s_flexcanEhancedRxFifoIsr = FLEXCAN_EhancedRxFifoHandleIRQ;
+    s_flexcanEnhancedRxFifoIsr = FLEXCAN_EnhancedRxFifoHandleIRQ;
 #endif
 
     /* We Enable Error & Status interrupt here, because this interrupt just
@@ -4539,33 +4539,6 @@ status_t FLEXCAN_TransferReceiveFifoNonBlocking(CAN_Type *base,
     return status;
 }
 
-/*!
- * brief Gets the Legacy Rx Fifo transfer status during a interrupt non-blocking receive.
- *
- * param base FlexCAN peripheral base address.
- * param handle FlexCAN handle pointer.
- * param count Number of CAN messages receive so far by the non-blocking transaction.
- * retval kStatus_InvalidArgument count is Invalid.
- * retval kStatus_Success Successfully return the count.
- */
-status_t FLEXCAN_TransferGetReceiveFifoCount(CAN_Type *base, flexcan_handle_t *handle, size_t *count)
-{
-    assert(NULL != handle);
-
-    status_t result = kStatus_Success;
-
-    if (handle->rxFifoState == (uint32_t)kFLEXCAN_StateIdle)
-    {
-        result = kStatus_NoTransferInProgress;
-    }
-    else
-    {
-        *count = handle->rxFifoTransferTotalNum - handle->rxFifoFrameNum;
-    }
-
-    return result;
-}
-
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
 /*!
  * brief Receives a message from Enhanced Rx FIFO using IRQ.
@@ -4628,6 +4601,33 @@ status_t FLEXCAN_TransferReceiveEnhancedFifoNonBlocking(CAN_Type *base,
     return status;
 }
 #endif
+
+/*!
+ * brief Gets the Rx Fifo transfer status during a interrupt non-blocking receive.
+ *
+ * param base FlexCAN peripheral base address.
+ * param handle FlexCAN handle pointer.
+ * param count Number of CAN messages receive so far by the non-blocking transaction.
+ * retval kStatus_InvalidArgument count is Invalid.
+ * retval kStatus_Success Successfully return the count.
+ */
+status_t FLEXCAN_TransferGetReceiveFifoCount(CAN_Type *base, flexcan_handle_t *handle, size_t *count)
+{
+    assert(NULL != handle);
+
+    status_t result = kStatus_Success;
+
+    if (handle->rxFifoState == (uint32_t)kFLEXCAN_StateIdle)
+    {
+        result = kStatus_NoTransferInProgress;
+    }
+    else
+    {
+        *count = handle->rxFifoTransferTotalNum - handle->rxFifoFrameNum;
+    }
+
+    return result;
+}
 
 /*!
  * brief Aborts the interrupt driven message send process.
@@ -4949,21 +4949,21 @@ static bool FLEXCAN_CheckUnhandleInterruptEvents(CAN_Type *base)
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
 /*!
- * brief Sub Handler Ehanced Rx FIFO event
+ * brief Sub Handler Enhanced Rx FIFO event
  *
  * param base FlexCAN peripheral base address.
  * param handle FlexCAN handle pointer.
  * param flags FlexCAN interrupt flags.
  *
- * return the status after handle Ehanced Rx FIFO event.
+ * return the status after handle Enhanced Rx FIFO event.
  */
-static status_t FLEXCAN_SubHandlerForEhancedRxFifo(CAN_Type *base, flexcan_handle_t *handle, uint64_t flags)
+static status_t FLEXCAN_SubHandlerForEnhancedRxFifo(CAN_Type *base, flexcan_handle_t *handle, uint64_t flags)
 {
     uint32_t watermark = ((base->ERFCR & CAN_ERFCR_ERFWM_MASK) >> CAN_ERFCR_ERFWM_SHIFT) + 1U;
     uint32_t transferFrames;
 
     status_t status;
-    /* Solve Ehanced Rx FIFO interrupt. */
+    /* Solve Enhanced Rx FIFO interrupt. */
     if ((0u != (flags & (uint64_t)kFLEXCAN_ERxFifoUnderflowIntFlag)) &&
         (0u != (base->ERFIER & CAN_ERFIER_ERFUFWIE_MASK)))
     {
@@ -4980,7 +4980,7 @@ static status_t FLEXCAN_SubHandlerForEhancedRxFifo(CAN_Type *base, flexcan_handl
              (0u != (base->ERFIER & CAN_ERFIER_ERFWMIIE_MASK)))
     {
         /* Whether the number of CAN messages remaining to be received is greater than the watermark. */
-        transferFrames = (handle->rxFifoFrameNum > watermark) ? watermark : handle->rxFifoFrameNum;
+        transferFrames = (handle->rxFifoFrameNum >= watermark) ? watermark : handle->rxFifoFrameNum;
 
         for (uint32_t i = 0; i < transferFrames; i++)
         {
@@ -4998,9 +4998,10 @@ static status_t FLEXCAN_SubHandlerForEhancedRxFifo(CAN_Type *base, flexcan_handl
                 return kStatus_FLEXCAN_RxFifoDisabled;
             }
         }
+
         if (handle->rxFifoFrameNum == 0U)
         {
-            /* Stop receiving Ehanced Rx FIFO when the transmission is over. */
+            /* Stop receiving Enhanced Rx FIFO when the transmission is over. */
             FLEXCAN_TransferAbortReceiveEnhancedFifo(base, handle);
             status = kStatus_FLEXCAN_RxFifoIdle;
         }
@@ -5034,9 +5035,10 @@ static status_t FLEXCAN_SubHandlerForEhancedRxFifo(CAN_Type *base, flexcan_handl
                 return kStatus_FLEXCAN_RxFifoDisabled;
             }
         }
+
         if (handle->rxFifoFrameNum == 0U)
         {
-            /* Stop receiving Ehanced Rx FIFO when the transmission is over. */
+            /* Stop receiving Enhanced Rx FIFO when the transmission is over. */
             FLEXCAN_TransferAbortReceiveEnhancedFifo(base, handle);
             status = kStatus_FLEXCAN_RxFifoIdle;
         }
@@ -5046,6 +5048,7 @@ static status_t FLEXCAN_SubHandlerForEhancedRxFifo(CAN_Type *base, flexcan_handl
             status = kStatus_FLEXCAN_RxFifoBusy;
         }
     }
+
     return status;
 }
 #endif
@@ -5110,7 +5113,7 @@ static status_t FLEXCAN_SubHandlerForLegacyRxFIFO(CAN_Type *base, flexcan_handle
             }
             if (handle->rxFifoFrameNum == 0U)
             {
-                /* Stop receiving Ehanced Rx FIFO when the transmission is over. */
+                /* Stop receiving Enhanced Rx FIFO when the transmission is over. */
                 FLEXCAN_TransferAbortReceiveFifo(base, handle);
                 status = kStatus_FLEXCAN_RxFifoIdle;
             }
@@ -5375,7 +5378,7 @@ void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
         else if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG) & base->ERFIER))
         {
-            status = FLEXCAN_SubHandlerForEhancedRxFifo(base, handle, result);
+            status = FLEXCAN_SubHandlerForEnhancedRxFifo(base, handle, result);
         }
 #endif
         else
@@ -5464,12 +5467,12 @@ void FLEXCAN_MbHandleIRQ(CAN_Type *base, flexcan_handle_t *handle, uint32_t star
  * $ref flexcan_c_ref_1$.
  */
 /*!
- * brief FlexCAN Ehanced Rx FIFO IRQ handle function.
+ * brief FlexCAN Enhanced Rx FIFO IRQ handle function.
  *
  * param base FlexCAN peripheral base address.
  * param handle FlexCAN handle pointer.
  */
-void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /* GCOVR_EXCL_FUNCTION */
+void FLEXCAN_EnhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /* GCOVR_EXCL_FUNCTION */
 {
     status_t status;
     uint64_t result;
@@ -5486,7 +5489,7 @@ void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /*
         result = FLEXCAN_GetStatusFlags(base);
         if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG) & enableInt))
         {
-            status = FLEXCAN_SubHandlerForEhancedRxFifo(base, handle, result);
+            status = FLEXCAN_SubHandlerForEnhancedRxFifo(base, handle, result);
 
             if (handle->callback != NULL)
             {
@@ -5625,7 +5628,7 @@ void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32
 #if defined(FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn)
     if (FSL_FEATURE_FLEXCAN_INSTANCE_HAS_ENHANCED_RX_FIFOn(s_flexcanBases[instance]) == 1)
     {
-        s_flexcanEhancedRxFifoIsr(s_flexcanBases[instance], s_flexcanHandle[instance]);
+        s_flexcanEnhancedRxFifoIsr(s_flexcanBases[instance], s_flexcanHandle[instance]);
     }
 #endif
 #endif

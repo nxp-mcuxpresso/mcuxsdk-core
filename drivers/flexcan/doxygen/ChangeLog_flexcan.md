@@ -7,6 +7,11 @@
     - `FLEXCAN_ReadRxMb`
     - `FLEXCAN_ReadFDRxMb`
   - Simplify RX Message Buffer handling sequence in interrupt handler `FLEXCAN_SubHandlerForMB`.
+  - Aligned watermark comparison logic between `FLEXCAN_EnhancedRxFifoHandleIRQ` and
+    `FLEXCAN_TransferReceiveEnhancedFifoNonBlocking` for consistency.
+  - Fixed `Ehanced` typo issue.
+- Bug Fixes
+  - Fixed Enhanced Rx FIFO filter configuration assertion `idFilterPairNum` in `FLEXCAN_SetEnhancedRxFifoConfig`.
 
 ## [2.15.0]
 
