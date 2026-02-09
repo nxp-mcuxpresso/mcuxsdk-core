@@ -1,0 +1,106 @@
+/*!
+@defgroup espi eSPI: Enhanced Serial Peripheral Interface
+@details The MCUXpresso SDK provides a peripheral driver for the Enhanced Serial Peripheral Interface (eSPI)
+                 module of MCUXpresso SDK devices.
+
+# Overview
+
+The eSPI (Enhanced Serial Peripheral Interface) is a low‑pin‑count, packet‑based bus used to connect
+an embedded controller or target device to a host processor. Compared with legacy LPC, eSPI provides
+separate logical channels for legacy I/O cycles, sideband control, out‑of‑band messaging and
+shared flash access, while reducing pin count and improving power management.
+
+On MCUXpresso SDK devices, the eSPI controller typically exposes the following functions:
+
+- **ACPI Endpoint / Index‑Data Ports**: For legacy ACPI/EC style register access.
+- **Mailbox Ports**: Shared, Single, Split, OOB‑Split and OEM mailboxes for message‑based exchanges.
+- **Bus‑Master Ports**: Memory and flash mastering for host‑initiated moves.
+- **Slave‑Attached Flash (SAF)**: Protocol offload for host accesses to on‑board flash.
+- **Virtual Wire Interface**: Sideband power‑management and reset signalling.
+- **Port 80 Capture**: POST code logging for boot debug.
+
+The eSPI driver is a thin, register‑level driver with helper APIs and a lightweight
+transactional layer built around an espi_handle_t and callback model.
+
+# Driver Architecture
+
+## Functional (low‑level) APIs
+
+Functional APIs are low‑level helpers targeting individual hardware features. They require
+knowledge of the eSPI peripheral and are intended for applications that need fine‑grained
+control or custom flows. All functional APIs take the ESPI_Type base pointer as the first
+parameter.
+
+## Transactional APIs and Handle
+
+The driver provides a lightweight transactional layer built around espi_handle_t.
+This layer centralizes interrupt handling, SAF flash callbacks and per‑port callbacks
+in a single structure that upper layers own.
+
+Key types:
+- **espi_handle_t**
+    - Holds callback hooks, userData, discovered OOB/SAF/MAF ports and cached address offsets.
+- **espi_callback_config_t**
+    - Provides commonCallback (global bus events) and portCallback (per‑port events).
+- **espi_flash_ops_t**
+    - Backend handler for Slave‑Attached Flash transactions described by espi_flash_request_t.
+
+Key transactional APIs:
+- **Handle Management**
+    - ESPI_CreateHandle(): Initialize espi_handle_t, discover key ports and enable IRQ in NVIC.
+    - ESPI_FlashCreateHandle(): Attach the SAF flash backend and define the accessible flash window.
+- **IRQ‑Driven Processing**
+    - ESPI_TransferHandleIRQ(): Common ISR entry that
+        - dispatches bus‑level events via commonCallback,
+        - routes port interrupts to portCallback,
+        - routes SAF flash port interrupts to the registered espi_flash_ops_t backend.
+
+Transactional flows are fully interrupt‑driven: the application installs a handle
+and callback set, then services all eSPI events from its ISR context using
+ESPI_TransferHandleIRQ(). SAF flash transactions are described by espi_flash_request_t
+and executed by the user‑supplied flashOps backend.
+
+# Key Features
+
+## Multi‑Channel and Port Model
+
+- **Rich Port Types**: ACPI endpoint/index‑data, mailbox (Shared, Single, Split, OOB‑Split, OEM),
+    bus master memory/flash and SAF.
+- **Configurable Port Mapping**: Each port has independently configured RAM window, address base,
+    direction and index offset via espi_port_config_t and espi_config_t.
+- **Per‑Port Interrupts**: Read, write, error and special‑purpose interrupt sources for each port.
+
+## Virtual Wire Interface
+
+- **Sideband Power Management**: Sleep state indication (S3/S4/S5), suspend status, platform reset,
+    host reset warnings and acknowledgements.
+- **Miscellaneous VW Signals**: GPIO‑like wake/sensor inputs, PCIe/EC groups, LAN/WLAN sleep, etc.
+- **Bidirectional Support**: Separate read (WIRERO) and write/ack (WIREWO) paths with symbolic
+    enums for clarity.
+
+## Out‑of‑Band (OOB) Messaging
+
+- **OOB Mailbox Port**: Dedicated OOB‑Split mailbox type for host–EC management traffic.
+- **Length‑Programmed Transfers**: ESPI_SendOOB() programs OMFLEN and RAM payload, then triggers
+    an OOB send; ESPI_ReadOOB() retrieves inbound OOB payloads.
+- **Host‑Visible Status**: Uses PnIRULESTAT.SSTCL encodings to signal start/complete/empty to host drivers.
+
+## Slave‑Attached Flash (SAF) and Bus Mastering
+
+- **SAF Offload**: Hardware decodes host read/write/erase requests; the driver surfaces them as
+    espi_flash_request_t to a user flashOps backend.
+- **Bounds and Chunking**: The driver clamps requests to the configured flashSize and supports
+    split completions (first/middle/last/only).
+- **Flexible Mastering**: Bus master ports support memory moves and optional MAF (Master‑Attached Flash)
+    operations using OMFLEN[TRANS] encodings.
+
+## Interrupt‑Driven Operation
+
+- **Global and Per‑Port Interrupts**: Separate enable/disable and status APIs for bus‑level and
+    per‑port sources.
+- **Centralized ISR Entry**: A single ESPI_TransferHandleIRQ() implementation simplifies integration
+    with SoC‑specific IRQ stubs.
+- **Callback‑Based Design**: Applications register lightweight callbacks for common bus events,
+    per‑port events and SAF flash backends, keeping the core driver generic and reusable.
+
+*/
