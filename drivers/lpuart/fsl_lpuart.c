@@ -250,7 +250,7 @@ size_t LPUART_TransferGetRxRingBufferLength(LPUART_Type *base, lpuart_handle_t *
 
     if (tmpRxRingBufferTail > tmpRxRingBufferHead)
     {
-        size = ((size_t)tmpRxRingBufferHead + tmpRxRingBufferSize - (size_t)tmpRxRingBufferTail);
+        size = tmpRxRingBufferSize - ((size_t)tmpRxRingBufferTail - (size_t)tmpRxRingBufferHead);
     }
     else
     {
@@ -376,6 +376,8 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
 {
     assert(NULL != config);
     assert(0U < config->baudRate_Bps);
+    assert(config->baudRate_Bps <= (UINT32_MAX / 32U));
+    assert(srcClock_Hz <= (UINT32_MAX / 2U));
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
     assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) > 0);
     assert((uint8_t)FSL_FEATURE_LPUART_FIFO_SIZEn(base) > config->txFifoWatermark);
@@ -387,7 +389,7 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
     uint16_t sbr;
     uint8_t osr, osrTemp;
     uint32_t tempDiff, calculatedBaud, baudDiff;
-    uint64_t sbrTemp;
+    uint32_t sbrTemp;
 
     /* This LPUART instantiation uses a slightly different baud rate calculation
      * The idea is to use the best OSR (over-sampling rate) possible
@@ -401,7 +403,7 @@ status_t LPUART_Init(LPUART_Type *base, const lpuart_config_t *config, uint32_t 
     for (osrTemp = 4U; osrTemp <= 32U; osrTemp++)
     {
         /* Calculate the temporary sbr value */
-        sbrTemp = ((((uint64_t)srcClock_Hz * 2U) / ((uint64_t)config->baudRate_Bps * (uint64_t)osrTemp)) + 1U) / 2U;
+        sbrTemp = (((srcClock_Hz * 2U) / (config->baudRate_Bps * (uint32_t)osrTemp)) + 1U) / 2U;
 
         /* Set sbrTemp to 1 if the srcClock_Hz can not satisfy the desired baud rate */
         if (sbrTemp == 0U)
@@ -782,13 +784,14 @@ void LPUART_GetDefaultConfig(lpuart_config_t *config)
 status_t LPUART_SetBaudRate(LPUART_Type *base, uint32_t baudRate_Bps, uint32_t srcClock_Hz)
 {
     assert(0U < baudRate_Bps);
-
+    assert(baudRate_Bps <= (UINT32_MAX / 32U));
+    assert(srcClock_Hz <= (UINT32_MAX / 2U));
     status_t status = kStatus_Success;
     uint32_t temp, oldCtrl;
     uint16_t sbr;
     uint8_t osr, osrTemp;
     uint32_t tempDiff, calculatedBaud, baudDiff;
-    uint64_t sbrTemp;
+    uint32_t sbrTemp;
 
     /* This LPUART instantiation uses a slightly different baud rate calculation
      * The idea is to use the best OSR (over-sampling rate) possible
@@ -802,7 +805,7 @@ status_t LPUART_SetBaudRate(LPUART_Type *base, uint32_t baudRate_Bps, uint32_t s
     for (osrTemp = 4U; osrTemp <= 32U; osrTemp++)
     {
         /* Calculate the temporary sbr value */
-        sbrTemp = ((((uint64_t)srcClock_Hz * 2U) / ((uint64_t)baudRate_Bps * (uint64_t)osrTemp)) + 1U) / 2U;
+        sbrTemp = (((srcClock_Hz * 2U) / (baudRate_Bps * (uint32_t)osrTemp)) + 1U) / 2U;
 
         /* Set sbrTemp to 1 if the srcClock_Hz can not satisfy the desired baud rate */
         if (sbrTemp == 0U)
