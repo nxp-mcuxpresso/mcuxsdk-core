@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>MCXA577VPN</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXA577_DFP.20.0.0</PackID>
+          <PackID>NXP.MCXA577_DFP.25.12.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
           <Cpu>IRAM(0x20000000,0x03c000) IRAM2(0x04000000,0x2000) IROM(0x03000000,0x2000) IROM2(0x00000000,0x100000) XRAM(0x04002000,0x2000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -391,7 +391,7 @@
         <TargetCommonOption>
           <Device>MCXA577VPN</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXA577_DFP.20.0.0</PackID>
+          <PackID>NXP.MCXA577_DFP.25.12.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
           <Cpu>IRAM(0x20000000,0x03c000) IRAM2(0x04000000,0x2000) IROM(0x03000000,0x2000) IROM2(0x00000000,0x100000) XRAM(0x04002000,0x2000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
