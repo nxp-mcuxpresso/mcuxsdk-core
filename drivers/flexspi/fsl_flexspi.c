@@ -818,6 +818,8 @@ status_t FLEXSPI_WriteBlocking(FLEXSPI_Type *base, uint8_t *buffer, size_t size)
     uint32_t status;
     status_t result = kStatus_Success;
     uint32_t i      = 0;
+    bool triggered     = false;
+    uint32_t txFifoSize = (FLEXSPI_IPTXFCR_TXWMRK_MASK >> FLEXSPI_IPTXFCR_TXWMRK_SHIFT) + 1U;
 
     /* Send data buffer */
     while (0U != size)
@@ -875,6 +877,19 @@ status_t FLEXSPI_WriteBlocking(FLEXSPI_Type *base, uint8_t *buffer, size_t size)
 
         /* Push a watermark level data into IP TX FIFO. */
         base->INTR = (uint32_t)kFLEXSPI_IpTxFifoWatermarkEmptyFlag;
+
+        if ((size == 0U) && (triggered == false))
+        {
+            base->IPCMD |= FLEXSPI_IPCMD_TRG_MASK;
+        }
+        else
+        {
+            if ((base->IPTXFSTS & FLEXSPI_IPTXFSTS_FILL_MASK) == txFifoSize)
+            {
+                base->IPCMD |= FLEXSPI_IPCMD_TRG_MASK;
+                triggered = true;
+            }
+        }
     }
 
     return result;
@@ -1027,38 +1042,72 @@ status_t FLEXSPI_TransferBlocking(FLEXSPI_Type *base, flexspi_transfer_t *xfer)
 #endif
         flashAddress += currentFlashSize * 1024U;
     }
-
     base->IPCR0 = flashAddress;
 
-    /* Reset fifos. */
-    base->IPTXFCR |= FLEXSPI_IPTXFCR_CLRIPTXF_MASK;
-    base->IPRXFCR |= FLEXSPI_IPRXFCR_CLRIPRXF_MASK;
-
+    /*
+     * For Write/Program operations:
+     * 1. Fill IP transmit FIFO with programming data (can be done before or after configuring registers)
+     * 2. Write flash memory access start address to IPCR0[SFAR]
+     * 3. Write read or program data size to IPCR1[IDATSZ], sequence index to IPCR1[ISEQID],
+     *    and sequence number to IPCR1[ISEQNUM]
+     * 4. Write 1 to IPCMD[TRG] to trigger flash memory access command
+     * 5. Wait for INTR[IPCMDDONE] flag
+     *
+     * For Read operations:
+     * 1. Write flash memory access start address to IPCR0[SFAR]
+     * 2. Write read data size to IPCR1[IDATSZ], sequence index to IPCR1[ISEQID],
+     *    and sequence number to IPCR1[ISEQNUM]
+     * 3. Write 1 to IPCMD[TRG] to trigger flash memory access command
+     * 4. Read data from IP receive FIFO
+     * 5. Wait for INTR[IPCMDDONE] flag
+     */
     /* Configure data size. */
-    if ((xfer->cmdType == kFLEXSPI_Read) || (xfer->cmdType == kFLEXSPI_Write) || (xfer->cmdType == kFLEXSPI_Config))
-    {
-        configValue = FLEXSPI_IPCR1_IDATSZ(xfer->dataSize);
-    }
-
-    /* Configure sequence ID. */
-    configValue |=
-        FLEXSPI_IPCR1_ISEQID((uint32_t)xfer->seqIndex) | FLEXSPI_IPCR1_ISEQNUM((uint32_t)xfer->SeqNumber - 1U);
-    base->IPCR1 = configValue;
-
-    /* Start Transfer. */
-    base->IPCMD |= FLEXSPI_IPCMD_TRG_MASK;
-
     if ((xfer->cmdType == kFLEXSPI_Write) || (xfer->cmdType == kFLEXSPI_Config))
     {
+        /* Reset TX FIFO */
+        base->IPTXFCR |= FLEXSPI_IPTXFCR_CLRIPTXF_MASK;
+        /* For write/programming commands: Fill IP transmit FIFO before triggering command */
+        /* Configure data size. */
+        configValue = FLEXSPI_IPCR1_IDATSZ(xfer->dataSize);
+
+        /* Configure sequence ID. */
+        configValue |=
+            FLEXSPI_IPCR1_ISEQID((uint32_t)xfer->seqIndex) | FLEXSPI_IPCR1_ISEQNUM((uint32_t)xfer->SeqNumber - 1U);
+        base->IPCR1 = configValue;
+
+        /* Fill transmit FIFO with data */
         result = FLEXSPI_WriteBlocking(base, (uint8_t *)xfer->data, xfer->dataSize);
     }
     else if (xfer->cmdType == kFLEXSPI_Read)
     {
+        /* Reset RX FIFO */
+        base->IPRXFCR |= FLEXSPI_IPRXFCR_CLRIPRXF_MASK;
+        /* For read commands: Trigger command first, then read from FIFO */
+        /* Configure data size. */
+        configValue = FLEXSPI_IPCR1_IDATSZ(xfer->dataSize);
+
+        /* Configure sequence ID. */
+        configValue |=
+            FLEXSPI_IPCR1_ISEQID((uint32_t)xfer->seqIndex) | FLEXSPI_IPCR1_ISEQNUM((uint32_t)xfer->SeqNumber - 1U);
+        base->IPCR1 = configValue;
+
+        /* Trigger the IP command */
+        base->IPCMD |= FLEXSPI_IPCMD_TRG_MASK;
+
+        /* Read data from receive FIFO */
         result = FLEXSPI_ReadBlocking(base, (uint8_t *)xfer->data, xfer->dataSize);
     }
     else
     {
-        /* Empty else. */
+        /* For commands without data transfer */
+
+        /* Configure sequence ID. */
+        configValue =
+            FLEXSPI_IPCR1_ISEQID((uint32_t)xfer->seqIndex) | FLEXSPI_IPCR1_ISEQNUM((uint32_t)xfer->SeqNumber - 1U);
+        base->IPCR1 = configValue;
+
+        /* Trigger the IP command */
+        base->IPCMD |= FLEXSPI_IPCMD_TRG_MASK;
     }
 
     /* Wait until the IP command execution finishes */
@@ -1528,3 +1577,4 @@ void FLEXSPI0_FLEXSPI1_DriverIRQHandler(void)
 #endif
 
 #endif
+
