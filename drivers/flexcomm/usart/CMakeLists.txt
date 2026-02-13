@@ -12,7 +12,7 @@ if(CONFIG_MCUX_COMPONENT_driver.flexcomm_usart_dma)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.flexcomm_usart)
-    mcux_component_version(2.8.6)
+    mcux_component_version(2.9.0)
 
     mcux_add_source(SOURCES fsl_usart.h fsl_usart.c)
 

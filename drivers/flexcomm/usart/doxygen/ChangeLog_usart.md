@@ -1,6 +1,6 @@
 # USART
 
-## [2.8.6]
+## [2.9.0]
 
 - New Features
   - Added support for RS-485 (configuration of OESEL, OEPOL, OETA in CFG register).
