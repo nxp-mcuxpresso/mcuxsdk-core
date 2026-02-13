@@ -32,7 +32,7 @@ This command exports project specific information and configuration details,
 and stores them in project_info.json which is then used in MCUXpresso Config Tools.
 '''
 
-JSON_SCHEMA_LINK = "https://mcuxpresso.nxp.com/staticdata/mcux/schema/project_info/project_info_schema_2.0.json"
+JSON_SCHEMA_LINK = "https://mcuxpresso.nxp.com/staticdata/mcux/schema/project_info/project_info_schema_3.0.json"
 class ProjectInfo(WestCommand):
     """
     West command class for extracting and exporting MCUXpresso SDK project information.
@@ -155,6 +155,9 @@ class ProjectInfo(WestCommand):
                     log.err("Generated project edit file path not found in CMakeCache.txt")
                     return False
                 
+                comp_id_regex = r".*MCUXPRESSO_CONFIG_TOOL_COMPONENT_ID_MAP_PATH:FILEPATH=([^\s]+)"
+                comp_id_path = self.regex_match_helper(comp_id_regex, cmake_cache)
+
                 self.project_info = {
                     "projectRootPath": project_path,
                     "name": project_name,
@@ -163,6 +166,9 @@ class ProjectInfo(WestCommand):
                     "source_generated_cmake_file_path": cmake_file_path,
                     "component_edit_prj_file_path": prj_file_path
                 }
+
+                if comp_id_path:
+                    self.project_info["component_id_map_path"] = comp_id_path
 
                 if core:
                     self.project_info["core"] = core
