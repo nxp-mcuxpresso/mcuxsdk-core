@@ -417,11 +417,11 @@ static void ENET_QOS_SetMTL(ENET_QOS_Type *base, const enet_qos_config_t *config
                 ((uint32_t)ENET_QOS_MTL_RXFIFOSIZE / ((uint32_t)multiqCfg->rxQueueUse * ENET_QOS_FIFOSIZE_UNIT)) - 1U);
             base->MTL_QUEUE[index].MTL_RXQX_OP_MODE = rxqOpReg;
 #if ENET_QOS_MAC_RXQ_CTRL_COUNT > 3
-            mtlrxQuemapReg                          = (index < 4U) ? &base->MTL_RXQ_DMA_MAP0 : &base->MTL_RXQ_DMA_MAP1;
+            mtlrxQuemapReg = (index < 4U) ? &base->MTL_RXQ_DMA_MAP0 : &base->MTL_RXQ_DMA_MAP1;
 #else
-            mtlrxQuemapReg                          = &base->MTL_RXQ_DMA_MAP0;
+            mtlrxQuemapReg = &base->MTL_RXQ_DMA_MAP0;
 #endif /* ENET_QOS_MAC_RXQ_CTRL_COUNT > 3 */
-            configIndex                             = (index & 0x3U);
+            configIndex = (index & 0x3U);
             *mtlrxQuemapReg &= ~((uint32_t)ENET_QOS_MTL_RXQ_DMA_MAP0_Q0MDMACH_MASK << (8U * configIndex));
             *mtlrxQuemapReg |= (uint32_t)ENET_QOS_MTL_RXQ_DMA_MAP0_Q0MDMACH(multiqCfg->rxQueueConfig[index].mapChannel)
                                << (8U * configIndex);
@@ -496,14 +496,14 @@ static status_t ENET_QOS_SetMacControl(ENET_QOS_Type *base,
         uint8_t configIndex;
         enet_qos_multiqueue_config_t *multiqCfg = config->multiqueueCfg;
 #ifndef ENET_QOS_EMAC_USED_AS_ENET_QOS
-        uint32_t txQueuePrioMap0                = base->MAC_TXQ_PRTY_MAP0;
-        uint32_t txQueuePrioMap1                = base->MAC_TXQ_PRTY_MAP1;
+        uint32_t txQueuePrioMap0 = base->MAC_TXQ_PRTY_MAP0;
+        uint32_t txQueuePrioMap1 = base->MAC_TXQ_PRTY_MAP1;
 #endif /* ENET_QOS_EMAC_USED_AS_ENET_QOS */
-        uint32_t rxQueuePrioMap0                = base->MAC_RXQ_CTRL[2];
+        uint32_t rxQueuePrioMap0 = base->MAC_RXQ_CTRL[2];
 #if ENET_QOS_MAC_RXQ_CTRL_COUNT > 3
-        uint32_t rxQueuePrioMap1                = base->MAC_RXQ_CTRL[3];
+        uint32_t rxQueuePrioMap1 = base->MAC_RXQ_CTRL[3];
 #endif /* ENET_QOS_MAC_RXQ_CTRL_COUNT > 3 */
-        uint32_t rxCtrlReg1                     = base->MAC_RXQ_CTRL[1];
+        uint32_t rxCtrlReg1 = base->MAC_RXQ_CTRL[1];
 
 #ifndef ENET_QOS_EMAC_USED_AS_ENET_QOS
         for (uint8_t index = 0U; index < multiqCfg->txQueueUse; index++)
@@ -587,11 +587,11 @@ static status_t ENET_QOS_SetMacControl(ENET_QOS_Type *base,
         base->MAC_TXQ_PRTY_MAP0 = txQueuePrioMap0;
         base->MAC_TXQ_PRTY_MAP1 = txQueuePrioMap1;
 #endif /* ENET_QOS_EMAC_USED_AS_ENET_QOS */
-        base->MAC_RXQ_CTRL[2]   = rxQueuePrioMap0;
+        base->MAC_RXQ_CTRL[2] = rxQueuePrioMap0;
 #if ENET_QOS_MAC_RXQ_CTRL_COUNT > 3
-        base->MAC_RXQ_CTRL[3]   = rxQueuePrioMap1;
+        base->MAC_RXQ_CTRL[3] = rxQueuePrioMap1;
 #endif /* ENET_QOS_MAC_RXQ_CTRL_COUNT > 3 */
-        base->MAC_RXQ_CTRL[1]   = rxCtrlReg1;
+        base->MAC_RXQ_CTRL[1] = rxCtrlReg1;
     }
     else
     {
@@ -605,8 +605,8 @@ static status_t ENET_QOS_SetMacControl(ENET_QOS_Type *base,
     /* Mask MMC counters interrupts as we don't handle
      * them in the interrupt handler.
      */
-    base->MAC_MMC_RX_INTERRUPT_MASK     = 0xFFFFFFFFU;
-    base->MAC_MMC_TX_INTERRUPT_MASK     = 0xFFFFFFFFU;
+    base->MAC_MMC_RX_INTERRUPT_MASK = 0xFFFFFFFFU;
+    base->MAC_MMC_TX_INTERRUPT_MASK = 0xFFFFFFFFU;
 #ifndef ENET_QOS_EMAC_USED_AS_ENET_QOS
     base->MAC_MMC_IPC_RX_INTERRUPT_MASK = 0xFFFFFFFFU;
 #endif /* ENET_QOS_EMAC_USED_AS_ENET_QOS */

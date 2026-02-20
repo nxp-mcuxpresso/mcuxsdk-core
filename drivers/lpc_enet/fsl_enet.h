@@ -355,7 +355,7 @@ typedef struct _enet_ptp_config
     bool ptp1588V2Enable;               /*!< ptp 1588 version 2 is used. */
     enet_ts_rollover_type_t tsRollover; /*!< 1588 time nanosecond rollover. */
 } enet_ptp_config_t;
-#endif /* ENET_PTP1588FEATURE_REQUIRED */
+#endif                                  /* ENET_PTP1588FEATURE_REQUIRED */
 
 /*! @brief Defines the ENET PTP time stamp structure. */
 typedef struct _enet_ptp_time

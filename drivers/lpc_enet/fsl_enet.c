@@ -912,9 +912,10 @@ void ENET_CreateHandler(ENET_Type *base,
             pbl = (base->DMA_CH[count].DMA_CHX_TX_CTRL & ENET_DMA_CH_DMA_CHX_TX_CTRL_TxPBL_MASK) >>
                   ENET_DMA_CH_DMA_CHX_TX_CTRL_TxPBL_SHIFT;
             pbl = ((base->DMA_CH[count].DMA_CHX_CTRL & ENET_DMA_CH_DMA_CHX_CTRL_PBLx8_MASK) != 0U) ? (8U * pbl) : pbl;
-            txFifoSize = (uint32_t)pow(
-                (double)2, (double)(uint32_t)(((base->MAC_HW_FEAT[1] & ENET_MAC_HW_FEAT_TXFIFOSIZE_MASK) >> ENET_MAC_HW_FEAT_TXFIFOSIZE_SHIFT) +
-                    7U));
+            txFifoSize                     = (uint32_t)pow((double)2,
+                                                           (double)(uint32_t)(((base->MAC_HW_FEAT[1] & ENET_MAC_HW_FEAT_TXFIFOSIZE_MASK) >>
+                                                           ENET_MAC_HW_FEAT_TXFIFOSIZE_SHIFT) +
+                                                          7U));
             handle->txLenLimitation[count] = txFifoSize - (pbl + 6U) * (32U / 8U);
         }
 
@@ -1575,7 +1576,7 @@ static inline void ENET_GetRxFrameErr(enet_rx_bd_struct_t *rxDesc, enet_rx_frame
     };
     union _frame_error error;
 
-    error.data = ENET_FRAME_RX_ERROR_BITS(rxDesc->rdes3);
+    error.data    = ENET_FRAME_RX_ERROR_BITS(rxDesc->rdes3);
     *rxFrameError = error.frameError;
 }
 
