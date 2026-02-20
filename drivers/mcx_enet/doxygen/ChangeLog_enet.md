@@ -1,5 +1,12 @@
 # MCX_ENET
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fixed ENET_EnableInterrupts to preserve already enabled interrupts.
+  - Fixed ENET_DisableInterrupts to correctly manage interrupt summary bits.
+  - Fixed IRQ handler to check interrupt enable status before processing events.
+
 ## [2.2.0]
 
 - New features

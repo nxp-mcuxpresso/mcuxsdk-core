@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 NXP
+ * Copyright 2020-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -278,7 +278,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief Defines the driver version. */
-#define FSL_ENET_QOS_DRIVER_VERSION (MAKE_VERSION(2, 7, 3))
+#define FSL_ENET_QOS_DRIVER_VERSION (MAKE_VERSION(2, 7, 4))
 /*! @} */
 
 /*! @name Control and status region bit masks of the receive buffer descriptor. */
@@ -1446,15 +1446,16 @@ status_t ENET_QOS_EnableRxParser(ENET_QOS_Type *base, bool enable);
 /*!
  * @brief Enables the ENET DMA and MAC interrupts.
  *
- * This function enables the ENET interrupt according to the provided mask. The mask
- * is a logical OR of enet_qos_dma_interrupt_enable_t and enet_qos_mac_interrupt_enable_t.
- * For example, to enable the dma and mac interrupt, do the following.
- * @code
+ * This function enables the ENET interrupts according to the provided mask.
+ * Already enabled interrupts stay enabled even if not listed in the provided mask.
+ * The mask is a logical OR of enet_qos_dma_interrupt_enable_t and enet_qos_mac_interrupt_enable_t.
+ * For example, to enable the dma and mac interrupt, do the following:
+ * code
  *     ENET_QOS_EnableInterrupts(ENET, kENET_QOS_DmaRx | kENET_QOS_DmaTx | kENET_QOS_MacPmt);
- * @endcode
+ * endcode
  *
- * @param base  ENET peripheral base address.
- * @param mask  ENET interrupts to enable. This is a logical OR of both
+ * param base  ENET peripheral base address.
+ * param mask  ENET interrupts to enable. This is a logical OR of both
  *             enumeration :: enet_qos_dma_interrupt_enable_t and enet_qos_mac_interrupt_enable_t.
  */
 void ENET_QOS_EnableInterrupts(ENET_QOS_Type *base, uint32_t mask);

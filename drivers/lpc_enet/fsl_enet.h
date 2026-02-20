@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief Defines the driver version. */
-#define FSL_ENET_DRIVER_VERSION (MAKE_VERSION(2, 3, 5))
+#define FSL_ENET_DRIVER_VERSION (MAKE_VERSION(2, 3, 6))
 /*! @} */
 
 /*! @name Control and status region bit masks of the receive buffer descriptor. */
@@ -896,8 +896,9 @@ static inline void ENET_ExitPowerDown(ENET_Type *base)
 /*!
  * @brief Enables the ENET DMA and MAC interrupts.
  *
- * This function enables the ENET interrupt according to the provided mask. The mask
- * is a logical OR of enet_dma_interrupt_enable_t and enet_mac_interrupt_enable_t.
+ * This function enables the ENET interrupts according to the provided mask.
+ * Already enabled interrupts stay enabled even if not listed in the provided mask.
+ * The mask is a logical OR of enet_dma_interrupt_enable_t and enet_mac_interrupt_enable_t.
  * For example, to enable the dma and mac interrupt, do the following.
  * @code
  *     ENET_EnableInterrupts(ENET, kENET_DmaRx | kENET_DmaTx | kENET_MacPmt);
