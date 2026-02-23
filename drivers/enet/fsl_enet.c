@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015 - 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -2160,11 +2160,26 @@ void ENET_ReclaimTxDescriptor(ENET_Type *base, enet_handle_t *handle, uint8_t ri
             txDirty->isTsAvail = false;
             if ((curBuffDescrip->controlExtend1 & ENET_BUFFDESCRIPTOR_TX_TIMESTAMP_MASK) != 0U)
             {
-                enet_ptp_time_t *ts = &txDirty->timeStamp;
-                /* Get transmit time stamp second. */
-                txDirty->isTsAvail = true;
-                ts->second         = handle->msTimerSecond;
-                ts->nanosecond     = curBuffDescrip->timestamp;
+                enet_ptp_time_t currentTime;
+
+                /* Get current PTP time */
+                ENET_Ptp1588GetTimer(base, handle, &currentTime);
+
+                /* Reconstruct the second when TX nanoseconds were captured.
+                 * If current nanoseconds < TX nanoseconds, second rolled over
+                 * between TX and reclaim, so TX happened in previous second.
+                 */
+                if (currentTime.nanosecond < curBuffDescrip->timestamp)
+                {
+                    if (currentTime.second > 0U)
+                    {
+                        currentTime.second--;
+                    }
+                }
+
+                txDirty->timeStamp.second     = currentTime.second;
+                txDirty->timeStamp.nanosecond = curBuffDescrip->timestamp;
+                txDirty->isTsAvail            = true;
             }
 #endif
             /* For tx buffer free or requeue for last descriptor.
