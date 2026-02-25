@@ -502,7 +502,7 @@ typedef struct _espi_callback_config
 } espi_callback_config_t;
 
 /*! @brief eSPI handle structure. */
-typedef struct _espi_handle
+struct _espi_handle
 {
     espi_callback_config_t callback;      /*!< Callback function. */
     void *userData;                       /*!< User data. */
@@ -512,7 +512,7 @@ typedef struct _espi_handle
     uint8_t oobPort;                      /*!< Port index for OOB (TYPE=Mailbox OOB Split). */
     uint8_t safPort;                      /*!< Port index for Slave Flash. */
     uint8_t mafPort;                      /*!< Port index for Bus Master Mem Single. */
-} espi_handle_t;
+};
 
 /*******************************************************************************
  * API
