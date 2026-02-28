@@ -22,7 +22,24 @@ endfunction()
 macro(project project_name)
   set(CMAKE_SYSTEM_NAME Generic)
 
+  # In IDE-only skip-mode we seed compiler metadata and may point compilers to
+  # a placeholder executable. Suppress CMake's STATUS-level compiler detection
+  # chatter during project() to avoid confusing output, but restore verbosity
+  # immediately after.
+  set(_mcux_restore_message_log_level FALSE)
+  if(DEFINED MCUX_SKIP_COMPILER_CHECKS AND MCUX_SKIP_COMPILER_CHECKS)
+    if(NOT DEFINED CMAKE_MESSAGE_LOG_LEVEL AND NOT DEFINED CACHE{CMAKE_MESSAGE_LOG_LEVEL})
+      set(_mcux_restore_message_log_level TRUE)
+      set(CMAKE_MESSAGE_LOG_LEVEL WARNING)
+    endif()
+  endif()
+
   __project(${project_name} LANGUAGES C CXX ASM)
+
+  if(_mcux_restore_message_log_level)
+    unset(CMAKE_MESSAGE_LOG_LEVEL)
+  endif()
+  unset(_mcux_restore_message_log_level)
   # Restore the original implementation
   function(project)
     set(project_ARGV ARGV)
@@ -49,7 +66,9 @@ macro(project project_name)
 
   # valiate compiler version
   # The reason to validate compiler version here is that cmake engine code will get CMAKE_C_COMPILER_VERSION and CMAKE_CXX_COMPILER_VERSION just in "project" macro invocation.
-  _validate_compiler_version()
+  if(NOT (DEFINED MCUX_SKIP_COMPILER_CHECKS AND MCUX_SKIP_COMPILER_CHECKS))
+    _validate_compiler_version()
+  endif()
   clear_default_added_compiler_flags()
   # parse arguments
   set(options NO_DEFAULT_CONFIG)

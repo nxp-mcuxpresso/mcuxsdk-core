@@ -326,6 +326,14 @@ function(ExternalZephyrProject_Add)
     SdkRootDirPath
     CMAKE_BUILD_TYPE
     CMAKE_VERBOSE_MAKEFILE
+    # Forward IDE-generation flags into image CMake runs.
+    # These are consumed by MCUXpresso toolchain logic (e.g. auto-enabling
+    # MCUX_SKIP_COMPILER_CHECKS for IDE-only generation when the toolchain
+    # is not installed).
+    GENERATE_GUI_PROJECT
+    GENERATE_STANDALONE_PROJECT
+    SYSBUILD_GENERATE_STANDALONE_PROJECT
+    MCUX_SKIP_COMPILER_CHECKS
   )
 
   set(sysbuild_cache_file ${CMAKE_BINARY_DIR}/${ZBUILD_APPLICATION}_sysbuild_cache.txt)
@@ -616,7 +624,7 @@ function(ExternalZephyrProject_Cmake)
 
   # Execute guigenerator scripts for all toolchains automatically when invoking sysbuild
   if (${${ZCMAKE_APPLICATION}_toolchain} MATCHES "iar|mdk|xtensa|armgcc|riscvllvm" AND FOUND_RUBY_EXECUTABLE)
-    
+
     # Create standalone project if user add "-t standalone_project" in command
     # Otherwise create GUI project
     if(SYSBUILD_GENERATE_STANDALONE_PROJECT)

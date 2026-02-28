@@ -8,7 +8,11 @@ set(TOOLCHAIN_ROOT $ENV{CW_DIR})
 string(REGEX REPLACE "\\\\" "/" TOOLCHAIN_ROOT "${TOOLCHAIN_ROOT}")
 
 if(NOT TOOLCHAIN_ROOT)
-    message(FATAL_ERROR "***Please set CW_DIR in environment variables***")
+    if(MCUX_SKIP_COMPILER_CHECKS)
+        set(TOOLCHAIN_ROOT "")
+    else()
+        message(FATAL_ERROR "***Please set CW_DIR in environment variables***")
+    endif()
 endif()
 
 SET(TARGET_TRIPLET "MCU/DSP56800x_EABI_Tools/bin")

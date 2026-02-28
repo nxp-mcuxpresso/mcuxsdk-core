@@ -7,7 +7,11 @@ set(TOOLCHAIN_ROOT $ENV{IAR_DIR})
 string(REGEX REPLACE "\\\\" "/" TOOLCHAIN_ROOT "${TOOLCHAIN_ROOT}")
 
 if(NOT TOOLCHAIN_ROOT)
-    message(FATAL_ERROR "***Please set IAR_DIR in environment variables***")
+    if(MCUX_SKIP_COMPILER_CHECKS)
+        set(TOOLCHAIN_ROOT "")
+    else()
+        message(FATAL_ERROR "***Please set IAR_DIR in environment variables***")
+    endif()
 endif()
 
 SET(TARGET_TRIPLET "arm/bin")

@@ -17,7 +17,11 @@ set(TOOLCHAIN_DIR $ENV{XCC_DIR})
 string(REGEX REPLACE "\\\\" "/" TOOLCHAIN_DIR "${TOOLCHAIN_DIR}")
 
 if(NOT TOOLCHAIN_DIR)
-    message(FATAL_ERROR "***Please set XCC_DIR in environment variables***")
+    if(MCUX_SKIP_COMPILER_CHECKS)
+        set(TOOLCHAIN_DIR "")
+    else()
+        message(FATAL_ERROR "***Please set XCC_DIR in environment variables***")
+    endif()
 endif()
 set(XCC_DIR ${TOOLCHAIN_DIR})
 
