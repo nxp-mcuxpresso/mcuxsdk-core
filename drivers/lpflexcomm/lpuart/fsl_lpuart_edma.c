@@ -273,6 +273,8 @@ status_t LPUART_SendEDMA(LPUART_Type *base, lpuart_edma_handle_t *handle, lpuart
 
         LPUART_SetTxFifoWatermark(base, 4U);
 
+        EDMA_ResetChannel(handle->txEdmaHandle->base, handle->txEdmaHandle->channel);
+
         if (oneFifoBlocks > 0U)
         {
             /* Transfer config for remaining FIFO words (1-3) */
@@ -392,6 +394,8 @@ status_t LPUART_ReceiveEDMA(LPUART_Type *base, lpuart_edma_handle_t *handle, lpu
 
         /* Count of blocks aligned to 1 FIFO words */
         uint32_t oneFifoBlocks = xfer->dataSize % 4U;
+
+        EDMA_ResetChannel(handle->rxEdmaHandle->base, handle->rxEdmaHandle->channel);
 
         if (oneFifoBlocks > 0U)
         {
