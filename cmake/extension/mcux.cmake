@@ -1,4 +1,4 @@
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # transfer to cmake path to error caused by "\"
@@ -6,6 +6,19 @@ file(TO_CMAKE_PATH ${SdkRootDirPath} SdkRootDirPath)
 
 # load modules
 include(${SdkRootDirPath}/cmake/extension/logging.cmake)
+
+if(NOT DEFINED APPLICATION_SOURCE_DIR)
+  set(APPLICATION_SOURCE_DIR
+      ${CMAKE_CURRENT_SOURCE_DIR}
+      CACHE PATH "Application Source Directory")
+endif()
+
+if(NOT DEFINED APPLICATION_BINARY_DIR)
+  set(APPLICATION_BINARY_DIR
+      ${CMAKE_CURRENT_BINARY_DIR}
+      CACHE PATH "Application Binary Directory")
+endif()
+
 include(${SdkRootDirPath}/cmake/extension/basic_settings.cmake)
 
 # using an underscore prefixed function of the same name. The following lines

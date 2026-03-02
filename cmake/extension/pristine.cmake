@@ -1,5 +1,5 @@
 # Copyright (c) 2017,2019,2021 Intel Corporation
-# Copyright 2024 NXP
+# Copyright 2024, 2026 NXP
 # SPDX-License-Identifier: Apache-2.0
 
 # NB: This could be dangerous to execute.
@@ -16,7 +16,7 @@ mandatory arguments:
 ")
   # Making the usage itself a fatal error messes up the formatting when printing.
   message(FATAL_ERROR "Pristine build failed, possible solutions:
-- Remove the contents of build directory, the default is mcu-sdk-3.0/build \
+- Remove the contents of build directory, the default is mcuxsdk/build \
 - Or specify a different build directory with -d, such as \"-d build_dir\"
 ")
 endmacro()
