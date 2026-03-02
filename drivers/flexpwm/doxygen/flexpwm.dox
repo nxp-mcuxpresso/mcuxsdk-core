@@ -1,0 +1,7 @@
+/*!
+@defgroup flexpwm_driver FlexPWM: Enhanced Flex Pulse Width Modulator
+@details The MCUXpresso SDK provides a driver for the Enhanced Flex Pulse Width Modulator (FlexPWM) of MCUXpresso SDK devices.
+
+# FlexPWM: Enhanced Flex Pulse Width Modulator {#FlexPWM}
+
+*/
