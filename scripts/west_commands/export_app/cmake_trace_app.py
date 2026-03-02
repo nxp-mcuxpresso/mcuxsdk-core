@@ -32,6 +32,7 @@ INJECT_TRACE_FILE = "trace.json"
 
 # Extra cmake options to generate trace file and useful kconfig files
 TRACE_OPTIONS = [
+    "-DMCUX_SKIP_COMPILER_CHECKS=y",
     "-DGENERATE_PROMPTLESS_SYMS=y",
     "--trace",
     "--trace-expand",
