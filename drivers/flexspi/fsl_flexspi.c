@@ -1016,7 +1016,19 @@ status_t FLEXSPI_TransferBlocking(FLEXSPI_Type *base, flexspi_transfer_t *xfer)
                  FLEXSPI_INTR_IPCMDGE_MASK | FLEXSPI_INTR_IPCMDDONE_MASK;
 
     /* Configure base address. */
-    base->IPCR0 = xfer->deviceAddress;
+    uint32_t flashAddress = xfer->deviceAddress;
+    uint32_t currentFlashSize = 0;
+
+    for (uint32_t i = 0; i < (uint32_t)xfer->port; i++)
+    {
+        currentFlashSize = base->FLSHCR0[i];
+#if defined(FSL_FEATURE_FLEXSPI_SUPPORT_ADDRESS_SHIFT) && (FSL_FEATURE_FLEXSPI_SUPPORT_ADDRESS_SHIFT)
+        currentFlashSize &= ~FLEXSPI_FLSHCR0_ADDRSHIFT_MASK;
+#endif
+        flashAddress += currentFlashSize * 1024U;
+    }
+
+    base->IPCR0 = flashAddress;
 
     /* Reset fifos. */
     base->IPTXFCR |= FLEXSPI_IPTXFCR_CLRIPTXF_MASK;
