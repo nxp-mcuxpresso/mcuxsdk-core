@@ -11,16 +11,8 @@
  * $Coverage Justification Reference$
  *
  * $Justification flexcan_c_ref_1$
- * Following FlexCAN IRQ handle function are invoked in specific platform startup file.
+ * FlexCAN IRQ handle function are invoked in specific platform startup file.
  * It is hard to update startup file for unit test, so add Justification.
- *  - FLEXCAN_MbHandleIRQ()
- *  - FLEXCAN_EhancedRxFifoHandleIRQ()
- *  - FLEXCAN_BusoffErrorHandleIRQ()
- *  - FLEXCAN_PNWakeUpHandleIRQ()
- *  - FLEXCAN_MemoryErrorHandleIRQ()
- *  - FLEXCAN_DriverDataIRQHandler()
- *  - FLEXCAN_DriverEventIRQHandler()
- *  - FLEXCAN_DriverIRQHandler()
  * 
  * $Justification flexcan_c_ref_2$
  * FDEN bit exists on platform which FlexCAN instances have CANFD mode, so code will not take if branch.
@@ -446,6 +438,10 @@ bool FLEXCAN_IsInstanceHasFDMode(CAN_Type *base)
     if (0U == (base->MCR & CAN_MCR_FDEN_MASK)) /* GCOVR_EXCL_BR_LINE */
     {
         /* Exit Freeze Mode. */
+        /*
+         * $Line Coverage Justification$
+         * $ref flexcan_c_ref_2$.
+         */
         (void)FLEXCAN_ExitFreezeMode(base); /* GCOVR_EXCL_START */
         return false;
     } /* GCOVR_EXCL_STOP */
@@ -496,6 +492,10 @@ uint32_t FLEXCAN_GetFDMailboxOffset(CAN_Type *base, uint8_t mbIdx)
         case (uint32_t)kFLEXCAN_64BperMB:
             offset = (((uint32_t)mbIdx / 7U) * 512U + ((uint32_t)mbIdx % 7U) * 72U);
             break;
+        /*
+         * $Line Coverage Justification$
+         * default branch not covered. $ref flexcan_c_ref_5$.
+         */
         /* GCOVR_EXCL_START */
         /* GCOVR_EXCL_BR_START */
         default:
@@ -5245,18 +5245,24 @@ static status_t FLEXCAN_SubHandlerForDataTransfered(CAN_Type *base,
     uint32_t bitStart;
     uint32_t bitEnd;
 
-    /*
-     * $Branch Coverage Justification$
-     * (i != startIdx) not covered. $ref flexcan_c_ref_4$.
-     * (i != endIdx) not covered. $ref flexcan_c_ref_4$.
-     * (j > bitEnd) not covered. $ref flexcan_c_ref_4$.
-     */
     for (uint32_t i = startIdx; i <= endIdx; i++)
     {
         if (intflag[i] != 0U)
         {
+            /*
+             * $Branch Coverage Justification$
+             * (i != startIdx) not covered. $ref flexcan_c_ref_4$.
+             */
             bitStart = (i == startIdx) ? (startMbIdx % 32U) : 0U; /* GCOVR_EXCL_BR_LINE */
+            /*
+             * $Branch Coverage Justification$
+             * (i != endIdx) not covered. $ref flexcan_c_ref_4$.
+             */
             bitEnd = (i == endIdx) ? (endMbIdx % 32U) : 31U; /* GCOVR_EXCL_BR_LINE */
+            /*
+             * $Branch Coverage Justification$
+             * (j > bitEnd) not covered. $ref flexcan_c_ref_4$.
+             */
             for (uint32_t j = bitStart; j <= bitEnd; j++) /* GCOVR_EXCL_BR_LINE */
             {
                 if (0UL != (intflag[i] & ((uint32_t)1UL << j)))
@@ -5372,17 +5378,8 @@ void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
 
 /*
  * $Function Coverage Justification$
- * Following functions are not covered. $ref flexcan_c_ref_1$.
- *  - FLEXCAN_MbHandleIRQ()
- *  - FLEXCAN_EhancedRxFifoHandleIRQ()
- *  - FLEXCAN_BusoffErrorHandleIRQ()
- *  - FLEXCAN_PNWakeUpHandleIRQ()
- *  - FLEXCAN_MemoryErrorHandleIRQ()
- *  - FLEXCAN_DriverDataIRQHandler()
- *  - FLEXCAN_DriverEventIRQHandler()
- *  - FLEXCAN_DriverIRQHandler()
+ * $ref flexcan_c_ref_1$.
  */
-
 /*!
  * brief FlexCAN Message Buffer IRQ handle function.
  *
@@ -5445,6 +5442,10 @@ void FLEXCAN_MbHandleIRQ(CAN_Type *base, flexcan_handle_t *handle, uint32_t star
 }
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
+/*
+ * $Function Coverage Justification$
+ * $ref flexcan_c_ref_1$.
+ */
 /*!
  * brief FlexCAN Ehanced Rx FIFO IRQ handle function.
  *
@@ -5484,6 +5485,10 @@ void FLEXCAN_EhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /*
 }
 #endif
 
+/*
+ * $Function Coverage Justification$
+ * $ref flexcan_c_ref_1$.
+ */
 /*!
  * brief FlexCAN Bus Off, Error and Warning IRQ handle function.
  *
@@ -5525,6 +5530,10 @@ void FLEXCAN_BusoffErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /* G
 }
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
+/*
+ * $Function Coverage Justification$
+ * $ref flexcan_c_ref_1$.
+ */
 /*!
  * brief FlexCAN Pretended Networking Wake-up IRQ handle function.
  *
@@ -5553,13 +5562,17 @@ void FLEXCAN_PNWakeUpHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /* GCOV
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
 #if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_HANCEI_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_HANCEI_SUPPORT)
+/*
+ * $Function Coverage Justification$
+ * $ref flexcan_c_ref_1$.
+ */
 /*!
  * brief FlexCAN Memory Error IRQ handle function.
  *
  * param base FlexCAN peripheral base address.
  * param handle FlexCAN handle pointer.
  */
-void FLEXCAN_MemoryErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
+void FLEXCAN_MemoryErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /* GCOVR_EXCL_FUNCTION */
 {
     uint64_t result;
     uint32_t enableInt;
@@ -5581,6 +5594,10 @@ void FLEXCAN_MemoryErrorHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
 #endif
 
 void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32_t endMbIdx);
+/*
+ * $Function Coverage Justification$
+ * $ref flexcan_c_ref_1$.
+ */
 void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32_t endMbIdx) /* GCOVR_EXCL_FUNCTION */
 {
     assert(NULL != s_flexcanHandle[instance]);
@@ -5599,6 +5616,10 @@ void FLEXCAN_DriverDataIRQHandler(uint32_t instance, uint32_t startMbIdx, uint32
 }
 
 void FLEXCAN_DriverEventIRQHandler(uint32_t instance);
+/*
+ * $Function Coverage Justification$
+ * $ref flexcan_c_ref_1$.
+ */
 void FLEXCAN_DriverEventIRQHandler(uint32_t instance) /* GCOVR_EXCL_FUNCTION */
 {
     assert(NULL != s_flexcanHandle[instance]);
@@ -5623,6 +5644,10 @@ void FLEXCAN_DriverEventIRQHandler(uint32_t instance) /* GCOVR_EXCL_FUNCTION */
 }
 
 void FLEXCAN_DriverIRQHandler(uint32_t instance);
+/*
+ * $Function Coverage Justification$
+ * $ref flexcan_c_ref_1$.
+ */
 void FLEXCAN_DriverIRQHandler(uint32_t instance) /* GCOVR_EXCL_FUNCTION */
 {
     assert(NULL != s_flexcanHandle[instance]);

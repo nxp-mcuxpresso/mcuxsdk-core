@@ -29,8 +29,7 @@
  * Hardware limitations make this code impossible to implement.
  * 
  * $Justification tpm_c_ref_6$
- * Following TPM IRQ handle functions are invoked in specific platform startup file or specific core.
- * It is hard to update startup file for unit test, so add Justification.
+ * TPM IRQ handle functions are invoked in specific platform startup file or specific core.
  */
 
 /*******************************************************************************
@@ -572,7 +571,7 @@ status_t TPM_SetupPwm(TPM_Type *base,
 
             /*
              * $Branch Coverage Justification$
-             * (mod > counterMax) not covered. $ref tpm_c_tpm_3$.
+             * (mod > counterMax) not covered. $ref tpm_c_ref_3$.
              */
             if ((mod > counterMax) || (mod == 0U)) /* GCOVR_EXCL_BR_LINE */
             {
@@ -586,7 +585,7 @@ status_t TPM_SetupPwm(TPM_Type *base,
             mod = tpmClock / (pwmFreq_Hz * 2u);
             /*
              * $Branch Coverage Justification$
-             * (mod > counterMax >> 1U) not covered. $ref tpm_c_tpm_3$.
+             * (mod > counterMax >> 1U) not covered. $ref tpm_c_ref_3$.
              */
             if ((mod > (counterMax >> 1U)) || (mod == 0U)) /* GCOVR_EXCL_BR_LINE */
             {
@@ -1237,11 +1236,8 @@ void TPM_RegisterCallBack(TPM_Type *base, tpm_callback_t callback)
 
 /*
  * $Function Coverage Justification$
- * Following functions are not covered. $ref tpm_c_ref_6$.
- *  - TPM_DriverIRQHandler()
- *  - TPM2_DriverIRQHandler()
+ * $ref tpm_c_ref_6$.
  */
-
 /*!
  * @brief TPM driver IRQ handler common entry.
  *
@@ -1281,6 +1277,10 @@ void TPM1_DriverIRQHandler(void)
 
 #if defined(TPM2)
 void TPM2_DriverIRQHandler(void);
+/*
+ * $Function Coverage Justification$
+ * $ref tpm_c_ref_6$.
+ */
 void TPM2_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 {
     assert(NULL != s_tpmCallback[2]);
