@@ -400,11 +400,15 @@ class CfgResolve(WestCommand):
             self._exit_with_error("component_edit_prj_file_path not found in project configuration")
         
         try:
-            component_regex = r"CONFIG_MCUX_COMPONENT_([^\s]+)(=y)"
-            with open(self.prj_conf_file, 'r') as conf_file:
-                existing_components = [
-                    match.group(1) for match in re.finditer(component_regex, conf_file.read())
-                ]
+            if os.path.exists(self.prj_conf_file):
+                component_regex = r"CONFIG_MCUX_COMPONENT_([^\s]+)(=y)"
+                with open(self.prj_conf_file, 'r') as conf_file:
+                    existing_components = [
+                        match.group(1) for match in re.finditer(component_regex, conf_file.read())
+                    ]
+            else:
+                log.wrn(f"Project component file does not exist. Creating on add component: {self.prj_conf_file}")
+                existing_components = []
 
             comp_added = False
 
