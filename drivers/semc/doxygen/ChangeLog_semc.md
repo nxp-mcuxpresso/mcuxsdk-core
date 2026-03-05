@@ -1,5 +1,11 @@
 # SEMC
 
+## [2.8.0]
+
+- Bug Fixes
+  - Fixed IOCR pinmux field masking so `SEMC_ConfigureSRAMWithChipSelection()` can reliably configure SRAM CE on chip selects other than CS0.
+  - Extended SRAM timing parameters in `semc_sram_config_t` to 32-bit and updated timing conversion to safely handle values greater than 255 ns.
+
 ## [2.7.2]
 
 - Bug Fixes

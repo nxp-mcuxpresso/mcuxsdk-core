@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023, 2025 NXP
+ * Copyright 2017-2023, 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -21,8 +21,10 @@
 #define SEMC_IPCOMMANDMAGICKEY        (0xA55A)
 #if defined(FSL_FEATURE_SEMC_SUPPORT_SRAM_COUNT) && (FSL_FEATURE_SEMC_SUPPORT_SRAM_COUNT > 0x01U)
 #define SEMC_IOCR_PINMUXBITWIDTH (0x4UL)
+#define SEMC_IOCR_PINMUXBITMASK  (0xFUL)
 #else
 #define SEMC_IOCR_PINMUXBITWIDTH (0x3UL)
+#define SEMC_IOCR_PINMUXBITMASK  (0x7UL)
 #endif /* FSL_FEATURE_SEMC_SUPPORT_SRAM_COUNT */
 #define SEMC_IOCR_NAND_CE   (4UL)
 #define SEMC_IOCR_NOR_CE    (5UL)
@@ -125,7 +127,7 @@ static status_t SEMC_CovertMemorySize(uint32_t size_kbytes, uint8_t *sizeConvert
  * @param clkSrc_Hz SEMC clock source frequency.
  * @return The changed internal clock cycle.
  */
-static uint8_t SEMC_ConvertTiming(uint8_t time_ns, uint32_t clkSrc_Hz);
+static uint8_t SEMC_ConvertTiming(uint32_t time_ns, uint32_t clkSrc_Hz);
 
 /*!
  * @brief Configure IP command.
@@ -203,23 +205,34 @@ static status_t SEMC_CovertMemorySize(uint32_t size_kbytes, uint8_t *sizeConvert
     return status;
 }
 
-static uint8_t SEMC_ConvertTiming(uint8_t time_ns, uint32_t clkSrc_Hz)
+static uint8_t SEMC_ConvertTiming(uint32_t time_ns, uint32_t clkSrc_Hz)
 {
     assert(clkSrc_Hz != 0x00U);
 
-    uint8_t clockCycles = 0;
-    uint32_t tClk_ps;
+    /* Use ps for higher resolution; avoid narrowing/overflow for large time_ns. */
+    uint64_t tClk_ps = 1000000000000ULL / (uint64_t)clkSrc_Hz;
+    uint64_t time_ps = (uint64_t)time_ns * 1000ULL;
 
-    clkSrc_Hz /= 1000000U;
-    /* Using ps for high resolution */
-    tClk_ps = 1000000U / clkSrc_Hz;
-
-    while (clockCycles < (time_ns * 1000U) / tClk_ps)
+    if ((time_ns == 0x00U) || (tClk_ps == 0x00ULL))
     {
-        clockCycles++;
+        return 0x00U;
     }
 
-    return (clockCycles == 0x00U) ? clockCycles : (clockCycles - 0x01U);
+    /* Ceiling(time_ps / tClk_ps). */
+    uint64_t requiredCycles = (time_ps + tClk_ps - 1ULL) / tClk_ps;
+    if (requiredCycles == 0ULL)
+    {
+        return 0x00U;
+    }
+
+    /* HW encoding is (cycles - 1). Saturate to avoid uint8_t wrap/infinite loop. */
+    requiredCycles -= 1ULL;
+    if (requiredCycles > (uint64_t)UINT8_MAX)
+    {
+        requiredCycles = (uint64_t)UINT8_MAX;
+    }
+
+    return (uint8_t)requiredCycles;
 }
 
 static status_t SEMC_ConfigureIPCommand(SEMC_Type *base, uint8_t size_bytes)
@@ -584,7 +597,7 @@ status_t SEMC_ConfigureNAND(SEMC_Type *base, semc_nand_config_t *config, uint32_
     base->MCR |= SEMC_MCR_MDIS_MASK;
 
     uint32_t iocReg =
-        base->IOCR & (~((SEMC_IOCR_PINMUXBITWIDTH << (uint32_t)config->cePinMux) | SEMC_IOCR_MUX_RDY_MASK));
+        base->IOCR & (~((SEMC_IOCR_PINMUXBITMASK << (uint32_t)config->cePinMux) | SEMC_IOCR_MUX_RDY_MASK));
 
     /* Base control. */
     if (config->rdyactivePolarity == kSEMC_RdyActivehigh)
@@ -672,7 +685,7 @@ status_t SEMC_ConfigureNOR(SEMC_Type *base, semc_nor_config_t *config, uint32_t 
         return kStatus_SEMC_InvalidBaseAddress;
     }
 
-    uint32_t iocReg = base->IOCR & (~(SEMC_IOCR_PINMUXBITWIDTH << (uint32_t)config->cePinMux));
+    uint32_t iocReg = base->IOCR & (~(SEMC_IOCR_PINMUXBITMASK << (uint32_t)config->cePinMux));
     uint32_t muxCe  = (config->cePinMux == kSEMC_MUXRDY) ?
                          (SEMC_IOCR_NOR_CE - 1U) :
                          ((config->cePinMux == kSEMC_MUXA8) ? SEMC_IOCR_NOR_CE_A8 : SEMC_IOCR_NOR_CE);
@@ -838,7 +851,7 @@ status_t SEMC_ConfigureSRAMWithChipSelection(SEMC_Type *base,
         return kStatus_SEMC_InvalidBaseAddress;
     }
 
-    uint32_t iocReg = base->IOCR & (~(SEMC_IOCR_PINMUXBITWIDTH << (uint32_t)config->cePinMux));
+    uint32_t iocReg = base->IOCR & (~(SEMC_IOCR_PINMUXBITMASK << (uint32_t)config->cePinMux));
 
     uint32_t muxCe = (config->cePinMux == kSEMC_MUXRDY) ?
                          (SEMC_IOCR_PSRAM_CE - 1U) :
@@ -1133,7 +1146,7 @@ status_t SEMC_ConfigureDBI(SEMC_Type *base, semc_dbi_config_t *config, uint32_t 
         return kStatus_SEMC_InvalidBaseAddress;
     }
 
-    uint32_t iocReg = base->IOCR & (~(SEMC_IOCR_PINMUXBITWIDTH << (uint32_t)config->csxPinMux));
+    uint32_t iocReg = base->IOCR & (~(SEMC_IOCR_PINMUXBITMASK << (uint32_t)config->csxPinMux));
     uint32_t muxCsx = (config->csxPinMux == kSEMC_MUXRDY) ?
                           (SEMC_IOCR_DBI_CSX - 1U) :
                           ((config->csxPinMux == kSEMC_MUXA8) ? SEMC_IOCR_DBI_CSX_A8 : SEMC_IOCR_DBI_CSX);
