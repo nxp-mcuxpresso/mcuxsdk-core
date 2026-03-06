@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -44,3 +44,101 @@ if MCUX_COMPONENT_driver.flash_k4
           This parameter defines how many loops to check completion before return timeout.
           If defined as 0, driver will wait forever until completion.
 endif
+
+
+config FLASH_K4_ASYNC_MODE
+    bool "Enable Flash K4 Asynchronous Mode (EXPERIMENTAL)"
+    default n
+    depends on MCUX_COMPONENT_driver.flash_k4
+    help
+      Queues Write and Erase operations for deferred execution during idle time
+      instead of blocking synchronously. Useful in dual-core single-image scenarios
+      to prevent flash operations from blocking time-critical tasks (e.g., radio).
+      
+      Benefits: Reduced blocking, improved real-time responsiveness
+      Drawbacks: Increased RAM usage, delayed writes, asynchronous error handling,
+                 requires periodic FLASH_Process() calls from idle task
+
+      This feature is EXPERIMENTAL.
+if FLASH_K4_ASYNC_MODE
+
+config FLASH_K4_ASYNC_QUEUE_SIZE
+    int "Maximum number of pending flash operations in the queue"
+    default 64
+    help
+      Defines the maximum number of flash operations that can be
+      queued for asynchronous execution.
+
+config FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE
+    int "Total circular buffer size for write data"
+    default 1024
+    help
+      Total size in bytes of the circular buffer used to store
+      write data for pending program operations.
+
+config FLASH_K4_WRITE_MIN_IDLE_TIME_US
+    int "Minimum idle time for write operations (microseconds)"
+    default 1000
+    help
+      Minimum LL idle duration required before executing a write operation.
+
+config FLASH_K4_ERASE_MIN_IDLE_TIME_US
+    int "Minimum idle time for erase operations (microseconds)"
+    default 5000
+    help
+      Minimum LL idle duration required before executing an erase operation.
+
+config FLASH_K4_ASYNC_MERGE_CONTIGUOUS_WRITES
+    bool "Enable merging of contiguous write operations"
+    default n
+    help
+      When enabled, contiguous write operations are merged into a single
+      operation to improve efficiency.
+
+config FLASH_K4_ASYNC_MAX_OPS_PER_PROCESS
+    int "Maximum operations per FLASH_Process() call"
+    default 4
+    help
+      Limits the number of operations processed in a single FLASH_Process()
+      call to avoid blocking the idle task for too long.
+
+config FLASH_K4_ASYNC_ENABLE_STATS
+    bool "Enable async operation statistics"
+    default n
+    help
+      Enable statistics tracking for debugging and monitoring async
+      flash operations.
+
+menu "Flash Operation Timing Estimates"
+
+config FLASH_K4_SECTOR_ERASE_TIME_US
+    int "Sector erase time estimate (microseconds)"
+    default 5000
+
+config FLASH_K4_PHRASE_PROG_TIME_US
+    int "Phrase program time estimate (microseconds)"
+    default 50
+
+config FLASH_K4_PAGE_PROG_TIME_US
+    int "Page program time estimate (microseconds)"
+    default 200
+
+config FLASH_K4_VERIFY_TIME_US
+    int "Verify operation time estimate (microseconds)"
+    default 10
+
+config FLASH_K4_VERIFY_BLOCK_TIME_US
+    int "Verify block time estimate (microseconds)"
+    default 1000
+
+config FLASH_K4_MISR_TIME_US
+    int "MISR operation time estimate (microseconds)"
+    default 500
+
+config FLASH_K4_DEFAULT_OP_TIME_US
+    int "Default operation time estimate (microseconds)"
+    default 100
+
+endmenu # Flash Operation Timing Estimates
+
+endif # FLASH_K4_ASYNC_MODE
