@@ -1706,25 +1706,24 @@ void LPI2C_SlaveInit(LPI2C_Type *base, const lpi2c_slave_config_t *slaveConfig, 
         LPI2C_SCFGR1_RXSTALL(slaveConfig->sclStall.enableRx) |
         LPI2C_SCFGR1_ADRSTALL(slaveConfig->sclStall.enableAddress);
 
-    /* Calculate SDA filter width. The width is equal to FILTSDA+3 cycles of functional clock.
-       And set FILTSDA to 0 disables the fileter, so the min value is 4. */
+    /* Calculate SDA filter width. The width is equal to FILTSDA cycles of functional clock.
+       Setting FILTSDA to 0 disables the filter. */
     tmpReg = LPI2C_SCFGR2_FILTSDA(
-        LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->sdaGlitchFilterWidth_ns, 4U,
-                                (LPI2C_SCFGR2_FILTSDA_MASK >> LPI2C_SCFGR2_FILTSDA_SHIFT) + 3U, 0U) -
-        3U);
+        LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->sdaGlitchFilterWidth_ns, 0U,
+                                (LPI2C_SCFGR2_FILTSDA_MASK >> LPI2C_SCFGR2_FILTSDA_SHIFT), 0U));
 
-    /* Calculate SDL filter width. The width is equal to FILTSCL+3 cycles of functional clock.
-       And set FILTSCL to 0 disables the fileter, so the min value is 4. */
-    tmpCycle = LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->sclGlitchFilterWidth_ns, 4U,
-                                       (LPI2C_SCFGR2_FILTSCL_MASK >> LPI2C_SCFGR2_FILTSCL_SHIFT) + 3U, 0U);
-    tmpReg |= LPI2C_SCFGR2_FILTSCL(tmpCycle - 3U);
+    /* Calculate SCL filter width. The width is equal to FILTSCL cycles of functional clock.
+       Setting FILTSCL to 0 disables the filter. */
+    tmpCycle = LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->sclGlitchFilterWidth_ns, 0U,
+                                       (LPI2C_SCFGR2_FILTSCL_MASK >> LPI2C_SCFGR2_FILTSCL_SHIFT), 0U);
+    tmpReg |= LPI2C_SCFGR2_FILTSCL(tmpCycle);
 
     /* Calculate data valid time. The time is equal to FILTSCL+DATAVD+3 cycles of functional clock.
        So the min value is FILTSCL+3. */
     tmpReg |= LPI2C_SCFGR2_DATAVD(
-        LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->dataValidDelay_ns, tmpCycle,
-                                tmpCycle + (LPI2C_SCFGR2_DATAVD_MASK >> LPI2C_SCFGR2_DATAVD_SHIFT), 0U) -
-        tmpCycle);
+        LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->dataValidDelay_ns, tmpCycle + 3U,
+                                tmpCycle + 3U + (LPI2C_SCFGR2_DATAVD_MASK >> LPI2C_SCFGR2_DATAVD_SHIFT), 0U) -
+        tmpCycle - 3U);
 
     /* Calculate clock hold time. The time is equal to CLKHOLD+3 cycles of functional clock.
        So the min value is 3. */
