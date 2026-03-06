@@ -4,6 +4,8 @@
 
 - Bug Fixes
   - Removed write to STAR register in LPI2C_SlaveTransferHandleIRQ handler in case of kLPI2C_SlaveRepeatedStartDetectFlag or kLPI2C_SlaveStopDetectFlag.
+  - Removed configuration of FILTSDA from LPI2C_MasterSetBaudRate().
+  - Set minimal possible value for FILTSDA and FILTSCL to 0.
 
 ## [2.6.4]
 

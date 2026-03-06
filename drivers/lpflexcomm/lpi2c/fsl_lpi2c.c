@@ -423,24 +423,21 @@ void LPI2C_MasterInit(LPI2C_Type *base, const lpi2c_master_config_t *masterConfi
 
     /* Configure glitch filters. */
     cfgr2 = base->MCFGR2;
-    if (0U != (masterConfig->sdaGlitchFilterWidth_ns))
-    {
-        /* Calculate SDA filter width. The width is equal to FILTSDA cycles of functional clock.
-           And set FILTSDA to 0 disables the fileter, so the min value is 1. */
-        cycles = LPI2C_GetCyclesForWidth(sourceClock_Hz, masterConfig->sdaGlitchFilterWidth_ns, 1U,
-                                         (LPI2C_MCFGR2_FILTSDA_MASK >> LPI2C_MCFGR2_FILTSDA_SHIFT), 0U);
-        cfgr2 &= ~LPI2C_MCFGR2_FILTSDA_MASK;
-        cfgr2 |= LPI2C_MCFGR2_FILTSDA(cycles);
-    }
-    if (0U != masterConfig->sclGlitchFilterWidth_ns)
-    {
-        /* Calculate SCL filter width. The width is equal to FILTSCL cycles of functional clock.
-           And set FILTSCL to 0 disables the fileter, so the min value is 1. */
-        cycles = LPI2C_GetCyclesForWidth(sourceClock_Hz, masterConfig->sclGlitchFilterWidth_ns, 1U,
-                                         (LPI2C_MCFGR2_FILTSCL_MASK >> LPI2C_MCFGR2_FILTSCL_SHIFT), 0U);
-        cfgr2 &= ~LPI2C_MCFGR2_FILTSCL_MASK;
-        cfgr2 |= LPI2C_MCFGR2_FILTSCL(cycles);
-    }
+
+    /* Calculate SDA filter width. The width is equal to FILTSDA cycles of functional clock.
+       Setting FILTSDA to 0 disables the filter. */
+    cycles = LPI2C_GetCyclesForWidth(sourceClock_Hz, masterConfig->sdaGlitchFilterWidth_ns, 0U,
+                                     (LPI2C_MCFGR2_FILTSDA_MASK >> LPI2C_MCFGR2_FILTSDA_SHIFT), 0U);
+    cfgr2 &= ~LPI2C_MCFGR2_FILTSDA_MASK;
+    cfgr2 |= LPI2C_MCFGR2_FILTSDA(cycles);
+
+    /* Calculate SCL filter width. The width is equal to FILTSCL cycles of functional clock.
+       Setting FILTSCL to 0 disables the filter. */
+    cycles = LPI2C_GetCyclesForWidth(sourceClock_Hz, masterConfig->sclGlitchFilterWidth_ns, 0U,
+                                     (LPI2C_MCFGR2_FILTSCL_MASK >> LPI2C_MCFGR2_FILTSCL_SHIFT), 0U);
+    cfgr2 &= ~LPI2C_MCFGR2_FILTSCL_MASK;
+    cfgr2 |= LPI2C_MCFGR2_FILTSCL(cycles);
+
     base->MCFGR2 = cfgr2;
 
     /* Configure baudrate after the SDA/SCL glitch filter setting,
@@ -638,26 +635,6 @@ void LPI2C_MasterSetBaudRate(LPI2C_Type *base, uint32_t sourceClock_Hz, uint32_t
     /* The max tVD:DAT/tVD:ACK/tHD:DAT should be at most 0.345 times of the SCL clock cycle, use 0.25 to be safe:
        tVD:DAT = ((DATAVD + 1) x (2 ^ PRESCALE) / sourceClock_Hz) < (0.25 / baudRate_Hz), bestDivider = 2 ^ PRESCALE */
     uint8_t tmpDataVd = (uint8_t)(sourceClock_Hz / baudRate_Hz / bestDivider / 4U) - 1U;
-
-    /* The min tSU:DAT should be at least 0.05 times of the SCL clock cycle:
-       tSU:DAT = ((2 + FILTSDA + 2 ^ PRESCALE) / sourceClock_Hz) >= (0.05 / baud),
-       plus bestDivider = 2 ^ PRESCALE, we can come up with:
-       FILTSDA >= (0.05 x sourceClock_Hz / baudRate_Hz - bestDivider - 2) */
-    if ((sourceClock_Hz / baudRate_Hz / 20U) > (bestDivider + 2U))
-    {
-        /* Read out the FILTSDA configuration, if it is smaller than expected, change the setting. */
-        uint8_t filtSda = (uint8_t)((base->MCFGR2 & LPI2C_MCFGR2_FILTSDA_MASK) >> LPI2C_MCFGR2_FILTSDA_SHIFT);
-        if (filtSda < (sourceClock_Hz / baudRate_Hz / 20U - bestDivider - 2U))
-        {
-            filtSda = (uint8_t)(sourceClock_Hz / baudRate_Hz / 20U) - bestDivider - 2U;
-            if (filtSda > (LPI2C_MCFGR2_FILTSDA_MASK >> LPI2C_MCFGR2_FILTSDA_SHIFT))
-            {
-                filtSda = LPI2C_MCFGR2_FILTSDA_MASK >> LPI2C_MCFGR2_FILTSDA_SHIFT;
-            }
-
-            base->MCFGR2 = (base->MCFGR2 & ~LPI2C_MCFGR2_FILTSDA_MASK) | LPI2C_MCFGR2_FILTSDA(filtSda);
-        }
-    }
 
     /* Set CLKHI, CLKLO, SETHOLD, DATAVD value. */
     tmpReg = LPI2C_MCCR0_CLKHI((uint32_t)tmpHigh) |
