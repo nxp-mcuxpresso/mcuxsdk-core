@@ -1,5 +1,5 @@
 /*
- * Copyright 2022, 2024-2025 NXP
+ * Copyright 2022, 2024-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -24,7 +24,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPI2C driver version. */
-#define FSL_LPI2C_DRIVER_VERSION (MAKE_VERSION(2, 2, 7))
+#define FSL_LPI2C_DRIVER_VERSION (MAKE_VERSION(2, 2, 8))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */

@@ -2270,9 +2270,6 @@ void LPI2C_SlaveTransferHandleIRQ(uint32_t instance, void *lpi2cSlaveHandle)
                 LPI2C_SlaveClearStatusFlags(base, flags & ((uint32_t)kLPI2C_SlaveRepeatedStartDetectFlag |
                                                            (uint32_t)kLPI2C_SlaveStopDetectFlag));
 
-                /* Revert to sending an Ack by default, in case we sent a Nack for receive. */
-                base->STAR = 0U;
-
                 if ((0U != (handle->eventMask & (uint32_t)xfer->event)) && (NULL != handle->callback))
                 {
                     handle->callback(base, xfer, handle->userData);

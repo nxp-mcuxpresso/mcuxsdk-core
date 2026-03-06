@@ -1,5 +1,10 @@
 # LPI2C
 
+## [2.2.8]
+
+- Bug Fixes
+  - Removed write to STAR register in LPI2C_SlaveTransferHandleIRQ handler in case of kLPI2C_SlaveRepeatedStartDetectFlag or kLPI2C_SlaveStopDetectFlag.
+
 ## [2.2.7]
 
 - Bug Fixes
