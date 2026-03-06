@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021, 2022, 2025 NXP
+ * Copyright 2016-2021, 2022, 2025-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -30,8 +30,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief TPM driver version 2.4.2. */
-#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 2))
+/*! @brief TPM driver version 2.4.3. */
+#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 3))
 /*! @} */
 
 /*!
@@ -706,7 +706,7 @@ void TPM_SetupQuadDecode(TPM_Type *base,
  */
 static inline void TPM_SetChannelPolarity(TPM_Type *base, tpm_chnl_t chnlNumber, bool enable)
 {
-    assert(1U == (uint8_t)FSL_FEATURE_TPM_POL_HAS_EFFECTn(base));
+    assert(1 == (int8_t)FSL_FEATURE_TPM_POL_HAS_EFFECTn(base));
     if (enable)
     {
         base->POL &= ~((uint32_t)TPM_POL_POL0_MASK << (uint8_t)chnlNumber);
@@ -736,7 +736,7 @@ static inline void TPM_SetChannelPolarity(TPM_Type *base, tpm_chnl_t chnlNumber,
  */
 static inline void TPM_EnableChannelExtTrigger(TPM_Type *base, tpm_chnl_t chnlNumber, bool enable)
 {
-    assert(1U == (uint8_t)FSL_FEATURE_TPM_TRIG_HAS_EFFECTn(base));
+    assert(1 == (int8_t)FSL_FEATURE_TPM_TRIG_HAS_EFFECTn(base));
     if (enable)
     {
         base->TRIG |= (uint32_t)TPM_TRIG_TRIG0_MASK << (uint8_t)chnlNumber;

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021, 2025 NXP
+ * Copyright 2016-2021, 2025-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -642,7 +642,7 @@ status_t TPM_SetupPwm(TPM_Type *base,
 
 #if defined(FSL_FEATURE_TPM_HAS_QDCTRL) && FSL_FEATURE_TPM_HAS_QDCTRL
     /* The TPM's QDCTRL register required to be effective */
-    if (1U == (uint8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base))
+    if (1 == (int8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base))
     {
         /* Clear quadrature Decoder mode because in quadrature Decoder mode PWM doesn't operate*/
         base->QDCTRL &= ~TPM_QDCTRL_QUADEN_MASK;
@@ -860,7 +860,7 @@ void TPM_SetupInputCapture(TPM_Type *base, tpm_chnl_t chnlNumber, tpm_input_capt
 
 #if defined(FSL_FEATURE_TPM_HAS_QDCTRL) && FSL_FEATURE_TPM_HAS_QDCTRL
     /* The TPM's QDCTRL register required to be effective */
-    if (1U == (uint8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base))
+    if (1 == (int8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base))
     {
         /* Clear quadrature Decoder mode for channel 0 or 1*/
         if (((uint32_t)chnlNumber == 0u) || ((uint32_t)chnlNumber == 1u))
@@ -912,7 +912,7 @@ status_t TPM_SetupOutputCompare(TPM_Type *base,
 
 #if defined(FSL_FEATURE_TPM_HAS_QDCTRL) && FSL_FEATURE_TPM_HAS_QDCTRL
     /* The TPM's QDCTRL register required to be effective */
-    if (1U == (uint8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base))
+    if (1 == (int8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base))
     {
         /* Clear quadrature Decoder mode for channel 0 or 1 */
         if (((uint32_t)chnlNumber == 0U) || ((uint32_t)chnlNumber == 1U))
@@ -977,7 +977,7 @@ void TPM_SetupDualEdgeCapture(TPM_Type *base,
 
 #if defined(FSL_FEATURE_TPM_HAS_QDCTRL) && FSL_FEATURE_TPM_HAS_QDCTRL
     /* The TPM's QDCTRL register required to be effective */
-    if (1U == (uint8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base))
+    if (1 == (int8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base))
     {
         /* Clear quadrature Decoder mode for channel 0 or 1*/
         if (chnlId == 0u)
@@ -1044,7 +1044,7 @@ void TPM_SetupQuadDecode(TPM_Type *base,
 {
     assert(NULL != phaseAParams);
     assert(NULL != phaseBParams);
-    assert(1U == (uint8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base));
+    assert(1 == (int8_t)FSL_FEATURE_TPM_QDCTRL_HAS_EFFECTn(base));
 
     /* Disable channel 0 */
     (void)TPM_DisableChannel(base, kTPM_Chnl_0);

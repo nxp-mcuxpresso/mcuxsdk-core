@@ -1,5 +1,10 @@
 # TPM
 
+## [2.4.3]
+
+- Bug Fixes
+  - Fixed CERT INT31-C Coverity issue: Casting from int to unsigned char without checking its value may result in lost or misinterpreted data.
+
 ## [2.4.2]
 
 - Bug Fixes
