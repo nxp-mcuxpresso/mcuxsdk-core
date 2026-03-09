@@ -1601,13 +1601,13 @@ void LPI2C_MasterTransferHandleIRQ(uint32_t instance, void *lpi2cMasterHandle)
  *  slaveConfig->sclStall.enableAck        = false;
  *  slaveConfig->sclStall.enableTx         = true;
  *  slaveConfig->sclStall.enableRx         = true;
- *  slaveConfig->sclStall.enableAddress    = true;
+ *  slaveConfig->sclStall.enableAddress    = false;
  *  slaveConfig->ignoreAck                 = false;
  *  slaveConfig->enableReceivedAddressRead = false;
  *  slaveConfig->sdaGlitchFilterWidth_ns   = 0;
  *  slaveConfig->sclGlitchFilterWidth_ns   = 0;
  *  slaveConfig->dataValidDelay_ns         = 0;
- *  slaveConfig->clockHoldTime_ns          = 0;
+ *  slaveConfig->clockHoldTime_ns          = 250;
  * endcode
  *
  * After calling this function, override any settings  to customize the configuration,
@@ -1725,11 +1725,10 @@ void LPI2C_SlaveInit(LPI2C_Type *base, const lpi2c_slave_config_t *slaveConfig, 
                                 tmpCycle + 3U + (LPI2C_SCFGR2_DATAVD_MASK >> LPI2C_SCFGR2_DATAVD_SHIFT), 0U) -
         tmpCycle - 3U);
 
-    /* Calculate clock hold time. The time is equal to CLKHOLD+3 cycles of functional clock.
-       So the min value is 3. */
+    /* Calculate clock hold time. The time is equal to CLKHOLD+3 cycles of functional clock in case CLKHOLD > 1. */
     base->SCFGR2 =
         tmpReg | LPI2C_SCFGR2_CLKHOLD(
-                     LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->clockHoldTime_ns, 3U,
+                     LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->clockHoldTime_ns, 4U,
                                              (LPI2C_SCFGR2_CLKHOLD_MASK >> LPI2C_SCFGR2_CLKHOLD_SHIFT) + 3U, 0U) -
                      3U);
 

@@ -7,6 +7,7 @@
   - Removed configuration of FILTSDA from LPI2C_MasterSetBaudRate().
   - Set minimal possible value for FILTSDA and FILTSCL to 0.
   - Updated configuration of glitch filters in LPI2C_SlaveInit().
+  - Set minimal possible value for SCFGR2[CLKHOLD] to 1.
 
 ## [2.2.7]
 
