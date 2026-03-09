@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 NXP
+ * Copyright 2024-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -266,10 +266,10 @@ static uint16_t EP_RxL2MFQueryDeleteEMTableEntry(ep_handle_t *handle, uint8_t si
 static uint16_t EP_RxL2MFSetHashTable(ep_handle_t *handle, uint8_t si, uint8_t typeSize, uint8_t *HTWord)
 {
     NETC_ENETC_Type *base = handle->hw.base;
-    uint32_t HT0Word0     = *(uint32_t *)((uint32_t)HTWord);
-    uint32_t HT0Word1     = *(uint32_t *)((uint32_t)HTWord + 0x4U);
-    uint32_t HT1Word0     = *(uint32_t *)((uint32_t)HTWord + 0x8U);
-    uint32_t HT1Word1     = *(uint32_t *)((uint32_t)HTWord + 0xcU);
+    uint32_t HT0Word0     = *(uint32_t *)((uintptr_t)HTWord);
+    uint32_t HT0Word1     = *(uint32_t *)((uintptr_t)HTWord + 0x4U);
+    uint32_t HT1Word0     = *(uint32_t *)((uintptr_t)HTWord + 0x8U);
+    uint32_t HT1Word1     = *(uint32_t *)((uintptr_t)HTWord + 0xcU);
 
     /* 64bits addr supported only */
     if ((typeSize & 0x03U) != 0U)
@@ -440,17 +440,17 @@ static uint16_t EP_RxL2MFSetPromisc(ep_handle_t *handle, uint8_t si, uint8_t typ
 static uint16_t EP_PsiHandleMacFilter(ep_handle_t *handle, uint8_t vsi, netc_psi_rx_msg_t *msgInfo)
 {
     NETC_ENETC_Type *base     = handle->hw.base;
-    netc_msg_header_t *header = (netc_msg_header_t *)(uint32_t)(msgInfo->msgBuff);
+    netc_msg_header_t *header = (netc_msg_header_t *)(uintptr_t)(msgInfo->msgBuff);
     /* For exact table */
-    uint8_t count    = *(uint8_t *)((uint32_t)msgInfo->msgBuff + 0x10U);
-    uint8_t *macAddr = (uint8_t *)((uint32_t)msgInfo->msgBuff + 0x14U);
+    uint8_t count    = *(uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x10U);
+    uint8_t *macAddr = (uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x14U);
     /* For hash table */
-    uint8_t typeSize = *(uint8_t *)((uint32_t)msgInfo->msgBuff + 0x10U);
-    uint8_t *HTWord  = (uint8_t *)((uint32_t)msgInfo->msgBuff + 0x14U);
+    uint8_t typeSize = *(uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x10U);
+    uint8_t *HTWord  = (uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x14U);
     /* For flush */
-    uint8_t type = *(uint8_t *)((uint32_t)msgInfo->msgBuff + 0x10U);
+    uint8_t type = *(uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x10U);
     /* For promisc */
-    uint8_t typeOp = *(uint8_t *)((uint32_t)msgInfo->msgBuff + 0x10U);
+    uint8_t typeOp = *(uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x10U);
     uint16_t ret   = NETC_MSG_RETURN_CODE(kNETC_MsgClassNotSupport, 0U, 0U);
 
     switch (header->cmdId)
@@ -725,8 +725,8 @@ static uint16_t EP_RxL2VFQueryDeleteEMTableEntry(ep_handle_t *handle, uint8_t si
 static uint16_t EP_RxL2VFSetHashTable(ep_handle_t *handle, uint8_t si, uint8_t size, uint8_t *HTWord)
 {
     NETC_ENETC_Type *base = handle->hw.base;
-    uint32_t HTWord0      = *(uint32_t *)((uint32_t)HTWord);
-    uint32_t HTWord1      = *(uint32_t *)((uint32_t)HTWord + 0x4U);
+    uint32_t HTWord0      = *(uint32_t *)((uintptr_t)HTWord);
+    uint32_t HTWord1      = *(uint32_t *)((uintptr_t)HTWord + 0x4U);
 
     /* 64bits addr supported only */
     if (size != 0U)
@@ -838,15 +838,15 @@ static uint16_t EP_RxL2VFSetPromisc(ep_handle_t *handle, uint8_t si, uint8_t op)
 
 static uint16_t EP_PsiHandleVlanFilter(ep_handle_t *handle, uint8_t vsi, netc_psi_rx_msg_t *msgInfo)
 {
-    netc_msg_header_t *header = (netc_msg_header_t *)(uint32_t)(msgInfo->msgBuff);
+    netc_msg_header_t *header = (netc_msg_header_t *)(uintptr_t)(msgInfo->msgBuff);
     /* For exact table */
-    uint8_t count   = *(uint8_t *)((uint32_t)msgInfo->msgBuff + 0x10U);
-    uint8_t *vlanId = (uint8_t *)((uint32_t)msgInfo->msgBuff + 0x14U);
+    uint8_t count   = *(uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x10U);
+    uint8_t *vlanId = (uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x14U);
     /* For hash table */
-    uint8_t size    = *(uint8_t *)((uint32_t)msgInfo->msgBuff + 0x10U);
-    uint8_t *HTWord = (uint8_t *)((uint32_t)msgInfo->msgBuff + 0x14U);
+    uint8_t size    = *(uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x10U);
+    uint8_t *HTWord = (uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x14U);
     /* For promisc */
-    uint8_t op   = *(uint8_t *)((uint32_t)msgInfo->msgBuff + 0x10U);
+    uint8_t op   = *(uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x10U);
     uint16_t ret = NETC_MSG_RETURN_CODE(kNETC_MsgClassNotSupport, 0U, 0U);
 
     switch (header->cmdId)
@@ -897,7 +897,7 @@ static uint16_t EP_GetLinkStatus(ep_handle_t *handle)
 
 static uint16_t EP_PsiHandleLinkStatus(ep_handle_t *handle, uint8_t vsi, netc_psi_rx_msg_t *msgInfo)
 {
-    netc_msg_header_t *header = (netc_msg_header_t *)(uint32_t)(msgInfo->msgBuff);
+    netc_msg_header_t *header = (netc_msg_header_t *)(uintptr_t)(msgInfo->msgBuff);
     uint16_t ret              = NETC_MSG_RETURN_CODE(kNETC_MsgClassNotSupport, 0U, 0U);
 
     switch (header->cmdId)
@@ -972,7 +972,7 @@ static uint16_t EP_GetLinkSpeed(ep_handle_t *handle)
 
 static uint16_t EP_PsiHandleLinkSpeed(ep_handle_t *handle, uint8_t vsi, netc_psi_rx_msg_t *msgInfo)
 {
-    netc_msg_header_t *header = (netc_msg_header_t *)(uint32_t)(msgInfo->msgBuff);
+    netc_msg_header_t *header = (netc_msg_header_t *)(uintptr_t)(msgInfo->msgBuff);
     uint16_t ret              = NETC_MSG_RETURN_CODE(kNETC_MsgClassNotSupport, 0U, 0U);
 
     switch (header->cmdId)
@@ -998,7 +998,7 @@ static uint16_t EP_PsiHandleLinkSpeed(ep_handle_t *handle, uint8_t vsi, netc_psi
 
 static uint16_t EP_PsiHandleIpVersion(ep_handle_t *handle, uint8_t vsi, netc_psi_rx_msg_t *msgInfo)
 {
-    netc_msg_header_t *header = (netc_msg_header_t *)(uint32_t)(msgInfo->msgBuff);
+    netc_msg_header_t *header = (netc_msg_header_t *)(uintptr_t)(msgInfo->msgBuff);
     uint16_t ret = (uint16_t)kNETC_MsgClassIpVersion << 8 | kNETC_MsgIpVersionNotAvail;
     uint8_t version;
 
@@ -1074,9 +1074,9 @@ status_t EP_PsiRxMsg(ep_handle_t *handle, netc_vsi_number_t vsi, netc_psi_rx_msg
 
 void EP_PsiHandleRxMsg(ep_handle_t *handle, uint8_t vsi, netc_psi_rx_msg_t *msgInfo)
 {
-    netc_msg_header_t *header = (netc_msg_header_t *)(uint32_t)(msgInfo->msgBuff);
+    netc_msg_header_t *header = (netc_msg_header_t *)(uintptr_t)(msgInfo->msgBuff);
     uint8_t crc0              = *(uint8_t *)(msgInfo->msgBuff);
-    uint8_t crc1              = *(uint8_t *)((uint32_t)msgInfo->msgBuff + 0x1U);
+    uint8_t crc1              = *(uint8_t *)((uintptr_t)msgInfo->msgBuff + 0x1U);
     uint16_t code             = NETC_MSG_RETURN_CODE(kNETC_MsgClassNotSupport, 0U, 0U);
     ENETC_SI_Type *base       = handle->hw.si;
     bool notify               = false;
