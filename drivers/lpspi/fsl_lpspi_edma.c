@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2022, 2024-2025 NXP
+ * Copyright 2016-2022, 2024-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -323,8 +323,8 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
     uint32_t bytesPerFrame = ((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT) / 8U + 1U;
     edma_transfer_config_t transferConfigRx = {0};
     edma_transfer_config_t transferConfigTx = {0};
-    edma_tcd_t *softwareTCD_pcsContinuous   = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[2]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
-    edma_tcd_t *softwareTCD_extraBytes      = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
+    edma_tcd_t *softwareTCD_pcsContinuous   = (edma_tcd_t *)((uintptr_t)(&handle->lpspiSoftwareTCD[2]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
+    edma_tcd_t *softwareTCD_extraBytes      = (edma_tcd_t *)((uintptr_t)(&handle->lpspiSoftwareTCD[1]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
 
     if (transfer->dataSize <= bytesPerFrame)
     {
@@ -391,12 +391,12 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
 
     if (handle->rxData != NULL)
     {
-        transferConfigRx.destAddr   = (uint32_t) & (handle->rxData[0]);
+        transferConfigRx.destAddr   = (uintptr_t) & (handle->rxData[0]);
         transferConfigRx.destOffset = 1;
     }
     else
     {
-        transferConfigRx.destAddr   = (uint32_t) & (handle->rxBuffIfNull);
+        transferConfigRx.destAddr   = (uintptr_t) & (handle->rxBuffIfNull);
         transferConfigRx.destOffset = 0;
     }
     transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
@@ -458,12 +458,12 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
     {
         if (handle->txData != NULL)
         {
-            transferConfigTx.srcAddr   = (uint32_t) & (transfer->txData[transfer->dataSize - bytesLastWrite]);
+            transferConfigTx.srcAddr   = (uintptr_t) & (transfer->txData[transfer->dataSize - bytesLastWrite]);
             transferConfigTx.srcOffset = 1;
         }
         else
         {
-            transferConfigTx.srcAddr   = (uint32_t)(&handle->txBuffIfNull);
+            transferConfigTx.srcAddr   = (uintptr_t)(&handle->txBuffIfNull);
             transferConfigTx.srcOffset = 0;
         }
 
@@ -536,10 +536,10 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
         /*  Set continue incase of twice call transfer. */
         LPSPI_SetPCSContinous(base, true);
         handle->transmitCommand    = LPSPI_GetTcr(base) & ~(LPSPI_TCR_CONTC_MASK | LPSPI_TCR_CONT_MASK);
-        transferConfigTx.srcAddr   = (uint32_t) & (handle->transmitCommand);
+        transferConfigTx.srcAddr   = (uintptr_t) & (handle->transmitCommand);
         transferConfigTx.srcOffset = 0;
 
-        transferConfigTx.destAddr   = (uint32_t) & (base->TCR);
+        transferConfigTx.destAddr   = (uintptr_t) & (base->TCR);
         transferConfigTx.destOffset = 0;
 
         transferConfigTx.srcTransferSize  = kEDMA_TransferSize4Bytes;
@@ -559,12 +559,12 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
 
     if (handle->txData != NULL)
     {
-        transferConfigTx.srcAddr   = (uint32_t)(handle->txData);
+        transferConfigTx.srcAddr   = (uintptr_t)(handle->txData);
         transferConfigTx.srcOffset = 1;
     }
     else
     {
-        transferConfigTx.srcAddr   = (uint32_t)(&handle->txBuffIfNull);
+        transferConfigTx.srcAddr   = (uintptr_t)(&handle->txBuffIfNull);
         transferConfigTx.srcOffset = 0;
     }
 
@@ -968,7 +968,7 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
     uint32_t bytesPerFrame = ((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT) / 8U + 1U;
     edma_transfer_config_t transferConfigRx = {0};
     edma_transfer_config_t transferConfigTx = {0};
-    edma_tcd_t *softwareTCD_extraBytes      = (edma_tcd_t *)((uint32_t)(&handle->lpspiSoftwareTCD[1]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
+    edma_tcd_t *softwareTCD_extraBytes      = (edma_tcd_t *)((uintptr_t)(&handle->lpspiSoftwareTCD[1]) & (~LPSPI_ALIGN_TCD_SIZE_MASK));
 
     /* Assign the original value for members of transfer handle. */
     handle->state                  = (uint8_t)kLPSPI_Busy;
@@ -1065,12 +1065,12 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
 
         if (handle->rxData != NULL)
         {
-            transferConfigRx.destAddr   = (uint32_t) & (handle->rxData[0]);
+            transferConfigRx.destAddr   = (uintptr_t) & (handle->rxData[0]);
             transferConfigRx.destOffset = 1;
         }
         else
         {
-            transferConfigRx.destAddr   = (uint32_t) & (handle->rxBuffIfNull);
+            transferConfigRx.destAddr   = (uintptr_t) & (handle->rxBuffIfNull);
             transferConfigRx.destOffset = 0;
         }
         transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
@@ -1133,7 +1133,7 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
         EDMA_ResetChannel(handle->edmaTxDataToTxRegHandle->base, handle->edmaTxDataToTxRegHandle->channel);
         if (isThereExtraTxBytes)
         {
-            transferConfigTx.srcAddr         = (uint32_t) & (transfer->txData[transfer->dataSize - bytesLastWrite]);
+            transferConfigTx.srcAddr         = (uintptr_t) & (transfer->txData[transfer->dataSize - bytesLastWrite]);
             transferConfigTx.srcOffset       = 1;
             transferConfigTx.destOffset      = 0;
             transferConfigTx.srcTransferSize = kEDMA_TransferSize1Bytes;
@@ -1169,7 +1169,7 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
                     break;
             } /* GCOVR_EXCL_STOP */
 
-            transferConfigTx.destAddr        = (uint32_t)txAddr + addrOffset;
+            transferConfigTx.destAddr        = (uintptr_t)txAddr + addrOffset;
             transferConfigTx.majorLoopCounts = 1;
 
 #if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
@@ -1182,7 +1182,7 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
 #endif
         }
 
-        transferConfigTx.srcAddr         = (uint32_t)(handle->txData);
+        transferConfigTx.srcAddr         = (uintptr_t)(handle->txData);
         transferConfigTx.srcOffset       = 1;
         transferConfigTx.destOffset      = 0;
         transferConfigTx.srcTransferSize = kEDMA_TransferSize1Bytes;

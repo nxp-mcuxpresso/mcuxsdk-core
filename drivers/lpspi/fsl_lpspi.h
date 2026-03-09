@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2023, 2024-2025 NXP
+ * Copyright 2016-2023, 2024-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -749,9 +749,9 @@ static inline void LPSPI_DisableDMA(LPSPI_Type *base, uint32_t mask)
  * @param base LPSPI peripheral address.
  * @return The LPSPI Transmit Data Register address.
  */
-static inline uint32_t LPSPI_GetTxRegisterAddress(LPSPI_Type *base)
+static inline uintptr_t LPSPI_GetTxRegisterAddress(LPSPI_Type *base)
 {
-    return (uint32_t) & (base->TDR);
+    return (uintptr_t) & (base->TDR);
 }
 
 /*!
@@ -764,9 +764,9 @@ static inline uint32_t LPSPI_GetTxRegisterAddress(LPSPI_Type *base)
  * @param base LPSPI peripheral address.
  * @return The LPSPI Receive Data Register address.
  */
-static inline uint32_t LPSPI_GetRxRegisterAddress(LPSPI_Type *base)
+static inline uintptr_t LPSPI_GetRxRegisterAddress(LPSPI_Type *base)
 {
-    return (uint32_t) & (base->RDR);
+    return (uintptr_t) & (base->RDR);
 }
 
 /*!
