@@ -2266,6 +2266,18 @@ module Internal
               target, "./settings[name=\"ILINK\"]/data/option[name=\"IlinkTrustzoneImportLibraryOut\"]/state", @operations.convert_string(value), used: used
             )
           end
+
+        end
+
+        class OptimizationsTab < TabBase
+
+          private
+
+          def use_vfe(target, value, *args, used: true, **kargs)
+            @operations.set_state_node(
+              target, "./settings[name=\"ILINK\"]/data/option[name=\"IlinkOptUseVfe\"]/state", @operations.convert_boolean(value), used: used
+            )
+          end
         end
 
         class ChecksumTab < TabBase

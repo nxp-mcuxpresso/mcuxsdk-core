@@ -806,6 +806,19 @@ module Iar
             return line
         end
 
+        def linker_use_vfe(target, line)
+            Core.assert(target.is_a?(String), "not a string")
+            Core.assert(line.is_a?(String), "not a string")
+            pattern = /\s(--vfe|--no_vfe)\s/
+            result  = line.match(pattern)
+            if result
+                @logger.debug("recognize: #{result[ 0 ]}")
+                @file.linkerTab.optimizationsTab.use_vfe(target, result[1] == '--vfe')
+                line.sub!(result[ 0 ], '')
+            end
+            return line
+        end
+
         def linker_tz_import_lib(target, line)
             Core.assert(target.is_a?(String), "not a string")
             Core.assert(line.is_a?(String), "not a string")

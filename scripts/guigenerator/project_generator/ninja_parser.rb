@@ -533,7 +533,7 @@ class NinjaParser
   end
   #for preifx like --preinclude/--include/--config_def may have several configs, must keep the prefix for each config
   def preprocess_flags_with_prefix(all_flags)
-    keep_prefix = ["--preinclude", "-include", "--config_def",  "-P", "--diag_suppress", "-Xlinker"]
+    keep_prefix = ["--preinclude", "-include", "--config_def",  "-P", "--diag_suppress", "-Xlinker", "--redirect"]
     result = []
 
     all_flags.each_with_index do |flag, index|

@@ -185,6 +185,7 @@ module Iar
         attr_reader :libraryTab
         attr_reader :inputTab
         attr_reader :outputTab
+        attr_reader :optimizationsTab
         attr_reader :checksumTab
         attr_reader :extraOptionTab
         attr_reader :diagnosticTab
@@ -195,6 +196,7 @@ module Iar
           @libraryTab = LibraryTab.new(@operations)
           @inputTab = InputTab.new(@operations)
           @outputTab = OutputTab.new(@operations)
+          @optimizationsTab = OptimizationsTab.new(@operations)
           @checksumTab = ChecksumTab.new(@operations)
           @extraOptionTab = ExtraOptionTab.new(@operations)
           @diagnosticTab = DiagnosticTab.new(@operations)
@@ -280,6 +282,12 @@ module Iar
           end
 
           def set_tz_import_lib(*args, **kargs)
+            super
+          end
+        end
+
+        class OptimizationsTab < OptimizationsTab
+          def use_vfe(*args, **kargs)
             super
           end
         end
