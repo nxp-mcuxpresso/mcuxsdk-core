@@ -1271,10 +1271,18 @@ static status_t LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
                     /*
                      * $Branch Coverage Justification$
                      * The transmission commands will not exceed FIFO SIZE.(will improve)
+                     * Can't control the number of words in the TX FIFO, so the FIFO doesn't have to be full.
                      */
-                    while ((size_t)FSL_FEATURE_LPI2C_FIFO_SIZEn(base) == stateParams->txCount) /* GCOVR_EXCL_BR_LINE */
+                    while ((size_t)FSL_FEATURE_LPI2C_FIFO_SIZEn(base) == stateParams->txCount) /* GCOVR_EXCL_START */
                     {
-                        LPI2C_MasterGetFifoCounts(base, NULL, &stateParams->txCount); /* GCOVR_EXCL_LINE */
+                        LPI2C_MasterGetFifoCounts(base, NULL, &stateParams->txCount);
+
+                        /* Check for errors. */
+                        status_t result = LPI2C_MasterCheckAndClearError(base, LPI2C_MasterGetStatusFlags(base));
+                        if (result != kStatus_Success)
+                        {
+                            return result;
+                        }
 
 #if I2C_RETRY_TIMES != 0U
                         if (--waitTimes == 0U)
@@ -1282,7 +1290,7 @@ static status_t LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
                             return kStatus_LPI2C_Timeout;
                         }
 #endif
-                    }
+                    } /* GCOVR_EXCL_STOP */
 
                     if (tmpRxSize > 256U)
                     {

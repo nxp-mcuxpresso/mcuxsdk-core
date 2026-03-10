@@ -8,6 +8,7 @@
   - Set minimal possible value for FILTSDA and FILTSCL to 0.
   - Updated configuration of glitch filters in LPI2C_SlaveInit().
   - Set minimal possible value for SCFGR2[CLKHOLD] to 1.
+  - Added error check to while loop in LPI2C_TransferStateMachineSendCommand().
 
 ## [2.6.4]
 

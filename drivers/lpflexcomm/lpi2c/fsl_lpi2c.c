@@ -1170,6 +1170,13 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
                                     while (txFifoSize == txCount)
                                     {
                                         LPI2C_MasterGetFifoCounts(base, NULL, &txCount);
+
+                                        /* Check for errors. */
+                                        result = LPI2C_MasterCheckAndClearError(base, LPI2C_MasterGetStatusFlags(base));
+                                        if (result != kStatus_Success)
+                                        {
+                                            return result;
+                                        }
                                     }
 
                                     if (tmpRxSize > 256U)
