@@ -23,6 +23,8 @@ For OSTIMER, allow users set the match in two ways, set match value with raw dat
 and st the match value with common data(decimal format).
 OSTIMER_SetMatchRawValue() is used with gray code and OSTIMER_SetMatchValue() is used together with 
 decimal data.
+Use OSTIMER_SetMatchValueSafe() when the match delta is small or unpredictable. It used decimal data.
+The extra synchronization cost (~7 OSTimer ticks) is the trade-off for a guaranteed success/fail result.
 
 ## OSTIMER get timer count {#OSTIMERTimerCount}
 The OSTIMER driver allow users to get the timer count in two ways, getting the gray code value by using
