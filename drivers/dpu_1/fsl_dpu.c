@@ -1136,10 +1136,6 @@ void DPU_Deinit(DISPLAY_SEERIS_Type *base)
         DPU_ClearInterruptsPendingFlags(base, i, 0xFFFFFFFFU);
     }
 
-#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
-    /* Disable dpu clock */
-    (void)CLOCK_DisableClock(s_dpuClock[DPU_GetInstance(base)]);
-#endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
 /*!
