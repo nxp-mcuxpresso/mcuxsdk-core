@@ -168,6 +168,7 @@ module Internal
           @as_marco[target].each do |line|
             flags_cmake += "    #{line} \\\n"
           end
+          flags_cmake += "    -fmacro-prefix-map=${ProjDirPath}/=./ \\\n"
           flags_cmake += "    ${FPU} \\\n"
           flags_cmake += "\")\n"
         end
@@ -177,6 +178,7 @@ module Internal
           @cc_marco[target].each do |line|
             flags_cmake += "    #{line} \\\n"
           end
+          flags_cmake += "    -fmacro-prefix-map=${ProjDirPath}/=./ \\\n"
           flags_cmake += "    ${FPU} \\\n"
           flags_cmake += "    ${DEBUG_CONSOLE_CONFIG} \\\n"
           flags_cmake += "\")\n"
@@ -187,6 +189,7 @@ module Internal
           @cxx_marco[target].each do |line|
             flags_cmake += "    #{line} \\\n"
           end
+          flags_cmake += "    -fmacro-prefix-map=${ProjDirPath}/=./ \\\n"
           flags_cmake += "    ${FPU} \\\n"  if @fpu.length > 0
           flags_cmake += "    ${DEBUG_CONSOLE_CONFIG} \\\n"
           flags_cmake += "\")\n"
