@@ -18,6 +18,7 @@
         * PMU_CleanLowVolGlitchDetectReset()
         * PMU_IsLowVolGlitchDetect()
     - Apply delay after all register write operations in existing and new APIs.
+    - Added PMU_DoHandshakeBetweenPMUAndPAC function to ensure proper synchronization between PMU and PAC after register updates.
 
 - Bug Fixes
     - Fixed inverted logic in PMU_EnableFRO16K() function where enable

@@ -309,7 +309,7 @@ static inline void PMU_EnableHighVolGlitchDetect(PMU_Type *base, bool enable)
         base->AGDET_HV_CTRL &= ~PMU_AGDET_HV_CTRL_AGDET_HV_EN_MASK;
     }
 #if CONFIG_PLS_PMU_REG_WRITE_DELAY_VAL
-    SDK_DelayAtLeastUs(CONFIG_PLS_PMU_REG_WRITE_DELAY_VAL, SystemCoreClock);
+   SDK_DelayAtLeastUs(CONFIG_PLS_PMU_REG_WRITE_DELAY_VAL, SystemCoreClock);
 #endif /* CONFIG_PLS_PMU_REG_WRITE_DELAY_VAL */
 }
 
@@ -419,6 +419,19 @@ static inline bool PMU_IsLowVolGlitchDetect(PMU_Type *base)
     return (bool)((base->AGDET_LV_CTRL & PMU_AGDET_LV_CTRL_AGDET_LV_RES_MASK) != 0UL);
 }
 
+/*!
+ * @brief Apply handshake between PMU and PAC after PMU register update.
+ * 
+ * @param base PMU peripheral base address.
+ */
+static inline void PMU_DoHandshakeBetweenPMUAndPAC(PMU_Type *base)
+{
+    uint32_t tmp32 = base->AWK_UP_TIME;
+    base->AWK_UP_TIME = tmp32;
+#if CONFIG_PLS_PMU_REG_WRITE_DELAY_VAL
+    SDK_DelayAtLeastUs(CONFIG_PLS_PMU_REG_WRITE_DELAY_VAL, SystemCoreClock);
+#endif /* CONFIG_PLS_PMU_REG_WRITE_DELAY_VAL */
+}
 #if defined(__cplusplus)
 }
 #endif
