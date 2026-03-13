@@ -41,7 +41,7 @@ static const clock_ip_name_t s_gpioClockName[] = GPIO_CLOCKS;
 static const reset_ip_name_t s_gpioResets[] = GPIO_RESETS_ARRAY;
 #endif
 
-static GPIO_Type *const s_gpioBases[] = GPIO_BASE_PTRS;
+static GPIO_Type * GPIO_ATTR const s_gpioBases[] = GPIO_BASE_PTRS;
 
 /*******************************************************************************
  * Prototypes
@@ -52,12 +52,12 @@ static GPIO_Type *const s_gpioBases[] = GPIO_BASE_PTRS;
  * @param base    GPIO peripheral base pointer(PTA, PTB, PTC, etc.)
  * @retval GPIO instance
  */
-static uint8_t GPIO_GetInstance(GPIO_Type *base);
+static uint8_t GPIO_GetInstance(GPIO_Type * GPIO_ATTR base);
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static uint8_t GPIO_GetInstance(GPIO_Type *base)
+static uint8_t GPIO_GetInstance(GPIO_Type * GPIO_ATTR base)
 {
     uint8_t instance;
 
@@ -80,7 +80,7 @@ static uint8_t GPIO_GetInstance(GPIO_Type *base)
  *
  * param base   GPIO peripheral base pointer.
  */
-status_t GPIO_PortInit(GPIO_Type *base)
+status_t GPIO_PortInit(GPIO_Type * GPIO_ATTR base)
 {
     status_t status;
 
@@ -113,7 +113,7 @@ status_t GPIO_PortInit(GPIO_Type *base)
  *
  * param base   GPIO peripheral base pointer.
  */
-status_t GPIO_PortDeinit(GPIO_Type *base)
+status_t GPIO_PortDeinit(GPIO_Type * GPIO_ATTR base)
 {
     status_t status;
 
@@ -160,7 +160,7 @@ status_t GPIO_PortDeinit(GPIO_Type *base)
  * param pin    GPIO port pin number
  * param config GPIO pin configuration pointer
  */
-status_t GPIO_PinInit(GPIO_Type *base, uint8_t pin, const gpio_pin_config_t *config)
+status_t GPIO_PinInit(GPIO_Type * GPIO_ATTR base, uint8_t pin, const gpio_pin_config_t *config)
 {
     assert(NULL != config);
 
