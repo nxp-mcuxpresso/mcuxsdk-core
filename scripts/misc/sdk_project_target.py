@@ -425,6 +425,11 @@ class MCUXAppTargets(object):
 
     def get_instance_targets(self, app_dir, apps, app_name, app_data, instance_data, is_pick_one_target_for_app=False, instance_type='board', app_shared_content={}, query_interal=True):
         assert(instance_type in ['board', 'device'])
+        # If filtering by boards only, skip device instances; if filtering by devices only, skip board instances
+        if instance_type == 'device' and self.BOARDS_FILTER and not self.DEVICES_FILTER:
+            return
+        if instance_type == 'board' and self.DEVICES_FILTER and not self.BOARDS_FILTER:
+            return
         if query_interal and app_name in MCUXAppTargets.INT_EXAMPLE_DATA:
             instance_data = { **instance_data, **MCUXAppTargets.INT_EXAMPLE_DATA[app_name] }
         use_sysbuild = app_data.get('use_sysbuild', False)
