@@ -1,5 +1,10 @@
 # MCX_ENET
 
+## [2.2.2]
+
+- Bug Fixes
+  - Fixed waiting for software reset to complete.
+
 ## [2.2.1]
 
 - Bug Fixes

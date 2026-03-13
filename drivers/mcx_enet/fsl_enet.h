@@ -20,7 +20,7 @@
 /*! @name Driver version */
 /*@{*/
 /*! @brief Defines the driver version. */
-#define FSL_ENET_DRIVER_VERSION (MAKE_VERSION(2, 2, 1))
+#define FSL_ENET_DRIVER_VERSION (MAKE_VERSION(2, 2, 2))
 /*@}*/
 
 /*! @name Control and status region bit masks of the receive buffer descriptor. */

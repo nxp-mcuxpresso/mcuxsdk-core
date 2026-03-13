@@ -44,6 +44,11 @@
 /*! @brief Binary rollover mode count convert */
 #define ENET_BINARY_ROLLOVER_SCALE(x) (uint32_t)((uint64_t)(x)*46566U / 100000U)
 
+#ifndef ENET_DMA_MODE_SWR_READ_DELAY
+/*! @brief Delay before reading of SWR bit after reset initiation */
+#define ENET_DMA_MODE_SWR_READ_DELAY (100UL)
+#endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -203,6 +208,14 @@ static void ENET_SetDMAControl(ENET_Type *base, const enet_config_t *config)
     /* Reset first and wait for the complete
      * The reset bit will automatically be cleared after complete. */
     base->DMA_MODE |= ENET_DMA_MODE_SWR_MASK;
+
+    /* Wait before reading SWR bit */
+    for (uint32_t i = 0U; i < ENET_DMA_MODE_SWR_READ_DELAY; i++)
+    {
+        __NOP();
+    }
+
+    /* Wait until reset is complete */
     while ((base->DMA_MODE & ENET_DMA_MODE_SWR_MASK) != 0U)
     {
     }
@@ -638,6 +651,13 @@ void ENET_Deinit(ENET_Type *base)
     /* Reset first and wait for the complete
      * The reset bit will automatically be cleared after complete. */
     base->DMA_MODE |= ENET_DMA_MODE_SWR_MASK;
+
+    /* Wait before reading SWR bit */
+    for (uint32_t i = 0U; i < ENET_DMA_MODE_SWR_READ_DELAY; i++)
+    {
+        __NOP();
+    }
+
     while ((base->DMA_MODE & ENET_DMA_MODE_SWR_MASK) != 0U)
     {
     }
