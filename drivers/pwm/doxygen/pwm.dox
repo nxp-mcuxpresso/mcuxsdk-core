@@ -31,6 +31,29 @@ capture.
   After configuring input capture, PWM_GetInputCaptureValue() can be used to read the
 captured counter value for a specified edge when related capture flag is set.
 
+## Force signal operations {#PWMForceOperation}
+  Several PWM registers are double-buffered and only propagate to their active
+counterparts when a FORCE_OUT event occurs in the corresponding submodule. This
+mechanism allows one or more parameters to be updated glitch-free while PWM output
+is running.
+
+  The function PWM_SetupForceSignal() select the signal fed into the deadtime insertion
+logic (normal PWM, inverted PWM, software control, or external). The write has no
+immediate effect; the new value takes effect only after a FORCE_OUT event.
+
+  The function PWM_UpdateCurrentPolarity() select which VAL comparator pair(VAL2/VAL3
+or VAL4/VAL5) drives the complementary output. Like PWM_SetupForceSignal(), it only
+updates the shadow register; a subsequent FORCE_OUT event is required to apply the change.
+
+  The function PWM_EnableLocalForce() selects the local software force source to perform a
+software-controlled initialization. This causes a FORCE_OUT event that latches all pending
+FORCE-buffered shadow registers into their active registers simultaneously.
+
+  To update multiple FORCE-buffered parameters atomically, write all shadow registers
+first using PWM_SetupForceSignal() and/or PWM_UpdateCurrentPolarity(), then call
+PWM_EnableLocalForce() once. All changes take effect in the same FORCE_OUT event,
+making the transition impossible to observe in an intermediate state.
+
 ## Fault operation  {#PWMFaultOperation}
   The function PWM_SetupFault() sets up the properties for each fault.
 
