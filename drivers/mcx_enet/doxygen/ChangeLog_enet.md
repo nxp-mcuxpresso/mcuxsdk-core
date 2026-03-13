@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed waiting for software reset to complete.
+  - Preserve CSR clock range for MDC clock across software reset.
 
 ## [2.2.1]
 

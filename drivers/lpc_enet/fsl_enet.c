@@ -198,6 +198,10 @@ static void ENET_SetDMAControl(ENET_Type *base, const enet_config_t *config)
     uint8_t index;
     uint32_t reg;
     uint32_t burstLen;
+    uint32_t cr;
+
+    /* Preserve CSR clock range for MDC clock before reset */
+    cr = base->MAC_MDIO_ADDR & ENET_MAC_MDIO_ADDR_CR_MASK;
 
     /* Reset first and wait for the complete
      * The reset bit will automatically be cleared after complete. */
@@ -205,6 +209,9 @@ static void ENET_SetDMAControl(ENET_Type *base, const enet_config_t *config)
     while ((base->DMA_MODE & ENET_DMA_MODE_SWR_MASK) != 0U)
     {
     }
+
+    /* Restore CSR clock range for MDC clock after reset */
+    base->MAC_MDIO_ADDR = (base->MAC_MDIO_ADDR & ~ENET_MAC_MDIO_ADDR_CR_MASK) | cr;
 
     /* Set the burst length. */
     for (index = 0; index < ENET_RING_NUM_MAX; index++)
@@ -610,12 +617,20 @@ void ENET_Init(ENET_Type *base, const enet_config_t *config, uint8_t *macAddr, u
  */
 void ENET_Deinit(ENET_Type *base)
 {
+    uint32_t cr;
+
+    /* Preserve CSR clock range for MDC clock before reset */
+    cr = base->MAC_MDIO_ADDR & ENET_MAC_MDIO_ADDR_CR_MASK;
+
     /* Reset first and wait for the complete
      * The reset bit will automatically be cleared after complete. */
     base->DMA_MODE |= ENET_DMA_MODE_SWR_MASK;
     while ((base->DMA_MODE & ENET_DMA_MODE_SWR_MASK) != 0U)
     {
     }
+
+    /* Restore CSR clock range for MDC clock after reset */
+    base->MAC_MDIO_ADDR = (base->MAC_MDIO_ADDR & ~ENET_MAC_MDIO_ADDR_CR_MASK) | cr;
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Disables the clock source. */

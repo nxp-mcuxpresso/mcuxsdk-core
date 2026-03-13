@@ -1,5 +1,10 @@
 # LPC_ENET
 
+## [2.3.7]
+
+- Bug Fixes
+  - Preserve CSR clock range for MDC clock across software reset.
+
 ## [2.3.6]
 
 - Bug Fixes
