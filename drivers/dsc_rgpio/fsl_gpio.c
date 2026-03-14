@@ -15,7 +15,7 @@
 #endif
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && \
-    defined(GPIO_CLOCKS_ARRAY)
+    defined(GPIO_CLOCKS)
 #define GPIO_DRIVER_HANDLE_CLOCK 1
 #else
 #define GPIO_DRIVER_HANDLE_CLOCK 0
@@ -33,7 +33,7 @@
 
 #if GPIO_DRIVER_HANDLE_CLOCK
 /*! @brief Array to map FGPIO instance number to clock name. */
-static const clock_ip_name_t s_gpioClockName[] = GPIO_CLOCKS_ARRAY;
+static const clock_ip_name_t s_gpioClockName[] = GPIO_CLOCKS;
 #endif
 
 #if GPIO_DRIVER_HANDLE_RESET
@@ -93,7 +93,7 @@ status_t GPIO_PortInit(GPIO_Type *base)
     else
     {
 #if GPIO_DRIVER_HANDLE_CLOCK
-        CLOCK_EnableGlock(s_gpioClockName[instance]);
+        CLOCK_EnableClock(s_gpioClockName[instance]);
 #endif
 
 #if defined(GPIO_RESETS_ARRAY)
@@ -126,7 +126,7 @@ status_t GPIO_PortDeinit(GPIO_Type *base)
     else
     {
 #if GPIO_DRIVER_HANDLE_CLOCK
-        CLOCK_EnableGlock(s_gpioClockName[instance]);
+        CLOCK_DisableClock(s_gpioClockName[instance]);
 #endif
         status = kStatus_Success;
     }
