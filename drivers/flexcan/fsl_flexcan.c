@@ -5473,8 +5473,7 @@ void FLEXCAN_EnhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /
     status_t status;
     uint64_t result;
     uint32_t enableInt;
-    uint32_t tempmask;
-    uint32_t tempflag;
+    uint32_t statusReg;
     bool fgRet = false;
     enableInt = base->ERFIER;
     enableInt &= (CAN_ERFIER_ERFUFWIE_MASK | CAN_ERFIER_ERFOVFIE_MASK | CAN_ERFIER_ERFWMIIE_MASK |
@@ -5494,9 +5493,11 @@ void FLEXCAN_EnhancedRxFifoHandleIRQ(CAN_Type *base, flexcan_handle_t *handle) /
         }
 
         /* Checking whether exist enhanced RX FIFO interrupt status. */
-        tempmask = base->ERFIER;
-        tempflag = base->ERFSR;
-        fgRet    = (0U != (tempmask & tempflag));
+        enableInt = base->ERFIER;
+        enableInt &= (CAN_ERFIER_ERFUFWIE_MASK | CAN_ERFIER_ERFOVFIE_MASK | CAN_ERFIER_ERFWMIIE_MASK |
+                      CAN_ERFIER_ERFDAIE_MASK);
+        statusReg = base->ERFSR;
+        fgRet     = (0U != (enableInt & statusReg));
     } while (fgRet);
 }
 #endif

@@ -13,7 +13,8 @@
   - Remove redundant feature macro for FlexCAN engine clock selection in `FLEXCAN_Init`.
 - Bug Fixes
   - Fixed Enhanced Rx FIFO filter configuration assertion `idFilterPairNum` in `FLEXCAN_SetEnhancedRxFifoConfig`.
-  - Fix Bus Off Done interrupt and Data Phase of Fast CAN FD Frames Error interrupt enable mask shift for CTRL2 register.
+  - Fixed Bus Off Done interrupt and Data Phase of Fast CAN FD Frames Error interrupt enable mask shift for CTRL2 register.
+  - Fixed Enhanced Rx FIFO interrupt enable and status flag comparing issue in `FLEXCAN_EnhancedRxFifoHandleIRQ`.
 
 ## [2.15.0]
 
