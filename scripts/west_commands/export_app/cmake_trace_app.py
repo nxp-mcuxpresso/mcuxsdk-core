@@ -291,15 +291,17 @@ class CmakeTraceApp(CmakeApp):
                 self.board_copy_folders = freestanding_copied_folders
             else:
                 self.board_copy_folders.extend(freestanding_copied_folders)
-        # Ensure list_project only catch exported boards
-        if filtered := {
-            k: v
-            for k, v in example_data.get("boards", {}).items()
-            if k.startswith(self.options.cmake_variables["board"])
-        }:
-            result[0][example_name]["boards"] = filtered
-        else:
-            result[0][example_name]["boards"] = {}
+
+        # Ensure list_project only catches examples exported for the target board.
+        for example_name, example_data in list(result[0].items()):
+            if filtered := {
+                k: v
+                for k, v in example_data.get("boards", {}).items()
+                if k.startswith(self.options.cmake_variables["board"])
+            }:
+                result[0][example_name]["boards"] = filtered
+            else:
+                del result[0][example_name]
 
         return result
 

@@ -413,7 +413,7 @@ class MCUXAppTargets(object):
                 continue
             query_internal = False if app_data.get('section-type', '') == 'freestanding_application' else True
             # Only example.yml shall only have one application
-            if (app_data.get('section-type', '') == 'application') and not app_shared_content:
+            if (app_data.get('section-type', '') in ['application', 'freestanding_application']) and not app_shared_content:
                 if (app_toolchains := app_data.get('contents', {}).get('toolchains', [])):
                     app_shared_content['toolchains'] = app_toolchains
             if app_data.get('boards'):
