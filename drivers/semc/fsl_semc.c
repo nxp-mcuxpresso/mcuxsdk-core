@@ -1258,6 +1258,11 @@ status_t SEMC_SendIPCommand(
             break;
     }
 
+    if (readCmd && (read == NULL))
+    {
+        return kStatus_InvalidArgument;
+    }
+
     if (writeCmd)
     {
         /* Set data. */

@@ -5,6 +5,8 @@
 - Bug Fixes
   - Fixed IOCR pinmux field masking so `SEMC_ConfigureSRAMWithChipSelection()` can reliably configure SRAM CE on chip selects other than CS0.
   - Extended SRAM timing parameters in `semc_sram_config_t` to 32-bit and updated timing conversion to safely handle values greater than 255 ns.
+  - Guard readback in `SEMC_SendIPCommand()` and return `kStatus_InvalidArgument` when a read command is 
+  issued with a null output pointer
 
 ## [2.7.2]
 
