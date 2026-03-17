@@ -675,7 +675,7 @@ class NinjaParser
       end
       cmd_list[index] = remove_last_quote_if_odd(cmd_list[index])
     end
-    cmd_list =cmd_list.compact.join(' && ').split(' ')
+    cmd_list = split_respecting_quotes(cmd_list.compact.join(' && '))
     # TODO Identify more toolchains if necessary
     cmd_list.each_with_index do |item, index |
       # copy file in build command in case it's not add by mcux_add_source
@@ -1020,7 +1020,6 @@ class NinjaParser
           else
             cmd.split(/\s+/)[-1].delete_suffix('"').delete_suffix("'")
           end
-
       cmd = translate_path_in_build_cmd(cmd.split('&&')[-1].strip)
       cmd_list << {'file'=> File.join(get_tool_rootdir(@toolchain), File.basename(generated_file)), 'command' => cmd.join(' && ').chomp}
     end
@@ -1353,6 +1352,28 @@ class NinjaParser
     else
       return '.'
     end
+  end
+
+  # Split a command string by spaces while preserving quoted substrings as single tokens.
+  # This handles toolchain paths that contain spaces, e.g.:
+  #   "C:\Program Files (x86)\Arm GNU Toolchain arm-none-eabi\14.2 rel1\bin\arm-none-eabi-gcc.exe"
+  def split_respecting_quotes(str)
+    tokens = []
+    current = ''
+    in_quote = false
+    str.each_char do |c|
+      if c == '"'
+        in_quote = !in_quote
+        current += c
+      elsif c == ' ' && !in_quote
+        tokens << current unless current.empty?
+        current = ''
+      else
+        current += c
+      end
+    end
+    tokens << current unless current.empty?
+    tokens
   end
 
   def translate_toolchain_path_variable(path)
