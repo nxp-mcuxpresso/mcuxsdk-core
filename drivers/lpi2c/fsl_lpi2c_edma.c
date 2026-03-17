@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021, 2025 NXP
+ * Copyright 2016-2021, 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -324,7 +324,7 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
     }
 
     /* Get a 32-byte aligned TCD pointer. */
-    edma_tcd_t *tcd = (edma_tcd_t *)((uint32_t)(&handle->tcds[1]) & (~ALIGN_TCD_SIZE_MASK));
+    edma_tcd_t *tcd = (edma_tcd_t *)((uintptr_t)(&handle->tcds[1]) & (~ALIGN_TCD_SIZE_MASK));
 
     bool hasSendData    = (transfer->direction == kLPI2C_Write) && (transfer->dataSize != 0U);
     bool hasReceiveData = (transfer->direction == kLPI2C_Read) && (transfer->dataSize != 0U);
@@ -336,7 +336,7 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
     if (hasSendData)
     {
         uint32_t *srcAddr               = (uint32_t *)transfer->data;
-        transferConfig.srcAddr          = (uint32_t)srcAddr;
+        transferConfig.srcAddr          = (uintptr_t)srcAddr;
         transferConfig.destAddr         = (uint32_t)LPI2C_MasterGetTxFifoAddress(base);
         transferConfig.srcTransferSize  = kEDMA_TransferSize1Bytes;
         transferConfig.destTransferSize = kEDMA_TransferSize1Bytes;
@@ -375,7 +375,7 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
         uint32_t *srcAddr = (uint32_t *)transfer->data;
         /* Set up data receive. */
         transferConfig.srcAddr          = (uint32_t)LPI2C_MasterGetRxFifoAddress(base);
-        transferConfig.destAddr         = (uint32_t)srcAddr;
+        transferConfig.destAddr         = (uintptr_t)srcAddr;
         transferConfig.srcTransferSize  = kEDMA_TransferSize1Bytes;
         transferConfig.destTransferSize = kEDMA_TransferSize1Bytes;
         transferConfig.srcOffset        = 0;
@@ -408,8 +408,8 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
             EDMA_TcdEnableInterrupts(tcd, (uint32_t)kEDMA_MajorInterruptEnable);
 #endif
 
-            transferConfig.srcAddr          = (uint32_t)&lpi2c_edma_RecSetting;
-            transferConfig.destAddr         = (uint32_t) & (base->MDER);
+            transferConfig.srcAddr          = (uintptr_t)&lpi2c_edma_RecSetting;
+            transferConfig.destAddr         = (uintptr_t) & (base->MDER);
             transferConfig.srcTransferSize  = kEDMA_TransferSize1Bytes;
             transferConfig.destTransferSize = kEDMA_TransferSize1Bytes;
             transferConfig.srcOffset        = 0;
@@ -417,7 +417,7 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
             transferConfig.minorLoopBytes   = sizeof(uint8_t);
             transferConfig.majorLoopCounts  = 1;
 
-            edma_tcd_t *tcdSetRxClearTxDMA = (edma_tcd_t *)((uint32_t)(&handle->tcds[2]) & (~ALIGN_TCD_SIZE_MASK));
+            edma_tcd_t *tcdSetRxClearTxDMA = (edma_tcd_t *)((uintptr_t)(&handle->tcds[2]) & (~ALIGN_TCD_SIZE_MASK));
 #if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
             EDMA_TcdResetExt(handle->rx->base, tcdSetRxClearTxDMA);
             EDMA_TcdSetTransferConfigExt(handle->rx->base, tcdSetRxClearTxDMA, &transferConfig, tcd);
@@ -436,7 +436,7 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
     /* Set up commands transfer. */
     if (commandCount != 0U)
     {
-        transferConfig.srcAddr          = (uint32_t)handle->commandBuffer;
+        transferConfig.srcAddr          = (uintptr_t)handle->commandBuffer;
         transferConfig.destAddr         = (uint32_t)LPI2C_MasterGetTxFifoAddress(base);
         transferConfig.srcTransferSize  = kEDMA_TransferSize2Bytes;
         transferConfig.destTransferSize = kEDMA_TransferSize2Bytes;
