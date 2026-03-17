@@ -1,5 +1,10 @@
 # XSPI
 
+## [2.7.2]
+
+- Bug Fixes
+  - Fixed typo where ptrSubBuffer2Config incorrectly used XSPI_BUFCR_SUBBUF1_DIV instead of XSPI_BUFCR_SUBBUF2_DIV.
+
 ## [2.7.1]
 
 - Bug Fixes

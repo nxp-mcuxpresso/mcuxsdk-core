@@ -2426,7 +2426,7 @@ RAMFUNC status_t XSPI_SetAhbBufferConfig(XSPI_Type *base,
             base->BUFCR[i] |= XSPI_BUFCR_SUB_DIV_EN_MASK |
                               XSPI_BUFCR_SUBBUF0_DIV(ahbBufferConfigs[i]->ptrSubBuffer0Config->divFactor) |
                               XSPI_BUFCR_SUBBUF1_DIV(ahbBufferConfigs[i]->ptrSubBuffer1Config->divFactor) |
-                              XSPI_BUFCR_SUBBUF1_DIV(ahbBufferConfigs[i]->ptrSubBuffer2Config->divFactor);
+                              XSPI_BUFCR_SUBBUF2_DIV(ahbBufferConfigs[i]->ptrSubBuffer2Config->divFactor);
 
             /* Set AHB buffer sub buffer start and end address range. */
             for (uint8_t j = 0U; j < XSPI_BUF_ADDR_RANGE_COUNT2; j++)
