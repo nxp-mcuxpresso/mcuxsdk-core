@@ -452,7 +452,7 @@ void LPI2C_MasterInit(LPI2C_Type *base, const lpi2c_master_config_t *masterConfi
     {
         cfgr2 = base->MCFGR2;
         /* Calculate bus idle timeout value. The value is equal to BUSIDLE cycles of functional clock divided by
-           prescaler. And set BUSIDLE to 0 disables the fileter, so the min value is 1. */
+           prescaler. And set BUSIDLE to 0 disables the filter, so the min value is 1. */
         cycles = LPI2C_GetCyclesForWidth(sourceClock_Hz, masterConfig->busIdleTimeout_ns, 1U,
                                          (LPI2C_MCFGR2_BUSIDLE_MASK >> LPI2C_MCFGR2_BUSIDLE_SHIFT), prescaler);
         cfgr2 &= ~LPI2C_MCFGR2_BUSIDLE_MASK;
@@ -463,7 +463,7 @@ void LPI2C_MasterInit(LPI2C_Type *base, const lpi2c_master_config_t *masterConfi
     if (0U != masterConfig->pinLowTimeout_ns)
     {
         /* Calculate bus pin low timeout value. The value is equal to PINLOW cycles of functional clock divided by
-           prescaler. And set PINLOW to 0 disables the fileter, so the min value is 1. */
+           prescaler. And set PINLOW to 0 disables the filter, so the min value is 1. */
         cycles       = LPI2C_GetCyclesForWidth(sourceClock_Hz, masterConfig->pinLowTimeout_ns / 256U, 1U,
                                          (LPI2C_MCFGR3_PINLOW_MASK >> LPI2C_MCFGR3_PINLOW_SHIFT), prescaler);
         base->MCFGR3 = (base->MCFGR3 & ~LPI2C_MCFGR3_PINLOW_MASK) | LPI2C_MCFGR3_PINLOW(cycles);
