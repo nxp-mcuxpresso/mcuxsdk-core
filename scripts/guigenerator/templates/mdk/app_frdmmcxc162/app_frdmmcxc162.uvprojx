@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>MCXC162VLF</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXC162_DFP.25.06.00</PackID>
+          <PackID>NXP.MCXC162_DFP.25.12.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
           <Cpu>IRAM(0x20000000,0x3000) IROM(0x00000000,0x010000) CPUTYPE("Cortex-M23") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -388,16 +388,16 @@
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>MCXC041</Device>
+          <Device>MCXC162VLF</Device>
           <Vendor>NXP</Vendor>
-          <PackID>NXP.MCXC041_DFP.25.06.01</PackID>
+          <PackID>NXP.MCXC162_DFP.25.12.00</PackID>
           <PackURL>https://mcuxpresso.nxp.com/cmsis_pack/repo/</PackURL>
-          <Cpu>IROM(0x00000000,0x8000) IRAM(0x20000000,0x0600) IRAM2(0x1FFFFE00,0x0200) CPUTYPE("Cortex-M0+") CLOCK(48000000) ELITTLE</Cpu>
+          <Cpu>IRAM(0x20000000,0x3000) IROM(0x00000000,0x010000) CPUTYPE("Cortex-M23") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD1FFFFE00 -FC800 -FN1 -FF0MK_P32_48MHZ_MCXC041 -FS00 -FL08000 -FP0($$Device:MCXC041$Flash\MK_P32_48MHZ_MCXC041.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0FLASH_64 -FS00 -FL010000 -FP0($$Device:MCXC162VLF$devices\MCXC162\arm\FLASH_64.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:MCXC041$Device\Include\MCXC041.h</RegisterFile>
+          <RegisterFile>$$Device:MCXC162VLF$devices\MCXC162\fsl_device_registers.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -407,7 +407,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:MCXC041$SVD\MCXC041.svd</SFDFile>
+          <SFDFile>$$Device:MCXC162VLF$devices\MCXC162\MCXC162.xml</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -483,14 +483,14 @@
           <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
-          <SimDllName>SARMCM3.DLL</SimDllName>
-          <SimDllArguments> </SimDllArguments>
-          <SimDlgDll>DARMCM1.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM0+</SimDlgDllArguments>
-          <TargetDllName>SARMCM3.DLL</TargetDllName>
-          <TargetDllArguments> </TargetDllArguments>
-          <TargetDlgDll>TARMCM1.DLL</TargetDlgDll>
-          <TargetDlgDllArguments>-pCM0+</TargetDlgDllArguments>
+          <SimDllName></SimDllName>
+          <SimDllArguments></SimDllArguments>
+          <SimDlgDll></SimDlgDll>
+          <SimDlgDllArguments></SimDlgDllArguments>
+          <TargetDllName>SARMV8M.DLL</TargetDllName>
+          <TargetDllArguments></TargetDllArguments>
+          <TargetDlgDll>TCM.DLL</TargetDlgDll>
+          <TargetDlgDllArguments>-pCM23</TargetDlgDllArguments>
         </DllOption>
         <DebugOption>
           <OPTHX>
@@ -511,8 +511,8 @@
             <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3>"" ()</Flash3>
+          <Flash2>BIN\UL2V8M.DLL</Flash2>
+          <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -548,7 +548,7 @@
             <AdsLsxf>1</AdsLsxf>
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
-            <AdsCpuType>"Cortex-M0+"</AdsCpuType>
+            <AdsCpuType>"Cortex-M23"</AdsCpuType>
             <RvctDeviceName></RvctDeviceName>
             <mOS>0</mOS>
             <uocRom>0</uocRom>
@@ -557,11 +557,11 @@
             <hadIRAM>1</hadIRAM>
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
-            <RvdsVP>0</RvdsVP>
+            <RvdsVP>2</RvdsVP>
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
             <nBranchProt>0</nBranchProt>
-            <hadIRAM2>1</hadIRAM2>
+            <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
             <useUlib>1</useUlib>
@@ -621,12 +621,12 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x600</Size>
+                <Size>0x3000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x10000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -651,7 +651,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x0</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x10000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -676,12 +676,12 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x600</Size>
+                <Size>0x3000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x1ffffe00</StartAddress>
-                <Size>0x200</Size>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
               </OCR_RVCT10>
             </OnChipMemories>
             <RvctStartVector></RvctStartVector>
