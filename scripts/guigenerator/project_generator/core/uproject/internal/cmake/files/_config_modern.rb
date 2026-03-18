@@ -156,7 +156,9 @@ module Internal
           flags_cmake += "ENDIF()  \n"
           flags_cmake += "\n"
         end
-        @debug_console = "-DSDK_DEBUGCONSOLE=1" if @debug_console == ''
+        # Only set DEBUG_CONSOLE_CONFIG when SDK_DEBUGCONSOLE was explicitly present in
+        # the original build flags. Do NOT default to SDK_DEBUGCONSOLE=1 for projects
+        # (e.g. TFM secure partitions) that intentionally leave it undefined.
         flags_cmake += "IF(NOT DEFINED DEBUG_CONSOLE_CONFIG)  \n"
         flags_cmake += "    SET(DEBUG_CONSOLE_CONFIG \"#{@debug_console}\")  \n"
         flags_cmake += "ENDIF()  \n"
