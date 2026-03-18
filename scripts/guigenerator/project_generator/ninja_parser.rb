@@ -188,16 +188,25 @@ class NinjaParser
 
   def parse_flags(source_pattern, type)
     find_source_obj = false
+    defines_line = ''
     @content.each do |line|
       if line.match(source_pattern)
         find_source_obj = true
+        defines_line = ''
         next
       end
       if find_source_obj
+        # Capture DEFINES line (from target_compile_definitions)
+        defines_match = line.match(/DEFINES\s=\s*([\S\s]+)\s*/)
+        if defines_match
+          defines_line = defines_match[1]
+        end
+
         pattern = /FLAGS\s=\s*([\S\s]+)\s*/
         result = line.match(pattern)
         if result
-          all_flags = preprocess_flags_with_prefix(result[1].split(/\s+/))
+          combined = (defines_line + ' ' + result[1]).strip
+          all_flags = preprocess_flags_with_prefix(combined.split(/\s+/))
           all_flags.each do |flag|
             case flag
             when /-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/
