@@ -1,5 +1,11 @@
 # SFA
 
+## [2.1.6]
+
+- Bug Fixes
+  - Updated timeout-related macro definitions and `#if` conditions to use explicit constant expressions for MISRA compliance.
+  - Improved `SFA_Mode0Calculate()` checks and rounding behavior for safer frequency calculation.
+
 ## [2.1.5]
 
 - Bug Fixes
