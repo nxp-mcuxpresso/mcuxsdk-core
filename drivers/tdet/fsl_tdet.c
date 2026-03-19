@@ -37,6 +37,14 @@
  * Code
  ******************************************************************************/
 
+void TDET_DriverIRQHandler(uint32_t instance);
+void TDET_DriverIRQHandler(uint32_t instance)
+{
+    (void)instance;
+    VBAT0_DriverIRQHandler();
+    SDK_ISR_EXIT_BARRIER;
+}
+
 /*!
  * Weak implementation of TDET IRQ, should be re-defined by user when using TDET IRQ
  */

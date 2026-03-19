@@ -20,7 +20,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief I3C driver version */
-#define FSL_I3C_DRIVER_VERSION (MAKE_VERSION(2, 14, 5))
+#define FSL_I3C_DRIVER_VERSION (MAKE_VERSION(2, 14, 6))
 /*! @} */
 
 /*!
@@ -1913,6 +1913,22 @@ void I3C_SlaveRequestIBIWithSingleData(I3C_Type *base, uint8_t data, size_t data
 
 /*! @} */
 /*! @} */
+
+/*! @name IRQ handler */
+/*! @{ */
+
+/*!
+ * @brief Common IRQ handler entry for all I3C instances.
+ *
+ * This function dispatches the IRQ to the correct instance handler using
+ * the instance index.
+ *
+ * @param instance I3C instance number.
+ */
+void I3C_DriverIRQHandler(uint32_t instance);
+
+/*! @} */
+
 #if defined(__cplusplus)
 }
 #endif

@@ -4,6 +4,8 @@
 
 - Bug Fixes
   - Fixed some quality issues.
+- New Features
+  - Added common IRQ handler entry USDHC_DriverIRQHandler.
 
 ## [2.8.8]
 

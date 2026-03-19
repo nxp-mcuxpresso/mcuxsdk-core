@@ -1,5 +1,10 @@
 # XSPI
 
+## [2.7.4]
+
+- New Features
+  - Added common IRQ handler entry XSPI_DriverIRQHandler.
+
 ## [2.7.3]
 
 - Bug Fixes

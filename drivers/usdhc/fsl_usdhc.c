@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021, 2025 NXP
+ * Copyright 2016-2021, 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -2515,6 +2515,15 @@ void USDHC_TransferHandleIRQ(USDHC_Type *base, usdhc_handle_t *handle)
     }
 #endif
     USDHC_ClearInterruptStatusFlags(base, interruptFlags);
+}
+
+void USDHC_DriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_usdhcBase))
+    {
+        s_usdhcIsr(s_usdhcBase[instance], s_usdhcHandle[instance]);
+    }
+    SDK_ISR_EXIT_BARRIER;
 }
 
 #ifdef USDHC0

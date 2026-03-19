@@ -1,5 +1,10 @@
 # FLEXSPI
 
+## [2.9.2]
+
+- New Features
+  - Added common IRQ handler entry FLEXSPI_CommonDriverIRQHandler.
+
 ## [2.9.1]
 
 - Bug Fixes

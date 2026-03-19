@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2020, 2024-2025 NXP
+ * Copyright 2016-2020, 2024-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -541,4 +541,17 @@ void FLEXIO3_DriverIRQHandler(void);
 void FLEXIO3_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 {
     FLEXIO_CommonIRQHandler();
+}
+
+void FLEXIO_CommonDriverIRQHandler(uint32_t instance);
+void FLEXIO_CommonDriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_flexioBases))
+    {
+        if (s_flexioHandle[instance] != NULL)
+        {
+            s_flexioIsr[instance](s_flexioType[instance], s_flexioHandle[instance]);
+        }
+    }
+    SDK_ISR_EXIT_BARRIER;
 }

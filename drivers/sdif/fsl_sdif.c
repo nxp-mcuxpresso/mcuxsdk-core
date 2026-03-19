@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2020 NXP
+ * Copyright 2016-2020, 2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1699,3 +1699,13 @@ void SDIF_DriverIRQHandler(void)
     SDK_ISR_EXIT_BARRIER;
 }
 #endif
+
+void SDIF_CommonDriverIRQHandler(uint32_t instance);
+void SDIF_CommonDriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_sdifBase))
+    {
+        s_sdifIsr(s_sdifBase[instance], s_sdifHandle[instance]);
+    }
+    SDK_ISR_EXIT_BARRIER;
+}

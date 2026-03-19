@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2021, 2025 NXP
+ * Copyright 2016-2021, 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1698,6 +1698,8 @@ status_t USDHC_TransferBlocking(USDHC_Type *base, usdhc_adma_config_t *dmaConfig
  * @param handle USDHC handle.
  */
 void USDHC_TransferHandleIRQ(USDHC_Type *base, usdhc_handle_t *handle);
+
+void USDHC_DriverIRQHandler(uint32_t instance);
 
 /*! @} */
 

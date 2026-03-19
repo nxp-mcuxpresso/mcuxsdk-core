@@ -1576,5 +1576,15 @@ void FLEXSPI0_FLEXSPI1_DriverIRQHandler(void)
 }
 #endif
 
+void FLEXSPI_CommonDriverIRQHandler(uint32_t instance);
+void FLEXSPI_CommonDriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_flexspiBases))
+    {
+        s_flexspiIsr(s_flexspiBases[instance], s_flexspiHandle[instance]);
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+
 #endif
 

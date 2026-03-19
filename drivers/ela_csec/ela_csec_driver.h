@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 NXP
+ * Copyright 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -758,6 +758,13 @@ void CSEC_DRV_InstallCallback(security_callback_t callbackFunc, void *callbackPa
  * @brief Cancels a previously launched asynchronous command.
  */
 void CSEC_DRV_CancelCommand(void);
+
+/*!
+ * @brief ELA_CSEC parameterized IRQ handler entry.
+ *
+ * @param instance ELA_CSEC instance index.
+ */
+void ELA_CSEC_DriverIRQHandler(uint32_t instance);
 
 #if defined(__cplusplus)
 }

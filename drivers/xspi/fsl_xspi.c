@@ -3271,6 +3271,28 @@ RAMFUNC static void XSPI_CommonIRQHandler(XSPI_Type *base, xspi_handle_t *handle
 }
 
 #if (defined(FSL_FEATURE_XSPI_HAS_EENV) && FSL_FEATURE_XSPI_HAS_EENV)
+void XSPI_DriverIRQHandler(uint32_t instance, uint32_t envId);
+void XSPI_DriverIRQHandler(uint32_t instance, uint32_t envId)
+{
+    if (instance < ARRAY_SIZE(s_xspiBases))
+    {
+        XSPI_CommonIRQHandler(s_xspiBases[instance], s_xspiHandle[instance][envId]);
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+#else /* FSL_FEATURE_XSPI_HAS_EENV == 0*/
+void XSPI_DriverIRQHandler(uint32_t instance);
+void XSPI_DriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_xspiBases))
+    {
+        XSPI_CommonIRQHandler(s_xspiBases[instance], s_xspiHandle[instance]);
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+#endif /* (defined(FSL_FEATURE_XSPI_HAS_EENV) && FSL_FEATURE_XSPI_HAS_EENV) */
+
+#if (defined(FSL_FEATURE_XSPI_HAS_EENV) && FSL_FEATURE_XSPI_HAS_EENV)
 #if defined(XSPI1)
 void XSPI1_0_IRQHandler(void);
 void XSPI1_0_IRQHandler(void)

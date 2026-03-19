@@ -22,9 +22,11 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief Defines TDET driver version 2.3.1.
+/*! @brief Defines TDET driver version 2.3.2.
  *
  * Change log:
+ * - Version 2.3.2
+ *   - Added common IRQ handler entry TDET_DriverIRQHandler.
  * - Version 2.3.1
  *   - Added support for KW43 device.
  * - Version 2.3.0
@@ -39,7 +41,7 @@
  * - Version 2.0.0
  *   - Initial version
  */
-#define FSL_TDET_DRIVER_VERSION (MAKE_VERSION(2, 3, 1))
+#define FSL_TDET_DRIVER_VERSION (MAKE_VERSION(2, 3, 2))
 /*! @} */
 
 /*!
