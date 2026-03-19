@@ -261,6 +261,7 @@ struct _lpi2c_master_handle
     lpi2c_master_transfer_t transfer;                    /*!< Copy of the current transfer info. */
     lpi2c_master_transfer_callback_t completionCallback; /*!< Callback function pointer. */
     void *userData;                                      /*!< Application data passed to callback. */
+    uint16_t chunkSize;                                  /*!< Remaining byte count in current chunk. */
 };
 
 /*! @brief Typedef for master interrupt handler, used internally for LPI2C master interrupt and EDMA transactional APIs.
@@ -983,7 +984,7 @@ void LPI2C_MasterTransferAbort(LPI2C_Type *base, lpi2c_master_handle_t *handle);
 /*! @}*/
 
 /*!
- * @name IRQ handler 
+ * @name IRQ handler
  * @{
  */
 
@@ -1092,7 +1093,7 @@ static inline void LPI2C_SlaveEnable(LPI2C_Type *base, bool enable)
 /*! @}*/
 
 /*!
- * @name Slave status 
+ * @name Slave status
  * @{
  */
 
@@ -1137,7 +1138,7 @@ static inline void LPI2C_SlaveClearStatusFlags(LPI2C_Type *base, uint32_t status
 /*! @}*/
 
 /*!
- * @name Slave interrupts 
+ * @name Slave interrupts
  * @{
  */
 

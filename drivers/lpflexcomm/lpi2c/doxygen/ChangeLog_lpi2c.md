@@ -10,6 +10,9 @@
   - Set minimal possible value for SCFGR2[CLKHOLD] to 1.
   - Added error check to while loop in LPI2C_RunTransferStateMachine() for case kSendCommandState.
 
+- Improvements
+  - Removed receive data size limitation in LPI2C_MasterTransferBlocking() and LPI2C_MasterTransferNonBlocking().
+
 ## [2.2.7]
 
 - Bug Fixes

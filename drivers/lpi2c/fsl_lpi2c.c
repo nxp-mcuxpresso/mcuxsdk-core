@@ -35,6 +35,8 @@
 #define FSL_COMPONENT_ID "platform.drivers.lpi2c"
 #endif
 
+#define LPI2C_MAX_RX_SIZE 256U
+
 #if defined(LPI2C_RSTS)
 #define LPI2C_RESETS_ARRAY LPI2C_RSTS
 #endif
@@ -112,10 +114,8 @@ static void LPI2C_CommonIRQHandler(LPI2C_Type *base, uint32_t instance);
  * @param base The I2C peripheral base address.
  * @param handle Master nonblocking driver handle.
  * @param variable_set Pass the address of the parent function variable.
- * @retval #kStatus_Success
- * @retval #kStatus_LPI2C_Timeout
  */
-static status_t LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
+static void LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
                                                   lpi2c_master_handle_t *handle,
                                                   lpi2c_state_machine_param_t *stateParams);
 
@@ -914,81 +914,62 @@ status_t LPI2C_MasterReceive(LPI2C_Type *base, void *rxBuff, size_t rxSize)
     assert(NULL != rxBuff);
 
     status_t result = kStatus_Success;
-    uint8_t *buf;
-    size_t tmpRxSize = rxSize;
+    uint8_t *buf = (uint8_t *)rxBuff;
+    uint16_t chunkSize = 0U;
 #if I2C_RETRY_TIMES != 0U
-    uint32_t waitTimes;
+    uint32_t waitTimes = I2C_RETRY_TIMES;
 #endif
 
-    /* Check transfer data size. */
-    if (rxSize > ((size_t)256 * (size_t)FSL_FEATURE_LPI2C_FIFO_SIZEn(base)))
+    /* Receive data */
+    while (rxSize > 0U)
     {
-        return kStatus_InvalidArgument;
-    }
-
-    /* Handle empty read. */
-    if (rxSize != 0U)
-    {
-        /* Wait until there is room in the command fifo. */
-        result = LPI2C_MasterWaitForTxReady(base);
-        if (kStatus_Success == result)
+        /* Ensure the rx cmd is sent */
+        if ((chunkSize < 4U) && (chunkSize < rxSize))
         {
-            /* Issue command to receive data. A single write to MTDR can issue read operation of 0xFFU + 1 byte of data
-               at most, so when the rxSize is larger than 0x100U, push multiple read commands to MTDR until rxSize is
-               reached. */
-            while (tmpRxSize != 0U)
+            /* Wait until there is room in the command fifo. */
+            result = LPI2C_MasterWaitForTxReady(base);
+            if (kStatus_Success != result)
             {
-                if (tmpRxSize > 256U)
-                {
-                    base->MTDR = (uint32_t)(kRxDataCmd) | (uint32_t)LPI2C_MTDR_DATA(0xFFU);
-                    tmpRxSize -= 256U;
-                }
-                else
-                {
-                    base->MTDR = (uint32_t)(kRxDataCmd) | (uint32_t)LPI2C_MTDR_DATA(tmpRxSize - 1U);
-                    tmpRxSize  = 0U;
-                }
+                return result;
             }
 
-            /* Receive data */
-            buf = (uint8_t *)rxBuff;
-            while (0U != (rxSize--))
-            {
-#if I2C_RETRY_TIMES != 0U
-                waitTimes = I2C_RETRY_TIMES;
-#endif
-                /* Read LPI2C receive fifo register. The register includes a flag to indicate whether */
-                /* the FIFO is empty, so we can both get the data and check if we need to keep reading */
-                /* using a single register read. */
-                uint32_t value = 0U;
-                do
-                {
-                    /* Check for errors. */
-                    result = LPI2C_MasterCheckAndClearError(base, LPI2C_MasterGetStatusFlags(base));
-                    if (kStatus_Success != result)
-                    {
-                        break;
-                    }
-
-                    value = base->MRDR;
-#if I2C_RETRY_TIMES != 0U
-                    waitTimes--;
-                } while ((0U != (value & LPI2C_MRDR_RXEMPTY_MASK)) && (0U != waitTimes));
-                if (0U == waitTimes)
-                {
-                    result = kStatus_LPI2C_Timeout;
-                }
-#else
-                } while (0U != (value & LPI2C_MRDR_RXEMPTY_MASK));
-#endif
-                if ((status_t)kStatus_Success != result)
-                {
-                    break;
-                }
-
-                *buf++ = (uint8_t)(value & LPI2C_MRDR_DATA_MASK);
-            }
+            uint16_t tmpChunk = MIN(rxSize - chunkSize, LPI2C_MAX_RX_SIZE);
+            base->MTDR = (uint32_t)kRxDataCmd | LPI2C_MTDR_DATA(tmpChunk - 1U);
+            chunkSize += tmpChunk;
         }
+
+        /* Read LPI2C receive fifo register. The register includes a flag to indicate whether
+           the FIFO is empty, so we can both get the data and check if we need to keep reading
+           using a single register read. */
+        uint32_t value = 0U;
+        do
+        {
+            /* Check for errors. */
+            result = LPI2C_MasterCheckAndClearError(base, LPI2C_MasterGetStatusFlags(base));
+            if (kStatus_Success != result)
+            {
+                break;
+            }
+
+            value = base->MRDR;
+
+#if I2C_RETRY_TIMES != 0U
+            if (0U == waitTimes--)
+            {
+                result = kStatus_LPI2C_Timeout;
+                break;
+            }
+#endif
+        } while (0U != (value & LPI2C_MRDR_RXEMPTY_MASK));
+
+        if ((status_t)kStatus_Success != result)
+        {
+            break;
+        }
+
+        *buf++ = (uint8_t)(value & LPI2C_MRDR_DATA_MASK);
+        chunkSize--;
+        rxSize--;
     }
 
     return result;
@@ -1059,13 +1040,6 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
     status_t result = kStatus_Success;
     uint16_t commandBuffer[7];
     uint32_t cmdCount = 0U;
-
-    /* Check transfer data size in read operation. */
-    if ((transfer->direction == kLPI2C_Read) &&
-        (transfer->dataSize > ((size_t)256 * (size_t)FSL_FEATURE_LPI2C_FIFO_SIZEn(base))))
-    {
-        return kStatus_InvalidArgument;
-    }
 
     /* Enable the master function and disable the slave function. */
     LPI2C_MasterEnable(base, true);
@@ -1221,7 +1195,7 @@ void LPI2C_MasterTransferCreateHandle(LPI2C_Type *base,
 #endif
 }
 
-static status_t LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
+static void LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
                                                   lpi2c_master_handle_t *handle,
                                                   lpi2c_state_machine_param_t *stateParams)
 {
@@ -1230,11 +1204,12 @@ static status_t LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
     uint16_t sendval;
 
     /* Make sure there is room in the tx fifo for the next command. */
-    if (0U == (stateParams->txCount)--)
+    if (0U == stateParams->txCount)
     {
         stateParams->state_complete = true;
-        return kStatus_Success;
+        return;
     }
+    stateParams->txCount--;
 
     /* Issue command. buf is a uint8_t* pointing at the uint16 command array. */
     sendval  = (uint16_t)handle->buf[0];
@@ -1253,56 +1228,13 @@ static status_t LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
             handle->state          = (uint8_t)kTransferDataState;
             handle->buf            = (uint8_t *)handle->transfer.data;
             handle->remainingBytes = (uint16_t)handle->transfer.dataSize;
+
             if (handle->transfer.direction == kLPI2C_Read)
             {
+                handle->state = (uint8_t)kIssueReadCommandState;
+
                 /* Disable TX interrupt */
                 LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterTxReadyFlag);
-                /* Issue command to receive data. A single write to MTDR can issue read operation of
-                    0xFFU + 1 byte of data at most, so when the dataSize is larger than 0x100U, push
-                    multiple read commands to MTDR until dataSize is reached. */
-                size_t tmpRxSize = handle->transfer.dataSize;
-                while (tmpRxSize != 0U)
-                {
-                    LPI2C_MasterGetFifoCounts(base, NULL, &stateParams->txCount);
-
-#if I2C_RETRY_TIMES != 0U
-                    uint32_t waitTimes = I2C_RETRY_TIMES;
-#endif
-                    /*
-                     * $Branch Coverage Justification$
-                     * The transmission commands will not exceed FIFO SIZE.(will improve)
-                     * Can't control the number of words in the TX FIFO, so the FIFO doesn't have to be full.
-                     */
-                    while ((size_t)FSL_FEATURE_LPI2C_FIFO_SIZEn(base) == stateParams->txCount) /* GCOVR_EXCL_START */
-                    {
-                        LPI2C_MasterGetFifoCounts(base, NULL, &stateParams->txCount);
-
-                        /* Check for errors. */
-                        status_t result = LPI2C_MasterCheckAndClearError(base, LPI2C_MasterGetStatusFlags(base));
-                        if (result != kStatus_Success)
-                        {
-                            return result;
-                        }
-
-#if I2C_RETRY_TIMES != 0U
-                        if (--waitTimes == 0U)
-                        {
-                            return kStatus_LPI2C_Timeout;
-                        }
-#endif
-                    } /* GCOVR_EXCL_STOP */
-
-                    if (tmpRxSize > 256U)
-                    {
-                        base->MTDR = (uint32_t)(kRxDataCmd) | (uint32_t)LPI2C_MTDR_DATA(0xFFU);
-                        tmpRxSize -= 256U;
-                    }
-                    else
-                    {
-                        base->MTDR = (uint32_t)(kRxDataCmd) | (uint32_t)LPI2C_MTDR_DATA(tmpRxSize - 1U);
-                        tmpRxSize  = 0U;
-                    }
-                }
             }
         }
         else
@@ -1311,33 +1243,33 @@ static status_t LPI2C_TransferStateMachineSendCommand(LPI2C_Type *base,
             handle->state = (uint8_t)kStopState;
         }
     }
-
-    return kStatus_Success;
 }
 
 static void LPI2C_TransferStateMachineReadCommand(LPI2C_Type *base,
                                                   lpi2c_master_handle_t *handle,
                                                   lpi2c_state_machine_param_t *stateParams)
 {
-    assert(handle->transfer.dataSize >= 1U);
+    assert(handle->remainingBytes > handle->chunkSize);
     assert(stateParams != NULL);
 
     /* Make sure there is room in the tx fifo for the read command. */
-    if (0U == (stateParams->txCount)--)
+    if (0U == stateParams->txCount)
     {
         stateParams->state_complete = true;
         return;
     }
+    stateParams->txCount--;
 
-    base->MTDR = (uint32_t)kRxDataCmd | LPI2C_MTDR_DATA(handle->transfer.dataSize - 1U);
+    uint16_t tmpChunk = MIN(handle->remainingBytes - handle->chunkSize, LPI2C_MAX_RX_SIZE);
+    base->MTDR = (uint32_t)kRxDataCmd | LPI2C_MTDR_DATA(tmpChunk - 1U);
+    handle->chunkSize += tmpChunk;
 
     /* Move to transfer state. */
     handle->state = (uint8_t)kTransferDataState;
-    if (handle->transfer.direction == kLPI2C_Read)
-    {
-        /* Disable TX interrupt */
-        LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterTxReadyFlag);
-    }
+
+    /* Disable TX interrupt */
+    LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterTxReadyFlag);
+
 }
 
 static void LPI2C_TransferStateMachineTransferData(LPI2C_Type *base,
@@ -1360,16 +1292,24 @@ static void LPI2C_TransferStateMachineTransferData(LPI2C_Type *base,
     }
     else
     {
-        /* XXX handle receive sizes > 256, use kIssueReadCommandState */
+        /* Ensure the rx cmd is sent */
+        if ((handle->chunkSize < 4U) && (handle->chunkSize < handle->remainingBytes))
+        {
+            handle->state = (uint8_t)kIssueReadCommandState;
+            return;
+        }
+
         /* Make sure there is data in the rx fifo. */
-        if (0U == stateParams->rxCount--)
+        if (0U == stateParams->rxCount)
         {
             stateParams->state_complete = true;
             return;
         }
+        stateParams->rxCount--;
 
         /* Read byte from fifo. */
-        *(handle->buf)++ = (uint8_t)(base->MRDR & LPI2C_MRDR_DATA_MASK);
+        *handle->buf++ = (uint8_t)(base->MRDR & LPI2C_MRDR_DATA_MASK);
+        handle->chunkSize--;
     }
 
     /* Move to stop when the transfer is done. */
@@ -1394,11 +1334,12 @@ static void LPI2C_TransferStateMachineStopState(LPI2C_Type *base,
     if ((handle->transfer.flags & (uint32_t)kLPI2C_TransferNoStopFlag) == 0U)
     {
         /* Make sure there is room in the tx fifo for the stop command. */
-        if (0U == (stateParams->txCount)--)
+        if (0U == stateParams->txCount)
         {
             stateParams->state_complete = true;
             return;
         }
+        stateParams->txCount--;
 
         base->MTDR = (uint32_t)kStopCmd;
     }
@@ -1451,7 +1392,6 @@ static void LPI2C_TransferStateMachineWaitState(LPI2C_Type *base,
  * @retval #kStatus_LPI2C_ArbitrationLost
  * @retval #kStatus_LPI2C_Nak
  * @retval #kStatus_LPI2C_FifoError
- * @retval #kStatus_LPI2C_Timeout
  */
 static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_handle_t *handle, bool *isDone)
 {
@@ -1505,7 +1445,7 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
             switch (handle->state) /* GCOVR_EXCL_BR_LINE */
             {
                 case (uint8_t)kSendCommandState:
-                    result = LPI2C_TransferStateMachineSendCommand(base, handle, &stateParams);
+                    LPI2C_TransferStateMachineSendCommand(base, handle, &stateParams);
                     break;
 
                 case (uint8_t)kIssueReadCommandState:
@@ -1527,15 +1467,6 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
                     assert(false);
                     break;
             } /* GCOVR_EXCL_STOP */
-
-            /*
-             * $Branch Coverage Justification$
-             * Depends on configuration of I2C_RETRY_TIMES
-             */
-            if (result != kStatus_Success) /* GCOVR_EXCL_BR_LINE */
-            {
-                break; /* GCOVR_EXCL_LINE */
-            }
         }
     }
     return result;
@@ -1572,8 +1503,8 @@ static void LPI2C_InitTransferStateMachine(lpi2c_master_handle_t *handle)
         uint16_t *cmd     = (uint16_t *)&handle->commandBuffer;
         uint16_t cmdCount = 0U;
 
-        /* Initial direction depends on whether a subaddress was provided, and of course the actual */
-        /* data transfer direction. */
+        /* Initial direction depends on whether a subaddress was provided, and of course the actual
+           data transfer direction. */
         lpi2c_direction_t direction = (0U != xfer->subaddressSize) ? kLPI2C_Write : xfer->direction;
 
         /* Start command. */
@@ -1628,13 +1559,6 @@ status_t LPI2C_MasterTransferNonBlocking(LPI2C_Type *base,
     assert(transfer->subaddressSize <= sizeof(transfer->subaddress));
 
     status_t result;
-
-    /* Check transfer data size in read operation. */
-    if ((transfer->direction == kLPI2C_Read) &&
-        (transfer->dataSize > (256U * (uint32_t)FSL_FEATURE_LPI2C_FIFO_SIZEn(base))))
-    {
-        return kStatus_InvalidArgument;
-    }
 
     /* Return busy if another transaction is in progress. */
     if (handle->state != (uint8_t)kIdleState)
@@ -1722,11 +1646,10 @@ status_t LPI2C_MasterTransferGetCount(LPI2C_Type *base, lpi2c_master_handle_t *h
         {
             case (uint8_t)kIdleState:
             case (uint8_t)kSendCommandState:
-            case (uint8_t)
-                kIssueReadCommandState: /* XXX return correct value for this state when >256 reads are supported */
                 *count = 0;
                 break;
 
+            case (uint8_t)kIssueReadCommandState:
             case (uint8_t)kTransferDataState:
                 *count = dataSize - remainingBytes;
                 break;
