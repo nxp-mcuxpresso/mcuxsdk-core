@@ -30,8 +30,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief TPM driver version 2.4.3. */
-#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 3))
+/*! @brief TPM driver version 2.4.4. */
+#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 4))
 /*! @} */
 
 /*!
@@ -50,7 +50,7 @@
 #endif
 
 /*! @brief Help macro to get the max counter value */
-#define TPM_MAX_COUNTER_VALUE(x) ((1U != (uint8_t)FSL_FEATURE_TPM_HAS_32BIT_COUNTERn(x)) ? 0xFFFFU : 0xFFFFFFFFU)
+#define TPM_MAX_COUNTER_VALUE(x) ((1 != FSL_FEATURE_TPM_HAS_32BIT_COUNTERn(x)) ? 0xFFFFU : 0xFFFFFFFFU)
 
 /*!
  * @brief List of TPM channels.
@@ -921,7 +921,7 @@ static inline status_t TPM_SetTimerPeriod(TPM_Type *base, uint32_t ticks)
 #if TPM_TIMEOUT
     uint32_t timeout = TPM_TIMEOUT;
 #endif
-    if (1U != (uint8_t)FSL_FEATURE_TPM_HAS_32BIT_COUNTERn(base))
+    if (1 != FSL_FEATURE_TPM_HAS_32BIT_COUNTERn(base))
     {
         assert(ticks <= 0xFFFFU);
     }
