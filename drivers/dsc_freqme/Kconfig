@@ -1,0 +1,12 @@
+# Copyright 2026 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.dsc_freqme
+    bool
+    default y if MCUX_HW_IP_DriverType_DSC_FREQME
+
+config MCUX_COMPONENT_driver.dsc_freqme
+    bool "dsc_freqme"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.dsc_freqme
