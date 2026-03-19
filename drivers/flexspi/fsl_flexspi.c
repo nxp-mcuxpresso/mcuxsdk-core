@@ -353,7 +353,7 @@ void FLEXSPI_Init(FLEXSPI_Type *base, const flexspi_config_t *config)
                    FLEXSPI_MCR2_RXCLKSRC_B(config->rxSampleClockPortB) |
 #endif
 #if defined(FSL_FEATURE_FLEXSPI_SUPPORT_RXCLKSRC_DIFF) && FSL_FEATURE_FLEXSPI_SUPPORT_RXCLKSRC_DIFF
-                   FLEXSPI_MCR2_RX_CLK_SRC_DIFF(config->rxSampleClockDiff) |
+                   FLEXSPI_MCR2_RX_CLK_SRC_DIFF(config->rxSampleClockDiff ? 1U : 0U) |
 #endif
 #if !(defined(FSL_FEATURE_FLEXSPI_HAS_NO_MCR2_SCKBDIFFOPT) && FSL_FEATURE_FLEXSPI_HAS_NO_MCR2_SCKBDIFFOPT)
                    FLEXSPI_MCR2_SCKBDIFFOPT(config->enableSckBDiffOpt ? 1U : 0U) |
@@ -374,9 +374,9 @@ void FLEXSPI_Init(FLEXSPI_Type *base, const flexspi_config_t *config)
                    FLEXSPI_AHBCR_PREFETCHEN(config->ahbConfig.enableAHBPrefetch ? 1U : 0U) |
                    FLEXSPI_AHBCR_BUFFERABLEEN(config->ahbConfig.enableAHBBufferable ? 1U : 0U) |
 #if (defined(FSL_FEATURE_FLEXSPI_HAS_RESUMEDISABLE_BIT_CONFIG_SUPPORT) && FSL_FEATURE_FLEXSPI_HAS_RESUMEDISABLE_BIT_CONFIG_SUPPORT)
-                   FLEXSPI_AHBCR_RESUMEDISABLE(config->ahbConfig.disableAhbReadResume) | 
+                   FLEXSPI_AHBCR_RESUMEDISABLE(config->ahbConfig.disableAhbReadResume ? 1UL : 0UL) |
 #endif 
-                   FLEXSPI_AHBCR_CACHABLEEN(config->ahbConfig.enableAHBCachable);
+                   FLEXSPI_AHBCR_CACHABLEEN(config->ahbConfig.enableAHBCachable ? 1UL : 0UL);
     base->AHBCR = configValue;
 
     /* Configure AHB rx buffers. */
@@ -577,7 +577,7 @@ void FLEXSPI_SetFlashConfig(FLEXSPI_Type *base, flexspi_device_config_t *config,
 
     /* Configure flash size and address shift. */
 #if defined(FSL_FEATURE_FLEXSPI_SUPPORT_ADDRESS_SHIFT) && (FSL_FEATURE_FLEXSPI_SUPPORT_ADDRESS_SHIFT)
-    base->FLSHCR0[port] = config->flashSize | FLEXSPI_FLSHCR0_ADDRSHIFT(config->addressShift);
+    base->FLSHCR0[port] = config->flashSize | FLEXSPI_FLSHCR0_ADDRSHIFT(config->addressShift ? 1UL : 0UL);
 #else
     base->FLSHCR0[port] = config->flashSize;
 #endif /* FSL_FEATURE_FLEXSPI_SUPPORT_ADDRESS_SHIFT */
@@ -1408,7 +1408,7 @@ void FLEXSPI_TransferHandleIRQ(FLEXSPI_Type *base, flexspi_handle_t *handle)
 
                             for (i = 0U; i < handle->dataSize; i++)
                             {
-                                *handle->data++ = ((uint8_t)(tempVal >> (8U * i)) & 0xFFU);
+                                *handle->data++ = (uint8_t)((tempVal >> (8U * i)) & 0xFFU);
                             }
                         }
 

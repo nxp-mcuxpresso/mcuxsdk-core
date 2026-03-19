@@ -1,5 +1,10 @@
 # FLEXSPI
 
+## [2.9.1]
+
+- Bug Fixes
+  - Fixed CERT INT31-C violations: added masks before uint8_t casts and replaced bool fields with ternary expressions.
+
 ## [2.9.0]
 
 - New Features
