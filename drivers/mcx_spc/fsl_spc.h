@@ -794,7 +794,7 @@ static inline void SPC_EnableIntegratedPowerSwitchAutomatically(SPC_Type *base, 
 {
     uint32_t tmp32 = ((base->CFG) & ~(SPC_CFG_INTG_PWSWTCH_SLEEP_EN_MASK | SPC_CFG_INTG_PWSWTCH_WKUP_EN_MASK));
 
-    tmp32 |= SPC_CFG_INTG_PWSWTCH_SLEEP_EN(sleepGate) | SPC_CFG_INTG_PWSWTCH_WKUP_EN(wakeupUngate);
+    tmp32 |= SPC_CFG_INTG_PWSWTCH_SLEEP_EN((sleepGate) ? 1U : 0U) | SPC_CFG_INTG_PWSWTCH_WKUP_EN((wakeupUngate) ? 1U : 0U);
 
     base->CFG = tmp32;
 }
@@ -1848,8 +1848,8 @@ void SPC_SetExternalVoltageDomainsConfig(SPC_Type *base, uint8_t lowPowerIsoMask
  */
 static inline uint8_t SPC_GetExternalDomainsStatus(SPC_Type *base)
 {
-    uint32_t tmp32 = (base->EVD_CFG >> SPC_EVD_CFG_REG_EVDSTAT_SHIFT);
-    assert(tmp32 <= UINT8_MAX);
+    uint32_t tmp32 = ((base->EVD_CFG >> SPC_EVD_CFG_REG_EVDSTAT_SHIFT) & 0xFFU);
+
     return (uint8_t)(tmp32);
 }
 
