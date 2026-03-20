@@ -320,6 +320,8 @@ static uint32_t SFA_Mode0Calculate(SFA_Type *base, uint32_t refFrequency)
     roundRemainder = frequency % refCountDiff;
     frequency     /= refCountDiff;
     roundThreshold = (refCountDiff >> 1U) + (refCountDiff & 1ULL);
+    /* INT30-C: Prevent unsigned integer overflow in addition. */
+    assert(frequency < UINT64_MAX);
     frequency     += (roundRemainder >= roundThreshold) ? 1ULL : 0ULL;
     if (prediv > 1U)
     {
