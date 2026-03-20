@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 NXP
+ * Copyright 2019-2025, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -27,8 +27,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief SPC driver version 2.8.1. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 8, 1))
+/*! @brief SPC driver version 2.8.2. */
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 8, 2))
 /*! @} */
 
 /*! @name Configuration */
@@ -148,6 +148,16 @@ enum _spc_voltage_detect_flags
 #endif                                                                  /* FSL_FEATURE_SPC_HAS_VDD_SYS */
     kSPC_CoreVDDLowVoltageDetectFlag = SPC_VD_STAT_COREVDD_LVDF_MASK,   /*!< Core VDD Low-Voltage detect flag. */
 };
+
+#if (defined(FSL_FEATURE_SPC_HAS_VDD_SYS) && FSL_FEATURE_SPC_HAS_VDD_SYS)
+#define SPC_VD_STAT_VALID_FLAGS_MASK \
+    (SPC_VD_STAT_IOVDD_HVDF_MASK | SPC_VD_STAT_COREVDD_HVDF_MASK | SPC_VD_STAT_IOVDD_LVDF_MASK | \
+     SPC_VD_STAT_COREVDD_LVDF_MASK | SPC_VD_STAT_SYSVDD_HVDF_MASK | SPC_VD_STAT_SYSVDD_LVDF_MASK)
+#else
+#define SPC_VD_STAT_VALID_FLAGS_MASK \
+    (SPC_VD_STAT_IOVDD_HVDF_MASK | SPC_VD_STAT_COREVDD_HVDF_MASK | SPC_VD_STAT_IOVDD_LVDF_MASK | \
+     SPC_VD_STAT_COREVDD_LVDF_MASK)
+#endif
 
 /*!
  * @brief SPC power domain isolation status.
@@ -1504,7 +1514,7 @@ static inline void SPC_DisableLowPowerModeVddCoreGlitchDetect(SPC_Type *base, bo
  */
 static inline uint8_t SPC_GetVoltageDetectStatusFlag(SPC_Type *base)
 {
-    return (uint8_t)(base->VD_STAT);
+    return (uint8_t)(base->VD_STAT & SPC_VD_STAT_VALID_FLAGS_MASK);
 }
 
 /*!
@@ -1900,7 +1910,7 @@ void SPC_SetExternalVoltageDomainsConfig(SPC_Type *base, uint8_t lowPowerIsoMask
  */
 static inline uint8_t SPC_GetExternalDomainsStatus(SPC_Type *base)
 {
-    return (uint8_t)(base->EVD_CFG >> SPC_EVD_CFG_REG_EVDSTAT_SHIFT);
+    return (uint8_t)((base->EVD_CFG & SPC_EVD_CFG_EVDSTAT_MASK) >> SPC_EVD_CFG_EVDSTAT_SHIFT);
 }
 
 /*! @} */

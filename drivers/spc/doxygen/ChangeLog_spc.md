@@ -1,5 +1,12 @@
 # SPC
 
+## [2.8.2]
+
+- Bug Fixes
+  - Mask voltage detect status bits to return only valid SPC VD status flags.
+  - Mask external domain status bits before shifting to return only EVDSTAT field values.
+
+
 ## [2.8.1]
 
 - Bug Fixes
