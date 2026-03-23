@@ -1,6 +1,5 @@
 /*
- * Copyright 2020-2021 NXP
- * All rights reserved.
+ * Copyright 2020-2021, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -22,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexCAN driver version. */
-#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 1, 2))
+#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*! @} */
 
 /*******************************************************************************
@@ -32,7 +31,11 @@
  * @defgroup flexcan_driver_log The Driver Change Log
  * @ingroup flexcan
  * @{
- * The current FLEXCAN driver version is 2.1.1.
+ * The current FLEXCAN driver version is 2.2.0.
+ *
+ * - 2.2.0
+ *   - Improvement
+ *     - Added support for new hardware features.
  *
  * - 2.1.1
  *   - Bug Fixes
@@ -476,6 +479,15 @@ typedef enum _flexcan_rx_fifo_filter_type
     kFLEXCAN_RxFifoFilterTypeD = 0x3U, /*!< All frames rejected. */
 } flexcan_rx_fifo_filter_type_t;
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
+/*! @brief FlexCAN payload endianness. */
+typedef enum _flexcan_endianness
+{
+    kFLEXCAN_BigEndian    = 0x0U, /*!< Transmit frame with MSB first, receive frame with big-endian format. */
+    kFLEXCAN_LittleEndian = 0x1U, /*!< Transmit frame with LSB first, receive frame with little-endian format. */
+} flexcan_endianness_t;
+#endif
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * @brief FlexCAN Message Buffer Data Size.
@@ -696,6 +708,25 @@ typedef struct _flexcan_timing_config
     uint8_t u8PropSeg;      /*!< Propagation Segment. */
 } flexcan_timing_config_t;
 
+/*!
+ * @brief FlexCAN retry count options.
+ *
+ * Defines the number of retransmission attempts when message transmission fails
+ * due to reasons other than loss of arbitration or being aborted by the host.
+ * The message is discarded if retransmission counter is exhausted.
+ */
+typedef enum _flexcan_retry_count
+{
+    kFLEXCAN_RetryDisabled  = 0U, /*!< No retransmission (abort immediately). */
+    kFLEXCAN_Retry1Time     = 1U, /*!< 1 retransmission attempt. */
+    kFLEXCAN_Retry2Times    = 2U, /*!< 2 retransmission attempts. */
+    kFLEXCAN_Retry3Times    = 3U, /*!< 3 retransmission attempts. */
+    kFLEXCAN_Retry4Times    = 4U, /*!< 4 retransmission attempts. */
+    kFLEXCAN_Retry5Times    = 5U, /*!< 5 retransmission attempts. */
+    kFLEXCAN_Retry6Times    = 6U, /*!< 6 retransmission attempts. */
+    kFLEXCAN_RetryUnlimited = 7U  /*!< Unlimited retransmissions. */
+} flexcan_retry_count_t;
+
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
 /*!
  * @brief Configuration for the Flexcan CAN FD mode. It only cover FD related parts.
@@ -740,6 +771,25 @@ typedef struct _flexcan_config
     bool bEnableListenOnlyMode;          /*!< Enable or Disable Listen Only Mode. */
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_DOZE_MODE_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_DOZE_MODE_SUPPORT)
     bool bEnableDoze; /*!< Enable or Disable Doze Mode. */
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_RESTRICTED_OPERATION_MODE) && FSL_FEATURE_FLEXCAN_HAS_RESTRICTED_OPERATION_MODE)
+    bool enableRestrictedMode; /*!< Enable or Disable Restricted Operation Mode. In this mode, FlexCAN can receive
+                                    and acknowledge messages, but cannot send error frames and overload frames. Error
+                                    and overload conditions are treated as protocol exceptions and enter integrating
+                                    state without incrementing error counters. */
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_RETRY_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_RETRY_CONTROL)
+    flexcan_retry_count_t retryCount; /*!< Number of retransmission attempts when transmission fails. */
+#endif
+
+    bool enableRemoteRequestFrameStored;  /*!< true: Store Remote Request Frame in the same fashion of data frame.
+                                               false: Generate an automatic Remote Response Frame. */
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
+    flexcan_endianness_t payloadEndianness; /*!< Selects the byte order for the payload of transmit and
+                                                 receive frames, see @ref flexcan_endianness_t. */
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
@@ -1358,6 +1408,67 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t u32Interru
     /* Solve others. */
     base->CTRL1 &= ~(u32InterruptFlags & (~((uint32_t)kFLEXCAN_WakeUpInterruptEnable)));
 }
+
+/*! @} */
+
+/*!
+ * @name Dynamic Control Interfaces
+ * @{
+ */
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FAULT_REACTION) && FSL_FEATURE_FLEXCAN_HAS_FAULT_REACTION)
+/*!
+ * @brief Enables or disables the fault reaction mode.
+ *
+ * When enabled, FlexCAN enters Freeze mode and drives TX pin to recessive state
+ * upon detecting a fault condition. FlexCAN remains in this safe state until
+ * the fault condition is cleared and MCR[FRZ] is written to 0 by software.
+ *
+ * This function can be called in any mode.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param enable True to enable fault reaction, false to disable.
+ */
+static inline void FLEXCAN_EnableFaultReaction(CAN_Type *base, bool enable)
+{
+    uint8_t boolConvert = (enable == true) ? 1U : 0U;
+    base->CTRL2 = (base->CTRL2 & ~(CAN_CTRL2_FLT_RXN_MASK)) | CAN_CTRL2_FLT_RXN(boolConvert);
+}
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_TX_PIN_OVERRIDE) && FSL_FEATURE_FLEXCAN_HAS_TX_PIN_OVERRIDE)
+/*!
+ * @brief Enables or disables TX pin override.
+ *
+ * When enabled, the value in MCR[TPOV] is forced onto the TX pin.
+ * This feature is typically used for testing and diagnostics.
+ *
+ * @note This function must not be enabled during functional mode.
+ * @note Soft reset affects TPOV field.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param enable True to enable TX pin override, false to disable.
+ */
+static inline void FLEXCAN_EnableTxPinOverride(CAN_Type *base, bool enable)
+{
+    uint8_t boolConvert = (enable == true) ? 1U : 0U;
+    base->CTRL2 = (base->CTRL2 & ~(CAN_MCR_TPOE_MASK)) | CAN_MCR_TPOE(boolConvert);
+}
+
+/*!
+ * @brief Sets the TX pin override value.
+ *
+ * This value is forced onto the TX pin when MCR[TPOE] is enabled.
+ *
+ * @param base FlexCAN peripheral base address.
+ * @param recessive True for recessive bit (logic 1), false for dominant bit (logic 0).
+ */
+static inline void FLEXCAN_SetTxPinOverrideValue(CAN_Type *base, bool recessive)
+{
+    uint8_t boolConvert = (recessive == true) ? 1U : 0U;
+    base->CTRL2 = (base->CTRL2 & ~(CAN_MCR_TPOV_MASK)) | CAN_MCR_TPOV(boolConvert);
+}
+#endif
 
 /*! @} */
 

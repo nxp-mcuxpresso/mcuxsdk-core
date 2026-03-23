@@ -1,6 +1,5 @@
 /*
- * Copyright 2020-2021 NXP
- * All rights reserved.
+ * Copyright 2020-2021, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -310,6 +309,7 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *psConfig)
 
     uint32_t mcrTemp;
     uint32_t ctrl1Temp;
+    uint32_t ctrl2Temp;
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     uint32_t instance;
 #endif
@@ -356,6 +356,9 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *psConfig)
     /* Save current CTRL1 value and enable to enter Freeze mode(enabled by default). */
     ctrl1Temp = base->CTRL1;
 
+    /* Save current CTRL2 value and enable to enter Freeze mode(enabled by default). */
+    ctrl2Temp = base->CTRL2;
+
     /* Save current MCR value and enable to enter Freeze mode(enabled by default). */
     mcrTemp = base->MCR;
 
@@ -367,6 +370,27 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *psConfig)
 
     /* Enable Listen Only Mode? */
     ctrl1Temp = (psConfig->bEnableListenOnlyMode) ? ctrl1Temp | CAN_CTRL1_LOM_MASK : ctrl1Temp & ~CAN_CTRL1_LOM_MASK;
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_RESTRICTED_OPERATION_MODE) && FSL_FEATURE_FLEXCAN_HAS_RESTRICTED_OPERATION_MODE)
+    /* Enable Restricted Operation Mode? */
+    ctrl1Temp = (psConfig->enableRestrictedMode) ? (ctrl1Temp | CAN_CTRL1_ROM_MASK) :
+                                                   (ctrl1Temp & ~CAN_CTRL1_ROM_MASK);
+#endif
+
+    /* Remote Response Frame is generated or Remote Request Frame is stored. */
+    ctrl2Temp = (psConfig->enableRemoteRequestFrameStored) ? ctrl2Temp | CAN_CTRL2_RRS_MASK :
+                                                             ctrl2Temp & ~CAN_CTRL2_RRS_MASK;
+
+    /* Selects the byte order for the payload of transmit and receive frames. */
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
+    ctrl2Temp = (psConfig->payloadEndianness == kFLEXCAN_LittleEndian) ? ctrl2Temp | CAN_CTRL2_PES_MASK :
+                                                                         ctrl2Temp & ~CAN_CTRL2_PES_MASK;
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_RETRY_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_RETRY_CONTROL)
+    /* Configure number of retransmission attempts. */
+    ctrl2Temp = (ctrl2Temp & ~CAN_CTRL2_RETRY_MASK) | CAN_CTRL2_RETRY((uint32_t)psConfig->retryCount);
+#endif
 
     /* Set the maximum number of Message Buffers */
     mcrTemp = (mcrTemp & ~CAN_MCR_MAXMB_MASK) | CAN_MCR_MAXMB((uint32_t)psConfig->u8MaxMsgBufNum - 1U);
@@ -392,6 +416,9 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *psConfig)
 
     /* Write back CTRL1 Configuration to register. */
     base->CTRL1 = ctrl1Temp;
+
+    /* Write back CTRL2 Configuration to register. */
+    base->CTRL2 = ctrl2Temp;
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
     /* Enable to update in MCER. */
@@ -544,6 +571,22 @@ void FLEXCAN_GetDefaultConfig(flexcan_config_t *psConfig, uint32_t u32ClkFreqHz)
     psConfig->bEnableListenOnlyMode = false;
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_DOZE_MODE_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_DOZE_MODE_SUPPORT)
     psConfig->bEnableDoze = false;
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_RESTRICTED_OPERATION_MODE) && FSL_FEATURE_FLEXCAN_HAS_RESTRICTED_OPERATION_MODE)
+    /* Disable Restricted Operation Mode (normal operation). */
+    psConfig->enableRestrictedMode = false;
+#endif
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_RETRY_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_RETRY_CONTROL)
+    /* Set unlimited retransmissions for maximum reliability. */
+    psConfig->retryCount = kFLEXCAN_RetryUnlimited;
+#endif
+
+    psConfig->enableRemoteRequestFrameStored = true;
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION) && FSL_FEATURE_FLEXCAN_HAS_ENDIANNESS_SELECTION)
+    psConfig->payloadEndianness = kFLEXCAN_BigEndian;
 #endif
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)

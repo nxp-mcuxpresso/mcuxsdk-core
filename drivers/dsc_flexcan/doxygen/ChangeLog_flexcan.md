@@ -1,5 +1,15 @@
 # FLEXCAN
 
+## [2.2.0]
+
+- Improvement
+  - Support Automatic Remote Response feature.
+  - Support Payload Endianness Selection feature.
+  - Support Fault Reaction Mode feature.
+  - Support TX Pin Override feature.
+  - Support Restricted Operation Mode feature.
+  - Support Retransmission Requests Number feature.
+
 ## [2.1.2]
 
 - Bug Fixes
