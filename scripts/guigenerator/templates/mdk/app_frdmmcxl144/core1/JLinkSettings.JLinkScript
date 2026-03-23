@@ -1,0 +1,257 @@
+/*
+ * Copyright 2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+ /* This script allow direct launch of code on cm0+ (AON) core of MCX L20
+  *
+  * 0) Replaces reset by just halting the core.
+  * 1) Connects to the main core by call of _ConnectCore0()
+  * 2) Loads bare minimal code into cm0 SRAM but through main core by
+  *    call of set_trap()
+  * 3) Enables cm0+ clocking and releases core from reset.
+  * 4) Switches J-link to use cm0
+  */
+
+
+int AP_CM0 = 2;
+int AP_CM33 = 0;
+
+U32 _AHB_ACC_32BIT_AUTO_INC  = (1 << 29) | (1 << 25) | (1 << 24) | (1 << 4) | (2 << 0);
+U32 _AHB_ACC_16BIT_AUTO_INC  = (1 << 29) | (1 << 25) | (1 << 24) | (1 << 4) | (1 << 0);
+U32 _ACCESS_DP               = 0;
+U32 _ACCESS_AP               = 1;
+
+static U32 ap_read(U32 ap, U32 Addr) {
+  U32 v;
+
+  JLINK_CORESIGHT_WriteDP(JLINK_CORESIGHT_DP_REG_SELECT, (ap << 24));
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_CTRL,   _AHB_ACC_32BIT_AUTO_INC);
+  JLINK_CORESIGHT_WriteDAP(JLINK_CORESIGHT_AP_REG_ADDR, _ACCESS_AP, Addr);
+  JLINK_CORESIGHT_ReadDAP(JLINK_CORESIGHT_AP_REG_DATA, _ACCESS_AP, &v);
+  return v;
+}
+
+static int ap_write(U32 ap, U32 Addr, U32 Data) {
+  int r;
+
+  JLINK_CORESIGHT_WriteDP(JLINK_CORESIGHT_DP_REG_SELECT, (ap << 24));
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_CTRL,   _AHB_ACC_32BIT_AUTO_INC);
+  r  = JLINK_CORESIGHT_WriteDAP(JLINK_CORESIGHT_AP_REG_ADDR, _ACCESS_AP, Addr);
+  r |= JLINK_CORESIGHT_WriteDAP(JLINK_CORESIGHT_AP_REG_DATA, _ACCESS_AP, Data);
+  return r;
+}
+
+void ConfigDebugMailbox(void)
+{
+  int value;
+  JLINK_SYS_Report("*** ConfigDebugMailbox start");
+  
+  // Read AP ID register to identify DM AP at index 1
+  JLINK_CORESIGHT_WriteDP(2, 0x010000f0);
+  // The returned AP ID should be 0x002A0000
+  value = JLINK_CORESIGHT_ReadAP(3);
+  JLINK_SYS_Report1("AP ID:", value);
+
+  // Select DM AP index 1
+  JLINK_CORESIGHT_WriteDP(2, 0x01000000);
+  JLINK_CORESIGHT_ReadDP(0);
+
+  // Active DebugMailbox, Write DM RESYNC_REQ + CHIP_RESET_REQ
+  JLINK_CORESIGHT_WriteAP(0, 0x21);
+
+  // Poll CSW register (0) for zero return, indicating success
+  value = -1;
+  while (value != 0)
+  {
+    value = JLINK_CORESIGHT_ReadAP(0);  
+  }
+  JLINK_SYS_Report1("RESYNC_REQ + CHIP_RESET_REQ:", value);
+  
+  // Start DM-AP
+  JLINK_CORESIGHT_WriteAP(1, 0x01);
+  // Poll RETURN register (2) for zero return
+  value = -1;
+  while (value != 0)
+  {
+    value = JLINK_CORESIGHT_ReadAP(2) & 0xFFFF;  
+  }
+  JLINK_SYS_Report1("Start DM-AP:", value);
+
+  // Enter Debug Session,  Write DM START_DBG_SESSION to REQUEST register (1)
+  JLINK_CORESIGHT_WriteAP(1, 0x07);
+  // Poll RETURN register (2) for zero return
+  value = -1;
+  while (value != 0)
+  {
+    value = JLINK_CORESIGHT_ReadAP(2) & 0xFFFF;  
+  }
+  JLINK_SYS_Report1("DEBUG_SESSION_REQ:", value);
+  
+  JLINK_SYS_Report("*** ConfigDebugMailbox end");
+  
+  //JLINK_SYS_Sleep(500); //this will ruin everything
+}
+
+/** Sets bare minimal startup code on offset ofs
+ */
+void set_trap(U32 ofs) {
+  int st;
+
+  /* Set the stack pointer to the address 0x1000 */
+  st = ap_write(AP_CM33, ofs, 0x1000);
+  JLINK_SYS_Report1("SP -> ", st);
+
+  /* Set the reset vector to the address 0x100, bit 0 set to 1
+     tells the CPU to expect thumb (2B log) instruction */
+  st = ap_write(AP_CM33, 0x00000004 + ofs, 0x101);
+  JLINK_SYS_Report1("Reset handler vector -> ", st);
+
+  /* Sets two thumb instructions jumping back to itself.*/
+  st = ap_write(AP_CM33, 0x00000100 + ofs, 0xE7feE7fe);
+  JLINK_SYS_Report1("Set thumb instruction -> ", st);
+}
+
+void launch_cm0aon()
+{
+  int st;
+  U32 v;
+
+  JLINK_SYS_Report("Launch CM0:");
+
+  /* Enables all the clocks. (CGU->PER_CLK_EN register)*/
+  st = ap_write(AP_CM33, 0xa0099000 + 0x00c, 0x7fe7);
+  JLINK_SYS_Report1("Enable AON clock -> ", st);
+
+  JLINK_SYS_Sleep(300);
+
+  v = ap_read(AP_CM33, 0xa0099010);
+  JLINK_SYS_Report1("RST_SUB_BLK == ", v);
+
+  /* Releases cm0 from reset by writing 1 to CMOP_RST_REL bit
+     of CGU->RST_SUB_BLK register */
+  st = ap_write(AP_CM33, 0xa0099000 + 0x010, v | 0x0010);
+  JLINK_SYS_Report1("Release AON from reset -> ", st);
+
+  v = ap_read(AP_CM33, 0xa0099010);
+  JLINK_SYS_Report1("RST_SUB_BLK == ", v);
+
+}
+
+U32 aon_in_reset(void) {
+	U32 v;
+  v = (~ap_read(AP_CM33, 0xa0099010)) & 0x10;
+
+  JLINK_SYS_Report1("aon_in_reset(void) -> ", v );
+
+  /*v = ap_read(AP_CM33, 0xa009900C);
+
+  JLINK_SYS_Report1("aon_in_reset(void) AHB clk bit = ", v & (1<<2));*/
+	    
+	return v;
+}
+/*********************************************************************
+*
+*       ResetTarget
+*/
+void ResetTarget(void) {
+  JLINK_TARGET_Halt(); // Make sure that the CPU is halted when reset is called
+}
+
+
+void _ConnectCore0(void) {
+  int v;
+
+  JLINK_CORESIGHT_WriteDP(2, 0x00000000);
+  v = JLINK_CORESIGHT_ReadAP(0);
+  JLINK_SYS_Report1("CPU0 CSW: ", v);
+
+  if (v == 0xFFFFFFFF)
+  {
+    // CPU0 AP not enabled, abort last AP read.
+    JLINK_CORESIGHT_WriteDP(0, 0x0000001F);
+
+    JLINK_SYS_Report("-- Activate debugger --");
+    // Select Debug Mailbox AP
+    JLINK_CORESIGHT_WriteDP(2, 0x020000f0);
+    v = JLINK_CORESIGHT_ReadAP(3);
+    JLINK_SYS_Report1("Debug Mailbox APIDR:", v);
+
+    // Activate DebugMailbox
+    JLINK_CORESIGHT_WriteDP(2, 0x02000000);
+    JLINK_CORESIGHT_WriteAP(0, 0x21);
+    v = JLINK_CORESIGHT_ReadAP(0);
+    while (v != 0)
+    {
+       v = JLINK_CORESIGHT_ReadAP(0);
+    }
+    // Enter Debug Session
+    JLINK_CORESIGHT_WriteDP(2, 0x02000000);
+    JLINK_CORESIGHT_WriteAP(1, 0x07);
+    //JLINK_SYS_Sleep(50);
+  }
+}
+
+
+/*********************************************************************
+*
+*       InitTarget
+*/
+void InitTarget(void) {
+  int v;
+  int st;
+  U32 in_reset;
+  JLINK_SYS_Report("***************************************************");
+  JLINK_SYS_Report("J-Link script: MCXL20 Cortex-M0P core J-Link script");
+  JLINK_SYS_Report("***************************************************");
+  // For SWD, no special setup is needed, just output the switching sequence
+  JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=0;DRPost=0;IRLenDevice=4");
+
+  CORESIGHT_AddAP(0, CORESIGHT_AHB_AP);
+  CORESIGHT_AddAP(1, CORESIGHT_JTAG_AP);
+  CORESIGHT_AddAP(2, CORESIGHT_AHB_AP);
+  JTAG_AllowTAPReset = 0;
+  
+  in_reset = aon_in_reset();
+  if(1)
+  {
+    JLINK_SYS_Report("AON in reset");
+
+    ConfigDebugMailbox();
+  
+    JLINK_SYS_Report("halting...");
+
+    JLINK_TARGET_Halt();
+    
+    JLINK_SYS_Report("halted");
+
+    CORESIGHT_IndexAHBAPToUse = AP_CM33;
+    
+    JLINK_SYS_Report("connecting...");
+
+    _ConnectCore0();
+    
+    JLINK_SYS_Report("connected");
+
+    /* MEM_* functions should not work in Init target but for some reason
+      (probably the call of the _ConnectCore0) they do */
+
+
+    JLINK_SYS_Report("AON IS in reset setting trap");
+    set_trap(0xB1000000); //CM0
+    JLINK_SYS_Report("AON trap planted, launching");
+    launch_cm0aon();
+    JLINK_SYS_Report("AON trap planted, launched");
+
+  }
+
+  CPU = CORTEX_M0;
+  CORESIGHT_IndexAHBAPToUse = AP_CM0;
+
+  if(in_reset)
+  {  
+    JLINK_TARGET_Halt();
+  }
+}
