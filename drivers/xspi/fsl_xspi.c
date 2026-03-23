@@ -1718,6 +1718,7 @@ RAMFUNC status_t XSPI_TransferBlocking(XSPI_Type *base, xspi_transfer_t *xfer)
             if (dataSize != 0UL)
             {
                 ptrBuffer += transferSize;
+                assert(addr <= (UINT32_MAX - transferSize));
                 addr += transferSize;
             }
         }
@@ -1797,6 +1798,7 @@ RAMFUNC status_t XSPI_TransferBlocking(XSPI_Type *base, xspi_transfer_t *xfer)
             if (dataSize != 0UL)
             {
                 ptrBuffer += transferSize;
+                assert(addr <= (UINT32_MAX - transferSize));
                 addr += transferSize;
             }
         }
@@ -1864,7 +1866,7 @@ RAMFUNC status_t XSPI_WriteBlockingTG(XSPI_Type *base, xspi_target_group_t tgId,
     {
     }
 
-    *tbct = 256UL - ((uint32_t)size / 4UL - 1UL);
+    *tbct = (256UL + 1UL) - (uint32_t)size / 4UL;
     /* Send data buffer */
     while (0U != size)
     {
@@ -1947,6 +1949,7 @@ RAMFUNC status_t XSPI_ReadBlockingTG(XSPI_Type *base, xspi_target_group_t tgId, 
     __IO uint32_t *errstat = (__IO uint32_t *)XSPI_TG_REG_ADDR(base, tgId, ERRSTAT);
 
     uint32_t rxWatermark    = (*rbct & XSPI_RBCT_WMRK_MASK) + 1UL;
+    assert(rxWatermark <= XSPI_RBDR_ARRAY_COUNT);
     status_t status         = kStatus_Success;
     uint32_t i              = 0UL;
     uint32_t removedCount   = 0UL;
@@ -3185,6 +3188,7 @@ RAMFUNC static void XSPI_CommonIRQHandler(XSPI_Type *base, xspi_handle_t *handle
         uint32_t rxDataSize = XSPI_GetRxBufferAvailableBytesCount(base);
 #endif
         uint32_t rxBufferWaterMark = (*rbct & XSPI_RBCT_WMRK_MASK) + 1UL;
+        assert(rxBufferWaterMark <= XSPI_RBDR_ARRAY_COUNT);
         bufferIndex                = handle->transferTotalSize - handle->dataSize;
         buffer                     = (uint8_t *)(handle->data) + bufferIndex;
 
@@ -3219,7 +3223,7 @@ RAMFUNC static void XSPI_CommonIRQHandler(XSPI_Type *base, xspi_handle_t *handle
 
                 XSPI_TriggerRxBufferPopEvent(base);
 
-                while ((XSPI_GetRxBufferRemovedBytesCount(base) - removedCount) != (rxBufferWaterMark * 4UL))
+                while (XSPI_GetRxBufferRemovedBytesCount(base) != (removedCount + rxBufferWaterMark * 4UL))
                 {
                 }
 #endif
