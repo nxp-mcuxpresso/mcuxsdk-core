@@ -2495,17 +2495,25 @@ void FLEXCAN_TransferCreateHandle(CAN_Type *base,
      */
     if (psHandle->pfCallback != NULL)
     {
-        FLEXCAN_EnableInterrupts(
-            base, (uint32_t)kFLEXCAN_BusOffInterruptEnable | (uint32_t)kFLEXCAN_ErrorInterruptEnable |
-                      (uint32_t)kFLEXCAN_RxWarningInterruptEnable | (uint32_t)kFLEXCAN_TxWarningInterruptEnable |
-                      (uint32_t)kFLEXCAN_WakeUpInterruptEnable);
+        FLEXCAN_EnableInterrupts(base, 
+                (uint32_t)kFLEXCAN_BusOffInterruptEnable | (uint32_t)kFLEXCAN_ErrorInterruptEnable |
+                (uint32_t)kFLEXCAN_RxWarningInterruptEnable | (uint32_t)kFLEXCAN_TxWarningInterruptEnable |
+                (uint32_t)kFLEXCAN_WakeUpInterruptEnable
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
+                | (uint32_t)kFLEXCAN_FDErrorInterruptEnable | (uint32_t)kFLEXCAN_BusOffDoneInterruptEnable
+#endif
+                );
     }
     else
     {
-        FLEXCAN_DisableInterrupts(
-            base, (uint32_t)kFLEXCAN_BusOffInterruptEnable | (uint32_t)kFLEXCAN_ErrorInterruptEnable |
-                      (uint32_t)kFLEXCAN_RxWarningInterruptEnable | (uint32_t)kFLEXCAN_TxWarningInterruptEnable |
-                      (uint32_t)kFLEXCAN_WakeUpInterruptEnable);
+        FLEXCAN_DisableInterrupts(base, 
+                (uint32_t)kFLEXCAN_BusOffInterruptEnable | (uint32_t)kFLEXCAN_ErrorInterruptEnable |
+                (uint32_t)kFLEXCAN_RxWarningInterruptEnable | (uint32_t)kFLEXCAN_TxWarningInterruptEnable |
+                (uint32_t)kFLEXCAN_WakeUpInterruptEnable
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
+                | (uint32_t)kFLEXCAN_FDErrorInterruptEnable | (uint32_t)kFLEXCAN_BusOffDoneInterruptEnable
+#endif
+                );
     }
 
     /* Enable interrupts in NVIC. */
@@ -3082,13 +3090,11 @@ void FLEXCAN_TransferHandleIRQ(flexcan_handle_t *psHandle)
         EsrStatus = FLEXCAN_GetStatusFlags(base);
 
         /* To psHandle FlexCAN Error and Status Interrupt first. */
-        if (0U != (EsrStatus & ((uint32_t)kFLEXCAN_TxWarningIntFlag | (uint32_t)kFLEXCAN_RxWarningIntFlag |
-                                (uint32_t)kFLEXCAN_BusOffIntFlag | (uint32_t)kFLEXCAN_ErrorIntFlag)))
+        if (0U != (EsrStatus & FLEXCAN_ERROR_AND_STATUS_INT_FLAG))
         {
             status = kStatus_FLEXCAN_ErrorStatus;
             /* Clear FlexCAN Error and Status Interrupt. */
-            FLEXCAN_ClearStatusFlags(base, (uint32_t)kFLEXCAN_TxWarningIntFlag | (uint32_t)kFLEXCAN_RxWarningIntFlag |
-                                               (uint32_t)kFLEXCAN_BusOffIntFlag | (uint32_t)kFLEXCAN_ErrorIntFlag);
+            FLEXCAN_ClearStatusFlags(base, FLEXCAN_ERROR_AND_STATUS_INT_FLAG);
         }
         else if (0U != (EsrStatus & (uint32_t)kFLEXCAN_WakeUpIntFlag))
         {

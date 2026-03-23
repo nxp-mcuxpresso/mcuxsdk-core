@@ -9,6 +9,7 @@
   - Support TX Pin Override feature.
   - Support Restricted Operation Mode feature.
   - Support Retransmission Requests Number feature.
+  - Support FD Error, Bus Off Done interrupt; Active to Passive, Passive to Active status flag.
 
 ## [2.1.2]
 

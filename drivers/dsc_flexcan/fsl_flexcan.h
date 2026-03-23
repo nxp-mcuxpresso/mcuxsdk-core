@@ -36,6 +36,7 @@
  * - 2.2.0
  *   - Improvement
  *     - Added support for new hardware features.
+ *     - Added support for new hardware interrupts.
  *
  * - 2.1.1
  *   - Bug Fixes
@@ -406,6 +407,22 @@
 #define FLEXCAN_RX_FIFO_EXT_FILTER_TYPE_C_LOW(id) \
     FLEXCAN_RX_FIFO_EXT_MASK_TYPE_C_LOW(id) /*!< Extend Rx FIFO Filter helper macro Type C lower part helper macro. */
 
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
+    #if (defined(FSL_FEATURE_FLEXCAN_HAS_FAULT_CONFINE_INTERRUPT) && FSL_FEATURE_FLEXCAN_HAS_FAULT_CONFINE_INTERRUPT)
+        #define FLEXCAN_ERROR_AND_STATUS_INT_FLAG   \
+            (CAN_ESR1_ERRINT_MASK | CAN_ESR1_ERRINT_FAST_MASK | CAN_ESR1_BOFFDONEINT_MASK | \
+             CAN_ESR1_TWRNINT_MASK | CAN_ESR1_RWRNINT_MASK | CAN_ESR1_BOFFINT_MASK |        \
+             CAN_ESR1_ATP_MASK | CAN_ESR1_PTA_MASK)
+    #else
+        #define FLEXCAN_ERROR_AND_STATUS_INT_FLAG   \
+            (CAN_ESR1_ERRINT_MASK | CAN_ESR1_ERRINT_FAST_MASK | CAN_ESR1_BOFFDONEINT_MASK | \
+             CAN_ESR1_TWRNINT_MASK | CAN_ESR1_RWRNINT_MASK | CAN_ESR1_BOFFINT_MASK)
+    #endif
+#else
+#define FLEXCAN_ERROR_AND_STATUS_INT_FLAG   \
+    (CAN_ESR1_TWRNINT_MASK | CAN_ESR1_RWRNINT_MASK | CAN_ESR1_BOFFINT_MASK | CAN_ESR1_ERRINT_MASK)
+#endif
+
 /*!
  * @brief FlexCAN transfer status codes, used by bus operation APIs and transactional APIs as return value to indicate
  *        the current status as the API's execution result, or used in the callback to indicate transfer results.
@@ -527,9 +544,18 @@ enum _flexcan_interrupt_enable
     kFLEXCAN_RxWarningInterruptEnable = CAN_CTRL1_RWRNMSK_MASK, /*!< Rx Warning interrupt. */
     kFLEXCAN_TxWarningInterruptEnable = CAN_CTRL1_TWRNMSK_MASK, /*!< Tx Warning interrupt. */
     kFLEXCAN_WakeUpInterruptEnable    = CAN_MCR_WAKMSK_MASK,    /*!< Wake Up interrupt. */
-    kFLEXCAN_AllInterruptEnable =
-        (kFLEXCAN_BusOffInterruptEnable | kFLEXCAN_ErrorInterruptEnable | kFLEXCAN_RxWarningInterruptEnable |
-         kFLEXCAN_TxWarningInterruptEnable | kFLEXCAN_WakeUpInterruptEnable)
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
+    kFLEXCAN_BusOffDoneInterruptEnable = CAN_CTRL2_BOFFDONEMSK_MASK, /*!< Bus Off Done interrupt. */
+    kFLEXCAN_FDErrorInterruptEnable = CAN_CTRL2_ERRMSK_FAST_MASK, /*!< Error interrupt for errors detected in
+                                                                       data phase of fast CAN FD frames. */
+#endif
+    kFLEXCAN_AllInterruptEnable = (
+        kFLEXCAN_BusOffInterruptEnable | kFLEXCAN_ErrorInterruptEnable | kFLEXCAN_RxWarningInterruptEnable |
+        kFLEXCAN_TxWarningInterruptEnable | kFLEXCAN_WakeUpInterruptEnable
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
+        | kFLEXCAN_BusOffDoneInterruptEnable | kFLEXCAN_FDErrorInterruptEnable
+#endif
+        )
 };
 
 /*!
@@ -577,9 +603,16 @@ enum _flexcan_status_flags
     kFLEXCAN_FaultConfinementFlag = CAN_ESR1_FLTCONF_MASK, /*!< Fault Confinement Status Flag. */
     kFLEXCAN_TransmittingFlag     = CAN_ESR1_TX_MASK,      /*!< FlexCAN In Transmission Status Flag. */
     kFLEXCAN_ReceivingFlag        = CAN_ESR1_RX_MASK,      /*!< FlexCAN In Reception Status Flag. */
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FAULT_CONFINE_INTERRUPT) && FSL_FEATURE_FLEXCAN_HAS_FAULT_CONFINE_INTERRUPT)
+    kFLEXCAN_ActiveToPassiveFlag  = CAN_ESR1_ATP_MASK,  /*!< Active to Passive error state Status Flag. */
+    kFLEXCAN_PassiveToActiveFlag  = CAN_ESR1_PTA_MASK,  /*!< Passive to Active error state Status Flag. */
+#endif
     kFLEXCAN_StatusAllFlags       = (
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
         kFLEXCAN_FDErrorIntFlag | kFLEXCAN_BusoffDoneIntFlag | kFLEXCAN_OverrunError |
+#endif
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FAULT_CONFINE_INTERRUPT) && FSL_FEATURE_FLEXCAN_HAS_FAULT_CONFINE_INTERRUPT)
+        kFLEXCAN_ActiveToPassiveFlag | kFLEXCAN_PassiveToActiveFlag |
 #endif
         kFLEXCAN_TxWarningIntFlag | kFLEXCAN_RxWarningIntFlag | kFLEXCAN_BusOffIntFlag | kFLEXCAN_ErrorIntFlag |
         kFLEXCAN_WakeUpIntFlag), /*!< All status/interrupt flags which are write clearable. */
@@ -1378,14 +1411,20 @@ static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint32_t mask)
  */
 static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t u32InterruptFlags)
 {
-    /* Solve Wake Up Interrupt. */
+    /* Solve Wake Up Interrupt (MCR register). */
     if ((uint32_t)kFLEXCAN_WakeUpInterruptEnable == (u32InterruptFlags & (uint32_t)kFLEXCAN_WakeUpInterruptEnable))
     {
         base->MCR |= CAN_MCR_WAKMSK_MASK;
     }
 
-    /* Solve others. */
-    base->CTRL1 |= (u32InterruptFlags & (~((uint32_t)kFLEXCAN_WakeUpInterruptEnable)));
+    /* Solve CTRL1 register interrupts. */
+    base->CTRL1 |= (u32InterruptFlags & (CAN_CTRL1_BOFFMSK_MASK | CAN_CTRL1_ERRMSK_MASK |
+                                         CAN_CTRL1_RWRNMSK_MASK | CAN_CTRL1_TWRNMSK_MASK));
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
+    /* Solve CTRL2 register interrupts. */
+    base->CTRL2 |= (u32InterruptFlags & (CAN_CTRL2_BOFFDONEMSK_MASK | CAN_CTRL2_ERRMSK_FAST_MASK));
+#endif
 }
 
 /*!
@@ -1399,14 +1438,20 @@ static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t u32Interrup
  */
 static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t u32InterruptFlags)
 {
-    /* Solve Wake Up Interrupt. */
+    /* Solve Wake Up Interrupt (MCR register). */
     if ((uint32_t)kFLEXCAN_WakeUpInterruptEnable == (u32InterruptFlags & (uint32_t)kFLEXCAN_WakeUpInterruptEnable))
     {
         base->MCR &= ~CAN_MCR_WAKMSK_MASK;
     }
 
-    /* Solve others. */
-    base->CTRL1 &= ~(u32InterruptFlags & (~((uint32_t)kFLEXCAN_WakeUpInterruptEnable)));
+    /* Solve CTRL1 register interrupts. */
+    base->CTRL1 &= ~(u32InterruptFlags & (CAN_CTRL1_BOFFMSK_MASK | CAN_CTRL1_ERRMSK_MASK |
+                                          CAN_CTRL1_RWRNMSK_MASK | CAN_CTRL1_TWRNMSK_MASK));
+
+#if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
+    /* Solve CTRL2 register interrupts. */
+    base->CTRL2 &= ~(u32InterruptFlags & (CAN_CTRL2_BOFFDONEMSK_MASK | CAN_CTRL2_ERRMSK_FAST_MASK));
+#endif
 }
 
 /*! @} */
