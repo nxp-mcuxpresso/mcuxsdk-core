@@ -10,6 +10,7 @@
   - Support Restricted Operation Mode feature.
   - Support Retransmission Requests Number feature.
   - Support FD Error, Bus Off Done interrupt; Active to Passive, Passive to Active status flag.
+  - Add instance specific feature macro.
 
 ## [2.1.2]
 

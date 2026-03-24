@@ -37,6 +37,7 @@
  *   - Improvement
  *     - Added support for new hardware features.
  *     - Added support for new hardware interrupts.
+ *     - Added instance specific feature macro.
  *
  * - 2.1.1
  *   - Bug Fixes
@@ -1411,10 +1412,13 @@ static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint32_t mask)
  */
 static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t u32InterruptFlags)
 {
-    /* Solve Wake Up Interrupt (MCR register). */
-    if ((uint32_t)kFLEXCAN_WakeUpInterruptEnable == (u32InterruptFlags & (uint32_t)kFLEXCAN_WakeUpInterruptEnable))
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_SELF_WAKEn(base))
     {
-        base->MCR |= CAN_MCR_WAKMSK_MASK;
+        /* Solve Wake Up Interrupt (MCR register). */
+        if ((uint32_t)kFLEXCAN_WakeUpInterruptEnable == (u32InterruptFlags & (uint32_t)kFLEXCAN_WakeUpInterruptEnable))
+        {
+            base->MCR |= CAN_MCR_WAKMSK_MASK;
+        }
     }
 
     /* Solve CTRL1 register interrupts. */
@@ -1423,7 +1427,10 @@ static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t u32Interrup
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
     /* Solve CTRL2 register interrupts. */
-    base->CTRL2 |= (u32InterruptFlags & (CAN_CTRL2_BOFFDONEMSK_MASK | CAN_CTRL2_ERRMSK_FAST_MASK));
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
+    {
+        base->CTRL2 |= (u32InterruptFlags & (CAN_CTRL2_BOFFDONEMSK_MASK | CAN_CTRL2_ERRMSK_FAST_MASK));
+    }
 #endif
 }
 
@@ -1438,10 +1445,13 @@ static inline void FLEXCAN_EnableInterrupts(CAN_Type *base, uint32_t u32Interrup
  */
 static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t u32InterruptFlags)
 {
-    /* Solve Wake Up Interrupt (MCR register). */
-    if ((uint32_t)kFLEXCAN_WakeUpInterruptEnable == (u32InterruptFlags & (uint32_t)kFLEXCAN_WakeUpInterruptEnable))
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_SELF_WAKEn(base))
     {
-        base->MCR &= ~CAN_MCR_WAKMSK_MASK;
+        /* Solve Wake Up Interrupt (MCR register). */
+        if ((uint32_t)kFLEXCAN_WakeUpInterruptEnable == (u32InterruptFlags & (uint32_t)kFLEXCAN_WakeUpInterruptEnable))
+        {
+            base->MCR &= ~CAN_MCR_WAKMSK_MASK;
+        }
     }
 
     /* Solve CTRL1 register interrupts. */
@@ -1450,7 +1460,10 @@ static inline void FLEXCAN_DisableInterrupts(CAN_Type *base, uint32_t u32Interru
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE) && FSL_FEATURE_FLEXCAN_HAS_FLEXIBLE_DATA_RATE)
     /* Solve CTRL2 register interrupts. */
-    base->CTRL2 &= ~(u32InterruptFlags & (CAN_CTRL2_BOFFDONEMSK_MASK | CAN_CTRL2_ERRMSK_FAST_MASK));
+    if (1 == FSL_FEATURE_FLEXCAN_INSTANCE_HAS_FLEXIBLE_DATA_RATEn(base))
+    {
+        base->CTRL2 &= ~(u32InterruptFlags & (CAN_CTRL2_BOFFDONEMSK_MASK | CAN_CTRL2_ERRMSK_FAST_MASK));
+    }
 #endif
 }
 
