@@ -1,5 +1,10 @@
 # SPC
 
+## [2.8.3]
+
+- Bug Fixes
+  - Fixed voltage detect status accumulation in Active, High Power, and Low Power mode helpers so VDD_SYS status bits are returned correctly when present.
+
 ## [2.8.2]
 
 - Bug Fixes

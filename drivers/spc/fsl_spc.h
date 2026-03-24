@@ -28,7 +28,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief SPC driver version 2.8.2. */
-#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 8, 2))
+#define FSL_SPC_DRIVER_VERSION (MAKE_VERSION(2, 8, 3))
 /*! @} */
 
 /*! @name Configuration */
@@ -866,7 +866,7 @@ static inline uint32_t SPC_GetHighPowerModeVoltageDetectStatus(SPC_Type *base)
             (SPC_HP_CFG_CORE_LVDE_MASK | SPC_HP_CFG_IO_LVDE_MASK | SPC_HP_CFG_CORE_HVDE_MASK | SPC_HP_CFG_IO_HVDE_MASK);
 
 #if (defined(FSL_FEATURE_SPC_HAS_VDD_SYS) && FSL_FEATURE_SPC_HAS_VDD_SYS)
-    state &= (SPC_HP_CFG_SYS_LVDE_MASK | SPC_HP_CFG_SYS_HVDE_MASK);
+    state |= (base->HP_CFG & (SPC_HP_CFG_SYS_LVDE_MASK | SPC_HP_CFG_SYS_HVDE_MASK));
 #endif
     return state;
 }
@@ -1154,10 +1154,10 @@ static inline uint32_t SPC_GetActiveModeVoltageDetectStatus(SPC_Type *base)
                                 SPC_ACTIVE_CFG_CORE_HVDE_MASK | SPC_ACTIVE_CFG_CORE_LVDE_MASK);
 
 #if (defined(FSL_FEATURE_SPC_HAS_VDD_SYS) && FSL_FEATURE_SPC_HAS_VDD_SYS)
-    state &= (SPC_ACTIVE_CFG_SYS_LVDE_MASK | SPC_ACTIVE_CFG_SYS_HVDE_MASK);
+    state |= (base->ACTIVE_CFG & (SPC_ACTIVE_CFG_SYS_LVDE_MASK | SPC_ACTIVE_CFG_SYS_HVDE_MASK));
 #endif /* FSL_FEATURE_SPC_HAS_VDD_SYS */
 
-        return state;
+    return state;
 }
 
 #if defined(FSL_FEATURE_SPC_HAS_CFG_REGISTER) && FSL_FEATURE_SPC_HAS_CFG_REGISTER
@@ -1351,7 +1351,7 @@ static inline uint32_t SPC_GetLowPowerModeVoltageDetectStatus(SPC_Type *base)
             (SPC_LP_CFG_IO_HVDE_MASK | SPC_LP_CFG_IO_LVDE_MASK | SPC_LP_CFG_CORE_HVDE_MASK | SPC_LP_CFG_CORE_LVDE_MASK);
 
 #if (defined(FSL_FEATURE_SPC_HAS_VDD_SYS) && FSL_FEATURE_SPC_HAS_VDD_SYS)
-    state &= (SPC_LP_CFG_SYS_HVDE_MASK | SPC_LP_CFG_SYS_LVDE_MASK);
+    state |= (base->LP_CFG & (SPC_LP_CFG_SYS_HVDE_MASK | SPC_LP_CFG_SYS_LVDE_MASK));
 #endif /* FSL_FEATURE_SPC_HAS_VDD_SYS */
 
     return state;
