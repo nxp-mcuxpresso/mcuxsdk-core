@@ -1358,18 +1358,9 @@ static inline void FLEXCAN_GetBusErrCount(CAN_Type *base, uint8_t *pu8TxErrBuf, 
  * @param mask The ORed FlexCAN Message Buffer mask.
  * @return The status of given Message Buffers.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-static inline uint64_t FLEXCAN_GetMbStatusFlags(CAN_Type *base, uint64_t mask)
-#else
 static inline uint32_t FLEXCAN_GetMbStatusFlags(CAN_Type *base, uint32_t mask)
-#endif
 {
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-    uint64_t tempflag = (uint64_t)base->IFLAG1;
-    return (tempflag | (((uint64_t)base->IFLAG2) << 32)) & mask;
-#else
     return (base->IFLAG1 & mask);
-#endif
 }
 
 /*!
@@ -1380,18 +1371,9 @@ static inline uint32_t FLEXCAN_GetMbStatusFlags(CAN_Type *base, uint32_t mask)
  * @param base FlexCAN peripheral base address.
  * @param mask The ORed FlexCAN Message Buffer mask.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint64_t mask)
-#else
 static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint32_t mask)
-#endif
 {
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-    base->IFLAG1 = (uint32_t)(mask & 0xFFFFFFFFU);
-    base->IFLAG2 = (uint32_t)(mask >> 32);
-#else
     base->IFLAG1 = mask;
-#endif
 }
 
 /*! @} */
@@ -1543,18 +1525,9 @@ static inline void FLEXCAN_SetTxPinOverrideValue(CAN_Type *base, bool recessive)
  * @param base FlexCAN peripheral base address.
  * @param mask The ORed FlexCAN Message Buffer mask.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-static inline void FLEXCAN_EnableMbInterrupts(CAN_Type *base, uint64_t mask)
-#else
 static inline void FLEXCAN_EnableMbInterrupts(CAN_Type *base, uint32_t mask)
-#endif
 {
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-    base->IMASK1 |= (uint32_t)(mask & 0xFFFFFFFFU);
-    base->IMASK2 |= (uint32_t)(mask >> 32);
-#else
     base->IMASK1 |= mask;
-#endif
 }
 
 /*!
@@ -1565,18 +1538,9 @@ static inline void FLEXCAN_EnableMbInterrupts(CAN_Type *base, uint32_t mask)
  * @param base FlexCAN peripheral base address.
  * @param mask The ORed FlexCAN Message Buffer mask.
  */
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-static inline void FLEXCAN_DisableMbInterrupts(CAN_Type *base, uint64_t mask)
-#else
 static inline void FLEXCAN_DisableMbInterrupts(CAN_Type *base, uint32_t mask)
-#endif
 {
-#if (defined(FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER)) && (FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER > 0)
-    base->IMASK1 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
-    base->IMASK2 &= ~((uint32_t)(mask >> 32));
-#else
     base->IMASK1 &= ~mask;
-#endif
 }
 
 /*! @} */
