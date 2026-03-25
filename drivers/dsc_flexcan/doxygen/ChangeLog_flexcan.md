@@ -12,6 +12,7 @@
   - Support FD Error, Bus Off Done interrupt; Active to Passive, Passive to Active status flag.
   - Add instance specific feature macro.
   - Remove feature macro `FSL_FEATURE_FLEXCAN_HAS_EXTENDED_FLAG_REGISTER` and `uint64_t`.
+  - Add new FlexCAN parameterized IRQ Handler `FLEXCAN_DriverIRQHandler`.
 
 ## [2.1.2]
 

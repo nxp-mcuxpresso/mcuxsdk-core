@@ -2964,6 +2964,7 @@ void FLEXCAN_TransferHandleIRQ(flexcan_handle_t *psHandle)
     uint32_t result    = 0xFFU;
     uint32_t EsrStatus = 0U;
     CAN_Type *base     = psHandle->base;
+
     do
     {
         /* Get Current FlexCAN Module Error and Status. */
@@ -3002,7 +3003,16 @@ void FLEXCAN_TransferHandleIRQ(flexcan_handle_t *psHandle)
  * @{
  */
 
-#if defined(CAN0) || defined(CAN)
+void FLEXCAN_DriverIRQHandler(uint32_t instance);
+void FLEXCAN_DriverIRQHandler(uint32_t instance)
+{
+    assert(NULL != s_flexcanHandle[instance]);
+
+    s_flexcanIsr(s_flexcanHandle[instance]);
+    SDK_ISR_EXIT_BARRIER;
+}
+
+#if defined(CAN0)
 void CAN0_DriverIRQHandler(void);
 void CAN0_DriverIRQHandler(void)
 {
