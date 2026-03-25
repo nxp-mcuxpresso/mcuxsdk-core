@@ -2961,23 +2961,23 @@ void FLEXCAN_TransferHandleIRQ(flexcan_handle_t *psHandle)
     assert(NULL != psHandle);
 
     status_t status;
-    uint32_t result    = 0xFFU;
-    uint32_t EsrStatus = 0U;
-    CAN_Type *base     = psHandle->base;
+    uint32_t result = 0U;
+    uint32_t mbNum  = 0xFFU;
+    CAN_Type *base  = psHandle->base;
 
     do
     {
         /* Get Current FlexCAN Module Error and Status. */
-        EsrStatus = FLEXCAN_GetStatusFlags(base);
+        result = FLEXCAN_GetStatusFlags(base);
 
         /* To psHandle FlexCAN Error and Status Interrupt first. */
-        if (0U != (EsrStatus & FLEXCAN_ERROR_AND_STATUS_INT_FLAG))
+        if (0U != (result & FLEXCAN_ERROR_AND_STATUS_INT_FLAG))
         {
             status = kStatus_FLEXCAN_ErrorStatus;
             /* Clear FlexCAN Error and Status Interrupt. */
             FLEXCAN_ClearStatusFlags(base, FLEXCAN_ERROR_AND_STATUS_INT_FLAG);
         }
-        else if (0U != (EsrStatus & (uint32_t)kFLEXCAN_WakeUpIntFlag))
+        else if (0U != (result & (uint32_t)kFLEXCAN_WakeUpIntFlag))
         {
             status = kStatus_FLEXCAN_WakeUp;
             FLEXCAN_ClearStatusFlags(base, (uint32_t)kFLEXCAN_WakeUpIntFlag);
@@ -2985,7 +2985,8 @@ void FLEXCAN_TransferHandleIRQ(flexcan_handle_t *psHandle)
         else
         {
             /* to psHandle real data transfer. */
-            status = FLEXCAN_SubHandlerForDataTransfered(base, psHandle, &result);
+            status = FLEXCAN_SubHandlerForDataTransfered(base, psHandle, &mbNum);
+            result = mbNum;
         }
 
         /* Calling Callback Function if has one. */

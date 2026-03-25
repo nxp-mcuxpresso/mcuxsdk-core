@@ -38,6 +38,7 @@
  *     - Added support for new hardware features.
  *     - Added support for new hardware interrupts.
  *     - Added instance specific feature macro.
+ *     - Enable the callback function to receive FlexCAN status flags.
  *
  * - 2.1.1
  *   - Bug Fixes
