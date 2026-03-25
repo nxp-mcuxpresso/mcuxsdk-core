@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 NXP
+ * Copyright 2022-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -1363,7 +1363,7 @@ void EDMA_TcdSetChannelLinkExt(EDMA_Type *base, edma_tcd_t *tcd, edma_channel_li
 static inline void EDMA_TcdSetBandWidthExt(EDMA_Type *base, edma_tcd_t *tcd, edma_bandwidth_t bandWidth)
 {
     assert(tcd != NULL);
-    assert(((uint32_t)tcd & 0x1FU) == 0U);
+    assert(((uintptr_t)tcd & 0x1FU) == 0U);
 
     EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) =
         (uint16_t)((EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) & (~DMA_CSR_BWC_MASK)) | DMA_CSR_BWC(bandWidth));
@@ -1396,7 +1396,7 @@ void EDMA_TcdSetModuloExt(EDMA_Type *base, edma_tcd_t *tcd, edma_modulo_t srcMod
 static inline void EDMA_TcdEnableAutoStopRequestExt(EDMA_Type *base, edma_tcd_t *tcd, bool enable)
 {
     assert(tcd != NULL);
-    assert(((uint32_t)tcd & 0x1FU) == 0U);
+    assert(((uintptr_t)tcd & 0x1FU) == 0U);
 
     EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) = (uint16_t)((EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) & (~DMA_CSR_DREQ_MASK)) |
                                                        DMA_CSR_DREQ((true == enable ? 1U : 0U)));
@@ -1893,6 +1893,17 @@ void EDMA_HandleIRQ(edma_handle_t *handle);
  * @param tcd Pointer to the TCD structure.
  */
 void EDMA_TcdInit(EDMA_Type *base, edma_tcd_t *tcdRegs);
+
+/*!
+ * @brief eDMA IRQ handler for a specific instance and channel.
+ *
+ * This function handles the eDMA interrupt for a specific instance and channel.
+ * It is typically called from SOC-specific interrupt handlers.
+ *
+ * @param instance eDMA instance number.
+ * @param channel eDMA channel number.
+ */
+void EDMA_DriverIRQHandler(uint32_t instance, uint32_t channel);
 
 /*! @} */
 
