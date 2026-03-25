@@ -174,7 +174,7 @@ class CfgResolve(WestCommand):
             log.wrn("No .cmake file found! Creating new file.")
             try:
                 if not os.path.exists(os.path.dirname(cmake_path)):
-                    log.wrn(f"Directory for .cmake file missing. Creating directory: {os.path.dirname(cmake_path)}")
+                    log.wrn(f"Directory for .cmake file does not exist. Creating directory: {os.path.dirname(cmake_path)}")
                     os.makedirs(os.path.dirname(cmake_path), exist_ok=True) # ensure directory exists
                 open(cmake_path, 'a').close()
                 return cmake_path
@@ -370,7 +370,7 @@ class CfgResolve(WestCommand):
                 files_to_remove = self._extract_unique_list(files_to_remove, self.cmake_remove_sources)
             
             if not files_to_remove:
-                log.inf("Skipping sources addition: No new unique source files to remove\n")
+                log.inf("Skipping sources removal: No new unique source files to remove\n")
                 return
 
             self._generate_cmake_block(files_to_remove, 'remove_sources')
@@ -416,6 +416,9 @@ class CfgResolve(WestCommand):
                 component_id = component.get("kconfig_id")
                 if component_id not in existing_components:
                     comp_added = True
+                    if not os.path.exists(os.path.dirname(self.prj_conf_file)):
+                        log.wrn(f"Directory for component file does not exist. Creating directory: {os.path.dirname(self.prj_conf_file)}")
+                        os.makedirs(os.path.dirname(self.prj_conf_file), exist_ok=True) # ensure directory exists
                     with open(self.prj_conf_file, 'a') as conf_file:
                         conf_file.write(f"\nCONFIG_MCUX_COMPONENT_{component_id}=y")
 
