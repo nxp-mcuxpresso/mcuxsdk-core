@@ -14,12 +14,6 @@ FREQME_Init() initializes the module, before invoking that function some steps a
 - Select reference and target clocks using input mux block, please note to feed selected clocks source to FREQME module.
 - If designed to measure external input clocks, please remember to set pin mux.
 
-## Frequency Measurement Mode Control APIs
-The funciton FREQME_CalculateTargetClkFreq() calculates the frequency of selected target clock. The formula is
-Ftarget = (RESULT + 1) * Freference / 2 ^ REF_SCALE. And the result value in unit of Hz.
-To measure the frequency with a high degree of accuracy, the frequency of target clock is better less than reference
-clock.
-
 ## Pulse Width Measurement Mode Control APIs
 Functions in this groups are useful when the operate mode is set as pulse width measure mode. To measure the pulse period
 with a high degree of accuracy, the frequency of reference clock is better less than target clock.

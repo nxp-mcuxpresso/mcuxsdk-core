@@ -1,0 +1,8 @@
+/*!
+@defgroup inputmux_driver INPUTMUX: Input Multiplexing Driver
+
+@details The MCUXpresso SDK provides a driver for the Input multiplexing (INPUTMUX).
+
+# Input Multiplexing Driver operation {#INPUTMUXInit}
+
+INPUTMUX_AttachSignal function configures the specified input
