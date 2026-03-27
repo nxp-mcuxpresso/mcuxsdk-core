@@ -1,5 +1,10 @@
 # CE
 
+## [2.3.5]
+
+- New Features:
+  - Updated CE driver to support MW30.
+
 ## [2.3.4]
 
 - Improvements:
