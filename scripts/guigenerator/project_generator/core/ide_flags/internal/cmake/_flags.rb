@@ -45,7 +45,9 @@ module CMake
         end
 
         def linker_flags(target, line)
-            line.split().each do |v|
+            # Parse tokens: quoted strings ("...") are treated as one token (path may contain spaces)
+            line.scan(/"[^"]*"|\S+/).each do |v|
+                v = v.gsub(/\A"(.*)"\z/, '\1')
                 @file.add_linker_flags(target, v)
             end
         end

@@ -206,7 +206,7 @@ class NinjaParser
         result = line.match(pattern)
         if result
           combined = (defines_line + ' ' + result[1]).strip
-          all_flags = preprocess_flags_with_prefix(combined.split(/\s+/))
+          all_flags = preprocess_flags_with_prefix(split_respecting_quotes(combined))
           all_flags.each do |flag|
             case flag
             when /-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/
@@ -295,34 +295,35 @@ class NinjaParser
         pattern = /INCLUDES\s=\s*([\S\s]+)\s*/
         result = line.match(pattern)
         if result
-          result[1].split(/\s+/) do |flag|
-            path = flag.tr('\\', '/')
-            pattern = /-I(\S+)/
-            _flag = path.match(pattern)
-            if _flag
-              if _flag[1].include? REPO_ROOT_PATH
-                if _flag[1] == REPO_ROOT_PATH
+          # Use scan with a pattern that handles both quoted paths (-I"path with space")
+          # and unquoted paths (-I/plain/path), so spaces inside quoted paths are preserved.
+          result[1].scan(/-I(?:"([^"]+)"|(\S+))/) do |quoted, unquoted|
+            include_dir = (quoted || unquoted)
+            path = include_dir.tr('\\', '/')
+            if path
+              if path.include? REPO_ROOT_PATH
+                if path == REPO_ROOT_PATH
                   include_path = './'
                 else
-                  include_path = _flag[1].split(REPO_ROOT_PATH)[-1].sub('/', '')
+                  include_path = path.split(REPO_ROOT_PATH)[-1].sub('/', '')
                 end
               else
                 begin
                   if ENV['standalone'] == 'true'
                     # if include path is same as output dir for standalone project,
                     # means it's in project root path, use './'
-                    if Pathname.new(_flag[1]).cleanpath == Pathname.new(@outdir).cleanpath
+                    if Pathname.new(path).cleanpath == Pathname.new(@outdir).cleanpath
                       include_path = './'
                     else
                       # Use path relative to output dir for standalone project if the file is out of the repo
-                      include_path = Pathname.new(_flag[1]).relative_path_from(Pathname.new(File.join(@outdir, @toolchain))).to_s
+                      include_path = Pathname.new(path).relative_path_from(Pathname.new(File.join(@outdir, @toolchain))).to_s
                     end
                   else
                     # Use relative path for GUI project
-                    include_path = Pathname.new(_flag[1]).relative_path_from(Pathname.new(REPO_ROOT_PATH)).cleanpath.to_s
+                    include_path = Pathname.new(path).relative_path_from(Pathname.new(REPO_ROOT_PATH)).cleanpath.to_s
                   end
                 rescue StandardError => e
-                  raise "Get relative path error: Can't get relative path from #{REPO_ROOT_PATH} to #{_flag[1]}, please make sure the destination path is in the same disk for Windows"
+                  raise "Get relative path error: Can't get relative path from #{REPO_ROOT_PATH} to #{path}, please make sure the destination path is in the same disk for Windows"
                 end
               end
 
@@ -397,8 +398,11 @@ class NinjaParser
         pattern = /LINK_LIBRARIES\s=\s*([\S\s]+)\s*/
         result = line.match(pattern)
         if result
-          link_libraries = result[1].split(/\s+/)
+          # Parse tokens: quoted strings ("...") are treated as one token (path may contain spaces)
+          link_libraries = result[1].scan(/"[^"]*"|\S+/)
           link_libraries&.each do |file_full_path|
+            # Strip surrounding double quotes if present
+            file_full_path = file_full_path.gsub(/\A"(.*)"\z/, '\1')
             next if ["-Wl,--start-group", "-Wl,--end-group"].include? file_full_path
             # skip system library
             unless %w[.a .o .lib].include? File.extname(file_full_path)
@@ -493,7 +497,9 @@ class NinjaParser
             all_flags = all_flags.gsub('-msgstyle', '').gsub('parseable', '').gsub('-g', '')
             all_flags = parse_ld_script(all_flags).split(/\s+/)
           else
-            all_flags = parse_ld_script(result[1]).split(/\s+/)
+            # Parse tokens: quoted strings ("...") are treated as one token (path may contain spaces)
+            raw_tokens = parse_ld_script(result[1]).scan(/"[^"]*"|\S+/)
+            all_flags = raw_tokens.map { |t| t.gsub(/\A"(.*)"\z/, '\1') }
           end
           all_flags = preprocess_flags_with_prefix(all_flags)
           all_flags.each do |flag|
@@ -540,6 +546,22 @@ class NinjaParser
     end
     all_flags
   end
+  # Reconstitute a flag whose path was split at spaces in the build directory.
+  # Concatenates subsequent tokens (from all_flags[index+1] onward) with a space
+  # until the block returns true or the next token looks like a new flag (starts with '-').
+  # Consumed tokens are set to nil in all_flags.
+  def reconstitute_flag_with_spaces(all_flags, index)
+    full = all_flags[index].strip
+    look_ahead = index + 1
+    while !yield(full) && look_ahead < all_flags.length &&
+          all_flags[look_ahead] && !all_flags[look_ahead].strip.start_with?('-')
+      full = "#{full} #{all_flags[look_ahead]}"
+      all_flags[look_ahead] = nil
+      look_ahead += 1
+    end
+    full
+  end
+
   #for preifx like --preinclude/--include/--config_def may have several configs, must keep the prefix for each config
   def preprocess_flags_with_prefix(all_flags)
     keep_prefix = ["--preinclude", "-include", "--config_def",  "-P", "--diag_suppress", "-Xlinker", "--redirect"]
@@ -572,8 +594,9 @@ class NinjaParser
           end
           all_flags[index+1] = nil
         elsif flag.strip.start_with?("--image_input=")
-          pattern = /--image_input=(\S+),(\S+),(\S+),(\d+)/
-          res = flag.strip.match(pattern)
+          pattern = /--image_input=(.+),(\S+),(\S+),(\d+)/
+          full_flag = reconstitute_flag_with_spaces(all_flags, index) { |s| s.match?(pattern) }
+          res = full_flag.match(pattern)
           if res && res[1]
             # If using relative path in cmake setting, need to transfer it to absolute path first, then get path relative to project path
             if res[1].start_with?('../') || res[1].start_with?('./')
@@ -581,18 +604,19 @@ class NinjaParser
             else
               path = File.join('$PROJ_DIR$', translate_project_relative_path(res[1], true))
             end
-            result.push flag.gsub(res[1], path)
+            result.push full_flag.gsub(res[1], path)
           end
         elsif flag.strip.start_with?("-Wl,--out-implib=")
-          pattern = /-Wl,--out-implib=(\S+)/
-          res = flag.strip.match(pattern)
-          if res[1]
-            # output lib are put into project root path
-            path = File.join('${ProjDirPath}', File.basename(res[1]))
-            result.push flag.gsub(res[1], path)
-          else
-            result.push flag
-          end
+          full_path = reconstitute_flag_with_spaces(all_flags, index) { |s| s.match?(/\.(o|a|lib)$/) }
+                        .sub('-Wl,--out-implib=', '')
+          # output lib are put into project root path; quote the path so it is handled
+          # correctly by the linker when ProjDirPath resolves to a path with spaces
+          path = File.join('${ProjDirPath}', File.basename(full_path))
+          result.push "-Wl,--out-implib=\\\"#{path}\\\""
+        elsif flag.strip.start_with?("--import_cmse_lib_out=")
+          full_path = reconstitute_flag_with_spaces(all_flags, index) { |s| s.match?(/\.(o|a|lib)$/) }
+                        .sub('--import_cmse_lib_out=', '')
+          result.push "--import_cmse_lib_out=#{full_path}"
         elsif flag.strip.match(/-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/)
           _flag = flag.match(/-D([\"A-Za-z0-9_\(\)]+)=?(.*)?/)
           if _flag[2] && _flag[2] != ''
@@ -677,7 +701,12 @@ class NinjaParser
     project_root_dir = File.join(@outdir, @toolchain)
     cmd_list = content.split(" && ")
     cmd_list.each_with_index do |cmd_item, index|
-      cmd_list[index] = nil if cmd_item.match(/(cmd.exe|cd)[\s\S]+[\/\\]#{File.basename(@outdir)}"?$/)
+      # Filter out cmd.exe wrapper and bare "cd <build_dir>" navigation commands that Ninja
+      # emits around every custom command on Windows. These are build-system artifacts and
+      # must not appear as COMMAND entries in the generated CMakeLists.txt.
+      # The trailing "* allows for zero or more closing quotes, which CMake adds when the
+      # build directory path contains spaces (e.g. "cd "C:\path\m 2"" ends with two quotes).
+      cmd_list[index] = nil if cmd_item.match(/(cmd.exe|cd)[\s\S]+[\/\\]#{File.basename(@outdir)}"*$/)
       # Add space between -I and path to handle path separately
       if cmd_list[index] && cmd_list[index].match(/\s-I\S+/)
         cmd_list[index] = cmd_list[index].sub(/\s-I/, ' -I ')
@@ -1366,20 +1395,30 @@ class NinjaParser
   # Split a command string by spaces while preserving quoted substrings as single tokens.
   # This handles toolchain paths that contain spaces, e.g.:
   #   "C:\Program Files (x86)\Arm GNU Toolchain arm-none-eabi\14.2 rel1\bin\arm-none-eabi-gcc.exe"
+  # Also handles backslash-escaped spaces (e.g. Ninja-style: /path/m\ 2/armgcc),
+  # treating the backslash-space as a literal space within the token.
   def split_respecting_quotes(str)
     tokens = []
     current = ''
     in_quote = false
-    str.each_char do |c|
+    chars = str.chars
+    i = 0
+    while i < chars.length
+      c = chars[i]
       if c == '"'
         in_quote = !in_quote
         current += c
+      elsif c == '\\' && !in_quote && i + 1 < chars.length && chars[i + 1] == ' '
+        # Backslash-escaped space: include the space in the current token without the backslash
+        current += ' '
+        i += 1
       elsif c == ' ' && !in_quote
         tokens << current unless current.empty?
         current = ''
       else
         current += c
       end
+      i += 1
     end
     tokens << current unless current.empty?
     tokens
@@ -1417,16 +1456,18 @@ class NinjaParser
       return path
     end
 
-    if path.include?(File.join(@outdir, @toolchain))
-      # translate path in build/${toolchain} for standalone project. 
+    # Strip surrounding quotes that CMake/Ninja adds when paths contain spaces
+    unquoted = path.delete_prefix('"').delete_suffix('"')
+    if unquoted.include?(File.join(@outdir, @toolchain))
+      # translate path in build/${toolchain} for standalone project.
       # eg, build/armgcc/mcux_config.h to $PROJ_DIR$/mcux_config.h
-      return path.gsub(File.join(@outdir, @toolchain), get_tool_rootdir(@toolchain))
-    elsif path.include?(@outdir)
+      return unquoted.gsub(File.join(@outdir, @toolchain), get_tool_rootdir(@toolchain))
+    elsif unquoted.include?(@outdir)
       # translate path in build for standalone project, because it will be copied to build/${toolchain}.
       #. eg, build/pdum_gen.h to $PROJ_DIR$/pdum_gen.h
-      return path.gsub(@outdir, get_tool_rootdir(@toolchain))
-    elsif path.include?(File.basename(ENV['SdkRootDirPath']))
-      dest_path = File.join(File.join(@outdir, @toolchain), path.split(/#{File.basename(ENV['SdkRootDirPath'])}[\/\\]/)[-1])
+      return unquoted.gsub(@outdir, get_tool_rootdir(@toolchain))
+    elsif unquoted.include?(File.basename(ENV['SdkRootDirPath']))
+      dest_path = File.join(File.join(@outdir, @toolchain), unquoted.split(/#{File.basename(ENV['SdkRootDirPath'])}[\/\\]/)[-1])
       return File.join(get_tool_rootdir(@toolchain), get_relative_path(File.join(@outdir, @toolchain), dest_path))
     else
       return path

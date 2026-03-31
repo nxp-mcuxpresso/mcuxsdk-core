@@ -390,8 +390,15 @@ endif()
 
 if(CONF_FILE)
   string(CONFIGURE "${CONF_FILE}" CONF_FILE_EXPANDED)
-  string(REPLACE " " ";" CONF_FILE_AS_LIST "${CONF_FILE_EXPANDED}")
-  list(APPEND merge_config_files ${CONF_FILE_AS_LIST})
+  # If the expanded value is an existing file path (possibly containing spaces),
+  # add it directly to avoid string(REPLACE " " ";") splitting the path on spaces.
+  # Otherwise fall back to the legacy space-separated list format.
+  if(EXISTS "${CONF_FILE_EXPANDED}")
+    list(APPEND merge_config_files "${CONF_FILE_EXPANDED}")
+  else()
+    string(REPLACE " " ";" CONF_FILE_AS_LIST "${CONF_FILE_EXPANDED}")
+    list(APPEND merge_config_files ${CONF_FILE_AS_LIST})
+  endif()
 endif()
 
 # Support assigning Kconfig symbols on the command-line with CMake

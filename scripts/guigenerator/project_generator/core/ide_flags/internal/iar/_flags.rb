@@ -822,7 +822,7 @@ module Iar
         def linker_tz_import_lib(target, line)
             Core.assert(target.is_a?(String), "not a string")
             Core.assert(line.is_a?(String), "not a string")
-            pattern = /\s--import_cmse_lib_out(\s+|=)(\S+)\s/
+            pattern = /\s--import_cmse_lib_out(\s+|=)(.+?\.(o|a|lib))/
             result  = line.match(pattern)
             if result && result[2]
                 @logger.debug("recognize: #{result[ 0 ]}")

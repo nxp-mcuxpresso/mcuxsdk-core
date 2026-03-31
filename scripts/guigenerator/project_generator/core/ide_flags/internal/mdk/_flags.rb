@@ -1063,7 +1063,7 @@ module Mdk
         def linker_tz_import_lib(target, line)
             Core.assert(target.is_a?(String), "not a string")
             Core.assert(line.is_a?(String), "not a string")
-            pattern = /\s--import-cmse-lib-out(\s+|=)(\S+)\s/
+            pattern = /\s--import-cmse-lib-out(\s+|=)"?(.+?\.(o|a|lib))"?/
             result  = line.match(pattern)
             if result && result[2]
                 @logger.debug("recognize: #{result[ 0 ]}")

@@ -23,7 +23,7 @@ module CMake
         line.gsub(pattern) do |match|
           prefix = $1
           include_file = $2
-          " #{prefix} #{File.join('${ProjDirPath}', include_file)} "
+          " #{prefix} \\\"#{File.join('${ProjDirPath}', include_file)}\\\" "
         end
       end
 

@@ -101,10 +101,10 @@ module Iar
         line = linker_read_command_file(target, line)
         line = linker_fill_settings(target, line)
         line = linker_suppress_diag(target, line)
+        line = linker_tz_import_lib(target, line)
         line = linker_configfile_defines(target, line)
         line = linker_semihosted(target, line)
         line = linker_use_vfe(target, line)
-        line = linker_tz_import_lib(target, line)
         line = linker_extra_options(target, line)
       end
   end

@@ -170,7 +170,7 @@ module Internal
           @as_marco[target].each do |line|
             flags_cmake += "    #{line} \\\n"
           end
-          flags_cmake += "    -fmacro-prefix-map=${ProjDirPath}/=./ \\\n"
+          flags_cmake += "    -fmacro-prefix-map=\\\"${ProjDirPath}/\\\"=./ \\\n"
           flags_cmake += "    ${FPU} \\\n"
           flags_cmake += "\")\n"
         end
@@ -180,7 +180,7 @@ module Internal
           @cc_marco[target].each do |line|
             flags_cmake += "    #{line} \\\n"
           end
-          flags_cmake += "    -fmacro-prefix-map=${ProjDirPath}/=./ \\\n"
+          flags_cmake += "    -fmacro-prefix-map=\\\"${ProjDirPath}/\\\"=./ \\\n"
           flags_cmake += "    ${FPU} \\\n"
           flags_cmake += "    ${DEBUG_CONSOLE_CONFIG} \\\n"
           flags_cmake += "\")\n"
@@ -191,7 +191,7 @@ module Internal
           @cxx_marco[target].each do |line|
             flags_cmake += "    #{line} \\\n"
           end
-          flags_cmake += "    -fmacro-prefix-map=${ProjDirPath}/=./ \\\n"
+          flags_cmake += "    -fmacro-prefix-map=\\\"${ProjDirPath}/\\\"=./ \\\n"
           flags_cmake += "    ${FPU} \\\n"  if @fpu.length > 0
           flags_cmake += "    ${DEBUG_CONSOLE_CONFIG} \\\n"
           flags_cmake += "\")\n"
@@ -253,7 +253,7 @@ module Internal
 
         @config_cmakelists.puts "target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE\n"
         @include_path.each do |path|
-          @config_cmakelists.puts "    #{path}\n"
+          @config_cmakelists.puts "    \"#{path}\""
         end
         @config_cmakelists.puts ")\n"
         @config_cmakelists.puts "\n"
@@ -292,7 +292,7 @@ module Internal
 
             targets.each do |target|
               @config_cmakelists.puts "if(CMAKE_BUILD_TYPE STREQUAL #{target})"
-              @config_cmakelists.puts "    target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE #{path})"
+              @config_cmakelists.puts "    target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE \"#{path}\")"
               @config_cmakelists.puts "endif(CMAKE_BUILD_TYPE STREQUAL #{target})"
               @config_cmakelists.puts "\n"
             end
@@ -751,8 +751,13 @@ module Internal
 
       # add trustzone project generated library as build artifact
       def add_build_artifacts(line)
-        res = line.match(/-Wl,--out-implib=(\S+)/)
-        @build_artifacts.push_uniq(Pathname.new(File.join('${ProjDirPath}', res[1])).cleanpath.to_s) if res
+        res = line.match(/-Wl,--out-implib=(.+)/)
+        if res
+          # Strip escaped quotes (\"…\") that wrap the path when ProjDirPath may contain spaces,
+          # then take just the basename so we don't re-prepend an already-translated ${ProjDirPath}
+          path = res[1].gsub('\"', '')
+          @build_artifacts.push_uniq("${ProjDirPath}/#{File.basename(path)}")
+        end
       end
 
       def add_precompile_command(command)
