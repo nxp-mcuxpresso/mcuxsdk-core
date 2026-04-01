@@ -1,6 +1,12 @@
 # Export App
 
+## [26.06.00]
+
+- Improvements
+  - Support CMake 4.3+'s new trace output format, see https://cmake.org/cmake/help/latest/release/4.3.html#other-changes
+
 ## [26.03.00]
+
 - New Features
   - Support copy example readme.md to output directory. If using `--bf`, it will automatically merge the copied board readme file.
 
