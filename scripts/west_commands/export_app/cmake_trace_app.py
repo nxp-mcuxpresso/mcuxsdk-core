@@ -669,7 +669,8 @@ class CmakeTraceApp(CmakeApp):
                 "${SdkRootDirPath}/" + (Path(p_file).parent).relative_to(SDK_ROOT_DIR).as_posix(),
             ]
             self.trace_receiver["result"].append(CMakeFunction(j))
-        else:
+        elif cmd != 'endif':
+            # NOTE CMake 4.3+ print "end" commands for control structures, see https://cmake.org/cmake/help/latest/release/4.3.html#other-changes
             self._write_raw(j, self.trace_receiver["result"])
         if (
             p_file == self.trace_receiver["cur_ps_file"]
