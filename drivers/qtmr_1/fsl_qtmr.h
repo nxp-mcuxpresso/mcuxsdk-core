@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022, 2025 NXP
+ * Copyright 2017-2022, 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -27,7 +27,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_QTMR_DRIVER_VERSION (MAKE_VERSION(2, 3, 1)) /*!< Version */
+#define FSL_QTMR_DRIVER_VERSION (MAKE_VERSION(2, 3, 2)) /*!< Version */
 /*! @} */
 
 #if (defined(FSL_FEATURE_TMR_HAS_32BIT_REGISTER) && FSL_FEATURE_TMR_HAS_32BIT_REGISTER)

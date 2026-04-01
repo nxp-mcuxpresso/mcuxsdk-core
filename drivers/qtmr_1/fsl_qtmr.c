@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022, 2025 NXP
+ * Copyright 2017-2022, 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -511,7 +511,10 @@ void QTMR_ClearStatusFlags(TMR_Type *base, qtmr_channel_selection_t channel, uin
 {
     qtmrRegType reg;
 
-    reg = base->CHANNEL[channel].SCTRL;
+    /* Pre-set all W0C status bits to 1 so that flags raised between the read and
+     * write-back are not accidentally cleared by writing 0 to bits not in mask.
+     */
+    reg = base->CHANNEL[channel].SCTRL | (qtmrRegType)(TMR_SCTRL_TCF_MASK | TMR_SCTRL_TOF_MASK | TMR_SCTRL_IEF_MASK);
     /* Timer compare flag */
     if ((mask & (uint32_t)kQTMR_CompareFlag) != 0U)
     {
@@ -529,7 +532,8 @@ void QTMR_ClearStatusFlags(TMR_Type *base, qtmr_channel_selection_t channel, uin
     }
     base->CHANNEL[channel].SCTRL = reg;
 
-    reg = base->CHANNEL[channel].CSCTRL;
+    /* Pre-set all W0C status bits to 1 for the same race-condition protection. */
+    reg = base->CHANNEL[channel].CSCTRL | (qtmrRegType)(TMR_CSCTRL_TCF1_MASK | TMR_CSCTRL_TCF2_MASK);
     /* Compare 1 flag */
     if ((mask & (uint32_t)kQTMR_Compare1Flag) != 0U)
     {
