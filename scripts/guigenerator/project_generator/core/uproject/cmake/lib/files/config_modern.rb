@@ -1,5 +1,7 @@
 # ********************************************************************
 # Copyright 2022 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
 require_relative '../../common/files/config_modern'
 
