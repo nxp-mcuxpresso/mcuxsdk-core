@@ -496,17 +496,17 @@ void FLEXIO_SetPinConfig(FLEXIO_Type *base, uint32_t pin, flexio_gpio_config_t *
 #endif /*FSL_FEATURE_FLEXIO_HAS_PIN_REGISTER*/
 
 /*
- * $Branch Coverage Justification$
+ * $Function Coverage Justification$
  * Code coverage of FLEXIO_DriverIRQHandler is device specific.
  */
 void FLEXIO_DriverIRQHandler(void);
-void FLEXIO_DriverIRQHandler(void)
+void FLEXIO_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 {
     FLEXIO_CommonIRQHandler();
 }
 
 /*
- * $Branch Coverage Justification$
+ * $Function Coverage Justification$
  * The individual FLEXIO IRQ handler functions are instance-specific and depend on
  * the hardware configuration and application usage.
  * Only the IRQ handlers for the FLEXIO instances actually used in the application will be invoked,
@@ -520,25 +520,25 @@ void FLEXIO0_DriverIRQHandler(void)
 }
 
 void FLEXIO1_DriverIRQHandler(void);
-void FLEXIO1_DriverIRQHandler(void)
+void FLEXIO1_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 {
     FLEXIO_CommonIRQHandler();
 }
 
 void UART2_FLEXIO_DriverIRQHandler(void);
-void UART2_FLEXIO_DriverIRQHandler(void)
+void UART2_FLEXIO_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 {
     FLEXIO_CommonIRQHandler();
 }
 
 void FLEXIO2_DriverIRQHandler(void);
-void FLEXIO2_DriverIRQHandler(void)
+void FLEXIO2_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 {
     FLEXIO_CommonIRQHandler();
 }
 
 void FLEXIO3_DriverIRQHandler(void);
-void FLEXIO3_DriverIRQHandler(void)
+void FLEXIO3_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 {
     FLEXIO_CommonIRQHandler();
 }
