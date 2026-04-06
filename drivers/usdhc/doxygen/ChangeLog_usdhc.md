@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed some quality issues.
+  - Do not invalidate cache on non-blocking non-DMA transfer.
 - New Features
   - Added common IRQ handler entry USDHC_DriverIRQHandler.
 

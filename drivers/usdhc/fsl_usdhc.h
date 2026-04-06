@@ -763,6 +763,8 @@ struct _usdhc_handle
 
     usdhc_transfer_callback_t callback; /*!< Callback function. */
     void *userData;                     /*!< Parameter for transfer complete callback. */
+
+    bool enDMA;                         /*!< Transfer parameter. Was DMA used? */
 };
 
 /*! @brief USDHC transfer function. */

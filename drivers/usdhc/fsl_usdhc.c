@@ -1873,6 +1873,8 @@ status_t USDHC_TransferScatterGatherADMANonBlocking(USDHC_Type *base,
         USDHC_EnableInterruptSignal(base, kUSDHC_CommandFlag);
     }
 
+    handle->enDMA = enDMA;
+
     /* send command first */
     USDHC_SendCommand(base, command);
 
@@ -2003,6 +2005,8 @@ status_t USDHC_TransferNonBlocking(USDHC_Type *base,
         USDHC_ClearInterruptStatusFlags(base, kUSDHC_CommandFlag);
         USDHC_EnableInterruptSignal(base, kUSDHC_CommandFlag);
     }
+
+    handle->enDMA = enDMA;
 
     /* send command first */
     USDHC_SendCommand(base, command);
@@ -2320,7 +2324,7 @@ static void USDHC_TransferHandleData(USDHC_Type *base, usdhc_handle_t *handle, u
                 transferStatus = kStatus_USDHC_TransferDataComplete;
 
 #if defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL
-                if (handle->data->dataDirection == kUSDHC_TransferDirectionReceive)
+                if (handle->enDMA && handle->data->dataDirection == kUSDHC_TransferDirectionReceive)
                 {
                     usdhc_scatter_gather_data_list_t *sgDataList = &handle->data->sgData;
                     while (sgDataList != NULL)
@@ -2387,7 +2391,7 @@ static void USDHC_TransferHandleData(USDHC_Type *base, usdhc_handle_t *handle, u
                 transferStatus = kStatus_USDHC_TransferDataComplete;
 
 #if defined(FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL) && FSL_SDK_ENABLE_DRIVER_CACHE_CONTROL
-                if (handle->data->rxData != NULL)
+                if (handle->enDMA && handle->data->rxData != NULL)
                 {
                     DCACHE_InvalidateByRange((uintptr_t)(handle->data->rxData),
                                              (handle->data->blockSize) * (handle->data->blockCount));
