@@ -2,8 +2,12 @@
 
 ## [26.06.00]
 
+- Bug Fixes
+  - Add selector-based workaround policy matching for example, board, and core, and log matched policies during trace app init.
+
 - Improvements
-  - Support CMake 4.3+'s new trace output format, see https://cmake.org/cmake/help/latest/release/4.3.html#other-changes
+  - Support CMake 4.3+'s new trace output format, see <https://cmake.org/cmake/help/latest/release/4.3.html#other-changes>
+  - If output dir contains space, wrap the output dir and build dir with double quotes in console log.
 
 ## [26.03.00]
 

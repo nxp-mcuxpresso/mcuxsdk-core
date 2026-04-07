@@ -14,6 +14,10 @@ from pathlib import Path
 from typing import Union
 from .cmake_app import *
 from .cmake_parser import *
+from .workaround_registry import (
+    WorkaroundPolicy,
+    get_workaround_policies,
+)
 from .misc import (
     LICENSE_HEAD,
     CONFIG_CHOICE_MAP,
@@ -108,6 +112,30 @@ class CmakeTraceApp(CmakeApp):
             self.cmake_trace_dir = "${board}_${core_id}"
         else:
             self.cmake_trace_dir = "${board}"
+        self._init_policies()
+
+    def _init_policies(self):
+        board = self.options.cmake_variables.get("board")
+        core_id = self.options.cmake_variables.get("core_id") or self.shared_options.core_id
+        try:
+            self.policies = get_workaround_policies(
+                self.source_dir,
+                SDK_ROOT_DIR,
+                board=board,
+                core_id=core_id,
+                app_id=self.options.name,
+            )
+        except ValueError:
+            self.policies = ()
+        if self.policies:
+            logger.debug(
+                "Matched workaround policies for %s (board=%s, core_id=%s, app_id=%s): %s",
+                self.source_dir.as_posix(),
+                board,
+                core_id,
+                self.options.name,
+                ", ".join(policy.value for policy in self.policies),
+            )
 
     def run(self):
         logger.debug("Export board specific freestanding example for " + self.source_list_file.as_posix())
@@ -704,6 +732,8 @@ class CmakeTraceApp(CmakeApp):
             self.output_board_dir.rmdir()
         if self.options.app_type == AppType.main_app:
             self.update_entry_kconfig()
+        if WorkaroundPolicy.INJECT_TRACE_KCONFIG_DEFINES in self.policies:
+            self._append_missing_kconfig_cc_defines()
         self.write_cmake_file(self.output_dir / "CMakeLists.txt", self.app_receiver["result"])
 
     def write_cmake_file(self, path, result):
@@ -894,13 +924,14 @@ class CmakeTraceApp(CmakeApp):
             else:
                 target_dir = self.headers_map[r_include_str] = self.get_target_path(r_include)
             # NOTE Formal sdk example shall record all header files through mcux_add_source
-            for item in r_include.iterdir():
-                if item.is_file() and is_header_file(item.as_posix()) and item.name not in self.preinclude_files:
-                    if item.name.endswith(".mex"):
-                        target_header = output_dir / item.name
-                    else:
-                        target_header = output_dir / self.headers_map[r_include_str] / item.name
-                    self.opt_headers_map[item] = target_header
+            if WorkaroundPolicy.SKIP_OPTIONAL_HEADER_STAGING not in self.policies:
+                for item in r_include.iterdir():
+                    if item.is_file() and is_header_file(item.as_posix()) and item.name not in self.preinclude_files:
+                        if item.name.endswith(".mex"):
+                            target_header = output_dir / item.name
+                        else:
+                            target_header = output_dir / self.headers_map[r_include_str] / item.name
+                        self.opt_headers_map[item] = target_header
 
 
             # if self.headers_map[r_include_str] in self.processed_headers:
@@ -1047,6 +1078,32 @@ class CmakeTraceApp(CmakeApp):
                     board_prj_conf.append(f"{v}=y")
         return board_prj_conf, force_selected
 
+    def _append_missing_kconfig_cc_defines(self):
+        """Read the trace build mcux_config.h and inject non-CONFIG_MCUX_
+        defines as CC flags so that values gated by disabled PRJSEGs
+        (e.g. DEMO_PANEL) are still available to the freestanding build."""
+        mcux_config_h = self.build_dir / "mcux_config.h"
+        if not mcux_config_h.exists():
+            return
+        defines = []
+        for line in open(mcux_config_h, "r").readlines():
+            m = re.match(r"^\s*#define\s+(\w+)\s+(.*)", line)
+            if not m:
+                continue
+            name, value = m.group(1), m.group(2).strip()
+            if name.startswith(("_", "CONFIG_MCUX_", "CONFIG_CPU_")):
+                continue
+            if name.startswith("CONFIG_CUSTOM_APP_"):
+                continue
+            # Keep only entries that originate from non-MCUX Kconfig symbols
+            if not name.startswith("CONFIG_"):
+                defines.append(f"-D{name}={value}" if value else f"-D{name}")
+        if defines:
+            flag_str = " ".join(defines)
+            self.app_receiver["result"].append(
+                f'\nmcux_add_configuration(\n    CC "{flag_str}"\n)\n'
+            )
+
     def update_trace_kconfig(self, force_selected):
         """
         Update the freestanding app Kconfig to force select promptless symbols
@@ -1107,7 +1164,7 @@ class CmakeTraceApp(CmakeApp):
                 continue
             missing_includes.append(s)
         if self.app_receiver["idx"]:
-            self.app_receiver["result"].insert(self.app_receiver["idx"], trace_cmake)
+            self.app_receiver["result"].insert(self.app_receiver["idx"] + len(prepend_content), trace_cmake)
         else:
             self.app_receiver["result"].append(trace_cmake)
         if missing_includes:
