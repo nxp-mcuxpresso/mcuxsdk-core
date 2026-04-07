@@ -105,7 +105,9 @@ class ExportApp(WestCommand):
             self.banner('you can use following command to build it.')
             print(' '.join(self.entry_app.build_cmd()))
         self.banner('To see all build configurations, please run:')
-        print(f'west list_project -p {self.entry_app.output_dir.as_posix()}')
+        if ' ' in (output_dir := self.entry_app.output_dir.as_posix()):
+            output_dir = f'"{output_dir}"'
+        print(f'west list_project -p {output_dir}')
 
     def _parse_remainder(self, remainder):
         self.args.source_dir = None

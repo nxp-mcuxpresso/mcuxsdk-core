@@ -187,9 +187,13 @@ Please switch to edit mode and replace example_root with the real path**\n\n
             source_dir = self.source_dir
         else:
             source_dir = self.output_dir
+        if ' ' in (src_posix := source_dir.as_posix()):
+            src_posix = f'"{src_posix}"'
+        if ' ' in (bld_posix := (self.shared_options.output_dir / build_dir).as_posix()):
+            bld_posix = f'"{bld_posix}"'
         cmd_list = ['west', 'build', '-b', board_var,
-                    '-p', 'always', source_dir.as_posix(),
-                    '-d', (self.shared_options.output_dir / build_dir).as_posix(),
+                    '-p', 'always', src_posix,
+                    '-d', bld_posix,
                     ]
         if self.is_sysbuild:
             cmd_list.append('--sysbuild')
