@@ -68,6 +68,27 @@ macro(project project_name)
     set(PROJECT_SOURCE_DIR
         "${PROJECT_SOURCE_DIR}"
         PARENT_SCOPE)
+    set(PROJECT_VERSION
+        "${PROJECT_VERSION}"
+        PARENT_SCOPE)
+    set(PROJECT_VERSION_MAJOR
+        "${PROJECT_VERSION_MAJOR}"
+        PARENT_SCOPE)
+    set(PROJECT_VERSION_MINOR
+        "${PROJECT_VERSION_MINOR}"
+        PARENT_SCOPE)
+    set(PROJECT_VERSION_PATCH
+        "${PROJECT_VERSION_PATCH}"
+        PARENT_SCOPE)
+    set(PROJECT_VERSION_TWEAK
+        "${PROJECT_VERSION_TWEAK}"
+        PARENT_SCOPE)
+    set(PROJECT_DESCRIPTION
+        "${PROJECT_DESCRIPTION}"
+        PARENT_SCOPE)
+    set(PROJECT_HOMEPAGE_URL
+        "${PROJECT_HOMEPAGE_URL}"
+        PARENT_SCOPE)
 
     set(${PROJECT_NAME}_BINARY_DIR
         "${${PROJECT_NAME}_BINARY_DIR}"
@@ -75,6 +96,36 @@ macro(project project_name)
     set(${PROJECT_NAME}_SOURCE_DIR
         "${${PROJECT_NAME}_SOURCE_DIR}"
         PARENT_SCOPE)
+    set(${PROJECT_NAME}_VERSION
+        "${${PROJECT_NAME}_VERSION}"
+        PARENT_SCOPE)
+    set(${PROJECT_NAME}_VERSION_MAJOR
+        "${${PROJECT_NAME}_VERSION_MAJOR}"
+        PARENT_SCOPE)
+    set(${PROJECT_NAME}_VERSION_MINOR
+        "${${PROJECT_NAME}_VERSION_MINOR}"
+        PARENT_SCOPE)
+    set(${PROJECT_NAME}_VERSION_PATCH
+        "${${PROJECT_NAME}_VERSION_PATCH}"
+        PARENT_SCOPE)
+    set(${PROJECT_NAME}_VERSION_TWEAK
+        "${${PROJECT_NAME}_VERSION_TWEAK}"
+        PARENT_SCOPE)
+    set(${PROJECT_NAME}_DESCRIPTION
+        "${${PROJECT_NAME}_DESCRIPTION}"
+        PARENT_SCOPE)
+    set(${PROJECT_NAME}_HOMEPAGE_URL
+        "${${PROJECT_NAME}_HOMEPAGE_URL}"
+        PARENT_SCOPE)
+
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.21")
+      set(PROJECT_IS_TOP_LEVEL
+          "${PROJECT_IS_TOP_LEVEL}"
+          PARENT_SCOPE)
+      set(${PROJECT_NAME}_IS_TOP_LEVEL
+          "${${PROJECT_NAME}_IS_TOP_LEVEL}"
+          PARENT_SCOPE)
+    endif()
   endfunction()
 
   # valiate compiler version
