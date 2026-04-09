@@ -4,6 +4,10 @@
 
 - Bug Fixes
   - Add selector-based workaround policy matching for example, board, and core, and log matched policies during trace app init.
+  - Fix `board_files.cmake` include order: adjust insertion index by `prepend_content` offset so board includes come after SDK includes, preserving correct header search order.
+
+- New Features
+  - Add `--copy-all-linker-files` option to copy all linker file variants (ram/flash/ddr) from the cmake trace into a `linker_files/` subdirectory. Also configurable via `west config export_app.copy_all_linker_files true`.
 
 - Improvements
   - Support CMake 4.3+'s new trace output format, see <https://cmake.org/cmake/help/latest/release/4.3.html#other-changes>
