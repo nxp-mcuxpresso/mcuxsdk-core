@@ -141,6 +141,7 @@ class SharedOptions:
     target_apps: List[str] = field(default_factory=list)
     board_copy_folders: List[str] = field(default_factory=list)
     default_trace_folders: List[str] = field(default_factory=list)
+    copy_all_linker_files: bool = False
 
     domains: Dict[str, str] = field(default_factory=dict)
 

@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 INJECT_BUILD_DIR = "build_tmp"
 INJECT_TRACE_FILE = "trace.json"
+LINKER_OUTPUT_DIR = "linker_files"
 
 # Extra cmake options to generate trace file and useful kconfig files
 TRACE_OPTIONS = [
@@ -80,8 +81,11 @@ class CmakeTraceApp(CmakeApp):
         self.output_board_dir = self.output_dir / self.dest_board_dirname
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.output_board_dir.mkdir(parents=True, exist_ok=True)
+        self.linker_output_dir = self.output_dir / LINKER_OUTPUT_DIR
+        self.linker_output_dir.mkdir(parents=True, exist_ok=True)
         self.app_files = [self.source_list_file.as_posix()]
         self.trace_files = []
+        self.linker_source_files = set()  # linker file paths seen in trace
         # receiver contexts hold staged data while reconstructing cmake
         self.app_receiver = {
             "result": [],
@@ -168,6 +172,9 @@ class CmakeTraceApp(CmakeApp):
             self.combine_prj_conf()
             if self.replacements:
                 self.apply_replacements(self.replacements)
+            # Remove linker file output dir if empty
+            if self.linker_output_dir.exists() and not any(self.linker_output_dir.iterdir()):
+                self.linker_output_dir.rmdir()
             if self.shared_options.debug:
                 self._dump_debug_info()
             elif self.options.app_type == AppType.main_app:
@@ -426,6 +433,19 @@ class CmakeTraceApp(CmakeApp):
                     self.get_all_path(j_line)
                 elif j_line.get("cmd") == "mcux_project_remove_source":
                     self.trace_mcux_project_remove_source(j_line, True)
+                # Record linker files from all toolchains so we can copy
+                if self.shared_options.copy_all_linker_files and ADD_LINKER_CMD_PATTERN.match(j_line.get("cmd", "")):
+                    try:
+                        parsed_func = CMakeFunction(j_line)
+                        base_path = Path(parsed_func.single_args["BASE_PATH"]) if parsed_func.single_args.get("BASE_PATH") else None
+                        linker = Path(parsed_func.single_args["LINKER"])
+                        resolved = (base_path / linker) if base_path else (Path(p_file).parent / linker)
+                        if resolved.is_file():
+                            self.linker_source_files.add(resolved)
+                        else:
+                            logger.warning(f"{resolved.as_posix()} is not a valid file.")
+                    except (KeyError, TypeError) as e:
+                        logger.warning(f"Cannot resolve linker path from {p_file}: {e}")
                 if check_path(p_file):
                     del j_line["time"]
                     if (
@@ -735,6 +755,8 @@ class CmakeTraceApp(CmakeApp):
             self.update_entry_kconfig()
         if WorkaroundPolicy.INJECT_TRACE_KCONFIG_DEFINES in self.policies:
             self._append_missing_kconfig_cc_defines()
+        if self.shared_options.copy_all_linker_files:
+            self._copy_linker_variants()
         self.write_cmake_file(self.output_dir / "CMakeLists.txt", self.app_receiver["result"])
 
     def write_cmake_file(self, path, result):
@@ -968,9 +990,9 @@ class CmakeTraceApp(CmakeApp):
                 parsed_func.multi_args["INCLUDES"][i] = parsed_func.single_args["BASE_PATH"].\
                     replace(SDK_ROOT_DIR.as_posix(), "${SdkRootDirPath}") + '/' + v
             del parsed_func.single_args["BASE_PATH"]
-        parsed_func.single_args["LINKER"] = f"{linker.name}"
-        target_linker = output_dir / linker.name
-        target_linker.parent.mkdir(parents=True, exist_ok=True)
+        rel_linker_dir = Path(os.path.relpath(self.linker_output_dir, output_dir)).as_posix()
+        parsed_func.single_args["LINKER"] = f"{rel_linker_dir}/{linker.name}"
+        target_linker = self.linker_output_dir / linker.name
         shutil.copy(linker, target_linker)
         return parsed_func
 
@@ -1104,6 +1126,15 @@ class CmakeTraceApp(CmakeApp):
             self.app_receiver["result"].append(
                 f'\nmcux_add_configuration(\n    CC "{flag_str}"\n)\n'
             )
+
+    def _copy_linker_variants(self):
+        """Copy all linker files seen in the cmake trace to the linker_files/
+        subdirectory so the user can switch between ram/flash variants
+        without modifying SDK files."""
+        for linker in self.linker_source_files:
+            target = self.linker_output_dir / linker.name
+            if not target.exists():
+                shutil.copy(linker, target)
 
     def update_trace_kconfig(self, force_selected):
         """

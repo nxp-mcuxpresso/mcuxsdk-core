@@ -66,6 +66,9 @@ class ExportApp(WestCommand):
                             help='Copy board related files')
         # Only for internal use
         parser.add_argument('--build', action="store_true", default=False, help=argparse.SUPPRESS)
+        parser.add_argument('--copy-all-linker-files', action="store_true",
+                            default=config.getboolean('export_app', 'copy_all_linker_files', fallback=False),
+                            help='Copy all linker file variants (ram/flash/ddr/...) to output directory')
         parser.add_argument('--debug', action="store_true", default=config.getboolean('export_app', 'debug', fallback=False), help=argparse.SUPPRESS)
         return parser
     
@@ -181,7 +184,8 @@ class ExportApp(WestCommand):
             board=self.args.board,
             board_core = self.args.board,
             board_copy_folders=self.args.board_copy_folders,
-            default_trace_folders=[upper_drive(Path(self.manifest.topdir).as_posix())]
+            default_trace_folders=[upper_drive(Path(self.manifest.topdir).as_posix())],
+            copy_all_linker_files=self.args.copy_all_linker_files,
         )
 
         if not self.shared_options.board:
@@ -191,6 +195,9 @@ class ExportApp(WestCommand):
             if self.shared_options.board_copy_folders:
                 self.wrn('--bf is only valid when you specify board/core')
             return
+        if self.shared_options.copy_all_linker_files and not self.shared_options.board_copy_folders:
+            self.wrn('--copy-all-linker-files without --bf: linker files will be copied but board files will not')
+            self.shared_options.copy_all_linker_files = False
         if 'core_id' in self.cmake_variables:
             self.shared_options.core_id = self.cmake_variables['core_id']
             self.shared_options.board_core = self.shared_options.board + '@' + self.shared_options.core_id
