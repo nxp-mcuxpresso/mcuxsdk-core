@@ -171,7 +171,8 @@
        defined(KW43B43ZC6_SERIES) || defined(KW43B43ZC7_SERIES) || \
        defined(KW43L43Z92_SERIES) || defined(KW43L43Z93_SERIES) || \
        defined(KW43L43Z96_SERIES) || defined(KW43L43Z97_SERIES) || \
-       defined(MCXW70AC_SERIES) || defined(MCXW70AD_SERIES))
+       defined(MCXW70AC_SERIES) || defined(MCXW70AD_SERIES) || \
+       defined(MCXW70AA_SERIES))
       
 #ifndef TRNG_ENT_COUNT
 #define TRNG_ENT_COUNT TRNG_ENTA_ENT_COUNT

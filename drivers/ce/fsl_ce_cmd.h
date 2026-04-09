@@ -13,7 +13,7 @@
 #if (defined(KW47_core0_SERIES) || defined(MCXW72_core0_SERIES) || defined(KW47_core1_SERIES) || \
      defined(MCXW72_core1_SERIES))
 #define DSP0_MU_BASE_ADDR MUA_BASE
-#elif (defined(KW43_core0_SERIES))
+#elif (defined(KW43_core0_SERIES) || defined(MCXW70_core0_SERIES))
 #define DSP0_MU_BASE_ADDR MU_1__MUA
 #endif
 

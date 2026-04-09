@@ -1,9 +1,14 @@
 # CE
 
+## [2.3.6]
+
+- New Features:
+  - Updated CE driver to support MCXW70.
+
 ## [2.3.5]
 
 - New Features:
-  - Updated CE driver to support MW30.
+  - Updated CE driver to support KW43.
 
 ## [2.3.4]
 

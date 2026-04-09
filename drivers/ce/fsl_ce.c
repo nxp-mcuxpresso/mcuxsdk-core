@@ -30,7 +30,7 @@ void CE_Init(ce_copy_image_t *ceCopyImage)
            ceCopyImage->destAddr == CE_STCM7_BASE);
 
     CE_InstallFirmware(ceCopyImage);
-#elif (defined(KW43_core0_SERIES))
+#elif (defined(KW43_core0_SERIES) || defined(MCXW70_core0_SERIES))
     assert(NULL != ceCopyImage);
     assert(0U != ceCopyImage->destAddr);
 
@@ -60,7 +60,7 @@ void CE_Init(ce_copy_image_t *ceCopyImage)
             MU_BootOtherCore(MUA, kMU_CoreBootFromSTCM5);
             break;
     } /* GCOVR_EXCL_STOP */
-#elif (defined(KW43_core0_SERIES))
+#elif (defined(KW43_core0_SERIES) || defined(MCXW70_core0_SERIES))
     /* By default, TRDC configuration does not enable the DSP's master permissions.
      * This statement configures the DSP's DID (Domain ID) and its Secure/Non-secure
      * attributes. Additionally, since there is PRESET data, the ROM has already
@@ -86,7 +86,7 @@ void CE_Init(ce_copy_image_t *ceCopyImage)
  */
 void CE_InstallFirmware(ce_copy_image_t *ceCopyImage)
 {
-#if (defined(KW47_core0_SERIES) || defined(MCXW72_core0_SERIES) || defined(KW43_core0_SERIES))
+#if (defined(KW47_core0_SERIES) || defined(MCXW72_core0_SERIES) || defined(KW43_core0_SERIES) || defined(MCXW70_core0_SERIES))
     uint32_t dstAddr;
     uint32_t srcAddr;
     uint32_t size;
@@ -117,7 +117,7 @@ void CE_InitWithoutFirmware(void)
     CLOCK_EnableClock(kCLOCK_DSP0_MUA);
 
     MU_Init(MUA);
-#elif (defined(KW43_core0_SERIES))
+#elif (defined(KW43_core0_SERIES) || defined(MCXW70_core0_SERIES))
     /* Enable DSP RAM clock */
     CLOCK_EnableClock(kCLOCK_Dsp_ramc0);
     /* Enable LCE clock */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021,2025 NXP
+ * Copyright 2018-2021,2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -24,7 +24,7 @@
  * @{
  */
 /*! @brief Flash driver version for SDK*/
-#define FSL_FLASH_DRIVER_VERSION (MAKE_VERSION(2, 3, 3)) /*!< Version 2.3.3. */
+#define FSL_FLASH_DRIVER_VERSION (MAKE_VERSION(2, 3, 4)) /*!< Version 2.3.4. */
 
 /*! @} */
 

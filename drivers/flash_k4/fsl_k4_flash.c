@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2021,2025 NXP
+ * Copyright 2018-2021,2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -105,7 +105,7 @@ status_t FLASH_Init(flash_config_t *config)
      defined(CPU_MCXW727AMFTA_cm33_core1) || defined(CPU_MCXW727CMFTA_cm33_core1))
         config->msf1Config[0].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
-#elif (defined(CPU_KW43B43ZC7MFTA) || defined(CPU_MCXW70ADMFTA))
+#elif (defined(KW43_core0_SERIES) || defined(MCXW70_core0_SERIES))
         config->msf1Config[0].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
 
@@ -178,7 +178,9 @@ status_t FLASH_Init(flash_config_t *config)
 
         config->msf1Config[1].ifrDesc.pflashIfr0Start   = FLASH_FEATURE_PFLASH1_IFR0_START_ADDRESS;
         config->msf1Config[1].ifrDesc.pflashIfr0MemSize = FLASH_FEATURE_PFLASH1_IFR0_SIZE;
-#elif (defined(CPU_KW43B43ZC7MFTA) || defined(CPU_MCXW70ADMFTA))
+#elif (defined(KW43_core0_SERIES) || defined(MCXW70_core0_SERIES))
+        config->msf1Config[1].flashDesc.blockBase  = FLASH_FEATURE_PFLASH1_START_ADDRESS;
+        config->msf1Config[1].flashDesc.blockCount = FLASH_FEATURE_PFLASH1_BLOCK_COUNT;
         config->msf1Config[1].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH1_BLOCK_COUNT * FLASH_FEATURE_PFLASH1_BLOCK_SIZE;
 #else
@@ -219,7 +221,7 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
          * Data cache may contain stale values following a flash programming or erasing operation.
-         * Data cache invalidation is only on KW43.
+         * Data cache invalidation is only on KW43/MCXW70.
          */
         flash_cache_invalidate();
 #endif
@@ -256,7 +258,7 @@ status_t FLASH_EraseAll(FMU_Type *base, uint32_t key)
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
          * Data cache may contain stale values following a flash programming or erasing operation.
-         * Data cache invalidation is only on KW43.
+         * Data cache invalidation is only on KW43/MCXW70.
          */
         flash_cache_invalidate();
 #endif
@@ -344,7 +346,7 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
          * Data cache may contain stale values following a flash programming or erasing operation.
-         * Data cache invalidation is only on KW43.
+         * Data cache invalidation is only on KW43/MCXW70.
          */
         flash_cache_invalidate();
 #endif
@@ -436,7 +438,7 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
          * Data cache may contain stale values following a flash programming or erasing operation.
-         * Data cache invalidation is only on KW43.
+         * Data cache invalidation is only on KW43/MCXW70.
          */
         flash_cache_invalidate();
 #endif
