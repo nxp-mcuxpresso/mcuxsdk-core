@@ -216,10 +216,10 @@
        defined(MCXA286_SERIES) || defined(MCXA287_SERIES) || \
        defined(MCXA456_SERIES) || defined(MCXA457_SERIES) || \
        defined(MCXA536_SERIES) || defined(MCXA537_SERIES) || \
-       defined(MCXA556_SERIES) || defined(MCXA566_SERIES) || \
-       defined(MCXA567_SERIES) || defined(MCXA577_SERIES) || \
-       defined(MCXC151_SERIES) || defined(MCXC161_SERIES) || \
-       defined(MCXC162_SERIES))
+       defined(MCXA556_SERIES) || defined(MCXA557_SERIES) || \
+       defined(MCXA566_SERIES) || defined(MCXA567_SERIES) || \
+       defined(MCXA577_SERIES) || defined(MCXC151_SERIES) || \
+       defined(MCXC161_SERIES) || defined(MCXC162_SERIES))
       
 #ifndef TRNG_ENT_COUNT
 #define TRNG_ENT_COUNT TRNG_ENTA_ENT_COUNT
