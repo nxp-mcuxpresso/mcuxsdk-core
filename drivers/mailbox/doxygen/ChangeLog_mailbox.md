@@ -1,5 +1,10 @@
 # MAILBOX
 
+## [2.3.6]
+
+- Improvements
+  - Added support for the MCXNxxxT series
+
 ## [2.3.5]
 
 - Improvements
