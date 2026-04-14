@@ -621,6 +621,23 @@ status_t FTM_SetupPwm(FTM_Type *base,
 /*!
  * brief Updates the duty cycle of an active PWM signal.
  *
+ * note This function only writes the new duty cycle value to the CnV buffer register.
+ *       FTM_Init() unconditionally enables enhanced PWM synchronization mode by setting
+ *       SYNCONF.SYNCMODE = 1 and COMBINE.SYNCENn = 1 in FTM_SetPwmSync(), regardless of the
+ *       configuration passed by the user. Therefore, the buffered CnV value does NOT take effect
+ *       immediately. The caller must trigger a register reload after this function returns, using
+ *       one of the following methods:
+ *       - Software trigger: call FTM_SetSoftwareTrigger(base, true) (if pwmSyncMode includes
+ *         kFTM_SoftwareTrigger). Note that if swTriggerResetCount was set to true during
+ *         initialization, this trigger will also force the FTM counter to the CNTIN value
+ *         (SYNCONF.SWRSTCNT = 1).
+ *       - Hardware trigger: no software call is needed. If pwmSyncMode includes
+ *         kFTM_HardwareTrigger_0/1/2, the reload happens automatically when the
+ *         corresponding hardware trigger fires (SYNCONF.HWWRBUF is set by FTM_Init()).
+ *       - LDOK: call FTM_SetLdok(base, true). The new value becomes active at the next
+ *         reload point: by default at counter overflow (MOD to CNTIN), or at earlier
+ *         events if additional reload points are configured via FTM_SetReloadPoints().
+ *
  * param base              FTM peripheral base address
  * param chnlNumber        The channel/channel pair number. In combined mode, this represents
  *                          the channel pair number
