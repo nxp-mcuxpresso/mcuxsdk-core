@@ -1,5 +1,12 @@
 # FTM
 
+## [2.7.6]
+
+- Bug Fixes
+  - Fixed QUADEN bit not cleared in FTM_SetupPwm() and FTM_SetupPwmMode() when switching from
+    quadrature decoder mode to PWM mode. QUADEN has higher priority and overrides PWM
+    operation if left set.
+
 ## [2.7.5]
 
 - Bug Fixes

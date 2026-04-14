@@ -466,6 +466,19 @@ status_t FTM_SetupPwm(FTM_Type *base,
         return kStatus_InvalidArgument;
     }
 
+#if !(defined(FSL_FEATURE_FTM_HAS_NO_QDCTRL) && FSL_FEATURE_FTM_HAS_NO_QDCTRL)
+#if defined(FSL_FEATURE_FTM_INSTANCE_HAS_QUAD_DECODEn)
+    if (FSL_FEATURE_FTM_INSTANCE_HAS_QUAD_DECODEn(base) == 1)
+    {
+        /* Clear the quadrature decoder mode because it's higher priority */
+        base->QDCTRL &= ~FTM_QDCTRL_QUADEN_MASK;
+    }
+#else
+    /* Clear the quadrature decoder mode because it's higher priority */
+    base->QDCTRL &= ~FTM_QDCTRL_QUADEN_MASK;
+#endif
+#endif
+
     if (mode == kFTM_CenterAlignedPwm)
     {
         base->SC |= FTM_SC_CPWMS_MASK;
@@ -735,6 +748,19 @@ status_t FTM_SetupPwmMode(FTM_Type *base,
     uint32_t reg;
     uint32_t mod, cnvFirstEdge;
     uint8_t i;
+
+#if !(defined(FSL_FEATURE_FTM_HAS_NO_QDCTRL) && FSL_FEATURE_FTM_HAS_NO_QDCTRL)
+#if defined(FSL_FEATURE_FTM_INSTANCE_HAS_QUAD_DECODEn)
+    if (FSL_FEATURE_FTM_INSTANCE_HAS_QUAD_DECODEn(base) == 1)
+    {
+        /* Clear the quadrature decoder mode because it's higher priority */
+        base->QDCTRL &= ~FTM_QDCTRL_QUADEN_MASK;
+    }
+#else
+    /* Clear the quadrature decoder mode because it's higher priority */
+    base->QDCTRL &= ~FTM_QDCTRL_QUADEN_MASK;
+#endif
+#endif
 
     switch (mode)
     {
