@@ -113,7 +113,7 @@ void SMM_SetExtInterruptConfig(SMM_Type *base, const smm_ext_int_config_t *ptrCo
 
 /*!
  * @brief Disable the AON CPU I/O signals on exit from DPD2.
- * 
+ * @deprecated Please use SMM_DisableAonCpuIso() as instead.
  * @param base SMM base address.
  */
 static inline void SMM_DisableAonCpuIsoSingal(SMM_Type *base)
@@ -123,7 +123,7 @@ static inline void SMM_DisableAonCpuIsoSingal(SMM_Type *base)
 
 /*!
  * @brief Disable the Main CPU I/O signals on exit from DPD1.
- * 
+ * @deprecated Please use SMM_DisableMainCpuIso() as instead.
  * @param base SMM base address.
  */
 static inline void SMM_DisableMainCpuIsoSingal(SMM_Type *base)
@@ -438,27 +438,13 @@ static inline void SMM_ClearExternalIntFlag(SMM_Type *base)
  */
 static inline void SMM_DisableMainCpuIso(SMM_Type *base)
 {
-    base->CNFG |= (SMM_CNFG_MAIN_ISO_DSBL_MASK);
-    for (uint32_t i = 0UL; i < 1000UL; i++)
-    {
-        i++;
-    }
-    base->CNFG &= ~(SMM_CNFG_MAIN_ISO_DSBL_MASK);
-    
-    for (uint32_t i = 0UL; i < 1000UL; i++)
-    {
-        i++;
-    }
-    base->CNFG |= (SMM_CNFG_MAIN_ISO_DSBL_MASK);
-    for (uint32_t i = 0UL; i < 1000UL; i++)
-    {
-        i++;
-    }
-    base->CNFG &= ~(SMM_CNFG_MAIN_ISO_DSBL_MASK);
-    for (uint32_t i = 0UL; i < 1000UL; i++)
-    {
-        i++;
-    }
+   base->CNFG |= SMM_CNFG_MAIN_ISO_DSBL_MASK;
+#if __CORTEX_M == 33U
+   SDK_DelayAtLeastUs(100000, CLOCK_GetCoreSysClkFreq());
+#else
+   SDK_DelayAtLeastUs(100000, CLOCK_GetAonCoreSysClkFreq());
+#endif /* __CORTEX_M */
+   base->CNFG &= ~SMM_CNFG_MAIN_ISO_DSBL_MASK;
 }
 
 /*!
@@ -469,25 +455,12 @@ static inline void SMM_DisableMainCpuIso(SMM_Type *base)
 static inline void SMM_DisableAonCpuIso(SMM_Type *base)
 {
     base->CNFG |= (SMM_CNFG_AON_ISO_DSBL_MASK);
-    for (uint32_t i = 0UL; i < 1000UL; i++)
-    {
-        i++;
-    }
+    #if __CORTEX_M == (33U)
+    SDK_DelayAtLeastUs(100000, CLOCK_GetCoreSysClkFreq());
+    #else
+    SDK_DelayAtLeastUs(100000, CLOCK_GetAonCoreSysClkFreq());
+    #endif /* __CORTEX_M */
     base->CNFG &= ~(SMM_CNFG_AON_ISO_DSBL_MASK);
-    for (uint32_t i = 0UL; i < 1000UL; i++)
-    {
-        i++;
-    }
-    base->CNFG |= (SMM_CNFG_AON_ISO_DSBL_MASK);
-    for (uint32_t i = 0UL; i < 1000UL; i++)
-    {
-        i++;
-    }
-    base->CNFG &= ~(SMM_CNFG_AON_ISO_DSBL_MASK);
-    for (uint32_t i = 0UL; i < 1000UL; i++)
-    {
-        i++;
-    }
 }
 
 /*!

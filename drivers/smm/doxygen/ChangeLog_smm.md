@@ -4,6 +4,7 @@
 
 - Bug Fixes
     - Fixed CERT INT31-C finding in interrupt enable/disable handling.
+    - Change delay value in SMM_DisableAonCpuIso() and SMM_DisableMainCpuIso(). 
 
 ## [2.1.1]
 
