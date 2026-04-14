@@ -46,6 +46,7 @@ class NinjaParser
     parse_postbuild
     parse_precompile
     parse_cmake_custom_command
+    parse_example_readme
     merge_ide_data
     set_project_language
     remove_unsupported_config
@@ -1021,6 +1022,47 @@ class NinjaParser
         @data[@name]['contents']['configuration']['tools'][@toolchain]['prebuild'].push(cmd['command'])
       end
     end
+  end
+
+  def parse_example_readme
+    return unless ENV['APPLICATION_SOURCE_DIR']
+
+    example_yml_path = File.join(ENV['APPLICATION_SOURCE_DIR'], 'example.yml')
+    return unless File.exist?(example_yml_path)
+
+    example_data = YAML.load_file(example_yml_path)
+    return unless example_data.is_a?(Hash)
+
+    # Find matching example entry by @name, or fall back to the first entry
+    example_entry = example_data[@name] || example_data.values.first
+    return unless example_entry.is_a?(Hash)
+
+    readme_list = example_entry.dig('contents', 'document', 'example_readme')
+    return unless readme_list.is_a?(Array)
+
+    readme_list.each do |readme_path|
+      next unless readme_path.is_a?(String)
+
+      # Expand ${var} patterns using environment variables (e.g. ${board}, ${board_root})
+      expanded_path = readme_path.gsub(/\$\{(\w+)\}/) { ENV[$1] || $& }
+
+      full_path = File.join(REPO_ROOT_PATH, expanded_path)
+      unless File.exist?(full_path)
+        @logger.debug("example_readme file not found, skipping: #{expanded_path}")
+        next
+      end
+
+      source_hash = {
+        'source' => expanded_path,
+        'type' => 'doc',
+        'project_path' => File.dirname(expanded_path),
+        'repo_path' => File.dirname(expanded_path),
+        'package_path' => File.dirname(expanded_path)
+      }
+      @data[@name]['contents']['modules']['demo']['files'].push(source_hash)
+    end
+  rescue StandardError => e
+    @logger.error("parse_example_readme error: #{e.message}")
   end
 
   def parse_linker_bat_file(cmd, cmd_list)
