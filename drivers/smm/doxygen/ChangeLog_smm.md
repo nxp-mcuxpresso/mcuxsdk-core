@@ -1,5 +1,9 @@
 # SMM
 
+## [2.2.0]
+- New Features
+    - Added APIs to clear wakeup source status.
+
 ## [2.1.2]
 
 - Bug Fixes

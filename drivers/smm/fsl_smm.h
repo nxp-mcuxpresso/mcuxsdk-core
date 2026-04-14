@@ -25,8 +25,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief smm driver version 2.1.2. */
-#define FSL_SMM_DRIVER_VERSION (MAKE_VERSION(2, 1, 2))
+/*! @brief smm driver version 2.2.0. */
+#define FSL_SMM_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*@}*/
 
 /*!
@@ -209,6 +209,17 @@ static inline uint32_t SMM_GetEnabledWakeupSourceToAonCpu(SMM_Type *base)
 static inline uint32_t SMM_GetWakeupSourceStatus(SMM_Type *base)
 {
     return (uint32_t)(base->WKUP_STAT & SMM_WKUP_STAT_WKUP_SRCS_MASK);
+}
+
+/*!
+ * @brief Clear wakeup source status.
+ * 
+ * @param base SMM base address.
+ * @param wakeupSources Mask value of wakeup sources to clear.
+ */
+static inline void SMM_ClearWakeupSourceStatus(SMM_Type *base, uint32_t wakeupSources)
+{
+    base->WKUP_STAT = wakeupSources & SMM_WKUP_STAT_WKUP_SRCS_MASK;
 }
 
 /*!
