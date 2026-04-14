@@ -25,7 +25,7 @@ extern TSI_Type *const s_tsiBases[];
  ******************************************************************************/
 
 /*! @brief TSI driver version */
-#define FSL_TSI_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
+#define FSL_TSI_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
 
 /*! @brief TSI status flags macro collection */
 #define ALL_FLAGS_MASK (TSI_DATA_EOSF_MASK | TSI_DATA_OUTRGF_MASK)
@@ -1250,7 +1250,7 @@ static inline void TSI_SetDvolt(TSI_Type *base, tsi_dvolt_option_t dvolt)
  */
 static inline void TSI_EnableNoiseCancellation(TSI_Type *base, bool enableCancellation)
 {
-    base->CONFIG = ((base->CONFIG) & ~TSI_CONFIG_S_NOISE_MASK) | (TSI_CONFIG_S_NOISE(enableCancellation));
+    base->CONFIG = ((base->CONFIG) & ~TSI_CONFIG_S_NOISE_MASK) | (TSI_CONFIG_S_NOISE(enableCancellation ? 1U : 0U));
 }
 
 #if defined(FSL_FEATURE_TSI_HAS_MUTUAL_TX_SEL) && FSL_FEATURE_TSI_HAS_MUTUAL_TX_SEL

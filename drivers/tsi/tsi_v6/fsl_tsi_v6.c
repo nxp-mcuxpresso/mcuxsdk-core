@@ -81,7 +81,8 @@ void TSI_InitSelfCapMode(TSI_Type *base, const tsi_selfCap_config_t *config)
     /* common settings */
     temp = (base->CONFIG) & ~(TSI_CONFIG_MUTUAL_MODE_MASK | TSI_CONFIG_S_SEN_MASK);
     base->CONFIG =
-        temp | (TSI_CONFIG_MUTUAL_MODE(config->commonConfig.mode) | TSI_CONFIG_S_SEN(config->enableSensitivity));
+        temp | (TSI_CONFIG_MUTUAL_MODE(config->commonConfig.mode) |
+                TSI_CONFIG_S_SEN(config->enableSensitivity ? 1U : 0U));
 
 #if !(defined(FSL_FEATURE_TSI_HAS_NO_SETCLK) && FSL_FEATURE_TSI_HAS_NO_SETCLK)
     TSI_SetMainClock(base, config->commonConfig.mainClock);

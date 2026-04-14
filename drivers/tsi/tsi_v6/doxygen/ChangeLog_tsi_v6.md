@@ -1,5 +1,10 @@
 # TSI_V6
 
+## [2.1.1]
+
+- Bug Fixes
+  - Fixed CERT INT31-C violations: use ternary expression for bool-to-uint32_t conversion in TSI_CONFIG_S_SEN and TSI_CONFIG_S_NOISE macros.
+
 ## [2.1.0]
 
 - New Features
