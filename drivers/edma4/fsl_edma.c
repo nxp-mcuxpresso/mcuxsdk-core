@@ -518,8 +518,8 @@ void EDMA_SetBandWidth(EDMA_Type *base, uint32_t channel, edma_bandwidth_t bandW
     assert(channel < (uint32_t)FSL_FEATURE_EDMA_INSTANCE_CHANNELn(base));
 
     EDMA_TCD_CSR(EDMA_TCD_BASE(base, channel), EDMA_TCD_TYPE(base)) =
-        (uint16_t)((EDMA_TCD_CSR(EDMA_TCD_BASE(base, channel), EDMA_TCD_TYPE(base)) & (~DMA_CSR_BWC_MASK)) |
-                   DMA_CSR_BWC(bandWidth));
+        (uint16_t)(((EDMA_TCD_CSR(EDMA_TCD_BASE(base, channel), EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_CSR_BWC_MASK)) |
+                   DMA_CSR_BWC(bandWidth)));
 }
 #endif
 
@@ -626,7 +626,7 @@ void EDMA_TcdSetTransferConfigExt(EDMA_Type *base,
             be enabled at the next transfer(the next TCD).
         */
         EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) =
-            (EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) | (uint16_t)DMA_CSR_ESG_MASK) & ~(uint16_t)DMA_CSR_DREQ_MASK;
+            (EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) | (uint16_t)DMA_CSR_ESG_MASK) & MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
     }
 }
 
@@ -648,12 +648,13 @@ void EDMA_ConfigChannelSoftwareTCDExt(EDMA_Type *base, edma_tcd_t *tcd, const ed
     assert(transfer != NULL);
     assert((transfer->minorLoopBytes % (1UL << ((uint32_t)transfer->srcTransferSize))) == 0U);
     assert((transfer->minorLoopBytes % (1UL << ((uint32_t)transfer->destTransferSize))) == 0U);
-    assert(((uint32_t)transfer->srcOffset % (1UL << ((uint32_t)transfer->srcTransferSize))) == 0U);
-    assert(((uint32_t)transfer->destOffset % (1UL << ((uint32_t)transfer->destTransferSize))) == 0U);
+    assert(((uint32_t)(uint16_t)transfer->srcOffset % (1UL << ((uint32_t)transfer->srcTransferSize))) == 0U);
+    assert(((uint32_t)(uint16_t)transfer->destOffset % (1UL << ((uint32_t)transfer->destTransferSize))) == 0U);
     assert((transfer->srcAddr % (1UL << ((uint32_t)transfer->srcTransferSize))) == 0U);
     assert((transfer->destAddr % (1UL << ((uint32_t)transfer->destTransferSize))) == 0U);
     assert((transfer->srcAddr % (1UL << ((uint32_t)transfer->srcAddrModulo))) == 0U);
     assert((transfer->destAddr % (1UL << ((uint32_t)transfer->dstAddrModulo))) == 0U);
+    assert(transfer->majorLoopCounts <= 0xFFFFU);
 
     uint16_t tmpreg;
 
@@ -665,9 +666,9 @@ void EDMA_ConfigChannelSoftwareTCDExt(EDMA_Type *base, edma_tcd_t *tcd, const ed
         DMA_ATTR_SSIZE(transfer->srcTransferSize) | DMA_ATTR_DSIZE(transfer->destTransferSize);
 
     /* Source address signed offset */
-    EDMA_TCD_SOFF(tcd, EDMA_TCD_TYPE(base)) = (uint16_t)(transfer->srcOffset);
+    EDMA_TCD_SOFF(tcd, EDMA_TCD_TYPE(base)) = (uint16_t)transfer->srcOffset;
     /* Destination address signed offset */
-    EDMA_TCD_DOFF(tcd, EDMA_TCD_TYPE(base)) = (uint16_t)(transfer->destOffset);
+    EDMA_TCD_DOFF(tcd, EDMA_TCD_TYPE(base)) = (uint16_t)transfer->destOffset;
 
     if (((transfer->enableSrcMinorLoopOffset) || (transfer->enableDstMinorLoopOffset)))
     {
@@ -692,16 +693,16 @@ void EDMA_ConfigChannelSoftwareTCDExt(EDMA_Type *base, edma_tcd_t *tcd, const ed
     {
         EDMA_TCD_DLAST_SGA(tcd, EDMA_TCD_TYPE(base)) = CONVERT_TO_DMA_ADDRESS((uint32_t)((uint8_t *)transfer->linkTCD));
         EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) =
-            (EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) | (uint16_t)DMA_CSR_ESG_MASK) & ~(uint16_t)DMA_CSR_DREQ_MASK;
+            (EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) | (uint16_t)DMA_CSR_ESG_MASK) & MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
     }
     else
     {
-        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_CSR_ESG_MASK;
+        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_CSR_ESG_MASK);
         EDMA_TCD_DLAST_SGA(tcd, EDMA_TCD_TYPE(base)) = (uint32_t)transfer->dstMajorLoopOffset;
     }
 
     /* configure interrupt/auto disable channel request */
-    EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) |= (transfer->enabledInterruptMask & (~(uint16_t)kEDMA_ErrorInterruptEnable));
+    EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) |= (transfer->enabledInterruptMask & MCUX_MASK_INVERT_16(kEDMA_ErrorInterruptEnable));
 
     /* Minor link config */
     if (transfer->enableChannelMinorLoopLink)
@@ -710,10 +711,10 @@ void EDMA_ConfigChannelSoftwareTCDExt(EDMA_Type *base, edma_tcd_t *tcd, const ed
         EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) |= DMA_CITER_ELINKYES_ELINK_MASK;
         EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) |= DMA_BITER_ELINKYES_ELINK_MASK;
         /* Set linked channel */
-        tmpreg = EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) & (~(uint16_t)DMA_CITER_ELINKYES_LINKCH_MASK);
+        tmpreg = EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_CITER_ELINKYES_LINKCH_MASK);
         tmpreg |= DMA_CITER_ELINKYES_LINKCH(transfer->minorLoopLinkChannel);
         EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) = tmpreg;
-        tmpreg = EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) & (~(uint16_t)DMA_BITER_ELINKYES_LINKCH_MASK);
+        tmpreg = EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_BITER_ELINKYES_LINKCH_MASK);
         tmpreg |= DMA_BITER_ELINKYES_LINKCH(transfer->minorLoopLinkChannel);
         EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) = tmpreg;
     }
@@ -723,22 +724,22 @@ void EDMA_ConfigChannelSoftwareTCDExt(EDMA_Type *base, edma_tcd_t *tcd, const ed
         /* Enable major link */
         EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) |= DMA_CSR_MAJORELINK_MASK;
         /* Set major linked channel */
-        tmpreg = EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) & (~(uint16_t)DMA_CSR_MAJORLINKCH_MASK);
+        tmpreg = EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_CSR_MAJORLINKCH_MASK);
         EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) = tmpreg | DMA_CSR_MAJORLINKCH(transfer->majorLoopLinkChannel);
     }
 
     /* clear link relate field if no channel link enabled */
     if ((!transfer->enableChannelMajorLoopLink) && (!transfer->enableChannelMinorLoopLink))
     {
-        EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_CITER_ELINKYES_ELINK_MASK;
-        EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_BITER_ELINKYES_ELINK_MASK;
-        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_CSR_MAJORELINK_MASK;
+        EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_CITER_ELINKYES_ELINK_MASK);
+        EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_BITER_ELINKYES_ELINK_MASK);
+        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_CSR_MAJORELINK_MASK);
     }
 
     /* major loop offset */
     EDMA_TCD_SLAST(tcd, EDMA_TCD_TYPE(base)) = (uint32_t)transfer->srcMajorLoopOffset;
     /* modulo feature */
-    tmpreg = EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(base)) & (~(uint16_t)(DMA_ATTR_SMOD_MASK | DMA_ATTR_DMOD_MASK));
+    tmpreg = EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_ATTR_SMOD_MASK | DMA_ATTR_DMOD_MASK);
     EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(base)) =
         tmpreg | DMA_ATTR_DMOD(transfer->dstAddrModulo) | DMA_ATTR_SMOD(transfer->srcAddrModulo);
 }
@@ -818,10 +819,10 @@ void EDMA_TcdSetChannelLinkExt(EDMA_Type *base, edma_tcd_t *tcd, edma_channel_li
         EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) |= DMA_CITER_ELINKYES_ELINK_MASK;
         EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) |= DMA_BITER_ELINKYES_ELINK_MASK;
         /* Set linked channel */
-        tmpreg = EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) & (~(uint16_t)DMA_CITER_ELINKYES_LINKCH_MASK);
+        tmpreg = EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_CITER_ELINKYES_LINKCH_MASK);
         tmpreg |= DMA_CITER_ELINKYES_LINKCH(linkedChannel);
         EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) = tmpreg;
-        tmpreg = EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) & (~(uint16_t)DMA_BITER_ELINKYES_LINKCH_MASK);
+        tmpreg = EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_BITER_ELINKYES_LINKCH_MASK);
         tmpreg |= DMA_BITER_ELINKYES_LINKCH(linkedChannel);
         EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) = tmpreg;
     }
@@ -832,14 +833,14 @@ void EDMA_TcdSetChannelLinkExt(EDMA_Type *base, edma_tcd_t *tcd, edma_channel_li
         /* Enable major link */
         EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) |= DMA_CSR_MAJORELINK_MASK;
         /* Set major linked channel */
-        tmpreg = EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) & (~(uint16_t)DMA_CSR_MAJORLINKCH_MASK);
+        tmpreg = EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_CSR_MAJORLINKCH_MASK);
         EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) = tmpreg | DMA_CSR_MAJORLINKCH(linkedChannel);
     }
     else /* Link none */
     {
-        EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_CITER_ELINKYES_ELINK_MASK;
-        EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_BITER_ELINKYES_ELINK_MASK;
-        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_CSR_MAJORELINK_MASK;
+        EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_CITER_ELINKYES_ELINK_MASK);
+        EDMA_TCD_BITER(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_BITER_ELINKYES_ELINK_MASK);
+        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_CSR_MAJORELINK_MASK);
     }
 }
 
@@ -862,7 +863,7 @@ void EDMA_TcdSetModuloExt(EDMA_Type *base, edma_tcd_t *tcd, edma_modulo_t srcMod
 
     uint16_t tmpreg;
 
-    tmpreg = EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(base)) & (~(uint16_t)(DMA_ATTR_SMOD_MASK | DMA_ATTR_DMOD_MASK));
+    tmpreg = EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(base)) & MCUX_MASK_INVERT_16(DMA_ATTR_SMOD_MASK | DMA_ATTR_DMOD_MASK);
     EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(base)) = tmpreg | DMA_ATTR_DMOD(destModulo) | DMA_ATTR_SMOD(srcModulo);
 }
 
@@ -906,13 +907,13 @@ void EDMA_TcdDisableInterruptsExt(EDMA_Type *base, edma_tcd_t *tcd, uint32_t mas
     /* Disable Major interrupt */
     if (0U != (mask & (uint32_t)kEDMA_MajorInterruptEnable))
     {
-        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_CSR_INTMAJOR_MASK;
+        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_CSR_INTMAJOR_MASK);
     }
 
     /* Disable Half major interrupt */
     if (0U != (mask & (uint32_t)kEDMA_HalfInterruptEnable))
     {
-        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= ~(uint16_t)DMA_CSR_INTHALF_MASK;
+        EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(base)) &= MCUX_MASK_INVERT_16(DMA_CSR_INTHALF_MASK);
     }
 }
 
@@ -996,7 +997,7 @@ void EDMA_TcdSetTransferConfig(edma_tcd_t *tcd, const edma_transfer_config_t *co
             be enabled at the next transfer(the next TCD).
         */
         EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) =
-            (EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) | (uint16_t)DMA_CSR_ESG_MASK) & ~(uint16_t)DMA_CSR_DREQ_MASK;
+            (EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) | (uint16_t)DMA_CSR_ESG_MASK) & MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
     }
 }
 
@@ -1020,12 +1021,13 @@ void EDMA_ConfigChannelSoftwareTCD(edma_tcd_t *tcd, const edma_transfer_config_t
     assert(transfer != NULL);
     assert((transfer->minorLoopBytes % (1UL << ((uint32_t)transfer->srcTransferSize))) == 0U);
     assert((transfer->minorLoopBytes % (1UL << ((uint32_t)transfer->destTransferSize))) == 0U);
-    assert(((uint32_t)transfer->srcOffset % (1UL << ((uint32_t)transfer->srcTransferSize))) == 0U);
-    assert(((uint32_t)transfer->destOffset % (1UL << ((uint32_t)transfer->destTransferSize))) == 0U);
+    assert(((uint32_t)(uint16_t)transfer->srcOffset % (1UL << ((uint32_t)transfer->srcTransferSize))) == 0U);
+    assert(((uint32_t)(uint16_t)transfer->destOffset % (1UL << ((uint32_t)transfer->destTransferSize))) == 0U);
     assert((transfer->srcAddr % (1UL << ((uint32_t)transfer->srcTransferSize))) == 0U);
     assert((transfer->destAddr % (1UL << ((uint32_t)transfer->destTransferSize))) == 0U);
     assert((transfer->srcAddr % (1UL << ((uint32_t)transfer->srcAddrModulo))) == 0U);
     assert((transfer->destAddr % (1UL << ((uint32_t)transfer->dstAddrModulo))) == 0U);
+    assert(transfer->majorLoopCounts <= 0xFFFFU);
 
     uint16_t tmpreg;
 
@@ -1037,9 +1039,9 @@ void EDMA_ConfigChannelSoftwareTCD(edma_tcd_t *tcd, const edma_transfer_config_t
         DMA_ATTR_SSIZE(transfer->srcTransferSize) | DMA_ATTR_DSIZE(transfer->destTransferSize);
 
     /* Source address signed offset */
-    EDMA_TCD_SOFF(tcd, kEDMA_EDMA4Flag) = (uint16_t)(transfer->srcOffset);
+    EDMA_TCD_SOFF(tcd, kEDMA_EDMA4Flag) = (uint16_t)transfer->srcOffset;
     /* Destination address signed offset */
-    EDMA_TCD_DOFF(tcd, kEDMA_EDMA4Flag) = (uint16_t)(transfer->destOffset);
+    EDMA_TCD_DOFF(tcd, kEDMA_EDMA4Flag) = (uint16_t)transfer->destOffset;
 
     if (((transfer->enableSrcMinorLoopOffset) || (transfer->enableDstMinorLoopOffset)))
     {
@@ -1064,16 +1066,16 @@ void EDMA_ConfigChannelSoftwareTCD(edma_tcd_t *tcd, const edma_transfer_config_t
     {
         EDMA_TCD_DLAST_SGA(tcd, kEDMA_EDMA4Flag) = CONVERT_TO_DMA_ADDRESS((uint32_t)((uint8_t *)transfer->linkTCD));
         EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) =
-            (EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) | (uint16_t)DMA_CSR_ESG_MASK) & ~(uint16_t)DMA_CSR_DREQ_MASK;
+            (EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) | (uint16_t)DMA_CSR_ESG_MASK) & MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
     }
     else
     {
-        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_CSR_ESG_MASK;
+        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_CSR_ESG_MASK);
         EDMA_TCD_DLAST_SGA(tcd, kEDMA_EDMA4Flag) = (uint32_t)transfer->dstMajorLoopOffset;
     }
 
     /* configure interrupt/auto disable channel request */
-    EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) |= (transfer->enabledInterruptMask & (~(uint16_t)kEDMA_ErrorInterruptEnable));
+    EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) |= (transfer->enabledInterruptMask & MCUX_MASK_INVERT_16(kEDMA_ErrorInterruptEnable));
 
     /* Minor link config */
     if (transfer->enableChannelMinorLoopLink)
@@ -1082,10 +1084,10 @@ void EDMA_ConfigChannelSoftwareTCD(edma_tcd_t *tcd, const edma_transfer_config_t
         EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) |= DMA_CITER_ELINKYES_ELINK_MASK;
         EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) |= DMA_BITER_ELINKYES_ELINK_MASK;
         /* Set linked channel */
-        tmpreg = EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) & (~(uint16_t)DMA_CITER_ELINKYES_LINKCH_MASK);
+        tmpreg = EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) & MCUX_MASK_INVERT_16(DMA_CITER_ELINKYES_LINKCH_MASK);
         tmpreg |= DMA_CITER_ELINKYES_LINKCH(transfer->minorLoopLinkChannel);
         EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) = tmpreg;
-        tmpreg = EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) & (~(uint16_t)DMA_BITER_ELINKYES_LINKCH_MASK);
+        tmpreg = EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) & MCUX_MASK_INVERT_16(DMA_BITER_ELINKYES_LINKCH_MASK);
         tmpreg |= DMA_BITER_ELINKYES_LINKCH(transfer->minorLoopLinkChannel);
         EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) = tmpreg;
     }
@@ -1095,22 +1097,22 @@ void EDMA_ConfigChannelSoftwareTCD(edma_tcd_t *tcd, const edma_transfer_config_t
         /* Enable major link */
         EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) |= DMA_CSR_MAJORELINK_MASK;
         /* Set major linked channel */
-        tmpreg                             = EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) & (~(uint16_t)DMA_CSR_MAJORLINKCH_MASK);
+        tmpreg                             = EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) & MCUX_MASK_INVERT_16(DMA_CSR_MAJORLINKCH_MASK);
         EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) = tmpreg | DMA_CSR_MAJORLINKCH(transfer->majorLoopLinkChannel);
     }
 
     /* clear link relate field if no channel link enabled */
     if ((!transfer->enableChannelMajorLoopLink) && (!transfer->enableChannelMinorLoopLink))
     {
-        EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_CITER_ELINKYES_ELINK_MASK;
-        EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_BITER_ELINKYES_ELINK_MASK;
-        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_CSR_MAJORELINK_MASK;
+        EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_CITER_ELINKYES_ELINK_MASK);
+        EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_BITER_ELINKYES_ELINK_MASK);
+        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_CSR_MAJORELINK_MASK);
     }
 
     /* major loop offset */
     EDMA_TCD_SLAST(tcd, kEDMA_EDMA4Flag) = (uint32_t)transfer->srcMajorLoopOffset;
     /* modulo feature */
-    tmpreg = EDMA_TCD_ATTR(tcd, kEDMA_EDMA4Flag) & (~(uint16_t)(DMA_ATTR_SMOD_MASK | DMA_ATTR_DMOD_MASK));
+    tmpreg = EDMA_TCD_ATTR(tcd, kEDMA_EDMA4Flag) & MCUX_MASK_INVERT_16(DMA_ATTR_SMOD_MASK | DMA_ATTR_DMOD_MASK);
     EDMA_TCD_ATTR(tcd, kEDMA_EDMA4Flag) =
         tmpreg | DMA_ATTR_DMOD(transfer->dstAddrModulo) | DMA_ATTR_SMOD(transfer->srcAddrModulo);
 }
@@ -1193,10 +1195,10 @@ void EDMA_TcdSetChannelLink(edma_tcd_t *tcd, edma_channel_link_type_t type, uint
         EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) |= DMA_CITER_ELINKYES_ELINK_MASK;
         EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) |= DMA_BITER_ELINKYES_ELINK_MASK;
         /* Set linked channel */
-        tmpreg = EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) & (~(uint16_t)DMA_CITER_ELINKYES_LINKCH_MASK);
+        tmpreg = EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) & MCUX_MASK_INVERT_16(DMA_CITER_ELINKYES_LINKCH_MASK);
         tmpreg |= DMA_CITER_ELINKYES_LINKCH(linkedChannel);
         EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) = tmpreg;
-        tmpreg = EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) & (~(uint16_t)DMA_BITER_ELINKYES_LINKCH_MASK);
+        tmpreg = EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) & MCUX_MASK_INVERT_16(DMA_BITER_ELINKYES_LINKCH_MASK);
         tmpreg |= DMA_BITER_ELINKYES_LINKCH(linkedChannel);
         EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) = tmpreg;
     }
@@ -1207,14 +1209,14 @@ void EDMA_TcdSetChannelLink(edma_tcd_t *tcd, edma_channel_link_type_t type, uint
         /* Enable major link */
         EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) |= DMA_CSR_MAJORELINK_MASK;
         /* Set major linked channel */
-        tmpreg                             = EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) & (~(uint16_t)DMA_CSR_MAJORLINKCH_MASK);
+        tmpreg                             = EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) & MCUX_MASK_INVERT_16(DMA_CSR_MAJORLINKCH_MASK);
         EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) = tmpreg | DMA_CSR_MAJORLINKCH(linkedChannel);
     }
     else /* Link none */
     {
-        EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_CITER_ELINKYES_ELINK_MASK;
-        EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_BITER_ELINKYES_ELINK_MASK;
-        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_CSR_MAJORELINK_MASK;
+        EDMA_TCD_CITER(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_CITER_ELINKYES_ELINK_MASK);
+        EDMA_TCD_BITER(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_BITER_ELINKYES_ELINK_MASK);
+        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_CSR_MAJORELINK_MASK);
     }
 }
 
@@ -1238,7 +1240,7 @@ void EDMA_TcdSetModulo(edma_tcd_t *tcd, edma_modulo_t srcModulo, edma_modulo_t d
 
     uint16_t tmpreg;
 
-    tmpreg = EDMA_TCD_ATTR(tcd, kEDMA_EDMA4Flag) & (~(uint16_t)(DMA_ATTR_SMOD_MASK | DMA_ATTR_DMOD_MASK));
+    tmpreg = EDMA_TCD_ATTR(tcd, kEDMA_EDMA4Flag) & MCUX_MASK_INVERT_16(DMA_ATTR_SMOD_MASK | DMA_ATTR_DMOD_MASK);
     EDMA_TCD_ATTR(tcd, kEDMA_EDMA4Flag) = tmpreg | DMA_ATTR_DMOD(destModulo) | DMA_ATTR_SMOD(srcModulo);
 }
 
@@ -1286,13 +1288,13 @@ void EDMA_TcdDisableInterrupts(edma_tcd_t *tcd, uint32_t mask)
     /* Disable Major interrupt */
     if (0U != (mask & (uint32_t)kEDMA_MajorInterruptEnable))
     {
-        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_CSR_INTMAJOR_MASK;
+        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_CSR_INTMAJOR_MASK);
     }
 
     /* Disable Half major interrupt */
     if (0U != (mask & (uint32_t)kEDMA_HalfInterruptEnable))
     {
-        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= ~(uint16_t)DMA_CSR_INTHALF_MASK;
+        EDMA_TCD_CSR(tcd, kEDMA_EDMA4Flag) &= MCUX_MASK_INVERT_16(DMA_CSR_INTHALF_MASK);
     }
 }
 
@@ -1563,6 +1565,7 @@ void EDMA_InstallTCDMemory(edma_handle_t *handle, edma_tcd_t *tcdPool, uint32_t 
      */
     handle->header  = 0;
     handle->tcdUsed = 0;
+    assert(tcdSize <= 127U);
     handle->tcdSize = (int8_t)tcdSize;
     handle->tcdPool = tcdPool;
 }
@@ -1745,6 +1748,11 @@ void EDMA_PrepareTransfer(edma_transfer_config_t *config,
 
     int16_t srcOffset = 0, destOffset = 0;
 
+    /* Bound check needed by static analysis for the (int16_t) casts below;
+     * EDMA_PrepareTransferConfig validates srcWidth/destWidth tighter (<=32/64/128 per feature flag). */
+    assert(srcWidth <= 0x7FFFU);
+    assert(destWidth <= 0x7FFFU);
+
     switch (type)
     {
         case kEDMA_MemoryToMemory:
@@ -1844,8 +1852,8 @@ void EDMA_PrepareTransferTCD(edma_handle_t *handle,
     EDMA_TcdResetExt(handle->base, tcd);
     assert((bytesEachRequest % (1UL << ((uint32_t)srcTransferSize))) == 0U);
     assert((bytesEachRequest % (1UL << ((uint32_t)destTransferSize))) == 0U);
-    assert(((uint32_t)srcOffset % (1UL << ((uint32_t)srcTransferSize))) == 0U);
-    assert(((uint32_t)destOffset % (1UL << ((uint32_t)destTransferSize))) == 0U);
+    assert(((uint32_t)(uint16_t)srcOffset % (1UL << ((uint32_t)srcTransferSize))) == 0U);
+    assert(((uint32_t)(uint16_t)destOffset % (1UL << ((uint32_t)destTransferSize))) == 0U);
     assert(((uint32_t)(uint32_t *)srcAddr % (1UL << ((uint32_t)srcTransferSize))) == 0U);
     assert(((uint32_t)(uint32_t *)destAddr % (1UL << ((uint32_t)destTransferSize))) == 0U);
 
@@ -1856,9 +1864,9 @@ void EDMA_PrepareTransferTCD(edma_handle_t *handle,
     EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(handle->base)) = DMA_ATTR_SSIZE(srcTransferSize) | DMA_ATTR_DSIZE(destTransferSize);
 
     /* Source address signed offset */
-    EDMA_TCD_SOFF(tcd, EDMA_TCD_TYPE(handle->base)) = (uint16_t)(srcOffset);
+    EDMA_TCD_SOFF(tcd, EDMA_TCD_TYPE(handle->base)) = (uint16_t)srcOffset;
     /* Destination address signed offset */
-    EDMA_TCD_DOFF(tcd, EDMA_TCD_TYPE(handle->base)) = (uint16_t)(destOffset);
+    EDMA_TCD_DOFF(tcd, EDMA_TCD_TYPE(handle->base)) = (uint16_t)destOffset;
 
     EDMA_TCD_NBYTES(tcd, EDMA_TCD_TYPE(handle->base)) = DMA_NBYTES_MLOFFNO_NBYTES(bytesEachRequest);
 
@@ -1882,13 +1890,13 @@ void EDMA_PrepareTransferTCD(edma_handle_t *handle,
             be enabled at the next transfer(the next TCD).
         */
         EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(handle->base)) =
-            (EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(handle->base)) | (uint16_t)DMA_CSR_ESG_MASK) & ~(uint16_t)DMA_CSR_DREQ_MASK;
+            (EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(handle->base)) | (uint16_t)DMA_CSR_ESG_MASK) & MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
     }
 
     /* configure interrupt/auto disable channel request, enable major interrupt by default */
     EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(handle->base)) |=
-        (EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(handle->base)) & (~(uint16_t)kEDMA_ErrorInterruptEnable)) |
-        (uint16_t)kEDMA_MajorInterruptEnable;
+        (uint16_t)((EDMA_TCD_CSR(tcd, EDMA_TCD_TYPE(handle->base)) & MCUX_MASK_INVERT_16(kEDMA_ErrorInterruptEnable)) |
+        (uint16_t)kEDMA_MajorInterruptEnable);
 }
 
 /*!
@@ -2013,7 +2021,7 @@ status_t EDMA_SubmitTransferTCD(edma_handle_t *handle, edma_tcd_t *tcd)
         currentTcd = handle->tail;
         handle->tcdUsed++;
         /* Calculate index of next TCD */
-        nextTcd = currentTcd + 1;
+        nextTcd = (int8_t)((currentTcd + 1) & 0x7F);
         if (nextTcd == handle->tcdSize)
         {
             nextTcd = 0;
@@ -2022,7 +2030,7 @@ status_t EDMA_SubmitTransferTCD(edma_handle_t *handle, edma_tcd_t *tcd)
         handle->tail = nextTcd;
         EnableGlobalIRQ(primask);
         /* Calculate index of previous TCD */
-        previousTcd = currentTcd != 0 ? currentTcd - 1 : (handle->tcdSize - 1);
+        previousTcd = currentTcd != 0 ? (int8_t)((currentTcd - 1) & 0x7F) : (int8_t)((handle->tcdSize - 1) & 0x7F);
 
         /* Configure current TCD block. */
         EDMA_TcdResetExt(handle->base, &handle->tcdPool[currentTcd]);
@@ -2053,7 +2061,7 @@ status_t EDMA_SubmitTransferTCD(edma_handle_t *handle, edma_tcd_t *tcd)
             /* Enable scatter/gather feature in the previous TCD block. */
             csr = EDMA_TCD_CSR((&handle->tcdPool[previousTcd]), EDMA_TCD_TYPE(handle->base)) |
                   ((uint16_t)DMA_CSR_ESG_MASK);
-            csr &= ~((uint16_t)DMA_CSR_DREQ_MASK);
+            csr &= MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
             EDMA_TCD_CSR((&handle->tcdPool[previousTcd]), EDMA_TCD_TYPE(handle->base)) = csr;
             /*
                 Check if the TCD block in the registers is the previous one (points to current TCD block). It
@@ -2082,7 +2090,7 @@ status_t EDMA_SubmitTransferTCD(edma_handle_t *handle, edma_tcd_t *tcd)
                 */
                 if (0U != (EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(handle->base)) & DMA_CSR_ESG_MASK))
                 {
-                    EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(handle->base)) &= ~(uint16_t)DMA_CSR_DREQ_MASK;
+                    EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(handle->base)) &= MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
                     return kStatus_Success;
                 }
                 /*
@@ -2205,7 +2213,7 @@ status_t EDMA_SubmitTransfer(edma_handle_t *handle, const edma_transfer_config_t
         currentTcd = handle->tail;
         handle->tcdUsed++;
         /* Calculate index of next TCD */
-        nextTcd = currentTcd + 1;
+        nextTcd = (int8_t)((currentTcd + 1) & 0x7F);
         if (nextTcd == handle->tcdSize)
         {
             nextTcd = 0;
@@ -2214,7 +2222,7 @@ status_t EDMA_SubmitTransfer(edma_handle_t *handle, const edma_transfer_config_t
         handle->tail = nextTcd;
         EnableGlobalIRQ(primask);
         /* Calculate index of previous TCD */
-        previousTcd = currentTcd != 0 ? currentTcd - 1 : (handle->tcdSize - 1);
+        previousTcd = currentTcd != 0 ? (int8_t)((currentTcd - 1) & 0x7F) : (int8_t)((handle->tcdSize - 1) & 0x7F);
         /* Configure current TCD block. */
         EDMA_TcdResetExt(handle->base, &handle->tcdPool[currentTcd]);
         EDMA_TcdSetTransferConfigExt(handle->base, &handle->tcdPool[currentTcd], config, NULL);
@@ -2235,7 +2243,7 @@ status_t EDMA_SubmitTransfer(edma_handle_t *handle, const edma_transfer_config_t
             /* Enable scatter/gather feature in the previous TCD block. */
             csr = EDMA_TCD_CSR((&handle->tcdPool[previousTcd]), EDMA_TCD_TYPE(handle->base)) |
                   ((uint16_t)DMA_CSR_ESG_MASK);
-            csr &= ~((uint16_t)DMA_CSR_DREQ_MASK);
+            csr &= MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
             EDMA_TCD_CSR((&handle->tcdPool[previousTcd]), EDMA_TCD_TYPE(handle->base)) = csr;
             /*
                 Check if the TCD block in the registers is the previous one (points to current TCD block). It
@@ -2264,7 +2272,7 @@ status_t EDMA_SubmitTransfer(edma_handle_t *handle, const edma_transfer_config_t
                 */
                 if (0U != (EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(handle->base)) & DMA_CSR_ESG_MASK))
                 {
-                    EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(handle->base)) &= ~(uint16_t)DMA_CSR_DREQ_MASK;
+                    EDMA_TCD_CSR(tcdRegs, EDMA_TCD_TYPE(handle->base)) &= MCUX_MASK_INVERT_16(DMA_CSR_DREQ_MASK);
                     return kStatus_Success;
                 }
                 /*
@@ -2339,7 +2347,8 @@ status_t EDMA_SubmitLoopTransfer(edma_handle_t *handle, edma_transfer_config_t *
     uint16_t citerStatus = EDMA_TCD_CITER(handle->tcdBase, EDMA_TCD_TYPE(handle->base)) & DMA_CITER_ELINKNO_CITER_MASK;
     uint16_t biterStatus = EDMA_TCD_BITER(handle->tcdBase, EDMA_TCD_TYPE(handle->base)) & DMA_BITER_ELINKNO_BITER_MASK;
 
-    if (handle->tcdSize < (int8_t)transferLoopCount)
+    assert(transferLoopCount <= 127U);
+    if (handle->tcdSize < (int8_t)(transferLoopCount & 0x7F))
     {
         return kStatus_InvalidArgument;
     }
@@ -2613,14 +2622,15 @@ void EDMA_HandleIRQ(edma_handle_t *handle)
         bool esg = ((EDMA_TCD_CSR(handle->tcdBase, EDMA_TCD_TYPE(handle->base)) & DMA_CSR_ESG_MASK) != 0U);
 
         /* Get the offset of the next transfer TCD blocks to be loaded into the eDMA engine. */
+        assert(sga >= CONVERT_TO_DMA_ADDRESS((uint32_t)handle->tcdPool));
         sga -= CONVERT_TO_DMA_ADDRESS((uint32_t)handle->tcdPool);
         /* Get the index of the next transfer TCD blocks to be loaded into the eDMA engine. */
         sga_index = sga / sizeof(edma_tcd_t);
         /* Adjust header positions, new_header should be the index of the current transfer TCD blocks. */
-        new_header = sga_index != 0U ? (uint8_t)sga_index - 1U : (uint8_t)handle->tcdSize - 1U;
+        new_header = sga_index != 0U ? (uint8_t)((sga_index - 1U) & 0xFFU) : (uint8_t)(((uint32_t)(uint8_t)handle->tcdSize - 1U) & 0xFFU);
 
         /* Calculate the number of finished TCDs */
-        if (new_header == (uint8_t)handle->header)
+        if (new_header == (uint8_t)(handle->header & 0x7F))
         {
             int8_t tmpTcdUsed = handle->tcdUsed;
             int8_t tmpTcdSize = handle->tcdSize;
@@ -2669,7 +2679,7 @@ void EDMA_HandleIRQ(edma_handle_t *handle)
         /* Invoke callback function. */
         if (NULL != handle->callback)
         {
-            (handle->callback)(handle, handle->userData, transfer_done, tcds_done);
+            (handle->callback)(handle, handle->userData, transfer_done, (tcds_done >= 0) ? (uint32_t)tcds_done : 0U);
         }
 
         /*
