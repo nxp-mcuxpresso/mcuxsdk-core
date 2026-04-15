@@ -81,6 +81,21 @@ module CodeWarrior
         @operations.set_attribute_node('com.freescale.cdt.debug.cw.memConfigPathList', 'listAttribute', path)
       end
 
+      def set_core_index(index)
+        @operations.set_attribute_node('com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.coreIndex', 'intAttribute', index.to_s)
+      end
+
+      def set_smp(value)
+        @operations.set_attribute_node('com.freescale.cdt.debug.cw.CW_SHADOWED_PREF.Embedded Initialization.smp', 'booleanAttribute', value.to_s)
+      end
+
+      def set_smp_cores(core_indices)
+        @xml.xpath("launchConfiguration/listAttribute[@key = \"com.freescale.cdt.debug.cw.SMPCores\"]/listEntry").each(&:remove)
+        core_indices.each do |index|
+          @operations.set_attribute_node('com.freescale.cdt.debug.cw.SMPCores', 'listAttribute', index.to_s)
+        end
+      end
+
       private
 
       class DocumentOperations

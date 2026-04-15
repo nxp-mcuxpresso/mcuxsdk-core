@@ -38,6 +38,10 @@ module CodeWarrior
         super
       end
 
+      def add_project_reference(*args)
+        super
+      end
+
       def project_parent_path(path)
           Core.assert(path.is_a?(String)) do
               "param is not a string"

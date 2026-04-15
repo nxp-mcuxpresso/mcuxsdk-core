@@ -419,7 +419,8 @@ module SDKGenerator
           manifest_schema_dir: manifest_schema_dir,
           compiler: specific_compiler,
           type: project_info[:language],
-          toolchain_version: project_info[:toolchain_version]
+          toolchain_version: project_info[:toolchain_version],
+          corename: project_info[:corename]
         }
 
         if project_class_name = get_toolchain_project_class(tool_key, project_info[:type])
@@ -719,12 +720,18 @@ module SDKGenerator
         when 'memory_config_file'
           file_supported_targets.each do |target|
             project_instance.set_memory_config_file(target.downcase, source['source'], rootdir: 'default_path') if project_instance.methods.include?(:set_memory_config_file)
+            if source.safe_key?('apply_targets') && project_instance.methods.include?(:flag_apply_targets)
+              project_instance.flag_apply_targets(target.downcase, source['apply_targets'].to_s, 'memory_config_file')
+            end
           end
           add_source_file(project_instance, source, tool_key, project_info)
           # set target initialization file
         when 'target_initialization_file'
           file_supported_targets.each do |target|
             project_instance.set_target_initialization_file(target.downcase, source['source'], rootdir: 'default_path')  if project_instance.methods.include?(:set_target_initialization_file)
+            if source.safe_key?('apply_targets') && project_instance.methods.include?(:flag_apply_targets)
+              project_instance.flag_apply_targets(target.downcase, source['apply_targets'].to_s, 'target_initialization_file')
+            end
           end
           add_source_file(project_instance, source, tool_key, project_info)
           # set preinclude file
@@ -960,6 +967,10 @@ module SDKGenerator
 
             project_instance.add_sys_path_recursively(identifier, include['path'], rootdir: 'default_path') if project_instance.methods.include?(:add_sys_search_path)
           end
+        end
+        # Set connected targets (coreIndex/smp) for codewarrior .launch files
+        if content.key?('connected_targets') && tool_key == 'codewarrior'
+          project_instance.set_connected_targets(identifier, content['connected_targets']) if project_instance.methods.include?(:set_connected_targets)
         end
 
         # Add binary-file
@@ -1245,6 +1256,11 @@ module SDKGenerator
           end
           # save project for IAR or Keil platform, arguments is for adding shared projects in the same workspace
           generated_files[tool_key] |= project_instance.save(shared_projects_info, project_info[:using_shared_workspace], project_info[:shared_workspace] || project_name)
+        elsif tool_key == 'codewarrior' && project_info[:sharing_workspace]
+          project_info[:sharing_workspace].each do |project_item|
+            project_instance.add_sharing_project(project_item) if project_instance.methods.include?(:add_sharing_project)
+          end
+          generated_files[tool_key] |= project_instance.save
         else
           # save project for other platform
           generated_files[tool_key] |= project_instance.save

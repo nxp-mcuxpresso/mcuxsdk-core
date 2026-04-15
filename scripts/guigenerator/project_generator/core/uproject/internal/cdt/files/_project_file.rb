@@ -56,6 +56,21 @@ module Cdt
             XmlUtils.save(@xml, path)
         end
 
+        # Add a project reference to <projects> node
+        # ==== arguments
+        # name      - referenced project name (text content)
+        # location  - location URI attribute value
+        def add_project_reference(name, location)
+            projects_node = @xml.at_xpath('/projectDescription/projects')
+            Core.assert(!projects_node.nil?) do
+                "node '/projectDescription/projects' does not exist"
+            end
+            project_node = Nokogiri::XML::Node.new('project', @xml)
+            project_node['location'] = location
+            project_node.content = name
+            projects_node << project_node
+        end
+
         # Add new Eclipse variable
         # ==== arguments
         # name      - variable name

@@ -77,6 +77,41 @@ module CodeWarrior
         end
       end
 
+      def set_per_core_init_properties(target, initialize_targets_str, init_path, chipset, chip, core_arch)
+        init_targets = initialize_targets_str.split(/\s+/)
+        base_key = "propertySet.[cw.dbg.ct.bareboard].com.freescale.cw.system.dsc.#{chipset}.#{chip}"
+        max_idx = init_targets.filter_map { |id| id[/_core(\d+)$/i, 1]&.to_i }.max || 0
+        @operations.hosts.each do |key, nodes|
+          next unless key.include?(target)
+          (0..max_idx).each do |core_idx|
+            if init_targets.any? { |id| id.end_with?("_core#{core_idx}") }
+              @operations.add_or_update_target_property(nodes, "#{base_key}.#{core_idx}.#{core_arch}.initPath", init_path)
+              @operations.add_or_update_target_property(nodes, "#{base_key}.#{core_idx}.#{core_arch}.useInitFile", 'true')
+            else
+              @operations.add_or_update_target_property(nodes, "#{base_key}.#{core_idx}.#{core_arch}.useInitFile", 'false')
+            end
+          end
+          @operations.add_or_update_target_property(nodes, "#{base_key}.useInitFile", 'true')
+        end
+      end
+
+      def set_per_core_mem_config_properties(target, apply_targets_str, mem_path, chipset, chip, core_arch)
+        apply_targets = apply_targets_str.split(/\s+/)
+        base_key = "propertySet.[cw.dbg.ct.bareboard].com.freescale.cw.system.dsc.#{chipset}.#{chip}"
+        max_idx = apply_targets.filter_map { |id| id[/_core(\d+)$/i, 1]&.to_i }.max || 0
+        @operations.hosts.each do |key, nodes|
+          next unless key.include?(target)
+          (0..max_idx).each do |core_idx|
+            if apply_targets.any? { |id| id.end_with?("_core#{core_idx}") }
+              @operations.add_or_update_target_property(nodes, "#{base_key}.#{core_idx}.#{core_arch}.memConfigPath", mem_path)
+              @operations.add_or_update_target_property(nodes, "#{base_key}.#{core_idx}.#{core_arch}.useMemoryConfigFile", 'true')
+            else
+              @operations.add_or_update_target_property(nodes, "#{base_key}.#{core_idx}.#{core_arch}.useMemoryConfigFile", 'false')
+            end
+          end
+          @operations.add_or_update_target_property(nodes, "#{base_key}.useMemoryConfigFile", 'true')
+        end
+      end
 
       private
 
@@ -148,6 +183,24 @@ module CodeWarrior
           end
           if node[key].include?('${res}') && map['RES']
             node[key] = node[key].gsub('${res}', map['RES'])
+          end
+        end
+
+        def add_or_update_target_property(nodes, key, value)
+          xpath = "APSC_Memento/host/properties/property[@key = \"#{key}\"]"
+          node = nodes.at_xpath(xpath)
+          if node
+            node['value'] = value
+          else
+            target_props = nodes.at_xpath(
+              "APSC_Memento/host[properties/property[@key = \"propertySet.[cw.dbg.main].systemType\"]]/properties"
+            )
+            if target_props
+              new_node = Nokogiri::XML::Node.new('property', nodes)
+              new_node['key'] = key
+              new_node['value'] = value
+              target_props << new_node
+            end
           end
         end
 
