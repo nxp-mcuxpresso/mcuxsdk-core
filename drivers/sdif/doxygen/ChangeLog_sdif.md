@@ -1,5 +1,10 @@
 # SDIF
 
+## [2.1.1]
+
+- Bug Fixes
+  - Fixed some code quality issues.
+
 ## [2.1.0]
 
 - Improvements

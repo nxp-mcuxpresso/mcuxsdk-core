@@ -21,8 +21,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief Driver version 2.0.15. */
-#define FSL_SDIF_DRIVER_VERSION (MAKE_VERSION(2U, 1U, 0U))
+/*! @brief Driver version */
+#define FSL_SDIF_DRIVER_VERSION (MAKE_VERSION(2U, 1U, 1U))
 /*! @} */
 
 /*! @brief  SDIOCLKCTRL setting
