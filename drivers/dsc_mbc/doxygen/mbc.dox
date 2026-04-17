@@ -1,0 +1,28 @@
+/*!
+@defgroup mbc MBC: Memory Block Checker Driver
+@details The MCUXpresso SDK provides a driver for the Memory Block Checker (MBC)
+submodule of the Trusted Resource Domain Controller (TRDC).
+
+The MBC hardware allows software to configure per-block access policies for
+slave memories for DSC platforms. Each block can independently permit or deny read, write, and
+execute access for the primary bus master and the secondary bus master.
+
+@{
+
+# MBC functions {#MBCFunc}
+
+The MBC driver provides the following functionality:
+ - Query hardware configuration: TRDC_GetMbcHardwareConfig().
+ - Configure memory access control policies: TRDC_MbcSetMemoryAccessConfig().
+ - Configure individual memory block access: TRDC_MbcSetMemoryBlockConfig().
+ - Clear access violation errors: TRDC_MbcClearError().
+
+# Typical use case {#MBCTypical}
+
+## Configure and test a MBC memory block {#MBCConfig}
+
+Refer to the driver example code located at
+<em>examples/driver_examples/dsc_mbc/basic/mbc.c</em>.
+
+*/
+/*! @} */
