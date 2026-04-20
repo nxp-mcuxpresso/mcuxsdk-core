@@ -1,0 +1,18 @@
+1. This template is for eDMA3 peripheral (per-channel register architecture).
+
+2. The init function should do as below
+   function declaration
+   {
+      insert fsl_edma.template
+      insert several fsl_edma_tcd.template (optional, for tcd0~tcd7)
+      insert several fsl_edma_start.template
+   }
+
+3. Macro definition.
+      fsl_edma_tcd.template
+          ${CHANNEL}$ must be 0, 1, 2, 3, 4, 5, 6 or 7, don't add any suffix for the number, say 0U or 1U is not allowed.
+
+      fsl_edma_start.template:
+          ${VPREFIX}$_CHn_CSR_INIT_MASK rule:
+              For each channel n (0-7), the mask should include the bits to be configured
+              in CH_CSR (ERQ, EARQ, EEI, etc.)
