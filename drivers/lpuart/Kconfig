@@ -1,4 +1,4 @@
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -12,7 +12,7 @@ config MCUX_HAS_COMPONENT_driver.lpuart_edma
 
 config MCUX_HAS_COMPONENT_driver.lpuart
     bool
-    default y if MCUX_HW_IP_DriverType_LPUART
+    default y if MCUX_HW_IP_DriverType_LPUART || MCUX_HW_IP_DriverType_DSC_LPUART
 
 config MCUX_COMPONENT_driver.lpuart_dma
     bool "lpuart_dma"
