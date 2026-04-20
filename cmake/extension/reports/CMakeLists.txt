@@ -146,3 +146,30 @@ if(NOT ${PAHOLE} STREQUAL PAHOLE-NOTFOUND)
     USES_TERMINAL
     )
 endif()
+
+set(dashboard_args
+    --output ${CMAKE_BINARY_DIR}/dashboard
+    --sdk-base ${SdkRootDirPath}
+    --bin-name ${APPLICATION_BINARY_NAME}
+)
+if(DEFINED board)
+  list(APPEND dashboard_args --board ${board})
+endif()
+if(DEFINED APPLICATION_SOURCE_DIR)
+  list(APPEND dashboard_args --app-source-dir ${APPLICATION_SOURCE_DIR})
+endif()
+if(DEFINED WEST_TOPDIR)
+  list(APPEND dashboard_args --topdir ${WEST_TOPDIR})
+endif()
+
+add_custom_target(
+  dashboard
+  ${PYTHON_EXECUTABLE}
+  ${SdkRootDirPath}/scripts/dashboard/dashboard.py
+  ${dashboard_args}
+  --open
+  ${CMAKE_BINARY_DIR}
+  DEPENDS ${APPLICATION_BINARY_NAME}
+  USES_TERMINAL
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
