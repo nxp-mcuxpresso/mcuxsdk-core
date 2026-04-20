@@ -46,6 +46,18 @@ static void *s_flexioType[FLEXIO_HANDLE_COUNT];
 /*< @brief pointer to array of FLEXIO Isr. */
 static flexio_isr_t s_flexioIsr[FLEXIO_HANDLE_COUNT];
 
+/*!
+ * @brief Common initial layout for FlexIO simulated peripheral types.
+ *
+ * @note This assumes all FlexIO simulated peripheral base types registered by
+ * FLEXIO_RegisterHandleIRQ() have FLEXIO_Type * as their first structure
+ * member.
+ */
+typedef struct _flexio_simulated_type
+{
+    FLEXIO_Type *flexioBase; /*!< FlexIO base pointer. */
+} flexio_simulated_type_t;
+
 /* FlexIO common IRQ Handler. */
 static void FLEXIO_CommonIRQHandler(void);
 
@@ -546,11 +558,18 @@ void FLEXIO3_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 void FLEXIO_CommonDriverIRQHandler(uint32_t instance);
 void FLEXIO_CommonDriverIRQHandler(uint32_t instance)
 {
+    uint32_t index;
+
     if (instance < ARRAY_SIZE(s_flexioBases))
     {
-        if (s_flexioHandle[instance] != NULL)
+        for (index = 0U; index < FLEXIO_HANDLE_COUNT; index++)
         {
-            s_flexioIsr[instance](s_flexioType[instance], s_flexioHandle[instance]);
+            if ((s_flexioHandle[index] != NULL) &&
+                (MSDK_REG_SECURE_ADDR(((flexio_simulated_type_t *)s_flexioType[index])->flexioBase) ==
+                 MSDK_REG_SECURE_ADDR(s_flexioBases[instance])))
+            {
+                s_flexioIsr[index](s_flexioType[index], s_flexioHandle[index]);
+            }
         }
     }
     SDK_ISR_EXIT_BARRIER;
