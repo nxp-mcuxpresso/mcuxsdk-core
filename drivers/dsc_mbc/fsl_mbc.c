@@ -110,7 +110,7 @@ void TRDC_MbcSetMemoryBlockConfig(TRDC_Type *base, const trdc_mbc_memory_block_c
     assert(NULL != config);
     assert(config->mbcIdx < TRDC_MBC_INDEX_COUNT);
     assert(config->slaveMemoryIdx < TRDC_MBC_SLAVE_COUNT);
-    assert(config->domainIdx < TRDC_MBC_DOMAIN_COUNT);
+    assert(config->domainIdx < FSL_FEATURE_TRDC_MBC_DOMAIN_COUNT);
 
     uint32_t shift      = 4UL * (config->memoryBlockIdx % 8UL);
     uint32_t regAddr    = (uint32_t) & (base->MBC_INDEX[config->mbcIdx].MBC_DOM0_MEM0_BLK_CFG_W[0]);
