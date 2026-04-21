@@ -440,9 +440,9 @@ static inline void SMM_DisableMainCpuIso(SMM_Type *base)
 {
    base->CNFG |= SMM_CNFG_MAIN_ISO_DSBL_MASK;
 #if __CORTEX_M == 33U
-   SDK_DelayAtLeastUs(100000, CLOCK_GetCoreSysClkFreq());
+   SDK_DelayAtLeastUs(10, CLOCK_GetCoreSysClkFreq());
 #else
-   SDK_DelayAtLeastUs(100000, CLOCK_GetAonCoreSysClkFreq());
+   SDK_DelayAtLeastUs(10, CLOCK_GetAonCoreSysClkFreq());
 #endif /* __CORTEX_M */
    base->CNFG &= ~SMM_CNFG_MAIN_ISO_DSBL_MASK;
 }
@@ -456,9 +456,9 @@ static inline void SMM_DisableAonCpuIso(SMM_Type *base)
 {
     base->CNFG |= (SMM_CNFG_AON_ISO_DSBL_MASK);
     #if __CORTEX_M == (33U)
-    SDK_DelayAtLeastUs(100000, CLOCK_GetCoreSysClkFreq());
+    SDK_DelayAtLeastUs(10, CLOCK_GetCoreSysClkFreq());
     #else
-    SDK_DelayAtLeastUs(100000, CLOCK_GetAonCoreSysClkFreq());
+    SDK_DelayAtLeastUs(10, CLOCK_GetAonCoreSysClkFreq());
     #endif /* __CORTEX_M */
     base->CNFG &= ~(SMM_CNFG_AON_ISO_DSBL_MASK);
 }
