@@ -25,6 +25,11 @@ config MCUX_DEPENDENCY_COMPONENT_driver.netc_imx952
                  MCUX_HW_DEVICE_MIMX9523 || MCUX_HW_DEVICE_MIMX9522
 
 
+
+config MCUX_DEPENDENCY_COMPONENT_driver.netc_imx937
+    bool
+    default y if MCUX_HW_DEVICE_MIMX9375
+
 config MCUX_DEPENDENCY_COMPONENT_driver.netc_imx943
     bool
     default y if MCUX_HW_DEVICE_MIMX94398
@@ -45,6 +50,11 @@ config MCUX_COMPONENT_driver.netc_imx952
     bool
     depends on MCUX_DEPENDENCY_COMPONENT_driver.netc_imx952
 
+
+config MCUX_COMPONENT_driver.netc_imx937
+    bool
+    depends on MCUX_DEPENDENCY_COMPONENT_driver.netc_imx937
+
 config MCUX_COMPONENT_driver.netc_imx943
     bool
     depends on MCUX_DEPENDENCY_COMPONENT_driver.netc_imx943
@@ -55,6 +65,7 @@ config MCUX_COMPONENT_driver.netc
     select MCUX_COMPONENT_driver.netc_rt1180 if MCUX_DEPENDENCY_COMPONENT_driver.netc_rt1180
     select MCUX_COMPONENT_driver.netc_imx95 if MCUX_DEPENDENCY_COMPONENT_driver.netc_imx95
     select MCUX_COMPONENT_driver.netc_imx952 if MCUX_DEPENDENCY_COMPONENT_driver.netc_imx952
+    select MCUX_COMPONENT_driver.netc_imx937 if MCUX_DEPENDENCY_COMPONENT_driver.netc_imx937
     select MCUX_COMPONENT_driver.netc_imx943 if MCUX_DEPENDENCY_COMPONENT_driver.netc_imx943
     depends on MCUX_HAS_COMPONENT_driver.netc
 
@@ -69,10 +80,10 @@ config MCUX_COMPONENT_driver.netc_phywrapper
     default y
     depends on MCUX_COMPONENT_driver.netc
     depends on MCUX_DEPENDENCY_COMPONENT_driver.netc_imx95 || MCUX_DEPENDENCY_COMPONENT_driver.netc_imx943 ||\
-               MCUX_DEPENDENCY_COMPONENT_driver.netc_imx952
+               MCUX_DEPENDENCY_COMPONENT_driver.netc_imx952 || MCUX_DEPENDENCY_COMPONENT_driver.netc_imx937
 
 config MCUX_COMPONENT_driver.netc_msg
     bool "netc VSI-PSI message"
     depends on MCUX_COMPONENT_driver.netc
     depends on MCUX_DEPENDENCY_COMPONENT_driver.netc_imx95 || MCUX_DEPENDENCY_COMPONENT_driver.netc_imx943 ||\
-               MCUX_DEPENDENCY_COMPONENT_driver.netc_imx952
+               MCUX_DEPENDENCY_COMPONENT_driver.netc_imx952 || MCUX_DEPENDENCY_COMPONENT_driver.netc_imx937
