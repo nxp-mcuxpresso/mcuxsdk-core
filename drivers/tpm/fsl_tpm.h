@@ -30,8 +30,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief TPM driver version 2.4.5. */
-#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 5))
+/*! @brief TPM driver version 2.4.6. */
+#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 6))
 /*! @} */
 
 /*!
@@ -72,7 +72,9 @@ typedef enum _tpm_chnl
 typedef enum _tpm_pwm_mode
 {
     kTPM_EdgeAlignedPwm = 0U, /*!< Edge aligned PWM */
+#if !(defined(FSL_FEATURE_TPM_HAS_NO_SC_CPWMS) && FSL_FEATURE_TPM_HAS_NO_SC_CPWMS)
     kTPM_CenterAlignedPwm,    /*!< Center aligned PWM */
+#endif
 #if defined(FSL_FEATURE_TPM_HAS_COMBINE) && FSL_FEATURE_TPM_HAS_COMBINE
     kTPM_CombinedPwm /*!< Combined PWM (Edge-aligned, center-aligned, or asymmetrical PWMs can be obtained in combined
                         mode using different software configurations) */
