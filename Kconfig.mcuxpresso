@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -89,6 +89,7 @@ menu "FreeRTOS"
     osource "rtos/freertos/coremqtt/Kconfig"
     osource "rtos/freertos/corepkcs11/Kconfig"
     osource "rtos/freertos/freertos-plus-tcp/Kconfig"
+    osource "rtos/freertos/lab-project-freertos-posix/Kconfig"
 endmenu
 menu "Eclipse ThreadX"
     osource "rtos/eclipse-threadx/threadx/Kconfig"
@@ -100,5 +101,3 @@ menu "External Modules"
     osource "$(KCONFIG_BINARY_DIR)/Kconfig.modules"
 
 endmenu
-
-

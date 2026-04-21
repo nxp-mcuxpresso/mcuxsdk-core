@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -20,6 +20,7 @@ mcux_add_cmakelists(${SdkRootDirPath}/rtos/freertos/corehttp OPTIONAL)
 mcux_add_cmakelists(${SdkRootDirPath}/rtos/freertos/corejson OPTIONAL)
 mcux_add_cmakelists(${SdkRootDirPath}/rtos/freertos/coremqtt OPTIONAL)
 mcux_add_cmakelists(${SdkRootDirPath}/rtos/freertos/corepkcs11 OPTIONAL)
+mcux_add_cmakelists(${SdkRootDirPath}/rtos/freertos/lab-project-freertos-posix OPTIONAL)
 mcux_add_cmakelists(${SdkRootDirPath}/rtos/freertos/freertos-kernel OPTIONAL)
 include(${SdkRootDirPath}/rtos/eclipse-threadx/threadx/mcux.cmake OPTIONAL)
 mcux_add_cmakelists(${SdkRootDirPath}/middleware/usb OPTIONAL)
