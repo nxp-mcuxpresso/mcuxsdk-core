@@ -1814,6 +1814,15 @@ FCT_PLACEMENT void flash_cache_speculation_control(bool isPreProcess, FMU_Type *
 
 void flash_cache_invalidate(void)
 {
+    /* save previous OCMDR0 value */
+    volatile uint32_t reg_sav = SMSCM->OCMDR0;
+    /* Disable flash cache : in the absence of specific cache invalidation function */
+    flash_cache_disable();
+    __ISB();
+    __DSB();
+    /* Re-enable Flash cache by restoring previous configuration */ 
+    SMSCM->OCMDR0 = reg_sav;
+
 }
 
 #else
