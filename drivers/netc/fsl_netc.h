@@ -53,7 +53,7 @@
 #define FSL_NETC_DRIVER_VERSION (MAKE_VERSION(2, 10, 4))
 
 /*! @brief Macro to divides an address into a low 32 bits and a possible high 32 bits */
-#define NETC_ADDR_LOW_32BIT(x)  ((uint32_t)(x) & 0xFFFFFFFFU)
+#define NETC_ADDR_LOW_32BIT(x)  ((uint32_t)((x) & 0xFFFFFFFFU))
 #define NETC_ADDR_HIGH_32BIT(x) ((4U != sizeof(uintptr_t)) ? (((uintptr_t)(x) >> 32U) & 0xFFFFFFFFU) : 0U)
 
 /*! @brief Status code for the NETC module */
