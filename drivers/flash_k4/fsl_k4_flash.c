@@ -360,7 +360,7 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
     {
         status = flash_check_user_key(key);
     }
-    
+
     if (status == kStatus_FLASH_Success)
     {
 #if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
@@ -426,6 +426,8 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
          * Data cache invalidation is only on KW43/MCXW70.
          */
         flash_cache_invalidate();
+        flash_cache_speculation_control(true, base);
+
 #endif
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
@@ -464,6 +466,8 @@ status_t FLASH_EraseAll(FMU_Type *base, uint32_t key)
          * Data cache invalidation is only on KW43/MCXW70.
          */
         flash_cache_invalidate();
+        flash_cache_speculation_control(true, base);
+
 #endif
     }
     else
@@ -650,6 +654,7 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
          * Data cache invalidation is only on KW43/MCXW70.
          */
         flash_cache_invalidate();
+        flash_cache_speculation_control(true, base);
 #endif
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
@@ -822,6 +827,8 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
          * Data cache invalidation is only on KW43/MCXW70.
          */
         flash_cache_invalidate();
+        flash_cache_speculation_control(true, base);
+
 #endif
 
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
@@ -857,8 +864,8 @@ status_t FLASH_VerifyErasePhrase(flash_config_t *config, FMU_Type *base, uint32_
             else
             {
                 /* Check for pending operations on this range */
-                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes, 
-                                                       &hasPendingErase, 
+                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes,
+                                                       &hasPendingErase,
                                                        &hasPendingProgram);
                 if (status != kStatus_FLASH_Success)
                 {
@@ -872,7 +879,7 @@ status_t FLASH_VerifyErasePhrase(flash_config_t *config, FMU_Type *base, uint32_
                     break;
                 }
 
-                /* If there's a pending erase that fully covers this range, 
+                /* If there's a pending erase that fully covers this range,
                  * return success (it will be erased) */
                 if (hasPendingErase)
                 {
@@ -956,8 +963,8 @@ status_t FLASH_VerifyErasePage(flash_config_t *config, FMU_Type *base, uint32_t 
             }
             else
             {
-                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes, 
-                                                       &hasPendingErase, 
+                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes,
+                                                       &hasPendingErase,
                                                        &hasPendingProgram);
                 if (status != kStatus_FLASH_Success)
                 {
@@ -1052,8 +1059,8 @@ status_t FLASH_VerifyEraseSector(flash_config_t *config, FMU_Type *base, uint32_
             }
             else
             {
-                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes, 
-                                                       &hasPendingErase, 
+                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes,
+                                                       &hasPendingErase,
                                                        &hasPendingProgram);
                 if (status != kStatus_FLASH_Success)
                 {
@@ -1146,8 +1153,8 @@ status_t FLASH_VerifyEraseIFRPhrase(flash_config_t *config, FMU_Type *base, uint
             }
             else
             {
-                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes, 
-                                                       &hasPendingErase, 
+                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes,
+                                                       &hasPendingErase,
                                                        &hasPendingProgram);
                 if (status != kStatus_FLASH_Success)
                 {
@@ -1335,8 +1342,8 @@ status_t FLASH_VerifyEraseIFRSector(flash_config_t *config, FMU_Type *base, uint
             }
             else
             {
-                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes, 
-                                                       &hasPendingErase, 
+                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes,
+                                                       &hasPendingErase,
                                                        &hasPendingProgram);
                 if (status != kStatus_FLASH_Success)
                 {
@@ -1436,8 +1443,8 @@ status_t FLASH_VerifyEraseAll(FMU_Type *base)
             }
             else
             {
-                status = FLASH_CheckPendingOpsOnRange(0, 0xFFFFFFFFU, 
-                                                       &hasPendingErase, 
+                status = FLASH_CheckPendingOpsOnRange(0, 0xFFFFFFFFU,
+                                                       &hasPendingErase,
                                                        &hasPendingProgram);
                 if (status != kStatus_FLASH_Success)
                 {
@@ -1507,8 +1514,8 @@ status_t FLASH_VerifyEraseBlock(flash_config_t *config, FMU_Type *base, uint32_t
             }
             else
             {
-                status = FLASH_CheckPendingOpsOnRange(0, 0x80000u, 
-                                                       &hasPendingErase, 
+                status = FLASH_CheckPendingOpsOnRange(0, 0x80000u,
+                                                       &hasPendingErase,
                                                        &hasPendingProgram);
                 if (status != kStatus_FLASH_Success)
                 {
@@ -1764,12 +1771,14 @@ status_t FLASH_GetProperty(flash_config_t *config, flash_property_tag_t whichPro
 #if defined(SMSCM)
 FCT_PLACEMENT void flash_cache_disable(void)
 {
+    /* Clear flash cache */
     SMSCM->OCMDR0 = (SMSCM->OCMDR0 & (~SMSCM_FLASH_CACHE_CTRL_MASK)) | SMSCM_FLASH_CACHE_CTRL(0x1);
+    /* disable flash cache once cache clear was applied */
     SMSCM->OCMDR0 = (SMSCM->OCMDR0 & (~SMSCM_FLASH_CACHE_CTRL_MASK)) | SMSCM_FLASH_CACHE_CTRL(0x8);
+    /* disable flash speculation buffer and data prefetch */
     SMSCM->OCMDR0 = (SMSCM->OCMDR0 & (~SMSCM_FLASH_SPECULATION_CTRL_MASK)) | SMSCM_FLASH_SPECULATION_CTRL(0x3);
     __ISB();
     __DSB();
-
 }
 
 FCT_PLACEMENT void flash_cache_speculation_control(bool isPreProcess, FMU_Type *base)
@@ -1815,12 +1824,12 @@ FCT_PLACEMENT void flash_cache_speculation_control(bool isPreProcess, FMU_Type *
 void flash_cache_invalidate(void)
 {
     /* save previous OCMDR0 value */
-    volatile uint32_t reg_sav = SMSCM->OCMDR0;
+    uint32_t reg_sav = SMSCM->OCMDR0;
     /* Disable flash cache : in the absence of specific cache invalidation function */
     flash_cache_disable();
     __ISB();
     __DSB();
-    /* Re-enable Flash cache by restoring previous configuration */ 
+    /* Re-enable Flash cache by restoring previous configuration */
     SMSCM->OCMDR0 = reg_sav;
 
 }
@@ -2263,7 +2272,7 @@ status_t FLASH_Process(void)
                     break;
                 }
             }
-            
+
             /* Remove the operation from the queue */
             status = FLASH_QueueGet(&op);
             if (status != kStatus_FLASH_Success)
@@ -2517,7 +2526,7 @@ static uint32_t FLASH_BufferPoolAvailable(void)
         /* Tail is after head: space at end + space at beginning */
         uint32_t spaceAtEnd = CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE - s_flashAsyncContext.bufferPool.tail;
         uint32_t spaceAtBegin = s_flashAsyncContext.bufferPool.head;
-        
+
         /* Return larger contiguous block */
         available = (spaceAtEnd >= spaceAtBegin) ? spaceAtEnd : spaceAtBegin;
     }
@@ -2609,7 +2618,7 @@ static uint8_t *FLASH_BufferPoolAlloc(uint32_t size, uint32_t *pOffset, uint32_t
 
     /* Perform allocation */
     pBuffer = &s_flashAsyncContext.bufferPool.buffer[allocOffset];
-    
+
     /* Update tail pointer */
     s_flashAsyncContext.bufferPool.tail = allocOffset + alignedSize;
     if (s_flashAsyncContext.bufferPool.tail >= CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
@@ -3029,7 +3038,7 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
             {
                 return kStatus_FLASH_AddressError; /* Handle underflow error */
             }
-            
+
             if (alignedLength > 0U)
             {
                 uint32_t endAddress = start + alignedLength - 1U;
@@ -3110,10 +3119,10 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
             uint32_t endAddr = startaddr + pOp->lengthInBytes;
             uint32_t regPrimask = DisableGlobalIRQ();
 
-            status = FLASH_CMD_ReadIntoMISR(s_flashAsyncContext.fmuBase, 
-                                            startaddr, 
-                                            endAddr, 
-                                            pOp->pSeed, 
+            status = FLASH_CMD_ReadIntoMISR(s_flashAsyncContext.fmuBase,
+                                            startaddr,
+                                            endAddr,
+                                            pOp->pSeed,
                                             pOp->pSignature);
             EnableGlobalIRQ(regPrimask);
             break;
@@ -3125,10 +3134,10 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
             uint32_t endAddr = startaddr + pOp->lengthInBytes;
             uint32_t regPrimask = DisableGlobalIRQ();
 
-            status = FLASH_CMD_ReadIFRIntoMISR(s_flashAsyncContext.fmuBase, 
-                                               startaddr, 
-                                               endAddr, 
-                                               pOp->pSeed, 
+            status = FLASH_CMD_ReadIFRIntoMISR(s_flashAsyncContext.fmuBase,
+                                               startaddr,
+                                               endAddr,
+                                               pOp->pSeed,
                                                pOp->pSignature);
             EnableGlobalIRQ(regPrimask);
             break;
@@ -3142,8 +3151,8 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
 
 #if defined(SMSCM) || defined(SYSCON_FMC0_CTRL_DFC_MASK)
     /* Invalidate cache after flash operations */
-    if ((pOp->opType == kFlashAsyncOp_Erase) || 
-        (pOp->opType == kFlashAsyncOp_Program) || 
+    if ((pOp->opType == kFlashAsyncOp_Erase) ||
+        (pOp->opType == kFlashAsyncOp_Program) ||
         (pOp->opType == kFlashAsyncOp_ProgramPage))
     {
         flash_cache_invalidate();
@@ -3286,7 +3295,7 @@ static void FLASH_ApplyPendingOpsToReadBuffer(uint32_t readAddr, uint8_t *pDst, 
  * @retval kStatus_FLASH_Success Check completed.
  * @retval kStatus_Fail          Mutex error.
  */
-static status_t FLASH_CheckPendingOpsOnRange(uint32_t startAddr, 
+static status_t FLASH_CheckPendingOpsOnRange(uint32_t startAddr,
                                               uint32_t length,
                                               bool *pHasPendingErase,
                                               bool *pHasPendingProgram)

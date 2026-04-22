@@ -1,5 +1,12 @@
 # FLASH
 
+## [2.3.5]
+
+- Improvement
+  - Add flash_cache_disable implementation for KW45, KW47 platforms.
+    In the absence of flash cache disable functionality, the flash module will use software workaround to prevent stale data from being returned, by disabling the cache and re-enabling it.
+
+
 ## [2.3.4]
 
 - Improvement
@@ -13,7 +20,7 @@
 ## [2.3.2]
 
 - Improvement
- - Enabled the kFLASH_PropertyPflash1SectorSize properity support in FLASH_GetProperty API.
+ - Enabled the kFLASH_PropertyPflash1SectorSize property support in FLASH_GetProperty API.
 
 ## [2.3.1]
 
