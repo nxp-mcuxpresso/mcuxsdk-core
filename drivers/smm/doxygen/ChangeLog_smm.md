@@ -3,6 +3,7 @@
 ## [2.2.0]
 - New Features
     - Added APIs to clear wakeup source status.
+    - Updated SMM driver register field mask names.
 
 ## [2.1.2]
 
