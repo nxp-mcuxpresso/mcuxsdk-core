@@ -1,5 +1,10 @@
 # QTMR
 
+## [2.3.3]
+
+- Improvements
+  - Added support for platforms without Timer Channel DMA Enable Register using FSL_FEATURE_TMR_HAS_NO_DMA_REGISTER.
+
 ## [2.3.2]
 
 - Bug Fixes

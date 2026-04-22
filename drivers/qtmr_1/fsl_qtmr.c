@@ -344,7 +344,9 @@ void QTMR_EnableInterrupts(TMR_Type *base, qtmr_channel_selection_t channel, uin
     if ((mask & (uint16_t)kQTMR_EdgeInterruptEnable) != 0UL)
     {
         /* Restriction: Do not set both SCTRL[IEFIE] and DMA[IEFDE] */
+#if !(defined(FSL_FEATURE_TMR_HAS_NO_DMA_REGISTER) && FSL_FEATURE_TMR_HAS_NO_DMA_REGISTER)
         base->CHANNEL[channel].DMA &= MCUX_MASK_INVERT_16(TMR_DMA_IEFDE_MASK);
+#endif /* FSL_FEATURE_TMR_HAS_NO_DMA_REGISTER */
         reg |= TMR_SCTRL_IEFIE_MASK;
     }
     base->CHANNEL[channel].SCTRL = reg;
@@ -624,6 +626,7 @@ void QTMR_SetCompareValue(TMR_Type *base, qtmr_channel_selection_t channel, uint
     }
 }
 
+#if !(defined(FSL_FEATURE_TMR_HAS_NO_DMA_REGISTER) && FSL_FEATURE_TMR_HAS_NO_DMA_REGISTER)
 /*!
  * brief Enable the Quad Timer DMA.
  *
@@ -687,6 +690,7 @@ void QTMR_DisableDma(TMR_Type *base, qtmr_channel_selection_t channel, uint32_t 
     }
     base->CHANNEL[channel].DMA = reg;
 }
+#endif /* FSL_FEATURE_TMR_HAS_NO_DMA_REGISTER */
 
 /*!
  * brief Set PWM output in idle status (high or low).
