@@ -29,6 +29,16 @@
 #define FCT_PLACEMENT
 #endif
 
+#if defined(FWK_UNIT_TEST)
+#define FLASH_STATIC
+#else
+#if (!defined(GCOV_DO_COVERAGE) || (GCOV_DO_COVERAGE == 0))
+#define FLASH_STATIC static
+#else
+#define FLASH_STATIC __WEAK
+#endif
+#endif
+
 #if defined(FLASH_DRIVER_IS_FLASH_RESIDENT) && FLASH_DRIVER_IS_FLASH_RESIDENT
 /*!
  * @brief Constants for execute-in-RAM flash function.
@@ -80,6 +90,32 @@ static status_t ifr_check_param(
 /*! @brief Validate user-provided erase key */
 static status_t flash_check_user_key(uint32_t key);
 
+/*! @brief Common erase sector implementation */
+static status_t flash_erase_sector_impl(FMU_Type *base, uint32_t start, uint32_t lengthInBytes);
+
+/*! @brief Common program phrase implementation */
+static status_t flash_program_phrase_impl(FMU_Type *base, uint32_t start, uint8_t *src, uint32_t lengthInBytes);
+
+/*! @brief Common program page implementation */
+static status_t flash_program_page_impl(FMU_Type *base, uint32_t start, uint8_t *src, uint32_t lengthInBytes);
+
+/*! @brief Common verify erase phrase implementation */
+static status_t flash_verify_erase_phrase_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes);
+
+/*! @brief Common verify erase page implementation */
+static status_t flash_verify_erase_page_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes);
+
+/*! @brief Common verify erase sector implementation */
+static status_t flash_verify_erase_sector_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes);
+
+/*! @brief Common verify erase IFR phrase implementation */
+static status_t flash_verify_erase_ifr_phrase_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes);
+
+/*! @brief Common verify erase IFR page implementation */
+static status_t flash_verify_erase_ifr_page_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes);
+
+/*! @brief Common verify erase IFR sector implementation */
+static status_t flash_verify_erase_ifr_sector_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes);
 /*******************************************************************************
  * Async Mode Prototypes
  ******************************************************************************/
@@ -110,7 +146,7 @@ static status_t FLASH_QueuePeek(flash_async_op_t *pOp);
 static status_t FLASH_QueueGet(flash_async_op_t *pOp);
 
 /*! @brief Get current queue count */
-static uint32_t FLASH_QueueCount(void);
+FLASH_STATIC uint32_t FLASH_QueueCount(void);
 
 /*! @brief Execute a single flash operation synchronously */
 static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp);
@@ -164,7 +200,7 @@ static void FLASH_QueueInit(void)
  */
 static inline bool FLASH_QueueIsFull(void)
 {
-    return (s_flashAsyncContext.opQueue.count >= CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE);
+    return (FLASH_QueueCount() >= CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE);
 }
 
 /*!
@@ -175,7 +211,7 @@ static inline bool FLASH_QueueIsFull(void)
  */
 static inline bool FLASH_QueueIsEmpty(void)
 {
-    return (s_flashAsyncContext.opQueue.count == 0U);
+    return (FLASH_QueueCount() == 0U);
 }
 
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
@@ -404,22 +440,9 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
         } while (false);
 
 #else
-        /* Sync mode: execute erase immediately (original behavior) */
-        uint32_t endAddress = start + lengthInBytes - 1U;
+        /* Sync mode: execute erase immediately */
+        status = flash_erase_sector_impl(base, start, lengthInBytes);
 
-        while (start <= endAddress)
-        {
-            status = FLASH_CMD_EraseSector(base, start);
-            if (kStatus_FLASH_Success != status)
-            {
-                break;
-            }
-            else
-            {
-                /* Increment to the next sector */
-                start += FLASH_FEATURE_SECTOR_SIZE;
-            }
-        }
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
          * Data cache may contain stale values following a flash programming or erasing operation.
@@ -508,7 +531,7 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
                 status = kStatus_FLASH_InvalidArgument;
                 break;
             }
-
+            
             /* Check if there is enough space, if not try to flush pending operations */
             if ((FLASH_BufferPoolAvailable() < lengthInBytes) || FLASH_QueueIsFull())
             {
@@ -581,73 +604,9 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
         } while (false);
 
 #else
-        /* Sync mode: execute program immediately (original behavior) */
+        /* Sync mode: execute program immediately */
+        status = flash_program_phrase_impl(base, start, src, lengthInBytes);
 
-        /* Align length to whole phrase */
-        uint32_t alignedLength = ALIGN_DOWN(lengthInBytes, sizeof(uint8_t) * FLASH_FEATURE_PHRASE_SIZE);
-        uint32_t extraBytes    = 0;
-        uint32_t *srcWord      = (uint32_t *)(uintptr_t)src;
-
-        if (lengthInBytes >= alignedLength)
-        {
-            extraBytes = lengthInBytes - alignedLength;
-        }
-        else
-        {
-            return kStatus_FLASH_AddressError; /* Handle underflow error */
-        }
-
-        if (alignedLength > 0U)
-        {
-            uint32_t endAddress;
-            if (start > UINT32_MAX - alignedLength)
-            {
-                return kStatus_FLASH_AddressError; /* Handle overflow error */
-            }
-            endAddress = start + alignedLength - 1U;
-            while (start <= endAddress)
-            {
-                status = FLASH_CMD_ProgramPhrase(base, start, srcWord);
-                if (kStatus_FLASH_Success != status)
-                {
-                    break;
-                }
-                else
-                {
-                    /* Increment to the next phrase */
-                    start += FLASH_FEATURE_PHRASE_SIZE;
-                    srcWord += FLASH_FEATURE_PHRASE_SIZE_IN_WORD;
-                }
-            }
-        }
-        else
-        {
-            ; /* MISRA */
-        }
-
-        if ((kStatus_FLASH_Success == status) && (extraBytes > 0U))
-        {
-            uint32_t extraData[4] = {0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu};
-
-            /* Copy extra bytes to phrase buffer */
-            union
-            {
-                uint32_t *src;
-                const void *srcVoid;
-            } srcPtr;
-            srcPtr.src = srcWord;
-
-            union
-            {
-                uint32_t *xData;
-                void *xDataVoid;
-            } xDataPtr;
-            xDataPtr.xData = (uint32_t *)&extraData[0];
-
-            (void)memcpy(xDataPtr.xDataVoid, srcPtr.srcVoid, extraBytes);
-
-            status = FLASH_CMD_ProgramPhrase(base, start, extraData);
-        }
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
          * Data cache may contain stale values following a flash programming or erasing operation.
@@ -768,59 +727,10 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
             status = kStatus_FLASH_Success;
 
         } while (false);
-
 #else
-        /* Sync mode: execute program page immediately (original behavior) */
+        /* Sync mode: execute program page immediately */
+        status = flash_program_page_impl(base, start, src, lengthInBytes);
 
-        /* Align length to whole page */
-        uint32_t alignedLength = ALIGN_DOWN(lengthInBytes, sizeof(uint8_t) * FLASH_FEATURE_PAGE_SIZE);
-        uint32_t extraBytes    = 0U;
-        uint32_t *srcWord      = (uint32_t *)(uintptr_t)src;
-
-        if (lengthInBytes >= alignedLength)
-        {
-            extraBytes = lengthInBytes - alignedLength;
-        }
-        else
-        {
-            return kStatus_FLASH_AddressError; /* Handle underflow error */
-        }
-
-        if (alignedLength > 0U)
-        {
-            uint32_t endAddress;
-            if (start > UINT32_MAX - alignedLength)
-            {
-                return kStatus_FLASH_AddressError; /* Handle overflow error */
-            }
-            endAddress = start + alignedLength - 1U;
-            while (start <= endAddress)
-            {
-                status = FLASH_CMD_ProgramPage(base, start, srcWord);
-                if (kStatus_FLASH_Success != status)
-                {
-                    break;
-                }
-                else
-                {
-                    /* Increment to the next page */
-                    start += FLASH_FEATURE_PAGE_SIZE;
-                    srcWord += FLASH_FEATURE_PAGE_SIZE_IN_WORD;
-                }
-            }
-        }
-        else
-        {
-            ; /* MISRA */
-        }
-
-        if ((kStatus_FLASH_Success == status) && (extraBytes > 0U))
-        {
-            uint32_t extraData[32];
-            (void)memset(extraData, 0xFF, sizeof(extraData));
-            (void)memcpy((void *)extraData, (const void *)srcWord, extraBytes);
-            status = FLASH_CMD_ProgramPage(base, start, extraData);
-        }
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
          * Data cache may contain stale values following a flash programming or erasing operation.
@@ -889,49 +799,16 @@ status_t FLASH_VerifyErasePhrase(flash_config_t *config, FMU_Type *base, uint32_
             }
 
             /* No pending ops affecting this range - verify synchronously */
-            {
-                uint32_t endAddress;
-                if (startaddr > UINT32_MAX - lengthInBytes)
-                {
-                    status = kStatus_FLASH_AddressError;
-                    break;
-                }
-                endAddress = startaddr + lengthInBytes - 1U;
-                uint32_t regPrimask = DisableGlobalIRQ();
-                while (startaddr <= endAddress)
-                {
-                    status = FLASH_CMD_VerifyErasePhrase(base, startaddr);
-                    if (kStatus_FLASH_Success != status)
-                    {
-                        break;
-                    }
-                    startaddr += FLASH_FEATURE_PHRASE_SIZE;
-                }
-                EnableGlobalIRQ(regPrimask);
-            }
+            uint32_t regPrimask = DisableGlobalIRQ();
+            status = flash_verify_erase_phrase_impl(base, startaddr, lengthInBytes);
+            EnableGlobalIRQ(regPrimask);
+
         } while (false);
 
 #else
         /* Sync mode: execute verify erase phrase immediately (original behavior) */
-        uint32_t endAddress;
-        if (lengthInBytes > UINT32_MAX - startaddr)
-        {
-            return kStatus_FLASH_AddressError; // Handle overflow error
-        }
-        endAddress = startaddr + lengthInBytes - 1U;
-        while (startaddr <= endAddress)
-        {
-            status = FLASH_CMD_VerifyErasePhrase(base, startaddr);
-            if (kStatus_FLASH_Success != status)
-            {
-                break;
-            }
-            else
-            {
-                /* Increment to the next phrase */
-                startaddr += FLASH_FEATURE_PHRASE_SIZE;
-            }
-        }
+         status = flash_verify_erase_phrase_impl(base, startaddr, lengthInBytes);
+
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
     else
@@ -985,48 +862,15 @@ status_t FLASH_VerifyErasePage(flash_config_t *config, FMU_Type *base, uint32_t 
             }
 
             /* No pending ops affecting this range - verify synchronously */
-            {
-                uint32_t endAddress;
-                if (startaddr > UINT32_MAX - lengthInBytes)
-                {
-                    status = kStatus_FLASH_AddressError;
-                    break;
-                }
-                endAddress = startaddr + lengthInBytes - 1U;
-                uint32_t regPrimask = DisableGlobalIRQ();
-                while (startaddr <= endAddress)
-                {
-                    status = FLASH_CMD_VerifyErasePage(base, startaddr);
-                    if (kStatus_FLASH_Success != status)
-                    {
-                        break;
-                    }
-                    startaddr += FLASH_FEATURE_PAGE_SIZE;
-                }
-                EnableGlobalIRQ(regPrimask);
-            }
+            uint32_t regPrimask = DisableGlobalIRQ();
+            status = flash_verify_erase_page_impl(base, startaddr, lengthInBytes);
+            EnableGlobalIRQ(regPrimask);
+
         } while (false);
 #else
         /* Sync mode: execute verify erase page immediately (original behavior) */
-        uint32_t endAddress;
-        if (startaddr > UINT32_MAX - lengthInBytes)
-        {
-            return kStatus_FLASH_AddressError; // Handle overflow error
-        }
-        endAddress = startaddr + lengthInBytes - 1U;
-        while (startaddr <= endAddress)
-        {
-            status = FLASH_CMD_VerifyErasePage(base, startaddr);
-            if (kStatus_FLASH_Success != status)
-            {
-                break;
-            }
-            else
-            {
-                /* Increment to the next page */
-                startaddr += FLASH_FEATURE_PAGE_SIZE;
-            }
-        }
+        status = flash_verify_erase_page_impl(base, startaddr, lengthInBytes);
+
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
     else
@@ -1080,49 +924,15 @@ status_t FLASH_VerifyEraseSector(flash_config_t *config, FMU_Type *base, uint32_
                 }
             }
 
-            {
-                uint32_t endAddress;
-                if (startaddr > UINT32_MAX - lengthInBytes)
-                {
-                    status = kStatus_FLASH_AddressError;
-                    break;
-                }
-                endAddress = startaddr + lengthInBytes - 1U;
-                uint32_t regPrimask = DisableGlobalIRQ();
-                while (startaddr <= endAddress)
-                {
-                    status = FLASH_CMD_VerifyEraseSector(base, startaddr);
-                    if (kStatus_FLASH_Success != status)
-                    {
-                        break;
-                    }
-                    startaddr += FLASH_FEATURE_SECTOR_SIZE;
-                }
-                EnableGlobalIRQ(regPrimask);
-            }
+            uint32_t regPrimask = DisableGlobalIRQ();
+            status = flash_verify_erase_sector_impl(base, startaddr, lengthInBytes);
+            EnableGlobalIRQ(regPrimask);
+
         } while (false);
 
 #else
         /* Sync mode: execute verify erase sector immediately (original behavior) */
-        uint32_t endAddress;
-        if (startaddr > UINT32_MAX - lengthInBytes)
-        {
-            return kStatus_FLASH_AddressError; // Handle overflow error
-        }
-        endAddress = startaddr + lengthInBytes - 1U;
-        while (startaddr <= endAddress)
-        {
-            status = FLASH_CMD_VerifyEraseSector(base, startaddr);
-            if (kStatus_FLASH_Success != status)
-            {
-                break;
-            }
-            else
-            {
-                /* Increment to the next sector */
-                startaddr += FLASH_FEATURE_SECTOR_SIZE;
-            }
-        }
+        status = flash_verify_erase_sector_impl(base, startaddr, lengthInBytes);
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
     else
@@ -1174,49 +984,16 @@ status_t FLASH_VerifyEraseIFRPhrase(flash_config_t *config, FMU_Type *base, uint
                 }
             }
 
-            {
-                uint32_t endAddress;
-                if (startaddr > UINT32_MAX - lengthInBytes)
-                {
-                    status = kStatus_FLASH_AddressError;
-                    break;
-                }
-                endAddress = startaddr + lengthInBytes - 1U;
-                uint32_t regPrimask = DisableGlobalIRQ();
-                while (startaddr <= endAddress)
-                {
-                    status = FLASH_CMD_VerifyEraseIFRPhrase(base, startaddr);
-                    if (kStatus_FLASH_Success != status)
-                    {
-                        break;
-                    }
-                    startaddr += FLASH_FEATURE_PHRASE_SIZE;
-                }
-                EnableGlobalIRQ(regPrimask);
-            }
+            uint32_t regPrimask = DisableGlobalIRQ();
+            status = flash_verify_erase_ifr_phrase_impl(base, startaddr, lengthInBytes);
+            EnableGlobalIRQ(regPrimask);
+
         } while (false);
 
 #else
         /* Sync mode: execute verify erase IFR phrase immediately (original behavior) */
-        uint32_t endAddress;
-        if (startaddr > UINT32_MAX - lengthInBytes)
-        {
-            return kStatus_FLASH_AddressError; // Handle overflow error
-        }
-        endAddress = startaddr + lengthInBytes - 1U;
-        while (startaddr <= endAddress)
-        {
-            status = FLASH_CMD_VerifyEraseIFRPhrase(base, startaddr);
-            if (kStatus_FLASH_Success != status)
-            {
-                break;
-            }
-            else
-            {
-                /* Increment to the next phrase */
-                startaddr += FLASH_FEATURE_PHRASE_SIZE;
-            }
-        }
+        status = flash_verify_erase_ifr_phrase_impl(base, startaddr, lengthInBytes);
+
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
     else
@@ -1269,48 +1046,16 @@ status_t FLASH_VerifyEraseIFRPage(flash_config_t *config, FMU_Type *base, uint32
                 }
             }
 
-            {
-                uint32_t endAddress;
-                if (startaddr > UINT32_MAX - lengthInBytes)
-                {
-                    status = kStatus_FLASH_AddressError;
-                    break;
-                }
-                endAddress = startaddr + lengthInBytes - 1U;
-                uint32_t regPrimask = DisableGlobalIRQ();
-                while (startaddr <= endAddress)
-                {
-                    status = FLASH_CMD_VerifyEraseIFRPage(base, startaddr);
-                    if (kStatus_FLASH_Success != status)
-                    {
-                        break;
-                    }
-                    startaddr += FLASH_FEATURE_PAGE_SIZE;
-                }
-                EnableGlobalIRQ(regPrimask);
-            }
+            uint32_t regPrimask = DisableGlobalIRQ();
+            status = flash_verify_erase_ifr_page_impl(base, startaddr, lengthInBytes);
+            EnableGlobalIRQ(regPrimask);
+
         } while (false);
 
 #else
-        uint32_t endAddress;
-        if (startaddr > UINT32_MAX - lengthInBytes)
-        {
-            return kStatus_FLASH_AddressError; // Handle overflow error
-        }
-        endAddress = startaddr + lengthInBytes - 1U;
-        while (startaddr <= endAddress)
-        {
-            status = FLASH_CMD_VerifyEraseIFRPage(base, startaddr);
-            if (kStatus_FLASH_Success != status)
-            {
-                break;
-            }
-            else
-            {
-                /* Increment to the next page */
-                startaddr += FLASH_FEATURE_PAGE_SIZE;
-            }
-        }
+        /* Sync mode: execute verify erase IFR page immediately (original behavior) */
+        status = flash_verify_erase_ifr_page_impl(base, startaddr, lengthInBytes);
+
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
     else
@@ -1363,49 +1108,16 @@ status_t FLASH_VerifyEraseIFRSector(flash_config_t *config, FMU_Type *base, uint
                 }
             }
 
-            {
-                uint32_t endAddress;
-                if (startaddr > UINT32_MAX - lengthInBytes)
-                {
-                    status = kStatus_FLASH_AddressError;
-                    break;
-                }
-                endAddress = startaddr + lengthInBytes - 1U;
-                uint32_t regPrimask = DisableGlobalIRQ();
-                while (startaddr <= endAddress)
-                {
-                    status = FLASH_CMD_VerifyEraseIFRSector(base, startaddr);
-                    if (kStatus_FLASH_Success != status)
-                    {
-                        break;
-                    }
-                    startaddr += FLASH_FEATURE_SECTOR_SIZE;
-                }
-                EnableGlobalIRQ(regPrimask);
-            }
+            uint32_t regPrimask = DisableGlobalIRQ();
+            status = flash_verify_erase_ifr_sector_impl(base, startaddr, lengthInBytes);
+            EnableGlobalIRQ(regPrimask);
+
         } while (false);
 
 #else
         /* Sync mode: execute verify erase IFR sector immediately (original behavior) */
-        uint32_t endAddress;
-        if (startaddr > UINT32_MAX - lengthInBytes)
-        {
-            return kStatus_FLASH_AddressError; // Handle overflow error
-        }
-        endAddress = startaddr + lengthInBytes - 1U;
-        while (startaddr <= endAddress)
-        {
-            status = FLASH_CMD_VerifyEraseIFRSector(base, startaddr);
-            if (kStatus_FLASH_Success != status)
-            {
-                break;
-            }
-            else
-            {
-                /* Increment to the next sector */
-                startaddr += FLASH_FEATURE_SECTOR_SIZE;
-            }
-        }
+        status = flash_verify_erase_ifr_sector_impl(base, startaddr, lengthInBytes);
+
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
     else
@@ -2115,37 +1827,370 @@ static status_t flash_check_user_key(uint32_t key)
     return status;
 }
 
+/*!
+ * @brief Common erase sector implementation.
+ *
+ * @param base Flash controller base address.
+ * @param start Start address (already validated).
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_erase_sector_impl(FMU_Type *base, uint32_t start, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t endAddress = start + lengthInBytes - 1U;
+
+    while (start <= endAddress)
+    {
+        status = FLASH_CMD_EraseSector(base, start);
+        if (kStatus_FLASH_Success != status)
+        {
+            break;
+        }
+        start += FLASH_FEATURE_SECTOR_SIZE;
+    }
+
+    return status;
+}
+
+/*!
+ * @brief Common program phrase implementation.
+ *
+ * @param base Flash controller base address.
+ * @param start Start address (already validated).
+ * @param src Source data pointer.
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_program_phrase_impl(FMU_Type *base, uint32_t start, uint8_t *src, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t alignedLength = ALIGN_DOWN(lengthInBytes, sizeof(uint8_t) * FLASH_FEATURE_PHRASE_SIZE);
+    uint32_t extraBytes = 0U;
+    uint32_t *srcWord = (uint32_t *)(uintptr_t)src;
+
+    if (lengthInBytes >= alignedLength)
+    {
+        extraBytes = lengthInBytes - alignedLength;
+    }
+    else
+    {
+        return kStatus_FLASH_AddressError;
+    }
+
+    if (alignedLength > 0U)
+    {
+        uint32_t endAddress;
+        if (start > UINT32_MAX - alignedLength)
+        {
+            return kStatus_FLASH_AddressError;
+        }
+        endAddress = start + alignedLength - 1U;
+        
+        while (start <= endAddress)
+        {
+            status = FLASH_CMD_ProgramPhrase(base, start, srcWord);
+            if (kStatus_FLASH_Success != status)
+            {
+                break;
+            }
+            start += FLASH_FEATURE_PHRASE_SIZE;
+            srcWord += FLASH_FEATURE_PHRASE_SIZE_IN_WORD;
+        }
+    }
+
+    if ((kStatus_FLASH_Success == status) && (extraBytes > 0U))
+    {
+        uint32_t extraData[4] = {0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu};
+
+        union
+        {
+            uint32_t *src;
+            const void *srcVoid;
+        } srcPtr;
+        srcPtr.src = srcWord;
+
+        union
+        {
+            uint32_t *xData;
+            void *xDataVoid;
+        } xDataPtr;
+        xDataPtr.xData = (uint32_t *)&extraData[0];
+
+        (void)memcpy(xDataPtr.xDataVoid, srcPtr.srcVoid, extraBytes);
+        status = FLASH_CMD_ProgramPhrase(base, start, extraData);
+    }
+
+    return status;
+}
+
+/*!
+ * @brief Common program page implementation.
+ *
+ * @param base Flash controller base address.
+ * @param start Start address (already validated).
+ * @param src Source data pointer.
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_program_page_impl(FMU_Type *base, uint32_t start, uint8_t *src, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t alignedLength = ALIGN_DOWN(lengthInBytes, sizeof(uint8_t) * FLASH_FEATURE_PAGE_SIZE);
+    uint32_t extraBytes = 0U;
+    uint32_t *srcWord = (uint32_t *)(uintptr_t)src;
+
+    if (lengthInBytes >= alignedLength)
+    {
+        extraBytes = lengthInBytes - alignedLength;
+    }
+    else
+    {
+        return kStatus_FLASH_AddressError;
+    }
+
+    if (alignedLength > 0U)
+    {
+        uint32_t endAddress;
+        if (start > UINT32_MAX - alignedLength)
+        {
+            return kStatus_FLASH_AddressError;
+        }
+        endAddress = start + alignedLength - 1U;
+        
+        while (start <= endAddress)
+        {
+            status = FLASH_CMD_ProgramPage(base, start, srcWord);
+            if (kStatus_FLASH_Success != status)
+            {
+                break;
+            }
+            start += FLASH_FEATURE_PAGE_SIZE;
+            srcWord += FLASH_FEATURE_PAGE_SIZE_IN_WORD;
+        }
+    }
+
+    if ((kStatus_FLASH_Success == status) && (extraBytes > 0U))
+    {
+        uint32_t extraData[32];
+        (void)memset(extraData, 0xFF, sizeof(extraData));
+        (void)memcpy((void *)extraData, (const void *)srcWord, extraBytes);
+        status = FLASH_CMD_ProgramPage(base, start, extraData);
+    }
+
+    return status;
+}
+
+/*!
+ * @brief Common verify erase phrase implementation.
+ *
+ * @param base Flash controller base address.
+ * @param startAddr Start address (already validated and adjusted).
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_verify_erase_phrase_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t endAddress;
+    
+    if (startAddr > UINT32_MAX - lengthInBytes)
+    {
+        return kStatus_FLASH_AddressError;
+    }
+    
+    endAddress = startAddr + lengthInBytes - 1U;
+    
+    while (startAddr <= endAddress)
+    {
+        status = FLASH_CMD_VerifyErasePhrase(base, startAddr);
+        if (kStatus_FLASH_Success != status)
+        {
+            break;
+        }
+        startAddr += FLASH_FEATURE_PHRASE_SIZE;
+    }
+    
+    return status;
+}
+
+/*!
+ * @brief Common verify erase page implementation.
+ *
+ * @param base Flash controller base address.
+ * @param startAddr Start address (already validated and adjusted).
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_verify_erase_page_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t endAddress;
+    
+    if (startAddr > UINT32_MAX - lengthInBytes)
+    {
+        return kStatus_FLASH_AddressError;
+    }
+    
+    endAddress = startAddr + lengthInBytes - 1U;
+    
+    while (startAddr <= endAddress)
+    {
+        status = FLASH_CMD_VerifyErasePage(base, startAddr);
+        if (kStatus_FLASH_Success != status)
+        {
+            break;
+        }
+        startAddr += FLASH_FEATURE_PAGE_SIZE;
+    }
+    
+    return status;
+}
+
+/*!
+ * @brief Common verify erase IFR phrase implementation.
+ *
+ * @param base Flash controller base address.
+ * @param startAddr Start address (already validated and adjusted).
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_verify_erase_ifr_phrase_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t endAddress;
+    
+    if (startAddr > UINT32_MAX - lengthInBytes)
+    {
+        return kStatus_FLASH_AddressError;
+    }
+    
+    endAddress = startAddr + lengthInBytes - 1U;
+    
+    while (startAddr <= endAddress)
+    {
+        status = FLASH_CMD_VerifyEraseIFRPhrase(base, startAddr);
+        if (kStatus_FLASH_Success != status)
+        {
+            break;
+        }
+        startAddr += FLASH_FEATURE_PHRASE_SIZE;
+    }
+    
+    return status;
+}
+
+/*!
+ * @brief Common verify erase IFR page implementation.
+ *
+ * @param base Flash controller base address.
+ * @param startAddr Start address (already validated and adjusted).
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_verify_erase_ifr_page_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t endAddress;
+    
+    if (startAddr > UINT32_MAX - lengthInBytes)
+    {
+        return kStatus_FLASH_AddressError;
+    }
+    
+    endAddress = startAddr + lengthInBytes - 1U;
+    
+    while (startAddr <= endAddress)
+    {
+        status = FLASH_CMD_VerifyEraseIFRPage(base, startAddr);
+        if (kStatus_FLASH_Success != status)
+        {
+            break;
+        }
+        startAddr += FLASH_FEATURE_PAGE_SIZE;
+    }
+    
+    return status;
+}
+
+
+/*!
+ * @brief Common verify erase IFR sector implementation.
+ *
+ * @param base Flash controller base address.
+ * @param startAddr Start address (already validated and adjusted).
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_verify_erase_ifr_sector_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t endAddress;
+    
+    if (startAddr > UINT32_MAX - lengthInBytes)
+    {
+        return kStatus_FLASH_AddressError;
+    }
+    
+    endAddress = startAddr + lengthInBytes - 1U;
+    
+    while (startAddr <= endAddress)
+    {
+        status = FLASH_CMD_VerifyEraseIFRSector(base, startAddr);
+        if (kStatus_FLASH_Success != status)
+        {
+            break;
+        }
+        startAddr += FLASH_FEATURE_SECTOR_SIZE;
+    }
+    
+    return status;
+}
+
+/*!
+ * @brief Common verify erase sector implementation.
+ *
+ * @param base Flash controller base address.
+ * @param startAddr Start address (already validated and adjusted).
+ * @param lengthInBytes Length in bytes (already validated).
+ *
+ * @return Status of the operation.
+ */
+static status_t flash_verify_erase_sector_impl(FMU_Type *base, uint32_t startAddr, uint32_t lengthInBytes)
+{
+    status_t status = kStatus_FLASH_Success;
+    uint32_t endAddress;
+    
+    if (startAddr > UINT32_MAX - lengthInBytes)
+    {
+        return kStatus_FLASH_AddressError;
+    }
+    
+    endAddress = startAddr + lengthInBytes - 1U;
+    
+    while (startAddr <= endAddress)
+    {
+        status = FLASH_CMD_VerifyEraseSector(base, startAddr);
+        if (kStatus_FLASH_Success != status)
+        {
+            break;
+        }
+        startAddr += FLASH_FEATURE_SECTOR_SIZE;
+    }
+    
+    return status;
+}
+
+
 #if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
-/*!
- * @brief Get the number of pending operations in the queue (public API).
- *
- * @return Number of pending operations.
- */
-uint32_t FLASH_GetPendingOperationCount(void)
-{
-    if (!s_flashAsyncContext.initialized)
-    {
-        return 0U;
-    }
-
-    return FLASH_QueueCount();
-}
-
-/*!
- * @brief Check if there are pending operations.
- *
- * @retval true There are pending operations in the queue.
- * @retval false The queue is empty or context not initialized.
- */
-bool FLASH_HasPendingOperations(void)
-{
-    if (!s_flashAsyncContext.initialized)
-    {
-        return false;
-    }
-
-    return (FLASH_QueueCount() > 0U);
-}
 
 /*!
  * @brief Process pending flash operations from the queue.
@@ -2286,9 +2331,9 @@ status_t FLASH_Process(void)
             /* Free buffer if this was a program operation */
             if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
             {
-                    FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
+                FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
             }
-
+            
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
             s_flashAsyncContext.totalOperationsProcessed++;
 #endif
@@ -2302,12 +2347,10 @@ status_t FLASH_Process(void)
             }
 
             /* Limit operations per call to avoid starving other tasks or if erase operation */
-#if defined(CONFIG_FLASH_K4_ASYNC_MAX_OPS_PER_PROCESS)
-            if ((opsProcessed >= CONFIG_FLASH_K4_ASYNC_MAX_OPS_PER_PROCESS) || (op.opType == kFlashAsyncOp_Erase))
+            if (opsProcessed >= CONFIG_FLASH_K4_ASYNC_MAX_OPS_PER_PROCESS)
             {
                 break;
             }
-#endif
         }
 
     } while (false);
@@ -2351,7 +2394,7 @@ status_t FLASH_FlushPendingOperations(uint32_t requiredSize)
             status = kStatus_FLASH_SizeError;
             break;
         }
-
+            
         /* Process operations until we have enough resources (0 means flush all) */
         while (!FLASH_QueueIsEmpty())
         {
@@ -2430,7 +2473,7 @@ static status_t FLASH_AsyncContextInit(flash_config_t *config)
         s_flashAsyncContext.mutexHandle = (osa_mutex_handle_t)s_flashAsyncContext.mutexBuffer;
 
         /* Initialize the mutex for thread-safe access */
-        osaStatus = OSA_MutexCreate((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+        osaStatus = OSA_MutexCreate(s_flashAsyncContext.mutexHandle);
         if (osaStatus != KOSA_StatusSuccess)
         {
             status = kStatus_Fail;
@@ -2482,9 +2525,6 @@ status_t FLASH_AsyncDeinit(void)
             break;
         }
 
-        /* Destroy the mutex */
-        (void)OSA_MutexDestroy((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
-
         /* Clear the context */
         s_flashAsyncContext.initialized    = false;
         s_flashAsyncContext.idleDurationCb = NULL;
@@ -2497,6 +2537,8 @@ status_t FLASH_AsyncDeinit(void)
         /* Reset buffer pool */
         (void)memset(&s_flashAsyncContext.bufferPool, 0, sizeof(flash_circular_buffer_pool_t));
 
+        /* Destroy the mutex */
+        (void)OSA_MutexDestroy(s_flashAsyncContext.mutexHandle);
     } while (false);
 
     return status;
@@ -2555,93 +2597,94 @@ static uint8_t *FLASH_BufferPoolAlloc(uint32_t size, uint32_t *pOffset, uint32_t
     uint32_t     alignedSize;
     uint32_t     allocOffset;
 
-    /* Validate parameters, 0 size is allowed */
-    if ((pOffset == NULL) || (pAllocSize == NULL))
+    do
     {
-        return NULL;
-    }
-
-    /* Initialize output parameters */
-    *pOffset = FLASH_ASYNC_INVALID_BUFFER_OFFSET;
-    *pAllocSize = 0U;
-
-    /* Align size for proper memory alignment */
-    alignedSize = FLASH_ALIGN_UP(size, FLASH_BUFFER_ALIGNMENT);
-
-    /* Check if request exceeds total buffer size */
-    if (alignedSize > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
-    {
-        return NULL;
-    }
-
-    /* Acquire mutex for thread-safe access */
-    osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-    if (osaStatus != KOSA_StatusSuccess)
-    {
-        return NULL;
-    }
-
-    /* Check if enough total space is available */
-    if ((CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE - s_flashAsyncContext.bufferPool.usedBytes) < alignedSize)
-    {
-        /* Not enough space */
-        (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
-        return NULL;
-    }
-
-    /* Try to allocate at tail position */
-    allocOffset = s_flashAsyncContext.bufferPool.tail;
-
-    if (s_flashAsyncContext.bufferPool.usedBytes == 0U)
-    {
-        /* Buffer empty - reset pointers and allocate from start */
-        s_flashAsyncContext.bufferPool.head = 0U;
-        s_flashAsyncContext.bufferPool.tail = 0U;
-        allocOffset = 0U;
-    }
-    else if ((allocOffset + alignedSize) > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
-    {
-        /* Not enough space at end - check if we can wrap to beginning */
-        if (alignedSize <= s_flashAsyncContext.bufferPool.head)
+        /* Validate parameters, 0 size is allowed */
+        if ((pOffset == NULL) || (pAllocSize == NULL))
         {
-            /* Wrap to beginning - waste remaining space at end */
-            /* Note: This fragmentation is acceptable for FIFO usage pattern */
+            break;
+        }
+
+        /* Initialize output parameters */
+        *pOffset = FLASH_ASYNC_INVALID_BUFFER_OFFSET;
+        *pAllocSize = 0U;
+
+        /* Align size for proper memory alignment */
+        alignedSize = FLASH_ALIGN_UP(size, FLASH_BUFFER_ALIGNMENT);
+
+        /* Check if request exceeds total buffer size */
+        if (alignedSize > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
+        {
+            break;
+        }
+
+        /* Acquire mutex for thread-safe access */
+        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+        assert(osaStatus == KOSA_StatusSuccess);
+        (void)osaStatus;
+
+        /* Check if enough total space is available */
+        if ((CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE - s_flashAsyncContext.bufferPool.usedBytes) < alignedSize)
+        {
+            /* Not enough space */
+            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+            break;
+        }
+
+        /* Try to allocate at tail position */
+        allocOffset = s_flashAsyncContext.bufferPool.tail;
+
+        if (s_flashAsyncContext.bufferPool.usedBytes == 0U)
+        {
+            /* Buffer empty - reset pointers and allocate from start */
+            s_flashAsyncContext.bufferPool.head = 0U;
+            s_flashAsyncContext.bufferPool.tail = 0U;
             allocOffset = 0U;
         }
-        else
+        else if ((allocOffset + alignedSize) > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
         {
-            /* Not enough contiguous space */
-            (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
-            return NULL;
+            /* Not enough space at end - check if we can wrap to beginning */
+            if (alignedSize <= s_flashAsyncContext.bufferPool.head)
+            {
+                /* Wrap to beginning - waste remaining space at end */
+                /* Note: This fragmentation is acceptable for FIFO usage pattern */
+                allocOffset = 0U;
+            }
+            else
+            {
+                /* Not enough contiguous space */
+                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+                break;
+            }
         }
-    }
 
-    /* Perform allocation */
-    pBuffer = &s_flashAsyncContext.bufferPool.buffer[allocOffset];
+        /* Perform allocation */
+        pBuffer = &s_flashAsyncContext.bufferPool.buffer[allocOffset];
+        
+        /* Update tail pointer */
+        s_flashAsyncContext.bufferPool.tail = allocOffset + alignedSize;
+        if (s_flashAsyncContext.bufferPool.tail >= CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
+        {
+            s_flashAsyncContext.bufferPool.tail = 0U;
+        }
 
-    /* Update tail pointer */
-    s_flashAsyncContext.bufferPool.tail = allocOffset + alignedSize;
-    if (s_flashAsyncContext.bufferPool.tail >= CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
-    {
-        s_flashAsyncContext.bufferPool.tail = 0U;
-    }
+        /* Update used bytes */
+        s_flashAsyncContext.bufferPool.usedBytes += alignedSize;
 
-    /* Update used bytes */
-    s_flashAsyncContext.bufferPool.usedBytes += alignedSize;
-
-    /* Return allocation info */
-    *pOffset = allocOffset;
-    *pAllocSize = alignedSize;
+        /* Return allocation info */
+        *pOffset = allocOffset;
+        *pAllocSize = alignedSize;
 
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-    if (s_flashAsyncContext.bufferPool.usedBytes > s_flashAsyncContext.peakBufferUsage)
-    {
-        s_flashAsyncContext.peakBufferUsage = s_flashAsyncContext.bufferPool.usedBytes;
-    }
+        if (s_flashAsyncContext.bufferPool.usedBytes > s_flashAsyncContext.peakBufferUsage)
+        {
+            s_flashAsyncContext.peakBufferUsage = s_flashAsyncContext.bufferPool.usedBytes;
+        }
 #endif
 
-    /* Release mutex */
-    (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+        /* Release mutex */
+        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+    } while (false);
 
     return pBuffer;
 }
@@ -2660,17 +2703,12 @@ static void FLASH_BufferPoolFree(uint32_t offset, uint32_t allocSize)
     osa_status_t osaStatus;
 
     /* Validate parameters */
-    if ((offset == FLASH_ASYNC_INVALID_BUFFER_OFFSET) || (allocSize == 0U))
-    {
-        return;
-    }
+    assert(offset != FLASH_ASYNC_INVALID_BUFFER_OFFSET);
 
     /* Acquire mutex for thread-safe access */
-    osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-    if (osaStatus != KOSA_StatusSuccess)
-    {
-        return;
-    }
+    osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+    assert(osaStatus == KOSA_StatusSuccess);
+    (void)osaStatus;
 
     /* Verify this is the head allocation (FIFO order) */
     if (offset == s_flashAsyncContext.bufferPool.head)
@@ -2691,6 +2729,7 @@ static void FLASH_BufferPoolFree(uint32_t offset, uint32_t allocSize)
         {
             /* Should not happen - reset to safe state */
             s_flashAsyncContext.bufferPool.usedBytes = 0U;
+            assert(0);
         }
 
         /* If buffer is now empty, reset pointers */
@@ -2706,12 +2745,12 @@ static void FLASH_BufferPoolFree(uint32_t offset, uint32_t allocSize)
         /* Log error or assert in debug builds */
 #if defined(DEBUG) || defined(_DEBUG)
         /* Assert or log error */
-      assert(0);
+        assert(0);
 #endif
     }
 
     /* Release mutex */
-    (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
 }
 
 /*!
@@ -2751,12 +2790,9 @@ static status_t FLASH_QueueOperation(flash_async_op_t *pOp)
         }
 
         /* Acquire mutex for thread-safe queue access */
-        osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        if (osaStatus != KOSA_StatusSuccess)
-        {
-            status = kStatus_Fail;
-            break;
-        }
+        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+        assert(osaStatus == KOSA_StatusSuccess);
+        (void)osaStatus;
 
         /* Check if queue is full */
         if (FLASH_QueueIsFull())
@@ -2785,7 +2821,7 @@ static status_t FLASH_QueueOperation(flash_async_op_t *pOp)
         }
 
         /* Release mutex */
-        (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
 
     } while (false);
 
@@ -2819,12 +2855,9 @@ static status_t FLASH_QueuePeek(flash_async_op_t *pOp)
         }
 
         /* Acquire mutex for thread-safe queue access */
-        osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        if (osaStatus != KOSA_StatusSuccess)
-        {
-            status = kStatus_Fail;
-            break;
-        }
+        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+        assert(osaStatus == KOSA_StatusSuccess);
+        (void)osaStatus;
 
         /* Check if queue is empty */
         if (FLASH_QueueIsEmpty())
@@ -2842,7 +2875,7 @@ static status_t FLASH_QueuePeek(flash_async_op_t *pOp)
         }
 
         /* Release mutex */
-        (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
 
     } while (false);
 
@@ -2876,11 +2909,8 @@ static status_t FLASH_QueueGet(flash_async_op_t *pOp)
 
         /* Acquire mutex for thread-safe queue access */
         osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        if (osaStatus != KOSA_StatusSuccess)
-        {
-            status = kStatus_Fail;
-            break;
-        }
+        assert(osaStatus == KOSA_StatusSuccess);
+        (void)osaStatus;
 
         /* Check if queue is empty */
         if (FLASH_QueueIsEmpty())
@@ -2914,22 +2944,14 @@ static status_t FLASH_QueueGet(flash_async_op_t *pOp)
  *
  * @return Number of pending operations in the queue.
  */
-static uint32_t FLASH_QueueCount(void)
+FLASH_STATIC uint32_t FLASH_QueueCount(void)
 {
     uint32_t     count = 0U;
-    osa_status_t osaStatus;
 
-    /* Acquire mutex for thread-safe access */
-    osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-
-    if (osaStatus == KOSA_StatusSuccess)
+    if (s_flashAsyncContext.initialized)
     {
         count = s_flashAsyncContext.opQueue.count;
-
-        /* Release mutex */
-        (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
     }
-
     return count;
 }
 
@@ -2973,7 +2995,7 @@ status_t FLASH_ReadWithPendingOps(uint32_t address, uint8_t *pDst, uint32_t leng
     return status;
 }
 
-status_t FLASH_RegisterIdleDurationCB(flash_ll_idle_duration_cb_t callback)
+status_t FLASH_RegisterIdleDurationCB(flash_idle_duration_cb_t callback)
 {
     status_t status = kStatus_FLASH_Success;
 
@@ -2996,168 +3018,86 @@ status_t FLASH_RegisterIdleDurationCB(flash_ll_idle_duration_cb_t callback)
 static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
 {
     status_t status = kStatus_FLASH_Success;
+    uint32_t regPrimask;
 
     if (pOp == NULL)
     {
-        return kStatus_FLASH_InvalidArgument;
+        status = kStatus_FLASH_InvalidArgument;
     }
-
-    switch (pOp->opType)
+    else
     {
-        case kFlashAsyncOp_Erase:
+        switch (pOp->opType)
         {
-            uint32_t start      = pOp->startAddress;
-            uint32_t endAddress = start + pOp->lengthInBytes - 1U;
-            uint32_t regPrimask = DisableGlobalIRQ();
-            while (start <= endAddress)
+            case kFlashAsyncOp_Erase:
             {
-                status = FLASH_CMD_EraseSector(s_flashAsyncContext.fmuBase, start);
-                if (kStatus_FLASH_Success != status)
-                {
-                    break;
-                }
-                start += FLASH_FEATURE_SECTOR_SIZE;
-            }
-            EnableGlobalIRQ(regPrimask);
-            break;
-        }
-
-        case kFlashAsyncOp_Program:
-        {
-            uint32_t  start         = pOp->startAddress;
-            uint32_t  lengthInBytes = pOp->lengthInBytes;
-            uint32_t  alignedLength = ALIGN_DOWN(lengthInBytes, sizeof(uint8_t) * FLASH_FEATURE_PHRASE_SIZE);
-            uint32_t  extraBytes    = 0U;
-            uint32_t *srcWord       = (uint32_t *)(uintptr_t)pOp->pBuffer;
-
-            if (lengthInBytes >= alignedLength)
-            {
-                extraBytes = lengthInBytes - alignedLength;
-            }
-            else
-            {
-                return kStatus_FLASH_AddressError; /* Handle underflow error */
-            }
-
-            if (alignedLength > 0U)
-            {
-                uint32_t endAddress = start + alignedLength - 1U;
-                uint32_t regPrimask = DisableGlobalIRQ();
-                while (start <= endAddress)
-                {
-                    status = FLASH_CMD_ProgramPhrase(s_flashAsyncContext.fmuBase, start, srcWord);
-                    if (kStatus_FLASH_Success != status)
-                    {
-                        break;
-                    }
-                    start += FLASH_FEATURE_PHRASE_SIZE;
-                    srcWord += FLASH_FEATURE_PHRASE_SIZE_IN_WORD;
-                }
+                regPrimask = DisableGlobalIRQ();
+                status = flash_erase_sector_impl(s_flashAsyncContext.fmuBase, pOp->startAddress, pOp->lengthInBytes);
                 EnableGlobalIRQ(regPrimask);
+                break;
             }
 
-            if ((kStatus_FLASH_Success == status) && (extraBytes > 0U))
+            case kFlashAsyncOp_Program:
             {
-                uint32_t extraData[4] = {0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu};
-                (void)memcpy((void *)extraData, (const void *)srcWord, extraBytes);
-                uint32_t regPrimask = DisableGlobalIRQ();
-                status = FLASH_CMD_ProgramPhrase(s_flashAsyncContext.fmuBase, start, extraData);
+                regPrimask = DisableGlobalIRQ();
+                status = flash_program_phrase_impl(s_flashAsyncContext.fmuBase, pOp->startAddress, pOp->pBuffer, pOp->lengthInBytes);
                 EnableGlobalIRQ(regPrimask);
-            }
-            break;
-        }
-
-        case kFlashAsyncOp_ProgramPage:
-        {
-            uint32_t  start         = pOp->startAddress;
-            uint32_t  lengthInBytes = pOp->lengthInBytes;
-            uint32_t  alignedLength = ALIGN_DOWN(lengthInBytes, sizeof(uint8_t) * FLASH_FEATURE_PAGE_SIZE);
-            uint32_t  extraBytes    = 0U;
-            uint32_t *srcWord       = (uint32_t *)(uintptr_t)pOp->pBuffer;
-
-            if (lengthInBytes >= alignedLength)
-            {
-                extraBytes = lengthInBytes - alignedLength;
-            }
-            else
-            {
-                return kStatus_FLASH_AddressError; /* Handle underflow error */
+                break;
             }
 
-            if (alignedLength > 0U)
+            case kFlashAsyncOp_ProgramPage:
             {
-                uint32_t endAddress = start + alignedLength - 1U;
-                uint32_t regPrimask = DisableGlobalIRQ();
-                while (start <= endAddress)
-                {
-                    status = FLASH_CMD_ProgramPage(s_flashAsyncContext.fmuBase, start, srcWord);
-                    if (kStatus_FLASH_Success != status)
-                    {
-                        break;
-                    }
-                    start += FLASH_FEATURE_PAGE_SIZE;
-                    srcWord += FLASH_FEATURE_PAGE_SIZE_IN_WORD;
-                }
+                regPrimask = DisableGlobalIRQ();
+                status = flash_program_page_impl(s_flashAsyncContext.fmuBase, pOp->startAddress, pOp->pBuffer, pOp->lengthInBytes);
                 EnableGlobalIRQ(regPrimask);
+                break;
             }
 
-            if ((kStatus_FLASH_Success == status) && (extraBytes > 0U))
+            case kFlashAsyncOp_ReadIntoMISR:
             {
-                uint32_t extraData[32];
-                (void)memset(extraData, 0xFF, sizeof(extraData));
-                (void)memcpy((void *)extraData, (const void *)srcWord, extraBytes);
+                uint32_t startaddr = pOp->startAddress;
+                uint32_t endAddr = startaddr + pOp->lengthInBytes;
                 uint32_t regPrimask = DisableGlobalIRQ();
-                status = FLASH_CMD_ProgramPage(s_flashAsyncContext.fmuBase, start, extraData);
+
+                status = FLASH_CMD_ReadIntoMISR(s_flashAsyncContext.fmuBase, 
+                                                startaddr, 
+                                                endAddr, 
+                                                pOp->pSeed, 
+                                                pOp->pSignature);
                 EnableGlobalIRQ(regPrimask);
+                break;
             }
-            break;
+
+            case kFlashAsyncOp_ReadIFRIntoMISR:
+            {
+                uint32_t startaddr = pOp->startAddress;
+                uint32_t endAddr = startaddr + pOp->lengthInBytes;
+                uint32_t regPrimask = DisableGlobalIRQ();
+
+                status = FLASH_CMD_ReadIFRIntoMISR(s_flashAsyncContext.fmuBase, 
+                                                   startaddr, 
+                                                   endAddr, 
+                                                   pOp->pSeed, 
+                                                   pOp->pSignature);
+                EnableGlobalIRQ(regPrimask);
+                break;
+            }
+
+
+            default:
+                status = kStatus_FLASH_InvalidArgument;
+                break;
         }
-
-        case kFlashAsyncOp_ReadIntoMISR:
-        {
-            uint32_t startaddr = pOp->startAddress;
-            uint32_t endAddr = startaddr + pOp->lengthInBytes;
-            uint32_t regPrimask = DisableGlobalIRQ();
-
-            status = FLASH_CMD_ReadIntoMISR(s_flashAsyncContext.fmuBase,
-                                            startaddr,
-                                            endAddr,
-                                            pOp->pSeed,
-                                            pOp->pSignature);
-            EnableGlobalIRQ(regPrimask);
-            break;
-        }
-
-        case kFlashAsyncOp_ReadIFRIntoMISR:
-        {
-            uint32_t startaddr = pOp->startAddress;
-            uint32_t endAddr = startaddr + pOp->lengthInBytes;
-            uint32_t regPrimask = DisableGlobalIRQ();
-
-            status = FLASH_CMD_ReadIFRIntoMISR(s_flashAsyncContext.fmuBase,
-                                               startaddr,
-                                               endAddr,
-                                               pOp->pSeed,
-                                               pOp->pSignature);
-            EnableGlobalIRQ(regPrimask);
-            break;
-        }
-
-
-        default:
-            status = kStatus_FLASH_InvalidArgument;
-            break;
-    }
 
 #if defined(SMSCM) || defined(SYSCON_FMC0_CTRL_DFC_MASK)
-    /* Invalidate cache after flash operations */
-    if ((pOp->opType == kFlashAsyncOp_Erase) ||
-        (pOp->opType == kFlashAsyncOp_Program) ||
-        (pOp->opType == kFlashAsyncOp_ProgramPage))
-    {
-        flash_cache_invalidate();
-    }
+        /* Invalidate cache after flash operations */
+        if ((pOp->opType == kFlashAsyncOp_Erase) || 
+            (pOp->opType == kFlashAsyncOp_Program) || 
+            (pOp->opType == kFlashAsyncOp_ProgramPage))
+        {
+            flash_cache_invalidate();
+        }
 #endif
+    }
 
     return status;
 }
@@ -3186,102 +3126,97 @@ static void FLASH_ApplyPendingOpsToReadBuffer(uint32_t readAddr, uint8_t *pDst, 
     /* Validate parameters */
     if ((pDst == NULL) || (length == 0U))
     {
-        return;
+        /* Do nothing - invalid parameters */
     }
-
-    /* Calculate read end address */
-    readEnd = readAddr + length;
-
-    /* Acquire mutex for thread-safe queue access */
-    osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-    if (osaStatus != KOSA_StatusSuccess)
+    else
     {
-        return;
-    }
-
-    /* If queue is empty, nothing to apply */
-    if (FLASH_QueueIsEmpty())
-    {
-        (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
-        return;
-    }
-
-    /* Iterate through all pending operations in queue order (head to tail) */
-    idx = s_flashAsyncContext.opQueue.head;
-    for (i = 0U; i < s_flashAsyncContext.opQueue.count; i++)
-    {
-        flash_async_op_t *pOp = &s_flashAsyncContext.opQueue.ops[idx];
-
-        /* Only process program operations */
-        if ((pOp->opType == kFlashAsyncOp_Program) || (pOp->opType == kFlashAsyncOp_ProgramPage))
+        /* Calculate read end address */
+        readEnd = readAddr + length;
+        /* If queue is empty, nothing to apply */
+        if (!FLASH_QueueIsEmpty())
         {
-            /* Check if operation has valid buffer */
-            if ((pOp->pBuffer != NULL) && (pOp->lengthInBytes > 0U))
-            {
-                uint32_t opStart = pOp->startAddress;
-                uint32_t opEnd   = opStart + pOp->lengthInBytes;
+            /* Acquire mutex for thread-safe queue access */
+            osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+            assert(osaStatus == KOSA_StatusSuccess);
+            (void)osaStatus;
 
-                /* Check if this operation overlaps with the read range */
-                if (FLASH_REGIONS_OVERLAP(readAddr, length, opStart, pOp->lengthInBytes))
+            /* Iterate through all pending operations in queue order (head to tail) */
+            idx = s_flashAsyncContext.opQueue.head;
+            for (i = 0U; i < s_flashAsyncContext.opQueue.count; i++)
+            {
+                flash_async_op_t *pOp = &s_flashAsyncContext.opQueue.ops[idx];
+
+                /* Only process program operations */
+                if ((pOp->opType == kFlashAsyncOp_Program) || (pOp->opType == kFlashAsyncOp_ProgramPage))
                 {
-                    uint32_t overlapStart;
-                    uint32_t overlapEnd;
-                    uint32_t overlapLen;
-                    uint32_t srcOffset;
-                    uint32_t dstOffset;
+                    /* Check if operation has valid buffer */
+                    if ((pOp->pBuffer != NULL) && (pOp->lengthInBytes > 0U))
+                    {
+                        uint32_t opStart = pOp->startAddress;
+                        uint32_t opEnd   = opStart + pOp->lengthInBytes;
 
-                    /* Calculate overlap region */
-                    overlapStart = (readAddr > opStart) ? readAddr : opStart;
-                    overlapEnd   = (readEnd < opEnd) ? readEnd : opEnd;
-                    overlapLen   = overlapEnd - overlapStart;
+                        /* Check if this operation overlaps with the read range */
+                        if (FLASH_REGIONS_OVERLAP(readAddr, length, opStart, pOp->lengthInBytes))
+                        {
+                            uint32_t overlapStart;
+                            uint32_t overlapEnd;
+                            uint32_t overlapLen;
+                            uint32_t srcOffset;
+                            uint32_t dstOffset;
 
-                    /* Calculate offsets into source (pending write) and destination (read) buffers */
-                    srcOffset = overlapStart - opStart;
-                    dstOffset = overlapStart - readAddr;
+                            /* Calculate overlap region */
+                            overlapStart = (readAddr > opStart) ? readAddr : opStart;
+                            overlapEnd   = (readEnd < opEnd) ? readEnd : opEnd;
+                            overlapLen   = overlapEnd - overlapStart;
 
-                    /* Apply pending write data to read buffer */
-                    (void)memcpy(&pDst[dstOffset], &pOp->pBuffer[srcOffset], overlapLen);
+                            /* Calculate offsets into source (pending write) and destination (read) buffers */
+                            srcOffset = overlapStart - opStart;
+                            dstOffset = overlapStart - readAddr;
+
+                            /* Apply pending write data to read buffer */
+                            (void)memcpy(&pDst[dstOffset], &pOp->pBuffer[srcOffset], overlapLen);
+                        }
+                    }
                 }
+                else if (pOp->opType == kFlashAsyncOp_Erase)
+                {
+                    /* For erase operations, fill overlapping region with 0xFF */
+                    uint32_t opStart = pOp->startAddress;
+                    uint32_t opEnd   = opStart + pOp->lengthInBytes;
+
+                    /* Check if this erase overlaps with the read range */
+                    if (FLASH_REGIONS_OVERLAP(readAddr, length, opStart, pOp->lengthInBytes))
+                    {
+                        uint32_t overlapStart;
+                        uint32_t overlapEnd;
+                        uint32_t overlapLen;
+                        uint32_t dstOffset;
+
+                        /* Calculate overlap region */
+                        overlapStart = (readAddr > opStart) ? readAddr : opStart;
+                        overlapEnd   = (readEnd < opEnd) ? readEnd : opEnd;
+                        overlapLen   = overlapEnd - overlapStart;
+
+                        /* Calculate offset into destination buffer */
+                        dstOffset = overlapStart - readAddr;
+
+                        /* Fill with erased value (0xFF) */
+                        (void)memset(&pDst[dstOffset], 0xFF, overlapLen);
+                    }
+                }
+                else
+                {
+                    /* Other operation types don't affect read data */
+                    ; /* MISRA */
+                }
+
+                /* Move to next operation in queue (circular) */
+                idx = (idx + 1U) % CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE;
             }
+            /* Release mutex */
+            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
         }
-        else if (pOp->opType == kFlashAsyncOp_Erase)
-        {
-            /* For erase operations, fill overlapping region with 0xFF */
-            uint32_t opStart = pOp->startAddress;
-            uint32_t opEnd   = opStart + pOp->lengthInBytes;
-
-            /* Check if this erase overlaps with the read range */
-            if (FLASH_REGIONS_OVERLAP(readAddr, length, opStart, pOp->lengthInBytes))
-            {
-                uint32_t overlapStart;
-                uint32_t overlapEnd;
-                uint32_t overlapLen;
-                uint32_t dstOffset;
-
-                /* Calculate overlap region */
-                overlapStart = (readAddr > opStart) ? readAddr : opStart;
-                overlapEnd   = (readEnd < opEnd) ? readEnd : opEnd;
-                overlapLen   = overlapEnd - overlapStart;
-
-                /* Calculate offset into destination buffer */
-                dstOffset = overlapStart - readAddr;
-
-                /* Fill with erased value (0xFF) */
-                (void)memset(&pDst[dstOffset], 0xFF, overlapLen);
-            }
-        }
-        else
-        {
-            /* Other operation types don't affect read data */
-            ; /* MISRA */
-        }
-
-        /* Move to next operation in queue (circular) */
-        idx = (idx + 1U) % CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE;
     }
-
-    /* Release mutex */
-    (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
 }
 
 /*!
@@ -3308,73 +3243,75 @@ static status_t FLASH_CheckPendingOpsOnRange(uint32_t startAddr,
     bool         hasPendingProgram = false;
     bool         eraseCoversRange  = false;
 
-    if ((pHasPendingErase == NULL) || (pHasPendingProgram == NULL))
+    do
     {
-        return kStatus_FLASH_InvalidArgument;
-    }
-
-    *pHasPendingErase   = false;
-    *pHasPendingProgram = false;
-
-    if (!s_flashAsyncContext.initialized)
-    {
-        return kStatus_FLASH_Success; /* No async context, no pending ops */
-    }
-
-    rangeEnd = startAddr + length;
-
-    /* Acquire mutex for thread-safe queue access */
-    osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-    if (osaStatus != KOSA_StatusSuccess)
-    {
-        return kStatus_Fail;
-    }
-
-    if (FLASH_QueueIsEmpty())
-    {
-        (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
-        return kStatus_FLASH_Success;
-    }
-
-    /* Iterate through all pending operations in queue order */
-    idx = s_flashAsyncContext.opQueue.head;
-    for (i = 0U; i < s_flashAsyncContext.opQueue.count; i++)
-    {
-        flash_async_op_t *pOp = &s_flashAsyncContext.opQueue.ops[idx];
-        uint32_t opStart = pOp->startAddress;
-        uint32_t opEnd   = opStart + pOp->lengthInBytes;
-
-        if (pOp->opType == kFlashAsyncOp_Erase)
+        if ((pHasPendingErase == NULL) || (pHasPendingProgram == NULL))
         {
-            /* Check if erase fully covers the verification range */
-            if ((opStart <= startAddr) && (opEnd >= rangeEnd))
+            status = kStatus_FLASH_InvalidArgument;
+            break;
+        }
+
+        *pHasPendingErase   = false;
+        *pHasPendingProgram = false;
+
+        if (!s_flashAsyncContext.initialized)
+        {
+            break; /* No async context, no pending ops */
+        }
+
+        rangeEnd = startAddr + length;
+
+        if (FLASH_QueueIsEmpty())
+        {
+            break;
+        }
+
+        /* Acquire mutex for thread-safe queue access */
+        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+        assert(osaStatus == KOSA_StatusSuccess);
+        (void)osaStatus;
+
+        /* Iterate through all pending operations in queue order */
+        idx = s_flashAsyncContext.opQueue.head;
+        for (i = 0U; i < s_flashAsyncContext.opQueue.count; i++)
+        {
+            flash_async_op_t *pOp = &s_flashAsyncContext.opQueue.ops[idx];
+            uint32_t opStart = pOp->startAddress;
+            uint32_t opEnd   = opStart + pOp->lengthInBytes;
+
+            if (pOp->opType == kFlashAsyncOp_Erase)
             {
-                eraseCoversRange = true;
-                hasPendingProgram = false;
+                /* Check if erase fully covers the verification range */
+                if ((opStart <= startAddr) && (opEnd >= rangeEnd))
+                {
+                    eraseCoversRange = true;
+                    hasPendingProgram = false;
+                }
             }
-        }
-        else if ((pOp->opType == kFlashAsyncOp_Program) || (pOp->opType == kFlashAsyncOp_ProgramPage))
-        {
-            /* Check if program operation overlaps with the range */
-            if (FLASH_REGIONS_OVERLAP(startAddr, length, opStart, pOp->lengthInBytes))
+            else if ((pOp->opType == kFlashAsyncOp_Program) || (pOp->opType == kFlashAsyncOp_ProgramPage))
             {
-                hasPendingProgram = true;
+                /* Check if program operation overlaps with the range */
+                if (FLASH_REGIONS_OVERLAP(startAddr, length, opStart, pOp->lengthInBytes))
+                {
+                    hasPendingProgram = true;
+                }
             }
+            else
+            {
+                ; /* Other operations don't affect erase verification */
+            }
+
+            idx = (idx + 1U) % CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE;
         }
-        else
-        {
-            ; /* Other operations don't affect erase verification */
-        }
 
-        idx = (idx + 1U) % CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE;
-    }
+        /* Release mutex */
+        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
 
-    /* Release mutex */
-    (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+        /* Report results - only report erase if it fully covers the range */
+        *pHasPendingErase   = eraseCoversRange;
+        *pHasPendingProgram = hasPendingProgram;
 
-    /* Report results - only report erase if it fully covers the range */
-    *pHasPendingErase   = eraseCoversRange;
-    *pHasPendingProgram = hasPendingProgram;
+    } while (false);
 
     return status;
 }
@@ -3415,19 +3352,16 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
             break;
         }
 
-        /* Acquire mutex for thread-safe queue access */
-        osaStatus = OSA_MutexLock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        if (osaStatus != KOSA_StatusSuccess)
+        /* Check if queue has any operations */
+        if (FLASH_QueueIsEmpty())
         {
             break;
         }
 
-        /* Check if queue has any operations */
-        if (FLASH_QueueIsEmpty())
-        {
-            (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
-            break;
-        }
+        /* Acquire mutex for thread-safe queue access */
+        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+        assert(osaStatus == KOSA_StatusSuccess);
+        (void)osaStatus;
 
         /* Get pointer to the last operation in queue (at tail - 1) */
         if (s_flashAsyncContext.opQueue.tail == 0U)
@@ -3443,14 +3377,14 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
         /* Check if last operation is a program operation */
         if ((pLastOp->opType != kFlashAsyncOp_Program) && (pLastOp->opType != kFlashAsyncOp_ProgramPage))
         {
-            (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
         /* Check if buffer is valid */
         if ((pLastOp->pBuffer == NULL) || (pLastOp->bufferOffset == FLASH_ASYNC_INVALID_BUFFER_OFFSET))
         {
-            (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
@@ -3460,7 +3394,7 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
         /* Check if new write is contiguous with last operation */
         if (start != lastOpEnd)
         {
-            (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
@@ -3481,7 +3415,7 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
         if (currentAllocEnd != s_flashAsyncContext.bufferPool.tail)
         {
             /* Last allocation is not at tail - cannot extend (another allocation happened) */
-            (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
@@ -3513,14 +3447,14 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
             if (alignedExtension > availableAtTail)
             {
                 /* Not enough contiguous space to extend */
-                (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
                 break;
             }
 
             /* Check total buffer capacity */
             if ((s_flashAsyncContext.bufferPool.usedBytes + alignedExtension) > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
             {
-                (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
                 break;
             }
 
@@ -3557,7 +3491,7 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
 #endif
 
         /* Release mutex */
-        (void)OSA_MutexUnlock((osa_mutex_handle_t)s_flashAsyncContext.mutexHandle);
+        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
 
     } while (false);
 

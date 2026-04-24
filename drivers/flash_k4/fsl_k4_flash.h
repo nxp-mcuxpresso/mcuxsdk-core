@@ -197,7 +197,7 @@ typedef struct _flash_async_op
  *
  * @return Available idle duration in microseconds.
  */
-typedef uint32_t (*flash_ll_idle_duration_cb_t)(void);
+typedef uint32_t (*flash_idle_duration_cb_t)(void);
 
 /*!
  * @brief Flash async operation status enumeration.
@@ -255,7 +255,7 @@ typedef struct _flash_async_context
     flash_circular_buffer_pool_t bufferPool;
 
     /* LL idle callback */
-    flash_ll_idle_duration_cb_t idleDurationCb;                           /*!< Callback for idle duration */
+    flash_idle_duration_cb_t idleDurationCb;                           /*!< Callback for idle duration */
 
     /* Flash configuration reference */
     flash_config_t *flashConfig;                                          /*!< Pointer to flash config */
@@ -551,16 +551,7 @@ status_t FLASH_Process(void);
  * @retval #kStatus_FLASH_InvalidArgument NULL callback provided.
  * @retval #kStatus_FLASH_Async_NotInit Async context not initialized.
  */
-status_t FLASH_RegisterIdleDurationCB(flash_ll_idle_duration_cb_t callback);
-
-/*!
- * @brief Get the number of pending operations in the queue.
- *
- * This function can be used for monitoring and debugging purposes.
- *
- * @return Number of pending operations.
- */
-uint32_t FLASH_GetPendingOperationCount(void);
+status_t FLASH_RegisterIdleDurationCB(flash_idle_duration_cb_t callback);
 
 /*!
  * @brief Flush pending operations to make room for a new operation.
@@ -574,14 +565,6 @@ uint32_t FLASH_GetPendingOperationCount(void);
  * @retval Other Error from flash operation execution.
  */
 status_t FLASH_FlushPendingOperations(uint32_t requiredSize);
-
-/*!
- * @brief Check if there are pending operations.
- *
- * @retval true There are pending operations in the queue.
- * @retval false The queue is empty.
- */
-bool FLASH_HasPendingOperations(void);
 
 /*!
  * @brief Read from flash with pending operation awareness.

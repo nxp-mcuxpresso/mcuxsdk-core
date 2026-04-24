@@ -1,5 +1,12 @@
 # FLASH
 
+## [2.4.0]
+
+- New Features
+  - Add asynchronous flash mode support for non-blocking flash operations.
+    Async mode allows applications to initiate flash operations and continue execution while the flash controller completes the operation in the background.
+
+
 ## [2.3.5]
 
 - Improvement
