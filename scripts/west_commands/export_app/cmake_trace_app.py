@@ -1081,6 +1081,14 @@ class CmakeTraceApp(CmakeApp):
             )
             return board_prj_conf, force_selected
 
+        # SDKGEN-3514: under this policy we drop *all* CONFIG_MCUX_COMPONENT_*
+        # entries from <board>/prj.conf and persist only the
+        # CONFIG_MCUX_PRJSEG_* decisions, letting Kconfig select chains
+        # rederive the component set at freestanding build time. This way
+        # profile overlays can flip  PRJSEGs without conflicting with hard-coded
+        # feature components like CONFIG_MCUX_COMPONENT_middleware.wifi.*.
+        drop_all_components = WorkaroundPolicy.EXCLUDE_APP_COMPONENTS_FROM_BOARD_PRJ in self.policies
+
         for c in raw_config:
             # Middleware may cause Kconfig build issues
             if not (match_result := re.match(r"CONFIG_MCUX_(COMPONENT|PRJSEG)[^=]+", c)):
@@ -1089,6 +1097,8 @@ class CmakeTraceApp(CmakeApp):
                 force_selected.append(item[7:])
                 continue
             if item in ps_list:
+                continue
+            if drop_all_components and item.startswith("CONFIG_MCUX_COMPONENT_"):
                 continue
             comp_list.append(c)
         board_prj_conf.extend(comp_list)

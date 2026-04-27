@@ -49,6 +49,7 @@ class WorkaroundSelector:
 class WorkaroundPolicy(str, Enum):
     SKIP_OPTIONAL_HEADER_STAGING = "skip_optional_header_staging"
     INJECT_TRACE_KCONFIG_DEFINES = "keep_prjseg_kconfig"
+    EXCLUDE_APP_COMPONENTS_FROM_BOARD_PRJ = "exclude_app_components_from_board_prj"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -85,6 +86,18 @@ WORKAROUND_POLICY_REGISTRY: WorkaroundRegistry = {
             remove_when="display_support Kconfig decoupled from PRJSEG cmake guard",
         ),
     ),
+    # Key ending with '/' enables prefix matching: applies to all examples
+    # under examples/matter_examples/.  Matter examples support multiple
+    # build profiles (wifi/thread); feature-specific components must not be
+    # hardcoded into <board>/prj.conf so overlays can switch profiles.
+    "examples/matter_examples/": (
+        WorkaroundRegistration(
+            selector=WorkaroundSelector(),
+            policies=(WorkaroundPolicy.EXCLUDE_APP_COMPONENTS_FROM_BOARD_PRJ,),
+            ticket="SDKGEN-3514",
+            description="Keep board prj.conf minimal so Matter profile overlays (wifi/thread) work.",
+        ),
+    ),
 }
 
 
@@ -106,13 +119,14 @@ def get_workaround_policies(
     app_id: Optional[str] = None,
 ) -> tuple[WorkaroundPolicy, ...]:
     example_key = normalize_example_key(source_dir, sdk_root)
-    registrations = WORKAROUND_POLICY_REGISTRY.get(example_key, ())
     matched = []
-
-    for registration in registrations:
-        if not registration.selector.matches(board=board, core_id=core_id, app_id=app_id):
-            continue
-        matched.extend(registration.policies)
+    for key, registrations in WORKAROUND_POLICY_REGISTRY.items():
+        # Exact match, or prefix match when key ends with '/'.
+        if key == example_key or (key.endswith("/") and example_key.startswith(key)):
+            for registration in registrations:
+                if not registration.selector.matches(board=board, core_id=core_id, app_id=app_id):
+                    continue
+                matched.extend(registration.policies)
 
     return tuple(dict.fromkeys(matched))
 
