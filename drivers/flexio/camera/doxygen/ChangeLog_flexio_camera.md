@@ -1,5 +1,10 @@
 # FLEXIO_CAMERA
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fixed INT30-C INT31-C issues.
+
 ## [2.2.0]
 
 - Improvements
