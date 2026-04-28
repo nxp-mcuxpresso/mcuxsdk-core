@@ -641,6 +641,13 @@ class NinjaParser
           elsif ['-data', '-prog', '-opt'].include? flag.strip
             result.push "#{flag} #{all_flags[index+1]}"
             all_flags[index+1] = nil
+          elsif (lib_match = flag.strip.match(/\A-L(?!arge)\s*"?([^"]+?)"?\z/))
+            # Extract -L<path> or -L"<path>" -> config => lib-search-path
+            lib_path = lib_match[1].sub(/[\/\\]+\z/, '')
+            lib_path = translate_project_relative_path(lib_path, true) if File.absolute_path?(lib_path)
+            cfg = @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]
+            cfg["lib-search-path"] ||= []
+            cfg["lib-search-path"] << {'path' => lib_path} unless cfg["lib-search-path"].any? { |e| e['path'] == lib_path }
           else
             pattern = /-l\"(\S+)MCU\/(DSP56800x_EABI_Tools\/lib\S+)\"/
             res = flag.strip.match(pattern)
