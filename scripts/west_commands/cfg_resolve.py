@@ -174,7 +174,7 @@ class CfgResolve(WestCommand):
             log.wrn("No .cmake file found! Creating new file.")
             try:
                 if not os.path.exists(os.path.dirname(cmake_path)):
-                    log.wrn(f"Directory for .cmake file does not exist. Creating directory: {os.path.dirname(cmake_path)}")
+                    log.wrn(f"Directory for .cmake file missing. Creating directory: {os.path.dirname(cmake_path)}")
                     os.makedirs(os.path.dirname(cmake_path), exist_ok=True) # ensure directory exists
                 open(cmake_path, 'a').close()
                 return cmake_path
@@ -281,7 +281,7 @@ class CfgResolve(WestCommand):
             os.rename(self.require_json_path, processed_json_path)
         except OSError as e:
             self._exit_with_error(f"Failed to rename processed JSON file: {self.require_json_path} - {e}")
-                                                       
+
     def add_includes(self, project):
         """
         Add includes to the CMake configuration based on project requirements.
@@ -334,6 +334,10 @@ class CfgResolve(WestCommand):
         try:
             sources_to_add = self._relativize_paths(sources_to_add)
 
+            self._remove_sources_from_remove_block(sources_to_add)
+
+            self._read_cmake_file()
+            
             if self._check_for_duplicate_block(sources_to_add, 'sources'):
                 sources_to_add = self._extract_unique_list(sources_to_add, self.cmake_sources)
         
@@ -345,6 +349,126 @@ class CfgResolve(WestCommand):
 
         except Exception as e:
             self._exit_with_error(f"Failed to add sources to cmake file: {e}")
+
+    def _remove_sources_from_add_block(self, files_to_remove):
+        """
+        Remove source files from the mcux_add_source block if they exist there.
+    
+        Args:
+            files_to_remove (list): List of source files to remove
+        
+        Returns:
+            list: List of files that were NOT found in the add block and still need to be removed
+        """
+        self._read_cmake_file()
+    
+        add_source_regex = r"# Added by cfg_resolve west command\s+mcux_add_source\(\s*BASE_PATH\s+\$\{CMAKE_CURRENT_LIST_DIR\}\s+SOURCES\s+([\s\S]*?)\)"
+    
+        add_block_match = re.search(add_source_regex, self.cmake_file_content)
+    
+        if not add_block_match:
+            return files_to_remove
+    
+        existing_add_block = add_block_match.group(0)
+        existing_sources_text = add_block_match.group(1)
+    
+        existing_sources = [s.strip() for s in existing_sources_text.split('\n') if s.strip()]
+    
+        files_found_in_add = [f for f in files_to_remove if f in existing_sources]
+        files_not_in_add = [f for f in files_to_remove if f not in existing_sources]
+    
+        if not files_found_in_add:
+            return files_to_remove
+    
+        remaining_sources = [s for s in existing_sources if s not in files_found_in_add]
+    
+        if remaining_sources:
+            formatted_items = []
+            for i, item in enumerate(remaining_sources):
+                if i == 0:
+                    formatted_items.append(f" {item}")
+                else:
+                    formatted_items.append(f"\t\t\t{item}")
+        
+            items_str = "\n".join(formatted_items)
+        
+            updated_add_block = f"""# Added by cfg_resolve west command
+mcux_add_source(
+\tBASE_PATH ${{CMAKE_CURRENT_LIST_DIR}}
+\tSOURCES{items_str}
+)"""
+            updated_content = self.cmake_file_content.replace(existing_add_block, updated_add_block)
+        else:
+            updated_content = self._remove_block_cleanly(self.cmake_file_content, existing_add_block)
+    
+        try:
+            with open(self.cmake_file_path, 'w') as cmake_file:
+                cmake_file.write(updated_content)
+            log.inf(f"Removed {len(files_found_in_add)} source(s) from mcux_add_source block")
+        except IOError as e:
+            self._exit_with_error(f"Error writing to CMake file {self.cmake_file_path}: {e}")
+    
+        return files_not_in_add
+
+    def _remove_sources_from_remove_block(self, files_to_add):
+        """
+        Remove source files from the mcux_project_remove_source block if they exist there.
+        This prevents conflicts when re-adding previously removed sources.
+    
+        Args:
+            files_to_add (list): List of source files being added
+        
+        Returns:
+            list: The original list (unchanged, as sources still need to be added)
+        """
+        self._read_cmake_file()
+    
+        remove_source_regex = r"# Added by cfg_resolve west command\s+mcux_project_remove_source\(\s*BASE_PATH\s+\$\{CMAKE_CURRENT_LIST_DIR\}\s+SOURCES\s+([\s\S]*?)\)"
+    
+        remove_block_match = re.search(remove_source_regex, self.cmake_file_content)
+    
+        if not remove_block_match:
+            return files_to_add
+    
+        existing_remove_block = remove_block_match.group(0)
+        existing_sources_text = remove_block_match.group(1)
+
+        existing_sources = [s.strip() for s in existing_sources_text.split('\n') if s.strip()]
+    
+        files_found_in_remove = [f for f in files_to_add if f in existing_sources]
+    
+        if not files_found_in_remove:
+            return files_to_add
+    
+        remaining_sources = [s for s in existing_sources if s not in files_found_in_remove]
+    
+        if remaining_sources:
+            formatted_items = []
+            for i, item in enumerate(remaining_sources):
+                if i == 0:
+                    formatted_items.append(f" {item}")
+                else:
+                    formatted_items.append(f"\t\t\t{item}")
+        
+            items_str = "\n".join(formatted_items)
+        
+            updated_remove_block = f"""# Added by cfg_resolve west command
+mcux_project_remove_source(
+\tBASE_PATH ${{CMAKE_CURRENT_LIST_DIR}}
+\tSOURCES{items_str}
+)"""
+            updated_content = self.cmake_file_content.replace(existing_remove_block, updated_remove_block)
+        else:
+            updated_content = self._remove_block_cleanly(self.cmake_file_content, existing_remove_block)
+    
+        try:
+            with open(self.cmake_file_path, 'w') as cmake_file:
+                cmake_file.write(updated_content)
+            log.inf(f"Removed {len(files_found_in_remove)} source(s) from mcux_project_remove_source block")
+        except IOError as e:
+            self._exit_with_error(f"Error writing to CMake file {self.cmake_file_path}: {e}")
+    
+        return files_to_add
 
 
     def remove_files(self, project):
@@ -362,13 +486,20 @@ class CfgResolve(WestCommand):
         if not files_to_remove:
             log.inf("Skipping file removal: No files specified")
             return
-        
+    
         try:
             files_to_remove = self._relativize_paths(files_to_remove)
+            files_to_remove = self._remove_sources_from_add_block(files_to_remove)
+        
+            if not files_to_remove:
+                log.inf("All sources removed from mcux_add_source block. No mcux_project_remove_source needed.\n")
+                return
+
+            self._read_cmake_file()
 
             if self._check_for_duplicate_block(files_to_remove, 'remove_sources'):
                 files_to_remove = self._extract_unique_list(files_to_remove, self.cmake_remove_sources)
-            
+        
             if not files_to_remove:
                 log.inf("Skipping sources removal: No new unique source files to remove\n")
                 return
@@ -400,15 +531,11 @@ class CfgResolve(WestCommand):
             self._exit_with_error("component_edit_prj_file_path not found in project configuration")
         
         try:
-            if os.path.exists(self.prj_conf_file):
-                component_regex = r"CONFIG_MCUX_COMPONENT_([^\s]+)(=y)"
-                with open(self.prj_conf_file, 'r') as conf_file:
-                    existing_components = [
-                        match.group(1) for match in re.finditer(component_regex, conf_file.read())
-                    ]
-            else:
-                log.wrn(f"Project component file does not exist. Creating on add component: {self.prj_conf_file}")
-                existing_components = []
+            component_regex = r"CONFIG_MCUX_COMPONENT_([^\s]+)(=y)"
+            with open(self.prj_conf_file, 'r') as conf_file:
+                existing_components = [
+                    match.group(1) for match in re.finditer(component_regex, conf_file.read())
+                ]
 
             comp_added = False
 
@@ -416,9 +543,6 @@ class CfgResolve(WestCommand):
                 component_id = component.get("kconfig_id")
                 if component_id not in existing_components:
                     comp_added = True
-                    if not os.path.exists(os.path.dirname(self.prj_conf_file)):
-                        log.wrn(f"Directory for component file does not exist. Creating directory: {os.path.dirname(self.prj_conf_file)}")
-                        os.makedirs(os.path.dirname(self.prj_conf_file), exist_ok=True) # ensure directory exists
                     with open(self.prj_conf_file, 'a') as conf_file:
                         conf_file.write(f"\nCONFIG_MCUX_COMPONENT_{component_id}=y")
 
@@ -489,6 +613,56 @@ class CfgResolve(WestCommand):
         try:
             self._read_cmake_file()
 
+            # Special handling for remove_sources
+            if block_type == 'remove_sources':
+                add_sources_config = block_configs['sources']
+                add_block_match = re.search(add_sources_config['regex'], self.cmake_file_content)
+                
+                if add_block_match:
+                    existing_add_block = add_block_match.group(0)
+                    
+                    # Extract existing sources from the add block
+                    sources_pattern = r"SOURCES\s+([\s\S]*?)\)"
+                    sources_match = re.search(sources_pattern, existing_add_block)
+                    
+                    if sources_match:
+                        existing_sources_text = sources_match.group(1)
+                        existing_sources = [s.strip() for s in existing_sources_text.split('\n') if s.strip()]
+                        
+                        items_to_remove_from_add = [item for item in items_list if item in existing_sources]
+                        items_still_to_remove = [item for item in items_list if item not in existing_sources]
+                        
+                        if items_to_remove_from_add:
+                            remaining_sources = [s for s in existing_sources if s not in items_to_remove_from_add]
+                            
+                            if remaining_sources:
+                                formatted_items = []
+                                for i, item in enumerate(remaining_sources):
+                                    if i == 0:
+                                        formatted_items.append(f"{add_sources_config['first_item_prefix']}{item}")
+                                    else:
+                                        formatted_items.append(f"{add_sources_config['other_item_prefix']}{item}")
+                                
+                                items_str = "\n".join(formatted_items)
+                                
+                                updated_add_block = f"""# Added by cfg_resolve west command
+{add_sources_config['function']}(
+\tBASE_PATH {base_path_var}
+\t{add_sources_config['param_name']}{items_str}
+)"""
+                                updated_content = self.cmake_file_content.replace(existing_add_block, updated_add_block)
+                            else:
+                                updated_content = self.cmake_file_content.replace(existing_add_block + '\n', '')
+                                updated_content = updated_content.replace(existing_add_block, '')
+                            
+                            with open(self.cmake_file_path, 'w') as cmake_file:
+                                cmake_file.write(updated_content)
+                            
+                            items_list = items_still_to_remove
+                            
+                            if not items_list:
+                                return
+
             block_match = re.search(config['regex'], self.cmake_file_content)
         
             if block_match:
@@ -530,6 +704,36 @@ class CfgResolve(WestCommand):
             self._exit_with_error(f"File I/O error while generating CMake block: {e}")
         except Exception as e:
             self._exit_with_error(f"Unexpected error while generating CMake block: {e}")
+
+
+    def _remove_block_cleanly(self, content, block_to_remove):
+        """
+        Remove a block from content and clean up extra whitespace.
+        
+        Args:
+            content (str): The file content
+            block_to_remove (str): The block to remove
+            
+        Returns:
+            str: Content with block removed and whitespace cleaned
+        """
+        patterns = [
+            f"\n\n{re.escape(block_to_remove)}\n",
+            f"\n{re.escape(block_to_remove)}\n",
+            f"{re.escape(block_to_remove)}\n",
+            re.escape(block_to_remove)
+        ]
+        
+        for pattern in patterns:
+            if re.search(pattern, content):
+                content = re.sub(pattern, '\n' if pattern.startswith('\n') else '', content, count=1)
+                break
+        
+        content = re.sub(r'\n{3,}', '\n\n', content)
+
+        content = content.lstrip('\n')
+        
+        return content
 
     def do_run(self, args, remainder):
         """
