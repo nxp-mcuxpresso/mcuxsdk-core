@@ -416,10 +416,26 @@ class MCUXAppTargets(object):
             if (app_data.get('section-type', '') in ['application', 'freestanding_application']) and not app_shared_content:
                 if (app_toolchains := app_data.get('contents', {}).get('toolchains', [])):
                     app_shared_content['toolchains'] = app_toolchains
-            if app_data.get('boards'):
-                self.get_instance_targets(app_dir, apps, app_name, app_data, app_data['boards'], is_pick_one_target_for_app, 'board', app_shared_content, query_internal)
-            elif app_data.get('devices'):
-                self.get_instance_targets(app_dir, apps, app_name, app_data, app_data['devices'], is_pick_one_target_for_app, 'device', app_shared_content, query_internal)
+            # Enter get_instance_targets when public yml lists boards/devices,
+            # or when INT_EXAMPLE_DATA has entries for this example name.
+            # The latter covers examples whose only consumers are internal-
+            # stage boards listed in examples_int/_boards/<board>/example.yml;
+            # without it, such examples are invisible to west list_project
+            # because get_instance_targets is where the INT merge happens.
+            # When public boards/devices are absent but INT data exists,
+            # default to 'board' iteration (or 'device' if only the devices
+            # key is present in the yml) since INT_EXAMPLE_DATA is fed
+            # primarily by examples_int/_boards.
+            boards_data = app_data.get('boards')
+            devices_data = app_data.get('devices')
+            has_int_data = query_internal and app_name in MCUXAppTargets.INT_EXAMPLE_DATA
+            if boards_data:
+                self.get_instance_targets(app_dir, apps, app_name, app_data, boards_data, is_pick_one_target_for_app, 'board', app_shared_content, query_internal)
+            elif devices_data:
+                self.get_instance_targets(app_dir, apps, app_name, app_data, devices_data, is_pick_one_target_for_app, 'device', app_shared_content, query_internal)
+            elif has_int_data:
+                instance_type = 'device' if ('devices' in app_data and 'boards' not in app_data) else 'board'
+                self.get_instance_targets(app_dir, apps, app_name, app_data, {}, is_pick_one_target_for_app, instance_type, app_shared_content, query_internal)
 
         return apps
 
