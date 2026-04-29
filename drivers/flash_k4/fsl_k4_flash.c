@@ -1220,6 +1220,100 @@ status_t FLASH_VerifyEraseIFRPhrase(flash_config_t *config, FMU_Type *base, uint
     return status;
 }
 
+status_t FLASH_VerifyEraseIFRPage(flash_config_t *config, FMU_Type *base, uint32_t start, uint32_t lengthInBytes)
+{
+    status_t status    = kStatus_Fail;
+    uint32_t startaddr = start;
+
+    status = ifr_check_param(config, base, &startaddr, lengthInBytes, FLASH_FEATURE_PAGE_SIZE);
+    if (status == kStatus_FLASH_Success)
+    {
+#if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
+        /* Async mode: queue the verify erase IFR page operation */
+        do
+        {
+            bool hasPendingErase   = false;
+            bool hasPendingProgram = false;
+
+            if (!s_flashAsyncContext.initialized)
+            {
+                /* Fall through to sync verification */
+            }
+            else
+            {
+                status = FLASH_CheckPendingOpsOnRange(start, lengthInBytes,
+                                                       &hasPendingErase,
+                                                       &hasPendingProgram);
+                if (status != kStatus_FLASH_Success)
+                {
+                    break;
+                }
+
+                if (hasPendingProgram)
+                {
+                    status = kStatus_FLASH_CommandFailure;
+                    break;
+                }
+
+                if (hasPendingErase)
+                {
+                    status = kStatus_FLASH_Success;
+                    break;
+                }
+            }
+
+            {
+                uint32_t endAddress;
+                if (startaddr > UINT32_MAX - lengthInBytes)
+                {
+                    status = kStatus_FLASH_AddressError;
+                    break;
+                }
+                endAddress = startaddr + lengthInBytes - 1U;
+                uint32_t regPrimask = DisableGlobalIRQ();
+                while (startaddr <= endAddress)
+                {
+                    status = FLASH_CMD_VerifyEraseIFRPage(base, startaddr);
+                    if (kStatus_FLASH_Success != status)
+                    {
+                        break;
+                    }
+                    startaddr += FLASH_FEATURE_PAGE_SIZE;
+                }
+                EnableGlobalIRQ(regPrimask);
+            }
+        } while (false);
+
+#else
+        uint32_t endAddress;
+        if (startaddr > UINT32_MAX - lengthInBytes)
+        {
+            return kStatus_FLASH_AddressError; // Handle overflow error
+        }
+        endAddress = startaddr + lengthInBytes - 1U;
+        while (startaddr <= endAddress)
+        {
+            status = FLASH_CMD_VerifyEraseIFRPage(base, startaddr);
+            if (kStatus_FLASH_Success != status)
+            {
+                break;
+            }
+            else
+            {
+                /* Increment to the next page */
+                startaddr += FLASH_FEATURE_PAGE_SIZE;
+            }
+        }
+#endif /* CONFIG_FLASH_K4_ASYNC_MODE */
+    }
+    else
+    {
+        ; // MISRA
+    }
+
+    return status;
+}
+
 status_t FLASH_VerifyEraseIFRSector(flash_config_t *config, FMU_Type *base, uint32_t start, uint32_t lengthInBytes)
 {
     status_t status    = kStatus_Fail;
