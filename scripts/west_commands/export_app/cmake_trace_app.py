@@ -951,7 +951,8 @@ class CmakeTraceApp(CmakeApp):
                 for item in r_include.iterdir():
                     if item.is_file() and is_header_file(item.as_posix()) and item.name not in self.preinclude_files:
                         if item.name.endswith(".mex"):
-                            target_header = output_dir / item.name
+                            # MCUX-87638 Forcibly copy mex file to board dir since it's required by mcux_add_config_mex_path and usually there is no conflict
+                            target_header = self.output_board_dir / item.name
                         else:
                             target_header = output_dir / self.headers_map[r_include_str] / item.name
                         self.opt_headers_map[item] = target_header
