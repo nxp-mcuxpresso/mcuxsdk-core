@@ -532,15 +532,12 @@ class CfgResolve(WestCommand):
             block_type (str): Type of block ('includes', 'sources', 'remove_sources')
             base_path_var (str): Base path variable to use in the CMake block
 
-        Returns:
-            str: Formatted CMake block string
-
         Raises:
             ValueError: If block_type is not supported
         """
 
         if not items_list:
-            return ""
+            return
         
         if not hasattr(self, 'cmake_file_path') or not self.cmake_file_path:
             self._exit_with_error("CMake file path not set. Call _get_cmake_file_path() first.")
@@ -578,56 +575,6 @@ class CfgResolve(WestCommand):
 
         try:
             self._read_cmake_file()
-
-            # Special handling for remove_sources
-            if block_type == 'remove_sources':
-                add_sources_config = block_configs['sources']
-                add_block_match = re.search(add_sources_config['regex'], self.cmake_file_content)
-                
-                if add_block_match:
-                    existing_add_block = add_block_match.group(0)
-                    
-                    # Extract existing sources from the add block
-                    sources_pattern = r"SOURCES\s+([\s\S]*?)\)"
-                    sources_match = re.search(sources_pattern, existing_add_block)
-                    
-                    if sources_match:
-                        existing_sources_text = sources_match.group(1)
-                        existing_sources = [s.strip() for s in existing_sources_text.split('\n') if s.strip()]
-                        
-                        items_to_remove_from_add = [item for item in items_list if item in existing_sources]
-                        items_still_to_remove = [item for item in items_list if item not in existing_sources]
-                        
-                        if items_to_remove_from_add:
-                            remaining_sources = [s for s in existing_sources if s not in items_to_remove_from_add]
-                            
-                            if remaining_sources:
-                                formatted_items = []
-                                for i, item in enumerate(remaining_sources):
-                                    if i == 0:
-                                        formatted_items.append(f"{add_sources_config['first_item_prefix']}{item}")
-                                    else:
-                                        formatted_items.append(f"{add_sources_config['other_item_prefix']}{item}")
-                                
-                                items_str = "\n".join(formatted_items)
-                                
-                                updated_add_block = f"""# Added by cfg_resolve west command
-{add_sources_config['function']}(
-\tBASE_PATH {base_path_var}
-\t{add_sources_config['param_name']}{items_str}
-)"""
-                                updated_content = self.cmake_file_content.replace(existing_add_block, updated_add_block)
-                            else:
-                                updated_content = self.cmake_file_content.replace(existing_add_block + '\n', '')
-                                updated_content = updated_content.replace(existing_add_block, '')
-                            
-                            with open(self.cmake_file_path, 'w') as cmake_file:
-                                cmake_file.write(updated_content)
-                            
-                            items_list = items_still_to_remove
-                            
-                            if not items_list:
-                                return
 
             block_match = re.search(config['regex'], self.cmake_file_content)
         
