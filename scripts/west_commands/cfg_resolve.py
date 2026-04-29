@@ -282,6 +282,7 @@ class CfgResolve(WestCommand):
         except OSError as e:
             self._exit_with_error(f"Failed to rename processed JSON file: {self.require_json_path} - {e}")
 
+
     def add_includes(self, project):
         """
         Add includes to the CMake configuration based on project requirements.
@@ -314,7 +315,6 @@ class CfgResolve(WestCommand):
             self._exit_with_error(f"Failed to add includes to cmake file: {e}")
 
 
-
     def add_sources(self, project):
         """
         Add source files to the CMake configuration based on project requirements.
@@ -333,8 +333,7 @@ class CfgResolve(WestCommand):
 
         try:
             sources_to_add = self._relativize_paths(sources_to_add)
-
-            self._remove_sources_from_remove_block(sources_to_add)
+            self._remove_sources_from_block(sources_to_add, 'remove_source')
 
             self._read_cmake_file()
             
@@ -350,38 +349,58 @@ class CfgResolve(WestCommand):
         except Exception as e:
             self._exit_with_error(f"Failed to add sources to cmake file: {e}")
 
-    def _remove_sources_from_add_block(self, files_to_remove):
+
+    def _remove_sources_from_block(self, files_list, block_type):
         """
-        Remove source files from the mcux_add_source block if they exist there.
+        Remove source files from a specified CMake block if they exist there.
     
         Args:
-            files_to_remove (list): List of source files to remove
-        
+            files_list (list): List of source files to process
+            block_type (str): Type of block to modify ('add_source' or 'remove_source')
+    
         Returns:
-            list: List of files that were NOT found in the add block and still need to be removed
+            list: For 'add_source': files that were NOT found in the block and still need processing
+                For 'remove_source': NONE
         """
+        block_configs = {
+            'add_source': {
+                'function': 'mcux_add_source',
+                'regex': r"# Added by cfg_resolve west command\s+mcux_add_source\(\s*BASE_PATH\s+\$\{CMAKE_CURRENT_LIST_DIR\}\s+SOURCES\s+([\s\S]*?)\)",
+                'log_message': 'mcux_add_source',
+                'return_remaining': True
+            },
+            'remove_source': {
+                'function': 'mcux_project_remove_source',
+                'regex': r"# Added by cfg_resolve west command\s+mcux_project_remove_source\(\s*BASE_PATH\s+\$\{CMAKE_CURRENT_LIST_DIR\}\s+SOURCES\s+([\s\S]*?)\)",
+                'log_message': 'mcux_project_remove_source',
+                'return_remaining': False
+            }
+        }
+
+        config = block_configs.get(block_type)
+        if not config:
+            self._exit_with_error(f"Unknown block type: {block_type}. Must be 'add_source' or 'remove_source'.")
+
         self._read_cmake_file()
-    
-        add_source_regex = r"# Added by cfg_resolve west command\s+mcux_add_source\(\s*BASE_PATH\s+\$\{CMAKE_CURRENT_LIST_DIR\}\s+SOURCES\s+([\s\S]*?)\)"
-    
-        add_block_match = re.search(add_source_regex, self.cmake_file_content)
-    
-        if not add_block_match:
-            return files_to_remove
-    
-        existing_add_block = add_block_match.group(0)
-        existing_sources_text = add_block_match.group(1)
-    
+
+        block_match = re.search(config['regex'], self.cmake_file_content)
+
+        if not block_match:
+            return files_list
+
+        existing_block = block_match.group(0)
+        existing_sources_text = block_match.group(1)
+
         existing_sources = [s.strip() for s in existing_sources_text.split('\n') if s.strip()]
-    
-        files_found_in_add = [f for f in files_to_remove if f in existing_sources]
-        files_not_in_add = [f for f in files_to_remove if f not in existing_sources]
-    
-        if not files_found_in_add:
-            return files_to_remove
-    
-        remaining_sources = [s for s in existing_sources if s not in files_found_in_add]
-    
+
+        files_found_in_block = [f for f in files_list if f in existing_sources]
+        files_not_in_block = [f for f in files_list if f not in existing_sources]
+
+        if not files_found_in_block:
+            return files_list
+
+        remaining_sources = [s for s in existing_sources if s not in files_found_in_block]
+
         if remaining_sources:
             formatted_items = []
             for i, item in enumerate(remaining_sources):
@@ -389,87 +408,27 @@ class CfgResolve(WestCommand):
                     formatted_items.append(f" {item}")
                 else:
                     formatted_items.append(f"\t\t\t{item}")
-        
+
             items_str = "\n".join(formatted_items)
-        
-            updated_add_block = f"""# Added by cfg_resolve west command
-mcux_add_source(
+
+            updated_block = f"""# Added by cfg_resolve west command
+{config['function']}(
 \tBASE_PATH ${{CMAKE_CURRENT_LIST_DIR}}
 \tSOURCES{items_str}
 )"""
-            updated_content = self.cmake_file_content.replace(existing_add_block, updated_add_block)
+            updated_content = self.cmake_file_content.replace(existing_block, updated_block)
         else:
-            updated_content = self._remove_block_cleanly(self.cmake_file_content, existing_add_block)
-    
+            updated_content = self._remove_block_cleanly(self.cmake_file_content, existing_block)
+
         try:
             with open(self.cmake_file_path, 'w') as cmake_file:
                 cmake_file.write(updated_content)
-            log.inf(f"Removed {len(files_found_in_add)} source(s) from mcux_add_source block")
+            log.inf(f"Removed {len(files_found_in_block)} source(s) from {config['log_message']} block")
         except IOError as e:
             self._exit_with_error(f"Error writing to CMake file {self.cmake_file_path}: {e}")
-    
-        return files_not_in_add
 
-    def _remove_sources_from_remove_block(self, files_to_add):
-        """
-        Remove source files from the mcux_project_remove_source block if they exist there.
-        This prevents conflicts when re-adding previously removed sources.
+        return files_not_in_block if config['return_remaining'] else None
     
-        Args:
-            files_to_add (list): List of source files being added
-        
-        Returns:
-            list: The original list (unchanged, as sources still need to be added)
-        """
-        self._read_cmake_file()
-    
-        remove_source_regex = r"# Added by cfg_resolve west command\s+mcux_project_remove_source\(\s*BASE_PATH\s+\$\{CMAKE_CURRENT_LIST_DIR\}\s+SOURCES\s+([\s\S]*?)\)"
-    
-        remove_block_match = re.search(remove_source_regex, self.cmake_file_content)
-    
-        if not remove_block_match:
-            return files_to_add
-    
-        existing_remove_block = remove_block_match.group(0)
-        existing_sources_text = remove_block_match.group(1)
-
-        existing_sources = [s.strip() for s in existing_sources_text.split('\n') if s.strip()]
-    
-        files_found_in_remove = [f for f in files_to_add if f in existing_sources]
-    
-        if not files_found_in_remove:
-            return files_to_add
-    
-        remaining_sources = [s for s in existing_sources if s not in files_found_in_remove]
-    
-        if remaining_sources:
-            formatted_items = []
-            for i, item in enumerate(remaining_sources):
-                if i == 0:
-                    formatted_items.append(f" {item}")
-                else:
-                    formatted_items.append(f"\t\t\t{item}")
-        
-            items_str = "\n".join(formatted_items)
-        
-            updated_remove_block = f"""# Added by cfg_resolve west command
-mcux_project_remove_source(
-\tBASE_PATH ${{CMAKE_CURRENT_LIST_DIR}}
-\tSOURCES{items_str}
-)"""
-            updated_content = self.cmake_file_content.replace(existing_remove_block, updated_remove_block)
-        else:
-            updated_content = self._remove_block_cleanly(self.cmake_file_content, existing_remove_block)
-    
-        try:
-            with open(self.cmake_file_path, 'w') as cmake_file:
-                cmake_file.write(updated_content)
-            log.inf(f"Removed {len(files_found_in_remove)} source(s) from mcux_project_remove_source block")
-        except IOError as e:
-            self._exit_with_error(f"Error writing to CMake file {self.cmake_file_path}: {e}")
-    
-        return files_to_add
-
 
     def remove_files(self, project):
         """
@@ -486,11 +445,11 @@ mcux_project_remove_source(
         if not files_to_remove:
             log.inf("Skipping file removal: No files specified")
             return
-    
+
         try:
             files_to_remove = self._relativize_paths(files_to_remove)
-            files_to_remove = self._remove_sources_from_add_block(files_to_remove)
-        
+            files_to_remove = self._remove_sources_from_block(files_to_remove, 'add_source')
+    
             if not files_to_remove:
                 log.inf("All sources removed from mcux_add_source block. No mcux_project_remove_source needed.\n")
                 return
@@ -499,7 +458,7 @@ mcux_project_remove_source(
 
             if self._check_for_duplicate_block(files_to_remove, 'remove_sources'):
                 files_to_remove = self._extract_unique_list(files_to_remove, self.cmake_remove_sources)
-        
+    
             if not files_to_remove:
                 log.inf("Skipping sources removal: No new unique source files to remove\n")
                 return
@@ -508,7 +467,6 @@ mcux_project_remove_source(
 
         except Exception as e:
             self._exit_with_error(f"Failed to remove sources from cmake file: {e}")
-
 
     def add_components(self, project):
         """
@@ -531,18 +489,26 @@ mcux_project_remove_source(
             self._exit_with_error("component_edit_prj_file_path not found in project configuration")
         
         try:
-            component_regex = r"CONFIG_MCUX_COMPONENT_([^\s]+)(=y)"
-            with open(self.prj_conf_file, 'r') as conf_file:
-                existing_components = [
-                    match.group(1) for match in re.finditer(component_regex, conf_file.read())
-                ]
-
+            if os.path.exists(self.prj_conf_file):
+                component_regex = r"CONFIG_MCUX_COMPONENT_([^\s]+)(=y)"
+                with open(self.prj_conf_file, 'r') as conf_file:
+                    existing_components = [
+                        match.group(1) for match in re.finditer(component_regex, conf_file.read())
+                    ]
+            else:
+                log.wrn(f"Project component file does not exist. Creating on add component: {self.prj_conf_file}")
+                existing_components = []
+                    
             comp_added = False
 
             for component in components_to_add:
                 component_id = component.get("kconfig_id")
                 if component_id not in existing_components:
                     comp_added = True
+                    if not os.path.exists(os.path.dirname(self.prj_conf_file)):
+                        log.wrn(f"Directory for component file does not exist. Creating directory: {os.path.dirname(self.prj_conf_file)}")
+                        os.makedirs(os.path.dirname(self.prj_conf_file), exist_ok=True) # ensure directory exists
+             
                     with open(self.prj_conf_file, 'a') as conf_file:
                         conf_file.write(f"\nCONFIG_MCUX_COMPONENT_{component_id}=y")
 
