@@ -18,6 +18,22 @@ config MCUX_COMPONENT_driver.qspi_mcxe31b
     bool
     depends on MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe31b
 
+config MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe32b
+    bool
+    default y if MCUX_HW_DEVICE_ID_MCXE32B
+
+config MCUX_COMPONENT_driver.qspi_mcxe32b
+    bool
+    depends on MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe32b
+
+config MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe327
+    bool
+    default y if MCUX_HW_DEVICE_ID_MCXE327
+
+config MCUX_COMPONENT_driver.qspi_mcxe327
+    bool
+    depends on MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe327
+
 config MCUX_HAS_COMPONENT_driver.qspi_edma
     bool
     default y if MCUX_HAS_COMPONENT_driver.qspi && (MCUX_HAS_COMPONENT_driver.edma || MCUX_HAS_COMPONENT_driver.edma4)
@@ -37,5 +53,7 @@ config MCUX_COMPONENT_driver.qspi
     bool "qspi"
     select MCUX_COMPONENT_driver.common
     select MCUX_COMPONENT_driver.qspi_mcxe31b if MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe31b
+    select MCUX_COMPONENT_driver.qspi_mcxe32b if MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe32b
+    select MCUX_COMPONENT_driver.qspi_mcxe327 if MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe327
     select MCUX_COMPONENT_driver.qspi_mcxe247 if MCUX_DEPENDENCY_COMPONENT_driver.qspi_mcxe247
     depends on MCUX_HAS_COMPONENT_driver.qspi
