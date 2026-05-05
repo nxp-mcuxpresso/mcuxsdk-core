@@ -1141,17 +1141,24 @@ status_t I2C_MasterReadBlocking(I2C_Type *base, uint8_t *rxBuff, size_t rxSize, 
     /* Setup the I2C peripheral to receive data. */
     base->C1 &= ~(uint8_t)(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK);
 
+#if !(defined(I2C_MASTER_FACK_CONTROL) && I2C_MASTER_FACK_CONTROL)
+    if (rxSize == 1U)
+    {
+        base->C1 |= I2C_C1_TXAK_MASK;
+    }
+#endif
+
     /* Do dummy read. */
     (void)base->D;
 
+#if defined(I2C_MASTER_FACK_CONTROL) && I2C_MASTER_FACK_CONTROL
     if (rxSize == 1U)
     {
         /* Issue NACK on read. */
         base->C1 |= I2C_C1_TXAK_MASK;
-#if defined(I2C_MASTER_FACK_CONTROL) && I2C_MASTER_FACK_CONTROL
         base->SMB &= ~(uint8_t)I2C_SMB_FACK_MASK;
-#endif
     }
+#endif
 
     while (0U != (rxSize--))
     {
@@ -1190,6 +1197,13 @@ status_t I2C_MasterReadBlocking(I2C_Type *base, uint8_t *rxBuff, size_t rxSize, 
         /* Clear the IICIF flag. */
         base->S = (uint8_t)kI2C_IntPendingFlag;
 
+#if !(defined(I2C_MASTER_FACK_CONTROL) && I2C_MASTER_FACK_CONTROL)
+        if (rxSize == 1U)
+        {
+            base->C1 |= I2C_C1_TXAK_MASK;
+        }
+#endif
+
         /* Read from the data register. */
         *rxBuff++ = base->D;
 
@@ -1198,16 +1212,14 @@ status_t I2C_MasterReadBlocking(I2C_Type *base, uint8_t *rxBuff, size_t rxSize, 
         {
             I2C_MasterAckByte(base);
         }
-#endif
 
         if (rxSize == 1U)
         {
-            base->C1 |= I2C_C1_TXAK_MASK;
-#if defined(I2C_MASTER_FACK_CONTROL) && I2C_MASTER_FACK_CONTROL
             /* Issue NACK on read. */
+            base->C1 |= I2C_C1_TXAK_MASK;
             base->SMB &= ~(uint8_t)I2C_SMB_FACK_MASK;
-#endif
         }
+#endif
     }
 
     return result;
