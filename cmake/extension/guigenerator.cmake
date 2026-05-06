@@ -101,7 +101,7 @@ if (${CONFIG_TOOLCHAIN} IN_LIST GUI_PROJECT_SUPPORTED_TOOLCHAIN AND FOUND_RUBY_E
             -E
             env
             ${COMMON_ENV_SETTINGS}
-            ruby
+            ${RUBY_EXECUTABLE}
             ${PROJECT_GENERATOR}
             -t
             ${CONFIG_TOOLCHAIN}
@@ -129,7 +129,7 @@ add_custom_target(
         -E
         env
         ${COMMON_ENV_SETTINGS} standalone=true
-        ruby
+        ${RUBY_EXECUTABLE}
         ${PROJECT_GENERATOR}
         -t
         ${CONFIG_TOOLCHAIN}

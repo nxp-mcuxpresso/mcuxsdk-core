@@ -4,3 +4,9 @@ source "https://rubygems.org"
 
 gem 'deep_merge'
 gem 'nokogiri'
+# Removed from Ruby's default gem set in 4.0.0; project_generator.rb requires
+# it at top level. Without an explicit gem entry the brew portable-ruby bottle
+# warns on every invocation: "logger is not part of the default gems since
+# Ruby 4.0.0". (Windows is unaffected because OCRA traces requires and bundles
+# logger automatically.)
+gem 'logger'

@@ -611,6 +611,25 @@ class Build(Forceable):
             "HINT": self.args.hint,
             'WEST': _CMAKE_TRUE
             }
+
+        # Forward an installed portable Ruby to mcuxsdk/cmake/extension/ruby.cmake.
+        # `west install_ruby` writes the bin directory to env.ruby in west config.
+        # Skip when the user already passed -DRUBY_EXECUTABLE=... explicitly via
+        # --cmake-opt (or any of the other cmake-opt-bearing flags already merged
+        # into cmake_opts) — explicit user intent must win over workspace defaults.
+        user_set_ruby = any(opt.startswith('-DRUBY_EXECUTABLE=')
+                            for opt in cmake_opts)
+        ruby_cfg = config.get('env', 'ruby', fallback=None)
+        if ruby_cfg and not user_set_ruby:
+            ruby_path = pathlib.Path(ruby_cfg)
+            if ruby_path.is_dir():
+                ruby_path = ruby_path / ('ruby.exe' if os.name == 'nt' else 'ruby')
+            if ruby_path.is_file():
+                extra_args['RUBY_EXECUTABLE'] = ruby_path.as_posix()
+            else:
+                self.wrn(f'env.ruby={ruby_cfg} does not point to a ruby executable; '
+                         'CMake will search PATH instead')
+
         if self.args.toolchain == 'zephyr':
             extra_args['ZEPHYR_SDK'] = 'y'
             self.args.toolchain = 'armgcc'

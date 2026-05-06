@@ -334,6 +334,11 @@ function(ExternalZephyrProject_Add)
     GENERATE_STANDALONE_PROJECT
     SYSBUILD_GENERATE_STANDALONE_PROJECT
     MCUX_SKIP_COMPILER_CHECKS
+    # Forward the user-selected Ruby interpreter into image CMake runs so the
+    # guigenerator chain uses the same ruby everywhere instead of falling back
+    # to find_program(ruby) — important when a portable Ruby is installed
+    # outside PATH (e.g. via `west install_ruby`).
+    RUBY_EXECUTABLE
   )
 
   set(sysbuild_cache_file ${CMAKE_BINARY_DIR}/${ZBUILD_APPLICATION}_sysbuild_cache.txt)
