@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Set the C1[TXAK] before start of reading last byte to sent NACK in I2C_MasterReadBlocking().
+  - Updated I2C_MasterTransferBlocking() to does not change xfer->subaddressSize.
 
 ## [2.0.11]
 

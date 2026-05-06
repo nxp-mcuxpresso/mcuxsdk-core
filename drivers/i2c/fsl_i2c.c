@@ -1244,6 +1244,7 @@ status_t I2C_MasterTransferBlocking(I2C_Type *base, i2c_master_transfer_t *xfer)
     assert(NULL != xfer);
 
     i2c_direction_t direction = xfer->direction;
+    uint8_t subaddressSize    = xfer->subaddressSize;
     status_t result           = kStatus_Success;
 
     /* Clear all status before transfer. */
@@ -1268,7 +1269,7 @@ status_t I2C_MasterTransferBlocking(I2C_Type *base, i2c_master_transfer_t *xfer)
 #endif
 
     /* Change to send write address when it's a read operation with command. */
-    if ((xfer->subaddressSize > 0U) && (xfer->direction == kI2C_Read))
+    if ((subaddressSize > 0U) && (xfer->direction == kI2C_Read))
     {
         direction = kI2C_Write;
     }
@@ -1334,15 +1335,15 @@ status_t I2C_MasterTransferBlocking(I2C_Type *base, i2c_master_transfer_t *xfer)
     }
 
     /* Send subaddress. */
-    if (0U != (xfer->subaddressSize))
+    if (0U != subaddressSize)
     {
         do
         {
             /* Clear interrupt pending flag. */
             base->S = (uint8_t)kI2C_IntPendingFlag;
 
-            xfer->subaddressSize--;
-            base->D = (uint8_t)((xfer->subaddress) >> (8U * xfer->subaddressSize));
+            subaddressSize--;
+            base->D = (uint8_t)((xfer->subaddress) >> (8U * subaddressSize));
 
 #if I2C_RETRY_TIMES != 0U
             waitTimes = I2C_RETRY_TIMES;
@@ -1375,7 +1376,7 @@ status_t I2C_MasterTransferBlocking(I2C_Type *base, i2c_master_transfer_t *xfer)
                 return result;
             }
 
-        } while (xfer->subaddressSize > 0u);
+        } while (subaddressSize > 0u);
 
         if (xfer->direction == kI2C_Read)
         {
