@@ -14,7 +14,11 @@ class NinjaParser
   NO_GUI_TEMPLATE_TOOLCHAIN = %w[armgcc xcc xclang riscvllvm]
   CUSTOM_COMMAND_IGNORE_LIST = %w[pristine menuconfig guiconfig hardenconfig guiproject
     standalone_project manifest flash debug debugserver attach usage ram_report rom_report
-    footprint] 
+    footprint]
+  # Tool-level config settings where the yml (IDE.yml) definition wins over
+  # the CMake-parsed one (i.e., do NOT concatenate the two arrays). Add any
+  # future setting that should follow the same rule here.
+  YML_OVERRIDE_TOOL_CONFIG_SETTINGS = %w[lib-search-path]
 
   def initialize(ninja, name, toolchain, config, outdir, logger)
     @logger = Logger.new(STDOUT)
@@ -1182,7 +1186,45 @@ class NinjaParser
       YAML.dump_file(dump_file, ide_data)
     end
 
+    # For settings in YML_OVERRIDE_TOOL_CONFIG_SETTINGS, yml takes precedence
+    # over CMake-parsed data: drop the CMake side under any tool where the yml
+    # already defines one, so the deep_merge below does not concatenate the
+    # two arrays.
+    drop_cmake_yml_override_settings(ide_data, @data)
+
     @data.deep_merge!(ide_data)
+  end
+
+  # For each setting listed in YML_OVERRIDE_TOOL_CONFIG_SETTINGS:
+  # if the yml defines it for a tool (under any config target), remove that
+  # setting from every config target of the same tool in the CMake-parsed
+  # @data before merging. This makes the yml override the CMake value rather
+  # than concatenating the two arrays.
+  def drop_cmake_yml_override_settings(yml_content, cmake_content)
+    return if yml_content.nil? || cmake_content.nil?
+    return if yml_content[@name].nil? || cmake_content[@name].nil?
+    yml_tools   = yml_content[@name].dig('contents', 'configuration', 'tools')
+    cmake_tools = cmake_content[@name].dig('contents', 'configuration', 'tools')
+    return if yml_tools.nil? || cmake_tools.nil?
+
+    yml_tools.each do |tool_name, tool_content|
+      next unless tool_content.is_a?(Hash)
+      yml_configs = tool_content['config']
+      next unless yml_configs.is_a?(Hash)
+      cmake_configs = cmake_tools.dig(tool_name, 'config')
+      next unless cmake_configs.is_a?(Hash)
+
+      YML_OVERRIDE_TOOL_CONFIG_SETTINGS.each do |setting|
+        yml_has_setting = yml_configs.any? do |_target, target_content|
+          target_content.is_a?(Hash) && target_content.key?(setting)
+        end
+        next unless yml_has_setting
+
+        cmake_configs.each_value do |target_content|
+          target_content.delete(setting) if target_content.is_a?(Hash)
+        end
+      end
+    end
   end
 
   def reorg_ide_data(content)
@@ -1263,9 +1305,15 @@ class NinjaParser
     elsif Array == value.class
       value.each { |v| value_iterator(variables, v) }
     elsif String == value.class
-      value.gsub!(/\${(\w+)}/) do |_match|
-        Core.assert(variables[$+], "variable '#{$+}' dose not exist")
-        variables[$+]
+      value.gsub!(/\${(\w+)}/) do |match|
+        var_name = $+
+        resolved = variables[var_name]
+        if resolved
+          resolved
+        else
+          @logger.info("variable '#{var_name}' does not exist, keep '${#{var_name}}' as is")
+          match
+        end
       end
     end
   end
