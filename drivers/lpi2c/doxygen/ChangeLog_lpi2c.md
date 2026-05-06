@@ -7,6 +7,7 @@
   - Added a check for an error from the previous transfer in the transfer API (when kLPI2C_TransferNoStopFlag was used).
   - Updated LPI2C_MasterReceive() to return kStatus_InvalidArgument when rxSize is 0.
   - Updated transfer API functions to return kStatus_InvalidArgument when transfer->dataSize is 0 and transfer->direction is kLPI2C_Read.
+  - Fixed assert issue in LPI2C_MasterSetBaudRate().
 
 ## [2.6.7]
 

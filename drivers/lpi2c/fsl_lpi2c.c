@@ -701,7 +701,10 @@ void LPI2C_MasterSetBaudRate(LPI2C_Type *base, uint32_t sourceClock_Hz, uint32_t
         a = (10U * sourceClock_Hz / divider / baudRate_Hz + 5U) / 10U;
         b = (uint32_t)scl_lat + 2U;
 
-        assert(a > b);
+        if (a <= b)
+        {
+            break;
+        }
         clkCycle = a - b;
 
         /* According to register description, The max value for CLKLO and CLKHI is 63.
@@ -738,6 +741,8 @@ void LPI2C_MasterSetBaudRate(LPI2C_Type *base, uint32_t sourceClock_Hz, uint32_t
             }
         }
     }
+
+    assert(bestError < 0xffffffffu);
 
     /* SCL low time tLO should be larger than or equal to SCL high time tHI:
        tLO = ((CLKLO + 1) x (2 ^ PRESCALE)) >= tHI = ((CLKHI + 1 + SCL_LATENCY) x (2 ^ PRESCALE)),
