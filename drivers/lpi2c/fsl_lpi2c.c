@@ -41,6 +41,9 @@
 #define LPI2C_RESETS_ARRAY LPI2C_RSTS
 #endif
 
+#define MIN_CLKLO 3U
+#define MIN_CLKHI 1U
+
 /*! @brief LPI2C master fifo commands. */
 enum
 {
@@ -707,6 +710,11 @@ void LPI2C_MasterSetBaudRate(LPI2C_Type *base, uint32_t sourceClock_Hz, uint32_t
         }
         clkCycle = a - b;
 
+        if (clkCycle < (MIN_CLKLO + MIN_CLKHI))
+        {
+            break;
+        }
+
         /* According to register description, The max value for CLKLO and CLKHI is 63.
            however to meet the I2C specification of tBUF, CLKHI should be less than
            clkCycle - 0.52 x sourceClock_Hz / baudRate_Hz / divider + 1U. Refer to the comment of the tmpHigh's
@@ -761,7 +769,7 @@ void LPI2C_MasterSetBaudRate(LPI2C_Type *base, uint32_t sourceClock_Hz, uint32_t
     uint8_t tmpHigh = (uint8_t)(((bestclkCycle - scl_lat) / 2U) & 0xffU);
 
     a = 13U * sourceClock_Hz / baudRate_Hz / bestDivider / 25U;
-    assert((uint32_t)bestclkCycle > a);
+    assert((uint32_t)bestclkCycle >= a);
     assert(a <= (uint32_t)UINT8_MAX);
 
     if (tmpHigh > (bestclkCycle - (uint8_t)a + 1U))
