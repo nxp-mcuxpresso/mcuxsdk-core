@@ -2169,7 +2169,6 @@ status_t SPC_SetHighPowerModeRegulatorsConfig(SPC_Type *base, const spc_hp_mode_
              * $ref spc_c_ref_5$.
              */
             status = SPC_SetHighPowerModeSystemLDORegulatorConfig(base, &config->SysLDOOption); /* GCOVR_EXCL_LINE */
-#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
             /*
              * $Line Coverage Justification$
              * $ref spc_c_ref_5$.
@@ -2177,6 +2176,8 @@ status_t SPC_SetHighPowerModeRegulatorsConfig(SPC_Type *base, const spc_hp_mode_
             /* GCOVR_EXCL_START */
             if (status == kStatus_Success)
             {
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
+                /* GCOVR_EXCL_START */
                 status = SPC_SetHighPowerModeBandgapModeConfig(base, config->bandgapMode);
 #if (defined(FSL_FEATURE_SPC_HAS_LPBUFF) && FSL_FEATURE_SPC_HAS_LPBUFF)
                 if (status == kStatus_Success) /* GCOVR_EXCL_BR_LINE */
@@ -2184,8 +2185,11 @@ status_t SPC_SetHighPowerModeRegulatorsConfig(SPC_Type *base, const spc_hp_mode_
                     SPC_EnableHighPowerModeCMPBandgapBuffer(base, config->lpBuff);
                 }
 #endif /* FSL_FEATURE_SPC_HAS_LPBUFF */
+                /* GCOVR_EXCL_STOP */
+#if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
             }
             /* GCOVR_EXCL_STOP */
+#endif /* FSL_FEATURE_SPC_HAS_SYS_LDO */
         }
     }
     return status;
