@@ -424,6 +424,9 @@ void SCTIMER_UpdatePwmDutycycle(SCT_Type *base, sctimer_out_t output, uint8_t du
     /* Retrieve the match register number for the PWM pulse period */
     pulseMatchReg = base->EV[event + 1U].CTRL & SCT_EV_CTRL_MATCHSEL_MASK;
 
+    assert((periodMatchReg < (uint32_t)FSL_FEATURE_SCT_NUMBER_OF_MATCH_CAPTURE) &&
+        (pulseMatchReg < (uint32_t)FSL_FEATURE_SCT_NUMBER_OF_MATCH_CAPTURE));
+
     period = base->MATCH[periodMatchReg];
 
     /* Stop the counter before updating match register */

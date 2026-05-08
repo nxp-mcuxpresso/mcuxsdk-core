@@ -1,5 +1,11 @@
 # SCTIMER
 
+
+## [2.5.5]
+
+- Bug Fixes
+  - Fixed CERT-C Array (CERT ARR30-C) violation issues.
+
 ## [2.5.4]
 
 - New Features
