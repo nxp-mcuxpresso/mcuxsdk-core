@@ -1082,13 +1082,18 @@ class CmakeTraceApp(CmakeApp):
             )
             return board_prj_conf, force_selected
 
-        # SDKGEN-3514: under this policy we drop *all* CONFIG_MCUX_COMPONENT_*
-        # entries from <board>/prj.conf and persist only the
-        # CONFIG_MCUX_PRJSEG_* decisions, letting Kconfig select chains
-        # rederive the component set at freestanding build time. This way
-        # profile overlays can flip  PRJSEGs without conflicting with hard-coded
-        # feature components like CONFIG_MCUX_COMPONENT_middleware.wifi.*.
-        drop_all_components = WorkaroundPolicy.EXCLUDE_APP_COMPONENTS_FROM_BOARD_PRJ in self.policies
+        # SDKGEN-3514: under this policy <board>/prj.conf carries board / device
+        # decisions only. Everything else is dropped here and re-derived by
+        # Kconfig at freestanding build time:
+        #   - CONFIG_MCUX_COMPONENT_*           dropped (PRJSEG selects re-pull them)
+        #   - CONFIG_MCUX_PRJSEG_module.{board,device}.*  kept
+        #   - any other CONFIG_MCUX_PRJSEG_*    dropped (Kconfig default + the
+        #     app's own prj.conf via combine_prj_conf are the source of truth)
+        strict_board_only = WorkaroundPolicy.EXCLUDE_APP_COMPONENTS_FROM_BOARD_PRJ in self.policies
+
+        def _is_board_or_device_prjseg(name):
+            short = name[len("CONFIG_MCUX_PRJSEG_"):]
+            return short.startswith("module.board.") or short.startswith("module.device.")
 
         for c in raw_config:
             # Middleware may cause Kconfig build issues
@@ -1099,8 +1104,11 @@ class CmakeTraceApp(CmakeApp):
                 continue
             if item in ps_list:
                 continue
-            if drop_all_components and item.startswith("CONFIG_MCUX_COMPONENT_"):
-                continue
+            if strict_board_only:
+                if item.startswith("CONFIG_MCUX_COMPONENT_"):
+                    continue
+                if item.startswith("CONFIG_MCUX_PRJSEG_") and not _is_board_or_device_prjseg(item):
+                    continue
             comp_list.append(c)
         board_prj_conf.extend(comp_list)
         for ps in ps_list:
