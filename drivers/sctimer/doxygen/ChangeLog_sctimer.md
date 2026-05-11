@@ -1,6 +1,14 @@
 # SCTIMER
 
 
+## [2.5.6]
+
+- Bug Fixes
+  - Fixed SCTIMER_CreateAndScheduleEvent setting EV[n].CTRL[HEVENT] only for
+    match-based events. IO-only events (COMBMODE = 2) bound to Counter_H in
+    16-bit mode (UNIFY = 0) now correctly have HEVENT = 1, so their state
+    mask is compared against STATE_H instead of STATE_L.
+
 ## [2.5.5]
 
 - Bug Fixes

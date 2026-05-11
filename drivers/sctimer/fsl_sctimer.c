@@ -501,6 +501,12 @@ status_t SCTIMER_CreateAndScheduleEvent(SCT_Type *base,
         return kStatus_InvalidArgument;
     }
 
+    if ((kSCTIMER_Counter_H == whichCounter) && (0U == (base->CONFIG & SCT_CONFIG_UNIFY_MASK)))
+    {
+        /* Use Counter_H bits if user wants to setup the High counter */
+        currentCtrlVal |= SCT_EV_CTRL_HEVENT(1U);
+    }
+
     if (s_currentEvent < (uint32_t)FSL_FEATURE_SCT_NUMBER_OF_EVENTS)
     {
         if (2U == combMode)
@@ -538,8 +544,6 @@ status_t SCTIMER_CreateAndScheduleEvent(SCT_Type *base,
                 if (s_currentMatchhigh < (uint32_t)FSL_FEATURE_SCT_NUMBER_OF_MATCH_CAPTURE)
                 {
                     currentCtrlVal |= SCT_EV_CTRL_MATCHSEL(s_currentMatchhigh);
-                    /* Use Counter_H bits if user wants to setup the High counter */
-                    currentCtrlVal |= SCT_EV_CTRL_HEVENT(1U);
                     temp                               = base->MATCH_ACCESS16BIT[s_currentMatchhigh].MATCHL;
                     base->MATCH[s_currentMatchhigh]    = temp | (matchValue << 16U);
                     temp                               = base->MATCHREL_ACCESS16BIT[s_currentMatchhigh].MATCHRELL;
