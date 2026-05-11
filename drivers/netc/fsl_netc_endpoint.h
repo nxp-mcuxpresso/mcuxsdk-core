@@ -324,7 +324,7 @@ typedef struct _ep_config_const
     uint32_t txRingUse : 7; /*!< Number of Tx Rings to be used, note that when SI is Switch management ENETC SI, the
                           number not include Tx ring 0. */
     uint32_t rxBdrGroupNum : 2;      /*!< Rx BD ring group number, range in 0 ~ 2. */
-    uint32_t ringPerBdrGroup : 3;    /*!< The ring number in every Rx BD ring group, range in 1 ~ 8, active when
+    uint32_t ringPerBdrGroup : 4;    /*!< The ring number in every Rx BD ring group, range in 1 ~ 8, active when
                                        rxBdrGroupNum not equal zero. */
     bool rxCacheMaintain : 1;        /*!< Enable/Disable Rx buffer cache maintain in driver. */
     bool txCacheMaintain : 1;        /*!< Enable/Disable Tx buffer cache maintain in driver. */

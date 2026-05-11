@@ -50,7 +50,7 @@
  */
 
 /*! @brief Driver Version */
-#define FSL_NETC_DRIVER_VERSION (MAKE_VERSION(2, 10, 5))
+#define FSL_NETC_DRIVER_VERSION (MAKE_VERSION(2, 10, 6))
 
 /*! @brief Macro to divides an address into a low 32 bits and a possible high 32 bits */
 #define NETC_ADDR_LOW_32BIT(x)  ((uint32_t)((x) & 0xFFFFFFFFU))
@@ -3524,7 +3524,7 @@ typedef struct _netc_hw_enetc_si_config
     uint32_t valnToIpvEnable : 1; /*!< Enable the VLAN PCP/DEI value (use NETC_VLAN_PCP_DEI_VALUE marco) to internal
                                      priority value mapping. */
     uint32_t rxBdrGroupNum : 2;   /*!< Rx BD ring group number, range in 0 ~ 2. */
-    uint32_t ringPerBdrGroup : 3; /*!< The ring number in every Rx BD ring group, range in 1 ~ 8, active when
+    uint32_t ringPerBdrGroup : 4; /*!< The ring number in every Rx BD ring group, range in 1 ~ 8, active when
                                     rxBdrGroupNum not equal zero. */
     netc_hw_enetc_si_rxr_group
         defaultRxBdrGroup;        /*!< The selected Rx BD ring group, active when rxBdrGroupNum not equal zero. */

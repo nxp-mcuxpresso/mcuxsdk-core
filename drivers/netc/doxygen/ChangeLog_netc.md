@@ -1,5 +1,10 @@
 # NETC
 
+## [2.10.6]
+
+- Bug Fixes
+  - Fixed ringPerBdrGroup width to 4-bit whose range is from 1 to 8.
+
 ## [2.10.5]
 
 - Bug Fixes
