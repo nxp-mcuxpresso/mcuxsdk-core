@@ -146,6 +146,13 @@
                             "items": {
                               "type": "string"
                             }
+                        },
+                        "freestanding_extra_args": {
+                            "type": "array",
+                            "description": "Extra cmake args (Zephyr-style, e.g. -DCONFIG_X=y, -DCONFIG_Y=n) applied to the export_app trace cmake invocation.",
+                            "items": {
+                              "type": "string"
+                            }
                         }
                     },
                     "required": [

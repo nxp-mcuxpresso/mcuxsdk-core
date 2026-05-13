@@ -111,6 +111,7 @@ class CmakeTraceApp(CmakeApp):
             self.board_copy_folders = self.options.board_copy_folders
         else:
             self.board_copy_folders = copy.deepcopy(self.shared_options.board_copy_folders)
+        self.freestanding_extra_args = []
         if self.options.app_type == AppType.linked_app:
             self.app_id = self.options.name
         if self.shared_options.core_id:
@@ -327,6 +328,10 @@ class CmakeTraceApp(CmakeApp):
                 self.board_copy_folders = freestanding_copied_folders
             else:
                 self.board_copy_folders.extend(freestanding_copied_folders)
+        # Zephyr-style per-example extra cmake args (e.g. -DCONFIG_*=y/n).  Used by
+        # _build_overlay_cmake / update_cmake_file / inject_cmd to route the same
+        # override through trace and freestanding rebuild.
+        self.freestanding_extra_args = example_data.get('contents', {}).get('freestanding_extra_args', [])
 
         # Ensure list_project only catches examples exported for the target board.
         for example_name, example_data in list(result[0].items()):
@@ -620,7 +625,7 @@ class CmakeTraceApp(CmakeApp):
 
     def process_app_context(self, i, j, trace_data=None):
         p_file, cmd, args = (j["file"], j["cmd"].lower(), j["args"])
-        if cmd in ["mcux_add_include", "mcux_add_source"]:
+        if cmd in ["mcux_add_include", "mcux_add_source", "mcux_add_library"]:
             if (ret := getattr(self, f"trace_{cmd}")(j, self.app_receiver["output_dir"])) == 0:
                 self._write_raw(j, self.app_receiver["result"])
             else:
@@ -684,7 +689,7 @@ class CmakeTraceApp(CmakeApp):
             return
         if not (self.trace_receiver["cur_ps"] or p_file.endswith("reconfig.cmake")):
             return
-        if cmd in ["mcux_add_include", "mcux_add_source"]:
+        if cmd in ["mcux_add_include", "mcux_add_source", "mcux_add_library"]:
             if (ret := getattr(self, f"trace_{cmd}")(j, self.trace_receiver["output_dir"])) == 0:
                 self._write_raw(j, self.trace_receiver["result"])
             else:
@@ -745,6 +750,12 @@ class CmakeTraceApp(CmakeApp):
             )
             if force_selected:
                 self.update_trace_kconfig(force_selected)
+            # Append the "disable" half of freestanding_extra_args to the board
+            # prj.conf so the freestanding rebuild's kconfig sees them.  Enable
+            # entries (PRJSEG=y) are intentionally skipped — ps_list already
+            # wrote =n for processed PRJSEGs and re-enabling them here would
+            # resurrect the SDK tree's PRJSEG block and duplicate board_files.cmake.
+            board_prj_conf.extend(self._extract_kconfig_overrides(only_disable=True))
             open(self.trace_receiver["output_dir"] / "prj.conf", "a", encoding="utf-8").write(
                 "\n".join(board_prj_conf)
             )
@@ -877,6 +888,12 @@ class CmakeTraceApp(CmakeApp):
 
     def trace_mcux_add_source(self, j, output_dir):
         parsed_func = CMakeFunction(j)
+        if not self._match_mcux_source_condition(parsed_func):
+            logger.debug(
+                f"Skip mcux_add_source at {j['file']}:{j['line']} — "
+                f"MCUX_SOURCE_CONDITION mismatch with current build"
+            )
+            return []
         failed_sources = []
         sources = []
         cur_dir = Path(j["file"]).parent
@@ -922,8 +939,86 @@ class CmakeTraceApp(CmakeApp):
 
         return self._finalize_cmake_args(parsed_func, cur_dir, sources, failed_sources, "SOURCES")
 
+    # MCUX_SOURCE_CONDITION key → CONFIG_* name in trace .config.  Per
+    # cmake/extension/basic_settings_lite.cmake.
+    _TRACE_FILTER_KEYS = {
+        "CORES": "CONFIG_MCUX_HW_CORE",
+        "CORE_IDS": "CONFIG_MCUX_HW_CORE_ID",
+        "BOARDS": "CONFIG_MCUX_HW_BOARD",
+        "DEVICE_IDS": "CONFIG_MCUX_HW_DEVICE_ID",
+    }
+
+    @property
+    def _trace_filter_values(self):
+        # Current build's MCUX_SOURCE_CONDITION values, read from the trace
+        # .config.  Used by _match_mcux_source_condition to mirror the runtime
+        # IN_LIST early-return inside cmake/extension/function.cmake at trace
+        # time, so per-device/per-core sources/libs are not over-staged.
+        build_dir = getattr(self, 'build_dir', None) or (
+            self.shared_options.output_dir / INJECT_BUILD_DIR
+        )
+        cache = getattr(self, '_trace_filter_values_cache', None)
+        if cache is not None and cache[0] == build_dir:
+            return cache[1]
+        try:
+            lines = (build_dir / ".config").read_text().splitlines()
+        except OSError:
+            self._trace_filter_values_cache = (build_dir, {})
+            return {}
+        result = {}
+        for cond_key, cfg_name in self._TRACE_FILTER_KEYS.items():
+            for line in lines:
+                if (m := re.match(rf'^{re.escape(cfg_name)}="?(.*?)"?\s*$', line)):
+                    result[cond_key] = m.group(1)
+                    break
+        self._trace_filter_values_cache = (build_dir, result)
+        return result
+
+    def _match_mcux_source_condition(self, parsed_func):
+        # Return False when a MCUX_SOURCE_CONDITION arg on the call lists
+        # values that exclude the current build's value.  Mirrors the
+        # AND-across-conditions / IN_LIST check in cmake/extension/function.cmake.
+        for key, cur in self._trace_filter_values.items():
+            if (vs := parsed_func.multi_args.get(key)) and cur not in vs:
+                return False
+        return True
+
+    def trace_mcux_add_library(self, j, output_dir):
+        parsed_func = CMakeFunction(j)
+        if not self._match_mcux_source_condition(parsed_func):
+            logger.debug(
+                f"Skip mcux_add_library at {j['file']}:{j['line']} — "
+                f"MCUX_SOURCE_CONDITION mismatch with current build"
+            )
+            return []
+        failed_libs = []
+        libs = []
+        cur_dir = Path(j["file"]).parent
+        base_path = Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
+
+        for s in parsed_func.multi_args.get("LIBS", []):
+            for r_lib in self._resolve_src_path(cur_dir, base_path, Path(s)):
+                if self._in_output_dir(r_lib):
+                    return 0
+                if not r_lib.exists():
+                    logger.debug(f"Skip not exist library file {r_lib.as_posix()}")
+                    continue
+                target_dir = self.get_target_path(r_lib.parent)
+                target_lib = output_dir / target_dir / r_lib.name
+                target_lib.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(r_lib, target_lib)
+                libs.append(target_lib.relative_to(output_dir).as_posix())
+
+        return self._finalize_cmake_args(parsed_func, cur_dir, libs, failed_libs, "LIBS")
+
     def trace_mcux_add_include(self, j, output_dir):
         parsed_func = CMakeFunction(j)
+        if not self._match_mcux_source_condition(parsed_func):
+            logger.debug(
+                f"Skip mcux_add_include at {j['file']}:{j['line']} — "
+                f"MCUX_SOURCE_CONDITION mismatch with current build"
+            )
+            return []
         failed_includes = []
         includes = []
         simple_inc = set(parsed_func.single_args) <= {"BASE_PATH"} and set(parsed_func.multi_args) == {"INCLUDES"}
@@ -999,6 +1094,12 @@ class CmakeTraceApp(CmakeApp):
 
     def trace_mcux_project_remove_source(self, j, preprocess=False):
         parsed_func = CMakeFunction(j)
+        if not self._match_mcux_source_condition(parsed_func):
+            logger.debug(
+                f"Skip mcux_project_remove_source at {j['file']}:{j['line']} — "
+                f"MCUX_SOURCE_CONDITION mismatch with current build"
+            )
+            return []
         if not preprocess:
             return [parsed_func]
         cur_dir = Path(j["file"]).parent
@@ -1222,6 +1323,43 @@ class CmakeTraceApp(CmakeApp):
             append_func = f"\nmcux_add_include(INCLUDES {' '.join(missing_includes)})\n"
             self.app_receiver["result"].append(append_func)
 
+    def _extract_kconfig_overrides(self, only_disable: bool = False) -> list:
+        # Extract -D CONFIG_*=val entries from freestanding_extra_args and return
+        # them as Kconfig fragment lines (CONFIG_X=val / # CONFIG_X is not set).
+        # Used by inject_cmd (FORCED_CONF_FILE, all entries) and by dump_result
+        # (appended to <board>/prj.conf, only_disable=True).
+        lines = []
+        for arg in self.freestanding_extra_args:
+            if not (m := re.match(r'^-D(CONFIG_[A-Za-z0-9_.]+)(?::[A-Za-z]+)?=(.*)$', arg)):
+                continue
+            key, value = m.group(1), m.group(2).strip()
+            is_disable = value in ('', 'n')
+            if only_disable and not is_disable:
+                continue
+            if is_disable:
+                lines.append(f'# {key} is not set')
+            else:
+                lines.append(f'{key}={value}')
+        return lines
+
+    def _write_trace_forced_conf(self):
+        # Emit a Kconfig fragment from freestanding_extra_args.  The trace cmake
+        # invocation receives -DFORCED_CONF_FILE=<this path>; kconfig.cmake at
+        # cmake/extension/kconfig.cmake:496 appends it to the merge_config_files
+        # list (loaded last), so user values here override anything set by the
+        # source example's prj.conf / board prj.conf.  Lives outside
+        # INJECT_BUILD_DIR so `west build -p always` doesn't wipe it before
+        # cmake configure reads it.
+        lines = self._extract_kconfig_overrides()
+        if not lines:
+            return None
+        overlay = self.shared_options.output_dir / ".export_overrides.conf"
+        overlay.parent.mkdir(parents=True, exist_ok=True)
+        with open(overlay, 'w') as f:
+            f.write("# Auto-generated by export_app from example.yml freestanding_extra_args.\n")
+            f.write("\n".join(lines) + "\n")
+        return overlay
+
     @cached_property
     def inject_cmd(self):
         """
@@ -1245,6 +1383,10 @@ class CmakeTraceApp(CmakeApp):
             cmd_list.append("--sysbuild")
         if self.shared_options.cmake_opts:
             cmd_list.extend(self.shared_options.cmake_opts)
+        if self.freestanding_extra_args:
+            cmd_list.extend(self.freestanding_extra_args)
+            if forced := self._write_trace_forced_conf():
+                cmd_list.append(f"-DFORCED_CONF_FILE={forced.as_posix()}")
         trace_parameters = deepcopy(TRACE_OPTIONS)
         trace_parameters[-1] = trace_parameters[-1].replace(
             "${BINARY_DIR}",

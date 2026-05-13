@@ -7,6 +7,9 @@
   - Fix `board_files.cmake` include order: adjust insertion index by `prepend_content` offset so board includes come after SDK includes, preserving correct header search order.
 
 - New Features
+  - Support `mcux_add_library`: stage prebuilt libraries (`.a` / `.lib`) referenced via `LIBS` into the freestanding tree alongside sources and headers.
+  - Filter `mcux_add_source` / `mcux_add_include` / `mcux_add_library` / `mcux_project_remove_source` trace calls by `CORES` / `CORE_IDS` / `BOARDS` / `DEVICE_IDS` against the current build's `CONFIG_MCUX_HW_*` values read from `build_tmp/.config`, mirroring the runtime AND IN_LIST early-return in `cmake/extension/function.cmake`. Calls whose condition list excludes the current build are dropped at trace time so per-device/per-board files and libraries are not over-copied.
+  - Add `contents.freestanding_extra_args` in `example.yml`: a list of cmake args (e.g. `-DCONFIG_X=y`, `-DCONFIG_Y=n`) applied to the export_app trace cmake invocation.
   - Add `--copy-all-linker-files` option to copy all linker file variants (ram/flash/ddr) from the cmake trace into a `linker_files/` subdirectory. Also configurable via `west config export_app.copy_all_linker_files true`.
 
 - Improvements
@@ -24,6 +27,7 @@
   - If user input board/core variable, the extension will run a cmake configuration step to get accurate cmake trace result. This may use more time to finish the export process, but it would be more accurate.
   - Support `include`, `mcux_project_remove_source`, `mcux_add_xxx_linker_script` commands.
   - Add option `--debug` to enable debug log output.
+
 - Improvements
   - Refactor the cmake trace logic to support more complex sdk examples.
   - Improve output structure.
