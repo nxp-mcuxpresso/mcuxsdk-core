@@ -1426,8 +1426,17 @@ void EDMA_HandleIRQ(edma_handle_t *handle)
         /* Get the index of the next transfer TCD blocks. */
         sga_index = sga / sizeof(edma_tcd_t);
         /* Adjust header positions. new_header should be the index of the current transfer TCD blocks.
-         * sga_index is bounded by tcdSize (<= 127, asserted in EDMA_InstallTCDMemory), fits in int8_t. */
-        new_header = sga_index != 0U ? (int8_t)(sga_index - 1U) : (int8_t)(handle->tcdSize - 1);
+         * sga_index is bounded by tcdSize (<= 127, asserted in EDMA_InstallTCDMemory), fits in int8_t.
+         * Separate composite expression into temp before narrowing cast to satisfy MISRA Rule 10.8. */
+        if (sga_index != 0U)
+        {
+            temp = sga_index - 1U;
+        }
+        else
+        {
+            temp = (uint32_t)handle->tcdSize - 1U;
+        }
+        new_header = (int8_t)temp;
 
         /* Calculate the number of finished TCDs */
         assert(handle->header >= 0);
