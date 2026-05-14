@@ -334,10 +334,13 @@ class CmakeTraceApp(CmakeApp):
         self.freestanding_extra_args = example_data.get('contents', {}).get('freestanding_extra_args', [])
 
         # Ensure list_project only catches examples exported for the target board.
+        # `or {}` handles `boards:` written as an empty YAML value (BaseLoader
+        # parses to ""): e.g. examples/driver_examples/lpspi/loopback delegates
+        # board enumeration to internal ecosystem data and leaves the field blank.
         for example_name, example_data in list(result[0].items()):
             if filtered := {
                 k: v
-                for k, v in example_data.get("boards", {}).items()
+                for k, v in (example_data.get("boards") or {}).items()
                 if k.startswith(self.options.cmake_variables["board"])
             }:
                 result[0][example_name]["boards"] = filtered
