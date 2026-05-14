@@ -886,6 +886,27 @@ class CmakeTraceApp(CmakeApp):
             i += 1
         return f"{key}"
 
+    def _resolve_target_subdir(self, source_parent, is_simple, output_dir):
+        # Inside a PRJSEG-gated block, group simple calls under one PRJSEG-derived
+        # folder; nest non-simple calls (carrying TOOLCHAINS/DEVICE_IDS/etc.) under it.
+        if output_dir != self.output_board_dir:
+            return self.get_target_path(source_parent)
+        cur_ps = self.trace_receiver.get("cur_ps")
+        if not cur_ps or not cur_ps.startswith("CONFIG_MCUX_PRJSEG_"):
+            return self.get_target_path(source_parent)
+        segments = cur_ps[len("CONFIG_MCUX_PRJSEG_"):].split(".")
+        try:
+            top = source_parent.resolve().relative_to(SDK_ROOT_DIR).parts[0]
+        except (ValueError, IndexError):
+            return self.get_target_path(source_parent)
+        if top in ("examples", "examples_int"):
+            prjseg_root = segments[-1]
+        else:
+            prjseg_root = f"{top}_{'_'.join(segments[-2:])}"
+        if is_simple:
+            return prjseg_root
+        return f"{prjseg_root}/{self.get_target_path(source_parent)}"
+
     def trace_mcux_add_source(self, j, output_dir):
         parsed_func = CMakeFunction(j)
         if not self._match_mcux_source_condition(parsed_func):
@@ -914,7 +935,7 @@ class CmakeTraceApp(CmakeApp):
                 if r_source_str in self.project_remove_sources:
                     logger.debug(f"Skip project removed source file {r_source_str}")
                     continue
-                target_dir = self.get_target_path(r_source.parent)
+                target_dir = self._resolve_target_subdir(r_source.parent, simple_src, output_dir)
                 if is_header_file(r_source):
                     if r_source.parent.as_posix() in self.headers_map:
                         target_dir = self.headers_map[r_source.parent.as_posix()]
@@ -996,6 +1017,7 @@ class CmakeTraceApp(CmakeApp):
         cur_dir = Path(j["file"]).parent
         base_path = Path(bp) if (bp := parsed_func.single_args.get("BASE_PATH")) else None
 
+        simple_lib = set(parsed_func.single_args) <= {"BASE_PATH"} and set(parsed_func.multi_args) == {"LIBS"}
         for s in parsed_func.multi_args.get("LIBS", []):
             for r_lib in self._resolve_src_path(cur_dir, base_path, Path(s)):
                 if self._in_output_dir(r_lib):
@@ -1003,7 +1025,7 @@ class CmakeTraceApp(CmakeApp):
                 if not r_lib.exists():
                     logger.debug(f"Skip not exist library file {r_lib.as_posix()}")
                     continue
-                target_dir = self.get_target_path(r_lib.parent)
+                target_dir = self._resolve_target_subdir(r_lib.parent, simple_lib, output_dir)
                 target_lib = output_dir / target_dir / r_lib.name
                 target_lib.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy(r_lib, target_lib)
@@ -1040,7 +1062,7 @@ class CmakeTraceApp(CmakeApp):
             if r_include_str in self.headers_map:
                 target_dir = self.headers_map[r_include_str]
             else:
-                target_dir = self.headers_map[r_include_str] = self.get_target_path(r_include)
+                target_dir = self.headers_map[r_include_str] = self._resolve_target_subdir(r_include, simple_inc, output_dir)
             # NOTE Formal sdk example shall record all header files through mcux_add_source
             if WorkaroundPolicy.SKIP_OPTIONAL_HEADER_STAGING not in self.policies:
                 for item in r_include.iterdir():
