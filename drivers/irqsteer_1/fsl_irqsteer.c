@@ -58,6 +58,7 @@ static irqsteer_data_t s_irqsteerData[IRQSTEER_MAX_INST];
  */
 void IRQSTEER_Init(int32_t instIdx)
 {
+    assert(instIdx >= 0 && instIdx < IRQSTEER_MAX_INST);
     if (s_irqsteerInit[instIdx] == false)
     {
         int32_t i = 0;
@@ -78,7 +79,7 @@ void IRQSTEER_Init(int32_t instIdx)
         /* Mask all interrupts. */
         for (i = 0; i < data->regNum; i++)
         {
-            *(volatile uint32_t *)((uint32_t)data->infoPtr->reg + IRQSTEER_CHAN_MASK(data->infoPtr->irqChanIdx, i, data->regNum)) = 0U;
+            *(volatile uint32_t *)((uintptr_t)data->infoPtr->reg + IRQSTEER_CHAN_MASK(data->infoPtr->irqChanIdx, i, data->regNum)) = 0U;
         }
 
         for (i = 0; i < data->intGrpNum; i++)
@@ -135,7 +136,7 @@ void IRQSTEER_EnableInterrupt(int32_t instIdx, IRQn_Type irq)
     regIdx = IRQSTEER_GEN_REG_IDX(data->regNum, inputIdx);
     bitOffset = inputIdx % IRQSTEER_INT_SRC_REG_WIDTH;
 
-    *(volatile uint32_t *)((uint32_t)data->infoPtr->reg + IRQSTEER_CHAN_MASK(data->infoPtr->irqChanIdx, regIdx, data->regNum)) |= (1U << bitOffset);
+    *(volatile uint32_t *)((uintptr_t)data->infoPtr->reg + IRQSTEER_CHAN_MASK(data->infoPtr->irqChanIdx, regIdx, data->regNum)) |= (1U << bitOffset);
 }
 
 /*! @} */
@@ -161,7 +162,7 @@ void IRQSTEER_DisableInterrupt(int32_t instIdx, IRQn_Type irq)
     regIdx = IRQSTEER_GEN_REG_IDX(data->regNum, inputIdx);
     bitOffset = inputIdx % IRQSTEER_INT_SRC_REG_WIDTH;
 
-    *(volatile uint32_t *)((uint32_t)data->infoPtr->reg + IRQSTEER_CHAN_MASK(data->infoPtr->irqChanIdx, regIdx, data->regNum)) &= ~(1U << bitOffset);
+    *(volatile uint32_t *)((uintptr_t)data->infoPtr->reg + IRQSTEER_CHAN_MASK(data->infoPtr->irqChanIdx, regIdx, data->regNum)) &= ~(1U << bitOffset);
 }
 
 /**
@@ -207,7 +208,7 @@ int32_t IRQSTEER_GetMasterIrqCount(int32_t instIdx, int32_t outputChanIdx)
      *    So each master 0 has 32 interrupt sources connected, and for other masters,
      *    every master has 64 interrupt sources connected.
      */
-    if ((data->regNum % 2U) == 0U)
+    if (((uint32_t)data->regNum % 2U) == 0U)
     {
         count = IRQSTEER_AGGREGATED_INT_NUM_PER_GRP;
     }
@@ -229,12 +230,12 @@ int32_t IRQSTEER_GetMasterIrqCount(int32_t instIdx, int32_t outputChanIdx)
 static int32_t IRQSTEER_GetRegIdx(int32_t instIdx, int32_t outputChanIdx, int32_t slice)
 {
     irqsteer_data_t *data = IRQSTEER_GetIrqsteerData(instIdx);
-    int32_t base = data->regNum - 1 - outputChanIdx * IRQSTEER_SLICE;
+    int32_t base = (int32_t)((uint32_t)data->regNum - 1U - (uint32_t)outputChanIdx * (uint32_t)IRQSTEER_SLICE);
 
-    if (data->regNum % 2) {
-        return base + slice;
+    if ((uint32_t)data->regNum % 2U) {
+        return (int32_t)((uint32_t)base + (uint32_t)slice);
     } else {
-        return base - slice;
+        return (int32_t)((uint32_t)base - (uint32_t)slice);
     }
 }
 
@@ -266,7 +267,7 @@ IRQn_Type IRQSTEER_GetMasterNextInterrupt(int32_t instIdx, int32_t outputChanIdx
         regIdx = IRQSTEER_GetRegIdx(instIdx, outputChanIdx, i);
 
         /* Get register's value */
-        chanStatus = *(uint32_t *)((uint32_t)data->infoPtr->reg + IRQSTEER_CHAN_STATUS(data->infoPtr->irqChanIdx, regIdx, data->regNum));
+        chanStatus = *(uint32_t *)((uintptr_t)data->infoPtr->reg + IRQSTEER_CHAN_STATUS(data->infoPtr->irqChanIdx, regIdx, data->regNum));
 
         for (j = 0; j < IRQSTEER_INT_SRC_REG_WIDTH; j++)
         {
@@ -281,8 +282,8 @@ IRQn_Type IRQSTEER_GetMasterNextInterrupt(int32_t instIdx, int32_t outputChanIdx
                  *                                   +-- output channel 0
                  * 0   REG29(32bit)-inputs[31:0)   +/
                  */
-                 idx = (data->regNum - 1) - regIdx;
-                 inputIdx = idx * IRQSTEER_INT_SRC_REG_WIDTH + bitOffset;
+                 idx = (int32_t)((uint32_t)data->regNum - 1U - (uint32_t)regIdx);
+                 inputIdx = (int32_t)((uint32_t)idx * (uint32_t)IRQSTEER_INT_SRC_REG_WIDTH + (uint32_t)bitOffset);
                  irqNum = (IRQn_Type)(inputIdx + FSL_FEATURE_IRQSTEER_IRQ_START_INDEX);
                  return irqNum;
             }
@@ -315,7 +316,7 @@ uint64_t IRQSTEER_GetMasterInterruptsStatus(int32_t instIdx, int32_t outputChanI
     for (i = 0; i < sliceNum; i++) {
         regIdx = IRQSTEER_GetRegIdx(instIdx, outputChanIdx, i);
 
-        chanStatus = *(uint32_t *)((uint32_t)data->infoPtr->reg + IRQSTEER_CHAN_STATUS(data->infoPtr->irqChanIdx, regIdx, data->regNum));
+        chanStatus = *(uint32_t *)((uintptr_t)data->infoPtr->reg + IRQSTEER_CHAN_STATUS(data->infoPtr->irqChanIdx, regIdx, data->regNum));
 
         interrupts |= ((uint64_t)chanStatus << (IRQSTEER_INT_SRC_REG_WIDTH * i));
     }
@@ -402,7 +403,7 @@ void IRQSTEER_CommonIRQHandler(int32_t instIdx, int32_t outputChanIdx)
          * 237: maximum irq number of system interrupt controller(GIC/NVIC)
          * 1069: irqsteer output channel number * 64 + 237
          */
-        isr = *(int32_t *)(SCB->VTOR + (((int)intSource + IRQSTEER_IRQ_OFFSET) << 2U));
+        isr = *(int32_t *)(SCB->VTOR + ((uint32_t)((int32_t)intSource + IRQSTEER_IRQ_OFFSET) << 2U));
 #endif
 
         if (isr != 0)
