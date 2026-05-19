@@ -170,8 +170,14 @@ void EDMA_Init(EDMA_Type *base, const edma_config_t *config)
     uint32_t tmpreg, i = 0U;
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
-    /* Ungate EDMA peripheral clock */
-    CLOCK_EnableClock(s_edmaClockName[EDMA_GetInstance(base)]);
+    {
+        uint32_t edmaInstance = EDMA_GetInstance(base);
+        /* Ungate EDMA peripheral clock */
+        if (edmaInstance < ARRAY_SIZE(s_edmaClockName))
+        {
+            CLOCK_EnableClock(s_edmaClockName[edmaInstance]);
+        }
+    }
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if defined(EDMA_RESETS_ARRAY)
@@ -234,8 +240,12 @@ void EDMA_Init(EDMA_Type *base, const edma_config_t *config)
 void EDMA_Deinit(EDMA_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+    uint32_t edmaInstance = EDMA_GetInstance(base);
     /* Gate EDMA peripheral clock */
-    CLOCK_DisableClock(s_edmaClockName[EDMA_GetInstance(base)]);
+    if (edmaInstance < ARRAY_SIZE(s_edmaClockName))
+    {
+        CLOCK_DisableClock(s_edmaClockName[edmaInstance]);
+    }
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
@@ -2709,6 +2719,12 @@ void EDMA_HandleIRQ(edma_handle_t *handle)
 void EDMA_DriverIRQHandler(uint32_t instance, uint32_t channel);
 void EDMA_DriverIRQHandler(uint32_t instance, uint32_t channel)
 {
+    /* Defensive bound checks so static analysis can prove array accesses below are in range. */
+    if ((instance >= ARRAY_SIZE(s_edmaBases)) ||
+        (channel >= (uint32_t)FSL_FEATURE_EDMA_MODULE_CHANNEL))
+    {
+        return;
+    }
 #if defined FSL_EDMA_SOC_IP_EDMA && FSL_EDMA_SOC_IP_EDMA
     if ((s_edmaBases[instance]->INT >> channel) != 0U)
     {
