@@ -1,5 +1,11 @@
 # CE
 
+## [2.3.7]
+
+- New Features:
+  - Add support for DSPV-lite to load firmware directly from flash on KW43 and MCXW70 platforms.
+  - Updated the DSPV-lite firmware.
+
 ## [2.3.6]
 
 - New Features:
