@@ -106,7 +106,8 @@ void ESPI_Init(ESPI_Type *base, const espi_config_t *config)
     /* Configure eSPI capabilities. */
     uint32_t value = ESPI_ESPICAP_SPICAP(config->spiMode) | ESPI_ESPICAP_MAXSPD(config->busSpeed) |
                      ESPI_ESPICAP_TRGT_REQ_SIZE_SUPP(config->maxSAFRxReqSize) |
-                     ESPI_ESPICAP_MEMMX(config->maxPayloadSize) | (config->enableAlertPin ? ESPI_ESPICAP_ALPIN_MASK : 0U);
+                     ESPI_ESPICAP_MEMMX(config->maxPayloadSize) |
+                     (config->enableAlertPin ? ESPI_ESPICAP_ALPIN_MASK : 0U);
 
     if (config->enableSAF)
     {
@@ -126,10 +127,10 @@ void ESPI_Init(ESPI_Type *base, const espi_config_t *config)
         for (uint32_t i = 0; i < config->portCount; i++)
         {
             const espi_port_config_t *pCfg = &config->portConfig[i];
-            base->PORT[i].CFG    = ESPI_CFG_TYPE(pCfg->type) | ESPI_CFG_DIRECTION(pCfg->direction);
-            base->PORT[i].RAMUSE = ESPI_RAMUSE_OFF(pCfg->ramOffset) | ESPI_RAMUSE_LEN(pCfg->ramSize);
-            base->PORT[i].ADDR   = ESPI_ADDR_OFF(pCfg->addrOffset) | ESPI_ADDR_BASE_ASZ(pCfg->addrBase) |
-                                 ESPI_ADDR_IDXOFF(pCfg->idxOffset);
+            base->PORT[i].CFG              = ESPI_CFG_TYPE(pCfg->type) | ESPI_CFG_DIRECTION(pCfg->direction);
+            base->PORT[i].RAMUSE           = ESPI_RAMUSE_OFF(pCfg->ramOffset) | ESPI_RAMUSE_LEN(pCfg->ramSize);
+            base->PORT[i].ADDR             = ESPI_ADDR_OFF(pCfg->addrOffset) | ESPI_ADDR_BASE_ASZ(pCfg->addrBase) |
+                                             ESPI_ADDR_IDXOFF(pCfg->idxOffset);
             value |= (1UL << i);
         }
     }
@@ -403,11 +404,11 @@ void ESPI_GetPortErrorStatus(ESPI_Type *base, uint32_t port, uint32_t pstat, esp
  */
 static void ESPI_HandleSAFIRQ(ESPI_Type *base, espi_handle_t *handle, uint32_t status)
 {
-    uint32_t dataIn = base->PORT[handle->safPort].DATAIN;
-    uint32_t length = (dataIn & ESPI_DATAIN_DATA_LEN_MASK) + 1U;
-    uint32_t tag    = (dataIn & 0x3C000000U) >> 26U;
-    uint32_t wrstat = (status & ESPI_STAT_WRSTAT_MASK) >> ESPI_STAT_WRSTAT_SHIFT;
-    uint8_t *buff = ESPI_GetPortRamBuffer(base, handle->safPort);
+    uint32_t dataIn              = base->PORT[handle->safPort].DATAIN;
+    uint32_t length              = (dataIn & ESPI_DATAIN_DATA_LEN_MASK) + 1U;
+    uint32_t tag                 = (dataIn & 0x3C000000U) >> 26U;
+    uint32_t wrstat              = (status & ESPI_STAT_WRSTAT_MASK) >> ESPI_STAT_WRSTAT_SHIFT;
+    uint8_t *buff                = ESPI_GetPortRamBuffer(base, handle->safPort);
     espi_flash_request_t request = {0};
 
     if (wrstat == (uint32_t)kESPI_WRSTAT_NoRequest)
@@ -415,7 +416,7 @@ static void ESPI_HandleSAFIRQ(ESPI_Type *base, espi_handle_t *handle, uint32_t s
         return;
     }
 
-    request.data    = (wrstat == (uint32_t)kESPI_WRSTAT_WriteRequest) ? &buff[4] : &buff[0];
+    request.data = (wrstat == (uint32_t)kESPI_WRSTAT_WriteRequest) ? &buff[4] : &buff[0];
     request.type = (espi_flash_trans_type_t)wrstat;
 
     /* Check for read or write interrupt. */
@@ -432,7 +433,8 @@ static void ESPI_HandleSAFIRQ(ESPI_Type *base, espi_handle_t *handle, uint32_t s
         if (addr >= handle->flashSize)
         {
             ESPI_SetFlashOpLen(base, handle->safPort, (uint32_t)kESPI_OMFLEN_SAFCompletionFail, 0U);
-            ESPI_SetFlashCompletion(base, handle->safPort, tag, (uint32_t)kESPI_SSTCL_SAFCompletion, (uint32_t)kESPI_SAFReadOnly);
+            ESPI_SetFlashCompletion(base, handle->safPort, tag, (uint32_t)kESPI_SSTCL_SAFCompletion,
+                                    (uint32_t)kESPI_SAFReadOnly);
         }
         else
         {
@@ -442,9 +444,9 @@ static void ESPI_HandleSAFIRQ(ESPI_Type *base, espi_handle_t *handle, uint32_t s
                 length = handle->flashSize - addr;
             }
 
-            request.addr    = addr;
-            request.length  = length;
-            request.tag     = (uint8_t)tag;
+            request.addr      = addr;
+            request.length    = length;
+            request.tag       = (uint8_t)tag;
             request.readStart = true;
 
             /* Using backend operation. */
@@ -481,8 +483,8 @@ void ESPI_TriggerOOBMsg(ESPI_Type *base, espi_handle_t *handle, uint32_t length)
     uint32_t value = (base->PORT[handle->oobPort].OMFLEN & ~ESPI_OMFLEN_LEN_MASK) | ESPI_OMFLEN_LEN(length - 1U);
     base->PORT[handle->oobPort].OMFLEN = value;
 
-    value = (base->PORT[handle->oobPort].IRULESTAT & ~ESPI_IRULESTAT_SSTCL_MASK) |
-            ESPI_IRULESTAT_SSTCL((uint32_t)kESPI_SSTCL_OOBSendComplete);
+    value                                 = (base->PORT[handle->oobPort].IRULESTAT & ~ESPI_IRULESTAT_SSTCL_MASK) |
+                                            ESPI_IRULESTAT_SSTCL((uint32_t)kESPI_SSTCL_OOBSendComplete);
     base->PORT[handle->oobPort].IRULESTAT = value;
 }
 
@@ -597,13 +599,13 @@ void ESPI_CreateHandle(ESPI_Type *base,
 
     (void)memset(handle, 0, sizeof(espi_handle_t));
 
-    handle->callback     = *callback;
-    handle->userData     = userData;
-    handle->oobPort      = ESPI_INVALID_PORT;
-    handle->safPort      = ESPI_INVALID_PORT;
-    handle->mafPort      = ESPI_INVALID_PORT;
-    handle->flashOps     = NULL;
-    handle->flashSize    = 0U;
+    handle->callback  = *callback;
+    handle->userData  = userData;
+    handle->oobPort   = ESPI_INVALID_PORT;
+    handle->safPort   = ESPI_INVALID_PORT;
+    handle->mafPort   = ESPI_INVALID_PORT;
+    handle->flashOps  = NULL;
+    handle->flashSize = 0U;
 
     /* Discover key ports by scanning PnCFG.TYPE once. */
     for (uint8_t port = 0; port < config->portCount; port++)
@@ -645,8 +647,7 @@ void ESPI_CreateHandle(ESPI_Type *base,
  * param flashOps Pointer to flash backend operations.
  * param flashSize Flash address space size.
  */
-void ESPI_FlashCreateHandle(
-    ESPI_Type *base, espi_handle_t *handle, espi_flash_ops_t flashOps, uint32_t flashSize)
+void ESPI_FlashCreateHandle(ESPI_Type *base, espi_handle_t *handle, espi_flash_ops_t flashOps, uint32_t flashSize)
 {
     assert(handle != NULL);
 

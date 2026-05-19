@@ -186,8 +186,8 @@ enum _espi_port_interrupt_flags
     kESPI_PortSpec2Interrupt = ESPI_STAT_INTSPC2_MASK,  /*!< Special 2 interrupt. */
     kESPI_PortSpec3Interrupt = ESPI_STAT_INSTSPC3_MASK, /*!< Special 3 interrupt. */
     kESPI_PortAllInterrupts  = kESPI_PortErrorInterrupt | kESPI_PortReadInterrupt | kESPI_PortWriteInterrupt |
-                              kESPI_PortSpec0Interrupt | kESPI_PortSpec1Interrupt | kESPI_PortSpec2Interrupt |
-                              kESPI_PortSpec3Interrupt,
+                               kESPI_PortSpec0Interrupt | kESPI_PortSpec1Interrupt | kESPI_PortSpec2Interrupt |
+                               kESPI_PortSpec3Interrupt,
 };
 
 /*! @brief eSPI SAF erase size enumeration */
@@ -996,8 +996,7 @@ void ESPI_CreateHandle(ESPI_Type *base,
  * @param flashOps Pointer to flash backend operations.
  * @param flashSize Flash address space size.
  */
-void ESPI_FlashCreateHandle(
-    ESPI_Type *base, espi_handle_t *handle, espi_flash_ops_t flashOps, uint32_t flashSize);
+void ESPI_FlashCreateHandle(ESPI_Type *base, espi_handle_t *handle, espi_flash_ops_t flashOps, uint32_t flashSize);
 
 /*!
  * @brief eSPI IRQ handle function.
