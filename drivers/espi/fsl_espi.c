@@ -135,7 +135,10 @@ void ESPI_Init(ESPI_Type *base, const espi_config_t *config)
     }
 
     base->MCTRL = ESPI_MCTRL_PENA(value) | ESPI_MCTRL_ENABLE(config->enableMode) |
-                  (config->enableP80 ? ESPI_MCTRL_P80ENA_MASK : 0U) | ESPI_MCTRL_CLK_DIV_DISABLE(1U);
+                  (config->enableP80 ? ESPI_MCTRL_P80ENA_MASK : 0U) |
+                  (config->disableClkDiv ? ESPI_MCTRL_CLK_DIV_DISABLE_MASK : 0U) |
+                  (config->enableEarlySample ? ESPI_MCTRL_EARLY_SAMPLE_MASK : 0U) |
+                  (config->enableStatusBlock ? ESPI_MCTRL_SBLKENA_MASK : 0U);
 }
 
 /*!
@@ -179,6 +182,9 @@ void ESPI_GetDefaultConfig(espi_config_t *config)
     config->maxPayloadSize      = (uint8_t)kESPI_MemMax256B;
     config->maxFlashPayloadSize = (uint8_t)kESPI_FlashMax512B;
     config->maxOOBPayloadSize   = (uint8_t)kESPI_OOBMax256B;
+    config->enableEarlySample   = false;
+    config->disableClkDiv       = false;
+    config->enableStatusBlock   = false;
 }
 
 /*!
@@ -230,16 +236,19 @@ status_t ESPI_SendVWire(ESPI_Type *base, espi_vw_wr_flags_t flag, uint32_t value
     }
     else
     {
-        uint32_t reg = (base->WIREWO & ~((uint32_t)flag));
+        uint32_t reg = 0U;
         if (flag == kESPI_VWireWr_E2P)
         {
-            assert(value <= ESPI_WIREWO_E2P_MASK);
-            reg |= ESPI_WIREWO_E2P(value);
+            assert(value <= (ESPI_WIREWO_E2P_MASK >> ESPI_WIREWO_E2P_SHIFT));
+            reg = ESPI_WIREWO_E2P(value);
         }
         else
         {
             assert(value <= 1U);
-            reg = (value == 0U) ? (reg & ~(uint32_t)flag) : (reg | (uint32_t)flag);
+            if (value != 0U)
+            {
+                reg = (uint32_t)flag;
+            }
         }
         base->WIREWO = reg;
         return kStatus_Success;
@@ -253,8 +262,8 @@ status_t ESPI_SendVWire(ESPI_Type *base, espi_vw_wr_flags_t flag, uint32_t value
  *
  * param base eSPI peripheral base address.
  * param port eSPI port index.
- * param idx Pointer to store the extracted IDX field.
- * param data Pointer to store the extracted DATA_LEN field.
+ * param idx Pointer to store the extracted IDX field (byte offset within port).
+ * param data Pointer to store the extracted data value (endpoint) or message length (mailbox).
  */
 void ESPI_GetEndpointData(ESPI_Type *base, uint32_t port, uint32_t *idx, uint32_t *data)
 {
