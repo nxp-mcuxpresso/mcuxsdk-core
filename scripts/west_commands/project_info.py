@@ -22,6 +22,7 @@ import shutil
 import sys
 
 
+from pathlib import Path
 from west import log
 from west.commands import WestCommand
 
@@ -216,6 +217,7 @@ class ProjectInfo(WestCommand):
             for command in compile_commands:
                 includes = re.findall(r'-I([^\s]+)', command['command'])
                 include_paths.update(includes)
+
                 
             self.project_info["includes"] = list(include_paths)
 
@@ -238,13 +240,18 @@ class ProjectInfo(WestCommand):
 
             files = set()
 
+            tmp_build_folder = os.path.join(self.output_dir, self.build_dir)
+            tmp_build_path = Path(tmp_build_folder).resolve()
+
             for file_path in file_paths:
+                if Path(file_path).resolve().is_relative_to(tmp_build_path):
+                    continue
                 if file_path.lower().endswith('.c'):
                     files.add(file_path)
                 elif file_path.lower().endswith('.h'):
                     files.add(file_path)
 
-            self.project_info["files"] = list(file_paths)
+            self.project_info["files"] = list(files)
 
         except FileNotFoundError:
             log.err(f"Source list file not found at {source_list_path}")
