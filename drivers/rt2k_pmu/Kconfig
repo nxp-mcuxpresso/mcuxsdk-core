@@ -1,0 +1,23 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.rt2k_pmu
+    bool
+    default y if MCUX_HW_IP_DriverType_RT2K_PMU
+
+config MCUX_COMPONENT_driver.rt2k_pmu
+    bool "rt2k_pmu"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.rt2k_pmu
+
+if MCUX_COMPONENT_driver.rt2k_pmu
+    config PMU_BB_UPDATE_TIMEOUT
+    int "Max loops to wait for PMU body bias update done."
+    default 0
+    help
+        The PMU_BB_CFG_DONE bit field will be set once new
+        settings of body bias completed.
+        If defined as 0, the driver will wait until completion.
+
+endif

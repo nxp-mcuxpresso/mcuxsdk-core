@@ -1,0 +1,140 @@
+/*!
+@defgroup rt2k_pmu PMU: Power Management Unit Driver
+@details The PMU driver provides APIs to configure and control the Power Management Unit.
+
+# Overview {#PMUOverview}
+
+The Power Management Unit (PMU) driver provides comprehensive control over:
+- Voltage regulators (LDOs) for multiple power rails
+- Temperature sensor with configurable thresholds
+- Voltage monitoring with per-rail thresholds
+- Body bias configuration for power optimization
+- Low-frequency oscillator control (LFFRO1M and XOSC32K)
+- Interrupt management for power events
+- Reset gate control (warm and cold reset)
+- FSM (Finite State Machine) bypass control
+
+## Features {#PMUFeatures}
+
+The PMU driver supports:
+- **Multiple voltage rails**: VDD_1V5, VDD_1V8, VDDA_1V8, VDD_0V8, VDD_CORE, VDD_PMU
+- **Temperature monitoring**: Configurable high (120°C to 135°C) and low (-20°C to -50°C) thresholds
+- **Voltage monitoring**: Per-rail upper/lower voltage thresholds with interrupt capability
+- **Body bias control**: Zero (ZBB), N-well only, P-well only, or both modes with VDD tracking
+- **Power optimization**: LDO bypass modes, voltage trimming (nominal, +5%, +10%, +20%)
+- **Clock sources**: 1MHz LFFRO, 32kHz crystal oscillator with self-charge or transconductance modes
+- **Interrupt handling**: Comprehensive interrupt support for voltage
+
+# Function groups {#PMUFunctionGroups}
+
+## Initialization and Configuration {#PMUInit}
+
+The PMU driver provides configuration functions for each subsystem:
+- PMU_SetFsmBypass() - Configure FSM bypass mode
+- PMU_ConfigLffro1M() - Configure 1MHz low-frequency oscillator
+- PMU_ConfigTemperatureSensor() - Set temperature monitoring thresholds
+
+## Voltage Regulator Control {#PMURegulators}
+
+Configure individual voltage rails:
+- PMU_ConfigVdd1V5() - Configure VDD_1V5 regulator
+- PMU_ConfigVdd1V8() - Configure VDD_1V8 regulator  
+- PMU_ConfigVdda1V8() - Configure VDDA_1V8 regulator
+- PMU_ConfigVdd0V8() - Configure VDD_0V8 regulator
+- PMU_ConfigLpLdos() - Configure low-power LDOs
+- PMU_BuckVddCoreInit - Configure Buck VDD_Core
+
+## Voltage Monitoring {#PMUMonitoring}
+
+Set voltage monitoring thresholds:
+- PMU_ConfigVddCoreSensors() - Configure VDD_CORE voltage thresholds
+- PMU_ConfigVddPmuMonitors() - Configure VDD_PMU monitoring thresholds
+
+## Body Bias Control {#PMUBodyBias}
+
+Optimize power through body bias:
+- PMU_BodyBiasConfigure() - Set body bias parameters
+- PMU_BodyBiasApply() - Apply body bias configuration
+
+## Interrupt Management {#PMUInterrupts}
+
+Handle PMU events:
+- PMU_EnableInterrupts() - Enable specific PMU interrupts
+- PMU_DisableInterrupts() - Disable specific PMU interrupts
+- PMU_ClearInterruptStatusFlags() - Clear interrupt flags
+- PMU_GetInterruptStatusFlags() - Read interrupt status
+- PMU_GetInterruptStatus() - Gets PMU interrupt status
+
+## Reset Control {#PMUReset}
+
+Control reset behavior:
+- PMU_ConfigWarmResetGates() - Configure warm reset gates
+- PMU_ConfigColdResetGates() - Configure cold reset gates
+
+## Status Monitoring {#PMUStatus}
+
+Monitor PMU status:
+- PMU_GetStatus() - Read PMU status register
+- PMU_WaitVddCoreOk() - Wait for VDD_CORE OK status
+
+# Hardware Requirements {#PMUHardwareReq}
+
+The PMU module requires:
+- External power supply connections for monitored rails
+- Proper decoupling capacitors on power rails
+- Temperature sensor calibration for accurate measurements
+- Clock source for body bias operation
+
+# Power Domains {#PMUPowerDomains}
+
+The PMU manages multiple power domains:
+
+## Core Power Domain
+- VDD_CORE: Main digital core supply (0.8V nominal)
+- Supplied by integrated buck converter or external source
+
+## I/O Power Domain  
+- VDD_1V8: Digital I/O supply (1.8V nominal)
+- VDDA_1V8: Analog I/O supply (1.8V nominal)
+
+## Internal Power Domain
+- VDD_0V8: Internal digital supply (0.8V nominal)
+- VDD_1V5: Internal reference supply (1.5V nominal)
+
+## PMU Power Domain
+- VDD_PMU: Always-on PMU supply (3.3V nominal)
+- Powers PMU control logic and monitoring circuits
+
+# Configuration Guidelines {#PMUConfigGuide}
+
+## Voltage Threshold Selection
+- Lower thresholds should be set above minimum operating voltage
+- Upper thresholds should be set below absolute maximum ratings
+- Allow margin for voltage ripple and transients
+
+## Temperature Threshold Selection
+- High temperature threshold typically set 10-15°C below junction max
+- Low temperature threshold based on minimum operating temperature
+- Consider thermal resistance and ambient conditions
+
+## Body Bias Configuration
+- Zero body bias (ZBB) for normal operation
+- Forward body bias (FBB) for performance boost
+- Reverse body bias (RBB) for leakage reduction
+- VDD tracking maintains optimal bias across voltage changes
+
+## LDO Trim Settings
+- Nominal trim for standard operation
+- Plus 5/10/20% trim for voltage adjustment
+- Consider load regulation and line regulation effects
+
+# Notes {#PMUNotes}
+
+- Always configure voltage thresholds appropriate for your system requirements
+- Body bias configuration should be applied carefully as it affects chip performance
+- Temperature thresholds should be set based on operating environment specifications
+- Some configurations may require specific power sequencing - consult the reference manual
+- W1C (Write-1-to-Clear) registers are handled automatically by the driver
+- Interrupt flags must be cleared before re-enabling interrupts
+- FSM bypass should only be used for debug or special test modes
+*/
