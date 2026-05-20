@@ -2472,6 +2472,8 @@ status_t FLASH_FlushPendingOperations(uint32_t requiredSize)
 {
     status_t         status = kStatus_FLASH_Success;
     flash_async_op_t op;
+    uint32_t suspendStatus = 0U;
+    bool suspended = false;
 
     /* Check if async context is initialized */
     if (!s_flashAsyncContext.initialized)
@@ -2481,7 +2483,7 @@ status_t FLASH_FlushPendingOperations(uint32_t requiredSize)
     /* If requiredSize exceeds total buffer capacity, return error */
     else if (requiredSize > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
     {
-        status = kStatus_FLASH_SizeError;
+        status = kStatus_FLASH_AddressError;
     }
     else
     {
@@ -2512,9 +2514,49 @@ status_t FLASH_FlushPendingOperations(uint32_t requiredSize)
                 {
                     break;
                 }
+            
+                /* Suspend before flash operations if callback registered */
+                if ((s_flashAsyncContext.notifyImminentFlashStallCb != NULL) &&
+                    ((op.opType == kFlashAsyncOp_Erase) || 
+                    (op.opType == kFlashAsyncOp_Program) || 
+                    (op.opType == kFlashAsyncOp_ProgramPage)))
+                {
+                    suspendStatus = s_flashAsyncContext.notifyImminentFlashStallCb(1U);  /* Suspend */
+                    if (suspendStatus == 0U)
+                    {
+                        suspended = true;
+                    }
+                    else
+                    {
+                        /* Free buffer before returning to avoid resource leak */
+                        if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
+                        {
+                            FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
+                        }
+                        status = kStatus_FLASH_CommandFailure;
+                        break;
+                    }
+                }
 
                 /* Execute the operation */
                 status = FLASH_ExecuteOperation(&op);
+
+                /* Resume after flash operations */
+                if (suspended && (s_flashAsyncContext.notifyImminentFlashStallCb != NULL))
+                {
+                    suspendStatus = s_flashAsyncContext.notifyImminentFlashStallCb(0U);  /* Resume */
+                    suspended = false;
+                    if (suspendStatus != 0U)
+                    {
+                        /* Free buffer before returning to avoid resource leak */
+                        if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
+                        {
+                            FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
+                        }
+                        status = kStatus_FLASH_CommandFailure;
+                        break;
+                    }
+                }
 
                 /* Free buffer if this was a program operation */
                 if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
@@ -2581,6 +2623,7 @@ static status_t FLASH_AsyncContextInit(flash_config_t *config)
 
         /* Callback must be registered by application */
         s_flashAsyncContext.idleDurationCb = NULL;
+        s_flashAsyncContext.notifyImminentFlashStallCb = NULL;
 
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
         s_flashAsyncContext.totalOperationsQueued    = 0U;
@@ -2921,7 +2964,6 @@ static status_t FLASH_QueueOperation(flash_async_op_t *pOp)
             s_flashAsyncContext.opQueue.tail = (s_flashAsyncContext.opQueue.tail + 1U) % CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE;
             s_flashAsyncContext.opQueue.count++;
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-            s_flashAsyncContext.totalOperationsQueued++;
             if (s_flashAsyncContext.opQueue.count > s_flashAsyncContext.peakOperationsQueued)
             {
                 s_flashAsyncContext.peakOperationsQueued = s_flashAsyncContext.opQueue.count;
@@ -3097,18 +3139,17 @@ status_t FLASH_RegisterIdleDurationCB(flash_idle_duration_cb_t callback)
 {
     status_t status = kStatus_FLASH_Success;
 
-    if (!s_flashAsyncContext.initialized)
-    {
-        status = kStatus_FLASH_CommandFailure;
-    }
-    else if (callback == NULL)
-    {
-        status = kStatus_FLASH_InvalidArgument;
-    }
-    else
-    {
+    /* Allow NULL to unregister callback */
         s_flashAsyncContext.idleDurationCb = callback;
-    }
+
+    return status;
+}
+
+status_t FLASH_RegisterNotifyImminentFlashStall(notify_imminent_flash_stall_cb_t callback)
+{
+    status_t status = kStatus_FLASH_Success;
+    /* Allow NULL to unregister callback */
+    s_flashAsyncContext.notifyImminentFlashStallCb = callback;
 
     return status;
 }
@@ -3127,12 +3168,14 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
     status_t status = kStatus_FLASH_Success;
     uint32_t regPrimask;
 
-    if (pOp == NULL)
+    do
     {
-        status = kStatus_FLASH_InvalidArgument;
-    }
-    else
-    {
+        if (pOp == NULL)
+        {
+            status = kStatus_FLASH_InvalidArgument;
+            break;
+        }
+
         switch (pOp->opType)
         {
             case kFlashAsyncOp_Erase:
@@ -3163,8 +3206,7 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
             {
                 uint32_t startaddr = pOp->startAddress;
                 uint32_t endAddr = startaddr + pOp->lengthInBytes;
-                uint32_t regPrimask = DisableGlobalIRQ();
-
+                regPrimask = DisableGlobalIRQ();
                 status = FLASH_CMD_ReadIntoMISR(s_flashAsyncContext.fmuBase, 
                                                 startaddr, 
                                                 endAddr, 
@@ -3178,8 +3220,7 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
             {
                 uint32_t startaddr = pOp->startAddress;
                 uint32_t endAddr = startaddr + pOp->lengthInBytes;
-                uint32_t regPrimask = DisableGlobalIRQ();
-
+                regPrimask = DisableGlobalIRQ();
                 status = FLASH_CMD_ReadIFRIntoMISR(s_flashAsyncContext.fmuBase, 
                                                    startaddr, 
                                                    endAddr, 
@@ -3189,11 +3230,16 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
                 break;
             }
 
-
             default:
                 status = kStatus_FLASH_InvalidArgument;
                 break;
         }
+
+        if (status != kStatus_FLASH_Success)
+        {
+            break;
+        }
+
 
 #if defined(SMSCM) || defined(SYSCON_FMC0_CTRL_DFC_MASK)
         /* Invalidate cache after flash operations */
@@ -3204,7 +3250,7 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
             flash_cache_invalidate();
         }
 #endif
-    }
+    } while (false);
 
     return status;
 }

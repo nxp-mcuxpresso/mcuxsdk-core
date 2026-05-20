@@ -207,7 +207,7 @@ typedef struct _flash_async_op
 #define FLASH_ASYNC_INVALID_BUFFER_OFFSET    (0xFFFFFFFFU)
 
 /*!
- * @brief Callback function type for getting LL idle duration.
+ * @brief Callback function type for getting idle duration.
  *
  * This callback is invoked by FLASH_Process() to determine if there is
  * sufficient idle time to execute a pending flash operation.
@@ -215,6 +215,14 @@ typedef struct _flash_async_op
  * @return Available idle duration in microseconds.
  */
 typedef uint32_t (*flash_idle_duration_cb_t)(void);
+
+/*!
+ * @brief Callback type for suspending/resuming before flash operations.
+ *
+ * @param suspend 1 to suspend, 0 to resume
+ * @return 0 on success, error code otherwise
+ */
+typedef uint32_t (*notify_imminent_flash_stall_cb_t)(uint32_t suspend);
 
 /*!
  * @brief Flash async operation status enumeration.
@@ -272,8 +280,9 @@ typedef struct _flash_async_context
     /* Circular buffer pool (replaces fixed buffer array) */
     flash_circular_buffer_pool_t bufferPool;
 
-    /* LL idle callback */
     flash_idle_duration_cb_t idleDurationCb;                           /*!< Callback for idle duration */
+
+    notify_imminent_flash_stall_cb_t notifyImminentFlashStallCb;                    /*!< Callback for suspend/resume */
 
     /* Flash configuration reference */
     flash_config_t *flashConfig;                                          /*!< Pointer to flash config */
@@ -340,7 +349,7 @@ status_t FLASH_Init(flash_config_t *config);
  * In synchronous mode, this function blocks until the erase completes.
  * In asynchronous mode, this function queues the erase operation and returns
  * immediately. The operation will be executed later by FLASH_Process() when
- * sufficient LL idle time is available.
+ * sufficient idle time is available.
  *
  * @param config Pointer to the flash driver configuration.
  * @param base FMU peripheral base address.
@@ -379,7 +388,7 @@ status_t FLASH_EraseAll(FMU_Type *base, uint32_t key);
  * In synchronous mode, this function blocks until programming completes.
  * In asynchronous mode, this function copies the source data to an internal
  * buffer, queues the operation, and returns immediately. The operation will
- * be executed later by FLASH_Process() when sufficient LL idle time is available.
+ * be executed later by FLASH_Process() when sufficient idle time is available.
  *
  * @param config Pointer to the flash driver configuration.
  * @param base FMU peripheral base address.
@@ -547,7 +556,7 @@ void flash_cache_speculation_control(bool isPreProcess, FMU_Type *base);
  *
  * This function should be called from the application's idle task or a low-priority
  * background task. It checks if there are pending operations in the queue and
- * executes them if sufficient LL idle time is available.
+ * executes them if sufficient idle time is available.
  *
  * The function processes at most one operation per call to avoid blocking the
  * idle task for too long.
@@ -560,7 +569,7 @@ void flash_cache_speculation_control(bool isPreProcess, FMU_Type *base);
 status_t FLASH_Process(void);
 
 /*!
- * @brief Register the LL idle duration callback.
+ * @brief Register the idle duration callback.
  *
  * This callback is invoked by FLASH_Process() to determine available idle time.
  * Must be registered before any async flash operations can be processed.
@@ -572,6 +581,19 @@ status_t FLASH_Process(void);
  * @retval #kStatus_FLASH_Async_NotInit Async context not initialized.
  */
 status_t FLASH_RegisterIdleDurationCB(flash_idle_duration_cb_t callback);
+
+/*!
+ * @brief Register a callback to notify of an imminent flash stall.
+ *
+ * This callback will be invoked before and after flash erase/program operations
+ * to notify and allow suspension of other activities before flash erase/program operations
+ *
+ * @param callback Function pointer to notify_imminent_flash_stall callback (NULL to unregister).
+ *
+ * @retval kStatus_FLASH_Success Callback registered successfully.
+ * @retval kStatus_FLASH_CommandFailure Async context not initialized.
+ */
+status_t FLASH_RegisterNotifyImminentFlashStall(notify_imminent_flash_stall_cb_t callback);
 
 /*!
  * @brief Register lock/unlock callbacks for thread-safe async operations.
