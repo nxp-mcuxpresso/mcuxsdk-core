@@ -1,0 +1,133 @@
+/*!
+ * @defgroup powercon POWERCON: Power Controller (CMC/SSC) Driver
+ * @details The MCUXpresso SDK provides a peripheral driver for the Power Controller (POWERCON)
+ *          module of MCUXpresso SDK devices.
+ * @{
+ */
+
+/*!
+ * @brief Overview
+ *
+ * The Power Controller (POWERCON) module orchestrates standby entry and exit for the SoC. It
+ * combines the per-core Core Mode Controllers (CMC), the System Sleep Controller (SSC), the SOC
+ * control block, and a set of persistent general-purpose registers (GPR). The driver exposes a
+ * thin register-level API used by the higher-level power-management layer to gate clocks, stage
+ * standby state, drive the P-Channel handshake to the PMU, and sequence the CMC/SSC finite state
+ * machines around the WFI that triggers low-power entry.
+ *
+ * # Features
+ *
+ * The POWERCON module supports:
+ * - Functional clock gating of the SOC control block
+ * - Per-core CMC low-power entry, wakeup source masking (IRQ and DMA), and FSM status monitoring
+ * - Debugger-attach wakeup and Clock Source Stop Inhibit (CSSI) control
+ * - Active-mode root-clock and clock-source control with PMU P-Channel handshake
+ * - Init-time SoC topology routing of clocks to their CMC handshake partners
+ * - Per-mode standby state staged before WFI (root-clock gating, clock source, PMU and PMIC config)
+ * - CMC and SSC step-count / handshake step-mode configuration
+ * - System-wide sleep coordination across CMC instances (force-standby and wakeup-suppress masks)
+ * - Warm and cold general-purpose registers for data that must survive warm reset or power-on reset
+ *
+ * # Configuration Structures
+ *
+ * The POWERCON driver uses the following configuration structures. For detailed field descriptions,
+ * see:
+ * - @ref powercon_topology_config_t - Init-time SoC topology (clock-to-CMC handshake routing)
+ * - @ref powercon_soc_standby_config_t - Per-mode standby state written before WFI
+ *
+ * # Important Notes
+ *
+ * ## Functional Clock Ordering
+ * - POWERCON_EnableFunctionClock() MUST be called before any other POWERCON_SOC_CTRL access.
+ * - After a power-on-reset wakeup (which resets POWERCON registers), the functional clock MUST be
+ *   re-enabled before any other POWERCON state is restored.
+ *
+ * ## Standby Staging
+ * - Standby state (POWERCON_SetSocStandbyConfig(), step-mode, and step-count APIs) MUST be written
+ *   before __WFI().
+ * - These registers MUST NOT be written while the CMC sleep FSM is busy
+ *   (POWERCON_IsCmcSleepBusy() returns true).
+ * - Topology routing (POWERCON_SetTopologyConfig()) is init-time only and MUST NOT be changed during
+ *   standby or at runtime.
+ *
+ * ## Active-Mode P-Channel Handshake
+ * - CSRCCFG_ACTIVE and PMUCFG_ACTIVE changes are staged; call POWERCON_TriggerSocUpdate() to apply
+ *   them and poll POWERCON_IsSocUpdateDone() before issuing the next trigger.
+ * - Root-clock (RCGCFG_ACTIVE) and PMIC-mode (PMICCFG_ACTIVE) writes take effect immediately and do
+ *   not require a P-Channel trigger.
+ *
+ * ## SSC Participation
+ * - Reset state of XMC_STBY_MASK excludes all CMCs from the SSC; call POWERCON_SetXmcStandbyMask()
+ *   with mask 0x00 at init so the SSC can fire.
+ * - POWERCON_SetForceStandbyMask() selects which CMC instances the SSC waits for before proceeding.
+ *
+ * ## Debug-Only Controls
+ * - Sleep-hold, pretend-sleep, and observe-mux helpers are for debug only and MUST NOT be left
+ *   enabled during normal standby or operation.
+ *
+ * ## Persistent GPR
+ * - Warm GPRs survive warm reset; cold GPRs survive power-on reset.
+ * - In warm GPR index 0, the lower bits are CCM ACK masks reserved by hardware and are preserved
+ *   automatically; only the upper bits carry user data.
+ *
+ * # API Groups
+ *
+ * The POWERCON driver APIs are organized into the following functional groups:
+ * - **Function Clock Control**: SOC control block functional clock gating
+ *   (POWERCON_EnableFunctionClock(), POWERCON_DisableFunctionClock())
+ * - **CMC Active-Mode Control**: Low-power request, IRQ/DMA wakeup masking, debug wakeup, and CSSI
+ *   (POWERCON_EnableWakeupIRQ(), POWERCON_EnableWakeupDMA(), POWERCON_EnableDebugWakeup(),
+ *   POWERCON_EnableCssi())
+ * - **CMC FSM Status**: Sleep/wakeup FSM monitoring and debug stepping
+ *   (POWERCON_IsCmcSleepBusy(), POWERCON_IsCmcWakeupBusy(), POWERCON_GetCmcFsmState())
+ * - **CMC Step Count Mode**: Per-step handshake/count mode and shared count value
+ *   (POWERCON_SetCmcStepModeMask(), POWERCON_SetCmcCountValue())
+ * - **SOC Ctrl — Active Mode**: Root-clock and clock-source control and PMU/PMIC handshake
+ *   (POWERCON_EnableRootClockInActiveMode(), POWERCON_EnableClockSourceInActiveMode(),
+ *   POWERCON_SetPmucfgActive(), POWERCON_TriggerSocUpdate(), POWERCON_IsSocUpdateDone())
+ * - **SOC Ctrl — Topology Configuration**: Init-time clock-to-CMC routing
+ *   (POWERCON_SetTopologyConfig())
+ * - **SOC Ctrl — Standby Configuration**: Per-mode standby state staging
+ *   (POWERCON_SetSocStandbyConfig())
+ * - **System Sleep Controller (SSC) Step Mode**: SSC step mode, count, force-standby and
+ *   wakeup-suppress masks (POWERCON_SetSysSleepCtrlStepModeMask(), POWERCON_SetForceStandbyMask(),
+ *   POWERCON_SetWakeupStandbyMask())
+ * - **Global Control**: XMC standby mask, fast clock-off, observe mux, and debug wakeup source
+ *   (POWERCON_SetXmcStandbyMask(), POWERCON_EnableFastClockOff())
+ * - **GPR — Persistent Data Storage**: Warm and cold general-purpose register access
+ *   (POWERCON_SetWarmGPR(), POWERCON_GetWarmGPR(), POWERCON_SetColdGPR(), POWERCON_GetColdGPR())
+ *
+ * # Typical Usage Flow
+ *
+ * @dot
+ * digraph usage_flow {
+ *     node [shape=box, style=rounded];
+ *     edge [fontsize=10];
+ *
+ *     start [label="System Init", shape=ellipse];
+ *     fclk [label="Enable Functional Clock\nPOWERCON_EnableFunctionClock()"];
+ *     topo [label="Topology Routing\nPOWERCON_SetTopologyConfig()"];
+ *     ssc_init [label="SSC Participation\n• POWERCON_SetXmcStandbyMask(0)\n• POWERCON_SetForceStandbyMask()"];
+ *     wake [label="Configure Wakeup Sources\n• POWERCON_EnableWakeupIRQ()\n• POWERCON_EnableWakeupDMA()"];
+ *     stage [label="Stage Standby State\n• POWERCON_SetSocStandbyConfig()\n• Step mode / count"];
+ *     wfi [label="__WFI()\n(CMC/SSC sleep FSM runs)", shape=ellipse];
+ *     wakeup [label="Wakeup\n(CMC/SSC wakeup FSM runs)"];
+ *     status [label="Check FSM Status\n• POWERCON_IsCmcWakeupBusy()\n• POWERCON_IsCmcSleepIdle()"];
+ *     resume [label="Resume Active Mode", shape=ellipse];
+ *
+ *     start -> fclk;
+ *     fclk -> topo;
+ *     topo -> ssc_init;
+ *     ssc_init -> wake;
+ *     wake -> stage;
+ *     stage -> wfi;
+ *     wfi -> wakeup;
+ *     wakeup -> status;
+ *     status -> resume;
+ * }
+ * @enddot
+ */
+
+/*!
+ * @}
+ */
