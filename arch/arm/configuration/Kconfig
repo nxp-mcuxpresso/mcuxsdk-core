@@ -18,7 +18,27 @@ config MCUX_PRJSEG_config.arm.shared
 
 config MCUX_PRJSEG_config.kinetis.shared
     bool
-    default y if MCUX_HW_SOC_SERIES_KINETIS || MCUX_HW_SOC_SERIES_RT || MCUX_HW_SOC_SERIES_LPC || MCUX_HW_SOC_SERIES_MCX || MCUX_HW_SOC_SERIES_MIMX
+    default y if MCUX_HW_SOC_SERIES_KINETIS
+    imply MCUX_PRJSEG_config.arm.shared
+
+config MCUX_PRJSEG_config.rt.shared
+    bool
+    default y if MCUX_HW_SOC_SERIES_RT
+    imply MCUX_PRJSEG_config.arm.shared
+
+config MCUX_PRJSEG_config.imx.shared
+    bool
+    default y if MCUX_HW_SOC_SERIES_MIMX
+    imply MCUX_PRJSEG_config.arm.shared
+
+config MCUX_PRJSEG_config.lpc.shared
+    bool
+    default y if MCUX_HW_SOC_SERIES_LPC
+    imply MCUX_PRJSEG_config.arm.shared
+
+config MCUX_PRJSEG_config.mcx.shared
+    bool
+    default y if MCUX_HW_SOC_SERIES_MCX
     imply MCUX_PRJSEG_config.arm.shared
 
 config MCUX_PRJSEG_config.wireless.shared

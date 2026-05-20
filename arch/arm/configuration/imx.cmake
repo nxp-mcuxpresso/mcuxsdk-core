@@ -1,8 +1,8 @@
-# Copyright 2024 NXP
+# Copyright 2025 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-if (CONFIG_MCUX_PRJSEG_config.mcx.shared)
+if (CONFIG_MCUX_PRJSEG_config.imx.shared)
     mcux_add_iar_configuration(
         AS "-M\"<>\" -w+ -s -j"
         CC "--diag_suppress=Pa082,Pa050 --endian=little -e --use_c++_inline --silent"
