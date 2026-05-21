@@ -379,7 +379,7 @@ status_t FLASH_Read(uint8_t *dst, uint32_t start, uint32_t lengthInBytes)
         status = FLASH_ReadWithPendingOps(start, dst, lengthInBytes);
 #else
         /* Direct memory read in sync mode */
-        (void)memcpy(dst, (const void *)(uintptr_t)start, lengthInBytes);
+        (void)memcpy(dst, (const uint8_t *)(uintptr_t)start, lengthInBytes);
 #endif
     }
 
@@ -1839,6 +1839,10 @@ static status_t flash_check_user_key(uint32_t key)
 static status_t flash_erase_sector_impl(FMU_Type *base, uint32_t start, uint32_t lengthInBytes)
 {
     status_t status = kStatus_FLASH_Success;
+    if (start > UINT32_MAX - lengthInBytes)
+    {
+        return kStatus_FLASH_AddressError;
+    }
     uint32_t endAddress = start + lengthInBytes - 1U;
 
     while (start <= endAddress)
@@ -1977,8 +1981,15 @@ static status_t flash_program_page_impl(FMU_Type *base, uint32_t start, uint8_t 
     {
         uint32_t extraData[32];
         (void)memset(extraData, 0xFF, sizeof(extraData));
-        (void)memcpy((void *)extraData, (const void *)srcWord, extraBytes);
-        status = FLASH_CMD_ProgramPage(base, start, extraData);
+        if (extraBytes <= sizeof(extraData))
+        {
+            (void)memcpy((void *)extraData, (const void *)srcWord, extraBytes);
+            status = FLASH_CMD_ProgramPage(base, start, extraData);
+        }
+        else
+        {
+            status = kStatus_FLASH_SizeError;
+        }
     }
 
     return status;

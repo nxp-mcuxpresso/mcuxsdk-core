@@ -24,7 +24,7 @@
  * @{
  */
 /*! @brief Flash driver version for SDK*/
-#define FSL_FLASH_DRIVER_VERSION (MAKE_VERSION(2, 4, 0)) /*!< Version 2.4.0. */
+#define FSL_FLASH_DRIVER_VERSION (MAKE_VERSION(2, 4, 1)) /*!< Version 2.4.1. */
 
 /*! @} */
 
@@ -34,7 +34,7 @@ enum _flash_driver_version_constants
     kFLASH_DriverVersionName   = 'F', /*!< Flash driver version name.*/
     kFLASH_DriverVersionMajor  = 2,   /*!< Major flash driver version.*/
     kFLASH_DriverVersionMinor  = 4,   /*!< Minor flash driver version.*/
-    kFLASH_DriverVersionBugfix = 0    /*!< Bugfix for flash driver version.*/
+    kFLASH_DriverVersionBugfix = 1    /*!< Bugfix for flash driver version.*/
 };
 
 /*!
@@ -503,8 +503,10 @@ status_t Read_IFR_Into_MISR(
 
 #if defined(SMSCM) || defined(SYSCON_FMC0_CTRL_DFC_MASK)
 void flash_cache_disable(void);
-void flash_cache_enable(void);
 void flash_cache_invalidate(void);
+#endif
+#if defined(SYSCON_FMC0_CTRL_DFC_MASK)
+void flash_cache_enable(void);
 #endif
 
 #if defined(SMSCM) || defined(SYSCON_FMC0_CTRL_DFS_MASK)
