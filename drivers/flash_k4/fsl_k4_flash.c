@@ -404,12 +404,38 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
         do
         {
             flash_async_op_t op;
+            osa_status_t     osaStatus;
 
             /* Check if async context is initialized */
             if (!s_flashAsyncContext.initialized)
             {
                 status = kStatus_FLASH_CommandFailure;
                 break;
+            }
+
+            /* Acquire mutex for thread-safe access */
+            osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+            assert(osaStatus == KOSA_StatusSuccess);
+            (void)osaStatus;
+            
+            /* Check if there is enough space, if not try to flush one pending operations */
+            if (FLASH_QueueIsFull())
+            {
+                status = FLASH_FlushPendingOperations(1U);
+                if (status != kStatus_FLASH_Success)
+                {
+                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+                    break;
+                }
+
+                /* Re-check resources after flush */
+                if (FLASH_QueueIsFull())
+                {
+                    /* Still not enough space - operation too large for async mode */
+                    status = kStatus_FLASH_SizeError;
+                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+                    break;
+                }
             }
 
             /* Prepare the erase operation descriptor */
@@ -428,20 +454,23 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
             if (status != kStatus_FLASH_Success)
             {
                 /* Queue full or other error */
+                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
                 break;
             }
 
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
             s_flashAsyncContext.totalOperationsQueued++;
 #endif
-
+            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             status = kStatus_FLASH_Success;
 
         } while (false);
 
 #else
         /* Sync mode: execute erase immediately */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = flash_erase_sector_impl(base, start, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
 
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
@@ -482,7 +511,9 @@ status_t FLASH_EraseAll(FMU_Type *base, uint32_t key)
 
     if (kStatus_FLASH_Success == status)
     {
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = FLASH_CMD_EraseAll(base);
+        EnableGlobalIRQ(regPrimask);
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
          * Data cache may contain stale values following a flash programming or erasing operation.
@@ -605,7 +636,9 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
 
 #else
         /* Sync mode: execute program immediately */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = flash_program_phrase_impl(base, start, src, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
 
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
@@ -729,7 +762,9 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
         } while (false);
 #else
         /* Sync mode: execute program page immediately */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = flash_program_page_impl(base, start, src, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
 
 #if defined(SMSCM) || defined (SYSCON_FMC0_CTRL_DFC_MASK)
         /*
@@ -807,7 +842,9 @@ status_t FLASH_VerifyErasePhrase(flash_config_t *config, FMU_Type *base, uint32_
 
 #else
         /* Sync mode: execute verify erase phrase immediately (original behavior) */
-         status = flash_verify_erase_phrase_impl(base, startaddr, lengthInBytes);
+        uint32_t regPrimask = DisableGlobalIRQ();
+        status = flash_verify_erase_phrase_impl(base, startaddr, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
 
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
@@ -869,7 +906,9 @@ status_t FLASH_VerifyErasePage(flash_config_t *config, FMU_Type *base, uint32_t 
         } while (false);
 #else
         /* Sync mode: execute verify erase page immediately (original behavior) */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = flash_verify_erase_page_impl(base, startaddr, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
 
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
@@ -932,7 +971,10 @@ status_t FLASH_VerifyEraseSector(flash_config_t *config, FMU_Type *base, uint32_
 
 #else
         /* Sync mode: execute verify erase sector immediately (original behavior) */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = flash_verify_erase_sector_impl(base, startaddr, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
+
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
     else
@@ -992,7 +1034,9 @@ status_t FLASH_VerifyEraseIFRPhrase(flash_config_t *config, FMU_Type *base, uint
 
 #else
         /* Sync mode: execute verify erase IFR phrase immediately (original behavior) */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = flash_verify_erase_ifr_phrase_impl(base, startaddr, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
 
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
@@ -1054,7 +1098,9 @@ status_t FLASH_VerifyEraseIFRPage(flash_config_t *config, FMU_Type *base, uint32
 
 #else
         /* Sync mode: execute verify erase IFR page immediately (original behavior) */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = flash_verify_erase_ifr_page_impl(base, startaddr, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
 
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
@@ -1116,7 +1162,9 @@ status_t FLASH_VerifyEraseIFRSector(flash_config_t *config, FMU_Type *base, uint
 
 #else
         /* Sync mode: execute verify erase IFR sector immediately (original behavior) */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = flash_verify_erase_ifr_sector_impl(base, startaddr, lengthInBytes);
+        EnableGlobalIRQ(regPrimask);
 
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
@@ -1185,7 +1233,9 @@ status_t FLASH_VerifyEraseAll(FMU_Type *base)
 
 #else
         /* Sync mode: execute verify erase all immediately (original behavior) */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = FLASH_CMD_VerifyEraseAll(base);
+        EnableGlobalIRQ(regPrimask);
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
 
@@ -1257,7 +1307,9 @@ status_t FLASH_VerifyEraseBlock(flash_config_t *config, FMU_Type *base, uint32_t
 #else
         /* Sync mode: execute verify erase block immediately (original behavior) */
         /* K4W1 M33 and NBU flash both have only one block, so 0U is sufficient here */
+        uint32_t regPrimask = DisableGlobalIRQ();
         status = FLASH_CMD_VerifyEraseBlock(base, 0U);
+        EnableGlobalIRQ(regPrimask);
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
     }
 
@@ -1337,7 +1389,9 @@ status_t Read_Into_MISR(
                 return kStatus_FLASH_AddressError; // Handle overflow error
             }
             endAddr = startAddr + ending - start;
+            uint32_t regPrimask = DisableGlobalIRQ();
             status  = FLASH_CMD_ReadIntoMISR(base, startAddr, endAddr, seed, signature);
+            EnableGlobalIRQ(regPrimask);
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
         }
         else
@@ -1426,7 +1480,9 @@ status_t Read_IFR_Into_MISR(
                 return kStatus_FLASH_AddressError; // Handle overflow error
             }
             endAddr = startAddr + ending - start;
+            uint32_t regPrimask = DisableGlobalIRQ();
             status  = FLASH_CMD_ReadIFRIntoMISR(base, startAddr, endAddr, seed, signature);
+            EnableGlobalIRQ(regPrimask);
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
         }
         else
@@ -2660,6 +2716,8 @@ static uint8_t *FLASH_BufferPoolAlloc(uint32_t size, uint32_t *pOffset, uint32_t
                 /* Wrap to beginning - waste remaining space at end */
                 /* Note: This fragmentation is acceptable for FIFO usage pattern */
                 allocOffset = 0U;
+                uint32_t wastedAtEnd = CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE - s_flashAsyncContext.bufferPool.tail;
+                s_flashAsyncContext.bufferPool.usedBytes += wastedAtEnd;
             }
             else
             {
