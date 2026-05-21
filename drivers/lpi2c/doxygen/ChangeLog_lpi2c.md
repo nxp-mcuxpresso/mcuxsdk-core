@@ -1,5 +1,10 @@
 # LPI2C
 
+## [2.6.7]
+
+- Bug Fixes
+  - Fixed MISRA 10.3 and 10.8 issues.
+
 ## [2.6.6]
 
 - Bug Fixes

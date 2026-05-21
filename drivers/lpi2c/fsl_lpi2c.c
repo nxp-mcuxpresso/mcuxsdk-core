@@ -933,8 +933,8 @@ status_t LPI2C_MasterReceive(LPI2C_Type *base, void *rxBuff, size_t rxSize)
                 return result;
             }
 
-            uint16_t tmpChunk = MIN(rxSize - chunkSize, LPI2C_MAX_RX_SIZE);
-            base->MTDR = (uint32_t)kRxDataCmd | LPI2C_MTDR_DATA(tmpChunk - 1U);
+            uint16_t tmpChunk = (uint16_t)MIN(rxSize - chunkSize, LPI2C_MAX_RX_SIZE);
+            base->MTDR = (uint32_t)kRxDataCmd | LPI2C_MTDR_DATA((uint32_t)tmpChunk - 1U);
             chunkSize += tmpChunk;
         }
 
@@ -1261,7 +1261,7 @@ static void LPI2C_TransferStateMachineReadCommand(LPI2C_Type *base,
     stateParams->txCount--;
 
     uint16_t tmpChunk = MIN(handle->remainingBytes - handle->chunkSize, LPI2C_MAX_RX_SIZE);
-    base->MTDR = (uint32_t)kRxDataCmd | LPI2C_MTDR_DATA(tmpChunk - 1U);
+    base->MTDR = (uint32_t)kRxDataCmd | LPI2C_MTDR_DATA((uint32_t)tmpChunk - 1U);
     handle->chunkSize += tmpChunk;
 
     /* Move to transfer state. */
