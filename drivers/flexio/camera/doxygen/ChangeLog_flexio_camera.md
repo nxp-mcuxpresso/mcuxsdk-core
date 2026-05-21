@@ -4,6 +4,8 @@
 
 - Bug Fixes
   - Fixed INT30-C INT31-C issues.
+  - Set SHIFTCFG[LATST]=1 on devices where the bit is available, so each shifter stores its
+    post-shift state and captures the final byte of the chain.
 
 ## [2.2.0]
 

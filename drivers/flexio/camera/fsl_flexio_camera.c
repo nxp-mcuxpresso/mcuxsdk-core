@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2020, 2025 NXP
+ * Copyright 2016-2020, 2025, 2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -131,6 +131,18 @@ void FLEXIO_CAMERA_Init(FLEXIO_CAMERA_Type *base, const flexio_camera_config_t *
     }
     shifterConfig.inputSource = kFLEXIO_ShifterInputFromPin;
     FLEXIO_SetShifterConfig(base->flexioBase, (uint8_t)i, &shifterConfig);
+
+#if defined(FLEXIO_SHIFTCFG_LATST_MASK)
+    /* On devices where the timer compare fires on the same clock edge as the final shift
+     * LATST=0 (default) causes every shifter to store its pre-shift state, missing the last
+     * byte captured in each shifter. Shifter[shifterStartIdx] is the last in the chain
+     * so it only starts filling at shift (32-count+1); with LATST=0 its [7:0] slot is still 0x00.
+     * Set LATST=1 (post-shift store) for all shifters so each captures a complete word. */
+    for (i = base->shifterStartIdx; i < (base->shifterStartIdx + base->shifterCount); i++)
+    {
+        base->flexioBase->SHIFTCFG[i] |= FLEXIO_SHIFTCFG_LATST_MASK;
+    }
+#endif /* FLEXIO_SHIFTCFG_LATST_MASK */
 
     /* FLEXIO_CAMERA timer config, the PCLK's clk is source of timer to drive the shifter, the HREF is the selecting
      * signal for available data. */
