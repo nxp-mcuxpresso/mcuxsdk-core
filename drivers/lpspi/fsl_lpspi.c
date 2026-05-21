@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2022, 2024-2025 NXP
+ * Copyright 2016-2022, 2024-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -1422,7 +1422,7 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     handle->writeTcrInIsr        = false;
 
     /* Backup frame size */
-    handle->frameSize     = (LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT;
+    handle->frameSize     = (uint16_t)((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT);
     uint32_t frameSizeNew = handle->frameSize;
     handle->bytesPerFrame = (uint16_t)(handle->frameSize / 8U) + 1U;
 

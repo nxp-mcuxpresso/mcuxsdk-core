@@ -1,5 +1,10 @@
 # LPSPI
 
+## [2.7.5]
+
+- Bug Fixes
+  - Fixed MISRA 10.3, 12,2 and 10.7 issues.
+
 ## [2.7.4]
 
 - Bug Fixes

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2023, 2024-2025 NXP
+ * Copyright 2016-2023, 2024-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPSPI driver version. */
-#define FSL_LPSPI_DRIVER_VERSION (MAKE_VERSION(2, 7, 4))
+#define FSL_LPSPI_DRIVER_VERSION (MAKE_VERSION(2, 7, 5))
 /*! @} */
 
 #ifndef LPSPI_DUMMY_DATA
@@ -888,7 +888,7 @@ static inline void LPSPI_FlushFifo(LPSPI_Type *base, bool flushTxFifo, bool flus
 
     LPSPI_Enable(base, enabled);
 #else
-    base->CR |= ((flushTxFifo ? 1U : 0U) << LPSPI_CR_RTF_SHIFT) | ((flushRxFifo ? 1U : 0U) << LPSPI_CR_RRF_SHIFT);
+    base->CR |= ((uint32_t)(flushTxFifo ? 1U : 0U) << LPSPI_CR_RTF_SHIFT) | ((uint32_t)(flushRxFifo ? 1U : 0U) << LPSPI_CR_RRF_SHIFT);
 #endif
 }
 
