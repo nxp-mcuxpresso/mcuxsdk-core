@@ -842,7 +842,7 @@ void TPM_UpdateChnlEdgeLevelSelect(TPM_Type *base, tpm_chnl_t chnlNumber, uint8_
     assert(((-1 != (int8_t)FSL_FEATURE_TPM_CHANNEL_COUNTn(base)) &&
            (uint8_t)chnlNumber < (uint8_t)FSL_FEATURE_TPM_CHANNEL_COUNTn(base)));
 
-    uint8_t control = TPM_GetChannelContorlBits(base, chnlNumber);
+    uint8_t control = TPM_GetChannelControlBits(base, chnlNumber);
 
     /* When switching mode, disable channel first */
     (void)TPM_DisableChannel(base, chnlNumber);

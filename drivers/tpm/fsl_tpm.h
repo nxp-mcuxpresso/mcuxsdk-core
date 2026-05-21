@@ -30,8 +30,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief TPM driver version 2.4.6. */
-#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 4, 6))
+/*! @brief TPM driver version 2.5.0. */
+#define FSL_TPM_DRIVER_VERSION (MAKE_VERSION(2, 5, 0))
 /*! @} */
 
 /*!
@@ -532,9 +532,8 @@ status_t TPM_UpdatePwmDutycycle(TPM_Type *base,
 void TPM_UpdateChnlEdgeLevelSelect(TPM_Type *base, tpm_chnl_t chnlNumber, uint8_t level);
 
 /*!
- * @brief Get the channel control bits value (mode, edge and level bit fileds).
- *
- * This function disable the channel by clear all mode and level control bits.
+ * @brief Get the channel control bits value (mode, edge and level bit fields).
+ * @deprecated Please use TPM_GetChannelControlBits() instead.
  *
  * @param base       TPM peripheral base address
  * @param chnlNumber The channel number
@@ -542,6 +541,20 @@ void TPM_UpdateChnlEdgeLevelSelect(TPM_Type *base, tpm_chnl_t chnlNumber, uint8_
  *         enumeration @ref tpm_chnl_control_bit_mask_t.
  */
 static inline uint8_t TPM_GetChannelContorlBits(TPM_Type *base, tpm_chnl_t chnlNumber)
+{
+    return (uint8_t)(base->CONTROLS[chnlNumber].CnSC &
+                     (TPM_CnSC_MSA_MASK | TPM_CnSC_MSB_MASK | TPM_CnSC_ELSA_MASK | TPM_CnSC_ELSB_MASK));
+}
+
+/*!
+ * @brief Get the channel control bits value (mode, edge and level bit fields).
+ *
+ * @param base       TPM peripheral base address
+ * @param chnlNumber The channel number
+ * @return The control bits value. This is the logical OR of members of the
+ *         enumeration @ref tpm_chnl_control_bit_mask_t.
+ */
+static inline uint8_t TPM_GetChannelControlBits(TPM_Type *base, tpm_chnl_t chnlNumber)
 {
     return (uint8_t)(base->CONTROLS[chnlNumber].CnSC &
                      (TPM_CnSC_MSA_MASK | TPM_CnSC_MSB_MASK | TPM_CnSC_ELSA_MASK | TPM_CnSC_ELSB_MASK));
