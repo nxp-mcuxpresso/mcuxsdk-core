@@ -1509,7 +1509,7 @@ class NinjaParser
         # Backslash-escaped space: include the space in the current token without the backslash
         current += ' '
         i += 1
-      elsif c == ' ' && !in_quote
+      elsif (c == ' ' || c == "\t") && !in_quote
         tokens << current unless current.empty?
         current = ''
       else
