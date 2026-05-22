@@ -32,11 +32,6 @@ config MCUX_PRJSEG_config.arm.core.fpu.fpv4_sp
     select CPU_CORTEX_M
     default y if MCUX_HW_FPV4_SP
 
-config MCUX_PRJSEG_config.device_core.define
-    bool
-    select CPU_CORTEX_M
-    default y
-
 config MCUX_PRJSEG_config.arm.core.cm7f
     bool
     select CPU_CORTEX_M

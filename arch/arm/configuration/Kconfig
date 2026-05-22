@@ -45,3 +45,7 @@ config MCUX_PRJSEG_config.wireless.shared
     bool
     default y if MCUX_HW_SOC_SERIES_WIRELESS
     imply MCUX_PRJSEG_config.arm.shared
+
+config MCUX_PRJSEG_config.device_core.define
+    bool
+    default y
