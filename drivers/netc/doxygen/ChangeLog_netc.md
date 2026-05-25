@@ -5,6 +5,7 @@
 - Bug Fixes
   - Fixed ringPerBdrGroup width to 4-bit whose range is from 1 to 8.
   - Converted to use SGMII 1G for i.MX952.
+  - Fixed some code quality issues.
 
 ## [2.10.5]
 
