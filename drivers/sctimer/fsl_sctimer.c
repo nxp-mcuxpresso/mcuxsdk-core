@@ -415,7 +415,7 @@ void SCTIMER_UpdatePwmDutycycle(SCT_Type *base, sctimer_out_t output, uint8_t du
 
     uint32_t periodMatchReg, pulseMatchReg;
     uint32_t pulsePeriod = 0, period;
-    assert(event < (uint32_t)FSL_FEATURE_SCT_NUMBER_OF_EVENTS);
+    assert(event < (uint32_t)FSL_FEATURE_SCT_NUMBER_OF_EVENTS - 1U);
     bool isHighTrue      = (0U != (base->OUT[output].CLR & (1UL << (event + 1U))));
 
     /* Retrieve the match register number for the PWM period */
