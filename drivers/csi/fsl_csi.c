@@ -1096,7 +1096,13 @@ status_t CSI_FragModeCreateHandle(CSI_Type *base,
     }
 
     /* Camera frame height must be dividable by DMA buffer line. */
-    if (config->height % config->dmaBufferLine != 0U)
+    if ((config->dmaBufferLine == 0U) || (((uint32_t)config->height % (uint32_t)config->dmaBufferLine) != 0U))
+    {
+        return kStatus_InvalidArgument;
+    }
+
+    /* config->width * CSI_FRAG_INPUT_BYTES_PER_PIXEL must fit in uint16_t. */
+    if (imgWidth_Bytes > 0xFFFFU)
     {
         return kStatus_InvalidArgument;
     }
@@ -1107,7 +1113,7 @@ status_t CSI_FragModeCreateHandle(CSI_Type *base,
     handle->height              = config->height;
     handle->width               = config->width;
     handle->maxLinePerFrag      = config->dmaBufferLine;
-    handle->dmaBytePerLine      = config->width * CSI_FRAG_INPUT_BYTES_PER_PIXEL;
+    handle->dmaBytePerLine      = (uint16_t)imgWidth_Bytes;
     handle->isDmaBufferCachable = config->isDmaBufferCachable;
 
     /* Get instance from peripheral base address. */
@@ -1206,12 +1212,28 @@ status_t CSI_FragModeTransferCaptureImage(CSI_Type *base,
     {
         handle->windowULX   = 0;
         handle->windowULY   = 0;
-        handle->windowLRX   = handle->width - 1U;
-        handle->windowLRY   = handle->height - 1U;
+        if ((handle->width == 0U) || (handle->height == 0U))
+        {
+            return kStatus_InvalidArgument;
+        }
+        handle->windowLRX   = (uint16_t)((uint32_t)handle->width - 1U);
+        handle->windowLRY   = (uint16_t)((uint32_t)handle->height - 1U);
         handle->linePerFrag = handle->maxLinePerFrag;
     }
 
-    windowWidth = handle->windowLRX - handle->windowULX + 1U;
+    if (handle->windowLRX < handle->windowULX)
+    {
+        return kStatus_InvalidArgument;
+    }
+
+    {
+        uint32_t windowWidthU32 = ((uint32_t)handle->windowLRX - (uint32_t)handle->windowULX) + 1U;
+        if (windowWidthU32 > 0xFFFFU)
+        {
+            return kStatus_InvalidArgument;
+        }
+        windowWidth = (uint16_t)windowWidthU32;
+    }
 
     if (config->outputGrayScale)
     {
@@ -1233,7 +1255,14 @@ status_t CSI_FragModeTransferCaptureImage(CSI_Type *base,
     }
     else
     {
-        handle->datBytePerLine = windowWidth * CSI_FRAG_INPUT_BYTES_PER_PIXEL;
+        {
+            uint32_t datBytePerLineU32 = (uint32_t)windowWidth * (uint32_t)CSI_FRAG_INPUT_BYTES_PER_PIXEL;
+            if (datBytePerLineU32 > 0xFFFFU)
+            {
+                return kStatus_InvalidArgument;
+            }
+            handle->datBytePerLine = (uint16_t)datBytePerLineU32;
+        }
         handle->copyFunc       = CSI_MemCopy;
     }
 
@@ -1323,7 +1352,14 @@ void CSI_FragModeTransferHandleIRQ(CSI_Type *base, csi_frag_handle_t *handle)
         }
 
         /* Copy from DMA buffer to user data buffer. */
-        dmaBufAddr += ((uint32_t)handle->windowULX * CSI_FRAG_INPUT_BYTES_PER_PIXEL);
+        {
+            uint32_t offset = (uint32_t)handle->windowULX * (uint32_t)CSI_FRAG_INPUT_BYTES_PER_PIXEL;
+            if (dmaBufAddr > (0xFFFFFFFFU - offset))
+            {
+                return;
+            }
+            dmaBufAddr += offset;
+        }
 
         for (line = 0; line < handle->linePerFrag; line++)
         {
@@ -1339,7 +1375,14 @@ void CSI_FragModeTransferHandleIRQ(CSI_Type *base, csi_frag_handle_t *handle)
 
                 handle->copyFunc(memDest.pvoid, memSrc.pvoid, handle->datBytePerLine);
                 handle->datCurWriteAddr += handle->datBytePerLine;
-                dmaBufAddr += handle->dmaBytePerLine;
+                {
+                    uint32_t offset = (uint32_t)handle->dmaBytePerLine;
+                    if (dmaBufAddr > (0xFFFFFFFFU - offset))
+                    {
+                        return;
+                    }
+                    dmaBufAddr += offset;
+                }
             }
             else
             {
