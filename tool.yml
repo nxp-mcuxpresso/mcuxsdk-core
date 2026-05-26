@@ -22,16 +22,16 @@ toolchains:
     compiler_version: '6.23'
     vendor: ARM
     vendor_url: http://www.arm.com
-    version: '5.42'
+    version: '5.43'
     os:
     - windows
   iar:
     name: IAR Embedded Workbench for ARM
     user_name: IAR Toolchain for ARM - 9.x
     toolchain: iar
-    version: 9.60.4
+    version: 9.70.4
     compiler: iar
-    compiler_version: 9.60.4
+    compiler_version: 9.70.4
     vendor: IAR Systems
     vendor_url: http://www.iar.com
     os:
