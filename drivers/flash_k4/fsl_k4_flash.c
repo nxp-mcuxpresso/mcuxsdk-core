@@ -2782,7 +2782,7 @@ static void FLASH_BufferPoolFree(uint32_t offset, uint32_t allocSize)
     /* Verify this is the head allocation (FIFO order) */
     if (offset == s_flashAsyncContext.bufferPool.head)
     {
-        /* Advance head pointer */
+        /* Normal case: advance head pointer */
         s_flashAsyncContext.bufferPool.head += allocSize;
         if (s_flashAsyncContext.bufferPool.head >= CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
         {
@@ -2808,12 +2808,48 @@ static void FLASH_BufferPoolFree(uint32_t offset, uint32_t allocSize)
             s_flashAsyncContext.bufferPool.tail = 0U;
         }
     }
+    else if ((offset == 0U) && (s_flashAsyncContext.bufferPool.head > offset))
+    {
+        /* Wrap-around case: allocation wrapped to beginning, but head is still at end */
+        /* This happens when allocation didn't fit at end and wrapped to start */
+        
+        /* The actual allocation size at the end that was wasted */
+        uint32_t wastedAtEnd = CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE - s_flashAsyncContext.bufferPool.head;
+        
+        /* Move head to the wrapped position (beginning) */
+        s_flashAsyncContext.bufferPool.head = 0U;
+        
+        /* Now advance by the actual allocation size */
+        s_flashAsyncContext.bufferPool.head += allocSize;
+        if (s_flashAsyncContext.bufferPool.head >= CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
+        {
+            s_flashAsyncContext.bufferPool.head -= CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE;
+        }
+        
+        /* Decrease used bytes by both wasted space and actual allocation */
+        uint32_t totalToFree = wastedAtEnd + allocSize;
+        if (s_flashAsyncContext.bufferPool.usedBytes >= totalToFree)
+        {
+            s_flashAsyncContext.bufferPool.usedBytes -= totalToFree;
+        }
+        else
+        {
+            /* Should not happen - reset to safe state */
+            s_flashAsyncContext.bufferPool.usedBytes = 0U;
+            assert(0);
+        }
+        
+        /* If buffer is now empty, reset pointers */
+        if (s_flashAsyncContext.bufferPool.usedBytes == 0U)
+        {
+            s_flashAsyncContext.bufferPool.head = 0U;
+            s_flashAsyncContext.bufferPool.tail = 0U;
+        }
+    }
     else
     {
         /* Out-of-order free detected - this should not happen with FIFO queue */
-        /* Log error or assert in debug builds */
 #if defined(DEBUG) || defined(_DEBUG)
-        /* Assert or log error */
         assert(0);
 #endif
     }
