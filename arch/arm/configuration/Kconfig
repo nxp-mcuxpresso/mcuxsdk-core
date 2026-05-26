@@ -31,6 +31,14 @@ config MCUX_PRJSEG_config.imx.shared
     default y if MCUX_HW_SOC_SERIES_MIMX
     imply MCUX_PRJSEG_config.arm.shared
 
+config MCUX_PRJSEG_config.imx.cortex_a.shared
+    bool
+    default y if (MCUX_PRJSEG_config.imx.shared && CPU_CORTEX_A)
+
+config MCUX_PRJSEG_config.imx.cortex_m.shared
+    bool
+    default y if (MCUX_PRJSEG_config.imx.shared && CPU_CORTEX_M)
+
 config MCUX_PRJSEG_config.lpc.shared
     bool
     default y if MCUX_HW_SOC_SERIES_LPC
