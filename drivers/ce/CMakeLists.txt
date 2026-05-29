@@ -21,6 +21,7 @@ if(CONFIG_MCUX_COMPONENT_driver.ce)
         fsl_ce_transform.c
         fsl_ce_transform.h
         firmware/ce_kw47_mcxw72.txt
+        firmware/ce_kw43_mcxw70.txt
     )
 
     mcux_add_include(INCLUDES . firmware)
