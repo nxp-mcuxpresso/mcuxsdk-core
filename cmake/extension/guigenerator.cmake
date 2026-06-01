@@ -94,7 +94,7 @@ set(COMMON_ENV_SETTINGS ${TMP_COMMON_ENV_SETTINGS})
 set(PROJECT_GENERATOR
     ${SdkRootDirPath}/scripts/guigenerator/project_generator/project_generator.rb
 )
-if (${CONFIG_TOOLCHAIN} IN_LIST GUI_PROJECT_SUPPORTED_TOOLCHAIN AND FOUND_RUBY_EXECUTABLE)
+if (FOUND_RUBY_EXECUTABLE AND ${CONFIG_TOOLCHAIN} IN_LIST GUI_PROJECT_SUPPORTED_TOOLCHAIN)
     add_custom_target(
             guiproject
             ${CMAKE_COMMAND}
@@ -114,40 +114,32 @@ if (${CONFIG_TOOLCHAIN} IN_LIST GUI_PROJECT_SUPPORTED_TOOLCHAIN AND FOUND_RUBY_E
             -c
             ${CMAKE_BUILD_TYPE}
             WORKING_DIRECTORY ${SdkRootDirPath}
+            COMMENT "Generating ${CONFIG_TOOLCHAIN} GUI project for ${MCUX_SDK_PROJECT_NAME} [${CMAKE_BUILD_TYPE}]"
             USES_TERMINAL COMMAND_EXPAND_LISTS)
-else ()
-    add_custom_target(
-            guiproject
-            COMMAND ${CMAKE_COMMAND} -E echo "Skip GUI project generation. You can refer ${ruby_install_link} to install ruby. And please ensure the specified toolchain is one of ${GUI_PROJECT_SUPPORTED_TOOLCHAIN}."
-            VERBATIM)
 endif ()
 
-if (${CONFIG_TOOLCHAIN} IN_LIST STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN AND FOUND_RUBY_EXECUTABLE)
-add_custom_target(
-        standalone_project
-        ${CMAKE_COMMAND}
-        -E
-        env
-        ${COMMON_ENV_SETTINGS} standalone=true
-        ${RUBY_EXECUTABLE}
-        ${PROJECT_GENERATOR}
-        -t
-        ${CONFIG_TOOLCHAIN}
-        -i
-        ${CMAKE_CURRENT_BINARY_DIR}/build.ninja
-        -o
-        ${CMAKE_CURRENT_BINARY_DIR}
-        -p
-        ${MCUX_SDK_PROJECT_NAME}
-        -c
-        ${CMAKE_BUILD_TYPE}
-        WORKING_DIRECTORY ${SdkRootDirPath}
-        USES_TERMINAL COMMAND_EXPAND_LISTS)
-else ()
+if (FOUND_RUBY_EXECUTABLE AND ${CONFIG_TOOLCHAIN} IN_LIST STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN)
     add_custom_target(
             standalone_project
-            COMMAND ${CMAKE_COMMAND} -E echo "Skip standalone project generation. You can refer ${ruby_install_link} to install ruby. And please ensure the specified toolchain is one of ${STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN}."
-            VERBATIM)
+            ${CMAKE_COMMAND}
+            -E
+            env
+            ${COMMON_ENV_SETTINGS} standalone=true
+            ${RUBY_EXECUTABLE}
+            ${PROJECT_GENERATOR}
+            -t
+            ${CONFIG_TOOLCHAIN}
+            -i
+            ${CMAKE_CURRENT_BINARY_DIR}/build.ninja
+            -o
+            ${CMAKE_CURRENT_BINARY_DIR}
+            -p
+            ${MCUX_SDK_PROJECT_NAME}
+            -c
+            ${CMAKE_BUILD_TYPE}
+            WORKING_DIRECTORY ${SdkRootDirPath}
+            COMMENT "Generating ${CONFIG_TOOLCHAIN} standalone project for ${MCUX_SDK_PROJECT_NAME} [${CMAKE_BUILD_TYPE}]"
+            USES_TERMINAL COMMAND_EXPAND_LISTS)
 endif ()
 
 add_custom_target(

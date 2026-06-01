@@ -6,6 +6,8 @@ require 'optparse'
 require 'logger'
 require_relative './generator'
 require_relative './ninja_parser'
+require_relative './out_of_tree_ninja_parser'
+require_relative './out_of_tree_generator'
 require_relative 'core/_fileutils'
 require_relative '../utils/utils'
 require 'rubygems'
@@ -124,7 +126,8 @@ if $PROGRAM_NAME == __FILE__
         logger.warn("The system Ruby version #{RUBY_VERSION} is lower than the minimum version #{RUBY_MINIMUM_REQUIRED}.")
     end
 
-    build_data = NinjaParser.new(ninja, project, toolchain, config, outdir, logger).process
+    parser_class = OutOfTreeNinjaParser.applicable? ? OutOfTreeNinjaParser : NinjaParser
+    build_data = parser_class.new(ninja, project, toolchain, config, outdir, logger).process
     build_option = make_up_build_option(project, toolchain, config, outdir)
 
     if logger.level == Logger::DEBUG
@@ -133,7 +136,10 @@ if $PROGRAM_NAME == __FILE__
       YAML.dump_file(dump_file, build_data)
     end
 
-    @generator = SDKGenerator::ProjectGenerator::Generator.new(build_data, logger, generate_options: build_option)
+    generator_class = SDKGenerator::ProjectGenerator::OutOfTreeGenerator.applicable? ?
+                        SDKGenerator::ProjectGenerator::OutOfTreeGenerator :
+                        SDKGenerator::ProjectGenerator::Generator
+    @generator = generator_class.new(build_data, logger, generate_options: build_option)
     # For armgcc project, build/mcux_config.h is forbidden because it will be removed by clean script,
     # so we need to copy it to project root dir and then update build data before generating project
     @generator.copy_files(build_data) if ENV['standalone'] == 'true'

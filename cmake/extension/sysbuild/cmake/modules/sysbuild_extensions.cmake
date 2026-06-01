@@ -358,14 +358,14 @@ function(ExternalZephyrProject_Add)
     endif()
   endforeach()
 
-  foreach(kconfig_target
-      menuconfig
-      hardenconfig
-      guiconfig
-      guiproject # add ${secondary_project}_guiproject target
-      standalone_project # add ${secondary_project}_standalone_project target
-      ${EXTRA_KCONFIG_TARGETS}
-      )
+  set(_image_kconfig_targets menuconfig hardenconfig guiconfig)
+  if(FOUND_RUBY_EXECUTABLE)
+    # add ${secondary_project}_guiproject and ${secondary_project}_standalone_project targets
+    list(APPEND _image_kconfig_targets guiproject standalone_project)
+  endif()
+  list(APPEND _image_kconfig_targets ${EXTRA_KCONFIG_TARGETS})
+
+  foreach(kconfig_target ${_image_kconfig_targets})
 
     if(NOT ZBUILD_APP_TYPE STREQUAL "MAIN")
       set(image_prefix "${ZBUILD_APPLICATION}_")
@@ -627,17 +627,25 @@ function(ExternalZephyrProject_Cmake)
     )
   endif()
 
-  # Execute guigenerator scripts for all toolchains automatically when invoking sysbuild
-  if (${${ZCMAKE_APPLICATION}_toolchain} MATCHES "iar|mdk|xtensa|codewarrior|armgcc|riscvllvm" AND FOUND_RUBY_EXECUTABLE)
-
-    # Create standalone project if user add "-t standalone_project" in command
-    # Otherwise create GUI project
+  # Execute guigenerator scripts for all toolchains automatically when invoking sysbuild.
+  # Keep these lists in sync with GUI_PROJECT_SUPPORTED_TOOLCHAIN /
+  # STANDALONE_PROJECT_SUPPORTED_TOOLCHAIN in cmake/extension/guigenerator.cmake.
+  set(tmp_project_target)
+  if(FOUND_RUBY_EXECUTABLE)
     if(SYSBUILD_GENERATE_STANDALONE_PROJECT)
-      set(tmp_project_target standalone_project)
+      # standalone_project supports: armgcc iar mdk xtensa codewarrior riscvllvm
+      if(${${ZCMAKE_APPLICATION}_toolchain} MATCHES "^(iar|mdk|xtensa|codewarrior|armgcc|riscvllvm)$")
+        set(tmp_project_target standalone_project)
+      endif()
     else()
-      set(tmp_project_target guiproject)
+      # guiproject supports: iar mdk xtensa codewarrior (skip for armgcc/riscvllvm)
+      if(${${ZCMAKE_APPLICATION}_toolchain} MATCHES "^(iar|mdk|xtensa|codewarrior)$")
+        set(tmp_project_target guiproject)
+      endif()
     endif()
+  endif()
 
+  if(tmp_project_target)
     execute_process(
             COMMAND ${CMAKE_COMMAND}
             --build ${BINARY_DIR}
@@ -652,7 +660,7 @@ function(ExternalZephyrProject_Cmake)
               "Location: ${SOURCE_DIR}"
               )
     endif()
-  endif ()
+  endif()
 
   load_cache(IMAGE ${ZCMAKE_APPLICATION} BINARY_DIR ${BINARY_DIR})
   if(EXISTS ${BINARY_DIR}/.config)
