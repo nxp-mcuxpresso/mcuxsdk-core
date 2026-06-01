@@ -102,7 +102,8 @@ void ELCDIF_RgbModeInit(LCDIF_Type *base, const elcdif_rgb_mode_config_t *config
 {
     assert(NULL != config);
     assert((uint32_t)config->pixelFormat < ARRAY_SIZE(s_pixelFormatReg));
-    assert(0U == (config->bufferAddr & 0x7U));
+    /* CUR_BUF/NEXT_BUF must be double-word aligned; bit 0 is the LUT bank selector so is ignored. */
+    assert(0U == (config->bufferAddr & 0x6U));
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && (0 != FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL))
     uint32_t instance = ELCDIF_GetInstance(base);
