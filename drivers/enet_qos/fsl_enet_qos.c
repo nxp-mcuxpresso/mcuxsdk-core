@@ -4097,3 +4097,11 @@ void EMAC_0_DriverIRQHandler(void)
     s_enetqosIsr(EMAC, s_ENETHandle[0]);
 }
 #endif
+
+#if defined(COMM__ENET_QOS)
+void COMM_ENET_QOS_DriverIRQHandler(void);
+void COMM_ENET_QOS_DriverIRQHandler(void)
+{
+    s_enetqosIsr(COMM__ENET_QOS, s_ENETHandle[0]);
+}
+#endif
