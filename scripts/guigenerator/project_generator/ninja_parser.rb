@@ -50,6 +50,7 @@ class NinjaParser
     parse_postbuild
     parse_precompile
     parse_cmake_custom_command
+    parse_custom_target_dependencies
     parse_example_readme
     merge_ide_data
     set_project_language
@@ -786,16 +787,31 @@ class NinjaParser
         # cd . means no cmd
         break if content == 'cd .' || content == ':'
         cmd_list = translate_path_in_build_cmd(content)
-        cmd_list.each_with_index do |cmd_str, index|
-          # translate cmake to ${CMAKE_COMMAND}, if starts with quote, indicates there is space in path
-          # Use [^"]* to match any character except quote before cmake executor
-          pattern = /"?[^"]*[\/\\]cmake(\.exe)?"|\s*\S+[\/\\]cmake(\.exe)?/
-          result = cmd_str.match(pattern)
-          while(result)
-            cmd_list[index] = cmd_str.sub(result[ 0 ], ' ${CMAKE_COMMAND}')
-            result = cmd_str.match(cmd_list[index])
+        # Decide how to rewrite the absolute cmake executable path embedded
+        # in PRE_LINK by CMake:
+        #   armgcc/riscvllvm → ${CMAKE_COMMAND} (re-processed by CMake at build time)
+        #   IDE + standalone → bare `cmake` (rely on PATH for portability)
+        #   IDE + in-tree GUI → leave the absolute build-time path
+        cmake_replacement =
+          if %w[armgcc riscvllvm].include? @toolchain
+            ' ${CMAKE_COMMAND}'
+          elsif ENV['standalone'] == 'true'
+            ' cmake'
+          end
+        if cmake_replacement
+          cmd_list.each_with_index do |cmd_str, index|
+            # translate cmake executable path, if starts with quote, indicates there is space in path
+            # Use [^"]* to match any character except quote before cmake executor
+            pattern = /"?[^"]*[\/\\]cmake(\.exe)?"|\s*\S+[\/\\]cmake(\.exe)?/
+            result = cmd_str.match(pattern)
+            while(result)
+              cmd_list[index] = cmd_str.sub(result[ 0 ], cmake_replacement)
+              result = cmd_str.match(cmd_list[index])
+            end
           end
         end
+
+        cmd_list = cmd_list.map { |c| wrap_for_mdk_shell(c) } if @toolchain == 'mdk'
 
         @logger.debug( "Parse prebuild command: #{cmd_list.join(' ')}")
         if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
@@ -806,6 +822,17 @@ class NinjaParser
         break
       end
     end
+  end
+
+  # MDK uVision executes BeforeMake/AfterMake User Programs directly without
+  # a shell. When the command needs shell semantics, wrap it in `cmd /C "..."` so
+  # the Windows command processor parses the metacharacters. Idempotent.
+  def wrap_for_mdk_shell(cmd)
+    cmd = cmd.to_s.strip
+    return cmd if cmd.empty?
+    return cmd if cmd.start_with?('cmd /C ', 'cmd.exe /C ', 'cmd /c ', 'cmd.exe /c ')
+    return cmd unless cmd.match?(/[><|]|&&/)
+    "cmd /C \"#{cmd}\""
   end
 
   def parse_postbuild
@@ -1035,6 +1062,111 @@ class NinjaParser
     end
   end
 
+  # Surface component-side `add_custom_target(<name> COMMAND ...)`
+  # + `add_dependencies(${MCUX_SDK_PROJECT_NAME} <name>)` as prebuild commands
+  # in the generated IDE / standalone project.
+  #
+  # CMake/Ninja does NOT inline such custom_target COMMANDs into the main
+  # target's PRE_LINK variable — it only wires them as order-only deps after
+  # `||` on the link build edge. `parse_prebuild` therefore never sees them.
+  # Walk those order-only deps, resolve each phony rule down to its
+  # CUSTOM_COMMAND block, extract `COMMAND = ...`, sanitize, and append to
+  # the prebuild list.
+  def parse_custom_target_dependencies
+    # Locate the link build edge for the main project target.
+    link_pattern = /^build\s+#{Regexp.escape(@name)}\.(elf|a)\s*:/
+    link_line = @content.find { |line| line.match(link_pattern) }
+    return unless link_line
+    return unless link_line.include?('||')
+
+    # Everything after `||` is the order-only dependency list.
+    order_only_part = link_line.split('||', 2)[1].strip
+    order_only_deps = order_only_part.split(/\s+/).reject(&:empty?)
+
+    custom_commands = []
+    order_only_deps.each do |dep|
+      dep_basename = File.basename(dep.tr('\\', '/'))
+      # Skip CMake/Ninja internal aggregators and well-known SDK targets
+      # already handled elsewhere or never meant to surface as a prebuild.
+      next if CUSTOM_COMMAND_IGNORE_LIST.include?(dep_basename)
+      next if dep_basename.start_with?('cmake_')
+      next if dep_basename == "#{@name}.elf" || dep_basename == "#{@name}.a"
+      # mcux_add_custom_command(BUILD_EVENT PRE_COMPILE) custom targets are
+      # named PRE_COMPILE_CMD_TARGET_<MD5> and are picked up by parse_precompile.
+      next if dep_basename.start_with?('PRE_COMPILE_CMD_TARGET_')
+
+      # Follow the phony rule to its CUSTOM_COMMAND target.
+      phony_pattern = /^build\s+#{Regexp.escape(dep)}\s*:\s*phony\s+(\S+)/
+      phony_line = @content.find { |line| line.match(phony_pattern) }
+      next unless phony_line
+
+      cmakefiles_path = phony_line.match(phony_pattern)[1]
+      custom_cmd_pattern = /^build\s+#{Regexp.escape(cmakefiles_path)}.*:\s+CUSTOM_COMMAND/
+      custom_idx = @content.find_index { |line| line.match(custom_cmd_pattern) }
+      next unless custom_idx
+
+      # COMMAND = ... lives in the variable block under the
+      # `build ...: CUSTOM_COMMAND` line.
+      ((custom_idx + 1)...@content.length).each do |i|
+        next_line = @content[i]
+        break if next_line.start_with?('build ') || next_line.start_with?('#')
+        cmd_match = next_line.match(/COMMAND\s*=\s*(.*)/)
+        if cmd_match
+          custom_commands << cmd_match[1].strip
+          break
+        end
+      end
+    end
+
+    return if custom_commands.empty?
+
+    cmake_replacement =
+      if %w[armgcc riscvllvm].include? @toolchain
+        ' ${CMAKE_COMMAND}'
+      elsif ENV['standalone'] == 'true'
+        ' cmake'
+      end
+
+    translated_commands = []
+    custom_commands.each do |raw_cmd|
+      # Strip the Ninja Windows shell wrapper that CMake emits around custom
+      # command bodies.
+      raw_cmd = raw_cmd.sub(/^[^"]*cmd\.exe\s+\/C\s+"cd\s+\/D\s+.+?\s*&&\s*/, '')
+      raw_cmd = raw_cmd.sub(/"\s*$/, '')
+
+      translated = translate_path_in_build_cmd(raw_cmd)
+      translated = [translated] unless translated.is_a?(Array)
+      translated.each do |cmd_str|
+        if cmake_replacement
+          pattern = /"?[^"]*[\/\\]cmake(\.exe)?"|\s*\S+[\/\\]cmake(\.exe)?/
+          result = cmd_str.match(pattern)
+          while(result)
+            cmd_str = cmd_str.sub(result[0], cmake_replacement)
+            result = cmd_str.match(pattern)
+          end
+        end
+        translated_commands << cmd_str
+      end
+    end
+
+    return if translated_commands.empty?
+
+    existing = @data.dig(@name, 'contents', 'configuration', 'tools', @toolchain, 'prebuild') || []
+    combined = existing + translated_commands
+
+    # MDK uvprojx schema only exposes two prebuild commands.
+    # For >2 prebuild commands, concatenate commands 2..N into
+    # the second slot with ` && ` so the IDE still runs
+    # all of them in order. Other toolchains accept N entries natively.
+    if @toolchain == 'mdk' && combined.length > 2
+      combined = [combined.first, combined[1..-1].join(' && ')]
+    end
+
+    combined = combined.map { |c| wrap_for_mdk_shell(c) } if @toolchain == 'mdk'
+
+    @data[@name]['contents']['configuration']['tools'][@toolchain]['prebuild'] = combined
+  end
+
   def parse_example_readme
     return unless ENV['APPLICATION_SOURCE_DIR']
 
@@ -1248,6 +1380,8 @@ class NinjaParser
       }
     }
     content&.each do |key, value|
+      next unless value
+
       if key == @toolchain
         tmp[@name]['contents']['configuration']['tools'][@toolchain].deep_merge! value
       elsif key == '__variable__'
