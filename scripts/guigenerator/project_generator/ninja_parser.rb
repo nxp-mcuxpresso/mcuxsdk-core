@@ -778,6 +778,26 @@ class NinjaParser
     cmd_list.map! {|cmd_str|  remove_last_quote_if_odd(cmd_str)}
   end
 
+  # Rewrite the absolute cmake executable path that CMake embeds at the start
+  # of each PRE_LINK/PRE_COMPILE command segment:
+  #   armgcc/riscvllvm → ${CMAKE_COMMAND} (re-processed by CMake at build time)
+  #   IDE + standalone → bare `cmake` (rely on PATH for portability)
+  #   IDE + in-tree GUI → leave the absolute build-time path
+  def rewrite_cmake_executor!(cmd_list)
+    cmake_replacement =
+      if %w[armgcc riscvllvm].include? @toolchain
+        '${CMAKE_COMMAND}'
+      elsif ENV['standalone'] == 'true'
+        'cmake'
+      end
+    return unless cmake_replacement
+    cmake_pat = /\A("[^"]+[\/\\]cmake(?:\.exe)?"|[^=\s]+[\/\\]cmake(?:\.exe)?)(?=\s|\z)/
+    cmd_list.each_with_index do |seg, i|
+      next if seg.nil? || seg.empty?
+      cmd_list[i] = seg.sub(cmake_pat, cmake_replacement)
+    end
+  end
+
   def parse_prebuild
     pattern = /PRE_LINK\s=\s(.*)/
     @content.each do |line|
@@ -787,29 +807,7 @@ class NinjaParser
         # cd . means no cmd
         break if content == 'cd .' || content == ':'
         cmd_list = translate_path_in_build_cmd(content)
-        # Decide how to rewrite the absolute cmake executable path embedded
-        # in PRE_LINK by CMake:
-        #   armgcc/riscvllvm → ${CMAKE_COMMAND} (re-processed by CMake at build time)
-        #   IDE + standalone → bare `cmake` (rely on PATH for portability)
-        #   IDE + in-tree GUI → leave the absolute build-time path
-        cmake_replacement =
-          if %w[armgcc riscvllvm].include? @toolchain
-            ' ${CMAKE_COMMAND}'
-          elsif ENV['standalone'] == 'true'
-            ' cmake'
-          end
-        if cmake_replacement
-          cmd_list.each_with_index do |cmd_str, index|
-            # translate cmake executable path, if starts with quote, indicates there is space in path
-            # Use [^"]* to match any character except quote before cmake executor
-            pattern = /"?[^"]*[\/\\]cmake(\.exe)?"|\s*\S+[\/\\]cmake(\.exe)?/
-            result = cmd_str.match(pattern)
-            while(result)
-              cmd_list[index] = cmd_str.sub(result[ 0 ], cmake_replacement)
-              result = cmd_str.match(cmd_list[index])
-            end
-          end
-        end
+        rewrite_cmake_executor!(cmd_list)
 
         cmd_list = cmd_list.map { |c| wrap_for_mdk_shell(c) } if @toolchain == 'mdk'
 
@@ -903,16 +901,9 @@ class NinjaParser
             content.sub!(result[ 0 ], ' $<TARGET_FILE:${MCUX_SDK_PROJECT_NAME}>')
             result = content.match(pattern)
           end
-          # translate cmake to ${CMAKE_COMMAND}, if starts with quote, indicates there is space in path
-          # Use [^"]* to match any character except quote before cmake executor
-          pattern = /\s"[^"]*bin[\/\\]cmake(\.exe)?"|\s\S+bin[\/\\]cmake(\.exe)?/
-          result = content.match(pattern)
-          while(result)
-            content.sub!(result[ 0 ], ' ${CMAKE_COMMAND}')
-            result = content.match(pattern)
-          end
         end
         cmd_list = translate_path_in_build_cmd(content)
+        rewrite_cmake_executor!(cmd_list)
 
         if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
           @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = cmd_list
@@ -970,7 +961,11 @@ class NinjaParser
   end
 
   def parse_precompile
-    cmd_list = []
+    # Two kinds of pre-compile step, collected separately and assigned at the end:
+    #   prebuild_cmds -> 'precompile'    -> MCUX_PREBUILD COMMAND (run, not linked)
+    #   link_obj_cmds -> 'cmake_command' -> add_custom_command + target_sources (linked)
+    prebuild_cmds = []
+    link_obj_cmds = []
     pattern = /build\sCMakeFiles(\/|\\)PRE_COMPILE_CMD_TARGET/
     @content.each_with_index do |line, index|
       result = line.match(pattern)
@@ -978,11 +973,56 @@ class NinjaParser
         content = @content[index+1].strip
         if content.include?('COMMAND = ')
           cmd = content.split('COMMAND = ')[-1]
-          cmd_list << cmd
+          # Add space between -D and path to handle path separately
+          cmd = cmd.gsub(/(\s-D[^=\s]+=)(\S)/) { "#{$1} #{$2}" }
+          translated = translate_path_in_build_cmd(cmd)
+          rewrite_cmake_executor!(translated)
+          # Re-collapse "-DVAR= value" into "-DVAR=value", reading the value
+          # up to the next argument boundary. Re-quote when the value still
+          # contains whitespace so it stays a single token.
+          joined = translated.compact.join(' ').gsub(
+            /(-D[^=\s]+=)\s+(\S+(?:\s+(?![-${"])\S+)*)/
+          ) do
+            prefix, value = $1, $2
+            value.include?(' ') ? "#{prefix}\"#{value}\"" : "#{prefix}#{value}"
+          end
+          next if joined.empty?
+
+          # If the step emits a linkable object, route it through add_custom_command/target_sources
+          # so CMake builds and links it (MCUX_PREBUILD only runs it -> undefined reference).
+          # See examples/_boards/imx95lp4xevk15/driver_examples/isi/dwc_mipi_csi2/reconfig.cmake
+          obj = joined.match(/-DOUTPUT_OBJ=("?)(\S+?)\1(?=\s|\z)/)
+          if obj && File.extname(obj[2]) == '.o'
+            link_obj_cmds << generated_source_cmake_command(obj[2], joined)
+          else
+            prebuild_cmds << joined
+          end
         end
       end
     end
-    @data[@name]['contents']['configuration']['tools'][@toolchain]['precompile'] = cmd_list if cmd_list
+    tool = @data[@name]['contents']['configuration']['tools'][@toolchain]
+    tool['precompile'] = prebuild_cmds unless prebuild_cmds.empty?
+    unless link_obj_cmds.empty?
+      tool['cmake_command'] ||= []
+      tool['cmake_command'].concat(link_obj_cmds)
+    end
+  end
+
+  # Build a cmake_command block that generates a file/object (add_custom_command)
+  # and adds it to the target (target_sources). Pure: returns the string.
+  def generated_source_cmake_command(output, command)
+    <<~HEREDOC
+      add_custom_command(
+        OUTPUT
+        #{output}
+        COMMAND
+        #{command}
+      )
+
+      target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+        #{output}
+      )
+    HEREDOC
   end
 
   # If the command is added by native add_custom_command without build events, the build command 
@@ -1042,18 +1082,7 @@ class NinjaParser
     cmd_list&.each do |cmd|
       if @toolchain == 'armgcc'
         @data[@name]['contents']['configuration']['tools'][@toolchain]['cmake_command'] ||= []
-        raw_command =  <<~HEREDOC
-          add_custom_command(
-            OUTPUT
-            #{cmd['file']}
-            COMMAND
-            #{cmd['command']}
-          )
-
-          target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE 
-            #{cmd['file']}
-          )
-        HEREDOC
+        raw_command = generated_source_cmake_command(cmd['file'], cmd['command'])
         @data[@name]['contents']['configuration']['tools'][@toolchain]['cmake_command'].push(raw_command)
       else
         @data[@name]['contents']['configuration']['tools'][@toolchain]['prebuild'] ||= []
@@ -1120,13 +1149,6 @@ class NinjaParser
 
     return if custom_commands.empty?
 
-    cmake_replacement =
-      if %w[armgcc riscvllvm].include? @toolchain
-        ' ${CMAKE_COMMAND}'
-      elsif ENV['standalone'] == 'true'
-        ' cmake'
-      end
-
     translated_commands = []
     custom_commands.each do |raw_cmd|
       # Strip the Ninja Windows shell wrapper that CMake emits around custom
@@ -1136,17 +1158,8 @@ class NinjaParser
 
       translated = translate_path_in_build_cmd(raw_cmd)
       translated = [translated] unless translated.is_a?(Array)
-      translated.each do |cmd_str|
-        if cmake_replacement
-          pattern = /"?[^"]*[\/\\]cmake(\.exe)?"|\s*\S+[\/\\]cmake(\.exe)?/
-          result = cmd_str.match(pattern)
-          while(result)
-            cmd_str = cmd_str.sub(result[0], cmake_replacement)
-            result = cmd_str.match(pattern)
-          end
-        end
-        translated_commands << cmd_str
-      end
+      rewrite_cmake_executor!(translated)
+      translated_commands.concat(translated)
     end
 
     return if translated_commands.empty?
@@ -1652,7 +1665,14 @@ class NinjaParser
       i += 1
     end
     tokens << current unless current.empty?
-    tokens
+    # Ninja quotes a -D<VAR>= option whole when its value has spaces, e.g.
+    # "-DOBJCOPY=c:/armgcc 14/bin/.../objcopy.exe". Split off the -D<VAR>= prefix so path
+    # translation sees a bare path. The value is left unquoted; parse_precompile re-assembles
+    # it and re-quotes any value that still contains a space.
+    tokens.flat_map do |tok|
+      m = tok.match(/\A"(-D[^=\s]+=)(.*)"\z/)
+      m ? [m[1], m[2]] : [tok]
+    end
   end
 
   def translate_toolchain_path_variable(path)
