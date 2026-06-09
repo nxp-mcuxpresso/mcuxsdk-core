@@ -401,70 +401,72 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
     {
 #if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
         /* Async mode: queue the erase operation */
-        do
-        {
-            flash_async_op_t op;
-            osa_status_t     osaStatus;
 
-            /* Check if async context is initialized */
-            if (!s_flashAsyncContext.initialized)
-            {
-                status = kStatus_FLASH_CommandFailure;
-                break;
-            }
+        /* Check if async context is initialized */
+        if (!s_flashAsyncContext.initialized)
+        {
+            status = kStatus_FLASH_CommandFailure;
+        }
+        else
+        {
+            osa_status_t osaStatus;
 
             /* Acquire mutex for thread-safe access */
             osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
             assert(osaStatus == KOSA_StatusSuccess);
             (void)osaStatus;
-            
-            /* Check if there is enough space, if not try to flush one pending operations */
-            if (FLASH_QueueIsFull())
-            {
-                status = FLASH_FlushPendingOperations(1U);
-                if (status != kStatus_FLASH_Success)
-                {
-                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                    break;
-                }
 
-                /* Re-check resources after flush */
+            do
+            {
+                flash_async_op_t op;
+
+                /* Check if there is enough space, if not try to flush one pending operations */
                 if (FLASH_QueueIsFull())
                 {
-                    /* Still not enough space - operation too large for async mode */
-                    status = kStatus_FLASH_SizeError;
-                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+                    status = FLASH_FlushPendingOperations(1U);
+                    if (status != kStatus_FLASH_Success)
+                    {
+                        break;
+                    }
+
+                    /* Re-check resources after flush */
+                    if (FLASH_QueueIsFull())
+                    {
+                        /* Still not enough space - operation too large for async mode */
+                        status = kStatus_FLASH_SizeError;
+                        break;
+                    }
+                }
+
+                /* Prepare the erase operation descriptor */
+                op.opType          = kFlashAsyncOp_Erase;
+                op.startAddress    = start;
+                op.lengthInBytes   = lengthInBytes;
+                op.pBuffer         = NULL;  /* No buffer needed for erase */
+                op.key             = key;
+
+                /* Store the FMU base for this operation */
+                s_flashAsyncContext.fmuBase = base;
+
+                /* Queue the operation */
+                status = FLASH_QueueOperation(&op);
+
+                if (status != kStatus_FLASH_Success)
+                {
+                    /* Queue full or other error */
                     break;
                 }
-            }
-
-            /* Prepare the erase operation descriptor */
-            op.opType          = kFlashAsyncOp_Erase;
-            op.startAddress    = start;
-            op.lengthInBytes   = lengthInBytes;
-            op.pBuffer         = NULL;  /* No buffer needed for erase */
-            op.key             = key;
-
-            /* Store the FMU base for this operation */
-            s_flashAsyncContext.fmuBase = base;
-
-            /* Queue the operation */
-            status = FLASH_QueueOperation(&op);
-
-            if (status != kStatus_FLASH_Success)
-            {
-                /* Queue full or other error */
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
 
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-            s_flashAsyncContext.totalOperationsQueued++;
+                s_flashAsyncContext.totalOperationsQueued++;
 #endif
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-            status = kStatus_FLASH_Success;
+                status = kStatus_FLASH_Success;
 
-        } while (false);
+            } while (false);
+
+            /* Single unlock point */
+            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+        }
 
 #else
         /* Sync mode: execute erase immediately */
@@ -542,108 +544,106 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
     {
 #if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
         /* Async mode: allocate buffer, copy data, and queue the operation */
-        do
+
+        /* Check if async context is initialized */
+        if (!s_flashAsyncContext.initialized)
         {
-            flash_async_op_t op;
-            osa_status_t     osaStatus;
-            uint32_t         bufferOffset = FLASH_ASYNC_INVALID_BUFFER_INDEX;
-            uint32_t         allocSize    = 0U;
-            uint8_t         *pBuffer      = NULL;
-
-            /* Check if async context is initialized */
-            if (!s_flashAsyncContext.initialized)
-            {
-                status = kStatus_FLASH_CommandFailure;
-                break;
-            }
-
-            /* Validate source pointer */
-            if (src == NULL)
-            {
-                status = kStatus_FLASH_InvalidArgument;
-                break;
-            }
+            status = kStatus_FLASH_CommandFailure;
+        }
+        /* Validate source pointer */
+        else if (src == NULL)
+        {
+            status = kStatus_FLASH_InvalidArgument;
+        }
+        else
+        {
+            osa_status_t osaStatus;
 
             /* Acquire mutex for thread-safe access */
             osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
             assert(osaStatus == KOSA_StatusSuccess);
             (void)osaStatus;
-            
-            /* Check if there is enough space, if not try to flush pending operations */
-            if ((FLASH_BufferPoolAvailable() < lengthInBytes) || FLASH_QueueIsFull())
-            {
-                status = FLASH_FlushPendingOperations(lengthInBytes);
-                if (status != kStatus_FLASH_Success)
-                {
-                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                    break;
-                }
 
-                /* Re-check resources after flush */
+            do
+            {
+                flash_async_op_t op;
+                uint32_t         bufferOffset = FLASH_ASYNC_INVALID_BUFFER_INDEX;
+                uint32_t         allocSize    = 0U;
+                uint8_t         *pBuffer      = NULL;
+
+                /* Check if there is enough space, if not try to flush pending operations */
                 if ((FLASH_BufferPoolAvailable() < lengthInBytes) || FLASH_QueueIsFull())
                 {
-                    /* Still not enough space - operation too large for async mode */
-                    status = kStatus_FLASH_SizeError;
-                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                    break;
+                    status = FLASH_FlushPendingOperations(lengthInBytes);
+                    if (status != kStatus_FLASH_Success)
+                    {
+                        break;
+                    }
+
+                    /* Re-check resources after flush */
+                    if ((FLASH_BufferPoolAvailable() < lengthInBytes) || FLASH_QueueIsFull())
+                    {
+                        /* Still not enough space - operation too large for async mode */
+                        status = kStatus_FLASH_SizeError;
+                        break;
+                    }
                 }
-            }
 
 #if defined(CONFIG_FLASH_K4_ASYNC_MERGE_CONTIGUOUS_WRITES) && (CONFIG_FLASH_K4_ASYNC_MERGE_CONTIGUOUS_WRITES == 1)
-            /* Try to merge with the last queued write operation */
-            if (FLASH_TryMergeWrite(start, src, lengthInBytes))
-            {
-                /* Successfully merged - no need to queue new operation */
-                status = kStatus_FLASH_Success;
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
+                /* Try to merge with the last queued write operation */
+                if (FLASH_TryMergeWrite(start, src, lengthInBytes))
+                {
+                    /* Successfully merged - no need to queue new operation */
+                    status = kStatus_FLASH_Success;
+                    break;
+                }
 #endif /* CONFIG_FLASH_K4_ASYNC_MERGE_CONTIGUOUS_WRITES */
 
-            /* Allocate buffer from pool */
-            pBuffer = FLASH_BufferPoolAlloc(lengthInBytes, &bufferOffset, &allocSize);
-            if (pBuffer == NULL)
-            {
-                /* No buffer available - should not happen after flush */
-                status = kStatus_Busy;
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
+                /* Allocate buffer from pool */
+                pBuffer = FLASH_BufferPoolAlloc(lengthInBytes, &bufferOffset, &allocSize);
+                if (pBuffer == NULL)
+                {
+                    /* No buffer available - should not happen after flush */
+                    status = kStatus_Busy;
+                    break;
+                }
 
-            /* Copy source data to allocated buffer */
-            (void)memcpy(pBuffer, src, lengthInBytes);
+                /* Copy source data to allocated buffer */
+                (void)memcpy(pBuffer, src, lengthInBytes);
 
-            /* Prepare the program operation descriptor */
-            op.opType        = kFlashAsyncOp_Program;
-            op.startAddress  = start;
-            op.lengthInBytes = lengthInBytes;
-            op.pBuffer       = pBuffer;
-            op.bufferOffset  = bufferOffset;
-            op.bufferSize    = allocSize;
-            op.key           = 0U;
-            op.pSeed         = NULL;
-            op.pSignature    = NULL;
+                /* Prepare the program operation descriptor */
+                op.opType        = kFlashAsyncOp_Program;
+                op.startAddress  = start;
+                op.lengthInBytes = lengthInBytes;
+                op.pBuffer       = pBuffer;
+                op.bufferOffset  = bufferOffset;
+                op.bufferSize    = allocSize;
+                op.key           = 0U;
+                op.pSeed         = NULL;
+                op.pSignature    = NULL;
 
-            /* Store the FMU base for this operation */
-            s_flashAsyncContext.fmuBase = base;
+                /* Store the FMU base for this operation */
+                s_flashAsyncContext.fmuBase = base;
 
-            /* Queue the operation */
-            status = FLASH_QueueOperation(&op);
+                /* Queue the operation */
+                status = FLASH_QueueOperation(&op);
 
-            if (status != kStatus_FLASH_Success)
-            {
-                /* Queue failed - free the buffer */
-                FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
+                if (status != kStatus_FLASH_Success)
+                {
+                    /* Queue failed - free the buffer */
+                    FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
+                    break;
+                }
 
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-            s_flashAsyncContext.totalOperationsQueued++;
+                s_flashAsyncContext.totalOperationsQueued++;
 #endif
+                status = kStatus_FLASH_Success;
+            } while (false);
+
+            /* Single unlock point */
             (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-            status = kStatus_FLASH_Success;
-        } while (false);
+        }
 
 #else
         /* Sync mode: execute program immediately */
@@ -679,109 +679,107 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
     {
 #if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
         /* Async mode: allocate buffer, copy data, and queue the operation */
-        do
+
+        /* Check if async context is initialized */
+        if (!s_flashAsyncContext.initialized)
         {
-            flash_async_op_t op;
-            osa_status_t     osaStatus;
-            uint32_t         bufferOffset = FLASH_ASYNC_INVALID_BUFFER_INDEX;
-            uint32_t         allocSize    = 0U;
-            uint8_t         *pBuffer      = NULL;
+            status = kStatus_FLASH_CommandFailure;
+        }
+        /* Validate source pointer */
+        else if (src == NULL)
+        {
+            status = kStatus_FLASH_InvalidArgument;
+        }
+        else
+        {
+            osa_status_t osaStatus;
 
-            /* Check if async context is initialized */
-            if (!s_flashAsyncContext.initialized)
-            {
-                status = kStatus_FLASH_CommandFailure;
-                break;
-            }
-
-            /* Validate source pointer */
-            if (src == NULL)
-            {
-                status = kStatus_FLASH_InvalidArgument;
-                break;
-            }
-            
             /* Acquire mutex for thread-safe access */
             osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
             assert(osaStatus == KOSA_StatusSuccess);
             (void)osaStatus;
 
-            /* Check if there is enough space, if not try to flush pending operations */
-            if ((FLASH_BufferPoolAvailable() < lengthInBytes) || FLASH_QueueIsFull())
+            do
             {
-                status = FLASH_FlushPendingOperations(lengthInBytes);
-                if (status != kStatus_FLASH_Success)
-                {
-                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                    break;
-                }
+                flash_async_op_t op;
+                uint32_t         bufferOffset = FLASH_ASYNC_INVALID_BUFFER_INDEX;
+                uint32_t         allocSize    = 0U;
+                uint8_t         *pBuffer      = NULL;
 
-                /* Re-check resources after flush */
+                /* Check if there is enough space, if not try to flush pending operations */
                 if ((FLASH_BufferPoolAvailable() < lengthInBytes) || FLASH_QueueIsFull())
                 {
-                    /* Still not enough space - operation too large for async mode */
-                    status = kStatus_FLASH_SizeError;
-                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                    break;
+                    status = FLASH_FlushPendingOperations(lengthInBytes);
+                    if (status != kStatus_FLASH_Success)
+                    {
+                        break;
+                    }
+
+                    /* Re-check resources after flush */
+                    if ((FLASH_BufferPoolAvailable() < lengthInBytes) || FLASH_QueueIsFull())
+                    {
+                        /* Still not enough space - operation too large for async mode */
+                        status = kStatus_FLASH_SizeError;
+                        break;
+                    }
                 }
-            }
 
 #if defined(CONFIG_FLASH_K4_ASYNC_MERGE_CONTIGUOUS_WRITES) && (CONFIG_FLASH_K4_ASYNC_MERGE_CONTIGUOUS_WRITES == 1)
-            /* Try to merge with the last queued write operation */
-            if (FLASH_TryMergeWrite(start, src, lengthInBytes))
-            {
-                /* Successfully merged - no need to queue new operation */
-                status = kStatus_FLASH_Success;
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
+                /* Try to merge with the last queued write operation */
+                if (FLASH_TryMergeWrite(start, src, lengthInBytes))
+                {
+                    /* Successfully merged - no need to queue new operation */
+                    status = kStatus_FLASH_Success;
+                    break;
+                }
 #endif /* CONFIG_FLASH_K4_ASYNC_MERGE_CONTIGUOUS_WRITES */
 
-            /* Allocate buffer from pool */
-            pBuffer = FLASH_BufferPoolAlloc(lengthInBytes, &bufferOffset, &allocSize);
-            if (pBuffer == NULL)
-            {
-                /* No buffer available - should not happen after flush */
-                status = kStatus_Busy;
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
+                /* Allocate buffer from pool */
+                pBuffer = FLASH_BufferPoolAlloc(lengthInBytes, &bufferOffset, &allocSize);
+                if (pBuffer == NULL)
+                {
+                    /* No buffer available - should not happen after flush */
+                    status = kStatus_Busy;
+                    break;
+                }
 
-            /* Copy source data to allocated buffer */
-            (void)memcpy(pBuffer, src, lengthInBytes);
+                /* Copy source data to allocated buffer */
+                (void)memcpy(pBuffer, src, lengthInBytes);
 
-            /* Prepare the program page operation descriptor */
-            op.opType          = kFlashAsyncOp_ProgramPage;
-            op.startAddress    = start;
-            op.lengthInBytes   = lengthInBytes;
-            op.pBuffer         = pBuffer;
-            op.bufferOffset    = bufferOffset;
-            op.bufferSize      = allocSize;
-            op.key             = 0U;  /* Not used for program operations */
-            op.pSeed           = NULL;
-            op.pSignature      = NULL;
+                /* Prepare the program page operation descriptor */
+                op.opType          = kFlashAsyncOp_ProgramPage;
+                op.startAddress    = start;
+                op.lengthInBytes   = lengthInBytes;
+                op.pBuffer         = pBuffer;
+                op.bufferOffset    = bufferOffset;
+                op.bufferSize      = allocSize;
+                op.key             = 0U;  /* Not used for program operations */
+                op.pSeed           = NULL;
+                op.pSignature      = NULL;
 
-            /* Store the FMU base for this operation */
-            s_flashAsyncContext.fmuBase = base;
+                /* Store the FMU base for this operation */
+                s_flashAsyncContext.fmuBase = base;
 
-            /* Queue the operation */
-            status = FLASH_QueueOperation(&op);
+                /* Queue the operation */
+                status = FLASH_QueueOperation(&op);
 
-            if (status != kStatus_FLASH_Success)
-            {
-                /* Queue failed - free the buffer */
-                FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
+                if (status != kStatus_FLASH_Success)
+                {
+                    /* Queue failed - free the buffer */
+                    FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
+                    break;
+                }
 
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-            s_flashAsyncContext.totalOperationsQueued++;
+                s_flashAsyncContext.totalOperationsQueued++;
 #endif
+                status = kStatus_FLASH_Success;
+            } while (false);
 
-            status = kStatus_FLASH_Success;
+            /* Single unlock point */
             (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-        } while (false);
+        }
+
 #else
         /* Sync mode: execute program page immediately */
         uint32_t regPrimask = DisableGlobalIRQ();
@@ -2299,160 +2297,161 @@ status_t FLASH_Process(void)
     uint32_t         opsProcessed = 0U;
     flash_async_op_t op;
 
-    do
+    /* Check if async context is initialized */
+    if (!s_flashAsyncContext.initialized)
     {
-        /* Check if async context is initialized */
-        if (!s_flashAsyncContext.initialized)
+        status = kStatus_FLASH_CommandFailure;
+    }
+    else
+    {
+        osa_status_t osaStatus;
+
+        /* Acquire mutex for thread-safe access */
+        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+        assert(osaStatus == KOSA_StatusSuccess);
+        (void)osaStatus;
+
+        do
         {
-            status = kStatus_FLASH_CommandFailure;
-            break;
-        }
-
-        /* Process operations while queue is not empty */
-        while (!FLASH_QueueIsEmpty())
-        {
-            osa_status_t osaStatus;
-
-            uint32_t requiredTime_us = 0U;
-            uint32_t availableTime_us = 0U;
-
-            /* Peek at the next operation to determine timing requirements */
-            status = FLASH_QueuePeek(&op);
-            if (status != kStatus_FLASH_Success)
+            /* Process operations while queue is not empty */
+            while (!FLASH_QueueIsEmpty())
             {
-                /* Queue became empty or error */
-                break;
-            }
+                uint32_t requiredTime_us  = 0U;
+                uint32_t availableTime_us = 0U;
 
-            /* Estimate required time based on operation type */
-            switch (op.opType)
-            {
-                case kFlashAsyncOp_Erase:
+                /* Peek at the next operation to determine timing requirements */
+                status = FLASH_QueuePeek(&op);
+                if (status != kStatus_FLASH_Success)
                 {
-                    /* Sector erase typically takes longer */
-                    uint32_t numSectors = (op.lengthInBytes + FLASH_FEATURE_SECTOR_SIZE - 1U) / FLASH_FEATURE_SECTOR_SIZE;
-                    requiredTime_us = numSectors * CONFIG_FLASH_K4_SECTOR_ERASE_TIME_US;
+                    /* Queue became empty or error */
                     break;
                 }
 
-                case kFlashAsyncOp_Program:
+                /* Estimate required time based on operation type */
+                switch (op.opType)
                 {
-                    uint32_t numPhrases = (op.lengthInBytes + FLASH_FEATURE_PHRASE_SIZE - 1U) / FLASH_FEATURE_PHRASE_SIZE;
-                    requiredTime_us = numPhrases * CONFIG_FLASH_K4_PHRASE_PROG_TIME_US;
-                    break;
+                    case kFlashAsyncOp_Erase:
+                    {
+                        /* Sector erase typically takes longer */
+                        uint32_t numSectors = (op.lengthInBytes + FLASH_FEATURE_SECTOR_SIZE - 1U) / FLASH_FEATURE_SECTOR_SIZE;
+                        requiredTime_us = numSectors * CONFIG_FLASH_K4_SECTOR_ERASE_TIME_US;
+                        break;
+                    }
+
+                    case kFlashAsyncOp_Program:
+                    {
+                        uint32_t numPhrases = (op.lengthInBytes + FLASH_FEATURE_PHRASE_SIZE - 1U) / FLASH_FEATURE_PHRASE_SIZE;
+                        requiredTime_us = numPhrases * CONFIG_FLASH_K4_PHRASE_PROG_TIME_US;
+                        break;
+                    }
+
+                    case kFlashAsyncOp_ProgramPage:
+                    {
+                        uint32_t numPages = (op.lengthInBytes + FLASH_FEATURE_PAGE_SIZE - 1U) / FLASH_FEATURE_PAGE_SIZE;
+                        requiredTime_us = numPages * CONFIG_FLASH_K4_PAGE_PROG_TIME_US;
+                        break;
+                    }
+
+                    case kFlashAsyncOp_VerifyErasePhrase:
+                    case kFlashAsyncOp_VerifyEraseIFRPhrase:
+                    {
+                        uint32_t numPhrases = (op.lengthInBytes + FLASH_FEATURE_PHRASE_SIZE - 1U) / FLASH_FEATURE_PHRASE_SIZE;
+                        requiredTime_us = numPhrases * CONFIG_FLASH_K4_VERIFY_TIME_US;
+                        break;
+                    }
+
+                    case kFlashAsyncOp_VerifyErasePage:
+                    case kFlashAsyncOp_VerifyEraseIFRPage:
+                    {
+                        uint32_t numPages = (op.lengthInBytes + FLASH_FEATURE_PAGE_SIZE - 1U) / FLASH_FEATURE_PAGE_SIZE;
+                        requiredTime_us = numPages * CONFIG_FLASH_K4_VERIFY_TIME_US;
+                        break;
+                    }
+
+                    case kFlashAsyncOp_VerifyEraseSector:
+                    case kFlashAsyncOp_VerifyEraseIFRSector:
+                    {
+                        uint32_t numSectors = (op.lengthInBytes + FLASH_FEATURE_SECTOR_SIZE - 1U) / FLASH_FEATURE_SECTOR_SIZE;
+                        requiredTime_us = numSectors * CONFIG_FLASH_K4_VERIFY_TIME_US;
+                        break;
+                    }
+
+                    case kFlashAsyncOp_VerifyEraseAll:
+                    case kFlashAsyncOp_VerifyEraseBlock:
+                    {
+                        requiredTime_us = CONFIG_FLASH_K4_VERIFY_BLOCK_TIME_US;
+                        break;
+                    }
+
+                    case kFlashAsyncOp_ReadIntoMISR:
+                    case kFlashAsyncOp_ReadIFRIntoMISR:
+                    {
+                        requiredTime_us = CONFIG_FLASH_K4_MISR_TIME_US;
+                        break;
+                    }
+
+                    default:
+                        requiredTime_us = CONFIG_FLASH_K4_DEFAULT_OP_TIME_US;
+                        break;
                 }
 
-                case kFlashAsyncOp_ProgramPage:
+                /* Check available idle time if callback is registered */
+                if (s_flashAsyncContext.idleDurationCb != NULL)
                 {
-                    uint32_t numPages = (op.lengthInBytes + FLASH_FEATURE_PAGE_SIZE - 1U) / FLASH_FEATURE_PAGE_SIZE;
-                    requiredTime_us = numPages * CONFIG_FLASH_K4_PAGE_PROG_TIME_US;
-                    break;
-                }
+                    availableTime_us = s_flashAsyncContext.idleDurationCb();
 
-                case kFlashAsyncOp_VerifyErasePhrase:
-                case kFlashAsyncOp_VerifyEraseIFRPhrase:
-                {
-                    uint32_t numPhrases = (op.lengthInBytes + FLASH_FEATURE_PHRASE_SIZE - 1U) / FLASH_FEATURE_PHRASE_SIZE;
-                    requiredTime_us = numPhrases * CONFIG_FLASH_K4_VERIFY_TIME_US;
-                    break;
-                }
-
-                case kFlashAsyncOp_VerifyErasePage:
-                case kFlashAsyncOp_VerifyEraseIFRPage:
-                {
-                    uint32_t numPages = (op.lengthInBytes + FLASH_FEATURE_PAGE_SIZE - 1U) / FLASH_FEATURE_PAGE_SIZE;
-                    requiredTime_us = numPages * CONFIG_FLASH_K4_VERIFY_TIME_US;
-                    break;
-                }
-
-                case kFlashAsyncOp_VerifyEraseSector:
-                case kFlashAsyncOp_VerifyEraseIFRSector:
-                {
-                    uint32_t numSectors = (op.lengthInBytes + FLASH_FEATURE_SECTOR_SIZE - 1U) / FLASH_FEATURE_SECTOR_SIZE;
-                    requiredTime_us = numSectors * CONFIG_FLASH_K4_VERIFY_TIME_US;
-                    break;
-                }
-
-                case kFlashAsyncOp_VerifyEraseAll:
-                case kFlashAsyncOp_VerifyEraseBlock:
-                {
-                    requiredTime_us = CONFIG_FLASH_K4_VERIFY_BLOCK_TIME_US;
-                    break;
-                }
-
-                case kFlashAsyncOp_ReadIntoMISR:
-                case kFlashAsyncOp_ReadIFRIntoMISR:
-                {
-                    requiredTime_us = CONFIG_FLASH_K4_MISR_TIME_US;
-                    break;
-                }
-
-                default:
-                    requiredTime_us = CONFIG_FLASH_K4_DEFAULT_OP_TIME_US;
-                    break;
-            }
-
-            /* Check available idle time if callback is registered */
-            if (s_flashAsyncContext.idleDurationCb != NULL)
-            {
-                availableTime_us = s_flashAsyncContext.idleDurationCb();
-
-                /* Check if we have enough time for this operation */
-                if (availableTime_us < requiredTime_us)
-                {
+                    /* Check if we have enough time for this operation */
+                    if (availableTime_us < requiredTime_us)
+                    {
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-                    s_flashAsyncContext.totalDeferredDueToIdle++;
+                        s_flashAsyncContext.totalDeferredDueToIdle++;
 #endif
-                    /* Not enough time - defer operation */
-                    status = kStatus_Busy;
+                        /* Not enough time - defer operation */
+                        status = kStatus_Busy;
+                        break;
+                    }
+                }
+
+                /* Remove the operation from the queue */
+                status = FLASH_QueueGet(&op);
+                if (status != kStatus_FLASH_Success)
+                {
                     break;
                 }
-            }
-            
-            /* Acquire mutex for thread-safe queue access */
-            osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-            assert(osaStatus == KOSA_StatusSuccess);
-            (void)osaStatus;
 
-            status = FLASH_QueueGet(&op);
-            if (status != kStatus_FLASH_Success)
-            {
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
+                /* Execute the operation */
+                status = FLASH_ExecuteOperation(&op);
 
-            /* Execute the operation */
-            status = FLASH_ExecuteOperation(&op);
+                /* Free buffer if this was a program operation */
+                if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
+                {
+                    FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
+                }
 
-            /* Free buffer if this was a program operation */
-            if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
-            {
-                FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
-            }
-
-            /* Release mutex */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-            
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-            s_flashAsyncContext.totalOperationsProcessed++;
+                s_flashAsyncContext.totalOperationsProcessed++;
 #endif
 
-            opsProcessed++;
+                opsProcessed++;
 
-            /* If operation failed, stop processing */
-            if (status != kStatus_FLASH_Success)
-            {
-                break;
+                /* If operation failed, stop processing */
+                if (status != kStatus_FLASH_Success)
+                {
+                    break;
+                }
+
+                /* Limit operations per call to avoid starving other tasks or if erase operation */
+                if (opsProcessed >= CONFIG_FLASH_K4_ASYNC_MAX_OPS_PER_PROCESS)
+                {
+                    break;
+                }
             }
 
-            /* Limit operations per call to avoid starving other tasks or if erase operation */
-            if (opsProcessed >= CONFIG_FLASH_K4_ASYNC_MAX_OPS_PER_PROCESS)
-            {
-                break;
-            }
-        }
+        } while (false);
 
-    } while (false);
+        /* Single unlock point */
+        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+    }
 
     return status;
 }
@@ -2478,76 +2477,75 @@ status_t FLASH_FlushPendingOperations(uint32_t requiredSize)
     status_t         status = kStatus_FLASH_Success;
     flash_async_op_t op;
 
-    do
+    /* Check if async context is initialized */
+    if (!s_flashAsyncContext.initialized)
+    {
+        status = kStatus_FLASH_CommandFailure;
+    }
+    /* If requiredSize exceeds total buffer capacity, return error */
+    else if (requiredSize > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
+    {
+        status = kStatus_FLASH_SizeError;
+    }
+    else
     {
         osa_status_t osaStatus;
-        /* Check if async context is initialized */
-        if (!s_flashAsyncContext.initialized)
-        {
-            status = kStatus_FLASH_CommandFailure;
-            break;
-        }
-
-        /* If requiredSize exceeds total buffer capacity, return error */
-        if (requiredSize > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
-        {
-            status = kStatus_FLASH_SizeError;
-            break;
-        }
 
         /* Acquire mutex for thread-safe access */
         osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
         assert(osaStatus == KOSA_StatusSuccess);
         (void)osaStatus;
-            
-        /* Process operations until we have enough resources (0 means flush all) */
-        while (!FLASH_QueueIsEmpty())
-        {
-            /* Check if we have enough resources for the new operation */
-            if (requiredSize != 0U)
-            {
-                bool hasQueueSlot    = !FLASH_QueueIsFull();
-                bool hasBufferSpace  = (FLASH_BufferPoolAvailable() >= requiredSize);
 
-                if (hasQueueSlot && hasBufferSpace)
+        do
+        {
+            /* Process operations until we have enough resources (0 means flush all) */
+            while (!FLASH_QueueIsEmpty())
+            {
+                /* Check if we have enough resources for the new operation */
+                if (requiredSize != 0U)
                 {
-                    /* Enough resources available */
-                    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+                    bool hasQueueSlot   = !FLASH_QueueIsFull();
+                    bool hasBufferSpace = (FLASH_BufferPoolAvailable() >= requiredSize);
+
+                    if (hasQueueSlot && hasBufferSpace)
+                    {
+                        /* Enough resources available */
+                        break;
+                    }
+                }
+
+                /* Get the operation from the queue */
+                status = FLASH_QueueGet(&op);
+                if (status != kStatus_FLASH_Success)
+                {
+                    break;
+                }
+
+                /* Execute the operation */
+                status = FLASH_ExecuteOperation(&op);
+
+                /* Free buffer if this was a program operation */
+                if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
+                {
+                    FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
+                }
+
+#if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
+                s_flashAsyncContext.totalOperationsProcessed++;
+#endif
+
+                /* If operation failed, stop processing */
+                if (status != kStatus_FLASH_Success)
+                {
                     break;
                 }
             }
 
-            /* Get the operation from the queue */
-            status = FLASH_QueueGet(&op);
-            if (status != kStatus_FLASH_Success)
-            {
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-                break;
-            }
+        } while (false);
 
-            /* Execute the operation */
-            status = FLASH_ExecuteOperation(&op);
-
-            /* Free buffer if this was a program operation */
-            if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
-            {
-                FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
-            }
-
-#if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-            s_flashAsyncContext.totalOperationsProcessed++;
-#endif
-
-            /* If operation failed, stop processing */
-            if (status != kStatus_FLASH_Success)
-            {
-                break;
-            }
-            /* Release mutex */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-        }
-
-    } while (false);
+        /* Single unlock point */
+        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+    }
 
     return status;
 }
@@ -2707,7 +2705,6 @@ static uint8_t *FLASH_BufferPoolAlloc(uint32_t size, uint32_t *pOffset, uint32_t
 
     do
     {
-        osa_status_t osaStatus;
         /* Validate parameters, 0 size is allowed */
         if ((pOffset == NULL) || (pAllocSize == NULL))
         {
@@ -2727,16 +2724,10 @@ static uint8_t *FLASH_BufferPoolAlloc(uint32_t size, uint32_t *pOffset, uint32_t
             break;
         }
 
-        /* Acquire mutex for thread-safe access */
-        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        assert(osaStatus == KOSA_StatusSuccess);
-        (void)osaStatus;
-
         /* Check if enough total space is available */
         if ((CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE - s_flashAsyncContext.bufferPool.usedBytes) < alignedSize)
         {
             /* Not enough space */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
@@ -2764,14 +2755,17 @@ static uint8_t *FLASH_BufferPoolAlloc(uint32_t size, uint32_t *pOffset, uint32_t
             else
             {
                 /* Not enough contiguous space */
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
                 break;
             }
+        }
+        else
+        {
+            ; /* MISRA */
         }
 
         /* Perform allocation */
         pBuffer = &s_flashAsyncContext.bufferPool.buffer[allocOffset];
-        
+
         /* Update tail pointer */
         s_flashAsyncContext.bufferPool.tail = allocOffset + alignedSize;
         if (s_flashAsyncContext.bufferPool.tail >= CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
@@ -2793,8 +2787,6 @@ static uint8_t *FLASH_BufferPoolAlloc(uint32_t size, uint32_t *pOffset, uint32_t
         }
 #endif
 
-        /* Release mutex */
-        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
     } while (false);
 
     return pBuffer;
@@ -2811,15 +2803,8 @@ static uint8_t *FLASH_BufferPoolAlloc(uint32_t size, uint32_t *pOffset, uint32_t
  */
 static void FLASH_BufferPoolFree(uint32_t offset, uint32_t allocSize)
 {
-    osa_status_t osaStatus;
-
     /* Validate parameters */
     assert(offset != FLASH_ASYNC_INVALID_BUFFER_OFFSET);
-
-    /* Acquire mutex for thread-safe access */
-    osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-    assert(osaStatus == KOSA_StatusSuccess);
-    (void)osaStatus;
 
     /* Verify this is the head allocation (FIFO order) */
     if (offset == s_flashAsyncContext.bufferPool.head)
@@ -2895,9 +2880,6 @@ static void FLASH_BufferPoolFree(uint32_t offset, uint32_t allocSize)
         assert(0);
 #endif
     }
-
-    /* Release mutex */
-    (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
 }
 
 /*!
@@ -2928,18 +2910,12 @@ static status_t FLASH_QueueOperation(flash_async_op_t *pOp)
 
     do
     {
-        osa_status_t osaStatus;
         /* Validate input parameter */
         if (pOp == NULL)
         {
             status = kStatus_FLASH_InvalidArgument;
             break;
         }
-
-        /* Acquire mutex for thread-safe queue access */
-        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        assert(osaStatus == KOSA_StatusSuccess);
-        (void)osaStatus;
 
         /* Check if queue is full */
         if (FLASH_QueueIsFull())
@@ -2967,9 +2943,6 @@ static status_t FLASH_QueueOperation(flash_async_op_t *pOp)
             status = kStatus_FLASH_Success;
         }
 
-        /* Release mutex */
-        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-
     } while (false);
 
     return status;
@@ -2993,18 +2966,12 @@ static status_t FLASH_QueuePeek(flash_async_op_t *pOp)
 
     do
     {
-        osa_status_t osaStatus;
         /* Validate input parameter */
         if (pOp == NULL)
         {
             status = kStatus_FLASH_InvalidArgument;
             break;
         }
-
-        /* Acquire mutex for thread-safe queue access */
-        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        assert(osaStatus == KOSA_StatusSuccess);
-        (void)osaStatus;
 
         /* Check if queue is empty */
         if (FLASH_QueueIsEmpty())
@@ -3020,9 +2987,6 @@ static status_t FLASH_QueuePeek(flash_async_op_t *pOp)
 
             status = kStatus_FLASH_Success;
         }
-
-        /* Release mutex */
-        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
 
     } while (false);
 
@@ -3109,39 +3073,38 @@ status_t FLASH_ReadWithPendingOps(uint32_t address, uint8_t *pDst, uint32_t leng
 {
     status_t status = kStatus_FLASH_Success;
 
-    do
+    /* Validate parameters */
+    if ((pDst == NULL) || (length == 0U))
     {
-        /* Validate parameters */
-        if ((pDst == NULL) || (length == 0U))
+        status = kStatus_FLASH_InvalidArgument;
+    }
+    else if (s_flashAsyncContext.initialized)
+    {
+        osa_status_t osaStatus;
+
+        /* Acquire mutex for thread-safe access */
+        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
+        assert(osaStatus == KOSA_StatusSuccess);
+        (void)osaStatus;
+
+        do
         {
-            status = kStatus_FLASH_InvalidArgument;
-            break;
-        }
-
-        if (s_flashAsyncContext.initialized)
-        {
-            osa_status_t osaStatus;
-
-            osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-            assert(osaStatus == KOSA_StatusSuccess);
-            (void)osaStatus;
-
             /* Read actual flash content under lock */
             (void)memcpy(pDst, (const void *)(uintptr_t)address, length);
 
             /* Apply any pending operations */
             FLASH_ApplyPendingOpsToReadBuffer(address, pDst, length);
 
-            /* Release mutex */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-        }
-        else
-        {
-            /* Not initialized - direct read without lock */
-            (void)memcpy(pDst, (const void *)(uintptr_t)address, length);
-        }
+        } while (false);
 
-    } while (false);
+        /* Single unlock point */
+        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+    }
+    else
+    {
+        /* Not initialized - direct read without lock */
+        (void)memcpy(pDst, (const void *)(uintptr_t)address, length);
+    }
 
     return status;
 }
@@ -3280,17 +3243,11 @@ static void FLASH_ApplyPendingOpsToReadBuffer(uint32_t readAddr, uint8_t *pDst, 
     }
     else
     {
-        osa_status_t osaStatus;
         /* Calculate read end address */
         readEnd = readAddr + length;
         /* If queue is empty, nothing to apply */
         if (!FLASH_QueueIsEmpty())
         {
-            /* Acquire mutex for thread-safe queue access */
-            osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-            assert(osaStatus == KOSA_StatusSuccess);
-            (void)osaStatus;
-
             /* Iterate through all pending operations in queue order (head to tail) */
             idx = s_flashAsyncContext.opQueue.head;
             for (i = 0U; i < s_flashAsyncContext.opQueue.count; i++)
@@ -3364,8 +3321,6 @@ static void FLASH_ApplyPendingOpsToReadBuffer(uint32_t readAddr, uint8_t *pDst, 
                 /* Move to next operation in queue (circular) */
                 idx = (idx + 1U) % CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE;
             }
-            /* Release mutex */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
         }
     }
 }
@@ -3393,76 +3348,75 @@ static status_t FLASH_CheckPendingOpsOnRange(uint32_t startAddr,
     bool         hasPendingProgram = false;
     bool         eraseCoversRange  = false;
 
-    do
+    /* Validate parameters */
+    if ((pHasPendingErase == NULL) || (pHasPendingProgram == NULL))
+    {
+        status = kStatus_FLASH_InvalidArgument;
+    }
+    else if (!s_flashAsyncContext.initialized || FLASH_QueueIsEmpty())
+    {
+        /* No async context or no pending ops */
+        *pHasPendingErase   = false;
+        *pHasPendingProgram = false;
+    }
+    else
     {
         osa_status_t osaStatus;
-        if ((pHasPendingErase == NULL) || (pHasPendingProgram == NULL))
-        {
-            status = kStatus_FLASH_InvalidArgument;
-            break;
-        }
 
         *pHasPendingErase   = false;
         *pHasPendingProgram = false;
 
-        if (!s_flashAsyncContext.initialized)
-        {
-            break; /* No async context, no pending ops */
-        }
-
         rangeEnd = startAddr + length;
-
-        if (FLASH_QueueIsEmpty())
-        {
-            break;
-        }
 
         /* Acquire mutex for thread-safe queue access */
         osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
         assert(osaStatus == KOSA_StatusSuccess);
         (void)osaStatus;
 
-        /* Iterate through all pending operations in queue order */
-        idx = s_flashAsyncContext.opQueue.head;
-        for (i = 0U; i < s_flashAsyncContext.opQueue.count; i++)
+        do
         {
-            flash_async_op_t *pOp = &s_flashAsyncContext.opQueue.ops[idx];
-            uint32_t opStart = pOp->startAddress;
-            uint32_t opEnd   = opStart + pOp->lengthInBytes;
-
-            if (pOp->opType == kFlashAsyncOp_Erase)
+            /* Iterate through all pending operations in queue order */
+            idx = s_flashAsyncContext.opQueue.head;
+            for (i = 0U; i < s_flashAsyncContext.opQueue.count; i++)
             {
-                /* Check if erase fully covers the verification range */
-                if ((opStart <= startAddr) && (opEnd >= rangeEnd))
+                flash_async_op_t *pOp = &s_flashAsyncContext.opQueue.ops[idx];
+                uint32_t opStart = pOp->startAddress;
+                uint32_t opEnd   = opStart + pOp->lengthInBytes;
+
+                if (pOp->opType == kFlashAsyncOp_Erase)
                 {
-                    eraseCoversRange = true;
-                    hasPendingProgram = false;
+                    /* Check if erase fully covers the verification range */
+                    if ((opStart <= startAddr) && (opEnd >= rangeEnd))
+                    {
+                        eraseCoversRange = true;
+                        hasPendingProgram = false;
+                    }
                 }
-            }
-            else if ((pOp->opType == kFlashAsyncOp_Program) || (pOp->opType == kFlashAsyncOp_ProgramPage))
-            {
-                /* Check if program operation overlaps with the range */
-                if (FLASH_REGIONS_OVERLAP(startAddr, length, opStart, pOp->lengthInBytes))
+                else if ((pOp->opType == kFlashAsyncOp_Program) || (pOp->opType == kFlashAsyncOp_ProgramPage))
                 {
-                    hasPendingProgram = true;
+                    /* Check if program operation overlaps with the range */
+                    if (FLASH_REGIONS_OVERLAP(startAddr, length, opStart, pOp->lengthInBytes))
+                    {
+                        hasPendingProgram = true;
+                    }
                 }
-            }
-            else
-            {
-                ; /* Other operations don't affect erase verification */
+                else
+                {
+                    ; /* Other operations don't affect erase verification */
+                }
+
+                idx = (idx + 1U) % CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE;
             }
 
-            idx = (idx + 1U) % CONFIG_FLASH_K4_ASYNC_QUEUE_SIZE;
-        }
+            /* Report results - only report erase if it fully covers the range */
+            *pHasPendingErase   = eraseCoversRange;
+            *pHasPendingProgram = hasPendingProgram;
 
-        /* Release mutex */
+        } while (false);
+
+        /* Single unlock point */
         (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
-
-        /* Report results - only report erase if it fully covers the range */
-        *pHasPendingErase   = eraseCoversRange;
-        *pHasPendingProgram = hasPendingProgram;
-
-    } while (false);
+    }
 
     return status;
 }
@@ -3486,7 +3440,6 @@ static status_t FLASH_CheckPendingOpsOnRange(uint32_t startAddr,
 static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
 {
     bool         merged = false;
-    osa_status_t osaStatus;
 
     do
     {
@@ -3509,11 +3462,6 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
             break;
         }
 
-        /* Acquire mutex for thread-safe queue access */
-        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        assert(osaStatus == KOSA_StatusSuccess);
-        (void)osaStatus;
-
         /* Get pointer to the last operation in queue (at tail - 1) */
         if (s_flashAsyncContext.opQueue.tail == 0U)
         {
@@ -3528,14 +3476,12 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
         /* Check if last operation is a program operation */
         if ((pLastOp->opType != kFlashAsyncOp_Program) && (pLastOp->opType != kFlashAsyncOp_ProgramPage))
         {
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
         /* Check if buffer is valid */
         if ((pLastOp->pBuffer == NULL) || (pLastOp->bufferOffset == FLASH_ASYNC_INVALID_BUFFER_OFFSET))
         {
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
@@ -3545,7 +3491,6 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
         /* Check if new write is contiguous with last operation */
         if (start != lastOpEnd)
         {
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
@@ -3566,7 +3511,6 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
         if (currentAllocEnd != s_flashAsyncContext.bufferPool.tail)
         {
             /* Last allocation is not at tail - cannot extend (another allocation happened) */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
             break;
         }
 
@@ -3598,14 +3542,12 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
             if (alignedExtension > availableAtTail)
             {
                 /* Not enough contiguous space to extend */
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
                 break;
             }
 
             /* Check total buffer capacity */
             if ((s_flashAsyncContext.bufferPool.usedBytes + alignedExtension) > CONFIG_FLASH_K4_ASYNC_TOTAL_BUFFER_SIZE)
             {
-                (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
                 break;
             }
 
@@ -3640,9 +3582,6 @@ static bool FLASH_TryMergeWrite(uint32_t start, uint8_t *src, uint32_t length)
 #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
         s_flashAsyncContext.totalMergedOperations++;
 #endif
-
-        /* Release mutex */
-        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
 
     } while (false);
 
