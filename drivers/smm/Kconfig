@@ -10,3 +10,19 @@ config MCUX_COMPONENT_driver.smm
     bool "smm"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.smm
+
+if MCUX_COMPONENT_driver.smm
+
+    config SMM_CM33_CORE_FREQUENCY
+        int "CM33 core frequency in Hz"
+        default 96000000
+        help
+            This parameter defines the CM33 core frequency in Hz. It is used to calculate the delay time for the SMM driver.
+    
+    config SMM_CM0P_CORE_FREQUENCY
+        int "CM0+ core frequency in Hz"
+        default 32768
+        help
+            This parameter defines the CM0+ core frequency in Hz. It is used to calculate the delay time for the SMM driver.
+
+endif
