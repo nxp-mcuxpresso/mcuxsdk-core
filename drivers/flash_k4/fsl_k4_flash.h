@@ -132,7 +132,24 @@ typedef struct _flash_config
  */
 #if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
 
-#include "fsl_os_abstraction.h"
+/*!
+ * @brief Lock callback type for async flash operations.
+ *
+ * Called by the driver to acquire a lock before accessing shared async resources.
+ * The implementation is provided by the application (e.g. OSA_MutexLock, DisableGlobalIRQ).
+ *
+ * @param userData Opaque pointer registered via FLASH_RegisterLockCallbacks().
+ */
+typedef void (*flash_lock_cb_t)(void *userData);
+
+/*!
+ * @brief Unlock callback type for async flash operations.
+ *
+ * Called by the driver to release the lock after accessing shared async resources.
+ *
+ * @param userData Opaque pointer registered via FLASH_RegisterLockCallbacks().
+ */
+typedef void (*flash_unlock_cb_t)(void *userData);
 
 /*! @brief Alignment for buffer allocations (must be power of 2). */
 #ifndef FLASH_BUFFER_ALIGNMENT
@@ -247,9 +264,10 @@ typedef struct _flash_async_context
     /* Custom circular queue */
     flash_op_queue_t opQueue;                                             /*!< Operation queue */
 
-    /* Mutex handle and storage */
-    osa_mutex_handle_t mutexHandle;                                       /*!< Mutex handle */
-    uint32_t           mutexBuffer[OSA_MUTEX_HANDLE_SIZE / sizeof(uint32_t)]; /*!< Mutex handle buffer */
+    /* Lock/unlock callbacks for thread-safe access (optional, NULL = no protection) */
+    flash_lock_cb_t   lockCb;       /*!< Callback to acquire the lock */
+    flash_unlock_cb_t unlockCb;     /*!< Callback to release the lock */
+    void             *lockUserData; /*!< Opaque pointer passed to lock/unlock callbacks */
 
     /* Circular buffer pool (replaces fixed buffer array) */
     flash_circular_buffer_pool_t bufferPool;
@@ -554,6 +572,28 @@ status_t FLASH_Process(void);
  * @retval #kStatus_FLASH_Async_NotInit Async context not initialized.
  */
 status_t FLASH_RegisterIdleDurationCB(flash_idle_duration_cb_t callback);
+
+/*!
+ * @brief Register lock/unlock callbacks for thread-safe async operations.
+ *
+ * This function is optional. If not called, no locking is performed and the
+ * driver assumes single-context usage. The application is responsible for
+ * creating and managing the underlying synchronization primitive.
+ *
+ * Example with OSA mutex:
+ * @code
+ *   static void MyLock(void *ud)   { OSA_MutexLock((osa_mutex_handle_t)ud, osaWaitForever_c); }
+ *   static void MyUnlock(void *ud) { OSA_MutexUnlock((osa_mutex_handle_t)ud); }
+ *   FLASH_RegisterLockCallbacks(MyLock, MyUnlock, myMutexHandle);
+ * @endcode
+ *
+ * @param lockCb   Function called to acquire the lock. May be NULL to disable locking.
+ * @param unlockCb Function called to release the lock. May be NULL to disable locking.
+ * @param userData Opaque pointer passed to both callbacks (e.g. mutex handle).
+ *
+ * @retval #kStatus_FLASH_Success Callbacks registered successfully.
+ */
+status_t FLASH_RegisterLockCallbacks(flash_lock_cb_t lockCb, flash_unlock_cb_t unlockCb, void *userData);
 
 /*!
  * @brief Flush pending operations to make room for a new operation.

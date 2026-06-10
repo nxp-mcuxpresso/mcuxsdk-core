@@ -67,6 +67,18 @@ enum _ftfx_ram_func_constants
 #define FLASH_REGIONS_OVERLAP(start1, len1, start2, len2) \
     (((start1) < ((start2) + (len2))) && ((start2) < ((start1) + (len1))))
 
+/*!
+ * @brief Acquire the async lock if a lock callback is registered.
+ */
+#define FLASH_LOCK()   \
+    do { if (s_flashAsyncContext.lockCb != NULL) { s_flashAsyncContext.lockCb(s_flashAsyncContext.lockUserData); } } while (0)
+
+/*!
+ * @brief Release the async lock if an unlock callback is registered.
+ */
+#define FLASH_UNLOCK() \
+    do { if (s_flashAsyncContext.unlockCb != NULL) { s_flashAsyncContext.unlockCb(s_flashAsyncContext.lockUserData); } } while (0)
+
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
 
 
@@ -409,12 +421,8 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
         }
         else
         {
-            osa_status_t osaStatus;
-
-            /* Acquire mutex for thread-safe access */
-            osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-            assert(osaStatus == KOSA_StatusSuccess);
-            (void)osaStatus;
+            /* Acquire lock for thread-safe access */
+            FLASH_LOCK();
 
             do
             {
@@ -465,7 +473,7 @@ status_t FLASH_Erase(flash_config_t *config, FMU_Type *base, uint32_t start, uin
             } while (false);
 
             /* Single unlock point */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+            FLASH_UNLOCK();
         }
 
 #else
@@ -557,12 +565,8 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
         }
         else
         {
-            osa_status_t osaStatus;
-
-            /* Acquire mutex for thread-safe access */
-            osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-            assert(osaStatus == KOSA_StatusSuccess);
-            (void)osaStatus;
+            /* Acquire lock for thread-safe access */
+            FLASH_LOCK();
 
             do
             {
@@ -642,7 +646,7 @@ status_t FLASH_Program(flash_config_t *config, FMU_Type *base, uint32_t start, u
             } while (false);
 
             /* Single unlock point */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+            FLASH_UNLOCK();
         }
 
 #else
@@ -692,12 +696,8 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
         }
         else
         {
-            osa_status_t osaStatus;
-
-            /* Acquire mutex for thread-safe access */
-            osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-            assert(osaStatus == KOSA_StatusSuccess);
-            (void)osaStatus;
+            /* Acquire lock for thread-safe access */
+            FLASH_LOCK();
 
             do
             {
@@ -777,7 +777,7 @@ status_t FLASH_ProgramPage(flash_config_t *config, FMU_Type *base, uint32_t star
             } while (false);
 
             /* Single unlock point */
-            (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+            FLASH_UNLOCK();
         }
 
 #else
@@ -2304,12 +2304,8 @@ status_t FLASH_Process(void)
     }
     else
     {
-        osa_status_t osaStatus;
-
-        /* Acquire mutex for thread-safe access */
-        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        assert(osaStatus == KOSA_StatusSuccess);
-        (void)osaStatus;
+        /* Acquire lock for thread-safe access */
+        FLASH_LOCK();
 
         do
         {
@@ -2450,7 +2446,7 @@ status_t FLASH_Process(void)
         } while (false);
 
         /* Single unlock point */
-        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+        FLASH_UNLOCK();
     }
 
     return status;
@@ -2489,12 +2485,8 @@ status_t FLASH_FlushPendingOperations(uint32_t requiredSize)
     }
     else
     {
-        osa_status_t osaStatus;
-
-        /* Acquire mutex for thread-safe access */
-        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        assert(osaStatus == KOSA_StatusSuccess);
-        (void)osaStatus;
+        /* Acquire lock for thread-safe access */
+        FLASH_LOCK();
 
         do
         {
@@ -2544,7 +2536,7 @@ status_t FLASH_FlushPendingOperations(uint32_t requiredSize)
         } while (false);
 
         /* Single unlock point */
-        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+        FLASH_UNLOCK();
     }
 
     return status;
@@ -2553,8 +2545,7 @@ status_t FLASH_FlushPendingOperations(uint32_t requiredSize)
 
 static status_t FLASH_AsyncContextInit(flash_config_t *config)
 {
-    status_t     status = kStatus_FLASH_Success;
-    osa_status_t osaStatus;
+    status_t status = kStatus_FLASH_Success;
 
     do
     {
@@ -2577,15 +2568,10 @@ static status_t FLASH_AsyncContextInit(flash_config_t *config)
         s_flashAsyncContext.flashConfig = config;
         s_flashAsyncContext.fmuBase     = FLASH;
 
-        s_flashAsyncContext.mutexHandle = (osa_mutex_handle_t)s_flashAsyncContext.mutexBuffer;
-
-        /* Initialize the mutex for thread-safe access */
-        osaStatus = OSA_MutexCreate(s_flashAsyncContext.mutexHandle);
-        if (osaStatus != KOSA_StatusSuccess)
-        {
-            status = kStatus_Fail;
-            break;
-        }
+        /* Lock/unlock callbacks must be registered by application via FLASH_RegisterLockCallbacks() */
+        s_flashAsyncContext.lockCb       = NULL;
+        s_flashAsyncContext.unlockCb     = NULL;
+        s_flashAsyncContext.lockUserData = NULL;
 
         /* Initialize the custom ring buffer queue */
         FLASH_QueueInit();
@@ -2644,8 +2630,10 @@ status_t FLASH_AsyncDeinit(void)
         /* Reset buffer pool */
         (void)memset(&s_flashAsyncContext.bufferPool, 0, sizeof(flash_circular_buffer_pool_t));
 
-        /* Destroy the mutex */
-        (void)OSA_MutexDestroy(s_flashAsyncContext.mutexHandle);
+        /* Clear lock callbacks */
+        s_flashAsyncContext.lockCb       = NULL;
+        s_flashAsyncContext.unlockCb     = NULL;
+        s_flashAsyncContext.lockUserData = NULL;
     } while (false);
 
     return status;
@@ -3080,12 +3068,8 @@ status_t FLASH_ReadWithPendingOps(uint32_t address, uint8_t *pDst, uint32_t leng
     }
     else if (s_flashAsyncContext.initialized)
     {
-        osa_status_t osaStatus;
-
-        /* Acquire mutex for thread-safe access */
-        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        assert(osaStatus == KOSA_StatusSuccess);
-        (void)osaStatus;
+        /* Acquire lock for thread-safe access */
+        FLASH_LOCK();
 
         do
         {
@@ -3098,7 +3082,7 @@ status_t FLASH_ReadWithPendingOps(uint32_t address, uint8_t *pDst, uint32_t leng
         } while (false);
 
         /* Single unlock point */
-        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+        FLASH_UNLOCK();
     }
     else
     {
@@ -3127,6 +3111,15 @@ status_t FLASH_RegisterIdleDurationCB(flash_idle_duration_cb_t callback)
     }
 
     return status;
+}
+
+status_t FLASH_RegisterLockCallbacks(flash_lock_cb_t lockCb, flash_unlock_cb_t unlockCb, void *userData)
+{
+    s_flashAsyncContext.lockCb       = lockCb;
+    s_flashAsyncContext.unlockCb     = unlockCb;
+    s_flashAsyncContext.lockUserData = userData;
+
+    return kStatus_FLASH_Success;
 }
 
 static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
@@ -3361,17 +3354,13 @@ static status_t FLASH_CheckPendingOpsOnRange(uint32_t startAddr,
     }
     else
     {
-        osa_status_t osaStatus;
-
         *pHasPendingErase   = false;
         *pHasPendingProgram = false;
 
         rangeEnd = startAddr + length;
 
-        /* Acquire mutex for thread-safe queue access */
-        osaStatus = OSA_MutexLock(s_flashAsyncContext.mutexHandle, osaWaitForever_c);
-        assert(osaStatus == KOSA_StatusSuccess);
-        (void)osaStatus;
+        /* Acquire lock for thread-safe queue access */
+        FLASH_LOCK();
 
         do
         {
@@ -3415,7 +3404,7 @@ static status_t FLASH_CheckPendingOpsOnRange(uint32_t startAddr,
         } while (false);
 
         /* Single unlock point */
-        (void)OSA_MutexUnlock(s_flashAsyncContext.mutexHandle);
+        FLASH_UNLOCK();
     }
 
     return status;
