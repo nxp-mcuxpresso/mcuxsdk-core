@@ -123,18 +123,6 @@ config FLASH_K4_PAGE_PROG_TIME_US
     int "Page program time estimate (microseconds)"
     default 200
 
-config FLASH_K4_VERIFY_TIME_US
-    int "Verify operation time estimate (microseconds)"
-    default 10
-
-config FLASH_K4_VERIFY_BLOCK_TIME_US
-    int "Verify block time estimate (microseconds)"
-    default 1000
-
-config FLASH_K4_MISR_TIME_US
-    int "MISR operation time estimate (microseconds)"
-    default 500
-
 config FLASH_K4_DEFAULT_OP_TIME_US
     int "Default operation time estimate (microseconds)"
     default 100

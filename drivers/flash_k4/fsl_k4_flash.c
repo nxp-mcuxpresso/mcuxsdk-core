@@ -1356,52 +1356,6 @@ status_t Read_Into_MISR(
         status = pflash_check_param(config, base, &startAddr, (ending - start), FLASH_FEATURE_PAGE_SIZE);
         if (status == kStatus_FLASH_Success)
         {
-#if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
-            /* Async mode: queue the Read Into MISR operation */
-            do
-            {
-                flash_async_op_t op;
-
-                /* Check if async context is initialized */
-                if (!s_flashAsyncContext.initialized)
-                {
-                    status = kStatus_FLASH_CommandFailure;
-                    break;
-                }
-
-                /* Validate signature pointer */
-                if (signature == NULL)
-                {
-                    status = kStatus_FLASH_InvalidArgument;
-                    break;
-                }
-
-                /* Prepare the Read Into MISR operation descriptor */
-                op.opType          = kFlashAsyncOp_ReadIntoMISR;
-                op.startAddress    = startAddr;
-                op.lengthInBytes   = ending - start;  /* Store length for end address calculation */
-                op.pBuffer         = NULL;            /* Not used for MISR */
-                op.key             = 0U;
-                op.pSeed           = seed;            /* Store seed pointer */
-                op.pSignature      = signature;       /* Store signature pointer */
-
-                /* Store the FMU base for this operation */
-                s_flashAsyncContext.fmuBase = base;
-
-                /* Queue the operation */
-                status = FLASH_QueueOperation(&op);
-
-                if (status != kStatus_FLASH_Success)
-                {
-                    /* Queue full or other error */
-                    break;
-                }
-#if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-                s_flashAsyncContext.totalOperationsQueued++;
-#endif
-                status = kStatus_FLASH_Success;
-            } while (false);
-#else
             /* Sync mode: execute Read Into MISR immediately (original behavior) */
             uint32_t endAddr;
             if (startAddr > UINT32_MAX - (ending - start))
@@ -1412,7 +1366,6 @@ status_t Read_Into_MISR(
             uint32_t regPrimask = DisableGlobalIRQ();
             status  = FLASH_CMD_ReadIntoMISR(base, startAddr, endAddr, seed, signature);
             EnableGlobalIRQ(regPrimask);
-#endif /* CONFIG_FLASH_K4_ASYNC_MODE */
         }
         else
         {
@@ -1443,56 +1396,6 @@ status_t Read_IFR_Into_MISR(
         status = ifr_check_param(config, base, &startAddr, (ending - start), FLASH_FEATURE_PAGE_SIZE);
         if (status == kStatus_FLASH_Success)
         {
-#if defined(CONFIG_FLASH_K4_ASYNC_MODE) && (CONFIG_FLASH_K4_ASYNC_MODE == 1)
-            /* Async mode: queue the Read IFR Into MISR operation */
-            do
-            {
-                flash_async_op_t op;
-
-                /* Check if async context is initialized */
-                if (!s_flashAsyncContext.initialized)
-                {
-                    status = kStatus_FLASH_CommandFailure;
-                    break;
-                }
-
-                /* Validate signature pointer */
-                if (signature == NULL)
-                {
-                    status = kStatus_FLASH_InvalidArgument;
-                    break;
-                }
-
-                /* Prepare the Read IFR Into MISR operation descriptor */
-                op.opType          = kFlashAsyncOp_ReadIFRIntoMISR;
-                op.startAddress    = startAddr;
-                op.lengthInBytes   = ending - start;  /* Store length for end address calculation */
-                op.pBuffer         = NULL;            /* Not used for MISR */
-                op.key             = 0U;
-                op.pSeed           = seed;            /* Store seed pointer */
-                op.pSignature      = signature;       /* Store signature pointer */
-
-                /* Store the FMU base for this operation */
-                s_flashAsyncContext.fmuBase = base;
-
-                /* Queue the operation */
-                status = FLASH_QueueOperation(&op);
-
-                if (status != kStatus_FLASH_Success)
-                {
-                    /* Queue full or other error */
-                    break;
-                }
-
-#if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-                s_flashAsyncContext.totalOperationsQueued++;
-#endif
-
-                status = kStatus_FLASH_Success;
-
-            } while (false);
-
-#else
             /* Sync mode: execute Read IFR Into MISR immediately (original behavior) */
             uint32_t endAddr;
             if (startAddr > UINT32_MAX - (ending - start))
@@ -1503,7 +1406,6 @@ status_t Read_IFR_Into_MISR(
             uint32_t regPrimask = DisableGlobalIRQ();
             status  = FLASH_CMD_ReadIFRIntoMISR(base, startAddr, endAddr, seed, signature);
             EnableGlobalIRQ(regPrimask);
-#endif /* CONFIG_FLASH_K4_ASYNC_MODE */
         }
         else
         {
@@ -2348,44 +2250,6 @@ status_t FLASH_Process(void)
                         break;
                     }
 
-                    case kFlashAsyncOp_VerifyErasePhrase:
-                    case kFlashAsyncOp_VerifyEraseIFRPhrase:
-                    {
-                        uint32_t numPhrases = (op.lengthInBytes + FLASH_FEATURE_PHRASE_SIZE - 1U) / FLASH_FEATURE_PHRASE_SIZE;
-                        requiredTime_us = numPhrases * CONFIG_FLASH_K4_VERIFY_TIME_US;
-                        break;
-                    }
-
-                    case kFlashAsyncOp_VerifyErasePage:
-                    case kFlashAsyncOp_VerifyEraseIFRPage:
-                    {
-                        uint32_t numPages = (op.lengthInBytes + FLASH_FEATURE_PAGE_SIZE - 1U) / FLASH_FEATURE_PAGE_SIZE;
-                        requiredTime_us = numPages * CONFIG_FLASH_K4_VERIFY_TIME_US;
-                        break;
-                    }
-
-                    case kFlashAsyncOp_VerifyEraseSector:
-                    case kFlashAsyncOp_VerifyEraseIFRSector:
-                    {
-                        uint32_t numSectors = (op.lengthInBytes + FLASH_FEATURE_SECTOR_SIZE - 1U) / FLASH_FEATURE_SECTOR_SIZE;
-                        requiredTime_us = numSectors * CONFIG_FLASH_K4_VERIFY_TIME_US;
-                        break;
-                    }
-
-                    case kFlashAsyncOp_VerifyEraseAll:
-                    case kFlashAsyncOp_VerifyEraseBlock:
-                    {
-                        requiredTime_us = CONFIG_FLASH_K4_VERIFY_BLOCK_TIME_US;
-                        break;
-                    }
-
-                    case kFlashAsyncOp_ReadIntoMISR:
-                    case kFlashAsyncOp_ReadIFRIntoMISR:
-                    {
-                        requiredTime_us = CONFIG_FLASH_K4_MISR_TIME_US;
-                        break;
-                    }
-
                     default:
                         requiredTime_us = CONFIG_FLASH_K4_DEFAULT_OP_TIME_US;
                         break;
@@ -3198,34 +3062,6 @@ static status_t FLASH_ExecuteOperation(flash_async_op_t *pOp)
             {
                 regPrimask = DisableGlobalIRQ();
                 status = flash_program_page_impl(s_flashAsyncContext.fmuBase, pOp->startAddress, pOp->pBuffer, pOp->lengthInBytes);
-                EnableGlobalIRQ(regPrimask);
-                break;
-            }
-
-            case kFlashAsyncOp_ReadIntoMISR:
-            {
-                uint32_t startaddr = pOp->startAddress;
-                uint32_t endAddr = startaddr + pOp->lengthInBytes;
-                regPrimask = DisableGlobalIRQ();
-                status = FLASH_CMD_ReadIntoMISR(s_flashAsyncContext.fmuBase, 
-                                                startaddr, 
-                                                endAddr, 
-                                                pOp->pSeed, 
-                                                pOp->pSignature);
-                EnableGlobalIRQ(regPrimask);
-                break;
-            }
-
-            case kFlashAsyncOp_ReadIFRIntoMISR:
-            {
-                uint32_t startaddr = pOp->startAddress;
-                uint32_t endAddr = startaddr + pOp->lengthInBytes;
-                regPrimask = DisableGlobalIRQ();
-                status = FLASH_CMD_ReadIFRIntoMISR(s_flashAsyncContext.fmuBase, 
-                                                   startaddr, 
-                                                   endAddr, 
-                                                   pOp->pSeed, 
-                                                   pOp->pSignature);
                 EnableGlobalIRQ(regPrimask);
                 break;
             }

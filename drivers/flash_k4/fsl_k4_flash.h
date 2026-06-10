@@ -173,16 +173,6 @@ typedef enum _flash_async_op_type
     kFlashAsyncOp_Erase = 0U,                /*!< Erase operation */
     kFlashAsyncOp_Program = 1U,              /*!< Program phrase operation */
     kFlashAsyncOp_ProgramPage = 2U,          /*!< Program page operation */
-    kFlashAsyncOp_VerifyErasePhrase = 3U,    /*!< Verify erase phrase operation */
-    kFlashAsyncOp_VerifyErasePage = 4U,      /*!< Verify erase page operation */
-    kFlashAsyncOp_VerifyEraseSector = 5U,    /*!< Verify erase sector operation */
-    kFlashAsyncOp_VerifyEraseIFRPhrase = 6U, /*!< Verify erase IFR phrase operation */
-    kFlashAsyncOp_VerifyEraseIFRPage = 7U,   /*!< Verify erase IFR page operation */
-    kFlashAsyncOp_VerifyEraseIFRSector = 8U, /*!< Verify erase IFR sector operation */
-    kFlashAsyncOp_VerifyEraseAll = 9U,       /*!< Verify erase all operation */
-    kFlashAsyncOp_VerifyEraseBlock = 10U,     /*!< Verify erase block operation */
-    kFlashAsyncOp_ReadIntoMISR = 11U,         /*!< Read into MISR operation */
-    kFlashAsyncOp_ReadIFRIntoMISR = 12U,      /*!< Read IFR into MISR operation */
 } flash_async_op_type_t;
 
 /*!
