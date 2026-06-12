@@ -19,7 +19,9 @@ if(NOT TOOLCHAIN_ROOT)
     endif()
 endif()
 
-if(WIN32)
+# Use CMAKE_HOST_WIN32 (not WIN32): WIN32 tracks the cross-compile target (CMAKE_SYSTEM_NAME=Generic)
+# and goes false when the toolchain file is processed twice, selecting the wrong host tool directory.
+if(CMAKE_HOST_WIN32)
     SET(TARGET_TRIPLET "ARM/ARMCLANG/bin")
 elseif(APPLE)
     SET(TARGET_TRIPLET "bin")
