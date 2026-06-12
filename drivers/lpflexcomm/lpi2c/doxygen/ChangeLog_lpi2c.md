@@ -1,5 +1,11 @@
 # LPI2C
 
+## [2.2.11]
+
+- Bug Fixes
+  - LPI2C_MasterTransferBlocking - added waiting while TX FIFO is not empty.
+  - Added a check for an error from the previous transfer in the transfer API (when kLPI2C_TransferNoStopFlag was used).
+
 ## [2.2.10]
 
 - Bug Fixes
