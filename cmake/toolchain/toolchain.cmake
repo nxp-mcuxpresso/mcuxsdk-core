@@ -26,7 +26,10 @@ set(CMAKE_CXX_COMPILER_FORCED "${CMAKE_C_COMPILER_FORCED}")
 set(CMAKE_CXX_COMPILER_WORKS "${CMAKE_C_COMPILER_WORKS}")
 
 # TOOLCHAIN EXTENSION
-IF(WIN32)
+# Use CMAKE_HOST_WIN32 (not WIN32): this toolchain file sets CMAKE_SYSTEM_NAME=Generic, so WIN32
+# tracks the cross-compile target and becomes false when the file is processed more than once,
+# wrongly clearing TOOLCHAIN_EXT. CMAKE_HOST_WIN32 always reflects the build host.
+IF(CMAKE_HOST_WIN32)
     SET(TOOLCHAIN_EXT ".exe")
 ELSE()
     SET(TOOLCHAIN_EXT "")

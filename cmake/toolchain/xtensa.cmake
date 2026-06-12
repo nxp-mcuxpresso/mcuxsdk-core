@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # TOOLCHAIN EXTENSION
-if(WIN32)
+# Use CMAKE_HOST_WIN32 (not WIN32): WIN32 tracks the cross-compile target (CMAKE_SYSTEM_NAME=Generic)
+# and goes false when the toolchain file is processed twice, wrongly clearing TOOLCHAIN_EXT.
+if(CMAKE_HOST_WIN32)
     set(TOOLCHAIN_EXT ".exe")
 else()
     set(TOOLCHAIN_EXT "")
