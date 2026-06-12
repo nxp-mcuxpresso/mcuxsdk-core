@@ -30,14 +30,19 @@ class PartDataLoader():
         return list(sorted(set(files)))
 
     def get_device_yml_files(self):
-        files = list()
+        # Collect files keyed by device folder name to prevent duplicates when
+        # the same device exists in both 'devices' and 'devices_int'.
+        # 'devices_int' takes priority as it is the internal/override source.
+        files_by_name = {}
         p = pathlib.Path(self.core_root_path, 'devices')
         if p.is_dir():
-            files.extend(self.get_device_yml_files_from_directory(p))
+            for f in self.get_device_yml_files_from_directory(p):
+                files_by_name[f.parent.name] = f
         p = pathlib.Path(self.core_root_path, 'devices_int')
         if p.is_dir():
-            files.extend(self.get_device_yml_files_from_directory(p))
-        return list(sorted(set(files)))
+            for f in self.get_device_yml_files_from_directory(p):
+                files_by_name[f.parent.name] = f
+        return list(sorted(files_by_name.values()))
 
     def load_single_file(self, args):
         filepath, shared_list, lock = args
