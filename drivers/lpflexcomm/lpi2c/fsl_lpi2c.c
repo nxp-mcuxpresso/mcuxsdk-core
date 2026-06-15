@@ -1277,7 +1277,8 @@ static status_t LPI2C_RunTransferStateMachine(LPI2C_Type *base, lpi2c_master_han
                     if ((xfer->flags & (uint32_t)kLPI2C_TransferNoStopFlag) == 0U)
                     {
                         /* We stay in this state until the stop state is detected. */
-                        if (0U != (status & (uint32_t)kLPI2C_MasterStopDetectFlag))
+                        if ((0U != (status & (uint32_t)kLPI2C_MasterStopDetectFlag)) &&
+                            ((base->MFSR & LPI2C_MFSR_TXCOUNT_MASK) == 0U))
                         {
                             *isDone = true;
                         }
