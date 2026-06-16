@@ -179,7 +179,7 @@ static uint8_t SFA_GetInstance(SFA_Type *base)
          * (s_sfaBases[instance] != base) not covered.
          * $ref sfa_c_ref_1$.
          */
-        if (MSDK_REG_SECURE_ADDR(s_sfaBases[instance]) == MSDK_REG_SECURE_ADDR(base)) /* GCOVR_EXCL_BR_LINE */
+        if (MSDK_REG_NONSECURE_ADDR(s_sfaBases[instance]) == MSDK_REG_NONSECURE_ADDR(base)) /* GCOVR_EXCL_BR_LINE */
         {
             break;
         }

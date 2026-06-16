@@ -1525,7 +1525,7 @@ static uint32_t trng_GetInstance(TRNG_Type *base)
     /* Find the instance index from base address mappings. */
     for (instance = 0; instance < ARRAY_SIZE(s_trngBases); instance++)
     {
-        if (MSDK_REG_SECURE_ADDR(s_trngBases[instance]) == MSDK_REG_SECURE_ADDR(base))
+        if (MSDK_REG_NONSECURE_ADDR(s_trngBases[instance]) == MSDK_REG_NONSECURE_ADDR(base))
         {
             break;
         }

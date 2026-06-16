@@ -97,7 +97,7 @@ uint32_t TPM_GetInstance(TPM_Type *base)
      */
     for (instance = 0; instance < tpmArrayCount; instance++) /* GCOVR_EXCL_BR_LINE */
     {
-        if (MSDK_REG_SECURE_ADDR(s_tpmBases[instance]) == MSDK_REG_SECURE_ADDR(base))
+        if (MSDK_REG_NONSECURE_ADDR(s_tpmBases[instance]) == MSDK_REG_NONSECURE_ADDR(base))
         {
             break;
         }
