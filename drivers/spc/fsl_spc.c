@@ -189,11 +189,11 @@ status_t SPC_SetActiveModeBandgapModeConfig(SPC_Type *base, spc_bandgap_mode_t m
          * $ref spc_c_ref_1$.
          */
         /* The bandgap mode must be enabled if any regulators' drive strength set as Normal. */
-        if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_DCDC_VDD_DS_MASK) == /* GCOVR_EXCL_START */
+        if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_DCDC_VDD_DS_MASK) ==
             SPC_ACTIVE_CFG_DCDC_VDD_DS(kSPC_DCDC_NormalDriveStrength))
         {
             return kStatus_SPC_BandgapModeWrong;
-        } /* GCOVR_EXCL_STOP */
+        }
 
 #if (defined(FSL_FEATURE_SPC_HAS_SYS_LDO) && FSL_FEATURE_SPC_HAS_SYS_LDO)
         /*
@@ -1084,7 +1084,7 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_low
 #if defined(FSL_FEATURE_SPC_HAS_SC_REG_BUSY) && FSL_FEATURE_SPC_HAS_SC_REG_BUSY
     if ((base->SC & SPC_SC_REG_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #else
-    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL)
+    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
         /*
@@ -1142,7 +1142,7 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_low
 #if defined(FSL_FEATURE_SPC_HAS_SC_REG_BUSY) && FSL_FEATURE_SPC_HAS_SC_REG_BUSY
     while ((base->SC & SPC_SC_REG_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #else
-    while ((base->SC & SPC_SC_BUSY_MASK) != 0UL)
+    while ((base->SC & SPC_SC_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
 #if SPC_BUSY_TIMEOUT
@@ -1194,7 +1194,7 @@ status_t SPC_SetActiveModeSystemLDORegulatorConfig(SPC_Type *base, const spc_act
 #if (defined(FSL_FEATURE_SPC_HAS_SC_REG_BUSY) && FSL_FEATURE_SPC_HAS_SC_REG_BUSY)
     if ((base->SC & SPC_SC_REG_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #else
-    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL)
+    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
         /*
@@ -1236,9 +1236,9 @@ status_t SPC_SetActiveModeSystemLDORegulatorConfig(SPC_Type *base, const spc_act
          * $ref spc_c_ref_3$.
          */
         /* If select voltage level as Over Drive Voltage, Drive Strength can not be set to low. */
-        if (option->SysLDOVoltage == kSPC_SysLDO_OverDriveVoltage) /* GCOVR_EXCL_LINE */
+        if (option->SysLDOVoltage == kSPC_SysLDO_OverDriveVoltage)
         {
-            return kStatus_SPC_SYSLDOLowDriveStrengthIgnore; /* GCOVR_EXCL_LINE */
+            return kStatus_SPC_SYSLDOLowDriveStrengthIgnore;
         }
     }
 
@@ -1299,7 +1299,7 @@ status_t SPC_SetLowPowerModeSystemLDORegulatorConfig(SPC_Type *base, const spc_l
 #if defined(FSL_FEATURE_SPC_HAS_SC_REG_BUSY) && FSL_FEATURE_SPC_HAS_SC_REG_BUSY
     if ((base->SC & SPC_SC_REG_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #else
-    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL)
+    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
         /*
@@ -1336,7 +1336,7 @@ status_t SPC_SetLowPowerModeSystemLDORegulatorConfig(SPC_Type *base, const spc_l
 #if defined(FSL_FEATURE_SPC_HAS_SC_REG_BUSY) && FSL_FEATURE_SPC_HAS_SC_REG_BUSY
     while ((base->SC & SPC_SC_REG_BUSY_MASK) != 0UL) /* GCOVR_EXCL_LINE */
 #else
-    while ((base->SC & SPC_SC_BUSY_MASK) != 0UL)
+    while ((base->SC & SPC_SC_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
 #if SPC_BUSY_TIMEOUT
@@ -1384,7 +1384,7 @@ status_t SPC_SetActiveModeDCDCRegulatorConfig(SPC_Type *base, const spc_active_m
 #if defined(FSL_FEATURE_SPC_HAS_SC_REG_BUSY) && FSL_FEATURE_SPC_HAS_SC_REG_BUSY
     if ((base->SC & SPC_SC_REG_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #else
-    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL)
+    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
         /*
@@ -1466,7 +1466,7 @@ status_t SPC_SetLowPowerModeDCDCRegulatorConfig(SPC_Type *base, const spc_lowpow
 #if defined(FSL_FEATURE_SPC_HAS_SC_REG_BUSY) && FSL_FEATURE_SPC_HAS_SC_REG_BUSY
     if ((base->SC & SPC_SC_REG_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #else
-    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL)
+    if ((base->SC & SPC_SC_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
         /*
@@ -1519,7 +1519,7 @@ status_t SPC_SetLowPowerModeDCDCRegulatorConfig(SPC_Type *base, const spc_lowpow
 #if defined(FSL_FEATURE_SPC_HAS_SC_REG_BUSY) && FSL_FEATURE_SPC_HAS_SC_REG_BUSY
     while ((base->SC & SPC_SC_REG_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #else
-    while ((base->SC & SPC_SC_BUSY_MASK) != 0UL)
+    while ((base->SC & SPC_SC_BUSY_MASK) != 0UL) /* GCOVR_EXCL_BR_LINE */
 #endif
     {
 #if SPC_BUSY_TIMEOUT

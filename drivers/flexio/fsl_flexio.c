@@ -556,7 +556,7 @@ void FLEXIO3_DriverIRQHandler(void) /* GCOVR_EXCL_FUNCTION */
 }
 
 void FLEXIO_CommonDriverIRQHandler(uint32_t instance);
-void FLEXIO_CommonDriverIRQHandler(uint32_t instance)
+void FLEXIO_CommonDriverIRQHandler(uint32_t instance)  /* GCOVR_EXCL_FUNCTION */
 {
     uint32_t index;
 
