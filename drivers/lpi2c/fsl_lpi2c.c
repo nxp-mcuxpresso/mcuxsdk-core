@@ -925,6 +925,11 @@ status_t LPI2C_MasterReceive(LPI2C_Type *base, void *rxBuff, size_t rxSize)
     uint32_t waitTimes = I2C_RETRY_TIMES;
 #endif
 
+    if (rxSize == 0U)
+    {
+        return kStatus_InvalidArgument;
+    }
+
     /* Receive data */
     while (rxSize > 0U)
     {
@@ -1046,6 +1051,11 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
     uint16_t commandBuffer[7];
     uint32_t cmdCount = 0U;
 
+    if ((transfer->direction == kLPI2C_Read) && (transfer->dataSize == 0U))
+    {
+        return kStatus_InvalidArgument;
+    }
+
     /* Enable the master function and disable the slave function. */
     LPI2C_MasterEnable(base, true);
     LPI2C_SlaveEnable(base, false);
@@ -1130,7 +1140,7 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
             }
 
             /* Receive Data. */
-            if ((transfer->direction == kLPI2C_Read) && (transfer->dataSize > 0U))
+            if (transfer->direction == kLPI2C_Read)
             {
                 result = LPI2C_MasterReceive(base, transfer->data, transfer->dataSize);
             }
@@ -1588,6 +1598,11 @@ status_t LPI2C_MasterTransferNonBlocking(LPI2C_Type *base,
     assert(transfer->subaddressSize <= sizeof(transfer->subaddress));
 
     status_t result;
+
+    if ((transfer->direction == kLPI2C_Read) && (transfer->dataSize == 0U))
+    {
+        return kStatus_InvalidArgument;
+    }
 
     /* Return busy if another transaction is in progress. */
     if (handle->state != (uint8_t)kIdleState)
