@@ -287,7 +287,11 @@ static uint32_t LPI2C_GetCyclesForWidth(
     else
     {
         /* Calculate the cycle count, round up the calculated value. */
-        cycles = (width_ns * 2U / busCycle_ns + 1U) / 2U;
+        /* cycles = (width_ns * 2U / busCycle_ns + 1U) / 2U; */
+        cycles = width_ns * 2U / busCycle_ns;
+        assert(cycles <= (UINT32_MAX - 1U));
+        cycles += 1U;
+        cycles /= 2U;
     }
 
     /* If the calculated value is smaller than the minimum value, use the minimum value */
@@ -396,6 +400,7 @@ static status_t LPI2C_MasterWaitForTxReady(LPI2C_Type *base)
     {
         /* Get the number of words in the tx fifo and compute empty slots. */
         LPI2C_MasterGetFifoCounts(base, NULL, &txCount);
+        assert(txFifoSize >= txCount);
         txCount = txFifoSize - txCount;
 
         /* Check for error flags. */
@@ -701,7 +706,12 @@ void LPI2C_MasterSetBaudRate(LPI2C_Type *base, uint32_t sourceClock_Hz, uint32_t
         scl_lat = (uint8_t)(((2U + filtScl) / divider) & 0xffU);
 
         /* Calculate the clkCycle, clkCycle = CLKLO + CLKHI, divider = 2 ^ prescale */
-        a = (10U * sourceClock_Hz / divider / baudRate_Hz + 5U) / 10U;
+        /* a = (10U * sourceClock_Hz / divider / baudRate_Hz + 5U) / 10U; */
+        a = 10U * sourceClock_Hz / divider / baudRate_Hz;
+        assert(a <= (UINT32_MAX - 5U));
+        a += 5U;
+        a /= 10U;
+
         b = (uint32_t)scl_lat + 2U;
 
         if (a <= b)
@@ -725,6 +735,7 @@ void LPI2C_MasterSetBaudRate(LPI2C_Type *base, uint32_t sourceClock_Hz, uint32_t
            we can come up with: CLKHI < 0.92 x CLKLO - ROUNDDOWN(2 + FILTSCL) / divider
            so the max boundary of CLKHI should be 0.92 x 63 - ROUNDDOWN(2 + FILTSCL) / divider,
            and the max boundary of clkCycle is 1.92 x 63 - ROUNDDOWN(2 + FILTSCL) / divider. */
+        assert((120U >= scl_lat));
         if (clkCycle > (120U - (uint32_t)scl_lat))
         {
             continue;
@@ -1061,7 +1072,7 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
     assert(transfer->subaddressSize <= sizeof(transfer->subaddress));
 
     status_t result = kStatus_Success;
-    uint16_t commandBuffer[7];
+    uint16_t commandBuffer[6];
     uint32_t cmdCount = 0U;
 
     if ((transfer->direction == kLPI2C_Read) && (transfer->dataSize == 0U))
@@ -1110,6 +1121,7 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
             {
                 subaddressRemaining--;
                 uint8_t subaddressByte    = (uint8_t)((transfer->subaddress >> (8U * subaddressRemaining)) & 0xffU);
+                assert(cmdCount < 5U);
                 commandBuffer[cmdCount++] = subaddressByte;
             }
         }
@@ -1138,6 +1150,7 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
                 break;
             }
 
+            assert(index < ARRAY_SIZE(commandBuffer));
             /* Write byte into LPI2C master data register. */
             base->MTDR = commandBuffer[index];
             index++;
@@ -1312,7 +1325,9 @@ static void LPI2C_TransferStateMachineReadCommand(LPI2C_Type *base,
     stateParams->txCount--;
 
     uint16_t tmpChunk = MIN(handle->remainingBytes - handle->chunkSize, LPI2C_MAX_RX_SIZE);
+    assert(tmpChunk >= 1U);
     base->MTDR = (uint32_t)kRxDataCmd | LPI2C_MTDR_DATA((uint32_t)tmpChunk - 1U);
+    assert(handle->chunkSize <= ((uint16_t)UINT16_MAX - tmpChunk));
     handle->chunkSize += tmpChunk;
 
     /* Move to transfer state. */
@@ -1570,6 +1585,7 @@ static void LPI2C_InitTransferStateMachine(lpi2c_master_handle_t *handle)
             while (0U != (subaddressRemaining--))
             {
                 uint8_t subaddressByte = (uint8_t)((xfer->subaddress >> (8U * subaddressRemaining)) & 0xffU);
+                assert(cmdCount < 5U);
                 cmd[cmdCount++]        = subaddressByte;
             }
         }
@@ -1924,17 +1940,17 @@ void LPI2C_SlaveInit(LPI2C_Type *base, const lpi2c_slave_config_t *slaveConfig, 
 
     /* Calculate data valid time. The time is equal to FILTSCL+DATAVD+3 cycles of functional clock.
        So the min value is FILTSCL+3. */
-    tmpReg |= LPI2C_SCFGR2_DATAVD(
-        LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->dataValidDelay_ns, tmpCycle + 3U,
-                                tmpCycle + 3U + (LPI2C_SCFGR2_DATAVD_MASK >> LPI2C_SCFGR2_DATAVD_SHIFT), 0U) -
-        tmpCycle - 3U);
+    uint32_t cycles = LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->dataValidDelay_ns, 0U,
+                                  (LPI2C_SCFGR2_DATAVD_MASK >> LPI2C_SCFGR2_DATAVD_SHIFT), 0U);
+    assert(tmpCycle <= (UINT32_MAX - 3U));
+    cycles = (cycles >= (tmpCycle + 3U)) ? (cycles - (tmpCycle + 3U)) : 0U;
+    tmpReg |= LPI2C_SCFGR2_DATAVD(cycles);
 
-    /* Calculate clock hold time. The time is equal to CLKHOLD+3 cycles of functional clock in case CLKHOLD > 1. */
-    base->SCFGR2 =
-        tmpReg | LPI2C_SCFGR2_CLKHOLD(
-                     LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->clockHoldTime_ns, 4U,
-                                             (LPI2C_SCFGR2_CLKHOLD_MASK >> LPI2C_SCFGR2_CLKHOLD_SHIFT) + 3U, 0U) -
-                     3U);
+    /* Calculate clock hold time. The time is equal to CLKHOLD+3 cycles of functional clock in case CLKHOLD >= 1. */
+    cycles = LPI2C_GetCyclesForWidth(sourceClock_Hz, slaveConfig->clockHoldTime_ns, 0U,
+                                     (LPI2C_SCFGR2_CLKHOLD_MASK >> LPI2C_SCFGR2_CLKHOLD_SHIFT), 0U);
+    cycles = (cycles > 3U) ? (cycles - 3U) : 1U;
+    base->SCFGR2 = tmpReg | LPI2C_SCFGR2_CLKHOLD(cycles);
 
     /* Save SCR to last so we don't enable slave until it is configured */
     base->SCR = LPI2C_SCR_FILTDZ(!slaveConfig->filterDozeEnable ? 1U : 0U) | LPI2C_SCR_FILTEN(slaveConfig->filterEnable ? 1U : 0U) |
@@ -2096,6 +2112,7 @@ status_t LPI2C_SlaveSend(LPI2C_Type *base, void *txBuff, size_t txSize, size_t *
 
     if (NULL != actualTxSize)
     {
+        assert(txSize >= remaining);
         *actualTxSize = txSize - remaining;
     }
 
@@ -2187,6 +2204,7 @@ status_t LPI2C_SlaveReceive(LPI2C_Type *base, void *rxBuff, size_t rxSize, size_
 
     if (NULL != actualRxSize)
     {
+        assert(rxSize >= remaining);
         *actualRxSize = rxSize - remaining;
     }
 

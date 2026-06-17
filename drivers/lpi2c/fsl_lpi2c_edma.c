@@ -200,6 +200,7 @@ static uint32_t LPI2C_GenerateCommands(lpi2c_master_edma_handle_t *handle)
             while (0U != subaddressRemaining--)
             {
                 uint8_t subaddressByte = (uint8_t)((xfer->subaddress >> (8U * subaddressRemaining)) & 0xffU);
+                assert(cmdCount < 5U);
                 cmd[cmdCount++]        = subaddressByte;
             }
         }
@@ -219,6 +220,7 @@ static uint32_t LPI2C_GenerateCommands(lpi2c_master_edma_handle_t *handle)
             size_t tmpRxSize = xfer->dataSize;
             while (tmpRxSize != 0U)
             {
+                assert(cmdCount < LPI2C_COMMAND_BUFFER_SIZE);
                 if (tmpRxSize > 256U)
                 {
                     cmd[cmdCount++] = (uint16_t)kRxDataCmd | (uint16_t)LPI2C_MTDR_DATA(0xFFU);

@@ -1,5 +1,10 @@
 # LPI2C_EDMA
 
+## [2.4.9]
+
+- Bug Fixes
+  - Fixed CERT-C issues.
+
 ## [2.4.8]
 
 - Bug Fixes
