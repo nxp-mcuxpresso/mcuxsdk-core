@@ -188,6 +188,20 @@ static void LPI2C_TransferStateMachineWaitState(LPI2C_Type *base,
 static uint8_t LPI2C_PrepareCommandBuffer(const lpi2c_master_transfer_t *transfer,
                                           uint16_t *commandBuffer);
 
+/*!
+ * @brief Handle slave transmit ready flag
+ * @param base The LPI2C peripheral base address.
+ * @param handle Pointer to slave handle structure.
+ */
+static void LPI2C_SlaveHandleTransmit(LPI2C_Type *base, lpi2c_slave_handle_t *handle);
+
+/*!
+ * @brief Handle slave receive ready flag
+ * @param base The LPI2C peripheral base address.
+ * @param handle Pointer to slave handle structure.
+ */
+static void LPI2C_SlaveHandleReceive(LPI2C_Type *base, lpi2c_slave_handle_t *handle);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -2401,6 +2415,67 @@ void LPI2C_SlaveTransferAbort(LPI2C_Type *base, lpi2c_slave_handle_t *handle)
     }
 }
 
+static void LPI2C_SlaveHandleTransmit(LPI2C_Type *base, lpi2c_slave_handle_t *handle)
+{
+    lpi2c_slave_transfer_t *xfer = &handle->transfer;
+
+    handle->wasTransmit = true;
+
+    /* If we're out of data, invoke callback to get more. */
+    if ((NULL == xfer->data) || (0U == xfer->dataSize))
+    {
+        xfer->event = kLPI2C_SlaveTransmitEvent;
+        if (NULL != handle->callback)
+        {
+            handle->callback(base, xfer, handle->userData);
+        }
+
+        /* Clear the transferred count now that we have a new buffer. */
+        handle->transferredCount = 0U;
+    }
+
+    /* Transmit a byte. */
+    if ((NULL != xfer->data) && (0U != xfer->dataSize))
+    {
+        base->STDR = *xfer->data++;
+        --xfer->dataSize;
+        assert(handle->transferredCount < UINT32_MAX);
+        ++handle->transferredCount;
+    }
+}
+
+static void LPI2C_SlaveHandleReceive(LPI2C_Type *base, lpi2c_slave_handle_t *handle)
+{
+    lpi2c_slave_transfer_t *xfer = &handle->transfer;
+
+    /* If we're out of room in the buffer, invoke callback to get another. */
+    if ((NULL == xfer->data) || (0U == xfer->dataSize))
+    {
+        xfer->event = kLPI2C_SlaveReceiveEvent;
+        if (NULL != handle->callback)
+        {
+            handle->callback(base, xfer, handle->userData);
+        }
+
+        /* Clear the transferred count now that we have a new buffer. */
+        handle->transferredCount = 0U;
+    }
+
+    /* Receive a byte. */
+    if ((NULL != xfer->data) && (0U != xfer->dataSize))
+    {
+        *xfer->data++ = (uint8_t)(base->SRDR & LPI2C_SRDR_DATA_MASK);
+        --xfer->dataSize;
+        assert(handle->transferredCount < UINT32_MAX);
+        ++handle->transferredCount;
+    }
+    else
+    {
+        /* We don't have any room to receive more data, so send a nack. */
+        base->STAR = LPI2C_STAR_TXNACK_MASK;
+    }
+}
+
 /*!
  * brief Reusable routine to handle slave interrupts.
  * note This function does not need to be called unless you are reimplementing the
@@ -2497,56 +2572,11 @@ void LPI2C_SlaveTransferHandleIRQ(LPI2C_Type *base, lpi2c_slave_handle_t *handle
             /* Handle transmit and receive. */
             if (0U != (flags & (uint32_t)kLPI2C_SlaveTxReadyFlag))
             {
-                handle->wasTransmit = true;
-
-                /* If we're out of data, invoke callback to get more. */
-                if ((NULL == xfer->data) || (0U == xfer->dataSize))
-                {
-                    xfer->event = kLPI2C_SlaveTransmitEvent;
-                    if (NULL != handle->callback)
-                    {
-                        handle->callback(base, xfer, handle->userData);
-                    }
-
-                    /* Clear the transferred count now that we have a new buffer. */
-                    handle->transferredCount = 0U;
-                }
-
-                /* Transmit a byte. */
-                if ((NULL != xfer->data) && (0U != xfer->dataSize))
-                {
-                    base->STDR = *xfer->data++;
-                    --xfer->dataSize;
-                    ++handle->transferredCount;
-                }
+                LPI2C_SlaveHandleTransmit(base, handle);
             }
             if (0U != (flags & (uint32_t)kLPI2C_SlaveRxReadyFlag))
             {
-                /* If we're out of room in the buffer, invoke callback to get another. */
-                if ((NULL == xfer->data) || (0U == xfer->dataSize))
-                {
-                    xfer->event = kLPI2C_SlaveReceiveEvent;
-                    if (NULL != handle->callback)
-                    {
-                        handle->callback(base, xfer, handle->userData);
-                    }
-
-                    /* Clear the transferred count now that we have a new buffer. */
-                    handle->transferredCount = 0U;
-                }
-
-                /* Receive a byte. */
-                if ((NULL != xfer->data) && (0U != xfer->dataSize))
-                {
-                    *xfer->data++ = (uint8_t)(base->SRDR & LPI2C_SRDR_DATA_MASK);
-                    --xfer->dataSize;
-                    ++handle->transferredCount;
-                }
-                else
-                {
-                    /* We don't have any room to receive more data, so send a nack. */
-                    base->STAR = LPI2C_STAR_TXNACK_MASK;
-                }
+                LPI2C_SlaveHandleReceive(base, handle);
             }
         }
     }
