@@ -174,6 +174,20 @@ static void LPI2C_TransferStateMachineWaitState(LPI2C_Type *base,
                                                 lpi2c_state_machine_param_t *stateParams,
                                                 bool *isDone);
 
+/*!
+ * @brief Prepares command buffer with START and subaddress commands for I2C transfer.
+ *
+ * This function fills the command buffer with the appropriate START command and subaddress
+ * bytes based on the transfer configuration. It handles both write and read directions,
+ * including the case where a repeated START is needed when switching from write to read.
+ *
+ * @param transfer Pointer to the transfer descriptor.
+ * @param commandBuffer Pointer to the command buffer to be filled (uint16_t array).
+ * @return Number of commands added to the buffer.
+ */
+static uint8_t LPI2C_PrepareCommandBuffer(const lpi2c_master_transfer_t *transfer,
+                                          uint16_t *commandBuffer);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -1051,6 +1065,51 @@ status_t LPI2C_MasterSend(LPI2C_Type *base, void *txBuff, size_t txSize)
     return result;
 }
 
+static uint8_t LPI2C_PrepareCommandBuffer(const lpi2c_master_transfer_t *transfer,
+                                          uint16_t *commandBuffer)
+{
+    uint8_t cmdCount = 0U;
+
+    /* Don't add START command if kLPI2C_TransferNoStartFlag is set */
+    if (0U == (transfer->flags & (uint32_t)kLPI2C_TransferNoStartFlag))
+    {
+        /* Initial direction depends on whether a subaddress was provided, and of course the actual
+           data transfer direction. */
+        lpi2c_direction_t direction = (0U != transfer->subaddressSize) ? kLPI2C_Write : transfer->direction;
+
+        /* Start command. */
+        commandBuffer[cmdCount++] =
+            (uint16_t)kStartCmd | (uint16_t)((uint16_t)((uint16_t)transfer->slaveAddress << 1U) | (uint16_t)direction);
+
+        /* Subaddress, MSB first. */
+        if (0U != transfer->subaddressSize)
+        {
+            uint32_t subaddressRemaining = transfer->subaddressSize;
+            while (0U != subaddressRemaining)
+            {
+                subaddressRemaining--;
+                uint8_t subaddressByte = (uint8_t)((transfer->subaddress >> (8U * subaddressRemaining)) & 0xffU);
+                assert(cmdCount < 5U);
+                commandBuffer[cmdCount++] = subaddressByte;
+            }
+        }
+
+        /* Reads need special handling - need to send repeated start if switching directions to read. */
+        if ((0U != transfer->dataSize) && (transfer->direction == kLPI2C_Read))
+        {
+            if (direction == kLPI2C_Write)
+            {
+                commandBuffer[cmdCount++] =
+                    (uint16_t)kStartCmd |
+                    (uint16_t)((uint16_t)((uint16_t)transfer->slaveAddress << 1U) | (uint16_t)kLPI2C_Read);
+            }
+        }
+    }
+
+    return cmdCount;
+}
+
+
 /*!
  * brief Performs a master polling transfer on the I2C bus.
  *
@@ -1073,7 +1132,7 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
 
     status_t result = kStatus_Success;
     uint16_t commandBuffer[6];
-    uint32_t cmdCount = 0U;
+    uint8_t cmdCount = 0U;
 
     if ((transfer->direction == kLPI2C_Read) && (transfer->dataSize == 0U))
     {
@@ -1105,38 +1164,7 @@ status_t LPI2C_MasterTransferBlocking(LPI2C_Type *base, lpi2c_master_transfer_t 
         /* Turn off auto-stop option. */
         base->MCFGR1 &= ~LPI2C_MCFGR1_AUTOSTOP_MASK;
 
-        lpi2c_direction_t direction = (0U != transfer->subaddressSize) ? kLPI2C_Write : transfer->direction;
-        if (0U == (transfer->flags & (uint32_t)kLPI2C_TransferNoStartFlag))
-        {
-            commandBuffer[cmdCount++] =
-                (uint16_t)kStartCmd |
-                (uint16_t)((uint16_t)((uint16_t)transfer->slaveAddress << 1U) | (uint16_t)direction);
-        }
-
-        /* Subaddress, MSB first. */
-        if (0U != transfer->subaddressSize)
-        {
-            uint32_t subaddressRemaining = transfer->subaddressSize;
-            while (0U != subaddressRemaining)
-            {
-                subaddressRemaining--;
-                uint8_t subaddressByte    = (uint8_t)((transfer->subaddress >> (8U * subaddressRemaining)) & 0xffU);
-                assert(cmdCount < 5U);
-                commandBuffer[cmdCount++] = subaddressByte;
-            }
-        }
-
-        /* Reads need special handling. */
-        if ((0U != transfer->dataSize) && (transfer->direction == kLPI2C_Read))
-        {
-            /* Need to send repeated start if switching directions to read. */
-            if (direction == kLPI2C_Write)
-            {
-                commandBuffer[cmdCount++] =
-                    (uint16_t)kStartCmd |
-                    (uint16_t)((uint16_t)((uint16_t)transfer->slaveAddress << 1U) | (uint16_t)kLPI2C_Read);
-            }
-        }
+        cmdCount = LPI2C_PrepareCommandBuffer(transfer, commandBuffer);
 
         /* Send command buffer */
         uint32_t index = 0U;
@@ -1567,43 +1595,9 @@ static void LPI2C_InitTransferStateMachine(lpi2c_master_handle_t *handle)
     }
     else
     {
-        uint16_t *cmd     = (uint16_t *)&handle->commandBuffer;
-        uint16_t cmdCount = 0U;
-
-        /* Initial direction depends on whether a subaddress was provided, and of course the actual
-           data transfer direction. */
-        lpi2c_direction_t direction = (0U != xfer->subaddressSize) ? kLPI2C_Write : xfer->direction;
-
-        /* Start command. */
-        cmd[cmdCount++] =
-            (uint16_t)kStartCmd | (uint16_t)((uint16_t)((uint16_t)xfer->slaveAddress << 1U) | (uint16_t)direction);
-
-        /* Subaddress, MSB first. */
-        if (0U != xfer->subaddressSize)
-        {
-            uint32_t subaddressRemaining = xfer->subaddressSize;
-            while (0U != (subaddressRemaining--))
-            {
-                uint8_t subaddressByte = (uint8_t)((xfer->subaddress >> (8U * subaddressRemaining)) & 0xffU);
-                assert(cmdCount < 5U);
-                cmd[cmdCount++]        = subaddressByte;
-            }
-        }
-
-        /* Reads need special handling. */
-        if ((0U != xfer->dataSize) && (xfer->direction == kLPI2C_Read))
-        {
-            /* Need to send repeated start if switching directions to read. */
-            if (direction == kLPI2C_Write)
-            {
-                cmd[cmdCount++] = (uint16_t)kStartCmd |
-                                  (uint16_t)((uint16_t)((uint16_t)xfer->slaveAddress << 1U) | (uint16_t)kLPI2C_Read);
-            }
-        }
-
         /* Set up state machine for transferring the commands. */
         handle->state          = (uint8_t)kSendCommandState;
-        handle->remainingBytes = cmdCount;
+        handle->remainingBytes = (uint16_t)LPI2C_PrepareCommandBuffer(xfer, (uint16_t *)&handle->commandBuffer);
         handle->buf            = (uint8_t *)&handle->commandBuffer;
     }
 }

@@ -10,6 +10,7 @@
   - Fixed assert issue in LPI2C_MasterSetBaudRate().
   - Fixed CERT-C issues.
   - Fixed MISRA issues.
+  - Improved HIS CCM for LPI2C_MasterTransferBlocking().
 
 ## [2.6.7]
 
