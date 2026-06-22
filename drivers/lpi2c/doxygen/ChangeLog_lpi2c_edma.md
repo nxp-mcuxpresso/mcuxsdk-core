@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed CERT-C issues.
+  - Fixed MISRA issues.
 
 ## [2.4.8]
 

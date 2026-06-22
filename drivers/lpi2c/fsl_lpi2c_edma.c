@@ -148,7 +148,7 @@ void LPI2C_MasterCreateEDMAHandle(LPI2C_Type *base,
     s_lpi2cMasterHandle[instance] = handle;
 
     /* Set LPI2C_MasterTransferEdmaHandleIRQ as LPI2C DMA IRQ handler */
-    s_lpi2cMasterIsr = LPI2C_MasterTransferEdmaHandleIRQ;
+    s_lpi2cMasterIsr = &LPI2C_MasterTransferEdmaHandleIRQ;
 
     /* Enable interrupt in NVIC. */
 #ifdef LPI2C_IRQS
@@ -159,10 +159,10 @@ void LPI2C_MasterCreateEDMAHandle(LPI2C_Type *base,
 #endif
 
     /* Set DMA channel completion callbacks. */
-    EDMA_SetCallback(handle->rx, LPI2C_MasterEDMACallback, handle);
+    EDMA_SetCallback(handle->rx, &LPI2C_MasterEDMACallback, handle);
     if (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0)
     {
-        EDMA_SetCallback(handle->tx, LPI2C_MasterEDMACallback, handle);
+        EDMA_SetCallback(handle->tx, &LPI2C_MasterEDMACallback, handle);
     }
 }
 

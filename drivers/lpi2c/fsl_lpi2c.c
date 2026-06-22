@@ -1243,7 +1243,7 @@ void LPI2C_MasterTransferCreateHandle(LPI2C_Type *base,
     s_lpi2cMasterHandle[instance] = handle;
 
     /* Set irq handler. */
-    s_lpi2cMasterIsr = LPI2C_MasterTransferHandleIRQ;
+    s_lpi2cMasterIsr = &LPI2C_MasterTransferHandleIRQ;
 
     /* Clear internal IRQ enables and enable NVIC IRQ. */
     LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterIrqFlags);
@@ -2250,7 +2250,7 @@ void LPI2C_SlaveTransferCreateHandle(LPI2C_Type *base,
     s_lpi2cSlaveHandle[instance] = handle;
 
     /* Set irq handler. */
-    s_lpi2cSlaveIsr = LPI2C_SlaveTransferHandleIRQ;
+    s_lpi2cSlaveIsr = &LPI2C_SlaveTransferHandleIRQ;
 
     /* Clear internal IRQ enables and enable NVIC IRQ. */
     LPI2C_SlaveDisableInterrupts(base, (uint32_t)kLPI2C_SlaveIrqFlags);
