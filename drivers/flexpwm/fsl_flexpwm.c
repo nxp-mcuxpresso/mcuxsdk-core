@@ -143,7 +143,7 @@ status_t FLEXPWM_DeInit(PWM_Type *base)
 #endif
 
 #if defined(FLEXPWM_RESETS_ARRAY)
-    RESET_SetPeripheralReset(s_flexpwmResets[instance]);
+    RESET_PeripheralReset(s_flexpwmResets[instance]);
 #endif
 
     return kStatus_Success;
