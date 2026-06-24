@@ -658,10 +658,11 @@ class CmakeTraceApp(CmakeApp):
         elif hasattr(self, f"trace_{cmd}"):
             self.app_receiver["result"].extend(getattr(self, f"trace_{cmd}")(j))
         elif cmd == "if":
-            if i == len(trace_data) - 1:
-                return
-            if trace_data[i + 1].get("cmd") == "if" or trace_data[i + 1].get("file") != p_file:
-                return
+            if WorkaroundPolicy.KEEP_APP_CONFIG_BLOCKS not in self.policies:
+                if i == len(trace_data) - 1:
+                    return
+                if trace_data[i + 1].get("cmd") == "if" or trace_data[i + 1].get("file") != p_file:
+                    return
             self.app_receiver["skip_line"] = self.write_raw_if(
                 self.file_cache[p_file], self.app_receiver["result"], j["line"]
             )

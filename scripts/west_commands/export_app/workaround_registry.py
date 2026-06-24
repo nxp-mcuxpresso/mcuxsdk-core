@@ -50,6 +50,7 @@ class WorkaroundPolicy(str, Enum):
     SKIP_OPTIONAL_HEADER_STAGING = "skip_optional_header_staging"
     INJECT_TRACE_KCONFIG_DEFINES = "keep_prjseg_kconfig"
     EXCLUDE_APP_COMPONENTS_FROM_BOARD_PRJ = "exclude_app_components_from_board_prj"
+    KEEP_APP_CONFIG_BLOCKS = "keep_app_config_blocks"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -96,6 +97,18 @@ WORKAROUND_POLICY_REGISTRY: WorkaroundRegistry = {
             policies=(WorkaroundPolicy.EXCLUDE_APP_COMPONENTS_FROM_BOARD_PRJ,),
             ticket="SDKGEN-3514",
             description="Keep board prj.conf minimal so Matter profile overlays (wifi/thread) work.",
+        ),
+        WorkaroundRegistration(
+            selector=WorkaroundSelector(),
+            policies=(WorkaroundPolicy.KEEP_APP_CONFIG_BLOCKS,),
+            ticket="SDKGEN-3556",
+            description=(
+                "Preserve config-guarded blocks in the application's own CMakeLists "
+                "verbatim. Matter apps gate optional features behind app Kconfigs "
+                "(e.g. CONFIG_CHIP_APP_BATTERY_MANAGER) that are disabled in the "
+                "default build, so the default-config export trace must not drop "
+                "those if() blocks or other build profiles fail to compile."
+            ),
         ),
     ),
 }
