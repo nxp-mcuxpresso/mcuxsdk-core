@@ -1,0 +1,7 @@
+/*!
+@defgroup opamp_1_driver OPAMP: Operational Amplifier
+@details The MCUXpresso SDK provides a driver for the Operational Amplifier (OPAMP) of MCUXpresso SDK devices.
+
+# OPAMP: Operational Amplifier {#OPAMP}
+
+*/
