@@ -74,7 +74,7 @@ uint32_t HSCMP_GetInstance(HSCMP_Type *base)
  * This function initializes the HSCMP module. The operations included are:
  * - Enabling the clock for HSCMP module.
  * - Configuring the comparator.
- * - Enabling the HSCMP module.
+ * - Enabling the HSCMP module optionally.
  * @note For some devices, multiple HSCMP instance share the same clock gate. In this case, to enable the clock for
  * any instance enables all the HSCMPs. Check the chip reference manual for the clock assignment of the HSCMP.
  *
@@ -138,7 +138,7 @@ void HSCMP_Init(HSCMP_Type *base, const hscmp_config_t *config)
     tmp32 |= ((uint32_t)(config->powerMode) << HSCMP_CCR2_CMP_HPMD_SHIFT);
     base->CCR2 = tmp32;
 
-    HSCMP_Enable(base, true); /* Enable the HSCMP module. */
+    HSCMP_Enable(base, config->enableComparator); /* Enable the HSCMP module optionally. */
 }
 
 /*!
@@ -182,6 +182,7 @@ void HSCMP_Deinit(HSCMP_Type *base)
  *
  * This function initializes the comparator configuration structure to these default values:
  * @code
+ *   config->enableComparator    = true;
  *   config->enableStopMode      = false;
  *   config->enableOutputPin     = false;
  *   config->useUnfilteredOutput = false;
@@ -196,6 +197,7 @@ void HSCMP_GetDefaultConfig(hscmp_config_t *config)
     /* Initializes the configure structure to zero. */
     (void)memset(config, 0, sizeof(*config));
 
+    config->enableComparator    = true;
     config->enableStopMode      = false;
     config->enableOutputPin     = false;
     config->useUnfilteredOutput = false;

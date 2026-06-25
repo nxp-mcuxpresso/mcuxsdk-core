@@ -101,6 +101,7 @@ typedef struct _hscmp_dac_config
  */
 typedef struct _hscmp_config
 {
+    bool enableComparator;    /*!< Decide whether to enable the comparator. */
     bool enableStopMode;      /*!< Decide whether to enable the comparator when in STOP modes. */
     bool enableOutputPin;     /*!< Decide whether to enable the comparator is available in selected pin. */
     bool useUnfilteredOutput; /*!< Decide whether to use unfiltered output. */
@@ -130,7 +131,7 @@ uint32_t HSCMP_GetInstance(HSCMP_Type *base);
  * This function initializes the HSCMP module. The operations included are:
  * - Enabling the clock for HSCMP module.
  * - Configuring the comparator.
- * - Enabling the HSCMP module.
+ * - Enabling the HSCMP module optionally.
  * @note For some devices, multiple HSCMP instance share the same clock gate. In this case, to enable the clock for
  * any instance enables all the HSCMPs. Check the chip reference manual for the clock assignment of the HSCMP.
  *
@@ -159,6 +160,7 @@ void HSCMP_Deinit(HSCMP_Type *base);
  *
  * This function initializes the comparator configuration structure to these default values:
  * @code
+ *   config->enableComparator    = true;
  *   config->enableStopMode      = false;
  *   config->enableOutputPin     = false;
  *   config->useUnfilteredOutput = false;
