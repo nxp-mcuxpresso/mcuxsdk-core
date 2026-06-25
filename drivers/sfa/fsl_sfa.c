@@ -36,6 +36,13 @@
  * (flags & (uint32_t)kSFA_RefStoppedFlag) == 0U) not covered. Test unfeasible,
  * the reference counter stopped flag state is too short not to catch.
  *
+ * $Justification sfa_c_ref_8$
+ * ((flags & (uint32_t)kSFA_ReferenceCounterTimeOutFlag) != 0U) in period/trigger mode not
+ * covered. Test unfeasible: with the CUT clock sources routed on the board the period/trigger
+ * measurement always completes within the reference target (reference-stopped path), and a
+ * configuration that forces the reference counter to expire does not deliver a latched
+ * reference-counter-timeout status to the interrupt handler. Same rationale as $ref sfa_c_ref_7$.
+ *
  */
 
 /* Component ID definition, used by tools. */
@@ -960,9 +967,17 @@ static void SFA_CommonIRQHandler(SFA_Type *base)
                 {
                     status = kStatus_SFA_MeasurementCompleted;
                 }
-                if ((flags & (uint32_t)kSFA_ReferenceCounterTimeOutFlag) != 0U)
+                /*
+                 * $Branch Coverage Justification$
+                 * $ref sfa_c_ref_8$.
+                 */
+                if ((flags & (uint32_t)kSFA_ReferenceCounterTimeOutFlag) != 0U) /* GCOVR_EXCL_BR_LINE */
                 {
-                    status = kStatus_SFA_ReferenceCounterTimeout;
+                    /*
+                     * $Line Coverage Justification$
+                     * $ref sfa_c_ref_8$.
+                     */
+                    status = kStatus_SFA_ReferenceCounterTimeout; /* GCOVR_EXCL_LINE */
                 }
                 break;
             }
