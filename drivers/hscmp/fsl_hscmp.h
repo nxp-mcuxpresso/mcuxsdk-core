@@ -1,6 +1,5 @@
 /*
- * Copyright 2021 NXP
- * All rights reserved.
+ * Copyright 2021, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -117,6 +116,13 @@ typedef struct _hscmp_config
  * @name Initialization
  * @{
  */
+/*!
+ * @brief Get instance number for HSCMP module.
+ *
+ * @param base HSCMP peripheral base address
+ * @return Instance number if valid base address is provided, otherwise returns 0xFFFFFFFF
+ */
+uint32_t HSCMP_GetInstance(HSCMP_Type *base);
 
 /*!
  * @brief Initialize the HSCMP
@@ -125,7 +131,7 @@ typedef struct _hscmp_config
  * - Enabling the clock for HSCMP module.
  * - Configuring the comparator.
  * - Enabling the HSCMP module.
- * Note: For some devices, multiple HSCMP instance share the same clock gate. In this case, to enable the clock for
+ * @note For some devices, multiple HSCMP instance share the same clock gate. In this case, to enable the clock for
  * any instance enables all the HSCMPs. Check the chip reference manual for the clock assignment of the HSCMP.
  *
  * @param base HSCMP peripheral base address.
@@ -141,7 +147,7 @@ void HSCMP_Init(HSCMP_Type *base, const hscmp_config_t *config);
  * - Disabling the clock for HSCMP module.
  *
  * This function disables the clock for the HSCMP.
- * Note: For some devices, multiple HSCMP instance shares the same clock gate. In this case, before disabling the
+ * @note For some devices, multiple HSCMP instance shares the same clock gate. In this case, before disabling the
  * clock for the HSCMP, ensure that all the HSCMP instances are not used.
  *
  * @param base HSCMP peripheral base address.
