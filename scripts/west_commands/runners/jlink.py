@@ -82,7 +82,7 @@ class JLinkBinaryRunner(ZephyrBinaryRunner):
 
     @classmethod
     def capabilities(cls):
-        return RunnerCaps(commands={'flash', 'debug', 'debugserver', 'attach'},
+        return RunnerCaps(commands={'sdk_flash', 'sdk_debug', 'sdk_debugserver', 'sdk_attach'},
                           dev_id=True, flash_addr=True, erase=True, reset=True,
                           tool_opt=True, file=True)
 
@@ -253,9 +253,9 @@ class JLinkBinaryRunner(ZephyrBinaryRunner):
                       (['-rtos', plugin_dir] if rtos else []) +
                       self.tool_opt)
 
-        if command == 'flash':
+        if command == 'sdk_flash':
             self.flash(**kwargs)
-        elif command == 'debugserver':
+        elif command == 'sdk_debugserver':
             if self.gdb_host:
                 raise ValueError('Cannot run debugserver with --gdb-host')
             self.require(self.gdbserver)
@@ -276,7 +276,7 @@ class JLinkBinaryRunner(ZephyrBinaryRunner):
                           self.tui_arg +
                           [elf_name] +
                           ['-ex', 'target remote {}:{}'.format(self.gdb_host, self.gdb_port)])
-            if command == 'debug':
+            if command == 'sdk_debug':
                 client_cmd += ['-ex', 'monitor halt',
                                '-ex', 'monitor reset',
                                '-ex', 'load']

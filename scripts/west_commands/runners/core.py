@@ -219,7 +219,7 @@ class MissingProgram(FileNotFoundError):
         super().__init__(errno.ENOENT, os.strerror(errno.ENOENT), program)
 
 
-_RUNNERCAPS_COMMANDS = {'flash', 'debug', 'debugserver', 'attach'}
+_RUNNERCAPS_COMMANDS = {'sdk_flash', 'sdk_debug', 'sdk_debugserver', 'sdk_attach'}
 
 @dataclass
 class RunnerCaps:
@@ -230,8 +230,8 @@ class RunnerCaps:
 
     Available capabilities:
 
-    - commands: set of supported commands; default is {'flash',
-      'debug', 'debugserver', 'attach'}.
+    - commands: set of supported commands; default is {'sdk_flash',
+      'sdk_debug', 'sdk_debugserver', 'sdk_attach'}.
 
     - dev_id: whether the runner supports device identifiers, in the form of an
       -i, --dev-id option. This is useful when the user has multiple debuggers
@@ -360,20 +360,20 @@ class ZephyrBinaryRunner(abc.ABC):
     This is supported by four top-level commands managed by the
     Zephyr build system:
 
-    - 'flash': flash a previously configured binary to the board,
+    - 'sdk_flash': flash a previously configured binary to the board,
       start execution on the target, then return.
 
-    - 'debug': connect to the board via a debugging protocol, program
+    - 'sdk_debug': connect to the board via a debugging protocol, program
       the flash, then drop the user into a debugger interface with
       symbol tables loaded from the current binary, and block until it
       exits.
 
-    - 'debugserver': connect via a board-specific debugging protocol,
+    - 'sdk_debugserver': connect via a board-specific debugging protocol,
       then reset and halt the target. Ensure the user is now able to
       connect to a debug server with symbol tables loaded from the
       binary.
 
-    - 'attach': connect to the board via a debugging protocol, then drop
+    - 'sdk_attach': connect to the board via a debugging protocol, then drop
       the user into a debugger interface with symbol tables loaded from
       the current binary, and block until it exits. Unlike 'debug', this
       command does not program the flash.
@@ -637,7 +637,7 @@ class ZephyrBinaryRunner(abc.ABC):
         return build_conf['CONFIG_SRAM_BASE_ADDRESS']
 
     def run(self, command: str, **kwargs):
-        '''Runs command ('flash', 'debug', 'debugserver', 'attach').
+        '''Runs command ('sdk_flash', 'sdk_debug', 'sdk_debugserver', 'sdk_attach').
 
         This is the main entry point to this runner.'''
         caps = self.capabilities()
