@@ -103,37 +103,23 @@ void HSCMP_Init(HSCMP_Type *base, const hscmp_config_t *config)
     RESET_ReleasePeripheralReset(s_hscmpResets[instance]);
 #endif
 
-    /* Configure. */
-    HSCMP_Enable(base, false);
-
-    /* CCR0 register. */
-    if (config->enableStopMode)
-    {
-        base->CCR0 |= HSCMP_CCR0_CMP_STOP_EN_MASK;
-    }
-    else
-    {
-        base->CCR0 &= ~HSCMP_CCR0_CMP_STOP_EN_MASK;
-    }
+    /* CCR0 register, disable comparator. */
+    tmp32 = base->CCR0;
+    tmp32 &= ~(HSCMP_CCR0_CMP_STOP_EN_MASK | HSCMP_CCR0_CMP_EN_MASK);
+    tmp32 |= config->enableStopMode ? HSCMP_CCR0_CMP_STOP_EN_MASK : 0U;
+    base->CCR0 = tmp32;
 
     /* CCR1 register. */
-    tmp32 = base->CCR1 & ~(HSCMP_CCR1_COUT_PEN_MASK | HSCMP_CCR1_COUT_SEL_MASK | HSCMP_CCR1_COUT_INV_MASK);
-    if (config->enableOutputPin)
-    {
-        tmp32 |= HSCMP_CCR1_COUT_PEN_MASK;
-    }
-    if (config->useUnfilteredOutput)
-    {
-        tmp32 |= HSCMP_CCR1_COUT_SEL_MASK;
-    }
-    if (config->enableInvertOutput)
-    {
-        tmp32 |= HSCMP_CCR1_COUT_INV_MASK;
-    }
+    tmp32 = base->CCR1;
+    tmp32 &= ~(HSCMP_CCR1_COUT_PEN_MASK | HSCMP_CCR1_COUT_SEL_MASK | HSCMP_CCR1_COUT_INV_MASK);
+    tmp32 |= config->enableOutputPin ? HSCMP_CCR1_COUT_PEN_MASK : 0U;
+    tmp32 |= config->useUnfilteredOutput ? HSCMP_CCR1_COUT_SEL_MASK : 0U;
+    tmp32 |= config->enableInvertOutput ? HSCMP_CCR1_COUT_INV_MASK : 0U;
     base->CCR1 = tmp32;
 
     /* CCR2 register. */
-    tmp32 = base->CCR2 & ~(HSCMP_CCR2_HYSTCTR_MASK | HSCMP_CCR2_CMP_NPMD_MASK | HSCMP_CCR2_CMP_HPMD_MASK);
+    tmp32 = base->CCR2;
+    tmp32 &= ~(HSCMP_CCR2_HYSTCTR_MASK | HSCMP_CCR2_CMP_NPMD_MASK | HSCMP_CCR2_CMP_HPMD_MASK);
     tmp32 |= HSCMP_CCR2_HYSTCTR(config->hysteresisMode);
     tmp32 |= ((uint32_t)(config->powerMode) << HSCMP_CCR2_CMP_HPMD_SHIFT);
     base->CCR2 = tmp32;
@@ -218,7 +204,8 @@ void HSCMP_SetInputChannels(HSCMP_Type *base, uint32_t positiveChannel, uint32_t
 {
     uint32_t tmp32;
 
-    tmp32 = base->CCR2 & ~(HSCMP_CCR2_PSEL_MASK | HSCMP_CCR2_MSEL_MASK);
+    tmp32 = base->CCR2;
+    tmp32 &= ~(HSCMP_CCR2_PSEL_MASK | HSCMP_CCR2_MSEL_MASK);
     tmp32 |= HSCMP_CCR2_PSEL(positiveChannel) | HSCMP_CCR2_MSEL(negativeChannel);
     base->CCR2 = tmp32;
 }
@@ -235,11 +222,9 @@ void HSCMP_SetFilterConfig(HSCMP_Type *base, const hscmp_filter_config_t *config
 
     uint32_t tmp32;
 
-    tmp32 = base->CCR1 & ~(HSCMP_CCR1_FILT_PER_MASK | HSCMP_CCR1_FILT_CNT_MASK | HSCMP_CCR1_SAMPLE_EN_MASK);
-    if (config->enableSample)
-    {
-        tmp32 |= HSCMP_CCR1_SAMPLE_EN_MASK;
-    }
+    tmp32 = base->CCR1;
+    tmp32 &= ~(HSCMP_CCR1_FILT_PER_MASK | HSCMP_CCR1_FILT_CNT_MASK | HSCMP_CCR1_SAMPLE_EN_MASK);
+    tmp32 |= config->enableSample ? HSCMP_CCR1_SAMPLE_EN_MASK : 0U;
     tmp32 |= HSCMP_CCR1_FILT_PER(config->filterSamplePeriod) | HSCMP_CCR1_FILT_CNT(config->filterSampleCount);
     base->CCR1 = tmp32;
 }
@@ -253,6 +238,7 @@ void HSCMP_SetFilterConfig(HSCMP_Type *base, const hscmp_filter_config_t *config
 void HSCMP_SetDACConfig(HSCMP_Type *base, const hscmp_dac_config_t *config)
 {
     uint32_t tmp32;
+
     if (config == NULL)
     {
         tmp32 = 0U; /* Disable internal DAC. */
@@ -260,11 +246,9 @@ void HSCMP_SetDACConfig(HSCMP_Type *base, const hscmp_dac_config_t *config)
     else
     {
         tmp32 = HSCMP_DCR_VRSEL(config->referenceVoltageSource) | HSCMP_DCR_DAC_DATA(config->DACValue);
-        if (config->enableLowPowerMode)
-        {
-            tmp32 |= HSCMP_DCR_DAC_HPMD_MASK;
-        }
+        tmp32 |= config->enableLowPowerMode ? HSCMP_DCR_DAC_HPMD_MASK : 0U;
         tmp32 |= HSCMP_DCR_DAC_EN_MASK;
     }
+
     base->DCR = tmp32;
 }
