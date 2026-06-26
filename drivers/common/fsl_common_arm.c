@@ -395,4 +395,10 @@ __attribute__((weak)) void IRQSTEER_DisableInterrupt(int32_t irqsteerInstIdx, IR
     (void)irqsteerInstIdx;
     (void)interrupt;
 }
+
+__attribute__((weak)) int32_t IRQSTEER_GetInstIdxByIRQ(IRQn_Type irq)
+{
+    (void)irq;
+    return -1;
+}
 #endif

@@ -1,5 +1,12 @@
 # COMMON
 
+## [2.6.7]
+
+- Improvements
+  - EnableIRQ/DisableIRQ: Use IRQSTEER_GetInstIdxByIRQ() to determine IRQSTEER
+    instance index instead of simple division. Supports multiple IRQSTEER instances
+    with different interrupt counts.
+
 ## [2.6.6]
 
 - Improvements
