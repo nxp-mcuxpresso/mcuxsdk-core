@@ -751,6 +751,8 @@ status_t CSI_TransferSubmitEmptyBuffer(CSI_Type *base, csi_handle_t *handle, uin
 
     CSI_REG_CR1(base) = (csicr1 & ~(CSI_CR1_FB2_DMA_DONE_INTEN_MASK | CSI_CR1_FB1_DMA_DONE_INTEN_MASK));
 
+    __DSB();
+
     if (handle->activeBufferNum == 1U)
     {
         /* Only 1 active framebuffer left, set the newly submitted buffer as active framebuffer */
@@ -763,6 +765,8 @@ status_t CSI_TransferSubmitEmptyBuffer(CSI_Type *base, csi_handle_t *handle, uin
     }
 
     CSI_REG_CR1(base) = csicr1;
+
+    __DSB();
 
     return status;
 }
@@ -792,6 +796,8 @@ status_t CSI_TransferGetFullBuffer(CSI_Type *base, csi_handle_t *handle, uint32_
 
     CSI_REG_CR1(base) = (csicr1 & ~(CSI_CR1_FB2_DMA_DONE_INTEN_MASK | CSI_CR1_FB1_DMA_DONE_INTEN_MASK));
 
+    __DSB();
+
     if (CSI_IsBufferQueueEmpty(&handle->fullBufferQueue))
     {
         frameBuffer = NULL;
@@ -803,6 +809,8 @@ status_t CSI_TransferGetFullBuffer(CSI_Type *base, csi_handle_t *handle, uint32_
     }
 
     CSI_REG_CR1(base) = csicr1;
+
+    __DSB();
 
     return status;
 }
