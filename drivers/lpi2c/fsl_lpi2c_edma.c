@@ -36,6 +36,12 @@
 /* @brief Mask to align an address to edma_tcd_t size. */
 #define ALIGN_TCD_SIZE_MASK (sizeof(edma_tcd_t) - 1U)
 
+#ifdef FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn
+#define FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(_dummy)
+#else
+#define FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ 0
+#endif
+
 /* ! @brief LPI2C master fifo commands. */
 enum _lpi2c_master_fifo_cmd
 {
@@ -89,11 +95,13 @@ static void LPI2C_MasterEDMACallback(edma_handle_t *dmaHandle, void *userData, b
  * @param lpi2cMasterEdmaHandle Pointer to the LPI2C master edma handle.
  */
 static void LPI2C_MasterTransferEdmaHandleIRQ(LPI2C_Type *base, void *lpi2cMasterEdmaHandle);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-
+#if !FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
 static uint32_t lpi2c_edma_RecSetting = 0x02;
+#endif
 
 /*******************************************************************************
  * Code
@@ -139,7 +147,11 @@ void LPI2C_MasterCreateEDMAHandle(LPI2C_Type *base,
     handle->completionCallback = callback;
     handle->userData           = userData;
     handle->rx                 = rxDmaHandle;
-    handle->tx                 = (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) > 0) ? txDmaHandle : rxDmaHandle;
+#if FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+    handle->tx                 = txDmaHandle;
+#else
+    handle->tx                 = rxDmaHandle;
+#endif
     handle->remainingCommand   = 0;
     handle->commandIndex       = 0;
     handle->enableTxReadyFlag  = false;
@@ -160,10 +172,9 @@ void LPI2C_MasterCreateEDMAHandle(LPI2C_Type *base,
 
     /* Set DMA channel completion callbacks. */
     EDMA_SetCallback(handle->rx, &LPI2C_MasterEDMACallback, handle);
-    if (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0)
-    {
-        EDMA_SetCallback(handle->tx, &LPI2C_MasterEDMACallback, handle);
-    }
+#if FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+    EDMA_SetCallback(handle->tx, &LPI2C_MasterEDMACallback, handle);
+#endif
 }
 
 static uint32_t LPI2C_GenerateCommands(lpi2c_master_edma_handle_t *handle)
@@ -320,10 +331,9 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
 
     /* Reset DMA channels. */
     EDMA_ResetChannel(handle->rx->base, handle->rx->channel);
-    if (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0)
-    {
-        EDMA_ResetChannel(handle->tx->base, handle->tx->channel);
-    }
+#if FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+    EDMA_ResetChannel(handle->tx->base, handle->tx->channel);
+#endif
 
     /* Get a 32-byte aligned TCD pointer. */
     edma_tcd_t *tcd = (edma_tcd_t *)((uint32_t)(&handle->tcds[1]) & (~ALIGN_TCD_SIZE_MASK));
@@ -388,7 +398,12 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
         /* Store the initially configured eDMA minor byte transfer count into the LPI2C handle */
         handle->nbytes = (uint8_t)transferConfig.minorLoopBytes;
 
-        if ((FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0) || (0U == commandCount))
+#if FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+        /* We can put this receive transfer on its own DMA channel. */
+        EDMA_SetTransferConfig(handle->rx->base, handle->rx->channel, &transferConfig, NULL);
+        EDMA_EnableChannelInterrupts(handle->rx->base, handle->rx->channel, (uint32_t)kEDMA_MajorInterruptEnable);
+#else
+        if (0U == commandCount)
         {
             /* We can put this receive transfer on its own DMA channel. */
             EDMA_SetTransferConfig(handle->rx->base, handle->rx->channel, &transferConfig, NULL);
@@ -429,6 +444,7 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
 #endif
             linkTcd = tcdSetRxClearTxDMA;
         }
+#endif
     }
     else
     {
@@ -445,10 +461,17 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
         transferConfig.srcOffset        = (int16_t)sizeof(uint16_t);
         transferConfig.destOffset       = 0;
         transferConfig.minorLoopBytes   = sizeof(uint16_t); /* TODO optimize to fill fifo */
-        if((FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0) || transfer->direction == kLPI2C_Write)
+
+#if FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+        transferConfig.majorLoopCounts = commandCount;
+        handle->remainingCommand = 0U;
+        handle->enableTxReadyFlag = false;
+#else
+        if(transfer->direction == kLPI2C_Write)
         {
             transferConfig.majorLoopCounts = commandCount;
-            handle->remainingCommand = 0;
+            handle->remainingCommand = 0U;
+            handle->enableTxReadyFlag = false;
         }
         else
         {
@@ -457,44 +480,33 @@ status_t LPI2C_MasterTransferEDMA(LPI2C_Type *base,
             transferConfig.majorLoopCounts = minCommandCount;
             handle->remainingCommand = commandCount - minCommandCount;
             handle->commandIndex = maxTxFifo;
-        }
 
-        /*
-         * $Branch Coverage Justification$
-         * $ref fsl_lpi2c_edma_c_ref_3$
-         */
-        if(handle->remainingCommand > 0U) /* GCOVR_EXCL_BR_LINE */
-        {
-            /* GCOVR_EXCL_START */
-            handle->enableTxReadyFlag = true;
-            EDMA_EnableChannelInterrupts(handle->rx->base, handle->rx->channel, (uint32_t)kEDMA_MajorInterruptEnable);
-            /* GCOVR_EXCL_STOP */
+            if(handle->remainingCommand > 0U)
+            {
+                handle->enableTxReadyFlag = true;
+                EDMA_EnableChannelInterrupts(handle->rx->base, handle->rx->channel, (uint32_t)kEDMA_MajorInterruptEnable);
+            }
+            else
+            {
+                handle->enableTxReadyFlag = false;
+            }
         }
-        else
-        {
-            handle->enableTxReadyFlag = false;
-        }
+#endif
 
         EDMA_SetTransferConfig(handle->tx->base, handle->tx->channel, &transferConfig, linkTcd);
     }
 
     /* Start DMA transfer. */
-    /*
-     * $Branch Coverage Justification$
-     * $ref fsl_lpi2c_edma_c_ref_2$
-     */
-    if (hasReceiveData || (0 == FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base)))
+#if FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+    if (hasReceiveData)
     {
         EDMA_StartTransfer(handle->rx);
     }
-    /*
-     * $Branch Coverage Justification$
-     * $ref fsl_lpi2c_edma_c_ref_2$
-     */
-    if ((hasSendData || (commandCount != 0U)) && (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0)) /* GCOVR_EXCL_BR_LINE */
-    {
-        EDMA_StartTransfer(handle->tx);
-    }
+    EDMA_StartTransfer(handle->tx);
+
+#else
+    EDMA_StartTransfer(handle->rx);
+#endif
 
     /* Enable DMA in both directions. This actually kicks of the transfer. */
     LPI2C_MasterEnableDMA(base, true, true);
@@ -576,10 +588,9 @@ status_t LPI2C_MasterTransferAbortEDMA(LPI2C_Type *base, lpi2c_master_edma_handl
 
     /* Terminate DMA transfers. */
     EDMA_AbortTransfer(handle->rx);
-    if (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0)
-    {
-        EDMA_AbortTransfer(handle->tx);
-    }
+#if FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+    EDMA_AbortTransfer(handle->tx);
+#endif
 
     /* Reset fifos. */
     base->MCR |= LPI2C_MCR_RRF_MASK | LPI2C_MCR_RTF_MASK;
@@ -610,12 +621,14 @@ static void LPI2C_MasterEDMACallback(edma_handle_t *dmaHandle, void *userData, b
         return;
     }
 
-    if((FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) == 0) && handle->enableTxReadyFlag == true)
+#if !FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+    if(handle->enableTxReadyFlag == true)
     {
         LPI2C_MasterEnableInterrupts(handle->base, (uint32_t)kLPI2C_MasterTxReadyFlag);
         handle->enableTxReadyFlag = false;
         return;
     }
+#endif
 
     /* Check for errors. */
     status_t result = LPI2C_MasterCheckAndClearError(handle->base, LPI2C_MasterGetStatusFlags(handle->base));
@@ -644,13 +657,9 @@ static void LPI2C_MasterTransferEdmaHandleIRQ(LPI2C_Type *base, void *lpi2cMaste
     uint32_t status                    = LPI2C_MasterGetStatusFlags(base);
     status_t result                    = kStatus_Success;
 
-    /*
-     * $Branch Coverage Justification$
-     * $ref fsl_lpi2c_edma_c_ref_3$
-     */
+#if !FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
     if((0U != (LPI2C_MasterGetEnabledInterrupts(base) & (uint32_t)kLPI2C_MasterTxReadyFlag)) && (0U != (status & (uint32_t)kLPI2C_MasterTxReadyFlag))) /* GCOVR_EXCL_BR_LINE */
     {
-        /* GCOVR_EXCL_START */
         if(handle->remainingCommand > 0U)
         {
             uint32_t i;
@@ -667,69 +676,68 @@ static void LPI2C_MasterTransferEdmaHandleIRQ(LPI2C_Type *base, void *lpi2cMaste
         {
             LPI2C_MasterDisableInterrupts(handle->base, (uint32_t)kLPI2C_MasterTxReadyFlag);
         }
-        /* GCOVR_EXCL_STOP */
+
+        return;
     }
-    else
+#endif
+
+    /* Terminate DMA transfers. */
+    EDMA_AbortTransfer(handle->rx);
+#if FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQ
+    EDMA_AbortTransfer(handle->tx);
+#endif
+
+    /* Done with this transaction. */
+    handle->isBusy = false;
+
+    /* Disable LPI2C interrupts. */
+    LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterIrqFlags);
+
+    /* Check error status */
+    if (0U != (status & (uint32_t)kLPI2C_MasterPinLowTimeoutFlag))
     {
-        /* Terminate DMA transfers. */
-        EDMA_AbortTransfer(handle->rx);
-        if (FSL_FEATURE_LPI2C_HAS_SEPARATE_DMA_RX_TX_REQn(base) != 0)
-        {
-            EDMA_AbortTransfer(handle->tx);
-        }
+        result = kStatus_LPI2C_PinLowTimeout;
+    }
+    else if (0U != (status & (uint32_t)kLPI2C_MasterArbitrationLostFlag))
+    {
+        result = kStatus_LPI2C_ArbitrationLost;
+    }
+    else if (0U != (status & (uint32_t)kLPI2C_MasterNackDetectFlag))
+    {
+        result = kStatus_LPI2C_Nak;
+    }
+    /*
+     * $Branch Coverage Justification$
+     * Check of last possible flag - shouldn't be false
+     */
+    else if (0U != (status & (uint32_t)kLPI2C_MasterFifoErrFlag)) /* GCOVR_EXCL_BR_START */
+    {
+        result = kStatus_LPI2C_FifoError;
+    }
+    else /* GCOVR_EXCL_BR_STOP */
+    {
+        ; /* Intentional empty */
+    }
 
-        /* Done with this transaction. */
-        handle->isBusy = false;
+    /* Clear error status. */
+    (void)LPI2C_MasterCheckAndClearError(base, status);
 
-        /* Disable LPI2C interrupts. */
-        LPI2C_MasterDisableInterrupts(base, (uint32_t)kLPI2C_MasterIrqFlags);
+    /* Send stop flag if needed */
+    if (0U == (handle->transfer.flags & (uint32_t)kLPI2C_TransferNoStopFlag))
+    {
+        status = LPI2C_MasterGetStatusFlags(base);
+        /* If bus is still busy and the master has not generate stop flag */
+        if ((status & ((uint32_t)kLPI2C_MasterBusBusyFlag | (uint32_t)kLPI2C_MasterStopDetectFlag)) ==
+            (uint32_t)kLPI2C_MasterBusBusyFlag)
+        {
+            /* Send a stop command to finalize the transfer. */
+            handle->base->MTDR = (uint32_t)kStopCmd;
+        }
+    }
 
-        /* Check error status */
-        if (0U != (status & (uint32_t)kLPI2C_MasterPinLowTimeoutFlag))
-        {
-            result = kStatus_LPI2C_PinLowTimeout;
-        }
-        else if (0U != (status & (uint32_t)kLPI2C_MasterArbitrationLostFlag))
-        {
-            result = kStatus_LPI2C_ArbitrationLost;
-        }
-        else if (0U != (status & (uint32_t)kLPI2C_MasterNackDetectFlag))
-        {
-            result = kStatus_LPI2C_Nak;
-        }
-        /*
-         * $Branch Coverage Justification$
-         * Check of last possible flag - shouldn't be false
-         */
-        else if (0U != (status & (uint32_t)kLPI2C_MasterFifoErrFlag)) /* GCOVR_EXCL_BR_START */
-        {
-            result = kStatus_LPI2C_FifoError;
-        }
-        else /* GCOVR_EXCL_BR_STOP */
-        {
-            ; /* Intentional empty */
-        }
-
-        /* Clear error status. */
-        (void)LPI2C_MasterCheckAndClearError(base, status);
-
-        /* Send stop flag if needed */
-        if (0U == (handle->transfer.flags & (uint32_t)kLPI2C_TransferNoStopFlag))
-        {
-            status = LPI2C_MasterGetStatusFlags(base);
-            /* If bus is still busy and the master has not generate stop flag */
-            if ((status & ((uint32_t)kLPI2C_MasterBusBusyFlag | (uint32_t)kLPI2C_MasterStopDetectFlag)) ==
-                (uint32_t)kLPI2C_MasterBusBusyFlag)
-            {
-                /* Send a stop command to finalize the transfer. */
-                handle->base->MTDR = (uint32_t)kStopCmd;
-            }
-        }
-
-        /* Invoke callback. */
-        if (handle->completionCallback != NULL)
-        {
-            handle->completionCallback(base, handle, result, handle->userData);
-        }
+    /* Invoke callback. */
+    if (handle->completionCallback != NULL)
+    {
+        handle->completionCallback(base, handle, result, handle->userData);
     }
 }
