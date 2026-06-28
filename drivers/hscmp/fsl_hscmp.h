@@ -20,9 +20,15 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief HSCMP driver version 2.0.4. */
-#define FSL_HSCMP_DRIVER_VERSION (MAKE_VERSION(2, 0, 4))
+/*! @brief HSCMP driver version 2.1.0. */
+#define FSL_HSCMP_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
 /*! @} */
+
+#define HSCMP_RRCR1_RR_CHEN_MASK (HSCMP_RRCR1_RR_CH0EN_MASK | HSCMP_RRCR1_RR_CH1EN_MASK | \
+                                  HSCMP_RRCR1_RR_CH2EN_MASK | HSCMP_RRCR1_RR_CH3EN_MASK | \
+                                  HSCMP_RRCR1_RR_CH4EN_MASK | HSCMP_RRCR1_RR_CH5EN_MASK | \
+                                  HSCMP_RRCR1_RR_CH6EN_MASK | HSCMP_RRCR1_RR_CH7EN_MASK)
+#define HSCMP_RRCR1_RR_CHEN_SHIFT (0U)
 
 /*!
  * @brief HSCMP status falgs mask.
@@ -31,6 +37,7 @@ enum _hscmp_status_flags
 {
     kHSCMP_OutputRisingEventFlag  = HSCMP_CSR_CFR_MASK,  /*!< Rising-edge on the comparison output has occurred. */
     kHSCMP_OutputFallingEventFlag = HSCMP_CSR_CFF_MASK,  /*!< Falling-edge on the comparison output has occurred. */
+    kHSCMP_RoundRobinEventFlag    = HSCMP_CSR_RRF_MASK,  /*!< Round-Robin comparison result changed for a channel. */
     kHSCMP_OutputAssertEventFlag  = HSCMP_CSR_COUT_MASK, /*!< Return the current value of the analog comparator output.
                                                               The flag does not support W1C. */
 };
@@ -42,6 +49,8 @@ enum _hscmp_interrupt_enable
 {
     kHSCMP_OutputRisingInterruptEnable  = HSCMP_IER_CFR_IE_MASK, /*!< Comparator interrupt enable rising. */
     kHSCMP_OutputFallingInterruptEnable = HSCMP_IER_CFF_IE_MASK, /*!< Comparator interrupt enable falling. */
+    kHSCMP_RoundRobinInterruptEnable    = HSCMP_IER_RRF_IE_MASK, /*!< Round-Robin interrupt enable: assert when comparison
+                                                                       result changes for a channel. */
 };
 /*!
  * @brief HSCMP hysteresis mode. See chip data sheet to get the actual hystersis
@@ -75,6 +84,44 @@ typedef enum _hscmp_dac_reference_voltage_source
 } hscmp_dac_reference_voltage_source_t;
 
 /*!
+ * @brief Input Plus/Minus port source selection (CCR2.INPSEL / CCR2.INMSEL).
+ *
+ * Selects the signal source fed into the comparator's Plus or Minus port before
+ * the 8-to-1 analog mux stage (PSEL/MSEL).
+ */
+typedef enum _hscmp_input
+{
+    kHSCMP_InputFromDAC       = 0U, /*!< IN0: input driven from the internal 8-bit DAC output. */
+    kHSCMP_InputFromAnalogMux = 1U, /*!< IN1: input driven from the analog 8-to-1 mux (selected by PSEL/MSEL). */
+} hscmp_input_t;
+
+/*!
+ * @brief HSCMP window COUT event select for closing the window.
+ */
+typedef enum _hscmp_window_event_select
+{
+    kHSCMP_WindowEventRisingEdge  = 0U, /*!< Rising edge of COUT can close the window. */
+    kHSCMP_WindowEventFallingEdge = 1U, /*!< Falling edge of COUT can close the window. */
+    kHSCMP_WindowEventBothEdges   = 2U, /*!< Both edges of COUT can close the window. */
+} hscmp_window_event_select_t;
+
+/*!
+ * @brief Configures HSCMP window mode.
+ */
+typedef struct _hscmp_window_config
+{
+    bool enableWindowMode;        /*!< Enable window mode. When true, COUTA is clocked by bus clock whenever WINDOW=1. */
+    bool enableWindowInvert;      /*!< Invert the WINDOW/SAMPLE input signal. */
+    bool enableWindowCloseByEvent; /*!< Allow a COUT edge event (selected by windowEventSelect) to close the window. */
+    hscmp_window_event_select_t windowEventSelect; /*!< COUT edge event that can close the window. Only effective when
+                                                        enableWindowCloseByEvent is true. */
+    bool enableCoutaOwenMode;     /*!< Enable COUTA output-override mode: COUTA is defined by coutaOwLevel when window
+                                       is closed instead of holding the last sampled value. */
+    bool coutaOwLevel;            /*!< COUTA output level while window is closed (when enableCoutaOwenMode is true).
+                                       false=0, true=1. */
+} hscmp_window_config_t;
+
+/*!
  * @brief Configure the filter.
  */
 typedef struct _hscmp_filter_config
@@ -93,7 +140,8 @@ typedef struct _hscmp_dac_config
 {
     bool enableLowPowerMode;                                     /*!< Decide whether to enable DAC low power mode. */
     hscmp_dac_reference_voltage_source_t referenceVoltageSource; /*!< Internal DAC supply voltage reference source. */
-    uint8_t DACValue; /*!< Value for the DAC Output Voltage. Available range is 0-63.*/
+    uint8_t DACValue;         /*!< Value for the DAC Output Voltage. Available range is 0-63.*/
+    bool enableDacOutput;     /*!< Enables the DAC output to be available for other on-chip peripherals. */
 } hscmp_dac_config_t;
 
 /*!
@@ -108,7 +156,59 @@ typedef struct _hscmp_config
     bool enableInvertOutput;  /*!< Decide whether to inverts the comparator output. */
     hscmp_hysteresis_mode_t hysteresisMode; /*!< HSCMP hysteresis mode. */
     hscmp_power_mode_t powerMode;           /*!< HSCMP power mode. */
+    bool enableDacLink; /*!< CMP-to-DAC link enable: when true the DAC is enabled/disabled by CMP_EN instead of
+                             DCR[DAC_EN]. */
+    bool enableOffset;  /*!< Comparator offset control: when true, hysteresis is asymmetric — does not apply when
+                             INP crosses INM rising or INM crosses INP falling. */
 } hscmp_config_t;
+
+/*!
+ * @brief Round-Robin fixed port selection (RRCR1.FIXP).
+ */
+typedef enum _hscmp_roundrobin_fixed_port
+{
+    kHSCMP_RoundRobinFixedPlusPort  = 0U, /*!< Fix the Plus port; sweep only the Minus port inputs. */
+    kHSCMP_RoundRobinFixedMinusPort = 1U, /*!< Fix the Minus port; sweep only the Plus port inputs. */
+} hscmp_roundrobin_fixed_port_t;
+
+/*!
+ * @brief Round-Robin channel bitmask.
+ *
+ * Use OR combinations of these values for:
+ * - @ref hscmp_roundrobin_config_t::channelEnableMask (RRCR1 channel enables)
+ * - @ref HSCMP_SetRoundRobinPresetState  (RRCSR preset comparison results)
+ * - @ref HSCMP_GetRoundRobinLastResult   (RRCSR last comparison results)
+ * - @ref HSCMP_GetRoundRobinChannelFlags (RRSR channel-changed flags)
+ * - @ref HSCMP_ClearRoundRobinChannelFlags (RRSR clear flags)
+ */
+enum _hscmp_roundrobin_channel_mask
+{
+    kHSCMP_RoundRobinChannel0Mask  = (1U << 0U), /*!< Channel 0 mask. */
+    kHSCMP_RoundRobinChannel1Mask  = (1U << 1U), /*!< Channel 1 mask. */
+    kHSCMP_RoundRobinChannel2Mask  = (1U << 2U), /*!< Channel 2 mask. */
+    kHSCMP_RoundRobinChannel3Mask  = (1U << 3U), /*!< Channel 3 mask. */
+    kHSCMP_RoundRobinChannel4Mask  = (1U << 4U), /*!< Channel 4 mask. */
+    kHSCMP_RoundRobinChannel5Mask  = (1U << 5U), /*!< Channel 5 mask. */
+    kHSCMP_RoundRobinChannel6Mask  = (1U << 6U), /*!< Channel 6 mask. */
+    kHSCMP_RoundRobinChannel7Mask  = (1U << 7U), /*!< Channel 7 mask. */
+};
+
+/*!
+ * @brief Configures the round-robin comparison mode.
+ */
+typedef struct _hscmp_roundrobin_config
+{
+    bool enableRoundRobin;       /*!< Enable round-robin mode. */
+    uint8_t sampleClockCount;    /*!< Number of sample clocks after mux switch before sampling (0-3). */
+    uint8_t initDelayModulus;    /*!< Initialization delay modulus in bus clock cycles (1-63; 0 means 63). */
+    hscmp_roundrobin_fixed_port_t fixedPort; /*!< Fixed port select: sweeps Minus inputs or Plus inputs. */
+    uint8_t fixedChannel;        /*!< Fixed channel select (0-7). */
+    uint32_t channelEnableMask;  /*!< Bitmask of channels enabled for round-robin scanning.
+                                      Use OR combinations of @ref _hscmp_roundrobin_channel_mask values. */
+    bool enableRRTimer;          /*!< Enable the round-robin internal timer to auto-trigger scanning (RRCR2). */
+    uint32_t timerReloadValue;   /*!< Timer reload value in bus clock cycles (28-bit, valid range 0-0x0FFFFFFFU). */
+} hscmp_roundrobin_config_t;
+
 /*******************************************************************************
  * API
  ******************************************************************************/
@@ -192,13 +292,27 @@ static inline void HSCMP_Enable(HSCMP_Type *base, bool enable)
 
 /*!
  * @brief Select the input channels for HSCMP. This function determines which input
- *        is selected for the negative and positive mux.
+ *        is selected for the negative and positive Analog Mux.
  *
  * @param base HSCMP peripheral base address.
- * @param positiveChannel Positive side input channel number. Available range is 0-7.
- * @param negativeChannel Negative side input channel number. Available range is 0-7.
+ * @param positiveChannel Positive side Analog Mux input channel number. Available range is 0-7.
+ * @param negativeChannel Negative side Analog Mux input channel number. Available range is 0-7.
  */
 void HSCMP_SetInputChannels(HSCMP_Type *base, uint32_t positiveChannel, uint32_t negativeChannel);
+
+/*!
+ * @brief Select the high-level input source for the Plus and Minus comparator ports.
+ *
+ * Configures CCR2.INPSEL and CCR2.INMSEL to choose between the internal DAC output
+ * (IN0) and the analog 8-to-1 mux path (IN1, whose channel is selected by PSEL/MSEL).
+ * Call @ref HSCMP_SetInputChannels to set the PSEL/MSEL channel when using
+ * @ref kHSCMP_InputFromAnalogMux.
+ *
+ * @param base  HSCMP peripheral base address.
+ * @param plus  Plus input of the comparator. See @ref hscmp_input_t.
+ * @param minus Minus input of the comparator. See @ref hscmp_input_t.
+ */
+void HSCMP_SetInputMux(HSCMP_Type *base, hscmp_input_t plus, hscmp_input_t minus);
 
 /*!
  * @brief Enables/disables the DMA request for rising/falling events.
@@ -243,6 +357,17 @@ static inline void HSCMP_EnableWindowMode(HSCMP_Type *base, bool enable)
 }
 
 /*!
+ * @brief Configure the window mode with full control over all window-related options.
+ *
+ * This function configures CCR1 window-related bits: WINDOW_EN, WINDOW_INV, WINDOW_CLS,
+ * EVT_SEL, COUTA_OWEN, and COUTA_OW.
+ *
+ * @param base   HSCMP peripheral base address.
+ * @param config Pointer to @ref hscmp_window_config_t structure.
+ */
+void HSCMP_SetWindowConfig(HSCMP_Type *base, const hscmp_window_config_t *config);
+
+/*!
  * @brief Configures the filter.
  *
  * @param base HSCMP peripheral base address.
@@ -257,6 +382,92 @@ void HSCMP_SetFilterConfig(HSCMP_Type *base, const hscmp_filter_config_t *config
  * @param config Pointer to "hscmp_dac_config_t" structure. If config is "NULL", disable internal DAC.
  */
 void HSCMP_SetDACConfig(HSCMP_Type *base, const hscmp_dac_config_t *config);
+
+/*!
+ * @brief Dynamically update the DAC output voltage.
+ *
+ * @param base  HSCMP peripheral base address.
+ * @param value New DAC output voltage code.
+ */
+static inline void HSCMP_SetDACValue(HSCMP_Type *base, uint8_t value)
+{
+    uint32_t tmp32 = base->DCR;
+    tmp32 &= ~HSCMP_DCR_DAC_DATA_MASK;
+    tmp32 |= HSCMP_DCR_DAC_DATA(value);
+    base->DCR = tmp32;
+}
+
+/*! @name Round Robin
+ * @{
+ */
+
+/*!
+ * @brief Configure the round-robin comparison mode.
+ *
+ * This function configures RRCR0, RRCR1, and RRCR2 registers.
+ *
+ * @param base   HSCMP peripheral base address.
+ * @param config Pointer to @ref hscmp_roundrobin_config_t structure.
+ */
+void HSCMP_SetRoundRobinConfig(HSCMP_Type *base, const hscmp_roundrobin_config_t *config);
+
+/*!
+ * @brief Get the round-robin last comparison results for each channel.
+ *
+ * Returns the RRCSR register. Each bit[n] reflects the latest comparison output for channel n
+ * after the round-robin sweep. Use @ref _hscmp_roundrobin_channel_mask to decode the result.
+ *
+ * @param base HSCMP peripheral base address.
+ * @return Bitmask of last comparison results. See @ref _hscmp_roundrobin_channel_mask.
+ */
+static inline uint32_t HSCMP_GetRoundRobinLastResult(HSCMP_Type *base)
+{
+    return base->RRCSR;
+}
+
+/*!
+ * @brief Set the round-robin preset comparison state for each channel.
+ *
+ * Writes the RRCSR register to set the reference comparison results. The hardware compares each
+ * new sweep result against this preset; if a channel result differs, the corresponding flag in
+ * RRSR is set. Call this before enabling round-robin to establish the initial reference state.
+ * Use @ref _hscmp_roundrobin_channel_mask values.
+ *
+ * @param base HSCMP peripheral base address.
+ * @param mask Bitmask of channels whose preset comparison output is high (1).
+ *             See @ref _hscmp_roundrobin_channel_mask.
+ */
+static inline void HSCMP_SetRoundRobinPresetState(HSCMP_Type *base, uint32_t mask)
+{
+    base->RRCSR = mask & 0xFFU;
+}
+
+/*!
+ * @brief Get the round-robin channel changed flags.
+ *
+ * Returns the RRSR register. A flag bit is set when the comparison result for that channel
+ * differs from the previous round. Use @ref _hscmp_roundrobin_channel_mask to decode.
+ *
+ * @param base HSCMP peripheral base address.
+ * @return Bitmask of channel-changed flags. See @ref _hscmp_roundrobin_channel_mask.
+ */
+static inline uint32_t HSCMP_GetRoundRobinChannelFlags(HSCMP_Type *base)
+{
+    return base->RRSR;
+}
+
+/*!
+ * @brief Clear the round-robin channel changed flags.
+ *
+ * @param base HSCMP peripheral base address.
+ * @param mask Bitmask of flags to clear. See @ref _hscmp_roundrobin_channel_mask.
+ */
+static inline void HSCMP_ClearRoundRobinChannelFlags(HSCMP_Type *base, uint32_t mask)
+{
+    base->RRSR = mask;
+}
+
+/*! @} */
 
 /*!
  * @brief Enable the interrupts.

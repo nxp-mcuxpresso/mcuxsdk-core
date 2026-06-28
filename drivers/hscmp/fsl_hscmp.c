@@ -105,8 +105,9 @@ void HSCMP_Init(HSCMP_Type *base, const hscmp_config_t *config)
 
     /* CCR0 register, disable comparator. */
     tmp32 = base->CCR0;
-    tmp32 &= ~(HSCMP_CCR0_CMP_STOP_EN_MASK | HSCMP_CCR0_CMP_EN_MASK);
+    tmp32 &= ~(HSCMP_CCR0_CMP_STOP_EN_MASK | HSCMP_CCR0_CMP_EN_MASK | HSCMP_CCR0_LINKEN_MASK);
     tmp32 |= config->enableStopMode ? HSCMP_CCR0_CMP_STOP_EN_MASK : 0U;
+    tmp32 |= config->enableDacLink ? HSCMP_CCR0_LINKEN_MASK : 0U;
     base->CCR0 = tmp32;
 
     /* CCR1 register. */
@@ -119,9 +120,11 @@ void HSCMP_Init(HSCMP_Type *base, const hscmp_config_t *config)
 
     /* CCR2 register. */
     tmp32 = base->CCR2;
-    tmp32 &= ~(HSCMP_CCR2_HYSTCTR_MASK | HSCMP_CCR2_CMP_NPMD_MASK | HSCMP_CCR2_CMP_HPMD_MASK);
+    tmp32 &= ~(HSCMP_CCR2_HYSTCTR_MASK | HSCMP_CCR2_CMP_NPMD_MASK |
+               HSCMP_CCR2_CMP_HPMD_MASK | HSCMP_CCR2_OFFSET_MASK);
     tmp32 |= HSCMP_CCR2_HYSTCTR(config->hysteresisMode);
     tmp32 |= ((uint32_t)(config->powerMode) << HSCMP_CCR2_CMP_HPMD_SHIFT);
+    tmp32 |= config->enableOffset ? HSCMP_CCR2_OFFSET_MASK : 0U;
     base->CCR2 = tmp32;
 
     HSCMP_Enable(base, config->enableComparator); /* Enable the HSCMP module optionally. */
@@ -190,15 +193,17 @@ void HSCMP_GetDefaultConfig(hscmp_config_t *config)
     config->enableInvertOutput  = false;
     config->hysteresisMode      = kHSCMP_HysteresisLevel0;
     config->powerMode           = kHSCMP_LowSpeedPowerMode;
+    config->enableDacLink       = false;
+    config->enableOffset        = false;
 }
 
 /*!
  * @brief Select the input channels for HSCMP. This function determines which input
- *        is selected for the negative and positive mux.
+ *        is selected for the negative and positive Analog Mux.
  *
  * @param base HSCMP peripheral base address.
- * @param positiveChannel Positive side input channel number. Available range is 0-7.
- * @param negativeChannel Negative side input channel number. Available range is 0-7.
+ * @param positiveChannel Positive side Analog Mux input channel number. Available range is 0-7.
+ * @param negativeChannel Negative side Analog Mux input channel number. Available range is 0-7.
  */
 void HSCMP_SetInputChannels(HSCMP_Type *base, uint32_t positiveChannel, uint32_t negativeChannel)
 {
@@ -207,6 +212,26 @@ void HSCMP_SetInputChannels(HSCMP_Type *base, uint32_t positiveChannel, uint32_t
     tmp32 = base->CCR2;
     tmp32 &= ~(HSCMP_CCR2_PSEL_MASK | HSCMP_CCR2_MSEL_MASK);
     tmp32 |= HSCMP_CCR2_PSEL(positiveChannel) | HSCMP_CCR2_MSEL(negativeChannel);
+    base->CCR2 = tmp32;
+}
+
+/*!
+ * @brief Select the high-level input source for the Plus and Minus comparator ports.
+ *
+ * Configures CCR2.INPSEL and CCR2.INMSEL to choose between the internal DAC output
+ * (IN0) and the analog 8-to-1 mux path (IN1, whose channel is selected by PSEL/MSEL).
+ * Call @ref HSCMP_SetInputChannels to set the PSEL/MSEL channel when using
+ * @ref kHSCMP_InputFromAnalogMux.
+ *
+ * @param base  HSCMP peripheral base address.
+ * @param plus  Plus input of the comparator. See @ref hscmp_input_t.
+ * @param minus Minus input of the comparator. See @ref hscmp_input_t.
+ */
+void HSCMP_SetInputMux(HSCMP_Type *base, hscmp_input_t plus, hscmp_input_t minus)
+{
+    uint32_t tmp32 = base->CCR2;
+    tmp32 &= ~(HSCMP_CCR2_INPSEL_MASK | HSCMP_CCR2_INMSEL_MASK);
+    tmp32 |= HSCMP_CCR2_INPSEL(plus) | HSCMP_CCR2_INMSEL(minus);
     base->CCR2 = tmp32;
 }
 
@@ -245,10 +270,83 @@ void HSCMP_SetDACConfig(HSCMP_Type *base, const hscmp_dac_config_t *config)
     }
     else
     {
-        tmp32 = HSCMP_DCR_VRSEL(config->referenceVoltageSource) | HSCMP_DCR_DAC_DATA(config->DACValue);
+        tmp32 = base->DCR;
+        tmp32 &= ~(HSCMP_DCR_DAC_EN_MASK | HSCMP_DCR_DAC_HPMD_MASK | HSCMP_DCR_VRSEL_MASK |
+                   HSCMP_DCR_DACOE_MASK | HSCMP_DCR_DAC_DATA_MASK);
         tmp32 |= config->enableLowPowerMode ? HSCMP_DCR_DAC_HPMD_MASK : 0U;
+        tmp32 |= HSCMP_DCR_VRSEL(config->referenceVoltageSource);
+        tmp32 |= config->enableDacOutput ? HSCMP_DCR_DACOE_MASK : 0U;
+        tmp32 |= HSCMP_DCR_DAC_DATA(config->DACValue);
         tmp32 |= HSCMP_DCR_DAC_EN_MASK;
     }
 
     base->DCR = tmp32;
+}
+
+/*!
+ * @brief Configure the window mode with full control over all window-related options.
+ *
+ * Configures CCR1 window-related bits: WINDOW_EN, WINDOW_INV, WINDOW_CLS, EVT_SEL,
+ * COUTA_OWEN, and COUTA_OW. All other CCR1 bits are preserved.
+ *
+ * @param base   HSCMP peripheral base address.
+ * @param config Pointer to "hscmp_window_config_t" structure.
+ */
+void HSCMP_SetWindowConfig(HSCMP_Type *base, const hscmp_window_config_t *config)
+{
+    assert(config != NULL);
+
+    uint32_t tmp32;
+
+    tmp32 = base->CCR1;
+    tmp32 &= ~(HSCMP_CCR1_WINDOW_EN_MASK | HSCMP_CCR1_WINDOW_INV_MASK | HSCMP_CCR1_WINDOW_CLS_MASK |
+               HSCMP_CCR1_EVT_SEL_MASK | HSCMP_CCR1_COUTA_OWEN_MASK | HSCMP_CCR1_COUTA_OW_MASK);
+
+    tmp32 |= config->enableWindowMode ? HSCMP_CCR1_WINDOW_EN_MASK : 0U;
+    tmp32 |= config->enableWindowInvert ? HSCMP_CCR1_WINDOW_INV_MASK : 0U;
+    tmp32 |= config->enableWindowCloseByEvent ? HSCMP_CCR1_WINDOW_CLS_MASK : 0U;
+    tmp32 |= HSCMP_CCR1_EVT_SEL(config->windowEventSelect);
+    tmp32 |= config->enableCoutaOwenMode ? HSCMP_CCR1_COUTA_OWEN_MASK : 0U;
+    tmp32 |= config->coutaOwLevel ? HSCMP_CCR1_COUTA_OW_MASK : 0U;
+
+    base->CCR1 = tmp32;
+}
+
+/*!
+ * @brief Configure the round-robin comparison mode.
+ *
+ * Configures RRCR0 (enable, sample clocks, init delay), RRCR1 (channel enable mask,
+ * fixed port, fixed channel), and RRCR2 (internal timer).
+ *
+ * @param base   HSCMP peripheral base address.
+ * @param config Pointer to "hscmp_roundrobin_config_t" structure.
+ */
+void HSCMP_SetRoundRobinConfig(HSCMP_Type *base, const hscmp_roundrobin_config_t *config)
+{
+    assert(config != NULL);
+
+    uint32_t tmp32;
+
+    /* RRCR0: enable, sample clocks, initialization delay modulus. */
+    tmp32 = base->RRCR0;
+    tmp32 &= ~(HSCMP_RRCR0_RR_EN_MASK | HSCMP_RRCR0_RR_NSAM_MASK | HSCMP_RRCR0_RR_INITMOD_MASK);
+    tmp32 |= config->enableRoundRobin ? HSCMP_RRCR0_RR_EN_MASK : 0U;
+    tmp32 |= HSCMP_RRCR0_RR_NSAM(config->sampleClockCount);
+    tmp32 |= HSCMP_RRCR0_RR_INITMOD(config->initDelayModulus);
+    base->RRCR0 = tmp32;
+
+    /* RRCR1: per-channel enable mask, fixed port, fixed channel. */
+    tmp32 = base->RRCR1;
+    tmp32 &= ~(HSCMP_RRCR1_RR_CHEN_MASK | HSCMP_RRCR1_FIXP_MASK | HSCMP_RRCR1_FIXCH_MASK);
+    tmp32 |= (config->channelEnableMask & HSCMP_RRCR1_RR_CHEN_MASK) << HSCMP_RRCR1_RR_CHEN_SHIFT;
+    tmp32 |= (config->fixedPort == kHSCMP_RoundRobinFixedMinusPort) ? HSCMP_RRCR1_FIXP_MASK : 0U;
+    tmp32 |= HSCMP_RRCR1_FIXCH(config->fixedChannel);
+    base->RRCR1 = tmp32;
+
+    /* RRCR2: internal timer reload value and enable. */
+    tmp32 = base->RRCR2;
+    tmp32 &= ~(HSCMP_RRCR2_RR_TIMER_RELOAD_MASK | HSCMP_RRCR2_RR_TIMER_EN_MASK);
+    tmp32 |= HSCMP_RRCR2_RR_TIMER_RELOAD(config->timerReloadValue);
+    tmp32 |= config->enableRRTimer ? HSCMP_RRCR2_RR_TIMER_EN_MASK : 0U;
+    base->RRCR2 = tmp32;
 }
