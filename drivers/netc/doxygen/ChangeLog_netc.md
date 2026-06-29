@@ -1,5 +1,10 @@
 # NETC
 
+## [2.10.7]
+
+- Bug Fixes
+  - Fixed i.MX943 PCIE VF config register addresses.
+
 ## [2.10.6]
 
 - Bug Fixes
