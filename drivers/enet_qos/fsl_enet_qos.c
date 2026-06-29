@@ -885,12 +885,13 @@ static inline bool ENET_QOS_IsMIIConfigValid(enet_qos_mii_mode_t mode, enet_qos_
     /* Errata ERR050539: ENET_QOS does not support RMII 10Mbps mode */
 #if defined(MIMXRT1171_SERIES) || defined(MIMXRT1172_SERIES) || defined(MIMXRT1173_cm7_SERIES) ||         \
     defined(MIMXRT1173_cm4_SERIES) || defined(MIMXRT1175_cm7_SERIES) || defined(MIMXRT1175_cm4_SERIES) || \
-    defined(MIMXRT1176_cm7_SERIES) || defined(MIMXRT1176_cm4_SERIES)
+    defined(MIMXRT1176_cm7_SERIES) || defined(MIMXRT1176_cm4_SERIES) || \
+    defined(MIMXRT1151_SERIES) || defined(MIMXRT1152_SERIES)
     if ((kENET_QOS_RmiiMode == mode) && (kENET_QOS_MiiSpeed10M == speed))
     {
         return false;
     }
-#endif /* MIMXRT117x_SERIES */
+#endif /* MIMXRT117x_SERIES and MIMXRT115x_SERIES */
 
     return true;
 }
