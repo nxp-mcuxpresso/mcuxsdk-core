@@ -23,6 +23,17 @@
   - Added `hscmp_input_t` enum and `HSCMP_SetInputMux()` API to configure CCR2.INPSEL and
     CCR2.INMSEL, selecting between the internal DAC output (IN0) and the analog 8-to-1 mux (IN1)
     for the Plus and Minus comparator input ports independently.
+  - Added `hscmp_func_clock_t` enum and `funcClockSel` field in `hscmp_config_t` to configure
+    CCR1.FUNC_CLK_SEL (functional clock source).
+  - Added `enableDacStopMode` field in `hscmp_dac_config_t` to configure DCR.DAC_STOP_EN (allow DAC_EN to
+    enable the DAC in stop mode).
+  - Added `hscmp_roundrobin_trig_sel_t` enum and `triggerSelect` field in `hscmp_roundrobin_config_t`
+    to configure RRCR0.RR_TRG_SEL (external/internal trigger).
+  - Added `hscmp_roundrobin_clk_sel_t` enum and `rrClockSel` field in `hscmp_roundrobin_config_t`
+    to configure RRCR0.RR_CLK_SEL (round-robin clock source).
+  - Added `sampleCount` field in `hscmp_roundrobin_config_t` to configure RRCR0.RR_SAMPLE_CNT
+    (number of samples for one channel).
+  - Added `sampleThreshold` field in `hscmp_roundrobin_config_t` to configure RRCR0.RR_SAMPLE_THRESHOLD.
 
 ## [2.0.4]
 

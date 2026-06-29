@@ -74,6 +74,19 @@ typedef enum _hscmp_power_mode
     kHSCMP_NanoPowerMode      = 2U, /*!< Nano power comparator is enabled. */
 } hscmp_power_mode_t;
 
+#if (defined(FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL)
+/*!
+ * @brief Functional clock source selection for HSCMP.
+ */
+typedef enum _hscmp_func_clock
+{
+    kHSCMP_FuncClockSource0 = 0U, /*!< Select functional clock source 0. */
+    kHSCMP_FuncClockSource1 = 1U, /*!< Select functional clock source 1. */
+    kHSCMP_FuncClockSource2 = 2U, /*!< Select functional clock source 2. */
+    kHSCMP_FuncClockSource3 = 3U, /*!< Select functional clock source 3. */
+} hscmp_func_clock_t;
+#endif
+
 /*!
  * @brief Internal DAC reference voltage source.
  */
@@ -142,6 +155,9 @@ typedef struct _hscmp_dac_config
     hscmp_dac_reference_voltage_source_t referenceVoltageSource; /*!< Internal DAC supply voltage reference source. */
     uint8_t DACValue;         /*!< Value for the DAC Output Voltage. Available range is 0-63.*/
     bool enableDacOutput;     /*!< Enables the DAC output to be available for other on-chip peripherals. */
+#if (defined(FSL_FEATURE_HSCMP_HAS_DAC_STOP_EN) && FSL_FEATURE_HSCMP_HAS_DAC_STOP_EN)
+    bool enableDacStopMode;   /*!< Allow DAC_EN to enable the DAC in stop mode. */
+#endif
 } hscmp_dac_config_t;
 
 /*!
@@ -160,6 +176,9 @@ typedef struct _hscmp_config
                              DCR[DAC_EN]. */
     bool enableOffset;  /*!< Comparator offset control: when true, hysteresis is asymmetric — does not apply when
                              INP crosses INM rising or INM crosses INP falling. */
+#if (defined(FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL)
+    hscmp_func_clock_t funcClockSel; /*!< Functional clock source for the comparator core. */
+#endif
 } hscmp_config_t;
 
 /*!
@@ -193,6 +212,30 @@ enum _hscmp_roundrobin_channel_mask
     kHSCMP_RoundRobinChannel7Mask  = (1U << 7U), /*!< Channel 7 mask. */
 };
 
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_TRG_SEL) && FSL_FEATURE_HSCMP_HAS_RR_TRG_SEL)
+/*!
+ * @brief Round-Robin trigger source selection.
+ */
+typedef enum _hscmp_roundrobin_trig_sel
+{
+    kHSCMP_RoundRobinExternalTrigger = 0U, /*!< External trigger drives round-robin scanning. */
+    kHSCMP_RoundRobinInternalTrigger = 1U, /*!< Internal trigger drives round-robin scanning. */
+} hscmp_roundrobin_trig_sel_t;
+#endif
+
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_RR_CLK_SEL)
+/*!
+ * @brief Round-Robin sampling clock source selection.
+ */
+typedef enum _hscmp_roundrobin_clk_sel
+{
+    kHSCMP_RoundRobinClockSource0 = 0U, /*!< Round-Robin clock source 0. */
+    kHSCMP_RoundRobinClockSource1 = 1U, /*!< Round-Robin clock source 1. */
+    kHSCMP_RoundRobinClockSource2 = 2U, /*!< Round-Robin clock source 2. */
+    kHSCMP_RoundRobinClockSource3 = 3U, /*!< Round-Robin clock source 3. */
+} hscmp_roundrobin_clk_sel_t;
+#endif
+
 /*!
  * @brief Configures the round-robin comparison mode.
  */
@@ -207,6 +250,20 @@ typedef struct _hscmp_roundrobin_config
                                       Use OR combinations of @ref _hscmp_roundrobin_channel_mask values. */
     bool enableRRTimer;          /*!< Enable the round-robin internal timer to auto-trigger scanning (RRCR2). */
     uint32_t timerReloadValue;   /*!< Timer reload value in bus clock cycles (28-bit, valid range 0-0x0FFFFFFFU). */
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_TRG_SEL) && FSL_FEATURE_HSCMP_HAS_RR_TRG_SEL)
+    hscmp_roundrobin_trig_sel_t triggerSelect; /*!< Round-Robin trigger source select. */
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_RR_CLK_SEL)
+    hscmp_roundrobin_clk_sel_t rrClockSel;     /*!< Round-Robin sampling clock source select. */
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_SAMPLE_CNT) && FSL_FEATURE_HSCMP_HAS_RR_SAMPLE_CNT)
+    uint8_t sampleCount;         /*!< Number of samples for one channel. */
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_SAMPLE_THRESHOLD) && FSL_FEATURE_HSCMP_HAS_RR_SAMPLE_THRESHOLD)
+    uint8_t sampleThreshold;     /*!< For one channel, when (RR_SAMPLE_THRESHOLD+1) sample results are "1",
+                                      the final result is "1"; otherwise the final result is "0".
+                                      This value must not be larger than sampleCount. */
+#endif
 } hscmp_roundrobin_config_t;
 
 /*******************************************************************************

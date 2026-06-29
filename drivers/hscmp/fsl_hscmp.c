@@ -116,6 +116,10 @@ void HSCMP_Init(HSCMP_Type *base, const hscmp_config_t *config)
     tmp32 |= config->enableOutputPin ? HSCMP_CCR1_COUT_PEN_MASK : 0U;
     tmp32 |= config->useUnfilteredOutput ? HSCMP_CCR1_COUT_SEL_MASK : 0U;
     tmp32 |= config->enableInvertOutput ? HSCMP_CCR1_COUT_INV_MASK : 0U;
+#if (defined(FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL)
+    tmp32 &= ~HSCMP_CCR1_FUNC_CLK_SEL_MASK;
+    tmp32 |= HSCMP_CCR1_FUNC_CLK_SEL(config->funcClockSel);
+#endif
     base->CCR1 = tmp32;
 
     /* CCR2 register. */
@@ -195,6 +199,9 @@ void HSCMP_GetDefaultConfig(hscmp_config_t *config)
     config->powerMode           = kHSCMP_LowSpeedPowerMode;
     config->enableDacLink       = false;
     config->enableOffset        = false;
+#if (defined(FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL)
+    config->funcClockSel        = kHSCMP_FuncClockSource0;
+#endif
 }
 
 /*!
@@ -277,6 +284,10 @@ void HSCMP_SetDACConfig(HSCMP_Type *base, const hscmp_dac_config_t *config)
         tmp32 |= HSCMP_DCR_VRSEL(config->referenceVoltageSource);
         tmp32 |= config->enableDacOutput ? HSCMP_DCR_DACOE_MASK : 0U;
         tmp32 |= HSCMP_DCR_DAC_DATA(config->DACValue);
+#if (defined(FSL_FEATURE_HSCMP_HAS_DAC_STOP_EN) && FSL_FEATURE_HSCMP_HAS_DAC_STOP_EN)
+        tmp32 &= ~HSCMP_DCR_DAC_STOP_EN_MASK;
+        tmp32 |= config->enableDacStopMode ? HSCMP_DCR_DAC_STOP_EN_MASK : 0U;
+#endif
         tmp32 |= HSCMP_DCR_DAC_EN_MASK;
     }
 
@@ -333,6 +344,22 @@ void HSCMP_SetRoundRobinConfig(HSCMP_Type *base, const hscmp_roundrobin_config_t
     tmp32 |= config->enableRoundRobin ? HSCMP_RRCR0_RR_EN_MASK : 0U;
     tmp32 |= HSCMP_RRCR0_RR_NSAM(config->sampleClockCount);
     tmp32 |= HSCMP_RRCR0_RR_INITMOD(config->initDelayModulus);
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_TRG_SEL) && FSL_FEATURE_HSCMP_HAS_RR_TRG_SEL)
+    tmp32 &= ~HSCMP_RRCR0_RR_TRG_SEL_MASK;
+    tmp32 |= HSCMP_RRCR0_RR_TRG_SEL(config->triggerSelect);
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_RR_CLK_SEL)
+    tmp32 &= ~HSCMP_RRCR0_RR_CLK_SEL_MASK;
+    tmp32 |= HSCMP_RRCR0_RR_CLK_SEL(config->rrClockSel);
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_SAMPLE_CNT) && FSL_FEATURE_HSCMP_HAS_RR_SAMPLE_CNT)
+    tmp32 &= ~HSCMP_RRCR0_RR_SAMPLE_CNT_MASK;
+    tmp32 |= HSCMP_RRCR0_RR_SAMPLE_CNT(config->sampleCount);
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_RR_SAMPLE_THRESHOLD) && FSL_FEATURE_HSCMP_HAS_RR_SAMPLE_THRESHOLD)
+    tmp32 &= ~HSCMP_RRCR0_RR_SAMPLE_THRESHOLD_MASK;
+    tmp32 |= HSCMP_RRCR0_RR_SAMPLE_THRESHOLD(config->sampleThreshold);
+#endif
     base->RRCR0 = tmp32;
 
     /* RRCR1: per-channel enable mask, fixed port, fixed channel. */
