@@ -52,6 +52,7 @@ enum _hscmp_interrupt_enable
     kHSCMP_RoundRobinInterruptEnable    = HSCMP_IER_RRF_IE_MASK, /*!< Round-Robin interrupt enable: assert when comparison
                                                                        result changes for a channel. */
 };
+
 /*!
  * @brief HSCMP hysteresis mode. See chip data sheet to get the actual hystersis
  *        value with each level
@@ -62,10 +63,17 @@ typedef enum _hscmp_hysteresis_mode
     kHSCMP_HysteresisLevel1 = 1U, /*!< The hard block output has level 1 hysteresis internally. */
     kHSCMP_HysteresisLevel2 = 2U, /*!< The hard block output has level 2 hysteresis internally. */
     kHSCMP_HysteresisLevel3 = 3U, /*!< The hard block output has level 3 hysteresis internally. */
+#if defined(FSL_FEATURE_HSCMP_HAS_HYSTERESIS_LEVEL) && (FSL_FEATURE_HSCMP_HAS_HYSTERESIS_LEVEL == 8)
+    kHSCMP_HysteresisLevel4 = 4U, /*!< The hard block output has level 4 hysteresis internally. */
+    kHSCMP_HysteresisLevel5 = 5U, /*!< The hard block output has level 5 hysteresis internally. */
+    kHSCMP_HysteresisLevel6 = 6U, /*!< The hard block output has level 6 hysteresis internally. */
+    kHSCMP_HysteresisLevel7 = 7U, /*!< The hard block output has level 7 hysteresis internally. */
+#endif
 } hscmp_hysteresis_mode_t;
 
+#if (defined(FSL_FEATURE_HSCMP_HAS_PWR_MODE_SELECT) && FSL_FEATURE_HSCMP_HAS_PWR_MODE_SELECT)
 /*!
- * @brief HSCMP nano mode.
+ * @brief HSCMP power mode.
  */
 typedef enum _hscmp_power_mode
 {
@@ -73,6 +81,7 @@ typedef enum _hscmp_power_mode
     kHSCMP_HighSpeedPowerMode = 1U, /*!< High speed comparison mode is selected. */
     kHSCMP_NanoPowerMode      = 2U, /*!< Nano power comparator is enabled. */
 } hscmp_power_mode_t;
+#endif
 
 #if (defined(FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL)
 /*!
@@ -87,6 +96,7 @@ typedef enum _hscmp_func_clock
 } hscmp_func_clock_t;
 #endif
 
+#if (defined(FSL_FEATURE_HSCMP_HAS_DAC_REF_VOL_SELECT) && FSL_FEATURE_HSCMP_HAS_DAC_REF_VOL_SELECT)
 /*!
  * @brief Internal DAC reference voltage source.
  */
@@ -95,7 +105,9 @@ typedef enum _hscmp_dac_reference_voltage_source
     kHSCMP_VrefSourceVin1 = 0U, /*!< vrefh_int is selected as resistor ladder network supply reference Vin. */
     kHSCMP_VrefSourceVin2 = 1U, /*!< vrefh_ext is selected as resistor ladder network supply reference Vin. */
 } hscmp_dac_reference_voltage_source_t;
+#endif
 
+#if (defined(FSL_FEATURE_HSCMP_HAS_INPUT_SELECT) && FSL_FEATURE_HSCMP_HAS_INPUT_SELECT)
 /*!
  * @brief Input Plus/Minus port source selection (CCR2.INPSEL / CCR2.INMSEL).
  *
@@ -107,6 +119,7 @@ typedef enum _hscmp_input
     kHSCMP_InputFromDAC       = 0U, /*!< IN0: input driven from the internal 8-bit DAC output. */
     kHSCMP_InputFromAnalogMux = 1U, /*!< IN1: input driven from the analog 8-to-1 mux (selected by PSEL/MSEL). */
 } hscmp_input_t;
+#endif
 
 /*!
  * @brief HSCMP window COUT event select for closing the window.
@@ -151,8 +164,12 @@ typedef struct _hscmp_filter_config
  */
 typedef struct _hscmp_dac_config
 {
-    bool enableLowPowerMode;                                     /*!< Decide whether to enable DAC low power mode. */
+#if (defined(FSL_FEATURE_HSCMP_HAS_DAC_PWR_MODE_SELECT) && FSL_FEATURE_HSCMP_HAS_DAC_PWR_MODE_SELECT)
+    bool enableLowPowerMode;  /*!< Decide whether to enable DAC low power mode. */
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_DAC_REF_VOL_SELECT) && FSL_FEATURE_HSCMP_HAS_DAC_REF_VOL_SELECT)
     hscmp_dac_reference_voltage_source_t referenceVoltageSource; /*!< Internal DAC supply voltage reference source. */
+#endif
     uint8_t DACValue;         /*!< Value for the DAC Output Voltage. Available range is 0-63.*/
     bool enableDacOutput;     /*!< Enables the DAC output to be available for other on-chip peripherals. */
 #if (defined(FSL_FEATURE_HSCMP_HAS_DAC_STOP_EN) && FSL_FEATURE_HSCMP_HAS_DAC_STOP_EN)
@@ -171,11 +188,17 @@ typedef struct _hscmp_config
     bool useUnfilteredOutput; /*!< Decide whether to use unfiltered output. */
     bool enableInvertOutput;  /*!< Decide whether to inverts the comparator output. */
     hscmp_hysteresis_mode_t hysteresisMode; /*!< HSCMP hysteresis mode. */
+#if (defined(FSL_FEATURE_HSCMP_HAS_PWR_MODE_SELECT) && FSL_FEATURE_HSCMP_HAS_PWR_MODE_SELECT)
     hscmp_power_mode_t powerMode;           /*!< HSCMP power mode. */
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_LINKEN) && FSL_FEATURE_HSCMP_HAS_LINKEN)
     bool enableDacLink; /*!< CMP-to-DAC link enable: when true the DAC is enabled/disabled by CMP_EN instead of
                              DCR[DAC_EN]. */
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_OFFSET) && FSL_FEATURE_HSCMP_HAS_OFFSET)
     bool enableOffset;  /*!< Comparator offset control: when true, hysteresis is asymmetric — does not apply when
                              INP crosses INM rising or INM crosses INP falling. */
+#endif
 #if (defined(FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL)
     hscmp_func_clock_t funcClockSel; /*!< Functional clock source for the comparator core. */
 #endif
@@ -357,6 +380,7 @@ static inline void HSCMP_Enable(HSCMP_Type *base, bool enable)
  */
 void HSCMP_SetInputChannels(HSCMP_Type *base, uint32_t positiveChannel, uint32_t negativeChannel);
 
+#if (defined(FSL_FEATURE_HSCMP_HAS_INPUT_SELECT) && FSL_FEATURE_HSCMP_HAS_INPUT_SELECT)
 /*!
  * @brief Select the high-level input source for the Plus and Minus comparator ports.
  *
@@ -370,6 +394,7 @@ void HSCMP_SetInputChannels(HSCMP_Type *base, uint32_t positiveChannel, uint32_t
  * @param minus Minus input of the comparator. See @ref hscmp_input_t.
  */
 void HSCMP_SetInputMux(HSCMP_Type *base, hscmp_input_t plus, hscmp_input_t minus);
+#endif
 
 /*!
  * @brief Enables/disables the DMA request for rising/falling events.

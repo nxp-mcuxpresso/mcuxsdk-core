@@ -105,9 +105,12 @@ void HSCMP_Init(HSCMP_Type *base, const hscmp_config_t *config)
 
     /* CCR0 register, disable comparator. */
     tmp32 = base->CCR0;
-    tmp32 &= ~(HSCMP_CCR0_CMP_STOP_EN_MASK | HSCMP_CCR0_CMP_EN_MASK | HSCMP_CCR0_LINKEN_MASK);
+    tmp32 &= ~(HSCMP_CCR0_CMP_STOP_EN_MASK | HSCMP_CCR0_CMP_EN_MASK);
     tmp32 |= config->enableStopMode ? HSCMP_CCR0_CMP_STOP_EN_MASK : 0U;
+#if (defined(FSL_FEATURE_HSCMP_HAS_LINKEN) && FSL_FEATURE_HSCMP_HAS_LINKEN)
+    tmp32 &= ~HSCMP_CCR0_LINKEN_MASK;
     tmp32 |= config->enableDacLink ? HSCMP_CCR0_LINKEN_MASK : 0U;
+#endif
     base->CCR0 = tmp32;
 
     /* CCR1 register. */
@@ -124,11 +127,16 @@ void HSCMP_Init(HSCMP_Type *base, const hscmp_config_t *config)
 
     /* CCR2 register. */
     tmp32 = base->CCR2;
-    tmp32 &= ~(HSCMP_CCR2_HYSTCTR_MASK | HSCMP_CCR2_CMP_NPMD_MASK |
-               HSCMP_CCR2_CMP_HPMD_MASK | HSCMP_CCR2_OFFSET_MASK);
+    tmp32 &= ~HSCMP_CCR2_HYSTCTR_MASK;
     tmp32 |= HSCMP_CCR2_HYSTCTR(config->hysteresisMode);
+#if (defined(FSL_FEATURE_HSCMP_HAS_PWR_MODE_SELECT) && FSL_FEATURE_HSCMP_HAS_PWR_MODE_SELECT)
+    tmp32 &= ~(HSCMP_CCR2_CMP_HPMD_MASK | HSCMP_CCR2_CMP_NPMD_MASK);
     tmp32 |= ((uint32_t)(config->powerMode) << HSCMP_CCR2_CMP_HPMD_SHIFT);
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_OFFSET) && FSL_FEATURE_HSCMP_HAS_OFFSET)
+    tmp32 &= ~HSCMP_CCR2_OFFSET_MASK;
     tmp32 |= config->enableOffset ? HSCMP_CCR2_OFFSET_MASK : 0U;
+#endif
     base->CCR2 = tmp32;
 
     HSCMP_Enable(base, config->enableComparator); /* Enable the HSCMP module optionally. */
@@ -196,9 +204,15 @@ void HSCMP_GetDefaultConfig(hscmp_config_t *config)
     config->useUnfilteredOutput = false;
     config->enableInvertOutput  = false;
     config->hysteresisMode      = kHSCMP_HysteresisLevel0;
+#if (defined(FSL_FEATURE_HSCMP_HAS_PWR_MODE_SELECT) && FSL_FEATURE_HSCMP_HAS_PWR_MODE_SELECT)
     config->powerMode           = kHSCMP_LowSpeedPowerMode;
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_LINKEN) && FSL_FEATURE_HSCMP_HAS_LINKEN)
     config->enableDacLink       = false;
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_OFFSET) && FSL_FEATURE_HSCMP_HAS_OFFSET)
     config->enableOffset        = false;
+#endif
 #if (defined(FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL) && FSL_FEATURE_HSCMP_HAS_FUNC_CLK_SEL)
     config->funcClockSel        = kHSCMP_FuncClockSource0;
 #endif
@@ -222,6 +236,7 @@ void HSCMP_SetInputChannels(HSCMP_Type *base, uint32_t positiveChannel, uint32_t
     base->CCR2 = tmp32;
 }
 
+#if (defined(FSL_FEATURE_HSCMP_HAS_INPUT_SELECT) && FSL_FEATURE_HSCMP_HAS_INPUT_SELECT)
 /*!
  * @brief Select the high-level input source for the Plus and Minus comparator ports.
  *
@@ -241,6 +256,7 @@ void HSCMP_SetInputMux(HSCMP_Type *base, hscmp_input_t plus, hscmp_input_t minus
     tmp32 |= HSCMP_CCR2_INPSEL(plus) | HSCMP_CCR2_INMSEL(minus);
     base->CCR2 = tmp32;
 }
+#endif
 
 /*!
  * @brief Configures the filter.
@@ -278,12 +294,17 @@ void HSCMP_SetDACConfig(HSCMP_Type *base, const hscmp_dac_config_t *config)
     else
     {
         tmp32 = base->DCR;
-        tmp32 &= ~(HSCMP_DCR_DAC_EN_MASK | HSCMP_DCR_DAC_HPMD_MASK | HSCMP_DCR_VRSEL_MASK |
-                   HSCMP_DCR_DACOE_MASK | HSCMP_DCR_DAC_DATA_MASK);
-        tmp32 |= config->enableLowPowerMode ? HSCMP_DCR_DAC_HPMD_MASK : 0U;
-        tmp32 |= HSCMP_DCR_VRSEL(config->referenceVoltageSource);
+        tmp32 &= ~(HSCMP_DCR_DAC_EN_MASK | HSCMP_DCR_DACOE_MASK | HSCMP_DCR_DAC_DATA_MASK);
         tmp32 |= config->enableDacOutput ? HSCMP_DCR_DACOE_MASK : 0U;
         tmp32 |= HSCMP_DCR_DAC_DATA(config->DACValue);
+#if (defined(FSL_FEATURE_HSCMP_HAS_DAC_PWR_MODE_SELECT) && FSL_FEATURE_HSCMP_HAS_DAC_PWR_MODE_SELECT)
+        tmp32 &= ~HSCMP_DCR_DAC_HPMD_MASK;
+        tmp32 |= config->enableLowPowerMode ? HSCMP_DCR_DAC_HPMD_MASK : 0U;
+#endif
+#if (defined(FSL_FEATURE_HSCMP_HAS_DAC_REF_VOL_SELECT) && FSL_FEATURE_HSCMP_HAS_DAC_REF_VOL_SELECT)
+        tmp32 &= ~HSCMP_DCR_VRSEL_MASK;
+        tmp32 |= HSCMP_DCR_VRSEL(config->referenceVoltageSource);
+#endif
 #if (defined(FSL_FEATURE_HSCMP_HAS_DAC_STOP_EN) && FSL_FEATURE_HSCMP_HAS_DAC_STOP_EN)
         tmp32 &= ~HSCMP_DCR_DAC_STOP_EN_MASK;
         tmp32 |= config->enableDacStopMode ? HSCMP_DCR_DAC_STOP_EN_MASK : 0U;
