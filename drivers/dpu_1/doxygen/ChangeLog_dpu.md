@@ -1,5 +1,10 @@
 # DPU
 
+## [2.5.0]
+
+- New feature.
+  - Added FSL_FEATURE_DISPLAY_SEERIS_HAS_LD macro for local dimming support.
+
 ## [2.4.1]
 
 - Bug Fixes.

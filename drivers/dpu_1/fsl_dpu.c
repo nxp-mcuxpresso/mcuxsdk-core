@@ -489,7 +489,8 @@ typedef struct
     uint8_t RESERVED_1[65320];
 } DPU_DISPLAY_Type;
 
-#if defined(FSL_FEATURE_DISPLAY_SEERIS_MDR7) && FSL_FEATURE_DISPLAY_SEERIS_MDR7
+#if defined(FSL_FEATURE_DISPLAY_SEERIS_MDR7) && FSL_FEATURE_DISPLAY_SEERIS_MDR7 && \
+    defined(FSL_FEATURE_DISPLAY_SEERIS_HAS_LD) && FSL_FEATURE_DISPLAY_SEERIS_HAS_LD
 static inline void writel(uint32_t value, volatile uint32_t *addr)
 {
     *addr = value;
@@ -2879,7 +2880,8 @@ status_t DPU_InitWarpCoordinates(DISPLAY_SEERIS_Type *base, dpu_unit_t unit, con
     return kStatus_Success;
 }
 
-#if defined(FSL_FEATURE_DISPLAY_SEERIS_MDR7) && FSL_FEATURE_DISPLAY_SEERIS_MDR7
+#if defined(FSL_FEATURE_DISPLAY_SEERIS_MDR7) && FSL_FEATURE_DISPLAY_SEERIS_MDR7 && \
+    defined(FSL_FEATURE_DISPLAY_SEERIS_HAS_LD) && FSL_FEATURE_DISPLAY_SEERIS_HAS_LD
 /*!
  * @brief Start the localdimming.
  *
