@@ -1,5 +1,14 @@
 # LPADC
 
+## [2.10.1]
+
+- Improvements
+  - Reworked the gain-calibration ratio in `LPADC_FinishAutoCalibration` to use
+    single-precision (`float`) arithmetic instead of double-precision, removing the
+    dependency on the libgcc double soft-float routines (`__floatsidf`, `__aeabi_dsub`,
+    `__aeabi_ddiv`, `__aeabi_d2f`) that were linked into every application using the
+    LPADC driver, reducing ROM footprint.
+
 ## [2.10.0]
 
 - Improvements

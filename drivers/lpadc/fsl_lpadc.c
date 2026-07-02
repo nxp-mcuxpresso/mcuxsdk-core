@@ -887,16 +887,16 @@ status_t LPADC_FinishAutoCalibration(ADC_Type *base)
     if (0U != ((base->GCC[0]) & 0x8000U))
     {
         GCCa         = GCCa - 0x10000;
-        GCRa         = (float)((131072.0) /
-                       (131072.0 - (double)GCCa)); /* Gain_CalA = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[0])) */
+        GCRa         = 131072.0f /
+                       (131072.0f - (float)GCCa); /* Gain_CalA = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[0])) */
         base->GCR[0] = LPADC_GetGainConvResult(GCRa); /* write A side GCALR. */
     }
 
     if (0U != ((base->GCC[1]) & 0x8000U))
     {
         GCCb         = GCCb - 0x10000;
-        GCRb         = (float)((131072.0) /
-                       (131072.0 - (double)GCCb)); /* Gain_CalB = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[1])) */
+        GCRb         = 131072.0f /
+                       (131072.0f - (float)GCCb); /* Gain_CalB = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[1])) */
         base->GCR[1] = LPADC_GetGainConvResult(GCRb); /* write B side GCALR. */
     }
 
@@ -965,8 +965,8 @@ status_t LPADC_FinishAutoCalibration(ADC_Type *base)
     GCCa         = ((base->GCC[0] & ADC_GCC_GAIN_CAL_MASK) >> ADC_GCC_GAIN_CAL_SHIFT);
 #if (defined(FSL_FEATURE_LPADC_FIFO_COUNT) && (FSL_FEATURE_LPADC_FIFO_COUNT == 2U))
     GCCb         = ((base->GCC[1] & ADC_GCC_GAIN_CAL_MASK) >> ADC_GCC_GAIN_CAL_SHIFT);
-    GCRb         = (float)((131072.0) /
-                   (131072.0 - (double)GCCb)); /* Gain_CalB = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[1])) */
+    GCRb         = 131072.0f /
+                   (131072.0f - (float)GCCb); /* Gain_CalB = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[1])) */
     base->GCR[1] = LPADC_GetGainConvResult(GCRb);      /* write B side GCALR. */
 #else
     if ((GCCa & (((ADC_GCC_GAIN_CAL_MASK >> ADC_GCC_GAIN_CAL_SHIFT) + 1U) >> 1U)) != 0U)
@@ -974,8 +974,8 @@ status_t LPADC_FinishAutoCalibration(ADC_Type *base)
         GCCa |= (~(uint32_t)(ADC_GCC_GAIN_CAL_MASK >> ADC_GCC_GAIN_CAL_SHIFT));
     }
 #endif /* FSL_FEATURE_LPADC_FIFO_COUNT */
-    GCRa         = (float)((131072.0) /
-                   (131072.0 - (double)GCCa)); /* Gain_CalA = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[0])) */
+    GCRa         = 131072.0f /
+                   (131072.0f - (float)GCCa); /* Gain_CalA = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[0])) */
     base->GCR[0] = LPADC_GetGainConvResult(GCRa);      /* write A side GCALR. */
 
     /* Indicate the values are valid. */
