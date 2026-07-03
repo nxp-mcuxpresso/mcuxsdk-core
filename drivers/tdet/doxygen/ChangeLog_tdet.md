@@ -1,5 +1,9 @@
 # TDET
 
+## [2.4.0]
+
+- Added support for MIMXRT2663.
+
 ## [2.3.3]
 
 - Fix MISRA and CERT-C findings.
