@@ -20,7 +20,7 @@
 
 /*! @name Driver version */
 /*@{*/
-#define FSL_ESPI_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
+#define FSL_ESPI_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*@}*/
 
 #define ESPI_INVALID_PORT (0xFFU)
@@ -427,6 +427,16 @@ typedef struct _espi_port80_status
     uint8_t previousCode; /*!< Previous POST code. */
     uint8_t counter;      /*!< POST code counter (0-15, wraps). */
 } espi_p80_status_t;
+
+/*!
+ * @brief eSPI GPIO VWire GPIO fields.
+ */
+typedef struct _espi_gpio_wire
+{
+    uint8_t index; /*!< VW index (128-255 for the GPIO expander group). */
+    uint8_t valid; /*!< Valid mask, one bit per GPIO (bits 3:0): 1 = update, 0 = retain. */
+    uint8_t level; /*!< GPIO levels, one bit per GPIO (bits 3:0): 0 = Low, 1 = High. */
+} espi_gpio_wire_t;
 
 /*! @brief eSPI Virtual Wire receive flags.
  *
@@ -888,6 +898,22 @@ static inline uint32_t ESPI_GetVWire(ESPI_Type *base)
  * @retval kStatus_Busy Previous write still pending.
  */
 status_t ESPI_SendVWire(ESPI_Type *base, espi_vw_wr_flags_t flag, uint32_t value);
+
+/*!
+ * @brief Reads and decodes the GPIO virtual wire message.
+ *
+ * @param base eSPI peripheral base address.
+ * @param wire Pointer to structure to receive the decoded fields.
+ */
+void ESPI_GetVWireGpio(ESPI_Type *base, espi_gpio_wire_t *wire);
+
+/*!
+ * @brief Sends the GPIO virtual wire message.
+ *
+ * @param base eSPI peripheral base address.
+ * @param wire Pointer to the fields to drive.
+ */
+void ESPI_SendVWireGpio(ESPI_Type *base, const espi_gpio_wire_t *wire);
 
 /*! @} */
 

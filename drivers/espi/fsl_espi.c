@@ -257,6 +257,42 @@ status_t ESPI_SendVWire(ESPI_Type *base, espi_vw_wr_flags_t flag, uint32_t value
 }
 
 /*!
+ * brief Reads and decodes the GPIO virtual wire message.
+ *
+ * param base eSPI peripheral base address.
+ * param wire Pointer to structure to receive the decoded fields.
+ */
+void ESPI_GetVWireGpio(ESPI_Type *base, espi_gpio_wire_t *wire)
+{
+    assert(wire != NULL);
+
+    uint32_t reg = base->WIREIN_GPIO;
+
+    wire->index = (uint8_t)((reg & ESPI_WIREIN_GPIO_INDEX_MASK) >> ESPI_WIREIN_GPIO_INDEX_SHIFT);
+    wire->valid = (uint8_t)((reg & ESPI_WIREIN_GPIO_VALID_MASK) >> ESPI_WIREIN_GPIO_VALID_SHIFT);
+    wire->level = (uint8_t)((reg & ESPI_WIREIN_GPIO_LEVEL_MASK) >> ESPI_WIREIN_GPIO_LEVEL_SHIFT);
+}
+
+/*!
+ * brief Sends the GPIO virtual wire message.
+ *
+ * param base eSPI peripheral base address.
+ * param wire Pointer to the fields to drive.
+ */
+void ESPI_SendVWireGpio(ESPI_Type *base, const espi_gpio_wire_t *wire)
+{
+    assert(wire != NULL);
+
+    uint32_t reg = (((uint32_t)wire->index << ESPI_WIREOUT_GPIO_INDEX_SHIFT) & ESPI_WIREOUT_GPIO_INDEX_MASK) |
+                   (((uint32_t)wire->valid << ESPI_WIREOUT_GPIO_VALID_SHIFT) & ESPI_WIREOUT_GPIO_VALID_MASK) |
+                   (((uint32_t)wire->level << ESPI_WIREOUT_GPIO_LEVEL_SHIFT) & ESPI_WIREOUT_GPIO_LEVEL_MASK);
+
+    /* WIREOUT_GPIO is typed read-only (__I) in the current device header pending
+     * the dPDM to make it R/W; write through a volatile pointer until corrected. */
+    *(volatile uint32_t *)(uintptr_t)&base->WIREOUT_GPIO = reg;
+}
+
+/*!
  * brief Gets endpoint data fields from a port.
  *
  * This function reads PnDATAIN and extracts the IDX field and DATA_LEN field.

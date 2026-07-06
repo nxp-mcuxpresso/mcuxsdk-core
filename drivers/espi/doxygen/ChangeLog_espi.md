@@ -1,5 +1,10 @@
 # ESPI
 
+## [2.2.0]
+
+- New Features
+  - Added VWire GPIO Expander feature.
+
 ## [2.1.0]
 
 - New Features
