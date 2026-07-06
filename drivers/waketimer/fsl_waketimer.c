@@ -16,6 +16,12 @@
 #define FSL_COMPONENT_ID "platform.drivers.waketimer"
 #endif
 
+#if defined(WAKETIMER_RSTS)
+#define WAKETIMER_RESETS_ARRAY WAKETIMER_RSTS
+#elif defined(WAKETIMER_RSTS_N)
+#define WAKETIMER_RESETS_ARRAY WAKETIMER_RSTS_N
+#endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -44,6 +50,11 @@ static WAKETIMER_Type *const s_waketimerBases[] = WAKETIMER_BASE_PTRS;
 static waketimer_callback_t s_waketimerCallback[sizeof(s_waketimerBases) / sizeof(s_waketimerBases[0])];
 /* Array of WAKETIMER IRQ number. */
 static const IRQn_Type s_waketimerIRQ[] = WAKETIMER_IRQS;
+
+#if defined(WAKETIMER_RESETS_ARRAY)
+/* Reset array */
+static const reset_ip_name_t s_waketimerResets[] = WAKETIMER_RESETS_ARRAY;
+#endif
 
 /*******************************************************************************
  * Code
@@ -77,6 +88,10 @@ void WAKETIMER_Init(WAKETIMER_Type *base, const waketimer_config_t *config)
     assert(NULL != base);
 
     uint32_t index = WAKETIMER_GetInstance(base);
+
+#if defined(WAKETIMER_RESETS_ARRAY)
+    RESET_ReleasePeripheralReset(s_waketimerResets[index]);
+#endif
 
     /* Halt timer */
     base->WAKE_TIMER_CTRL |= WAKETIMER_WAKE_TIMER_CTRL_CLR_WAKE_TIMER_MASK;

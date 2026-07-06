@@ -11,6 +11,17 @@
 #define FSL_COMPONENT_ID "platform.drivers.mipi_csi"
 #endif
 
+#if defined(MIPI_CSI_RSTS)
+#define MIPI_CSI_RESETS_ARRAY MIPI_CSI_RSTS
+#elif defined(MIPI_CSI_RSTS_N)
+#define MIPI_CSI_RESETS_ARRAY MIPI_CSI_RSTS_N
+#endif
+
+#if defined(MIPI_CSI_RESETS_ARRAY)
+/* Reset array */
+static const reset_ip_name_t s_mipiCsiResets[] = MIPI_CSI_RESETS_ARRAY;
+#endif
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -64,6 +75,10 @@ status_t CSI2RX_Init(MIPI_CSI2RX_Type *base, const csi2rx_config_t *config)
 
     uint32_t reg;
     uint32_t timeout;
+
+#if defined(MIPI_CSI_RESETS_ARRAY)
+    RESET_ReleasePeripheralReset(s_mipiCsiResets[0]);
+#endif
 
     reg = 0U;
     reg |= MIPI_CSI2RX_CFG_REG0_CFG_UC_PRG_RXHS_SETTLE(config->tClkSettle_EscClk);

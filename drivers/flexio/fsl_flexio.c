@@ -123,13 +123,17 @@ uint32_t FLEXIO_GetInstance(FLEXIO_Type *base)
 void FLEXIO_Init(FLEXIO_Type *base, const flexio_config_t *userConfig)
 {
     uint32_t ctrlReg = 0;
+#if (!(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)) \
+    || defined(FLEXIO_RESETS_ARRAY)
+    uint32_t instance = FLEXIO_GetInstance(base);
+#endif
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
-    CLOCK_EnableClock(s_flexioClocks[FLEXIO_GetInstance(base)]);
+    CLOCK_EnableClock(s_flexioClocks[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if defined(FLEXIO_RESETS_ARRAY)
-    RESET_ReleasePeripheralReset(s_flexioResets[FLEXIO_GetInstance(base)]);
+    RESET_ReleasePeripheralReset(s_flexioResets[instance]);
 #endif
 
     FLEXIO_Reset(base);

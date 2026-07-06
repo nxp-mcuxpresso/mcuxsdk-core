@@ -11,6 +11,12 @@
 #define FSL_COMPONENT_ID "platform.drivers.stm"
 #endif
 
+#if defined(STM_RSTS)
+#define STM_RESETS_ARRAY STM_RSTS
+#elif defined(STM_RSTS_N)
+#define STM_RESETS_ARRAY STM_RSTS_N
+#endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -35,7 +41,10 @@ static STM_Type *const s_stmBases[] = STM_BASE_PTRS;
 static const clock_ip_name_t s_stmClocks[] = STM_CLOCKS;
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
-/* TODO Update when reset driver ready */
+#if defined(STM_RESETS_ARRAY)
+/* Reset array */
+static const reset_ip_name_t s_stmResets[] = STM_RESETS_ARRAY;
+#endif
 
 /*! @brief Pointers real ISRs installed by drivers for each instance. */
 static stm_callback_t s_stmCallback[ARRAY_SIZE(s_stmBases)] = {0};
@@ -109,6 +118,10 @@ void STM_Init(STM_Type *base, const stm_config_t *config)
     /* Enable the STM clock */
     CLOCK_EnableClock(s_stmClocks[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
+#if defined(STM_RESETS_ARRAY)
+    RESET_ReleasePeripheralReset(s_stmResets[instance]);
+#endif
 
     /* Freeze timer in Debug mode*/
     if(!config->enableRunInDebug)

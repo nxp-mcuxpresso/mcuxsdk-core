@@ -15,7 +15,9 @@
 #define FSL_COMPONENT_ID "platform.drivers.lpc_freqme"
 #endif
 
-#if defined(FREQME_RSTS_N)
+#if defined(FREQME_RSTS)
+#define FREQME_RESETS_ARRAY FREQME_RSTS
+#elif defined(FREQME_RSTS_N)
 #define FREQME_RESETS_ARRAY FREQME_RSTS_N
 #endif
 

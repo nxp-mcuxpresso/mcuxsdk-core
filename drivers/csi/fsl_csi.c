@@ -28,6 +28,12 @@
 #define FSL_COMPONENT_ID "platform.drivers.csi"
 #endif
 
+#if defined(CSI_RSTS)
+#define CSI_RESETS_ARRAY CSI_RSTS
+#elif defined(CSI_RSTS_N)
+#define CSI_RESETS_ARRAY CSI_RSTS_N
+#endif
+
 /* Two frame buffer loaded to CSI register at most. */
 #define CSI_MAX_ACTIVE_FRAME_NUM 2U
 
@@ -94,6 +100,11 @@ static CSI_Type *const s_csiBases[] = CSI_BASE_PTRS;
 /*! @brief Pointers to CSI clocks for each CSI submodule. */
 static const clock_ip_name_t s_csiClocks[] = CSI_CLOCKS;
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
+#if defined(CSI_RESETS_ARRAY)
+/* Reset array */
+static const reset_ip_name_t s_csiResets[] = CSI_RESETS_ARRAY;
+#endif
 
 /* Array for the CSI driver handle. */
 #if !CSI_DRIVER_FRAG_MODE
@@ -262,9 +273,17 @@ status_t CSI_Init(CSI_Type *base, const csi_config_t *config)
         return kStatus_InvalidArgument;
     }
 
-#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+#if (!(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)) \
+    || defined(CSI_RESETS_ARRAY)
     uint32_t instance = CSI_GetInstance(base);
+#endif
+
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     CLOCK_EnableClock(s_csiClocks[instance]);
+#endif
+
+#if defined(CSI_RESETS_ARRAY)
+    RESET_ReleasePeripheralReset(s_csiResets[instance]);
 #endif
 
     CSI_Reset(base);

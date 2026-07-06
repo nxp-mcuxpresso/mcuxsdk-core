@@ -11,6 +11,17 @@
 #define FSL_COMPONENT_ID "platform.drivers.sramctl"
 #endif
 
+#if defined(SRAMCTL_RSTS)
+#define SRAMCTL_RESETS_ARRAY SRAMCTL_RSTS
+#elif defined(SRAMCTL_RSTS_N)
+#define SRAMCTL_RESETS_ARRAY SRAMCTL_RSTS_N
+#endif
+
+#if defined(SRAMCTL_RESETS_ARRAY)
+/* Reset array */
+static const reset_ip_name_t s_sramctlResets[] = SRAMCTL_RESETS_ARRAY;
+#endif
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -21,6 +32,10 @@ status_t SRAMCTL_Init(SRAMCTL_Type *base, sramctl_config_t const *config)
     {
         return kStatus_InvalidArgument;
     }
+
+#if defined(SRAMCTL_RESETS_ARRAY)
+    RESET_ReleasePeripheralReset(s_sramctlResets[0]);
+#endif
 
     /* Clear previous completion / event flags (W1C), including any latched ECC errors. */
     (void)SRAMCTL_ClearStatusFlags(base, (uint32_t)(kSRAMCTL_InitializationDone | kSRAMCTL_BusError | kSRAMCTL_AddressValid |

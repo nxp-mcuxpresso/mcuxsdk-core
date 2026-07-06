@@ -14,6 +14,12 @@
 #define FSL_COMPONENT_ID "platform.drivers.enet_qos"
 #endif
 
+#if defined(ENET_QOS_RSTS)
+#define ENET_QOS_RESETS_ARRAY ENET_QOS_RSTS
+#elif defined(ENET_QOS_RSTS_N)
+#define ENET_QOS_RESETS_ARRAY ENET_QOS_RSTS_N
+#endif
+
 /*! @brief Defines 10^9 nanosecond. */
 #define ENET_QOS_NANOSECS_ONESECOND (1000000000U)
 /*! @brief Defines 10^6 microsecond.*/
@@ -203,6 +209,11 @@ static enet_qos_state_t s_enetStates[ARRAY_SIZE(s_enetqosBases)] = {{}};
 /*! @brief Pointers to enet clocks for each instance. */
 const clock_ip_name_t s_enetqosClock[ARRAY_SIZE(s_enetqosBases)] = ENETQOS_CLOCKS;
 #endif /*  FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
+#if defined(ENET_QOS_RESETS_ARRAY)
+/* Reset array */
+static const reset_ip_name_t s_enetqosResets[] = ENET_QOS_RESETS_ARRAY;
+#endif
 
 /*******************************************************************************
  * Code
@@ -988,12 +999,19 @@ status_t ENET_QOS_Init(
     assert(config != NULL);
 
     status_t result = kStatus_Success;
-#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
+#if (!(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)) \
+    || defined(ENET_QOS_RESETS_ARRAY)
     uint32_t instance = ENET_QOS_GetInstance(base);
+#endif
 
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Ungate ENET clock. */
     (void)CLOCK_EnableClock(s_enetqosClock[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
+#if defined(ENET_QOS_RESETS_ARRAY)
+    RESET_ReleasePeripheralReset(s_enetqosResets[instance]);
+#endif
 
     /* Initializes the ENET DMA with basic function. */
     result = ENET_QOS_SetDMAControl(base, config);

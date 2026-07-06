@@ -1151,7 +1151,7 @@ void FLEXCAN_Init(CAN_Type *base, const flexcan_config_t *pConfig, uint32_t sour
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
 #if defined(FLEXCAN_RESETS_ARRAY)
-    RESET_ReleasePeripheralReset(s_flexcanResets[FLEXCAN_GetInstance(base)]);
+    RESET_ReleasePeripheralReset(s_flexcanResets[instance]);
 #endif
 
 #if defined(CAN_CTRL1_CLKSRC_MASK)
