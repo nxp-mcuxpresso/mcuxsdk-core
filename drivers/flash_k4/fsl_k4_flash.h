@@ -24,7 +24,7 @@
  * @{
  */
 /*! @brief Flash driver version for SDK*/
-#define FSL_FLASH_DRIVER_VERSION (MAKE_VERSION(2, 4, 1)) /*!< Version 2.4.1. */
+#define FSL_FLASH_DRIVER_VERSION (MAKE_VERSION(2, 4, 2)) /*!< Version 2.4.2. */
 
 /*! @} */
 
@@ -34,7 +34,7 @@ enum _flash_driver_version_constants
     kFLASH_DriverVersionName   = 'F', /*!< Flash driver version name.*/
     kFLASH_DriverVersionMajor  = 2,   /*!< Major flash driver version.*/
     kFLASH_DriverVersionMinor  = 4,   /*!< Minor flash driver version.*/
-    kFLASH_DriverVersionBugfix = 1    /*!< Bugfix for flash driver version.*/
+    kFLASH_DriverVersionBugfix = 2    /*!< Bugfix for flash driver version.*/
 };
 
 /*!
@@ -151,6 +151,22 @@ typedef void (*flash_lock_cb_t)(void *userData);
  */
 typedef void (*flash_unlock_cb_t)(void *userData);
 
+/*!
+ * @brief Non-blocking try-lock callback type for async flash operations.
+ *
+ * Called by FLASH_Process() from the idle task to attempt lock acquisition
+ * without blocking. If the lock is already held by another task the callback
+ * must return false immediately so the idle task is never put to sleep.
+ *
+ * Register via FLASH_RegisterTryLockCallback(). When not registered
+ * FLASH_Process() falls back to the blocking lock callback.
+ *
+ * @param userData Opaque pointer registered alongside the callback.
+ * @return true  Lock acquired successfully.
+ * @return false Lock is currently held by another task.
+ */
+typedef bool (*flash_trylock_cb_t)(void *userData);
+
 /*! @brief Alignment for buffer allocations (must be power of 2). */
 #ifndef FLASH_BUFFER_ALIGNMENT
 #define FLASH_BUFFER_ALIGNMENT          (4U)
@@ -263,8 +279,9 @@ typedef struct _flash_async_context
     flash_op_queue_t opQueue;                                             /*!< Operation queue */
 
     /* Lock/unlock callbacks for thread-safe access (optional, NULL = no protection) */
-    flash_lock_cb_t   lockCb;       /*!< Callback to acquire the lock */
+    flash_lock_cb_t   lockCb;       /*!< Callback to acquire the lock (blocking) */
     flash_unlock_cb_t unlockCb;     /*!< Callback to release the lock */
+    flash_trylock_cb_t tryLockCb;   /*!< Non-blocking try-lock used by FLASH_Process (idle context) */
     void             *lockUserData; /*!< Opaque pointer passed to lock/unlock callbacks */
 
     /* Circular buffer pool (replaces fixed buffer array) */
@@ -606,6 +623,35 @@ status_t FLASH_RegisterNotifyImminentFlashStall(notify_imminent_flash_stall_cb_t
  * @retval #kStatus_FLASH_Success Callbacks registered successfully.
  */
 status_t FLASH_RegisterLockCallbacks(flash_lock_cb_t lockCb, flash_unlock_cb_t unlockCb, void *userData);
+
+/*!
+ * @brief Register a non-blocking try-lock callback used by FLASH_Process().
+ *
+ * FLASH_Process() is typically called from the FreeRTOS idle hook where
+ * blocking is forbidden. This callback must attempt to acquire the lock with
+ * a zero timeout and return immediately.
+ *
+ * When this callback is registered, FLASH_Process() will call it instead of
+ * the blocking lock callback. If it returns false the function returns
+ * kStatus_Busy so that the idle task is never blocked.
+ *
+ * When not registered FLASH_Process() falls back to the blocking lockCb.
+ *
+ * Example using OSA mutex with zero timeout:
+ * @code
+ *   static bool MyTryLock(void *ud) {
+ *       return (OSA_MutexLock((osa_mutex_handle_t)ud, 0U) == KOSA_StatusSuccess);
+ *   }
+ *   FLASH_RegisterTryLockCallback(MyTryLock, myMutexHandle);
+ * @endcode
+ *
+ * @param tryLockCb  Non-blocking try-lock function. Pass NULL to unregister.
+ * @param userData   Opaque pointer passed to the callback (same handle as
+ *                   the one passed to FLASH_RegisterLockCallbacks).
+ *
+ * @retval #kStatus_FLASH_Success Callback registered successfully.
+ */
+status_t FLASH_RegisterTryLockCallback(flash_trylock_cb_t tryLockCb, void *userData);
 
 /*!
  * @brief Flush pending operations to make room for a new operation.

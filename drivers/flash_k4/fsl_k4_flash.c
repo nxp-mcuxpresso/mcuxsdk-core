@@ -79,6 +79,27 @@ enum _ftfx_ram_func_constants
 #define FLASH_UNLOCK() \
     do { if (s_flashAsyncContext.unlockCb != NULL) { s_flashAsyncContext.unlockCb(s_flashAsyncContext.lockUserData); } } while (0)
 
+/*!
+ * @brief Non-blocking try-lock for FLASH_Process() (idle-task context).
+ *
+ * Uses tryLockCb when registered (zero-timeout, never blocks), otherwise
+ * falls back to the blocking lockCb so non-idle-hook callers still work.
+ * Sets (acquired_) to true if the lock was acquired, false otherwise.
+ */
+#define FLASH_LOCK_TRY(acquired_)                                              \
+    do {                                                                        \
+        if (s_flashAsyncContext.tryLockCb != NULL)                             \
+        {                                                                       \
+            (acquired_) = s_flashAsyncContext.tryLockCb(                       \
+                              s_flashAsyncContext.lockUserData);                \
+        }                                                                       \
+        else                                                                    \
+        {                                                                       \
+            FLASH_LOCK();                                                       \
+            (acquired_) = true;                                                 \
+        }                                                                       \
+    } while (0)
+
 #endif /* CONFIG_FLASH_K4_ASYNC_MODE */
 
 
@@ -2206,111 +2227,121 @@ status_t FLASH_Process(void)
     }
     else
     {
-        /* Acquire lock for thread-safe access */
-        FLASH_LOCK();
+        bool lockAcquired = false;
 
-        do
+        /* Non-blocking try-lock: FLASH_Process() runs in idle hook where blocking is forbidden. */
+        FLASH_LOCK_TRY(lockAcquired);
+
+        if (!lockAcquired)
         {
-            /* Process operations while queue is not empty */
-            while (!FLASH_QueueIsEmpty())
+            /* Mutex held by another task; skip this idle slot. */
+            status = kStatus_Busy;
+        }
+        else
+        {
+            do
             {
-                uint32_t requiredTime_us  = 0U;
-                uint32_t availableTime_us = 0U;
-
-                /* Peek at the next operation to determine timing requirements */
-                status = FLASH_QueuePeek(&op);
-                if (status != kStatus_FLASH_Success)
+                /* Process operations while queue is not empty */
+                while (!FLASH_QueueIsEmpty())
                 {
-                    /* Queue became empty or error */
-                    break;
-                }
+                    uint32_t requiredTime_us  = 0U;
+                    uint32_t availableTime_us = 0U;
 
-                /* Estimate required time based on operation type */
-                switch (op.opType)
-                {
-                    case kFlashAsyncOp_Erase:
+                    /* Peek at the next operation to determine timing requirements */
+                    status = FLASH_QueuePeek(&op);
+                    if (status != kStatus_FLASH_Success)
                     {
-                        /* Sector erase typically takes longer */
-                        uint32_t numSectors = (op.lengthInBytes + FLASH_FEATURE_SECTOR_SIZE - 1U) / FLASH_FEATURE_SECTOR_SIZE;
-                        requiredTime_us = numSectors * CONFIG_FLASH_K4_SECTOR_ERASE_TIME_US;
+                        /* Queue became empty or error */
                         break;
                     }
 
-                    case kFlashAsyncOp_Program:
+                    /* Estimate required time based on operation type */
+                    switch (op.opType)
                     {
-                        uint32_t numPhrases = (op.lengthInBytes + FLASH_FEATURE_PHRASE_SIZE - 1U) / FLASH_FEATURE_PHRASE_SIZE;
-                        requiredTime_us = numPhrases * CONFIG_FLASH_K4_PHRASE_PROG_TIME_US;
+                        case kFlashAsyncOp_Erase:
+                        {
+                            /* Sector erase typically takes longer */
+                            uint32_t numSectors = (op.lengthInBytes + FLASH_FEATURE_SECTOR_SIZE - 1U) / FLASH_FEATURE_SECTOR_SIZE;
+                            requiredTime_us = numSectors * CONFIG_FLASH_K4_SECTOR_ERASE_TIME_US;
+                            break;
+                        }
+
+                        case kFlashAsyncOp_Program:
+                        {
+                            uint32_t numPhrases = (op.lengthInBytes + FLASH_FEATURE_PHRASE_SIZE - 1U) / FLASH_FEATURE_PHRASE_SIZE;
+                            requiredTime_us = numPhrases * CONFIG_FLASH_K4_PHRASE_PROG_TIME_US;
+                            break;
+                        }
+
+                        case kFlashAsyncOp_ProgramPage:
+                        {
+                            uint32_t numPages = (op.lengthInBytes + FLASH_FEATURE_PAGE_SIZE - 1U) / FLASH_FEATURE_PAGE_SIZE;
+                            requiredTime_us = numPages * CONFIG_FLASH_K4_PAGE_PROG_TIME_US;
+                            break;
+                        }
+
+                        default:
+                            requiredTime_us = CONFIG_FLASH_K4_DEFAULT_OP_TIME_US;
+                            break;
+                    }
+
+                    /* Check available idle time if callback is registered */
+                    if (s_flashAsyncContext.idleDurationCb != NULL)
+                    {
+                        availableTime_us = s_flashAsyncContext.idleDurationCb();
+
+                        /* Check if we have enough time for this operation */
+                        if (availableTime_us < requiredTime_us)
+                        {
+    #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
+                            s_flashAsyncContext.totalDeferredDueToIdle++;
+    #endif
+                            /* Not enough time - defer operation */
+                            status = kStatus_Busy;
+                            break;
+                        }
+                    }
+
+                    /* Remove the operation from the queue */
+                    status = FLASH_QueueGet(&op);
+                    if (status != kStatus_FLASH_Success)
+                    {
                         break;
                     }
 
-                    case kFlashAsyncOp_ProgramPage:
+                    /* Execute the operation */
+                    status = FLASH_ExecuteOperation(&op);
+
+                    /* Free buffer if this was a program operation */
+                    if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
                     {
-                        uint32_t numPages = (op.lengthInBytes + FLASH_FEATURE_PAGE_SIZE - 1U) / FLASH_FEATURE_PAGE_SIZE;
-                        requiredTime_us = numPages * CONFIG_FLASH_K4_PAGE_PROG_TIME_US;
+                        FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
+                    }
+
+    #if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
+                    s_flashAsyncContext.totalOperationsProcessed++;
+    #endif
+
+                    opsProcessed++;
+
+                    /* If operation failed, stop processing */
+                    if (status != kStatus_FLASH_Success)
+                    {
                         break;
                     }
 
-                    default:
-                        requiredTime_us = CONFIG_FLASH_K4_DEFAULT_OP_TIME_US;
-                        break;
-                }
-
-                /* Check available idle time if callback is registered */
-                if (s_flashAsyncContext.idleDurationCb != NULL)
-                {
-                    availableTime_us = s_flashAsyncContext.idleDurationCb();
-
-                    /* Check if we have enough time for this operation */
-                    if (availableTime_us < requiredTime_us)
+                    /* Limit operations per call to avoid starving other tasks or if erase operation */
+                    if (opsProcessed >= CONFIG_FLASH_K4_ASYNC_MAX_OPS_PER_PROCESS)
                     {
-#if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-                        s_flashAsyncContext.totalDeferredDueToIdle++;
-#endif
-                        /* Not enough time - defer operation */
-                        status = kStatus_Busy;
                         break;
                     }
                 }
 
-                /* Remove the operation from the queue */
-                status = FLASH_QueueGet(&op);
-                if (status != kStatus_FLASH_Success)
-                {
-                    break;
-                }
+            } while (false);
 
-                /* Execute the operation */
-                status = FLASH_ExecuteOperation(&op);
-
-                /* Free buffer if this was a program operation */
-                if ((op.opType == kFlashAsyncOp_Program) || (op.opType == kFlashAsyncOp_ProgramPage))
-                {
-                    FLASH_BufferPoolFree(op.bufferOffset, op.bufferSize);
-                }
-
-#if defined(CONFIG_FLASH_K4_ASYNC_ENABLE_STATS) && (CONFIG_FLASH_K4_ASYNC_ENABLE_STATS == 1)
-                s_flashAsyncContext.totalOperationsProcessed++;
-#endif
-
-                opsProcessed++;
-
-                /* If operation failed, stop processing */
-                if (status != kStatus_FLASH_Success)
-                {
-                    break;
-                }
-
-                /* Limit operations per call to avoid starving other tasks or if erase operation */
-                if (opsProcessed >= CONFIG_FLASH_K4_ASYNC_MAX_OPS_PER_PROCESS)
-                {
-                    break;
-                }
-            }
-
-        } while (false);
-
-        /* Single unlock point */
-        FLASH_UNLOCK();
+            /* Single unlock point */
+            FLASH_UNLOCK();
+        }
     }
 
     return status;
@@ -2477,6 +2508,7 @@ static status_t FLASH_AsyncContextInit(flash_config_t *config)
         /* Lock/unlock callbacks must be registered by application via FLASH_RegisterLockCallbacks() */
         s_flashAsyncContext.lockCb       = NULL;
         s_flashAsyncContext.unlockCb     = NULL;
+        s_flashAsyncContext.tryLockCb    = NULL;
         s_flashAsyncContext.lockUserData = NULL;
 
         /* Initialize the custom ring buffer queue */
@@ -3023,6 +3055,15 @@ status_t FLASH_RegisterLockCallbacks(flash_lock_cb_t lockCb, flash_unlock_cb_t u
     s_flashAsyncContext.lockCb       = lockCb;
     s_flashAsyncContext.unlockCb     = unlockCb;
     s_flashAsyncContext.lockUserData = userData;
+
+    return kStatus_FLASH_Success;
+}
+
+status_t FLASH_RegisterTryLockCallback(flash_trylock_cb_t tryLockCb, void *userData)
+{
+    /* userData is ignored: same lockUserData registered via FLASH_RegisterLockCallbacks() is reused. */
+    (void)userData;
+    s_flashAsyncContext.tryLockCb = tryLockCb;
 
     return kStatus_FLASH_Success;
 }
