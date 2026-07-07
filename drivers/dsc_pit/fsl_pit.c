@@ -106,12 +106,13 @@ void PIT_Init(PIT_Type *base, const pit_config_t *psConfig)
 
 #if defined(FSL_FEATURE_PIT_CTRL_HAS_PRESET_POLARITY_BIT) && FSL_FEATURE_PIT_CTRL_HAS_PRESET_POLARITY_BIT
     base->CTRL = PIT_CTRL_PRESCALER(psConfig->ePrescaler) | PIT_CTRL_CLKSEL(psConfig->eClockSource) |
-                 u16SlaveBits | PIT_CTRL_PRIE(psConfig->bEnableInterrupt) |
-                 PIT_CTRL_CNT_EN(psConfig->bEnableTimer) | PIT_CTRL_PRESET_POLARITY(psConfig->bEnableNegativeEdge);
+                 u16SlaveBits | PIT_CTRL_PRIE(psConfig->bEnableInterrupt ? 1U : 0U) |
+                 PIT_CTRL_CNT_EN(psConfig->bEnableTimer ? 1U : 0U) |
+                 PIT_CTRL_PRESET_POLARITY(psConfig->bEnableNegativeEdge ? 1U : 0U);
 #else
     base->CTRL = PIT_CTRL_PRESCALER(psConfig->ePrescaler) | PIT_CTRL_CLKSEL(psConfig->eClockSource) |
-                 u16SlaveBits | PIT_CTRL_PRIE(psConfig->bEnableInterrupt) |
-                 PIT_CTRL_CNT_EN(psConfig->bEnableTimer);
+                 u16SlaveBits | PIT_CTRL_PRIE(psConfig->bEnableInterrupt ? 1U : 0U) |
+                 PIT_CTRL_CNT_EN(psConfig->bEnableTimer ? 1U : 0U);
 #endif
 }
 
@@ -123,7 +124,7 @@ void PIT_Init(PIT_Type *base, const pit_config_t *psConfig)
 void PIT_Deinit(PIT_Type *base)
 {
     /* Stop the counter */
-    base->CTRL &= ~((uint16_t)PIT_CTRL_CNT_EN_MASK);
+    base->CTRL = (uint16_t)(base->CTRL & (~((uint16_t)PIT_CTRL_CNT_EN_MASK)));
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Disable the module clock */
