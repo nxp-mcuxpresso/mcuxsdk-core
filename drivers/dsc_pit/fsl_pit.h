@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 NXP
+ * Copyright 2020-2022, 2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief PIT driver version. */
-#define FSL_PIT_DRIVER_VERSION (MAKE_VERSION(2, 3, 1))
+#define FSL_PIT_DRIVER_VERSION (MAKE_VERSION(2, 3, 2))
 /*! @} */
 
 /*******************************************************************************
@@ -231,8 +231,10 @@ typedef struct _pit_config
 {
     pit_prescaler_value_t ePrescaler : 5;  /*!< Clock prescaler value */
     bool bEnableInterrupt : 1;             /*!< Enable PIT Roll-Over Interrupt */
+#if defined(FSL_FEATURE_PIT_CTRL_HAS_SLAVE) && FSL_FEATURE_PIT_CTRL_HAS_SLAVE
     bool bEnableSlaveMode : 1;             /*!< Enable the PIT module in slave mode, in which mode the timer
                                       will be triggered by master PIT enable.*/
+#endif
     bool bEnableTimer : 1;                 /*!< PIT timer enable flag, which is false by default */
     pit_count_clock_source_t eClockSource; /*!< Specify the PIT count clock source */
 #if defined(FSL_FEATURE_PIT_32BIT_COUNTER) && FSL_FEATURE_PIT_32BIT_COUNTER
@@ -324,6 +326,7 @@ void PIT_GetDefaultConfig(pit_config_t *psConfig);
  * @{
  */
 
+#if defined(FSL_FEATURE_PIT_CTRL_HAS_SLAVE) && FSL_FEATURE_PIT_CTRL_HAS_SLAVE
 /*!
  * @brief Enable/Disable PIT slave mode.
  *
@@ -341,6 +344,7 @@ static inline void PIT_EnableSlaveMode(PIT_Type *base, bool bEnable)
         base->CTRL = base->CTRL | PIT_CTRL_SLAVE_MASK;
     }
 }
+#endif
 
 /*!
  * @brief Sets the PIT clock prescaler.
