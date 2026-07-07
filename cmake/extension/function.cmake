@@ -2520,8 +2520,8 @@ endfunction()
 function(mcux_add_custom_command)
   set(single_value BUILD_EVENT WORKING_DIRECTORY)
   set(multi_value TARGETS TOOLCHAINS BYPRODUCTS BUILD_COMMAND)
-  cmake_parse_arguments(_ "${options}" "${single_value}" "${multi_value}"
-          ${ARGN})
+  cmake_parse_arguments(PARSE_ARGV 0 _ "${options}" "${single_value}"
+          "${multi_value}")
   set(match_target false)
   if(__TARGETS)
     foreach(item ${__TARGETS})
