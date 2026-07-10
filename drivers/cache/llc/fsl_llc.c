@@ -23,7 +23,7 @@
 
 #define LLC_WAY_NUMBER (8U)
 
-#define LLC_SET_NUMBER (8192U)
+#define LLC_SET_NUMBER (256U)
 
 #define LLC_WAY_PARTITION_COUNT (8U)
 
