@@ -1,0 +1,7 @@
+/*!
+@defgroup dual_adc_driver DualADC: Dual Analog-to-Digital Converter
+@details The MCUXpresso SDK provides a driver for the Dual Analog-to-Digital Converter (DualADC, DADC) of MCUXpresso SDK devices.
+
+# DualADC: Dual Analog-to-Digital Converter {#DualADC}
+
+*/

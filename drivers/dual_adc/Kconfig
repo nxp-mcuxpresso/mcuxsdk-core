@@ -1,0 +1,31 @@
+# Copyright 2026 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.dual_adc
+    bool
+    default y if MCUX_HW_IP_DriverType_DADC
+
+config MCUX_COMPONENT_driver.dual_adc
+    bool "dual_adc"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.dual_adc
+
+if MCUX_COMPONENT_driver.dual_adc
+    config DUALADC_RESET_TIMEOUT
+        int "Max loops to wait for DualADC software reset to complete (0 means wait forever)"
+        default 0
+        help
+            Maximum number of loop iterations to wait for CTRL[RSTA]/CTRL[RSTB] to clear
+            after a software reset is asserted in DUALADC_Init.
+            If set to 0, the driver waits indefinitely until the reset completes.
+
+    config DUALADC_CALIBRATION_TIMEOUT
+        int "Max loops to wait for each DualADC calibration step to complete (0 means wait forever)"
+        default 0
+        help
+            Maximum number of loop iterations for each polling step inside DUALADC_DoCalibration:
+            offset calibration (STAT0[CAL_RDY]), high-speed calibration (STAT0[CAL_RDY]),
+            gain calibration hardware completion (GCC[n][RDY]), and final CAL_RDY confirmation.
+            If set to 0, each step waits indefinitely until completion.
+endif
