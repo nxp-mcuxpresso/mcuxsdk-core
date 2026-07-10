@@ -385,7 +385,7 @@ static inline void POWERCON_SetCmcCountValue(POWERCON_CMC_CTRL_Type *base, uint3
 /*!
  * @brief Enable one root clock in active mode (RMW-clear one bit in RCGCFG_ACTIVE).
  *
- * RCGCFG_ACTIVE is active-low: bit=0 enables the clock, bit=1 disables it.
+ * RCGCFG_ACTIVE is active-low: bit=1 enables the clock, bit=0 disables it.
  * This function clears the bit for the given clockIndex, enabling that root clock.
  * Takes effect immediately — no P-Channel trigger required.
  *
@@ -394,7 +394,7 @@ static inline void POWERCON_SetCmcCountValue(POWERCON_CMC_CTRL_Type *base, uint3
  */
 static inline void POWERCON_EnableRootClockInActiveMode(POWERCON_SOC_CTRL_Type *base, uint8_t clockIndex)
 {
-    base->RCGCFG_ACTIVE &= ~(1UL << (uint32_t)clockIndex);
+    base->RCGCFG_ACTIVE |= (1UL << (uint32_t)clockIndex);
 }
 
 /*!
@@ -409,7 +409,7 @@ static inline void POWERCON_EnableRootClockInActiveMode(POWERCON_SOC_CTRL_Type *
  */
 static inline void POWERCON_DisableRootClockInActiveMode(POWERCON_SOC_CTRL_Type *base, uint8_t clockIndex)
 {
-    base->RCGCFG_ACTIVE |= (1UL << (uint32_t)clockIndex);
+    base->RCGCFG_ACTIVE &= ~(1UL << (uint32_t)clockIndex);
 }
 
 /*!
