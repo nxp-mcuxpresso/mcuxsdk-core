@@ -4093,6 +4093,18 @@ void ENET_QOS_CommonIRQHandler(ENET_QOS_Type *base, enet_qos_handle_t *handle)
     SDK_ISR_EXIT_BARRIER;
 }
 
+/* Parameterized common IRQ handler: services the given ENET_QOS instance so a single entry can back
+ * that instance's vector (ENET_QOS_DriverIRQHandler is already taken). */
+void ENET_QOS_CommonDriverIRQHandler(uint32_t instance);
+void ENET_QOS_CommonDriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_enetqosBases))
+    {
+        s_enetqosIsr(s_enetqosBases[instance], s_ENETHandle[instance]);
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+
 #if defined(ENET_QOS)
 void ENET_QOS_DriverIRQHandler(void);
 void ENET_QOS_DriverIRQHandler(void)
@@ -4118,9 +4130,11 @@ void EMAC_0_DriverIRQHandler(void)
 #endif
 
 #if defined(COMM__ENET_QOS)
+/* Route RT2660's ENET_QOS vector through the parameterized common handler. This thin wrapper can be
+ * dropped once the startup is generated to call ENET_QOS_CommonDriverIRQHandler directly. */
 void COMM_ENET_QOS_DriverIRQHandler(void);
 void COMM_ENET_QOS_DriverIRQHandler(void)
 {
-    s_enetqosIsr(COMM__ENET_QOS, s_ENETHandle[0]);
+    ENET_QOS_CommonDriverIRQHandler(ENET_QOS_GetInstance(COMM__ENET_QOS));
 }
 #endif

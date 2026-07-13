@@ -1,5 +1,10 @@
 # ENET_QOS
 
+## [2.7.6]
+
+- New features
+  - Added the parameterized common IRQ handler ENET_QOS_CommonDriverIRQHandler.
+
 ## [2.7.5]
 
 - New features
