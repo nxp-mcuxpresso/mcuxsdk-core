@@ -20,7 +20,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_IRTC_DRIVER_VERSION (MAKE_VERSION(2, 4, 0))
+#define FSL_IRTC_DRIVER_VERSION (MAKE_VERSION(2, 3, 4))
 /*! @} */
 
 #if !(defined(FSL_FEATURE_RTC_IS_SLAVE) && (FSL_FEATURE_RTC_IS_SLAVE != 0U))
@@ -68,10 +68,6 @@ typedef enum _irtc_interrupt_enable
 #if !defined(FSL_FEATURE_RTC_HAS_NO_TAMPER_FEATURE) || (!FSL_FEATURE_RTC_HAS_NO_TAMPER_FEATURE)
     kIRTC_TamperInterruptEnable = RTC_IER_TAMPER_IE_MASK, /*!< Tamper Interrupt Enable */
 #endif
-#if defined(FSL_FEATURE_RTC_HAS_MINUTES_TIMER_FEATURE) && FSL_FEATURE_RTC_HAS_MINUTES_TIMER_FEATURE
-    kIRTC_CountDownTimerTimeoutInterruptEnable =
-        RTC_IER_CNT_DN_TIMEOUT_IE_MASK,                 /*!< Count Down Timer Timeout Interrupt Enable */
-#endif
     kIRTC_AlarmInterruptEnable = RTC_IER_ALM_IE_MASK,   /*!< Alarm Interrupt Enable */
     kIRTC_DayInterruptEnable   = RTC_IER_DAY_IE_MASK,   /*!< Days Interrupt Enable */
     kIRTC_HourInterruptEnable  = RTC_IER_HOUR_IE_MASK,  /*!< Hours Interrupt Enable */
@@ -101,23 +97,20 @@ typedef enum _irtc_status_flags
 #if !defined(FSL_FEATURE_RTC_HAS_NO_TAMPER_FEATURE) || (!FSL_FEATURE_RTC_HAS_NO_TAMPER_FEATURE)
     kIRTC_TamperFlag = RTC_ISR_TAMPER_IS_MASK, /*!< Tamper Status flag*/
 #endif
-#if defined(FSL_FEATURE_RTC_HAS_MINUTES_TIMER_FEATURE) && FSL_FEATURE_RTC_HAS_MINUTES_TIMER_FEATURE
-    kIRTC_CountDownTimerTimeoutFlag = RTC_ISR_CNT_DN_TIMEOUT_IS_MASK, /*!< Count Down Timer Timeout Status flag */
-#endif
-    kIRTC_AlarmFlag     = RTC_ISR_ALM_IS_MASK,                        /*!< Alarm Status flag */
-    kIRTC_DayFlag       = RTC_ISR_DAY_IS_MASK,                        /*!< Days Status flag */
-    kIRTC_HourFlag      = RTC_ISR_HOUR_IS_MASK,                       /*!< Hour Status flag */
-    kIRTC_MinFlag       = RTC_ISR_MIN_IS_MASK,                        /*!< Minutes Status flag */
-    kIRTC_1hzFlag       = RTC_ISR_IS_1HZ_MASK,                        /*!< 1 Hz interval status flag */
-    kIRTC_2hzFlag       = RTC_ISR_IS_2HZ_MASK,                        /*!< 2 Hz interval status flag*/
-    kIRTC_4hzFlag       = RTC_ISR_IS_4HZ_MASK,                        /*!< 4 Hz interval status flag*/
-    kIRTC_8hzFlag       = RTC_ISR_IS_8HZ_MASK,                        /*!< 8 Hz interval status flag*/
-    kIRTC_16hzFlag      = RTC_ISR_IS_16HZ_MASK,                       /*!< 16 Hz interval status flag*/
-    kIRTC_32hzFlag      = RTC_ISR_IS_32HZ_MASK,                       /*!< 32 Hz interval status flag*/
-    kIRTC_64hzFlag      = RTC_ISR_IS_64HZ_MASK,                       /*!< 64 Hz interval status flag*/
-    kIRTC_128hzFlag     = RTC_ISR_IS_128HZ_MASK,                      /*!< 128 Hz interval status flag*/
-    kIRTC_256hzFlag     = RTC_ISR_IS_256HZ_MASK,                      /*!< 256 Hz interval status flag*/
-    kIRTC_512hzFlag     = RTC_ISR_IS_512HZ_MASK,                      /*!< 512 Hz interval status flag*/
+    kIRTC_AlarmFlag     = RTC_ISR_ALM_IS_MASK,                    /*!< Alarm Status flag */
+    kIRTC_DayFlag       = RTC_ISR_DAY_IS_MASK,                    /*!< Days Status flag */
+    kIRTC_HourFlag      = RTC_ISR_HOUR_IS_MASK,                   /*!< Hour Status flag */
+    kIRTC_MinFlag       = RTC_ISR_MIN_IS_MASK,                    /*!< Minutes Status flag */
+    kIRTC_1hzFlag       = RTC_ISR_IS_1HZ_MASK,                    /*!< 1 Hz interval status flag */
+    kIRTC_2hzFlag       = RTC_ISR_IS_2HZ_MASK,                    /*!< 2 Hz interval status flag*/
+    kIRTC_4hzFlag       = RTC_ISR_IS_4HZ_MASK,                    /*!< 4 Hz interval status flag*/
+    kIRTC_8hzFlag       = RTC_ISR_IS_8HZ_MASK,                    /*!< 8 Hz interval status flag*/
+    kIRTC_16hzFlag      = RTC_ISR_IS_16HZ_MASK,                   /*!< 16 Hz interval status flag*/
+    kIRTC_32hzFlag      = RTC_ISR_IS_32HZ_MASK,                   /*!< 32 Hz interval status flag*/
+    kIRTC_64hzFlag      = RTC_ISR_IS_64HZ_MASK,                   /*!< 64 Hz interval status flag*/
+    kIRTC_128hzFlag     = RTC_ISR_IS_128HZ_MASK,                  /*!< 128 Hz interval status flag*/
+    kIRTC_256hzFlag     = RTC_ISR_IS_256HZ_MASK,                  /*!< 256 Hz interval status flag*/
+    kIRTC_512hzFlag     = RTC_ISR_IS_512HZ_MASK,                  /*!< 512 Hz interval status flag*/
     kIRTC_InvalidFlag   = (RTC_STATUS_INVAL_BIT_MASK << 16U),     /*!< Indicates if time/date counters are invalid */
     kIRTC_WriteProtFlag = (RTC_STATUS_WRITE_PROT_EN_MASK << 16U), /*!< Write protect enable status flag */
 #if !defined(FSL_FEATURE_RTC_HAS_NO_CPU_LOW_VOLT_FLAG) || (!FSL_FEATURE_RTC_HAS_NO_CPU_LOW_VOLT_FLAG)
@@ -127,10 +120,10 @@ typedef enum _irtc_status_flags
     kIRTC_ResetSrcFlag = (RTC_STATUS_RST_SRC_MASK << 16U), /*!< Reset source flag */
 #endif
 #if !(defined(FSL_FEATURE_RTC_IS_SLAVE) && (FSL_FEATURE_RTC_IS_SLAVE != 0U))
-    kIRTC_CmpIntFlag  = (RTC_STATUS_CMP_INT_MASK << 16U),             /*!< Compensation interval status flag */
-    kIRTC_CmpDoneFlag = (RTC_STATUS_CMP_DONE_MASK << 16U),            /*!< Compensation done flag */
+    kIRTC_CmpIntFlag  = (RTC_STATUS_CMP_INT_MASK << 16U),  /*!< Compensation interval status flag */
+    kIRTC_CmpDoneFlag = (RTC_STATUS_CMP_DONE_MASK << 16U), /*!< Compensation done flag */
 #endif
-    kIRTC_BusErrFlag = (RTC_STATUS_BUS_ERR_MASK << 16U),              /*!< Bus error flag */
+    kIRTC_BusErrFlag  = (RTC_STATUS_BUS_ERR_MASK << 16U),  /*!< Bus error flag */
 #if defined(FSL_FEATURE_RTC_HAS_SUBSYSTEM) && FSL_FEATURE_RTC_HAS_SUBSYSTEM
     kIRTC_WakeTimerFlag = (RTC_WAKE_TIMER_CTRL_WAKE_FLAG_MASK << 28U) /*!< Wake timer status flag */
 #endif
@@ -231,9 +224,6 @@ typedef struct _irtc_config
     bool disableClockOutput; /*!< true: The selected clock is not output to other peripherals;
                                   false: The selected clock is output to other peripherals */
 #endif
-#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
-    bool bcdModeEnable; /*!< true: BCD mode is enabled; false: BCD mode is disabled */
-#endif
 } irtc_config_t;
 
 /*******************************************************************************
@@ -283,9 +273,6 @@ status_t IRTC_Deinit(RTC_Type *base);
  *    config->wakeupSelect = true;
  *    config->timerStdMask = false;
  *    config->alrmMatch = kRTC_MatchSecMinHr;
- *    config->clockSelect = kIRTC_Clk16K;
- *    config->disableClockOutput = true;
- *    config->bcdModeEnable = false;
  * @endcode
  * @param config Pointer to user's IRTC config structure.
  */
@@ -870,102 +857,6 @@ static inline uint32_t IRTC_GetWakeupCount(RTC_Type *base)
 
 /*! @}*/
 #endif
-
-#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
-/*!
- * @name BCD mode operations
- * @{
- */
-
-/*!
- * @brief Convert binary to BCD format
- *
- * @param binary Binary value to convert. Valid range is 0 to 99; larger values would
- *               overflow the tens nibble and produce an invalid BCD result.
- * @return BCD formatted value
- */
-static inline uint8_t IRTC_BinaryToBCD(uint8_t binary)
-{
-    assert(binary <= 99U);
-    return (uint8_t)(((binary / 10U) << 4U) | (binary % 10U));
-}
-
-/*!
- * @brief Convert BCD to binary format
- *
- * @param bcd BCD value to convert. Each nibble must be a valid decimal digit (0 to 9).
- * @return Binary formatted value
- */
-static inline uint8_t IRTC_BCDToBinary(uint8_t bcd)
-{
-    assert(((bcd >> 4U) <= 9U) && ((bcd & 0x0FU) <= 9U));
-    return (uint8_t)(((bcd >> 4U) * 10U) + (bcd & 0x0FU));
-}
-
-/*!
- * @brief Check if BCD mode is enabled
- *
- * @param base RTC peripheral base address
- * @return true if BCD mode is enabled, false otherwise
- */
-static inline bool IRTC_IsBCDModeEnabled(RTC_Type *base)
-{
-    return (0U != (base->CTRL & RTC_CTRL_BCD_EN_MASK));
-}
-
-/*! @}*/
-
-#endif /* FSL_FEATURE_RTC_HAS_BCD_MODE */
-
-#if defined(FSL_FEATURE_RTC_HAS_MINUTES_TIMER_FEATURE) && FSL_FEATURE_RTC_HAS_MINUTES_TIMER_FEATURE
-/*!
- * @name Minutes Count Down Timer Interface
- * @{
- */
-
-/*! @brief Mask of the reserved upper byte of CNTDWN_TIMER, preserved on a read-modify-write of the counter value. */
-#define RTC_CNTDWN_TIMER_RESERVED_MASK ((uint16_t)(~(uint16_t)RTC_CNTDWN_TIMER_COUNT_DOWN_TIMER_MASK))
-
-/*!
- * @brief Disable the minutes count down timer.
- *
- * @param base RTC peripheral base address
- *
- */
-static inline void IRTC_DisableMinutesCountDownTimer(RTC_Type *base)
-{
-    /* Only write to the lower 8 bits to disable the minutes count down timer */
-    base->CNTDWN_TIMER = (base->CNTDWN_TIMER & RTC_CNTDWN_TIMER_RESERVED_MASK);
-}
-
-/*!
- * @brief Set the minutes count down timer.
- *
- * @param base RTC peripheral base address
- * @param minutesCountDownValue The value to set the minutes count down timer.
- *        Valid range is 1 to 127 in binary mode and 1 to 99 in BCD mode.
- * @note  Writing 0 has no effect; use IRTC_DisableMinutesCountDownTimer() to disable the counter.
- */
-static inline void IRTC_SetMinutesCountDownTimer(RTC_Type *base, uint8_t minutesCountDownValue)
-{
-#if defined(FSL_FEATURE_RTC_HAS_BCD_MODE) && FSL_FEATURE_RTC_HAS_BCD_MODE
-    if (IRTC_IsBCDModeEnabled(base))
-    {
-        assert((minutesCountDownValue > 0U) && (minutesCountDownValue <= 99U));
-        base->CNTDWN_TIMER = (base->CNTDWN_TIMER & RTC_CNTDWN_TIMER_RESERVED_MASK) |
-                             (uint16_t)IRTC_BinaryToBCD(minutesCountDownValue);
-    }
-    else
-#endif
-    {
-        assert((minutesCountDownValue > 0U) && (minutesCountDownValue <= 127U));
-        base->CNTDWN_TIMER = (base->CNTDWN_TIMER & RTC_CNTDWN_TIMER_RESERVED_MASK) | (uint16_t)minutesCountDownValue;
-    }
-}
-
-/*! @}*/
-
-#endif /* FSL_FEATURE_RTC_HAS_MINUTES_TIMER_FEATURE */
 
 #if defined(__cplusplus)
 }
