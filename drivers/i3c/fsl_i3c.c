@@ -1096,6 +1096,11 @@ static uint32_t I3C_CalcErrorRatio(uint32_t curFreq, uint32_t desiredFreq)
  * The I3C master is automatically disabled and re-enabled as necessary to configure the baud
  * rate. Do not call this function during a transfer, or the transfer is aborted.
  *
+ * note On devices affected by I3C errata ERR053429, an SDR read with PPBAUD < 2 can lose the
+ *       last received byte when the RxFIFO fills before the CPU/DMA services it. For safe SDR
+ *       reads, request a push-pull baud that yields PPBAUD > 1, or guarantee the CPU/DMA drains
+ *       the RxFIFO fast enough to avoid a Full event.
+ *
  * param base The I3C peripheral base address.
  * param baudRate_Hz Pointer to structure of requested bus frequency in Hertz.
  * param sourceClock_Hz I3C functional clock frequency in Hertz.
