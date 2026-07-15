@@ -1,5 +1,10 @@
 # DPU
 
+## [2.5.1]
+
+- Bug Fixes
+  - Fix DPU_StopDisplay functionality and remove DPU_DISPLAY_Type
+
 ## [2.5.0]
 
 - New feature.

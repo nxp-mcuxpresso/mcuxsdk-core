@@ -481,14 +481,6 @@ typedef struct
     __IO uint32_t DITHERCONTROL12BITS;
 } DPU_DITHER_Type;
 
-typedef struct
-{
-    DPU_DOMAINBLEND_Type DOMAINBLEND;
-    uint8_t RESERVED_0[65464];
-    DPU_FRAMEGEN_Type FRAMEGEN;
-    uint8_t RESERVED_1[65320];
-} DPU_DISPLAY_Type;
-
 #if defined(FSL_FEATURE_DISPLAY_SEERIS_MDR7) && FSL_FEATURE_DISPLAY_SEERIS_MDR7 && \
     defined(FSL_FEATURE_DISPLAY_SEERIS_HAS_LD) && FSL_FEATURE_DISPLAY_SEERIS_HAS_LD
 static inline void writel(uint32_t value, volatile uint32_t *addr)
@@ -2497,9 +2489,9 @@ void DPU_StopDisplay(DISPLAY_SEERIS_Type *base, uint8_t displayIndex)
 {
     assert(displayIndex < DPU_DISPLAY_COUNT);
 
-    DPU_DISPLAY_Type *display = (DPU_DISPLAY_Type *)(((uint32_t)base) + s_displayOffsetArray[displayIndex]);
+    DPU_FRAMEGEN_Type *display = (DPU_FRAMEGEN_Type *)(((uint32_t)base) + s_displayOffsetArray[displayIndex]);
 
-    display->FRAMEGEN.FGENABLE = 0U;
+    display->FGENABLE = 0U;
 }
 
 /*!
