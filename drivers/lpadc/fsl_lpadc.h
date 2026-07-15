@@ -22,8 +22,8 @@
 
 /*! @name Driver version */
 /*! @{ */
-/*! @brief LPADC driver version 2.10.2. */
-#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 10, 2))
+/*! @brief LPADC driver version 2.10.3. */
+#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 10, 3))
 /*! @} */
 
 /*! @name Configuration */
@@ -1373,7 +1373,7 @@ static inline void LPADC_GetOffsetValue(ADC_Type *base, int16_t *pValue)
     if ((ofstrim & ADC_OFSTRIM_OFSTRIM_SIGN) != 0U)
     {
         /* If the sign bit is set, then set the other MSB. */
-        ofstrim |= (uint16_t)(~(uint32_t)ADC_OFSTRIM_OFSTRIM_MAX & 0xFFFFU);
+        ofstrim |= (uint16_t)(~(uint16_t)ADC_OFSTRIM_OFSTRIM_MAX & 0xFFFFU);
     }
 
     *pValue = (int16_t)ofstrim;

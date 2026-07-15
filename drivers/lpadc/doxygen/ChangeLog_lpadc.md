@@ -1,5 +1,11 @@
 # LPADC
 
+## [2.10.3]
+
+- Bug Fixes
+  - Fixed MISRA C-2012 essential-type-model violations (Rules 10.1, 10.3, 10.4 and 10.8)
+    in `LPADC_FinishAutoCalibration` and `LPADC_GetOffsetValue`.
+
 ## [2.10.2]
 
 - Improvements

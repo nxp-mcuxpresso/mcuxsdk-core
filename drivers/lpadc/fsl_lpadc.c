@@ -946,6 +946,7 @@ status_t LPADC_FinishAutoCalibration(ADC_Type *base)
     float GCRb;
 #else
     int32_t GCCa;
+    uint32_t gccField;
 #endif /* FSL_FEATURE_LPADC_FIFO_COUNT */
     float GCRa;
 
@@ -964,17 +965,20 @@ status_t LPADC_FinishAutoCalibration(ADC_Type *base)
     }
 
     /* Calculate gain offset. */
-    GCCa         = ((base->GCC[0] & ADC_GCC_GAIN_CAL_MASK) >> ADC_GCC_GAIN_CAL_SHIFT);
 #if (defined(FSL_FEATURE_LPADC_FIFO_COUNT) && (FSL_FEATURE_LPADC_FIFO_COUNT == 2U))
+    GCCa         = ((base->GCC[0] & ADC_GCC_GAIN_CAL_MASK) >> ADC_GCC_GAIN_CAL_SHIFT);
     GCCb         = ((base->GCC[1] & ADC_GCC_GAIN_CAL_MASK) >> ADC_GCC_GAIN_CAL_SHIFT);
     GCRb         = 131072.0f /
                    (131072.0f - (float)GCCb); /* Gain_CalB = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[1])) */
     base->GCR[1] = LPADC_GetGainConvResult(GCRb);      /* write B side GCALR. */
 #else
-    if ((GCCa & (((ADC_GCC_GAIN_CAL_MASK >> ADC_GCC_GAIN_CAL_SHIFT) + 1U) >> 1U)) != 0U)
+    gccField = ((base->GCC[0] & ADC_GCC_GAIN_CAL_MASK) >> ADC_GCC_GAIN_CAL_SHIFT);
+    /* Sign-extend the two's-complement gain-cal field when its sign bit is set (width-generic). */
+    if ((gccField & (((ADC_GCC_GAIN_CAL_MASK >> ADC_GCC_GAIN_CAL_SHIFT) + 1U) >> 1U)) != 0U)
     {
-        GCCa |= (~(uint32_t)(ADC_GCC_GAIN_CAL_MASK >> ADC_GCC_GAIN_CAL_SHIFT));
+        gccField |= ~((uint32_t)ADC_GCC_GAIN_CAL_MASK >> ADC_GCC_GAIN_CAL_SHIFT);
     }
+    GCCa = (int32_t)gccField;
 #endif /* FSL_FEATURE_LPADC_FIFO_COUNT */
     GCRa         = 131072.0f /
                    (131072.0f - (float)GCCa); /* Gain_CalA = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[0])) */
