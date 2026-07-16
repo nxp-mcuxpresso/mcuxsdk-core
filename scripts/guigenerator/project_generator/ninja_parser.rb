@@ -274,7 +274,7 @@ class NinjaParser
               elsif _flag[1] == '-ir'
                 @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-path-recursively"] = [] unless @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-path-recursively"]
                 @data[@name]['contents']['configuration']['tools'][@toolchain]['config'][@config]["sys-path-recursively"] << {'path' => res}
-              end 
+              end
             else
               if @toolchain == 'codewarrior'
                 # Codewarrior IDE will add these flags automatically, not need to add them from CMake setting
@@ -428,10 +428,10 @@ class NinjaParser
 
   def add_file(file_full_path, line, type, attribute = nil, exclude = false)
     file_path = file_full_path.tr('\\', '/')
-    
+
     unless File.exist?(file_path)
       @non_existent_files.push_uniq file_path
-      # Ignore non-existent source files into build to prevent build error. 
+      # Ignore non-existent source files into build to prevent build error.
       # The library file is an exception, becasue it is set in linker flags, could be created by other project
       return unless attribute == 'extra-libraries'
     end
@@ -461,7 +461,7 @@ class NinjaParser
     }
     source_hash['attribute'] = attribute if attribute
     source_hash['exclude'] = exclude if exclude
-    
+
     # Codewarrior use "build" as build folder, can not set source file to this folder
     if @toolchain == 'codewarrior' && source_hash['project_path'] == 'build'
       source_hash['project_path'] = 'build_dir'
@@ -491,7 +491,7 @@ class NinjaParser
                 next
               end
               if xlinker_flag
-                all_flags << "-Xlinker #{flag}"             
+                all_flags << "-Xlinker #{flag}"
                 xlinker_flag = false
               else
                 all_flags << flag
@@ -750,7 +750,9 @@ class NinjaParser
       end
       if item.match(/-[Io](\S+)/)
         path = item.include?(repo_root_dir) && item.match(/-[Io](\S+)/)[1]
-        if File.exist?(path)
+        # path is false when the token is a -I/-o style flag that does not point
+        # into the repo (e.g. nxpimage's -oc option config flags). Skip those.
+        if path && File.exist?(path)
           if ENV['standalone'] == 'true'
             dest_path = File.join(File.join(@outdir, @toolchain), path.split(/#{repo_root_dir}[\/\\]/)[-1])
             new_path = get_relative_path(File.join(@outdir, @toolchain), dest_path)
@@ -842,13 +844,29 @@ class NinjaParser
         # match binary convert command, unless there are extra process by other tool such as python
         if content.match(/\S+?.elf/) && content.match(/\S+(.bin|.srec|.hex)/) && content.match(/(-Obinary|--bin|-Osrec|--srec|--m32|-Oihex|--ihex|--i32)/) && !content.include?("python")
           bin_file = File.basename(content.match(/\S+\.(bin|srec|hex)/)[0])
-          @data[@name]['contents']['configuration']['tools'][@toolchain]['binary-file'] = bin_file
 
-          # If there is copy command after binary convert, need to keep it in postbuild command
-          unless content.include?("-E copy")
-            break
-          else
-            content = content.split("#{bin_file} &&")[-1].strip
+          # Determine whether the ELF->binary conversion is preceded by other real
+          # post-build commands (e.g. padding the ELF, patching in a Master Boot Image).
+          # Ninja chains post-build commands with " && " and prefixes each one with a
+          # "cd <build_dir>" navigation command. If real commands run BEFORE the binary
+          # conversion, we cannot delegate the conversion to the IDE's built-in output
+          # converter: that converter runs right after linking (before any post-build
+          # command) and would operate on the un-processed ELF. In that case keep the
+          # whole post-build chain as explicit commands instead of short-circuiting.
+          conv_pattern = /(-Obinary|--bin|-Osrec|--srec|--m32|-Oihex|--ihex|--i32)/
+          segments = content.split(" && ").map(&:strip).reject { |s| s.empty? || s.start_with?('cd ') }
+          conv_index = segments.index { |s| s.match(conv_pattern) }
+          has_preceding_cmds = !conv_index.nil? && conv_index > 0
+
+          unless has_preceding_cmds
+            @data[@name]['contents']['configuration']['tools'][@toolchain]['binary-file'] = bin_file
+
+            # If there is copy command after binary convert, need to keep it in postbuild command
+            unless content.include?("-E copy")
+              break
+            else
+              content = content.split("#{bin_file} &&")[-1].strip
+            end
           end
         elsif content.match(/\s*(CMakeFiles\S+post-build.bat)\s\d+/)
           # If post build command is too long for Windows, it wiil be saved in post-build.bat file
@@ -861,19 +879,25 @@ class NinjaParser
             break
           end
         end
-        
+
         # cd . means no postbuild cmd
         if content == 'cd .' || content == ':'
           break
         elsif @toolchain == 'iar'
+          # Match only the project output file path and replace it with the IAR
+          # built-in $TARGET_PATH$ variable. Treat whitespace, '"' and '=' as
+          # boundaries so a path embedded in a key="value" token (e.g. nxpimage's
+          # inputImageFile="/abs/nbu_ble.elf") only has its path portion replaced,
+          # yielding inputImageFile="$TARGET_PATH$" instead of swallowing the
+          # option name and leaving a dangling quote.
           if ENV['project_type']  == 'LIBRARY'
-            pattern = /\s\S+lib#{@name}\.a/
+            pattern = /[^\s"=]*lib#{Regexp.escape(@name)}\.a/
           else
-            pattern = /\s\S+#{@name}\.elf/
+            pattern = /[^\s"=]*#{Regexp.escape(@name)}\.elf/
           end
           result = content.match(pattern)
           while(result)
-            content.sub!(result[ 0 ], ' $TARGET_PATH$')
+            content.sub!(result[ 0 ], '$TARGET_PATH$')
             result = content.match(pattern)
           end
         elsif @toolchain == 'mdk'
@@ -905,6 +929,15 @@ class NinjaParser
         cmd_list = translate_path_in_build_cmd(content)
         rewrite_cmake_executor!(cmd_list)
 
+        # IAR runs each <buildAction> as a separate post-link step and does NOT
+        # guarantee they execute in listed order (observed out-of-order runs like
+        # 1, 2, 0). When there is more than one post-build command, join them into
+        # a single chained command with ' && ' so IAR emits one build action that
+        # runs the whole chain sequentially in a single shell invocation.
+        if @toolchain == 'iar' && cmd_list.length > 1
+          cmd_list = [cmd_list.reject { |c| c.nil? || c.strip.empty? }.join(' && ')]
+        end
+
         if NO_GUI_TEMPLATE_TOOLCHAIN.include? @toolchain
           @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] = cmd_list
         else
@@ -928,14 +961,14 @@ class NinjaParser
       next if bat_line.match(/^set ERROR_CODE=/)
       next if bat_line.match(/^exit \/b/)
       next if bat_line.strip.empty?
-      
+
       # Extract the actual command (remove error handling)
       if bat_line.match(/\|\|\s*\(set FAIL_LINE=\d+&\s*goto :ABORT\)/)
         command = bat_line.split(/\|\|/).first.strip
       else
         command = bat_line.strip
       end
-      
+
       translated_cmd = translate_path_in_build_cmd(command)
       cmd_list << translated_cmd.join(' && ') if translated_cmd && !translated_cmd.empty?
     end
@@ -957,7 +990,7 @@ class NinjaParser
         @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'] ||= []
         @data[@name]['contents']['configuration']['tools'][@toolchain]['postbuild'].push(cmd.chomp)
       end
-    end  
+    end
   end
 
   def parse_precompile
@@ -1025,7 +1058,7 @@ class NinjaParser
     HEREDOC
   end
 
-  # If the command is added by native add_custom_command without build events, the build command 
+  # If the command is added by native add_custom_command without build events, the build command
   # can not be found in POST_BUILD/PRE_LINK variable from build.ninja, need special handling
   def parse_cmake_custom_command
     parse_source_file_generation_command
@@ -1040,7 +1073,7 @@ class NinjaParser
   #       ${APPLICATION_BINARY_DIR}/pdum_gen.h
   #       ${APPLICATION_BINARY_DIR}/pdum_apdu.S
   #       COMMAND ${PYTHON_EXECUTABLE} ${PDUMCONFIG}
-  #       ARGS 
+  #       ARGS
   #       -z coordinator
   #       -e ENDIAN
   #       -f ${ZPSCFG}
@@ -1061,7 +1094,7 @@ class NinjaParser
             next
           end
         end
-        
+
         content = @content[index+3].strip
         # Find the command
         if content.include?('COMMAND = ')
@@ -1230,7 +1263,7 @@ class NinjaParser
       bat_file = cmd.match(/(\S+preprocess_linker_file-\S+\.bat)/)[1]
       bat_file_path = File.join(ENV['build_dir'], bat_file).tr('\\', '/')
     end
-  
+
     # read the .bat file to get the generated linker file
     if bat_file_path && File.exist?(bat_file_path)
       pattern = /(.*\.(ld|icf|scf)).*.*\|\|/
@@ -1251,7 +1284,7 @@ class NinjaParser
       end
 
       if generated_file
-        cmd_list << {'file'=> File.join(get_tool_rootdir(@toolchain), File.basename(generated_file)), 'command' => cmd.join(' && ').chomp}   
+        cmd_list << {'file'=> File.join(get_tool_rootdir(@toolchain), File.basename(generated_file)), 'command' => cmd.join(' && ').chomp}
       end
     else
       generated_file = if @toolchain == 'iar'
@@ -1703,7 +1736,7 @@ class NinjaParser
       return path
     end
   end
-  
+
   # translate path to standalone project path
   def translate_to_standalone_path(path)
     if !ENV['standalone'] || ENV['standalone'] != 'true'
