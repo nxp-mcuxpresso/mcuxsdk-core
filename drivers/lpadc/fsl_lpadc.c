@@ -460,7 +460,9 @@ void LPADC_GetConvResultBlocking(ADC_Type *base, lpadc_conv_result_t *result)
  */
 void LPADC_SetConvTriggerConfig(ADC_Type *base, uint32_t triggerId, const lpadc_conv_trigger_config_t *config)
 {
-    assert(triggerId < ADC_TCTRL_COUNT); /* Check if the triggerId is available in this device. */
+#if defined(FSL_FEATURE_LPADC_ADC_TCTRL_COUNT)
+    assert(triggerId < FSL_FEATURE_LPADC_ADC_TCTRL_COUNT); /* Check if the triggerId is available in this device. */
+#endif
     assert(config != NULL);              /* Check if the input pointer is available. */
 
     uint32_t tmp32;

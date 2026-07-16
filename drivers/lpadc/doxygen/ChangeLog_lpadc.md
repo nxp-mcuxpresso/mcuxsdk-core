@@ -1,5 +1,12 @@
 # LPADC
 
+## [2.10.2]
+
+- Improvements
+  - Gate the trigger (TCTRL) enums and the trigger-id assert on
+    `FSL_FEATURE_ADC_TCTRL_COUNT` for every trigger index, so devices with fewer
+    triggers no longer expose unavailable trigger registers.
+
 ## [2.10.1]
 
 - Improvements
