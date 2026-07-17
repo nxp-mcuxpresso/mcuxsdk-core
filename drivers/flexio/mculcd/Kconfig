@@ -8,7 +8,7 @@ config MCUX_HAS_COMPONENT_driver.flexio_mculcd_dma
 
 config MCUX_HAS_COMPONENT_driver.flexio_mculcd_edma
     bool
-    default y if MCUX_HAS_COMPONENT_driver.flexio_mculcd && (MCUX_HAS_COMPONENT_driver.edma || MCUX_HAS_COMPONENT_driver.edma4)
+    default y if MCUX_HAS_COMPONENT_driver.flexio_mculcd && (MCUX_HAS_COMPONENT_driver.edma || MCUX_HAS_COMPONENT_driver.edma_unified)
 
 config MCUX_HAS_COMPONENT_driver.flexio_mculcd_smartdma
     bool
@@ -28,7 +28,7 @@ config MCUX_COMPONENT_driver.flexio_mculcd_edma
     bool "flexio_mculcd_edma"
     select MCUX_COMPONENT_driver.flexio_mculcd
     select MCUX_COMPONENT_driver.edma if MCUX_HAS_COMPONENT_driver.edma
-    select MCUX_COMPONENT_driver.edma4 if MCUX_HAS_COMPONENT_driver.edma4
+    select MCUX_COMPONENT_driver.edma_unified if MCUX_HAS_COMPONENT_driver.edma_unified
     depends on MCUX_HAS_COMPONENT_driver.flexio_mculcd_edma
 
 config MCUX_COMPONENT_driver.flexio_mculcd_smartdma

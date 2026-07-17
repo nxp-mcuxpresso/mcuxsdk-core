@@ -4,7 +4,7 @@
 
 config MCUX_HAS_COMPONENT_driver.lpflexcomm_lpi2c_edma
     bool
-    default y if MCUX_HAS_COMPONENT_driver.lpflexcomm_lpi2c && MCUX_HAS_COMPONENT_driver.edma4
+    default y if MCUX_HAS_COMPONENT_driver.lpflexcomm_lpi2c && MCUX_HAS_COMPONENT_driver.edma_unified
 
 config MCUX_HAS_COMPONENT_driver.lpflexcomm_lpi2c
     bool
@@ -18,5 +18,5 @@ config MCUX_COMPONENT_driver.lpflexcomm_lpi2c
 config MCUX_COMPONENT_driver.lpflexcomm_lpi2c_edma
     bool "lpflexcomm_lpi2c_edma"
     select MCUX_COMPONENT_driver.lpflexcomm_lpi2c
-    select MCUX_COMPONENT_driver.edma4
+    select MCUX_COMPONENT_driver.edma_unified
     depends on MCUX_HAS_COMPONENT_driver.lpflexcomm_lpi2c_edma

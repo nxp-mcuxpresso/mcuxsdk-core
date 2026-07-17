@@ -4,7 +4,7 @@
 
 config MCUX_HAS_COMPONENT_driver.asrc_edma
     bool
-    default y if MCUX_HAS_COMPONENT_driver.asrc && (MCUX_HAS_COMPONENT_driver.edma || MCUX_HAS_COMPONENT_driver.edma4)
+    default y if MCUX_HAS_COMPONENT_driver.asrc && (MCUX_HAS_COMPONENT_driver.edma || MCUX_HAS_COMPONENT_driver.edma_unified)
 
 config MCUX_HAS_COMPONENT_driver.asrc
     bool
@@ -14,7 +14,7 @@ config MCUX_COMPONENT_driver.asrc_edma
     bool "asrc_edma"
     select MCUX_COMPONENT_driver.asrc
     select MCUX_COMPONENT_driver.edma if MCUX_HAS_COMPONENT_driver.edma
-    select MCUX_COMPONENT_driver.edma4 if MCUX_HAS_COMPONENT_driver.edma4
+    select MCUX_COMPONENT_driver.edma_unified if MCUX_HAS_COMPONENT_driver.edma_unified
     depends on MCUX_HAS_COMPONENT_driver.asrc_edma
 
 config MCUX_COMPONENT_driver.asrc

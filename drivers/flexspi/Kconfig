@@ -8,7 +8,7 @@ config MCUX_HAS_COMPONENT_driver.flexspi_dma
 
 config MCUX_HAS_COMPONENT_driver.flexspi_edma
     bool
-    default y if MCUX_HAS_COMPONENT_driver.flexspi && (MCUX_HAS_COMPONENT_driver.edma || MCUX_HAS_COMPONENT_driver.edma4)
+    default y if MCUX_HAS_COMPONENT_driver.flexspi && (MCUX_HAS_COMPONENT_driver.edma || MCUX_HAS_COMPONENT_driver.edma_unified)
 
 config MCUX_HAS_COMPONENT_driver.flexspi
     bool
@@ -24,7 +24,7 @@ config MCUX_COMPONENT_driver.flexspi_edma
     bool "flexspi_edma"
     select MCUX_COMPONENT_driver.flexspi
     select MCUX_COMPONENT_driver.edma if MCUX_HAS_COMPONENT_driver.edma
-    select MCUX_COMPONENT_driver.edma4 if MCUX_HAS_COMPONENT_driver.edma4
+    select MCUX_COMPONENT_driver.edma_unified if MCUX_HAS_COMPONENT_driver.edma_unified
     depends on MCUX_HAS_COMPONENT_driver.flexspi_edma
 
 config MCUX_COMPONENT_driver.flexspi

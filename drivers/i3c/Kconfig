@@ -8,7 +8,7 @@ config MCUX_HAS_COMPONENT_driver.i3c_dma
 
 config MCUX_HAS_COMPONENT_driver.i3c_edma
     bool
-    default y if MCUX_HAS_COMPONENT_driver.i3c && MCUX_HAS_COMPONENT_driver.edma4
+    default y if MCUX_HAS_COMPONENT_driver.i3c && MCUX_HAS_COMPONENT_driver.edma_unified
 
 config MCUX_HAS_COMPONENT_driver.i3c
     bool
@@ -23,7 +23,7 @@ config MCUX_COMPONENT_driver.i3c_dma
 config MCUX_COMPONENT_driver.i3c_edma
     bool "i3c_edma"
     select MCUX_COMPONENT_driver.i3c
-    select MCUX_COMPONENT_driver.edma4
+    select MCUX_COMPONENT_driver.edma_unified
     depends on MCUX_HAS_COMPONENT_driver.i3c_edma
 
 config MCUX_COMPONENT_driver.i3c
