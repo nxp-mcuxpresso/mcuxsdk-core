@@ -1,0 +1,29 @@
+
+
+/*!
+@defgroup edma eDMA: Enhanced Direct Memory Access (eDMA) Controller Driver
+@details The MCUXpresso SDK provides a peripheral driver for the enhanced Direct Memory Access (eDMA)
+         of MCUXpresso SDK devices.
+
+@note This is the unified eDMA driver serving the eDMA3, eDMA4 and eDMA5 IP versions.
+      Its Kconfig component is @c driver.edma_unified; the historical @c driver.edma4
+      component is retained as a deprecated alias. This is why a device whose IP is
+      eDMA3 (for example an "edma3" driver example) correctly enables the unified
+      component rather than a version-specific one. The @c edma4_* / @c edma5_*
+      identifiers inside the driver name the IP-specific TCD layout, not the component.
+
+# Typical use case{#EDMATypicalUseCase}
+
+## eDMA Operation{#EDMAOper}
+
+Refer to the driver examples codes located at \<SDK_ROOT\>/boards/\<BOARD\>/driver_examples/edma*/
+
+/*!
+@defgroup edma_core eDMA core Driver
+@ingroup edma
+*/
+
+/*!
+@defgroup edma_soc eDMA soc Driver
+@ingroup edma
+*/

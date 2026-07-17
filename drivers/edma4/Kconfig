@@ -2,11 +2,18 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+# Deprecated alias of driver.edma_unified. The unified eDMA driver serves the
+# eDMA3/eDMA4/eDMA5 IP versions; driver.edma4 is only the historical component
+# name, kept so out-of-tree consumers that still reference driver.edma4 keep working
+# without changes. The alias provides no sources of its own; enabling driver.edma4
+# selects driver.edma_unified, so the implementation and headers always come from
+# edma_unified (driver.edma4 || driver.edma_unified both resolve to the unified
+# driver files). New development should use driver.edma_unified. (MCUX-88886)
 config MCUX_HAS_COMPONENT_driver.edma4
     bool
     default y if MCUX_HW_IP_DriverType_EDMA3 || MCUX_HW_IP_DriverType_EDMA4 || MCUX_HW_IP_DriverType_EDMA5
 
 config MCUX_COMPONENT_driver.edma4
-    bool "edma4"
+    bool "edma4 (deprecated: use edma_unified)"
     depends on MCUX_HAS_COMPONENT_driver.edma4
-    select MCUX_COMPONENT_driver.edma_soc
+    select MCUX_COMPONENT_driver.edma_unified

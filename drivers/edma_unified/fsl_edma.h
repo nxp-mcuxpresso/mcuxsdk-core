@@ -21,12 +21,24 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief eDMA driver version */
-#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 12)) /*!< Version 2.10.12. */
+#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 13)) /*!< Version 2.10.13. */
 /*! @} */
 
-/*! @brief eDMA driver name */
+/*! @brief eDMA driver name.
+ *
+ * This is the unified eDMA driver serving the eDMA3, eDMA4 and eDMA5 IP versions.
+ * Its Kconfig component is @c driver.edma_unified; the historical @c driver.edma4
+ * component and the @c FSL_EDMA_DRIVER_EDMA4 macro are retained as deprecated
+ * aliases for backward compatibility. The version-specific @c edma4_* / @c edma5_*
+ * identifiers inside this driver refer to the corresponding IP TCD layout, not to
+ * the component name.
+ */
+#ifndef FSL_EDMA_DRIVER_UNIFIED
+#define FSL_EDMA_DRIVER_UNIFIED (1)
+#endif
+/*! @brief Deprecated alias of FSL_EDMA_DRIVER_UNIFIED; use FSL_EDMA_DRIVER_UNIFIED. */
 #ifndef FSL_EDMA_DRIVER_EDMA4
-#define FSL_EDMA_DRIVER_EDMA4 (1)
+#define FSL_EDMA_DRIVER_EDMA4 FSL_EDMA_DRIVER_UNIFIED
 #endif
 
 /*!@brief Macro used for allocate edma TCD */
@@ -303,7 +315,7 @@ typedef struct _edma_channel_config
  */
 typedef edma_core_tcd_t edma_tcd_t;
 
-/*! @brief edma4 channel transfer configuration
+/*! @brief eDMA channel transfer configuration
  *
  * The transfer configuration structure support full feature configuration of the transfer control descriptor.
  *
@@ -316,7 +328,7 @@ typedef edma_core_tcd_t edma_tcd_t;
  *       5. the dstAddr should align with the dstWidthOfEachTransfer
  *       6. the srcAddr should align with srcAddrModulo if modulo feature is enabled
  *       7. the dstAddr should align with dstAddrModulo if modulo feature is enabled
- *       If anyone of above condition can not be satisfied, the edma4 interfaces will generate assert error.
+ *       If anyone of above condition can not be satisfied, the eDMA interfaces will generate assert error.
  *
  * 1.To perform a simple transfer, below members should be initialized at least
  * .srcAddr - source address

@@ -1,0 +1,12 @@
+# Copyright 2024 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.edma_unified
+    bool
+    default y if MCUX_HW_IP_DriverType_EDMA3 || MCUX_HW_IP_DriverType_EDMA4 || MCUX_HW_IP_DriverType_EDMA5
+
+config MCUX_COMPONENT_driver.edma_unified
+    bool "edma_unified"
+    depends on MCUX_HAS_COMPONENT_driver.edma_unified
+    select MCUX_COMPONENT_driver.edma_soc
