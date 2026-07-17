@@ -1123,6 +1123,9 @@ class NinjaParser
       # mcux_add_custom_command(BUILD_EVENT PRE_COMPILE) custom targets are
       # named PRE_COMPILE_CMD_TARGET_<MD5> and are picked up by parse_precompile.
       next if dep_basename.start_with?('PRE_COMPILE_CMD_TARGET_')
+      # The linker-preprocessing custom target is already parsed as a prebuild command by
+      # parse_source_file_generation_command. Skip it here to avoid a duplicate buildAction.
+      next if dep_basename == 'preprocess_linker_file'
 
       # Follow the phony rule to its CUSTOM_COMMAND target.
       phony_pattern = /^build\s+#{Regexp.escape(dep)}\s*:\s*phony\s+(\S+)/
