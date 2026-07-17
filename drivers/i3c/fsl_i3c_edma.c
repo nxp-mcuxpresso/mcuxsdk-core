@@ -233,14 +233,14 @@ static void I3C_SetEDMATcd(i3c_master_edma_handle_t *handle,
     uint32_t instance   = I3C_GetInstance(handle->base);
     edma_tcd_t *edmaTcd = isEndTcd ? NULL : &s_edma_tcd[instance][tcdIdx + 1U];
 
-#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+#if defined FSL_EDMA_DRIVER_UNIFIED && FSL_EDMA_DRIVER_UNIFIED
     EDMA_Type *edmaBase = handle->txDmaHandle->base;
     EDMA_TcdResetExt(edmaBase, &s_edma_tcd[instance][tcdIdx]);
 #else
     EDMA_TcdReset(&s_edma_tcd[instance][tcdIdx]);
 #endif
 
-#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+#if defined FSL_EDMA_DRIVER_UNIFIED && FSL_EDMA_DRIVER_UNIFIED
     EDMA_TcdSetTransferConfigExt(edmaBase, &s_edma_tcd[instance][tcdIdx], xferConfig, edmaTcd);
 #else
     EDMA_TcdSetTransferConfig(&s_edma_tcd[instance][tcdIdx], xferConfig, edmaTcd);
@@ -248,7 +248,7 @@ static void I3C_SetEDMATcd(i3c_master_edma_handle_t *handle,
 
     if (isEndTcd)
     {
-#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+#if defined FSL_EDMA_DRIVER_UNIFIED && FSL_EDMA_DRIVER_UNIFIED
         EDMA_TcdEnableInterruptsExt(edmaBase, &s_edma_tcd[instance][tcdIdx], kEDMA_MajorInterruptEnable);
 #else
         EDMA_TcdEnableInterrupts(&s_edma_tcd[instance][tcdIdx], kEDMA_MajorInterruptEnable);
@@ -256,7 +256,7 @@ static void I3C_SetEDMATcd(i3c_master_edma_handle_t *handle,
     }
     else
     {
-#if defined FSL_EDMA_DRIVER_EDMA4 && FSL_EDMA_DRIVER_EDMA4
+#if defined FSL_EDMA_DRIVER_UNIFIED && FSL_EDMA_DRIVER_UNIFIED
         EDMA_TcdDisableInterruptsExt(edmaBase, &s_edma_tcd[instance][tcdIdx], kEDMA_MajorInterruptEnable);
 #else
         EDMA_TcdDisableInterrupts(&s_edma_tcd[instance][tcdIdx], kEDMA_MajorInterruptEnable);
