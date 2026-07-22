@@ -1,5 +1,10 @@
 # LPSPI
 
+## [2.7.7]
+
+- Improvements
+  - Improved performance of LPSPI_MasterTransferBlocking().
+
 ## [2.7.6]
 
 - Bug Fixes
