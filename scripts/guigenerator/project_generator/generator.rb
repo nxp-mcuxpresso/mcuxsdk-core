@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -1047,6 +1047,7 @@ module SDKGenerator
           project_instance.set_slave_workspace(identifier, content['asym-multicore-debugger']['slave-workspace']) if content['asym-multicore-debugger'].key?('slave-workspace')
           project_instance.set_slave_project(identifier, content['asym-multicore-debugger']['slave-project']) if content['asym-multicore-debugger'].key?('slave-project')
           project_instance.set_slave_configuration(identifier, content['asym-multicore-debugger']['slave-configuration']) if content['asym-multicore-debugger'].key?('slave-configuration')
+          project_instance.set_slave_attach(identifier, content['asym-multicore-debugger']['attach-partner']) if content['asym-multicore-debugger'].key?('attach-partner')
         end
         if content.key?('download-extra-image')
           content['download-extra-image'].each do |each_image_config|

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -369,6 +369,20 @@ module Iar
           "no '.ewd' file set in templates"
         end
         @ewd_file.multicoreTab.slave_configuration(target, value)
+      end
+
+      # Enable or disable "Attach partner to running target" (OCAttachSlave).
+      # Required when the secondary image is flash-resident (XIP) and embedded
+      # inside the primary flash image; prevents IAR from issuing a second
+      # independent download+reset+verify into flash that the primary owns.
+      # ==== arguments
+      # target    - target name
+      # value     - value: true/false
+      def set_slave_attach(target, value, *_args, **_kwargs)
+        Core.assert(!@ewd_file.nil?) do
+          "no '.ewd' file set in templates"
+        end
+        @ewd_file.multicoreTab.slave_multicore_attach(target, value)
       end
 
       # enable download extra image
