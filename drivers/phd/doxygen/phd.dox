@@ -1,0 +1,7 @@
+/*!
+@defgroup phd_driver PHD: Phase Detector
+@details The MCUXpresso SDK provides a driver for the Phase Detector (PHD) of MCUXpresso SDK devices.
+
+# PHD: Phase Detector {#PHD}
+
+*/
