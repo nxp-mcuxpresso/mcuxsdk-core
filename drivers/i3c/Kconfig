@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -13,6 +13,10 @@ config MCUX_HAS_COMPONENT_driver.i3c_edma
 config MCUX_HAS_COMPONENT_driver.i3c
     bool
     default y if MCUX_HW_IP_DriverType_I3C
+
+config MCUX_HAS_COMPONENT_driver.i3c_msg_dma
+    bool
+    default y if MCUX_HAS_COMPONENT_driver.i3c && MCUX_HAS_COMPONENT_driver.edma4
 
 config MCUX_COMPONENT_driver.i3c_dma
     bool "i3c_dma"
@@ -30,6 +34,12 @@ config MCUX_COMPONENT_driver.i3c
     bool "i3c"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.i3c
+
+config MCUX_COMPONENT_driver.i3c_msg_dma
+    bool "i3c_msg_dma"
+    select MCUX_COMPONENT_driver.i3c
+    select MCUX_COMPONENT_driver.edma4 if MCUX_HAS_COMPONENT_driver.edma4
+    depends on MCUX_HAS_COMPONENT_driver.i3c_msg_dma
 
 if MCUX_COMPONENT_driver.i3c
     config I3C_RETRY_TIMES

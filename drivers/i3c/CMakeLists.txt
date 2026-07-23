@@ -28,3 +28,16 @@ if(CONFIG_MCUX_COMPONENT_driver.i3c)
     mcux_add_include(INCLUDES .)
 
 endif()
+
+if(CONFIG_MCUX_COMPONENT_driver.i3c_msg_dma)
+    mcux_component_version(2.0.0)
+
+    mcux_add_source(SOURCES fsl_i3c_msg_dma.c fsl_i3c_msg_dma.h fsl_i3c_port.h)
+
+    if(CONFIG_MCUX_COMPONENT_driver.edma4)
+        mcux_add_source(SOURCES fsl_i3c_port_edma.c)
+    endif()
+
+    mcux_add_include(INCLUDES .)
+
+endif()

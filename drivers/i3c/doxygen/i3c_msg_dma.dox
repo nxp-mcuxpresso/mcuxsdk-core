@@ -1,0 +1,4 @@
+/*!
+ * @defgroup i3c_master_msg_dma_driver I3C Message Mode DMA Driver
+ * @ingroup i3c
+ */
