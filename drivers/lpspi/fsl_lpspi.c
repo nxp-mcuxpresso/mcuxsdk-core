@@ -923,6 +923,7 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
                     return false; /* GCOVR_EXCL_LINE */
                 }
             }
+            assert(txRemainingByteCount >= bytesPerFrame);
             txRemainingByteCount -= bytesPerFrame;
         }
         else
@@ -1991,6 +1992,7 @@ status_t LPSPI_SlaveTransferNonBlocking(LPSPI_Type *base, lpspi_slave_handle_t *
         readRegRemainingTimes = handle->readRegRemainingTimes;
         if (readRegRemainingTimes <= (uint32_t)handle->rxWatermark)
         {
+            assert(readRegRemainingTimes > 0U);
             base->FCR = (base->FCR & (~LPSPI_FCR_RXWATER_MASK)) | LPSPI_FCR_RXWATER(readRegRemainingTimes - 1U);
         }
 
@@ -2281,7 +2283,6 @@ static uint32_t LPSPI_CombineWriteData(const uint8_t *txData, uint8_t bytesEachW
     {
         case 1:
             wordToSend = *txData;
-            ++txData;
             break;
 
         case 2:
@@ -2290,14 +2291,12 @@ static uint32_t LPSPI_CombineWriteData(const uint8_t *txData, uint8_t bytesEachW
                 wordToSend = *txData;
                 ++txData;
                 wordToSend |= (unsigned)(*txData) << 8U;
-                ++txData;
             }
             else
             {
                 wordToSend = (unsigned)(*txData) << 8U;
                 ++txData;
                 wordToSend |= *txData;
-                ++txData;
             }
 
             break;
@@ -2310,7 +2309,6 @@ static uint32_t LPSPI_CombineWriteData(const uint8_t *txData, uint8_t bytesEachW
                 wordToSend |= (unsigned)(*txData) << 8U;
                 ++txData;
                 wordToSend |= (unsigned)(*txData) << 16U;
-                ++txData;
             }
             else
             {
@@ -2319,7 +2317,6 @@ static uint32_t LPSPI_CombineWriteData(const uint8_t *txData, uint8_t bytesEachW
                 wordToSend |= (unsigned)(*txData) << 8U;
                 ++txData;
                 wordToSend |= *txData;
-                ++txData;
             }
             break;
 
@@ -2333,7 +2330,6 @@ static uint32_t LPSPI_CombineWriteData(const uint8_t *txData, uint8_t bytesEachW
                 wordToSend |= (unsigned)(*txData) << 16U;
                 ++txData;
                 wordToSend |= (unsigned)(*txData) << 24U;
-                ++txData;
             }
             else
             {
@@ -2344,7 +2340,6 @@ static uint32_t LPSPI_CombineWriteData(const uint8_t *txData, uint8_t bytesEachW
                 wordToSend |= (unsigned)(*txData) << 8U;
                 ++txData;
                 wordToSend |= *txData;
-                ++txData;
             }
             break;
 
@@ -2368,70 +2363,63 @@ static void LPSPI_SeparateReadData(uint8_t *rxData, uint32_t readData, uint8_t b
     switch (bytesEachRead) /* GCOVR_EXCL_BR_LINE */
     {
         case 1:
-            *rxData = (uint8_t)readData;
-            ++rxData;
+            *rxData = (uint8_t)(readData & 0xFFU);
             break;
 
         case 2:
             if (!isByteSwap)
             {
-                *rxData = (uint8_t)readData;
+                *rxData = (uint8_t)(readData & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 8);
-                ++rxData;
+                *rxData = (uint8_t)((readData >> 8) & 0xFFU);
             }
             else
             {
-                *rxData = (uint8_t)(readData >> 8);
+                *rxData = (uint8_t)((readData >> 8) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)readData;
-                ++rxData;
+                *rxData = (uint8_t)(readData & 0xFFU);
             }
             break;
 
         case 3:
             if (!isByteSwap)
             {
-                *rxData = (uint8_t)readData;
+                *rxData = (uint8_t)(readData & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 8);
+                *rxData = (uint8_t)((readData >> 8) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 16);
-                ++rxData;
+                *rxData = (uint8_t)((readData >> 16) & 0xFFU);
             }
             else
             {
-                *rxData = (uint8_t)(readData >> 16);
+                *rxData = (uint8_t)((readData >> 16) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 8);
+                *rxData = (uint8_t)((readData >> 8) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)readData;
-                ++rxData;
+                *rxData = (uint8_t)(readData & 0xFFU);
             }
             break;
 
         case 4:
             if (!isByteSwap)
             {
-                *rxData = (uint8_t)readData;
+                *rxData = (uint8_t)(readData & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 8);
+                *rxData = (uint8_t)((readData >> 8) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 16);
+                *rxData = (uint8_t)((readData >> 16) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 24);
-                ++rxData;
+                *rxData = (uint8_t)((readData >> 24) & 0xFFU);
             }
             else
             {
-                *rxData = (uint8_t)(readData >> 24);
+                *rxData = (uint8_t)((readData >> 24) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 16);
+                *rxData = (uint8_t)((readData >> 16) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)(readData >> 8);
+                *rxData = (uint8_t)((readData >> 8) & 0xFFU);
                 ++rxData;
-                *rxData = (uint8_t)readData;
-                ++rxData;
+                *rxData = (uint8_t)(readData & 0xFFU);
             }
             break;
 

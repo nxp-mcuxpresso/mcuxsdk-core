@@ -1,5 +1,10 @@
 # LPSPI
 
+## [2.0.2]
+
+- Bug Fixes
+  - Fixed CERT-C issues.
+
 ## [2.0.1]
 
 - Bug Fixes

@@ -1,5 +1,10 @@
 # LPSPI_EDMA
 
+## [2.4.11]
+
+- Bug Fixes
+  - Fixed CERT-C issues.
+
 ## [2.4.10]
 
 - Bug Fixes

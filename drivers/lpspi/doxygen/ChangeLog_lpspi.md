@@ -1,5 +1,10 @@
 # LPSPI
 
+## [2.7.8]
+
+- Bug Fixes
+  - Fixed CERT-C issues.
+
 ## [2.7.7]
 
 - Bug Fixes
