@@ -596,7 +596,7 @@ uint32_t LPSPI_MasterSetBaudRate(LPSPI_Type *base,
                 break;
             }
 
-            realBaudrate = (srcClock_Hz / ((1U << prescaler) * (scaler + 2U)));
+            realBaudrate = (srcClock_Hz / (((uint32_t)1U << prescaler) * (scaler + 2U)));
 
             /* calculate the baud rate difference based on the conditional statement
              * that states that the calculated baud rate must not exceed the desired baud rate
@@ -791,7 +791,7 @@ void LPSPI_MasterTransferCreateHandle(LPSPI_Type *base,
     s_lpspiHandle[LPSPI_GetInstance(base)] = handle;
 
     /* Set irq handler. */
-    s_lpspiMasterIsr = LPSPI_MasterTransferHandleIRQ;
+    s_lpspiMasterIsr = &LPSPI_MasterTransferHandleIRQ;
 
     handle->callback = callback;
     handle->userData = userData;
@@ -1844,7 +1844,7 @@ void LPSPI_SlaveTransferCreateHandle(LPSPI_Type *base,
     s_lpspiHandle[LPSPI_GetInstance(base)] = handle;
 
     /* Set irq handler. */
-    s_lpspiSlaveIsr = LPSPI_SlaveTransferHandleIRQ;
+    s_lpspiSlaveIsr = &LPSPI_SlaveTransferHandleIRQ;
 
     handle->callback = callback;
     handle->userData = userData;

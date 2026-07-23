@@ -78,12 +78,9 @@ static void LPSPI_SeparateEdmaReadData(uint8_t *rxData, uint32_t readData, uint3
 /***********************************************************************************************************************
  * Variables
  ***********************************************************************************************************************/
-/*! @brief Pointers to lpspi bases for each instance. */
-static LPSPI_Type *const s_lpspiBases[] = LPSPI_BASE_PTRS;
-
 /*! @brief Pointers to lpspi edma handles for each instance. */
-static lpspi_master_edma_private_handle_t s_lpspiMasterEdmaPrivateHandle[ARRAY_SIZE(s_lpspiBases)];
-static lpspi_slave_edma_private_handle_t s_lpspiSlaveEdmaPrivateHandle[ARRAY_SIZE(s_lpspiBases)];
+static lpspi_master_edma_private_handle_t s_lpspiMasterEdmaPrivateHandle[FSL_FEATURE_SOC_LPSPI_COUNT];
+static lpspi_slave_edma_private_handle_t s_lpspiSlaveEdmaPrivateHandle[FSL_FEATURE_SOC_LPSPI_COUNT];
 
 /***********************************************************************************************************************
  * Code
@@ -379,7 +376,7 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
         }
     }
 
-    EDMA_SetCallback(handle->edmaRxRegToRxDataHandle, EDMA_LpspiMasterCallback,
+    EDMA_SetCallback(handle->edmaRxRegToRxDataHandle, &EDMA_LpspiMasterCallback,
                      &s_lpspiMasterEdmaPrivateHandle[instance]);
 
     /* Configure rx EDMA transfer */
@@ -1050,7 +1047,7 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
         }
     }
 
-    EDMA_SetCallback(handle->edmaRxRegToRxDataHandle, EDMA_LpspiSlaveCallback,
+    EDMA_SetCallback(handle->edmaRxRegToRxDataHandle, &EDMA_LpspiSlaveCallback,
                      &s_lpspiSlaveEdmaPrivateHandle[instance]);
 
     /*Rx*/

@@ -595,7 +595,8 @@ uint32_t LPSPI_MasterSetBaudRate(LPSPI_Type *base,
             {
                 break;
             }
-            realBaudrate = (srcClock_Hz / ((1U << prescaler) * (scaler + 2U)));
+
+            realBaudrate = (srcClock_Hz / (((uint32_t)1U << prescaler) * (scaler + 2U)));
 
             /* calculate the baud rate difference based on the conditional statement
              * that states that the calculated baud rate must not exceed the desired baud rate
@@ -774,7 +775,7 @@ void LPSPI_MasterTransferCreateHandle(LPSPI_Type *base,
     s_lpspiHandle[LPSPI_GetInstance(base)] = handle;
 
     /* Set irq handler. */
-    s_lpspiMasterIsr = LPSPI_MasterTransferHandleIRQ;
+    s_lpspiMasterIsr = &LPSPI_MasterTransferHandleIRQ;
 
     handle->callback = callback;
     handle->userData = userData;
@@ -1324,7 +1325,7 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     handle->writeTcrInIsr        = false;
 
     /* Backup frame size */
-    handle->frameSize     = (LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT;
+    handle->frameSize     = (uint16_t)((LPSPI_GetTcr(base) & LPSPI_TCR_FRAMESZ_MASK) >> LPSPI_TCR_FRAMESZ_SHIFT);
     uint32_t frameSizeNew = handle->frameSize;
     handle->bytesPerFrame = (uint16_t)(handle->frameSize / 8U) + 1U;
 
@@ -1821,7 +1822,7 @@ void LPSPI_SlaveTransferCreateHandle(LPSPI_Type *base,
     s_lpspiHandle[LPSPI_GetInstance(base)] = handle;
 
     /* Set irq handler. */
-    s_lpspiSlaveIsr = LPSPI_SlaveTransferHandleIRQ;
+    s_lpspiSlaveIsr = &LPSPI_SlaveTransferHandleIRQ;
 
     handle->callback = callback;
     handle->userData = userData;
