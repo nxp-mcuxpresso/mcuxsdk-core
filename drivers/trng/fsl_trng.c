@@ -1906,7 +1906,7 @@ static status_t trng_SetStatisticalCheckLimit(TRNG_Type *base,
     uint32_t range;
     status_t status = kStatus_Success;
 
-    if ((NULL != limit) && ((int32_t)limit->maximum > limit->minimum))
+    if ((NULL != limit) && (limit->minimum >= 0) && (limit->maximum > (uint32_t)limit->minimum))
     {
         range = limit->maximum - (uint32_t)limit->minimum; /* Registers use range instead of minimum value.*/
 
@@ -2218,7 +2218,7 @@ status_t TRNG_GetRandomData(TRNG_Type *base, void *data, size_t dataSize)
     uint32_t tmpValidFlag;
     uint32_t tmpErrorFlag;
 
-    int index = 0;
+    uint32_t index = 0U;
 
 #if defined(TRNG_SW_HEALTH_TESTS)
     /* TRNG errata: execute SW tests */
@@ -2281,7 +2281,16 @@ status_t TRNG_GetRandomData(TRNG_Type *base, void *data, size_t dataSize)
             }
 
             /* Read Entropy.*/
-            random_32 = trng_ReadEntropy(base, (uint32_t)index++);
+            random_32 = trng_ReadEntropy(base, index);
+            /* Advance the entropy register index, wrapping without unsigned overflow. */
+            if (index >= (TRNG_ENT_COUNT - 1U))
+            {
+                index = 0U;
+            }
+            else
+            {
+                index++;
+            }
 
             random_p = (uint8_t *)&random_32;
 
@@ -2365,7 +2374,7 @@ status_t TRNG_GetRandomData(TRNG_Type *base, void *data, size_t dataSize)
 
         /* Start a new entropy generation.
         It is done by reading of the last entropy register.*/
-        if (((unsigned)index % TRNG_ENT_COUNT) != 0U)
+        if ((index % TRNG_ENT_COUNT) != 0U)
         {
             (void)trng_ReadEntropy(base, (TRNG_ENT_COUNT - 1u));
         }

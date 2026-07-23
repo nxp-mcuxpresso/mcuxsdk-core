@@ -1,5 +1,11 @@
 # TRNG
 
+## [2.0.24]
+
+- Bug fix:
+  - Fixed CERT-C integer findings (INT30-C, INT31-C, INT32-C) in TRNG_GetRandomData()
+    and trng_SetStatisticalCheckLimit().
+
 ## [2.0.23]
 
 - New features:
