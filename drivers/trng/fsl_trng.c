@@ -1908,7 +1908,7 @@ static status_t trng_SetStatisticalCheckLimit(TRNG_Type *base,
 
     if ((NULL != limit) && ((int32_t)limit->maximum > limit->minimum))
     {
-        range = limit->maximum - limit->minimum; /* Registers use range instead of minimum value.*/
+        range = limit->maximum - (uint32_t)limit->minimum; /* Registers use range instead of minimum value.*/
 
         if (statistical_check == kTRNG_StatisticalCheckMonobit) /* Allowable maximum and minimum number of ones/zero
                                                                    detected during entropy generation. */
@@ -1955,7 +1955,7 @@ static status_t trng_SetStatisticalCheckLimit(TRNG_Type *base,
                                                                                entropy sample frquency count during
                                                                                entropy generation . */
         {
-            status = trng_SetFrequencyCountMaxLimit(base, limit->minimum, limit->maximum);
+            status = trng_SetFrequencyCountMaxLimit(base, (uint32_t)limit->minimum, limit->maximum);
         }
         else
         {
