@@ -271,6 +271,7 @@ class Build(Forceable):
 
         device, origin = self._find_device()
         board, origin = self._find_board()
+        self._validate_core_id(board, device)
         self._run_cmake(board, device, origin)
         if args.cmake_only:
             return
@@ -318,6 +319,60 @@ class Build(Forceable):
         elif getattr(self, 'config_device', None):
             device, origin = self.config_device, 'configfile'
         return device, origin
+
+    @staticmethod
+    def _opt_value(opts, key):
+        """Value of a ``-D<key>[:TYPE]=<value>`` option (last wins), or None."""
+        value = None
+        key = key.lower()
+        for opt in opts or []:
+            if not opt.startswith('-D') or '=' not in opt:
+                continue
+            lhs, rhs = opt[2:].split('=', 1)
+            lhs = lhs.split(':', 1)[0]  # strip an optional ":TYPE"
+            if lhs.lower() == key:
+                value = rhs
+        return value
+
+    def _cmake_opt_value(self, key):
+        return self._opt_value(getattr(self.args, 'cmake_opts', []) or [], key)
+
+    def _validate_core_id(self, board, device):
+        """Fail fast when core_id is misconfigured for the resolved device."""
+        core_id = self._cmake_opt_value('core_id')
+        if not core_id:
+            return
+        board = board or self._cmake_opt_value('board')
+        device = device or self._cmake_opt_value('device')
+        try:
+            sys.path.insert(0, script_dir)
+            from misc import core_data
+        except ImportError:
+            return
+        except Exception as exc:
+            self.wrn(f'core_id validation unavailable: {exc}')
+            return
+        if not device and board:
+            device = core_data.resolve_device(board)
+        code, info = core_data.classify_core_id(core_id, board=board, device=device)
+        board_ref = f" (board '{board}')" if board else ''
+        if code == core_data.OK:
+            return
+        if code == core_data.UNRESOLVED:
+            self.wrn(f"cannot resolve cores for device '{device or board}'; "
+                     f"skipping core_id validation")
+            return
+        if code == core_data.SINGLE_CORE_HAS_COREID:
+            msg = (f"device '{device}'{board_ref} is single-core; do not pass "
+                   f"-Dcore_id={core_id} — single-core boards are built without "
+                   f"a core_id")
+        else:  # INVALID_COREID
+            msg = (f"core_id '{core_id}' is not valid for device '{device}'"
+                   f"{board_ref}; valid core_id(s): {', '.join(info['core_ids'])}")
+        if getattr(self.args, 'force', False):
+            self.wrn(msg + '; continuing anyway because --force was given')
+        else:
+            self.check_force(False, msg)
 
     def _parse_remainder(self, remainder):
         self.args.source_dir = None
@@ -770,31 +825,28 @@ class Build(Forceable):
             sys.path.insert(0, script_dir)
             from misc import sdk_project_target
 
-            cmake_opt_dict = {}
-            for opt in cmake_opts:
-                opt = opt[2:]
-                if '=' not in opt:
-                    continue
-                k, v = opt.split('=')
-                cmake_opt_dict[k.lower()] = v
-            board_core = cmake_opt_dict.get('board', '')
-            if cmake_opt_dict.get('core_id'):
-                board_core = board_core + '@' + cmake_opt_dict['core_id']
+            def opt(key):
+                return self._opt_value(cmake_opts, key)
+
+            board_core = opt('board') or ''
+            if opt('core_id'):
+                board_core = board_core + '@' + opt('core_id')
             op = sdk_project_target.MCUXRepoProjects()
-            if cmake_opt_dict.get('sdkrootdirpath', '') not in self.source_dir:
+            sdk_root_dir_path = opt('sdkrootdirpath') or ''
+            if sdk_root_dir_path not in self.source_dir:
                 # Freestanding example's example.yml is out of tree, need parse it to get the real example.yml location
                 source_example_yml = yaml.safe_load(open(os.path.join(self.source_dir, 'example.yml'), 'r'))
                 _, example_data = next(iter(source_example_yml.items()))
                 repo_source_dir = example_data.get('contents', {}).get('meta_path', '')
-                app_path = os.path.join(cmake_opt_dict.get('sdkrootdirpath', ''), repo_source_dir)
+                app_path = os.path.join(sdk_root_dir_path, repo_source_dir)
             else:
-                app_path = (pathlib.Path(self.source_dir) / 'example.yml').relative_to(pathlib.Path(cmake_opt_dict.get('sdkrootdirpath', ''))).as_posix()
+                app_path = (pathlib.Path(self.source_dir) / 'example.yml').relative_to(pathlib.Path(sdk_root_dir_path)).as_posix()
             matched_cases = op.search_app_targets(
                 app_path=app_path,
                 board_cores_filter=[board_core],
-                shields_filter=[cmake_opt_dict['shield']] if cmake_opt_dict.get('shield') else [],
-                devices_filter=[cmake_opt_dict['device']] if cmake_opt_dict.get('device') else [],
-                toolchains_filter=[cmake_opt_dict['config_toolchain']] if cmake_opt_dict.get('config_toolchain') else [],
+                shields_filter=[opt('shield')] if opt('shield') else [],
+                devices_filter=[opt('device')] if opt('device') else [],
+                toolchains_filter=[opt('config_toolchain')] if opt('config_toolchain') else [],
                 targets_filter=[],
                 is_pick_one_target_for_app=False,
                 validate=False
