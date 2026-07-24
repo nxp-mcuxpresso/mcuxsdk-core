@@ -80,6 +80,14 @@ static void LPSPI_SeparateEdmaReadData(uint8_t *rxData, uint32_t readData, uint3
  */
 static uint32_t LPSPI_GetAddressOffset(uint32_t transferSize, bool isByteSwap);
 
+/*!
+ * @brief Get EDMA transfer size enumeration from byte count.
+ *
+ * @param bytes Number of bytes (1, 2, or 4).
+ * @return EDMA transfer size enumeration.
+ */
+static edma_transfer_size_t LPSPI_GetEdmaTransferSize(uint32_t bytes);
+
 /***********************************************************************************************************************
  * Variables
  ***********************************************************************************************************************/
@@ -142,6 +150,37 @@ static uint32_t LPSPI_GetAddressOffset(uint32_t transferSize, bool isByteSwap)
     }
 
     return addrOffset;
+}
+
+static edma_transfer_size_t LPSPI_GetEdmaTransferSize(uint32_t bytes)
+{
+    edma_transfer_size_t transferSize;
+
+    /*
+     * $Branch Coverage Justification$
+     * $ref fsl_lpspi_edma_c_ref_1$
+     */
+    switch (bytes) /* GCOVR_EXCL_BR_LINE */
+    {
+        case 1U:
+            transferSize = kEDMA_TransferSize1Bytes;
+            break;
+
+        case 2U:
+            transferSize = kEDMA_TransferSize2Bytes;
+            break;
+
+        case 4U:
+            transferSize = kEDMA_TransferSize4Bytes;
+            break;
+
+        default: /* GCOVR_EXCL_START */
+            transferSize = kEDMA_TransferSize1Bytes;
+            assert(false);
+            break;
+    } /* GCOVR_EXCL_STOP */
+
+    return transferSize;
 }
 
 /*!
@@ -410,34 +449,8 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
         transferConfigRx.destOffset = 0;
     }
     transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
-
-    /*
-     * $Branch Coverage Justification$
-     * $ref fsl_lpspi_edma_c_ref_1$
-     */
-    switch (handle->bytesEachRead) /* GCOVR_EXCL_BR_LINE */
-    {
-        case (1U):
-            transferConfigRx.srcTransferSize = kEDMA_TransferSize1Bytes;
-            transferConfigRx.minorLoopBytes  = 1;
-            break;
-
-        case (2U):
-            transferConfigRx.srcTransferSize = kEDMA_TransferSize2Bytes;
-            transferConfigRx.minorLoopBytes  = 2;
-            break;
-
-        case (4U):
-            transferConfigRx.srcTransferSize = kEDMA_TransferSize4Bytes;
-            transferConfigRx.minorLoopBytes  = 4;
-            break;
-
-        default: /* GCOVR_EXCL_START */
-            transferConfigRx.srcTransferSize = kEDMA_TransferSize1Bytes;
-            transferConfigRx.minorLoopBytes  = 1;
-            assert(false);
-            break;
-    } /* GCOVR_EXCL_STOP */
+    transferConfigRx.srcTransferSize  = LPSPI_GetEdmaTransferSize(handle->bytesEachRead);
+    transferConfigRx.minorLoopBytes   = (uint32_t)handle->bytesEachRead;
 
     addrOffset = LPSPI_GetAddressOffset(handle->bytesEachRead, handle->isByteSwap);
     assert(rxAddr <= (UINT32_MAX - addrOffset));
@@ -471,32 +484,10 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
             transferConfigTx.srcOffset = 0;
         }
 
-        transferConfigTx.destOffset = 0;
-
-        transferConfigTx.srcTransferSize = kEDMA_TransferSize1Bytes;
-
-        /*
-         * $Branch Coverage Justification$
-         * $ref fsl_lpspi_edma_c_ref_1$
-         */
-        switch (bytesLastWrite) /* GCOVR_EXCL_BR_LINE */
-        {
-            case (1U):
-                transferConfigTx.destTransferSize = kEDMA_TransferSize1Bytes;
-                transferConfigTx.minorLoopBytes   = 1;
-                break;
-
-            case (2U):
-                transferConfigTx.destTransferSize = kEDMA_TransferSize2Bytes;
-                transferConfigTx.minorLoopBytes   = 2;
-                break;
-
-            default: /* GCOVR_EXCL_START */
-                transferConfigTx.destTransferSize = kEDMA_TransferSize1Bytes;
-                transferConfigTx.minorLoopBytes   = 1;
-                assert(false);
-                break;
-        } /* GCOVR_EXCL_STOP */
+        transferConfigTx.destOffset       = 0;
+        transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
+        transferConfigTx.destTransferSize = LPSPI_GetEdmaTransferSize(bytesLastWrite);
+        transferConfigTx.minorLoopBytes   = (uint32_t)bytesLastWrite;
 
         addrOffset = LPSPI_GetAddressOffset(bytesLastWrite, handle->isByteSwap);
         assert(txAddr <= (UINT32_MAX - addrOffset));
@@ -565,37 +556,10 @@ status_t LPSPI_MasterTransferEDMALite(LPSPI_Type *base, lpspi_master_edma_handle
         transferConfigTx.srcOffset = 0;
     }
 
-    transferConfigTx.destOffset = 0;
-
-    transferConfigTx.srcTransferSize = kEDMA_TransferSize1Bytes;
-
-    /*
-     * $Branch Coverage Justification$
-     * $ref fsl_lpspi_edma_c_ref_1$
-     */
-    switch (handle->bytesEachRead) /* GCOVR_EXCL_BR_LINE */
-    {
-        case (1U):
-            transferConfigTx.destTransferSize = kEDMA_TransferSize1Bytes;
-            transferConfigTx.minorLoopBytes   = 1;
-            break;
-
-        case (2U):
-            transferConfigTx.destTransferSize = kEDMA_TransferSize2Bytes;
-            transferConfigTx.minorLoopBytes   = 2;
-            break;
-
-        case (4U):
-            transferConfigTx.destTransferSize = kEDMA_TransferSize4Bytes;
-            transferConfigTx.minorLoopBytes   = 4;
-            break;
-
-        default: /* GCOVR_EXCL_START */
-            transferConfigTx.destTransferSize = kEDMA_TransferSize1Bytes;
-            transferConfigTx.minorLoopBytes   = 1;
-            assert(false);
-            break;
-    } /* GCOVR_EXCL_STOP */
+    transferConfigTx.destOffset       = 0;
+    transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
+    transferConfigTx.destTransferSize = LPSPI_GetEdmaTransferSize(handle->bytesEachRead);
+    transferConfigTx.minorLoopBytes   = (uint32_t)handle->bytesEachRead;
 
     addrOffset = LPSPI_GetAddressOffset(handle->bytesEachRead, handle->isByteSwap);
     assert(txAddr <= (UINT32_MAX - addrOffset));
@@ -1062,34 +1026,8 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
             transferConfigRx.destOffset = 0;
         }
         transferConfigRx.destTransferSize = kEDMA_TransferSize1Bytes;
-
-        /*
-         * $Branch Coverage Justification$
-         * $ref fsl_lpspi_edma_c_ref_1$
-         */
-        switch (handle->bytesEachRead) /* GCOVR_EXCL_BR_LINE */
-        {
-            case (1U):
-                transferConfigRx.srcTransferSize = kEDMA_TransferSize1Bytes;
-                transferConfigRx.minorLoopBytes  = 1;
-                break;
-
-            case (2U):
-                transferConfigRx.srcTransferSize = kEDMA_TransferSize2Bytes;
-                transferConfigRx.minorLoopBytes  = 2;
-                break;
-
-            case (4U):
-                transferConfigRx.srcTransferSize = kEDMA_TransferSize4Bytes;
-                transferConfigRx.minorLoopBytes  = 4;
-                break;
-
-            default: /* GCOVR_EXCL_START */
-                transferConfigRx.srcTransferSize = kEDMA_TransferSize1Bytes;
-                transferConfigRx.minorLoopBytes  = 1;
-                assert(false);
-                break;
-        } /* GCOVR_EXCL_STOP */
+        transferConfigRx.srcTransferSize  = LPSPI_GetEdmaTransferSize(handle->bytesEachRead);
+        transferConfigRx.minorLoopBytes   = (uint32_t)handle->bytesEachRead;
 
         addrOffset = LPSPI_GetAddressOffset(handle->bytesEachRead, handle->isByteSwap);
         assert(rxAddr <= (UINT32_MAX - addrOffset));
@@ -1115,33 +1053,12 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
         if (isThereExtraTxBytes)
         {
             assert(transfer->dataSize >= bytesLastWrite);
-            transferConfigTx.srcAddr         = (uint32_t) & (handle->txData[transfer->dataSize - bytesLastWrite]);
-            transferConfigTx.srcOffset       = 1;
-            transferConfigTx.destOffset      = 0;
-            transferConfigTx.srcTransferSize = kEDMA_TransferSize1Bytes;
-
-            /*
-             * $Branch Coverage Justification$
-             * $ref fsl_lpspi_edma_c_ref_1$
-             */
-            switch (bytesLastWrite) /* GCOVR_EXCL_BR_LINE */
-            {
-                case (1U):
-                    transferConfigTx.destTransferSize = kEDMA_TransferSize1Bytes;
-                    transferConfigTx.minorLoopBytes   = 1;
-                    break;
-
-                case (2U):
-                    transferConfigTx.destTransferSize = kEDMA_TransferSize2Bytes;
-                    transferConfigTx.minorLoopBytes   = 2;
-                    break;
-
-                default: /* GCOVR_EXCL_START */
-                    transferConfigTx.destTransferSize = kEDMA_TransferSize1Bytes;
-                    transferConfigTx.minorLoopBytes   = 1;
-                    assert(false);
-                    break;
-            } /* GCOVR_EXCL_STOP */
+            transferConfigTx.srcAddr          = (uint32_t) & (handle->txData[transfer->dataSize - bytesLastWrite]);
+            transferConfigTx.srcOffset        = 1;
+            transferConfigTx.destOffset       = 0;
+            transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
+            transferConfigTx.destTransferSize = LPSPI_GetEdmaTransferSize(bytesLastWrite);
+            transferConfigTx.minorLoopBytes   = (uint32_t)bytesLastWrite;
 
             addrOffset = LPSPI_GetAddressOffset(bytesLastWrite, handle->isByteSwap);
             assert(txAddr <= (UINT32_MAX - addrOffset));
@@ -1158,38 +1075,12 @@ status_t LPSPI_SlaveTransferEDMA(LPSPI_Type *base, lpspi_slave_edma_handle_t *ha
 #endif
         }
 
-        transferConfigTx.srcAddr         = (uint32_t)(handle->txData);
-        transferConfigTx.srcOffset       = 1;
-        transferConfigTx.destOffset      = 0;
-        transferConfigTx.srcTransferSize = kEDMA_TransferSize1Bytes;
-
-        /*
-         * $Branch Coverage Justification$
-         * $ref fsl_lpspi_edma_c_ref_1$
-         */
-        switch (handle->bytesEachRead) /* GCOVR_EXCL_BR_LINE */
-        {
-            case (1U):
-                transferConfigTx.destTransferSize = kEDMA_TransferSize1Bytes;
-                transferConfigTx.minorLoopBytes   = 1;
-                break;
-
-            case (2U):
-                transferConfigTx.destTransferSize = kEDMA_TransferSize2Bytes;
-                transferConfigTx.minorLoopBytes   = 2;
-                break;
-
-            case (4U):
-                transferConfigTx.destTransferSize = kEDMA_TransferSize4Bytes;
-                transferConfigTx.minorLoopBytes   = 4;
-                break;
-
-            default: /* GCOVR_EXCL_START */
-                transferConfigTx.destTransferSize = kEDMA_TransferSize1Bytes;
-                transferConfigTx.minorLoopBytes   = 1;
-                assert(false);
-                break;
-        } /* GCOVR_EXCL_STOP */
+        transferConfigTx.srcAddr          = (uint32_t)(handle->txData);
+        transferConfigTx.srcOffset        = 1;
+        transferConfigTx.destOffset       = 0;
+        transferConfigTx.srcTransferSize  = kEDMA_TransferSize1Bytes;
+        transferConfigTx.destTransferSize = LPSPI_GetEdmaTransferSize(handle->bytesEachRead);
+        transferConfigTx.minorLoopBytes   = (uint32_t)handle->bytesEachRead;
 
         addrOffset = LPSPI_GetAddressOffset(handle->bytesEachRead, handle->isByteSwap);
         assert(txAddr <= (UINT32_MAX - addrOffset));
