@@ -227,6 +227,17 @@ volatile uint8_t g_lpspiDummyData[ARRAY_SIZE(s_lpspiBases)] = {0};
 /**********************************************************************************************************************
  * Code
  *********************************************************************************************************************/
+/*!
+ * @brief Calculate bytes per read/write operation based on frame size.
+ * This is not a public API.
+ *
+ * @param bytesPerFrame The number of bytes per frame.
+ * @return The number of bytes to read/write per operation (capped at 4).
+ */
+static inline uint8_t LPSPI_GetBytesPerOperation(uint32_t bytesPerFrame)
+{
+    return (bytesPerFrame <= 4U) ? (uint8_t)bytesPerFrame : 4U;
+}
 
 /*!
  * brief Get the LPSPI instance from peripheral base address.
@@ -1220,16 +1231,8 @@ status_t LPSPI_MasterTransferBlocking(LPSPI_Type *base, lpspi_transfer_t *transf
         return kStatus_LPSPI_Timeout; /* GCOVR_EXCL_LINE */
     }
 
-    if (bytesPerFrame <= 4U)
-    {
-        stateParams.bytesEachWrite = (uint8_t)bytesPerFrame;
-        stateParams.bytesEachRead  = (uint8_t)bytesPerFrame;
-    }
-    else
-    {
-        stateParams.bytesEachWrite = 4U;
-        stateParams.bytesEachRead  = 4U;
-    }
+    stateParams.bytesEachWrite = LPSPI_GetBytesPerOperation(bytesPerFrame);
+    stateParams.bytesEachRead  = stateParams.bytesEachWrite;
 
     /*
      * $Branch Coverage Justification$
@@ -1363,17 +1366,10 @@ status_t LPSPI_MasterTransferNonBlocking(LPSPI_Type *base, lpspi_master_handle_t
     handle->fifoSize        = LPSPI_GetRxFifoSize(base);
     handle->isPcsContinuous = isPcsContinuous;
     handle->isByteSwap      = ((transfer->configFlags & (uint32_t)kLPSPI_MasterByteSwap) != 0U);
-    /*Calculate the bytes for write/read the TX/RX register each time*/
-    if (handle->bytesPerFrame <= 4U)
-    {
-        handle->bytesEachWrite = (uint8_t)handle->bytesPerFrame;
-        handle->bytesEachRead  = (uint8_t)handle->bytesPerFrame;
-    }
-    else
-    {
-        handle->bytesEachWrite = 4U;
-        handle->bytesEachRead  = 4U;
-    }
+
+    /* Calculate the bytes for write/read the TX/RX register each time */
+    handle->bytesEachWrite = LPSPI_GetBytesPerOperation(handle->bytesPerFrame);
+    handle->bytesEachRead  = handle->bytesEachWrite;
 
     /*Set the RX and TX watermarks to reduce the ISR times.*/
     /*
@@ -1909,17 +1905,11 @@ status_t LPSPI_SlaveTransferNonBlocking(LPSPI_Type *base, lpspi_slave_handle_t *
     /*The TX and RX FIFO sizes are always the same*/
     handle->fifoSize   = LPSPI_GetRxFifoSize(base);
     handle->isByteSwap = ((transfer->configFlags & (uint32_t)kLPSPI_SlaveByteSwap) != 0U);
-    /*Calculate the bytes for write/read the TX/RX register each time*/
-    if (bytesPerFrame <= 4U)
-    {
-        handle->bytesEachWrite = (uint8_t)bytesPerFrame;
-        handle->bytesEachRead  = (uint8_t)bytesPerFrame;
-    }
-    else
-    {
-        handle->bytesEachWrite = 4U;
-        handle->bytesEachRead  = 4U;
-    }
+
+    /* Calculate the bytes for write/read the TX/RX register each time */
+    handle->bytesEachWrite = LPSPI_GetBytesPerOperation(bytesPerFrame);
+    handle->bytesEachRead  = handle->bytesEachWrite;
+
     /* Set proper RX and TX watermarks to reduce the ISR response times. */
     /*
      * $Branch Coverage Justification$

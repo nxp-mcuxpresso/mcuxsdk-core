@@ -5,6 +5,8 @@
 - Bug Fixes
   - Fixed CERT-C issues.
   - Fixed MISRA issues.
+- Improvements
+  - Improved HIS CCM.
 
 ## [2.0.1]
 
