@@ -5,6 +5,8 @@
 - Bug Fixes
   - Fixed CERT-C issues.
   - Fixed MISRA issues.
+- Improvements
+  - Improved HIS CCM in LPSPI_MasterTransferEDMALite() and LPSPI_SlaveTransferEDMA().
 
 ## [2.4.10]
 
