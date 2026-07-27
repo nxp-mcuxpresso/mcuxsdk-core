@@ -25,24 +25,23 @@ void NETC_SocGetBaseResource(netc_enetc_hw_t *hw, netc_hw_si_idx_t si)
     uint8_t siNum    = getSiNum(si);
     uint8_t siIdx    = getSiIdx(si);
 
-    assert(1U + siIdx < sizeof(s_netcBases) / sizeof(s_netcBases[0]));
-
     hw->si             = s_enetcSiBases[siIdx];
     hw->base           = s_netcEnetcBases[instance];
     hw->common         = (NETC_SW_ENETC_Type *)((uintptr_t)hw->base + 0x1000U);
     hw->portGroup.port = (NETC_PORT_Type *)((uintptr_t)hw->base + 0x4000U);
     hw->portGroup.eth  = (NETC_ETH_LINK_Type *)((uintptr_t)hw->base + 0x5000U);
     hw->global         = (ENETC_GLOBAL_Type *)((uintptr_t)hw->base + 0x10000U);
+    hw->msixTable      = (netc_msix_entry_t *)((uintptr_t)hw->si + 0x30000U);
+
     if (siNum == 0U)
     {
+        assert(1U + siIdx < sizeof(s_netcBases) / sizeof(s_netcBases[0]));
         hw->func.pf   = s_netcBases[1 + siIdx];
-        hw->msixTable = (netc_msix_entry_t *)((uintptr_t)hw->si + 0x30000U);
     }
     else
     {
         assert(siIdx >= 4U);
         hw->func.vf   = s_netcVfBases[siIdx - 4U];
-        hw->msixTable = (netc_msix_entry_t *)((uintptr_t)hw->si + 0x60000U);
     }
 }
 
