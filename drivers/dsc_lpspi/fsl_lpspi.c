@@ -1640,6 +1640,69 @@ void LPSPI_MasterTransferAbort(LPSPI_Type *base, lpspi_master_handle_t *handle)
     handle->rxRemainingByteCount = 0;
 }
 
+/* Drains the master RX FIFO and adjusts the RX watermark register. */
+static void LPSPI_MasterHandleRxFifo(LPSPI_Type *base, lpspi_master_handle_t *handle)
+{
+    uint32_t readData;
+    uint8_t bytesEachRead          = handle->bytesEachRead;
+    bool isByteSwap                = handle->isByteSwap;
+    uint32_t readRegRemainingTimes = handle->readRegRemainingTimes;
+
+    if (handle->rxRemainingByteCount != 0U)
+    {
+        /* First, disable the interrupts to avoid potentially triggering another interrupt
+         * while reading out the RX FIFO as more data may be coming into the RX FIFO. We'll
+         * re-enable the interrupts based on the LPSPI state after reading out the FIFO.
+         */
+        LPSPI_DisableInterrupts(base, (uint32_t)kLPSPI_RxInterruptEnable);
+
+        /*
+         * $Branch Coverage Justification$
+         * If the remaining number is 0, the FIFO must be 0, and the condition after will not be judged.(will
+         * improve)
+         */
+        while ((LPSPI_GetRxFifoCount(base) != 0U) && (handle->rxRemainingByteCount != 0U)) /* GCOVR_EXCL_BR_LINE */
+        {
+            /*Read out the data*/
+            readData = LPSPI_ReadData(base);
+
+            /*Decrease the read RX register times.*/
+            --handle->readRegRemainingTimes;
+            readRegRemainingTimes = handle->readRegRemainingTimes;
+
+            if (handle->rxRemainingByteCount < (size_t)bytesEachRead)
+            {
+                handle->bytesEachRead = (uint8_t)(handle->rxRemainingByteCount);
+                bytesEachRead         = handle->bytesEachRead;
+            }
+
+            LPSPI_SeparateReadData(handle->rxData, readData, bytesEachRead, isByteSwap);
+            handle->rxData += bytesEachRead;
+
+            /*Decrease the remaining RX byte count.*/
+            handle->rxRemainingByteCount -= (size_t)bytesEachRead;
+        }
+
+        /* Re-enable the interrupts only if rxCount indicates there is more data to receive,
+         * else we may get a spurious interrupt.
+         * */
+        if (handle->rxRemainingByteCount != 0U)
+        {
+            /* Set the TDF and RDF interrupt enables simultaneously to avoid race conditions */
+            LPSPI_EnableInterrupts(base, (uint32_t)kLPSPI_RxInterruptEnable);
+        }
+    }
+
+    /*Set rxWatermark to (readRegRemainingTimes-1) if readRegRemainingTimes less than rxWatermark. Otherwise there
+     *is not RX interrupt for the last datas because the RX count is not greater than rxWatermark.
+     */
+    if (readRegRemainingTimes <= (uint32_t)handle->rxWatermark)
+    {
+        base->FCR = (base->FCR & (~LPSPI_FCR_RXWATER_MASK)) |
+                    LPSPI_FCR_RXWATER((readRegRemainingTimes > 1U) ? (readRegRemainingTimes - 1U) : (0U));
+    }
+}
+
 /*!
  * brief LPSPI Master IRQ handler function.
  *
@@ -1652,67 +1715,11 @@ void LPSPI_MasterTransferHandleIRQ(LPSPI_Type *base, lpspi_master_handle_t *hand
 {
     assert(handle != NULL);
 
-    uint32_t readData;
-    uint8_t bytesEachRead          = handle->bytesEachRead;
-    bool isByteSwap                = handle->isByteSwap;
-    uint32_t readRegRemainingTimes = handle->readRegRemainingTimes;
     uint32_t frameSize;
 
     if (handle->rxData != NULL)
     {
-        if (handle->rxRemainingByteCount != 0U)
-        {
-            /* First, disable the interrupts to avoid potentially triggering another interrupt
-             * while reading out the RX FIFO as more data may be coming into the RX FIFO. We'll
-             * re-enable the interrupts based on the LPSPI state after reading out the FIFO.
-             */
-            LPSPI_DisableInterrupts(base, (uint32_t)kLPSPI_RxInterruptEnable);
-
-            /*
-             * $Branch Coverage Justification$
-             * If the remaining number is 0, the FIFO must be 0, and the condition after will not be judged.(will
-             * improve)
-             */
-            while ((LPSPI_GetRxFifoCount(base) != 0U) && (handle->rxRemainingByteCount != 0U)) /* GCOVR_EXCL_BR_LINE */
-            {
-                /*Read out the data*/
-                readData = LPSPI_ReadData(base);
-
-                /*Decrease the read RX register times.*/
-                --handle->readRegRemainingTimes;
-                readRegRemainingTimes = handle->readRegRemainingTimes;
-
-                if (handle->rxRemainingByteCount < (size_t)bytesEachRead)
-                {
-                    handle->bytesEachRead = (uint8_t)(handle->rxRemainingByteCount);
-                    bytesEachRead         = handle->bytesEachRead;
-                }
-
-                LPSPI_SeparateReadData(handle->rxData, readData, bytesEachRead, isByteSwap);
-                handle->rxData += bytesEachRead;
-
-                /*Decrease the remaining RX byte count.*/
-                handle->rxRemainingByteCount -= (size_t)bytesEachRead;
-            }
-
-            /* Re-enable the interrupts only if rxCount indicates there is more data to receive,
-             * else we may get a spurious interrupt.
-             * */
-            if (handle->rxRemainingByteCount != 0U)
-            {
-                /* Set the TDF and RDF interrupt enables simultaneously to avoid race conditions */
-                LPSPI_EnableInterrupts(base, (uint32_t)kLPSPI_RxInterruptEnable);
-            }
-        }
-
-        /*Set rxWatermark to (readRegRemainingTimes-1) if readRegRemainingTimes less than rxWatermark. Otherwise there
-         *is not RX interrupt for the last datas because the RX count is not greater than rxWatermark.
-         */
-        if (readRegRemainingTimes <= (uint32_t)handle->rxWatermark)
-        {
-            base->FCR = (base->FCR & (~LPSPI_FCR_RXWATER_MASK)) |
-                        LPSPI_FCR_RXWATER((readRegRemainingTimes > 1U) ? (readRegRemainingTimes - 1U) : (0U));
-        }
+        LPSPI_MasterHandleRxFifo(base, handle);
     }
 
     if (handle->txRemainingByteCount != 0U)
@@ -2103,6 +2110,59 @@ void LPSPI_SlaveTransferAbort(LPSPI_Type *base, lpspi_slave_handle_t *handle)
     handle->rxRemainingByteCount = 0U;
 }
 
+/* Drains the slave RX FIFO and adjusts the RX watermark register. */
+static void LPSPI_SlaveHandleRxFifo(LPSPI_Type *base, lpspi_slave_handle_t *handle)
+{
+    uint32_t readData; /* variable to store word read from RX FIFO */
+    uint8_t bytesEachRead = handle->bytesEachRead;
+    bool isByteSwap       = handle->isByteSwap;
+    uint32_t readRegRemainingTimes;
+
+    if (handle->rxRemainingByteCount > 0U)
+    {
+        while (LPSPI_GetRxFifoCount(base) != 0U)
+        {
+            /*Read out the data*/
+            readData = LPSPI_ReadData(base);
+
+            /*Decrease the read RX register times.*/
+            --handle->readRegRemainingTimes;
+
+            if (handle->rxRemainingByteCount < (size_t)bytesEachRead)
+            {
+                handle->bytesEachRead = (uint8_t)handle->rxRemainingByteCount;
+                bytesEachRead         = handle->bytesEachRead;
+            }
+
+            LPSPI_SeparateReadData(handle->rxData, readData, bytesEachRead, isByteSwap);
+            handle->rxData += bytesEachRead;
+
+            /*Decrease the remaining RX byte count.*/
+            handle->rxRemainingByteCount -= (size_t)bytesEachRead;
+
+            if ((handle->txRemainingByteCount > 0U) && (handle->txData != NULL))
+            {
+                LPSPI_SlaveTransferFillUpTxFifo(base, handle);
+            }
+
+            if (handle->rxRemainingByteCount == 0U)
+            {
+                break;
+            }
+        }
+    }
+
+    /*Set rxWatermark to (readRegRemainingTimes-1) if readRegRemainingTimes less than rxWatermark. Otherwise there
+     *is not RX interrupt for the last datas because the RX count is not greater than rxWatermark.
+     */
+    readRegRemainingTimes = handle->readRegRemainingTimes;
+    if (readRegRemainingTimes <= (uint32_t)handle->rxWatermark)
+    {
+        base->FCR = (base->FCR & (~LPSPI_FCR_RXWATER_MASK)) |
+                    LPSPI_FCR_RXWATER((readRegRemainingTimes > 1U) ? (readRegRemainingTimes - 1U) : (0U));
+    }
+}
+
 /*!
  * brief LPSPI Slave IRQ handler function.
  *
@@ -2115,56 +2175,9 @@ void LPSPI_SlaveTransferHandleIRQ(LPSPI_Type *base, lpspi_slave_handle_t *handle
 {
     assert(handle != NULL);
 
-    uint32_t readData; /* variable to store word read from RX FIFO */
-    uint8_t bytesEachRead = handle->bytesEachRead;
-    bool isByteSwap       = handle->isByteSwap;
-    uint32_t readRegRemainingTimes;
-
     if (handle->rxData != NULL)
     {
-        if (handle->rxRemainingByteCount > 0U)
-        {
-            while (LPSPI_GetRxFifoCount(base) != 0U)
-            {
-                /*Read out the data*/
-                readData = LPSPI_ReadData(base);
-
-                /*Decrease the read RX register times.*/
-                --handle->readRegRemainingTimes;
-
-                if (handle->rxRemainingByteCount < (size_t)bytesEachRead)
-                {
-                    handle->bytesEachRead = (uint8_t)handle->rxRemainingByteCount;
-                    bytesEachRead         = handle->bytesEachRead;
-                }
-
-                LPSPI_SeparateReadData(handle->rxData, readData, bytesEachRead, isByteSwap);
-                handle->rxData += bytesEachRead;
-
-                /*Decrease the remaining RX byte count.*/
-                handle->rxRemainingByteCount -= (size_t)bytesEachRead;
-
-                if ((handle->txRemainingByteCount > 0U) && (handle->txData != NULL))
-                {
-                    LPSPI_SlaveTransferFillUpTxFifo(base, handle);
-                }
-
-                if (handle->rxRemainingByteCount == 0U)
-                {
-                    break;
-                }
-            }
-        }
-
-        /*Set rxWatermark to (readRegRemainingTimes-1) if readRegRemainingTimes less than rxWatermark. Otherwise there
-         *is not RX interrupt for the last datas because the RX count is not greater than rxWatermark.
-         */
-        readRegRemainingTimes = handle->readRegRemainingTimes;
-        if (readRegRemainingTimes <= (uint32_t)handle->rxWatermark)
-        {
-            base->FCR = (base->FCR & (~LPSPI_FCR_RXWATER_MASK)) |
-                        LPSPI_FCR_RXWATER((readRegRemainingTimes > 1U) ? (readRegRemainingTimes - 1U) : (0U));
-        }
+        LPSPI_SlaveHandleRxFifo(base, handle);
     }
     if ((handle->rxData == NULL) && (handle->txRemainingByteCount != 0U) && (handle->txData != NULL))
     {
