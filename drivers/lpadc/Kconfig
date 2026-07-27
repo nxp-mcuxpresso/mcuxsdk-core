@@ -37,4 +37,14 @@ if MCUX_COMPONENT_driver.lpadc
           This parameter defines how many loops to check the gain calibration GAIN_CAL ready.
           If defined as 0, driver will wait forever until ready.
 
+    config LPADC_USE_FIXED_POINT_GAIN_CALCULATION
+        bool "Use fixed point arithmetic for the gain calibration calculation"
+        default n
+        help
+          Calculate the auto-calibration gain conversion result with integer-only
+          arithmetic instead of the float/double software library, which saves
+          several kB of flash on code size sensitive devices. The fixed point
+          result keeps the gain fraction in Q17.14, so the two least significant
+          bits of the gain conversion result are always zero.
+
 endif

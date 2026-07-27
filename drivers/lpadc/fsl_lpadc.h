@@ -23,7 +23,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPADC driver version 2.10.3. */
-#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 10, 3))
+#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 11, 0))
 /*! @} */
 
 /*! @name Configuration */
@@ -70,6 +70,23 @@
     #define LPADC_GAIN_CAL_READY_TIMEOUT CONFIG_LPADC_GAIN_CAL_READY_TIMEOUT
 #else
     #define LPADC_GAIN_CAL_READY_TIMEOUT 0U
+#endif
+#endif
+
+/*!
+ * @brief Use fixed point arithmetic for the auto-calibration gain calculation
+ *
+ * When set to 1, LPADC_FinishAutoCalibration() calculates the gain conversion
+ * result with integer-only arithmetic instead of the float/double software
+ * library, which saves several kB of flash on code size sensitive devices.
+ * The fixed point result keeps the gain fraction in Q17.14, so the two least
+ * significant bits of the gain conversion result are always zero.
+ */
+#ifndef LPADC_USE_FIXED_POINT_GAIN_CALCULATION
+#ifdef CONFIG_LPADC_USE_FIXED_POINT_GAIN_CALCULATION
+    #define LPADC_USE_FIXED_POINT_GAIN_CALCULATION CONFIG_LPADC_USE_FIXED_POINT_GAIN_CALCULATION
+#else
+    #define LPADC_USE_FIXED_POINT_GAIN_CALCULATION 0U
 #endif
 #endif
 
