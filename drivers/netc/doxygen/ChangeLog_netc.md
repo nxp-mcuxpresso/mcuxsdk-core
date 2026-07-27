@@ -5,6 +5,7 @@
 - Bug Fixes
   - Fixed i.MX943 PCIE VF config register addresses.
   - Fixed i.MX943 PCIE VF MSIX table addresses.
+  - Fixed NETC_TimerAddOffset function.
 - Improvements
   - Updated VSI-PSI message driver for link status/speed per protocol v0.7.
 
