@@ -1,5 +1,11 @@
 # EVTG
 
+## [2.0.4]
+
+- Improvements
+  - Enabled the EVTG peripheral clock inside EVTG_Init() (guarded by FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL),
+    so the driver no longer relies on the application to ungate the clock.
+
 ## [2.0.3]
 
 - Bug Fixes
