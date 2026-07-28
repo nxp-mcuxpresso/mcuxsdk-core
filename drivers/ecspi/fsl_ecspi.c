@@ -176,10 +176,11 @@ static void ECSPI_SendTransfer(ECSPI_Type *base, ecspi_master_handle_t *handle)
 
     uint32_t dataCounts       = 0U;
     uint32_t txRemainingBytes = (uint32_t)(handle->txRemainingBytes);
+    uint32_t fifoCounts       = (uint32_t)ECSPI_GetTxFifoCount(base);
     /* Caculate the data size to send */
     dataCounts =
-        ((uint32_t)FSL_FEATURE_ECSPI_TX_FIFO_SIZEn(base) - (uint32_t)ECSPI_GetTxFifoCount(base)) < txRemainingBytes ?
-            ((uint32_t)FSL_FEATURE_ECSPI_TX_FIFO_SIZEn(base) - (uint32_t)ECSPI_GetTxFifoCount(base)) :
+        ((uint32_t)FSL_FEATURE_ECSPI_TX_FIFO_SIZEn(base) - fifoCounts) < txRemainingBytes ?
+            ((uint32_t)FSL_FEATURE_ECSPI_TX_FIFO_SIZEn(base) - fifoCounts) :
             txRemainingBytes;
     while ((dataCounts--) != 0UL)
     {
@@ -197,9 +198,10 @@ static void ECSPI_ReceiveTransfer(ECSPI_Type *base, ecspi_master_handle_t *handl
     assert(base != NULL);
 
     uint32_t dataCounts = 0U;
+    uint32_t fifoCounts = ECSPI_GetRxFifoCount(base);
     /* Caculate the data size need to receive */
     dataCounts =
-        (ECSPI_GetRxFifoCount(base) < handle->rxRemainingBytes) ? ECSPI_GetRxFifoCount(base) : handle->rxRemainingBytes;
+        (fifoCounts < handle->rxRemainingBytes) ? fifoCounts : handle->rxRemainingBytes;
 
     ECSPI_ReadNonBlocking(base, handle->rxData, dataCounts);
     if (NULL != handle->rxData)
