@@ -1,6 +1,14 @@
-# Copyright 2024 NXP
+# Copyright 2024, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
+
+# Pin the IAR C++ dialect to --c++. Otherwise CMake's IAR-CXX module may compute
+# --eec++ (e.g. IAR 10.10.1 defaults to C++20 on pre-4.4 CMake), which collides
+# with the arch config's --c++ -> "Illegal combination: --eec++ and --c++".
+# Non-FORCE default keeps -DCMAKE_IAR_CXX_FLAG=... overridable.
+if(NOT CMAKE_IAR_CXX_FLAG)
+  set(CMAKE_IAR_CXX_FLAG "--c++" CACHE STRING "IAR C++ dialect flag")
+endif()
 
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")
 set(TOOLCHAIN_ROOT $ENV{IAR_DIR})
