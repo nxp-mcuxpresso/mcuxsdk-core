@@ -159,6 +159,24 @@ void EVTG_Init(EVTG_Type *base, evtg_index_t evtgIndex, evtg_config_t *psConfig)
 }
 
 /*!
+ * brief De-initialize EVTG.
+ *
+ * This function gates the EVTG peripheral clock. It is the counterpart of ref EVTG_Init().
+ *
+ * param base EVTG base address.
+ */
+void EVTG_Deinit(EVTG_Type *base)
+{
+#if defined(EVTG_DRIVER_CLK_CTRL)
+    /* Gate the EVTG clock. */
+    CLOCK_DisableClock(s_evtgClocks[EVTG_GetInstance(base)]);
+#else
+    /* Suppress unused-parameter warning when driver clock control is disabled. */
+    (void)base;
+#endif /* EVTG_DRIVER_CLK_CTRL */
+}
+
+/*!
  * brief Configure AOI product term by initializing the product term
  *       configuration structure.
  *
