@@ -1007,24 +1007,20 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
 
             stateParams->rxRemainingByteCount -= (wordsToRead * stateParams->bytesEachRead);
 
-            if (stateParams->bytesEachRead == 1U)
+            while (wordsToRead > 0U)
             {
-                while (wordsToRead > 0U)
+                if (stateParams->bytesEachRead == 1U)
                 {
                     *rxDataPtr = (uint8_t)(base->RDR & 0xFFU);
                     rxDataPtr++;
-                    wordsToRead--;
                 }
-            }
-            else
-            {
-                while (wordsToRead > 0U)
+                else
                 {
                     readData = base->RDR;
                     LPSPI_SeparateReadData(rxDataPtr, readData, stateParams->bytesEachRead, isByteSwap);
                     rxDataPtr += stateParams->bytesEachRead;
-                    wordsToRead--;
                 }
+                wordsToRead--;
             }
 
             stateParams->rxData = rxDataPtr;
