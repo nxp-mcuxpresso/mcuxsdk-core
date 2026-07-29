@@ -652,7 +652,12 @@ static inline uint32_t LPSPI_GetTcr(LPSPI_Type *base)
          */
         (void)base->SR;
         tcr_values[i] = base->TCR;
-    } while(tcr_values[0] != tcr_values[1]);
+
+    /*
+     * $Branch Coverage Justification$
+     * Device specific.
+     */
+    } while(tcr_values[0] != tcr_values[1]); /* GCOVR_EXCL_BR_LINE */
 
     return tcr_values[0];
 }

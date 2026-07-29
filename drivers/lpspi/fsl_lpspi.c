@@ -993,9 +993,13 @@ static bool LPSPI_MasterTransferWriteAllTxData(LPSPI_Type *base,
 
             uint8_t *rxDataPtr = stateParams->rxData;
 
-            if (stateParams->rxRemainingByteCount < stateParams->bytesEachRead)
+            /*
+             * $Branch Coverage Justification$
+             * Coverage depends on timing and hardware (FIFO sizes).
+             */
+            if (stateParams->rxRemainingByteCount < stateParams->bytesEachRead) /* GCOVR_EXCL_BR_LINE */
             {
-                stateParams->bytesEachRead = (uint8_t)stateParams->rxRemainingByteCount;
+                stateParams->bytesEachRead = (uint8_t)stateParams->rxRemainingByteCount; /* GCOVR_EXCL_LINE */
             }
 
             uint32_t wordsToRead = stateParams->rxRemainingByteCount / stateParams->bytesEachRead;
