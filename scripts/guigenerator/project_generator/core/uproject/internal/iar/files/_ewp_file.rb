@@ -1021,6 +1021,15 @@ module Internal
               target, "settings[name=\"General\"]/data/option[name=\"DSPExtension\"]/state", @operations.convert_enum(value, convert), used: used
             )
           end
+
+          # Set NEON (Helium/MVE) option. For Cortex-M55/M85 a "no_mve" sub-token on
+          # the --cpu flag disables the MVE (Helium) extension in the IAR GUI project.
+          def mve(target, value,*args, used: true, **kargs)
+            convert = {'no_mve' => 0}
+            @operations.set_state_node(
+              target, "settings[name=\"General\"]/data/option[name=\"NEON\"]/state", @operations.convert_enum(value, convert), used: used
+            )
+          end
         end
 
 

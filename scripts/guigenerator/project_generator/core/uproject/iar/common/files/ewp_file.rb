@@ -113,6 +113,10 @@ module Iar
             super
           end
 
+        def mve(*args, **kargs)
+            super
+          end
+
           def use_core_variant(*args, **kargs)
             super
           end

@@ -60,7 +60,7 @@ module Iar
             Core.assert(target.is_a?(String), "not a string")
             Core.assert(line.is_a?(String), "not a string")
             # cpu
-            pattern = /(?i)\s--cpu(=|\s+)(\S+?)\.?(no_dsp)?\.?(no_se)?\s/
+            pattern = /(?i)\s--cpu(=|\s+)(\S+?)\.?(no_dsp)?\.?(no_se)?\.?(no_mve)?\s/
             result  = line.match(pattern)
             if (result && result[ 0 ])
                 @logger.debug("recognize: #{result[ 0 ]}")
@@ -68,6 +68,8 @@ module Iar
                 @file.generalTab.targetTab.dspExtension(target, result[ 3 ]) if result[ 3 ]
                 # trustZone: if included "no_se", handle this flag
                 @file.generalTab.targetTab.trustZone(target, result[ 4 ]) if result[ 4 ]
+                # mve/NEON: if included "no_mve", disable the NEON (Helium/MVE) option
+                @file.generalTab.targetTab.mve(target, result[ 5 ]) if result[ 5 ]
                 @file.generalTab.targetTab.core(target, result[ 2 ].downcase)
                 line.sub!(result[ 0 ], '')
             else
@@ -852,7 +854,7 @@ module Iar
             Core.assert(line.is_a?(String), "not a string")
 
             # remove cpu and fpu setting, because ide will provide them
-            pattern = /(?i)\s--cpu(=|\s+)(\S+?)\.?(no_dsp)?\.?(no_se)?\s/
+            pattern = /(?i)\s--cpu(=|\s+)(\S+?)\.?(no_dsp)?\.?(no_se)?\.?(no_mve)?\s/
             result  = line.match(pattern)
             if (result && result[ 0 ])
                 @logger.debug("recognize: #{result[ 0 ]}")
