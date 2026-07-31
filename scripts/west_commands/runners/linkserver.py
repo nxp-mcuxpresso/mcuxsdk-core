@@ -1,4 +1,4 @@
-# Copyright 2023 NXP
+# Copyright 2023, 2026 NXP
 # Copyright (c) 2017 Linaro Limited.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -90,7 +90,7 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
                             {DEFAULT_LINKSERVER_EXE}''')
         # user may need to override settings.
         parser.add_argument('--override', required=False, action='append',
-                            help=f'''configuration overrides as defined bylinkserver. Example: /device/memory/0/location=0xcafecafe''')
+                            help=f'''configuration overrides as defined by linkserver. Example: /device/memory/0/location=0xcafecafe''')
 
     @classmethod
     def do_create(cls, cfg, args):
@@ -187,7 +187,10 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
         if self.erase:
             self.do_erase()
 
-        # Use .hex or .bin, preferring .hex over .bin
+        # Use .hex or .bin, preferring .hex over .bin; fall back to .elf if
+        # neither was produced (e.g. MCUX_BUILD_OUTPUT_HEX is disabled or the
+        # build system did not generate a conversion step).  LinkServer flash
+        # can load an ELF directly because it contains section addresses.
         if self.supports_hex and self.hex_name is not None and os.path.isfile(self.hex_name):
             flash_cmd = (["load", self.hex_name])
         elif self.bin_name is not None and os.path.isfile(self.bin_name):
@@ -198,9 +201,14 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
                 raise RuntimeError("no load flash address could be found...")
 
             flash_cmd = (["load", "--addr", hex(load_addr), self.bin_name])
+        elif self.elf_name is not None and os.path.isfile(self.elf_name):
+            self.logger.warning('no hex/bin found, falling back to ELF: %s',
+                                self.elf_name)
+            flash_cmd = (["load", self.elf_name])
         else:
-            err = 'Cannot flash; no hex ({}) or bin ({}) file found.'
-            raise ValueError(err.format(self.hex_name, self.bin_name))
+            err = 'Cannot flash; no hex ({}), bin ({}) or elf ({}) file found.'
+            raise ValueError(err.format(self.hex_name, self.bin_name,
+                                        self.elf_name))
 
         # Flash the selected file
         linkserver_cmd = linkserver_cmd + flash_cmd

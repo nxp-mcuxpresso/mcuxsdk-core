@@ -8,6 +8,9 @@ rsource "examples/Kconfig"
 # device
 rsource "devices/Kconfig"
 
+# Build output format (hex/bin generation)
+rsource "cmake/extension/flash/Kconfig"
+
 # Driver config
 menu "Driver Configuration"
     rsource "drivers/Kconfig"

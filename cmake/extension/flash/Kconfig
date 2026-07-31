@@ -1,0 +1,22 @@
+# Copyright 2026 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+menu "Build output"
+
+config MCUX_BUILD_OUTPUT_HEX
+    bool "Build an Intel HEX file from the application"
+    default y
+    help
+      Build an Intel HEX (.hex) output file from the application ELF as a
+      POST_BUILD step. The .hex file is consumed by west flash and most NXP
+      production programming tools (LinkServer, blhost, MSD drag-and-drop).
+
+config MCUX_BUILD_OUTPUT_BIN
+    bool "Build a raw binary file from the application"
+    help
+      Build a raw binary (.bin) output file from the application ELF as a
+      POST_BUILD step. Useful for bootloaders or tools that require a flat
+      binary image. Note: a base flash address is required at load time.
+
+endmenu

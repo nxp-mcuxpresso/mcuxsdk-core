@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 
 function(runners_yaml_append content)
   # Append ${content}\n to a target property which is later evaluated as a
@@ -40,35 +40,17 @@ function(runners_yaml_append_config)
   runners_yaml_append("  board_dir: ${SdkRootDirPath}/${board_root}/${board}")
   # get_runners_prop(elf_file elf "${KERNEL_ELF_NAME}")
   runners_yaml_append("  # Build outputs:")
-  # runners_yaml_append("  elf_file: ${elf}")
-  # hardcode for mcuxsdk, currently we do not allow user to configure output type in kconfig
-  runners_yaml_append("  bin_file: ${APPLICATION_BINARY_NAME}.bin")
+  # The ELF is always produced; hex/bin are produced only when the corresponding
+  # Kconfig option is enabled (MCUX_BUILD_OUTPUT_HEX / MCUX_BUILD_OUTPUT_BIN).
+  # Advertising a file that was not built causes west flash to fail with a
+  # "file not found" error, so only include entries for files that exist.
   runners_yaml_append("  elf_file: ${APPLICATION_BINARY_NAME}.elf")
-  runners_yaml_append("  hex_file: ${APPLICATION_BINARY_NAME}.hex")
-  # if(CONFIG_BUILD_OUTPUT_EXE)
-  #   get_runners_prop(exe_file exe "${KERNEL_EXE_NAME}")
-  # else()
-  #   get_runners_prop(exe_file exe "")
-  # endif()
-  # if(exe)
-  #   runners_yaml_append("  exe_file: ${exe}")
-  # endif()
-  # if(CONFIG_BUILD_OUTPUT_HEX)
-  #   get_runners_prop(hex_file hex "${KERNEL_HEX_NAME}")
-  # else()
-  #   get_runners_prop(hex_file hex "")
-  # endif()
-  # if(hex)
-  #   runners_yaml_append("  hex_file: ${hex}")
-  # endif()
-  # if(CONFIG_BUILD_OUTPUT_BIN)
-  #   get_runners_prop(bin_file bin "${KERNEL_BIN_NAME}")
-  #   runners_yaml_append("  bin_file: ${bin}")
-  # endif()
-  # if(CONFIG_BUILD_OUTPUT_UF2)
-  #   get_runners_prop(uf2_file uf2 "${KERNEL_UF2_NAME}")
-  #   runners_yaml_append("  uf2_file: ${uf2}")
-  # endif()
+  if(CONFIG_MCUX_BUILD_OUTPUT_HEX)
+    runners_yaml_append("  hex_file: ${APPLICATION_BINARY_NAME}.hex")
+  endif()
+  if(CONFIG_MCUX_BUILD_OUTPUT_BIN)
+    runners_yaml_append("  bin_file: ${APPLICATION_BINARY_NAME}.bin")
+  endif()
 
   if(CMAKE_GDB OR OPENOCD OR OPENOCD_DEFAULT_PATH)
     runners_yaml_append("  # Host tools:")
