@@ -1,5 +1,10 @@
 # NETC
 
+## [2.10.8]
+
+- Bug Fixes
+  - Fixed switch driver to use the BPCAPR NUM_SBP macro spelling.
+
 ## [2.10.7]
 
 - New Features

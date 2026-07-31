@@ -3258,7 +3258,7 @@ status_t SWT_UpdateSBPTableEntry(swt_handle_t *handle, netc_tb_sbp_config_t *con
 {
     assert(handle != NULL);
 
-    uint32_t entryNumMax = (handle->hw.base->BPCAPR & NETC_SW_BPCAPR_NUM_SPB_MASK) >> NETC_SW_BPCAPR_NUM_SPB_SHIFT;
+    uint32_t entryNumMax = (handle->hw.base->BPCAPR & NETC_SW_BPCAPR_NUM_SBP_MASK) >> NETC_SW_BPCAPR_NUM_SBP_SHIFT;
     status_t status      = kStatus_NETC_LackOfResource;
     netc_cmd_bd_t cmdBd  = {0};
     netc_cbdr_handle_t cdbrHandle;
@@ -3290,7 +3290,7 @@ status_t SWT_GetSBPEntryState(swt_handle_t *handle, uint32_t entryID, netc_tb_sb
 {
     assert(handle != NULL);
 
-    uint32_t entryNumMax = (handle->hw.base->BPCAPR & NETC_SW_BPCAPR_NUM_SPB_MASK) >> NETC_SW_BPCAPR_NUM_SPB_SHIFT;
+    uint32_t entryNumMax = (handle->hw.base->BPCAPR & NETC_SW_BPCAPR_NUM_SBP_MASK) >> NETC_SW_BPCAPR_NUM_SBP_SHIFT;
     status_t status      = kStatus_NETC_LackOfResource;
     netc_cmd_bd_t cmdBd  = {0};
     netc_cbdr_handle_t cdbrHandle;

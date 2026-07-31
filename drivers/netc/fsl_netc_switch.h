@@ -1825,7 +1825,7 @@ status_t SWT_GetBPEntryState(swt_handle_t *handle, uint32_t entryID, netc_tb_bp_
  */
 static inline uint32_t SWT_GetSBPTableEntryNum(swt_handle_t *handle)
 {
-    return (handle->hw.base->BPCAPR & NETC_SW_BPCAPR_NUM_SPB_MASK) >> NETC_SW_BPCAPR_NUM_SPB_SHIFT;
+    return (handle->hw.base->BPCAPR & NETC_SW_BPCAPR_NUM_SBP_MASK) >> NETC_SW_BPCAPR_NUM_SBP_SHIFT;
 }
 
 /*!
