@@ -492,7 +492,7 @@ status_t LLC_GetErrorStatus(LLC_Type *base, llc_error_status_t *errorStatus);
  * Set the number of correctable errors that must be corrected before the correctable
  * error interrupt output signal (IRQ_C_LEVEL) is asserted.
  */
-void LLC_SetCorrectableErrorInterruptThreshold(LLC_Type *base, uint8_t threshold)
+static inline void LLC_SetCorrectableErrorInterruptThreshold(LLC_Type *base, uint8_t threshold)
 {
     assert(base != NULL);
     base->CCUCECR = (base->CCUCECR & ~LLC_CCUCECR_ERRTHRESHOLD_MASK) | LLC_CCUCECR_ERRTHRESHOLD(threshold);
