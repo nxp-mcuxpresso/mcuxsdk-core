@@ -1,0 +1,5 @@
+config MCUX_COMPONENT_middleware.mstp-lib
+    bool "mstp-lib"
+    help
+      Enable the mstp-lib library to support MSTP (Multiple Spanning Tree Protocol)
+      and RSTP (Rapid Spanning Tree Protocol) as defined in IEEE 802.1Q/802.1D.
