@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if(CONFIG_MCUX_COMPONENT_driver.netc_rt1180)
-    mcux_component_version(2.0.0)
+    mcux_component_version(2.0.1)
 
     mcux_add_source(SOURCES socs/imxrt1180/fsl_netc_soc.c socs/imxrt1180/fsl_netc_soc.h)
 
