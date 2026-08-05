@@ -2,6 +2,8 @@
 
 ## [2.10.7]
 
+- New Features
+  - Added i.MX937 SOC driver.
 - Bug Fixes
   - Fixed i.MX943 PCIE VF config register addresses.
   - Fixed i.MX943 PCIE VF MSIX table addresses.
