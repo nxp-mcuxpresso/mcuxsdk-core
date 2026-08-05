@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Copyright (c) 2022, Nordic Semiconductor ASA
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 
 # Setup basic settings for a Zephyr project.
 #
@@ -23,6 +23,25 @@
 include_guard(GLOBAL)
 
 set(INTERNAL_EXAMPLE_FOLDER "examples_int")
+
+# MCUX-88073: single overridable root for prebuilt binary blobs.
+# Defaults to the SDK root so when unset the build resolves blobs from their
+# historical in-tree paths (no behavior change). Override via:
+#   -DMCUX_PREBUILT_ROOT=<path>  (CMake cache)
+#   env MCUX_PREBUILT_ROOT=<path>
+#   west config blobs.prebuilt-root <path>  (consumed by blobs.py)
+# MCUX_PREBUILT_ROOT is intentionally left as a plain (non-CACHE) variable so
+# that an environment-variable change between builds takes effect without
+# requiring a cache wipe. Set it explicitly before including this file (or via
+# $ENV{MCUX_PREBUILT_ROOT}) to point at an out-of-tree prebuilt root.
+if(NOT DEFINED MCUX_PREBUILT_ROOT)
+    if(DEFINED ENV{MCUX_PREBUILT_ROOT})
+        set(MCUX_PREBUILT_ROOT $ENV{MCUX_PREBUILT_ROOT})
+    else()
+        set(MCUX_PREBUILT_ROOT ${SdkRootDirPath})
+    endif()
+endif()
+file(TO_CMAKE_PATH "${MCUX_PREBUILT_ROOT}" MCUX_PREBUILT_ROOT)
 
 include(${SdkRootDirPath}/cmake/extension/basic_settings_lite.cmake)
 include(${SdkRootDirPath}/cmake/extension/misc_function.cmake)
