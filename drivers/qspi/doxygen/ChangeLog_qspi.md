@@ -1,5 +1,10 @@
 # QSPI
 
+## [2.3.4]
+
+- Improvements
+  - Fixed Coverity MSG issues.
+
 ## [2.3.3]
 
 - Improvements

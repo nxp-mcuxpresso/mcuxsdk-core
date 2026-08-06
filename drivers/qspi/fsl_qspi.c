@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2021, 2025 NXP
+ * Copyright 2016-2021, 2025-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -115,7 +115,7 @@ void QSPI_Init(QuadSPI_Type *base, qspi_config_t *config, uint32_t srcClock_Hz)
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Enable QSPI clock */
-    CLOCK_EnableClock(s_qspiClock[QSPI_GetInstance(base)]);
+    (void)CLOCK_EnableClock(s_qspiClock[QSPI_GetInstance(base)]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
     /* Do software reset to QSPI module */
@@ -211,7 +211,7 @@ void QSPI_Deinit(QuadSPI_Type *base)
 {
     QSPI_Enable(base, false);
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
-    CLOCK_DisableClock(s_qspiClock[QSPI_GetInstance(base)]);
+    (void)CLOCK_DisableClock(s_qspiClock[QSPI_GetInstance(base)]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
@@ -264,8 +264,8 @@ void QSPI_SetFlashConfig(QuadSPI_Type *base, qspi_flash_config_t *config)
     /* Set Word Addressable feature */
     /* INT31-C: Explicit boolean to integer conversion */
     uint32_t wordAddrEnable = config->enableWordAddress ? 1U : 0U;
-    val = QuadSPI_SFACR_WA(wordAddrEnable) | QuadSPI_SFACR_CAS(config->cloumnspace);
-    base->SFACR = val;
+    val                     = QuadSPI_SFACR_WA(wordAddrEnable) | QuadSPI_SFACR_CAS(config->cloumnspace);
+    base->SFACR             = val;
 #endif /* FSL_FEATURE_QSPI_HAS_NO_SFACR */
 
     /* Config look up table */
@@ -613,7 +613,8 @@ void QSPI_ReadBlocking(QuadSPI_Type *base, uint32_t *buffer, size_t size)
             }
         }
 
-        level = (level < (size / 4U - i)) ? level : (size / 4U - i);
+        level = MIN(level, (uint32_t)(size / 4U - i));
+        assert(level <= (uint32_t)ARRAY_SIZE(base->RBDR));
 
         /* Data from RBDR */
         if (0U != (base->RBCT & QuadSPI_RBCT_RXBRD_MASK))
