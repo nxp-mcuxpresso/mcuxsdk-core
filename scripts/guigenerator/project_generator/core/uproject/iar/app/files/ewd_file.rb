@@ -1,5 +1,5 @@
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -17,6 +17,7 @@ module App
         attr_reader :imagesTab
         attr_reader :extraoptionTab
         attr_reader :debuggercmsisdapTab
+        attr_reader :debuggerjlinkTab
 
         def initialize(*args, **kwargs)
             super
@@ -27,6 +28,7 @@ module App
             @imagesTab = ImagesTab.new(@operations)
             @extraoptionTab = ExtraOptionTab.new(@operations)
             @debuggercmsisdapTab = DebuggerCmsisDapTab.new(@operations)
+            @debuggerjlinkTab = DebuggerJlinkTab.new(@operations)
         end
 
         def save(*args, **kwargs) super end
@@ -75,6 +77,13 @@ module App
             def cmsisdap_multicpu_enable(*args) super end
             def cmsisdap_multitarget_enable(*args) super end
             def cmsisdap_resetlist(*args) super end
+            def restore_breakpoint(*args) super end
+
+        end
+
+        class DebuggerJlinkTab < DebuggerJlinkTab
+
+            def restore_breakpoint(*args) super end
 
         end
 

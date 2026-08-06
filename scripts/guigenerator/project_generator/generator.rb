@@ -1205,6 +1205,9 @@ module SDKGenerator
         if project_instance.methods.include?(:set_debugger_cmsisdap)
           project_instance.set_debugger_cmsisdap(identifier, cmsisdap_interface, cmsisdap_multicpu, cmsisdap_multitarget, cmsisdap_resetlist) if content['debugger_setting'].key?('cmsisdap_interface') || content['debugger_setting'].key?('cmsisdap_multitarget') || content['debugger_setting'].key?('cmsisdap_multicpu') || content['debugger_setting'].key?('cmsisdap_resetlist')
         end
+        if content['debugger_setting'].key?('restore_breakpoint') && project_instance.methods.include?(:set_debugger_restore_breakpoint)
+          project_instance.set_debugger_restore_breakpoint(identifier, content['debugger_setting']['restore_breakpoint'].to_s)
+        end
       end
 
       # Add armgcc misc settings

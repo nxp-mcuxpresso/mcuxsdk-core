@@ -298,6 +298,19 @@ module Iar
         @ewd_file.debuggercmsisdapTab.cmsisdap_resetlist(target, cmsisdapresetlist)
       end
 
+      # Restore software breakpoints at the given location for both J-Link and
+      # CMSIS-DAP debuggers (IAR GUI only).
+      # ==== arguments
+      # target    - target name
+      # value     - breakpoint location expression, e.g. "_call_main"
+      def set_debugger_restore_breakpoint(target, value)
+        Core.assert(!@ewd_file.nil?) do
+          "no '.ewd' file set in templates"
+        end
+        @ewd_file.debuggerjlinkTab.restore_breakpoint(target, value)
+        @ewd_file.debuggercmsisdapTab.restore_breakpoint(target, value)
+      end
+
       # use Extra option for Debugegr
       # ==== arguments
       # target    - target name

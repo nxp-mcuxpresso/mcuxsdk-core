@@ -1,5 +1,5 @@
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -455,6 +455,32 @@ module Iar
                 end
                 @operations.set_state_node(
                     target, "settings/data/option[name=\"CMSISDAPResetList\"]/state", @operations.convert_string(value)
+                )
+            end
+
+            # Restore software breakpoints for the CMSIS-DAP debugger.
+            # Enables "Restore software breakpoints at" and sets its location expression.
+            def restore_breakpoint(target, value)
+                @operations.set_state_node(
+                    target, "settings/data/option[name=\"CMSISDAPRestoreBreakpointsCheck\"]/state", @operations.convert_string('1')
+                )
+                @operations.set_state_node(
+                    target, "settings/data/option[name=\"CMSISDAPUpdateBreakpointsEdit\"]/state", @operations.convert_string(value)
+                )
+            end
+
+        end
+
+        class DebuggerJlinkTab < TabBase
+            private
+            # Restore software breakpoints for the J-Link debugger.
+            # Enables "Restore software breakpoints at" and sets its location expression.
+            def restore_breakpoint(target, value)
+                @operations.set_state_node(
+                    target, "settings/data/option[name=\"CCJLinkDoUpdateBreakpoints\"]/state", @operations.convert_string('1')
+                )
+                @operations.set_state_node(
+                    target, "settings/data/option[name=\"CCJLinkUpdateBreakpoints\"]/state", @operations.convert_string(value)
                 )
             end
 
