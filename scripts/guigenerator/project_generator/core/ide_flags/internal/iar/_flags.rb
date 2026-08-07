@@ -1,5 +1,5 @@
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -60,16 +60,19 @@ module Iar
             Core.assert(target.is_a?(String), "not a string")
             Core.assert(line.is_a?(String), "not a string")
             # cpu
-            pattern = /(?i)\s--cpu(=|\s+)(\S+?)\.?(no_dsp)?\.?(no_se)?\.?(no_mve)?\s/
+            # Match --cpu=<core>(.<suffix>)* where suffixes no_dsp/no_se/no_mve may
+            # appear in any order (e.g. --cpu=Cortex-M85.no_mve.no_se).
+            pattern = /(?i)\s--cpu(=|\s+)(\S+?)((?:\.(no_dsp|no_se|no_mve))*)\s/
             result  = line.match(pattern)
             if (result && result[ 0 ])
                 @logger.debug("recognize: #{result[ 0 ]}")
+                suffixes = result[ 3 ].downcase.scan(/no_dsp|no_se|no_mve/)
                 # dspExtension: if included "no_dsp", handle this flag
-                @file.generalTab.targetTab.dspExtension(target, result[ 3 ]) if result[ 3 ]
+                @file.generalTab.targetTab.dspExtension(target, 'no_dsp') if suffixes.include?('no_dsp')
                 # trustZone: if included "no_se", handle this flag
-                @file.generalTab.targetTab.trustZone(target, result[ 4 ]) if result[ 4 ]
+                @file.generalTab.targetTab.trustZone(target, 'no_se') if suffixes.include?('no_se')
                 # mve/NEON: if included "no_mve", disable the NEON (Helium/MVE) option
-                @file.generalTab.targetTab.mve(target, result[ 5 ]) if result[ 5 ]
+                @file.generalTab.targetTab.mve(target, 'no_mve') if suffixes.include?('no_mve')
                 @file.generalTab.targetTab.core(target, result[ 2 ].downcase)
                 line.sub!(result[ 0 ], '')
             else
@@ -854,7 +857,7 @@ module Iar
             Core.assert(line.is_a?(String), "not a string")
 
             # remove cpu and fpu setting, because ide will provide them
-            pattern = /(?i)\s--cpu(=|\s+)(\S+?)\.?(no_dsp)?\.?(no_se)?\.?(no_mve)?\s/
+            pattern = /(?i)\s--cpu(=|\s+)(\S+?)((?:\.(no_dsp|no_se|no_mve))*)\s/
             result  = line.match(pattern)
             if (result && result[ 0 ])
                 @logger.debug("recognize: #{result[ 0 ]}")
