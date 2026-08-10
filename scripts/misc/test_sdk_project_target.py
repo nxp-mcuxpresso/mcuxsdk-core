@@ -931,5 +931,61 @@ class TestEdgeCases:
                     assert len(result) == 1
 
 
+class TestMCUXRepoProjectsGetDefaultSearchRoots:
+    """Tests for MCUXRepoProjects.get_default_search_roots (MCUX-83504)."""
+
+    def _make_project(self, abspath, has_examples=None):
+        p = Mock()
+        p.abspath = abspath
+        p.userdata = {'has_examples': has_examples} if has_examples is not None else {}
+        return p
+
+    def test_returns_marked_project_paths(self):
+        """Projects with has_examples: true are returned as search roots."""
+        manifest = Mock()
+        manifest.projects = [
+            self._make_project('/ws/examples', has_examples=True),
+            self._make_project('/ws/middleware/emwin', has_examples=True),
+            self._make_project('/ws/middleware/erpc', has_examples=None),
+        ]
+        result = MCUXRepoProjects.get_default_search_roots(manifest)
+        assert result == ['/ws/examples', '/ws/middleware/emwin']
+
+    def test_falls_back_to_cwd_when_no_marked_projects(self):
+        """When no projects carry has_examples the CWD fallback is used."""
+        manifest = Mock()
+        manifest.projects = [
+            self._make_project('/ws/drivers'),
+            self._make_project('/ws/components'),
+        ]
+        with patch('sdk_project_target.os.getcwd', return_value='/current/dir'):
+            result = MCUXRepoProjects.get_default_search_roots(manifest)
+        assert result == ['/current/dir']
+
+    def test_falls_back_to_cwd_when_manifest_is_none(self):
+        """A None manifest produces the CWD fallback."""
+        with patch('sdk_project_target.os.getcwd', return_value='/current/dir'):
+            result = MCUXRepoProjects.get_default_search_roots(None)
+        assert result == ['/current/dir']
+
+    def test_falls_back_to_cwd_on_manifest_exception(self):
+        """An exception during manifest iteration falls back gracefully."""
+        manifest = Mock()
+        manifest.projects = property(lambda self: (_ for _ in ()).throw(RuntimeError('boom')))
+        with patch('sdk_project_target.os.getcwd', return_value='/current/dir'):
+            result = MCUXRepoProjects.get_default_search_roots(manifest)
+        assert result == ['/current/dir']
+
+    def test_ignores_false_has_examples(self):
+        """Projects with has_examples: false are not included."""
+        manifest = Mock()
+        manifest.projects = [
+            self._make_project('/ws/examples', has_examples=True),
+            self._make_project('/ws/middleware/erpc', has_examples=False),
+        ]
+        result = MCUXRepoProjects.get_default_search_roots(manifest)
+        assert result == ['/ws/examples']
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -516,6 +516,28 @@ class MCUXRepoProjects(object):
     def __init__(self):
         super().__init__()
 
+    @staticmethod
+    def get_default_search_roots(manifest=None):
+        """Return project root paths that are marked with userdata.has_examples: true.
+
+        When *manifest* (a ``west.manifest.Manifest`` object) is supplied the method
+        reads project userdata directly.  If the manifest is unavailable or no
+        projects carry the attribute, the call falls back to the current working
+        directory so that the legacy behaviour is preserved.
+        """
+        search_roots = []
+        if manifest is not None:
+            try:
+                for project in manifest.projects:
+                    userdata = getattr(project, 'userdata', None) or {}
+                    if userdata.get('has_examples'):
+                        search_roots.append(project.abspath)
+            except Exception:
+                pass
+        if not search_roots:
+            search_roots = [os.getcwd()]
+        return search_roots
+
     def search_app_targets(
             self,
             app_path,

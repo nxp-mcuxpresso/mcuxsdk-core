@@ -102,10 +102,16 @@ class ListProject(WestCommand):
         output_format = args.list_format or config_get('list_format', 'cmd')
         is_validate_example_yml = args.validate or config_getboolean('validate', False)
         match_cases = []
-        app_paths = args.app_path 
+        app_paths = args.app_path
         if not app_paths:
-            app_paths = [os.getcwd()]
-            print("No app_path given, will recursively search current directory, it may take a long time... ")
+            app_paths = sdk_project_target.MCUXRepoProjects.get_default_search_roots(
+                manifest=self.manifest
+            )
+            if len(app_paths) == 1 and app_paths[0] == os.getcwd():
+                print("No app_path given, will recursively search current directory, it may take a long time... ")
+            else:
+                print(f"No app_path given, searching {len(app_paths)} manifest project(s) with examples...")
+
         for app_path in app_paths:
             match_cases.extend(
                 op.search_app_targets(
