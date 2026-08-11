@@ -100,6 +100,13 @@ typedef struct _i3c_transfer_handleIrq_param
     uint32_t enabledInts;
 } i3c_slave_handleIrq_param_t;
 
+typedef struct _i3c_i2c_timing_preset_entry
+{
+    i3c_legacy_i2c_speed_mode_t speed;
+    i3c_master_src_clk_t srcClk;
+    i3c_timing_t timing;
+} i3c_i2c_timing_preset_entry_t;
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -142,6 +149,109 @@ i3c_slave_isr_t s_i3cSlaveIsr;
 
 /*! @brief Pointers to slave handles for each instance. */
 void *s_i3cSlaveHandle[ARRAY_SIZE(kI3cBases)];
+
+static const i3c_i2c_timing_preset_entry_t s_i2cTimingPresets[] = {
+    /*
+     * 24 MHz Fast-mode, Set#1: PPBAUD=1, ODBAUD=15, I2CBAUD=0.
+     * Spec   : SCL<=400 kHz, tHIGH>=600 ns, tLOW>=1300 ns, tSU_STA>=600 ns, tHD_STA>=600 ns,
+     *          tSU_STO>=600 ns, tHD_DAT>=0 ns, tSU_DAT>=100 ns.
+     * Config : SCL=375 kHz, tHIGH=1333.3 ns, tLOW=1333.3 ns, tSU_STA=643.3 ns, tHD_STA=690 ns,
+     *          tSU_STO=623.3 ns, tHD_DAT=633.3 ns, tSU_DAT=700 ns.
+     */
+    {
+        kI3C_LegacyI2CFastMode,
+        kI3C_MasterSrcClk24M,
+        {
+            .ppBaud   = 1U,
+            .ppLow    = 0U,
+            .odBaud   = 15U,
+            .odHighPP = false,
+            .i2cBaud  = 0U,
+#if defined(FSL_FEATURE_I3C_HAS_I2CBLOW) && FSL_FEATURE_I3C_HAS_I2CBLOW
+            .i2cBlow = 0U,
+#endif
+#if defined(FSL_FEATURE_I3C_HAS_I2CHS) && FSL_FEATURE_I3C_HAS_I2CHS
+            .i2cHs = false,
+#endif
+            .actualI2cBaud = 375000U,
+        },
+    },
+    /*
+     * 25 MHz Fast-mode preset, Set#1: PPBAUD=2, ODBAUD=10, I2CBAUD=0.
+     * Spec   : SCL<=400 kHz, tHIGH>=600 ns, tLOW>=1300 ns, tSU_STA>=600 ns, tHD_STA>=600 ns,
+     *          tSU_STO>=600 ns, tHD_DAT=-, tSU_DAT>=100 ns.
+     * Config : SCL=378.79 kHz, tHIGH=1320 ns, tLOW=1320 ns, tSU_STA=660 ns, tHD_STA=660 ns,
+     *          tSU_STO=640 ns, tHD_DAT=650 ns, tSU_DAT=670 ns.
+     */
+    {
+        kI3C_LegacyI2CFastMode,
+        kI3C_MasterSrcClk25M,
+        {
+            .ppBaud   = 2U,
+            .ppLow    = 0U,
+            .odBaud   = 10U,
+            .odHighPP = false,
+            .i2cBaud  = 0U,
+#if defined(FSL_FEATURE_I3C_HAS_I2CBLOW) && FSL_FEATURE_I3C_HAS_I2CBLOW
+            .i2cBlow = 0U,
+#endif
+#if defined(FSL_FEATURE_I3C_HAS_I2CHS) && FSL_FEATURE_I3C_HAS_I2CHS
+            .i2cHs = false,
+#endif
+            .actualI2cBaud = 378790U,
+        },
+    },
+    /*
+     * 24 MHz Fast-mode Plus preset, Set#1: PPBAUD=0, ODBAUD=13, I2CBAUD=0.
+     * Spec   : SCL<=1000 kHz, tHIGH>=260 ns, tLOW>=500 ns, tSU_STA>=260 ns, tHD_STA>=260 ns,
+     *          tSU_STO>=260 ns, tHD_DAT=-, tSU_DAT>=50 ns.
+     * Config : SCL=857.14 kHz, tHIGH=583.3 ns, tLOW=583.3 ns, tSU_STA=310 ns, tHD_STA=273.3 ns,
+     *          tSU_STO=290 ns, tHD_DAT=300 ns, tSU_DAT=283.3 ns.
+     */
+    {
+        kI3C_LegacyI2CFastModePlus,
+        kI3C_MasterSrcClk24M,
+        {
+            .ppBaud   = 0U,
+            .ppLow    = 0U,
+            .odBaud   = 13U,
+            .odHighPP = false,
+            .i2cBaud  = 0U,
+#if defined(FSL_FEATURE_I3C_HAS_I2CBLOW) && FSL_FEATURE_I3C_HAS_I2CBLOW
+            .i2cBlow = 0U,
+#endif
+#if defined(FSL_FEATURE_I3C_HAS_I2CHS) && FSL_FEATURE_I3C_HAS_I2CHS
+            .i2cHs = false,
+#endif
+            .actualI2cBaud = 857140U,
+        },
+    },
+    /*
+     * 25 MHz Fast-mode Plus preset, Set#1: PPBAUD=0, ODBAUD=13, I2CBAUD=0.
+     * Spec   : SCL<=1000 kHz, tHIGH>=260 ns, tLOW>=500 ns, tSU_STA>=260 ns, tHD_STA>=260 ns,
+     *          tSU_STO>=260 ns, tHD_DAT=-, tSU_DAT>=50 ns.
+     * Config : SCL=892.86 kHz, tHIGH=560 ns, tLOW=560 ns, tSU_STA=300 ns, tHD_STA=260 ns,
+     *          tSU_STO=280 ns, tHD_DAT=290 ns, tSU_DAT=270 ns.
+     */
+    {
+        kI3C_LegacyI2CFastModePlus,
+        kI3C_MasterSrcClk25M,
+        {
+            .ppBaud   = 0U,
+            .ppLow    = 0U,
+            .odBaud   = 13U,
+            .odHighPP = false,
+            .i2cBaud  = 0U,
+#if defined(FSL_FEATURE_I3C_HAS_I2CBLOW) && FSL_FEATURE_I3C_HAS_I2CBLOW
+            .i2cBlow = 0U,
+#endif
+#if defined(FSL_FEATURE_I3C_HAS_I2CHS) && FSL_FEATURE_I3C_HAS_I2CHS
+            .i2cHs = false,
+#endif
+            .actualI2cBaud = 892860U,
+        },
+    },
+};
 
 /*!
  * @brief introduce function I3C_TransferStateMachineIBIWonState.
@@ -712,6 +822,40 @@ static uint32_t I3C_CalcErrorRatio(uint32_t curFreq, uint32_t targetFreq)
 static bool I3C_RateInTolerance(uint32_t curFreq, uint32_t targetFreq)
 {
     return (targetFreq == 0U) || (I3C_CalcErrorRatio(curFreq, targetFreq) <= FSL_I3C_ERROR_RATE_MAX);
+}
+
+/*!
+ * brief Get prevalidated timing values for supported I2C speed.
+ *
+ * param[in]  speed   I2C Speed mode.
+ * param[in]  srcClk  FCLK source clock.
+ * param[out] timing  Prevalidated timing values. Valid when kStatus_Success is returned.
+ * return kStatus_Success A supported preset timing is found.
+ *         kStatus_Fail The requested timing is not supported.
+ */
+status_t I3C_MasterGetI2CPresetTiming(i3c_legacy_i2c_speed_mode_t speed,
+                                      i3c_master_src_clk_t srcClk,
+                                      i3c_timing_t *timing)
+{
+    size_t idx;
+
+    assert(timing != NULL);
+
+    if (speed == kI3C_LegacyI2CStandardMode)
+    {
+        return kStatus_Fail;
+    }
+
+    for (idx = 0U; idx < ARRAY_SIZE(s_i2cTimingPresets); idx++)
+    {
+        if ((s_i2cTimingPresets[idx].speed == speed) && (s_i2cTimingPresets[idx].srcClk == srcClk))
+        {
+            *timing = s_i2cTimingPresets[idx].timing;
+            return kStatus_Success;
+        }
+    }
+
+    return kStatus_Fail;
 }
 
 /*!

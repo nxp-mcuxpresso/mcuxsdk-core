@@ -316,6 +316,21 @@ typedef enum _i3c_master_bus_mode
     kI3C_LimitedBus   = 2U, /*!< I3C controller on a legacy I2C bus. */
 } i3c_master_bus_mode_t;
 
+/*! @brief Legacy I2C preset selector. */
+typedef enum _i3c_legacy_i2c_speed_mode
+{
+    kI3C_LegacyI2CStandardMode = 0U, /*!< Reserved for future Standard-mode support. */
+    kI3C_LegacyI2CFastMode     = 1U, /*!< Legacy I2C Fast-mode preset. */
+    kI3C_LegacyI2CFastModePlus = 2U, /*!< Legacy I2C Fast-mode Plus preset. */
+} i3c_legacy_i2c_speed_mode_t;
+
+/*! @brief Validated source clock selector for I2C timing presets. */
+typedef enum _i3c_master_src_clk
+{
+    kI3C_MasterSrcClk24M = 0U, /*!< Use the validated 24 MHz timing table. */
+    kI3C_MasterSrcClk25M = 1U, /*!< Use the validated 25 MHz timing table. */
+} i3c_master_src_clk_t;
+
 /*!
  * @brief I3C master baud rate configuration.
  */
@@ -1159,6 +1174,20 @@ static inline void I3C_MasterGetFifoCounts(I3C_Type *base, size_t *rxCount, size
  * @param sourceClock_Hz I3C functional clock frequency in Hertz.
  */
 void I3C_MasterSetBaudRate(I3C_Type *base, const i3c_baudrate_hz_t *baudRate_Hz, uint32_t sourceClock_Hz);
+
+/*!
+ * @ingroup i3c_master_driver
+ * @brief Get prevalidated timing values for supported I2C speed.
+ *
+ * @param[in]  speed   I2C Speed mode.
+ * @param[in]  srcClk  FCLK source clock.
+ * @param[out] timing  Prevalidated timing values. Valid when kStatus_Success is returned.
+ * @return kStatus_Success A supported preset timing is found.
+ *         kStatus_Fail The requested timing is not supported.
+ */
+status_t I3C_MasterGetI2CPresetTiming(i3c_legacy_i2c_speed_mode_t speed,
+                                      i3c_master_src_clk_t srcClk,
+                                      i3c_timing_t *timing);
 
 /*!
  * @ingroup i3c_master_driver
