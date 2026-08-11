@@ -138,9 +138,6 @@ status_t DUALADC_Init(DADC_Type *base, const dadc_config_t *config)
 
     uint32_t instance = DUALADC_GetInstance(base);
     uint32_t reg;
-#if DUALADC_RESET_TIMEOUT
-    uint32_t timeout;
-#endif
 
     if (instance >= ARRAY_SIZE(s_dualadcBases))
     {
@@ -156,22 +153,15 @@ status_t DUALADC_Init(DADC_Type *base, const dadc_config_t *config)
     RESET_ReleasePeripheralReset(s_dualadcResets[instance]);
 #endif
 
-    /* Assert software reset for ADCA and ADCB to guarantee a clean initial state. */
     base->CTRL |= (DADC_CTRL_RSTA_MASK | DADC_CTRL_RSTB_MASK);
 
-    /* Wait for reset completion: hardware clears both bits when reset is accepted. */
-#if DUALADC_RESET_TIMEOUT
-    timeout = DUALADC_RESET_TIMEOUT;
-#endif
-    while ((base->CTRL & (DADC_CTRL_RSTA_MASK | DADC_CTRL_RSTB_MASK)) != 0U)
+    /* Add a short delay to ensure reset completion. */
+    for (uint32_t i = 0; i < DUALADC_RESET_TIMEOUT; i++)
     {
-#if DUALADC_RESET_TIMEOUT
-        if (--timeout == 0U)
-        {
-            return kStatus_Timeout;
-        }
-#endif
+        __NOP();
     }
+
+    base->CTRL &= MCUX_MASK_INVERT_32(DADC_CTRL_RSTA_MASK | DADC_CTRL_RSTB_MASK);
 
     /* Disable the module before setting configuration. */
     base->CTRL &= MCUX_MASK_INVERT_32(DADC_CTRL_ADCEN_MASK);
@@ -254,9 +244,6 @@ status_t DUALADC_DeInit(DADC_Type *base)
         /* Invalid instance, do not attempt to deinitialize */
         return kStatus_InvalidArgument;
     }
-
-    /* Disable DualADC to terminate any active conversion before gating the clock. */
-    base->CTRL &= MCUX_MASK_INVERT_32(DADC_CTRL_ADCEN_MASK);
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Gate the DualADC submodule clock. */

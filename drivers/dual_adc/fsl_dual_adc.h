@@ -23,15 +23,28 @@
 /*! @} */
 
 /*!
- * @brief Max loop count waiting for software reset (CTRL[RSTA]/CTRL[RSTB]) to complete.
+ * @brief NOP loop count used to hold CTRL[RSTA]/CTRL[RSTB] asserted long enough
+ *        for the software reset to take effect.
  *
- * Set via Kconfig option CONFIG_DUALADC_RESET_TIMEOUT. Default 0 means wait forever.
+ * CTRL[RSTA] and CTRL[RSTB] are NOT self-clearing. The logic high level must be
+ * sustained for more than 2 ADC functional clock cycles before the reset takes
+ * effect; the bits must then be cleared explicitly by software. This macro
+ * controls how many __NOP() iterations are executed between asserting and
+ * releasing the reset bits in DUALADC_Init, providing a portable hold time that
+ * scales with CPU clock speed.
+ *
+ * The required NOP count scales with the CPU-to-ADC clock frequency ratio:
+ *   min_count = ceil(2 * f_CPU / f_ADC)
+ * The default value of 20 covers ratios up to 10 (e.g., 150 MHz CPU with
+ * 16 MHz ADC clock). Increase this value via Kconfig option
+ * CONFIG_DUALADC_RESET_TIMEOUT when the CPU clock is much faster than the
+ * ADC functional clock (large f_CPU/f_ADC ratio).
  */
 #ifndef DUALADC_RESET_TIMEOUT
 #ifdef CONFIG_DUALADC_RESET_TIMEOUT
-#define DUALADC_RESET_TIMEOUT CONFIG_DUALADC_RESET_TIMEOUT
+#define DUALADC_RESET_TIMEOUT (uint32_t)CONFIG_DUALADC_RESET_TIMEOUT
 #else
-#define DUALADC_RESET_TIMEOUT 0 /* Wait forever until reset completes. */
+#define DUALADC_RESET_TIMEOUT (20UL)
 #endif
 #endif
 
@@ -732,6 +745,60 @@ static inline void DUALADC_EnableDmaB(DADC_Type *base)
 static inline void DUALADC_DisableDmaB(DADC_Type *base)
 {
     base->DE &= MCUX_MASK_INVERT_32(DADC_DE_DMAENAB_MASK);
+}
+
+/*!
+ * @brief Assert the software reset for ADCA (CTRL[RSTA]).
+ *
+ * @note CTRL[RSTA] is NOT self-clearing. After asserting reset, the logic high level
+ *       must be held for more than 2 ADC functional clock cycles before invoking
+ *       @ref DUALADC_ReleaseResetADCA to release it explicitly.
+ *
+ * @param base DualADC peripheral base address.
+ */
+static inline void DUALADC_ResetADCA(DADC_Type *base)
+{
+    base->CTRL |= DADC_CTRL_RSTA_MASK;
+}
+
+/*!
+ * @brief Release the software reset for ADCA by clearing CTRL[RSTA].
+ *
+ * @note Must be called after the reset has been held for more than 2 ADC functional
+ *       clock cycles, see @ref DUALADC_ResetADCA.
+ *
+ * @param base DualADC peripheral base address.
+ */
+static inline void DUALADC_ReleaseResetADCA(DADC_Type *base)
+{
+    base->CTRL &= MCUX_MASK_INVERT_32(DADC_CTRL_RSTA_MASK);
+}
+
+/*!
+ * @brief Assert the software reset for ADCB (CTRL[RSTB]).
+ *
+ * @note CTRL[RSTB] is NOT self-clearing. After asserting reset, the logic high level
+ *       must be held for more than 2 ADC functional clock cycles before invoking
+ *       @ref DUALADC_ReleaseResetADCB to release it explicitly.
+ *
+ * @param base DualADC peripheral base address.
+ */
+static inline void DUALADC_ResetADCB(DADC_Type *base)
+{
+    base->CTRL |= DADC_CTRL_RSTB_MASK;
+}
+
+/*!
+ * @brief Release the software reset for ADCB by clearing CTRL[RSTB].
+ *
+ * @note Must be called after the reset has been held for more than 2 ADC functional
+ *       clock cycles, see @ref DUALADC_ResetADCB.
+ *
+ * @param base DualADC peripheral base address.
+ */
+static inline void DUALADC_ReleaseResetADCB(DADC_Type *base)
+{
+    base->CTRL &= MCUX_MASK_INVERT_32(DADC_CTRL_RSTB_MASK);
 }
 
 /*! @} */

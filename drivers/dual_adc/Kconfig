@@ -13,12 +13,23 @@ config MCUX_COMPONENT_driver.dual_adc
 
 if MCUX_COMPONENT_driver.dual_adc
     config DUALADC_RESET_TIMEOUT
-        int "Max loops to wait for DualADC software reset to complete (0 means wait forever)"
-        default 0
+        int "NOP loop count to hold CTRL[RSTA]/CTRL[RSTB] asserted during software reset"
+        default 20
         help
-            Maximum number of loop iterations to wait for CTRL[RSTA]/CTRL[RSTB] to clear
-            after a software reset is asserted in DUALADC_Init.
-            If set to 0, the driver waits indefinitely until the reset completes.
+            CTRL[RSTA] and CTRL[RSTB] are NOT self-clearing. The logic high level must
+            be sustained for more than 2 ADC functional clock cycles before the reset
+            takes effect; the bits are then cleared explicitly by software.
+
+            This value controls how many __NOP() iterations DUALADC_Init executes
+            between asserting and releasing the reset bits, providing a portable hold
+            time that adapts to different CPU and ADC clock frequency combinations.
+
+            The required count scales with the CPU-to-ADC clock frequency ratio:
+              min_count = ceil(2 * f_CPU / f_ADC)
+            The default of 20 covers ratios up to 10 (e.g., 150 MHz CPU with a
+            16 MHz ADC clock). Increase this value when the CPU clock is much faster
+            than the ADC functional clock (i.e., when f_CPU/f_ADC is large) to
+            ensure the minimum 2 ADC clock cycle hold time is always met.
 
     config DUALADC_CALIBRATION_TIMEOUT
         int "Max loops to wait for each DualADC calibration step to complete (0 means wait forever)"
