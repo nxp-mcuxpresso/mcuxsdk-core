@@ -1,5 +1,10 @@
 # XSPI
 
+## [2.7.6]
+
+- Bug Fixes
+  - Fixed CERT-C INT31-C violations in XSPI_TG_REG_ADDR_xxx macros
+
 ## [2.7.5]
 
 - Bug Fixes
