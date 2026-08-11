@@ -1172,40 +1172,8 @@ void I3C_MasterInit(I3C_Type *base, const i3c_master_config_t *masterConfig, uin
 i3c_master_state_t I3C_MasterGetState(I3C_Type *base)
 {
     uint32_t masterState = (base->MSTATUS & I3C_MSTATUS_STATE_MASK) >> I3C_MSTATUS_STATE_SHIFT;
-    i3c_master_state_t returnCode;
 
-    switch (masterState)
-    {
-        case (uint32_t)kI3C_MasterStateIdle:
-            returnCode = kI3C_MasterStateIdle;
-            break;
-        case (uint32_t)kI3C_MasterStateSlvReq:
-            returnCode = kI3C_MasterStateSlvReq;
-            break;
-        case (uint32_t)kI3C_MasterStateMsgSdr:
-            returnCode = kI3C_MasterStateMsgSdr;
-            break;
-        case (uint32_t)kI3C_MasterStateNormAct:
-            returnCode = kI3C_MasterStateNormAct;
-            break;
-        case (uint32_t)kI3C_MasterStateDdr:
-            returnCode = kI3C_MasterStateDdr;
-            break;
-        case (uint32_t)kI3C_MasterStateDaa:
-            returnCode = kI3C_MasterStateDaa;
-            break;
-        case (uint32_t)kI3C_MasterStateIbiAck:
-            returnCode = kI3C_MasterStateIbiAck;
-            break;
-        case (uint32_t)kI3C_MasterStateIbiRcv:
-            returnCode = kI3C_MasterStateIbiRcv;
-            break;
-        default:
-            returnCode = kI3C_MasterStateIdle;
-            break;
-    }
-
-    return returnCode;
+    return (i3c_master_state_t)masterState;
 }
 
 /*!
@@ -2574,6 +2542,12 @@ static void I3C_TransferStateMachineTransferDataState(I3C_Type *base,
 
     uint8_t *dataBuff = (uint8_t *)handle->transfer.data;
 
+    if (handle->remainingBytes == 0UL)
+    {
+        handle->state = (uint8_t)kWaitForCompletionState;
+        return;
+    }
+
     if (handle->transfer.direction == kI3C_Write)
     {
         /* Make sure there is room in the tx fifo. */
@@ -2622,9 +2596,14 @@ static void I3C_TransferStateMachineTransferDataState(I3C_Type *base,
     handle->transfer.data = (void *)dataBuff;
 
     /* Move to stop when the transfer is done. */
-    if (--handle->remainingBytes == 0UL)
+    if (handle->remainingBytes <= 1UL)
     {
-        handle->state = (uint8_t)kWaitForCompletionState;
+        handle->remainingBytes = 0UL;
+        handle->state          = (uint8_t)kWaitForCompletionState;
+    }
+    else
+    {
+        handle->remainingBytes--;
     }
 }
 
@@ -2667,7 +2646,6 @@ static status_t I3C_RunTransferStateMachine(I3C_Type *base, i3c_master_handle_t 
     i3c_master_state_machine_param_t stateParams;
     (void)memset(&stateParams, 0, sizeof(stateParams));
 
-    stateParams.result         = kStatus_Success;
     stateParams.state_complete = false;
 
     /* Set default isDone return value. */
@@ -3271,28 +3249,9 @@ void I3C_SlaveDeinit(I3C_Type *base)
  */
 i3c_slave_activity_state_t I3C_SlaveGetActivityState(I3C_Type *base)
 {
-    uint8_t activeState = (uint8_t)((base->SSTATUS & I3C_SSTATUS_ACTSTATE_MASK) >> I3C_SSTATUS_ACTSTATE_SHIFT);
-    i3c_slave_activity_state_t returnCode;
-    switch (activeState)
-    {
-        case (uint8_t)kI3C_SlaveNoLatency:
-            returnCode = kI3C_SlaveNoLatency;
-            break;
-        case (uint8_t)kI3C_SlaveLatency1Ms:
-            returnCode = kI3C_SlaveLatency1Ms;
-            break;
-        case (uint8_t)kI3C_SlaveLatency100Ms:
-            returnCode = kI3C_SlaveLatency100Ms;
-            break;
-        case (uint8_t)kI3C_SlaveLatency10S:
-            returnCode = kI3C_SlaveLatency10S;
-            break;
-        default:
-            returnCode = kI3C_SlaveNoLatency;
-            break;
-    }
+    uint32_t activeState = (base->SSTATUS & I3C_SSTATUS_ACTSTATE_MASK) >> I3C_SSTATUS_ACTSTATE_SHIFT;
 
-    return returnCode;
+    return (i3c_slave_activity_state_t)activeState;
 }
 
 #if !(defined(FSL_FEATURE_I3C_HAS_NO_SLAVE_IBI_MR_HJ) && FSL_FEATURE_I3C_HAS_NO_SLAVE_IBI_MR_HJ)
@@ -3749,6 +3708,9 @@ static void I3C_SlaveTransferHandleTxReady(I3C_Type *base,
 {
     assert(NULL != base && NULL != handle && NULL != stateParams);
 
+    uint8_t *txData;
+    size_t txDataSize;
+
     handle->wasTransmit = true;
 
     /* If we're out of data, invoke callback to get more. */
@@ -3776,22 +3738,30 @@ static void I3C_SlaveTransferHandleTxReady(I3C_Type *base,
         return;
     }
 
-    /* Transmit a byte. */
-    while ((handle->transfer.txDataSize != 0UL) && ((stateParams->txCount) != 0U))
+    /* Transmit bytes until FIFO is full. */
+    txData     = handle->transfer.txData;
+    txDataSize = handle->transfer.txDataSize;
+    while ((txDataSize != 0UL) && ((stateParams->txCount) != 0U))
     {
-        if (handle->transfer.txDataSize > 1UL)
+        uint8_t txByte = *txData;
+        txData++;
+
+        if (txDataSize > 1UL)
         {
-            base->SWDATAB = *handle->transfer.txData++;
+            base->SWDATAB = txByte;
         }
         else
         {
-            base->SWDATABE = *handle->transfer.txData++;
+            base->SWDATABE = txByte;
             I3C_SlaveDisableInterrupts(base, (uint32_t)kI3C_SlaveTxReadyFlag);
         }
-        handle->transfer.txDataSize--;
+
+        txDataSize--;
         handle->transferredCount++;
         stateParams->txCount--;
     }
+    handle->transfer.txData     = txData;
+    handle->transfer.txDataSize = txDataSize;
 }
 
 static void I3C_SlaveTransferHandleRxReady(I3C_Type *base,
