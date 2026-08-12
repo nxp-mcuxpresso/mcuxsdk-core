@@ -844,12 +844,12 @@ static inline uint8_t LPUART_ReadByte(LPUART_Type *base)
     }
     else
     {
-        result = (uint8_t)base->DATA;
+        result = (uint8_t)(base->DATA & 0xFFU);
     }
 
     return result;
 #else
-    return (uint8_t)(base->DATA);
+    return (uint8_t)(base->DATA & 0xFFU);
 #endif
 }
 

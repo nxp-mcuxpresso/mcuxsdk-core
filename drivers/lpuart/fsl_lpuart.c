@@ -327,10 +327,10 @@ static void LPUART_ReadNonBlocking(LPUART_Type *base, uint8_t *data, size_t leng
         }
         else
         {
-            data[i] = (uint8_t)base->DATA;
+            data[i] = (uint8_t)(base->DATA & 0xFFU);
         }
 #else
-        data[i] = (uint8_t)(base->DATA);
+        data[i] = (uint8_t)(base->DATA & 0xFFU);
 #endif
     }
 }
@@ -1712,8 +1712,11 @@ status_t LPUART_TransferGetSendCount(LPUART_Type *base, lpuart_handle_t *handle,
     else
     {
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
-        *count = handle->txDataSizeAll - tmptxDataSize -
-                 ((base->WATER & LPUART_WATER_TXCOUNT_MASK) >> LPUART_WATER_TXCOUNT_SHIFT);
+        uint32_t txCount = ((base->WATER & LPUART_WATER_TXCOUNT_MASK) >> LPUART_WATER_TXCOUNT_SHIFT);
+        assert(handle->txDataSizeAll >= tmptxDataSize);
+        *count = (uint32_t)(handle->txDataSizeAll - tmptxDataSize);
+        assert(*count >= txCount);
+        *count -= txCount;
 #else
         if ((base->STAT & (uint32_t)kLPUART_TxDataRegEmptyFlag) != 0U)
         {
@@ -1721,6 +1724,7 @@ status_t LPUART_TransferGetSendCount(LPUART_Type *base, lpuart_handle_t *handle,
         }
         else
         {
+            assert(handle->txDataSizeAll > tmptxDataSize);
             *count = handle->txDataSizeAll - tmptxDataSize - 1U;
         }
 #endif
@@ -2119,7 +2123,7 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
             {
                 if (!handle->is16bitData)
                 {
-                    handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)tpmData;
+                    handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
                 }
                 else
                 {
@@ -2129,7 +2133,7 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
 #else
             if (!handle->is16bitData)
             {
-                handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)tpmData;
+                handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
             }
             else
             {
@@ -2171,11 +2175,11 @@ static void LPUART_TransferHandleSendDataEmpty(LPUART_Type *base, lpuart_handle_
     uint32_t irqMask;
 /* Get the bytes that available at this moment. */
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
-    assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) > 0);
-    count = (uint8_t)FSL_FEATURE_LPUART_FIFO_SIZEn(base) -
-            (uint8_t)((base->WATER & LPUART_WATER_TXCOUNT_MASK) >> LPUART_WATER_TXCOUNT_SHIFT);
+    uint32_t txCount = ((base->WATER & LPUART_WATER_TXCOUNT_MASK) >> LPUART_WATER_TXCOUNT_SHIFT);
+    assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) >= txCount);
+    count = (uint8_t)((FSL_FEATURE_LPUART_FIFO_SIZEn(base) - txCount) & 0xFFU);
 #else
-    count = 1;
+    count = 1U;
 #endif
 
     while ((0U != handle->txDataSize) && (0U != count))
@@ -2183,7 +2187,7 @@ static void LPUART_TransferHandleSendDataEmpty(LPUART_Type *base, lpuart_handle_
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
         tempCount = (uint8_t)MIN(handle->txDataSize, count);
 #else
-        tempCount = 1;
+        tempCount = 1U;
 #endif
 
         /* Using non block API to write the data to the registers. */

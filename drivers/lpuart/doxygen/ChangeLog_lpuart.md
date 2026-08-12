@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed inconsistent C union access.
+  - Fixed CERT-C issues.
 
 ## [2.11.0]
 
