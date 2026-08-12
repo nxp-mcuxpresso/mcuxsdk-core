@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef _PUF_H_
-#define _PUF_H_
+#ifndef PUF_H_
+#define PUF_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -351,4 +351,4 @@ status_t PUF_PowerCycle(PUF_Type *base, puf_config_t *conf);
 }
 #endif /* __cplusplus */
 
-#endif /* _PUF_H_ */
+#endif /* PUF_H_ */

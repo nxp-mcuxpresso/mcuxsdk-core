@@ -6,8 +6,8 @@
  */
 
 
-#ifndef _FSL_PMU_H
-#define _FSL_PMU_H
+#ifndef FSL_PMU_H
+#define FSL_PMU_H
 
 
 #include "fsl_common.h"
@@ -487,4 +487,4 @@ static inline void PMU_DoHandshakeBetweenPMUAndPAC(PMU_Type *base)
 /*!
  * @}
  */
-#endif /* __FSL_PMU_H */
+#endif /* FSL_PMU_H */

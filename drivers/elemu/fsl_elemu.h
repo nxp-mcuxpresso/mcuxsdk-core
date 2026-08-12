@@ -4,8 +4,8 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-#ifndef __ELEMU_DRIVER_H__
-#define __ELEMU_DRIVER_H__
+#ifndef ELEMU_DRIVER_H__
+#define ELEMU_DRIVER_H__
 
 #include "fsl_common.h"
 #include "fsl_device_registers.h"
@@ -244,4 +244,4 @@ status_t ELEMU_loadFw(ELEMU_Type *mu, uint32_t image[]);
 
 /** @}*/
 
-#endif /* __ELEMU_DRIVER_H__ */
+#endif /* ELEMU_DRIVER_H__ */
