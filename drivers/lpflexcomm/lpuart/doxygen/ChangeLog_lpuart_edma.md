@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed race condition in LPUART_ReceiveEDMA() for transfers whose size is not a multiple of 4 bytes.
+  - Fixed self assignment issues.
 
 ## [2.1.1]
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2022, 2025 NXP
+ * Copyright 2016-2022, 2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -89,8 +89,9 @@ static void LPUART_SendEDMACallback(edma_handle_t *handle, void *param, bool tra
     lpuart_edma_private_handle_t *lpuartPrivateHandle = (lpuart_edma_private_handle_t *)param;
 
     /* Avoid the warning for unused variables. */
-    handle = handle;
-    tcds   = tcds;
+    (void)handle;
+    (void)tcds;
+
     /*
      * $Branch Coverage Justification$
      * $ref fsl_lpuart_edma_c_ref_1$
@@ -115,8 +116,9 @@ static void LPUART_ReceiveEDMACallback(edma_handle_t *handle, void *param, bool 
     lpuart_edma_private_handle_t *lpuartPrivateHandle = (lpuart_edma_private_handle_t *)param;
 
     /* Avoid warning for unused parameters. */
-    handle = handle;
-    tcds   = tcds;
+    (void)handle;
+    (void)tcds;
+
     /*
      * $Branch Coverage Justification$
      * $ref fsl_lpuart_edma_c_ref_1$

@@ -84,8 +84,8 @@ static void LPUART_SendEDMACallback(edma_handle_t *handle, void *param, bool tra
     lpuart_edma_private_handle_t *lpuartPrivateHandle = (lpuart_edma_private_handle_t *)param;
 
     /* Avoid the warning for unused variables. */
-    handle = handle;
-    tcds   = tcds;
+    (void)handle;
+    (void)tcds;
 
     if (transferDone)
     {
@@ -121,8 +121,8 @@ static void LPUART_ReceiveEDMACallback(edma_handle_t *handle, void *param, bool 
     lpuart_edma_private_handle_t *lpuartPrivateHandle = (lpuart_edma_private_handle_t *)param;
 
     /* Avoid warning for unused parameters. */
-    handle = handle;
-    tcds   = tcds;
+    (void)handle;
+    (void)tcds;
 
     if (transferDone)
     {
