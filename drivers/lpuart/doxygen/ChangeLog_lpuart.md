@@ -1,5 +1,10 @@
 # LPUART
 
+## [2.11.1]
+
+- Bug Fixes
+  - Fixed inconsistent C union access.
+
 ## [2.11.0]
 
 - New Feature

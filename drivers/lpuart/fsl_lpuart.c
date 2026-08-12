@@ -1645,14 +1645,7 @@ status_t LPUART_TransferSendNonBlocking(LPUART_Type *base, lpuart_handle_t *hand
     }
     else
     {
-        if (!handle->is16bitData)
-        {
-            handle->txData = xfer->txData;
-        }
-        else
-        {
-            handle->txData16 = xfer->txData16;
-        }
+        handle->txData        = xfer->txData;
         handle->txDataSize    = xfer->dataSize;
         handle->txDataSizeAll = xfer->dataSize;
         handle->txState       = (uint8_t)kLPUART_TxBusy;
@@ -1829,7 +1822,8 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
                     }
                     else
                     {
-                        xfer->rxData16[bytesCurrentReceived] = handle->rxRingBuffer16[handle->rxRingBufferTail];
+                        ((uint16_t *)(void *)xfer->rxData)[bytesCurrentReceived] =
+                            ((const uint16_t *)(const void *)handle->rxRingBuffer)[handle->rxRingBufferTail];
                     }
                     bytesCurrentReceived++;
 
@@ -1856,7 +1850,7 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
                 }
                 else
                 {
-                    handle->rxData16 = &xfer->rxData16[bytesCurrentReceived];
+                    handle->rxData = &xfer->rxData[bytesCurrentReceived * 2U];
                 }
                 handle->rxDataSize    = bytesToReceive;
                 handle->rxDataSizeAll = xfer->dataSize;
@@ -1888,7 +1882,7 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
             }
             else
             {
-                handle->rxData16 = &xfer->rxData16[bytesCurrentReceived];
+                handle->rxData = &xfer->rxData[bytesCurrentReceived * 2U];
             }
             handle->rxDataSize    = bytesToReceive;
             handle->rxDataSizeAll = bytesToReceive;
@@ -2129,7 +2123,7 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
                 }
                 else
                 {
-                    handle->rxRingBuffer16[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
+                    ((uint16_t *)(void *)handle->rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
                 }
             }
 #else
@@ -2139,7 +2133,7 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
             }
             else
             {
-                handle->rxRingBuffer16[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
+                ((uint16_t *)(void *)handle->rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
             }
 #endif
 
