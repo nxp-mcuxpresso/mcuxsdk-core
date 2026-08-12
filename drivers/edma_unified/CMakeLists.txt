@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if(CONFIG_MCUX_COMPONENT_driver.edma_unified)
-    mcux_component_version(2.10.13)
+    mcux_component_version(2.10.14)
 
     mcux_add_source(
         SOURCES

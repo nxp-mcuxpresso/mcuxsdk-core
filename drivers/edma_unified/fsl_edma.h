@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief eDMA driver version */
-#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 13)) /*!< Version 2.10.13. */
+#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 14)) /*!< Version 2.10.14. */
 /*! @} */
 
 /*! @brief eDMA driver name.

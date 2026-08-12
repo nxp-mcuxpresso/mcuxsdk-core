@@ -1,5 +1,10 @@
 # EDMA
 
+## [2.10.14]
+
+- Improvements
+  - Applied ERRATA 52315.
+
 ## [2.10.13]
 
 - Improvements

@@ -41,9 +41,7 @@ static edma_transfer_size_t EDMA_TransferWidthMapping(uint32_t width);
  * @param base edma base address.
  * @param tcd edma transfer content descriptor.
  */
-#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327
 static inline status_t EDMA_CheckErrata(EDMA_Type *base, edma_tcd_t *tcd);
-#endif
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -93,10 +91,11 @@ static uint32_t EDMA_GetInstance(EDMA_Type *base)
     return instance;
 }
 
-#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327
 static inline status_t EDMA_CheckErrata(EDMA_Type *base, edma_tcd_t *tcd)
 {
     status_t status = kStatus_Success;
+
+#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327
     /* errata 51327: to use scatter gather feature, NBYTES must be multiple of 8 */
     if ((uint32_t)FSL_FEATURE_EDMA_INSTANCE_HAS_ERRATA_51327n(base) == 1U)
     {
@@ -106,10 +105,68 @@ static inline status_t EDMA_CheckErrata(EDMA_Type *base, edma_tcd_t *tcd)
             status = kStatus_InvalidArgument;
         }
     }
+#endif
+
+#if defined FSL_FEATURE_EDMA_HAS_ERRATA_52315
+    /* errata 52315: on affected eDMA instances certain TCD configuration errors can
+     * cause subsequent DMA requests not to be serviced. Validate the TCD so the
+     * following hardware error scenarios (reported in CHn_ES) are avoided:
+     *   - SAE: SADDR not consistent with ATTR[SSIZE]
+     *   - DAE: DADDR not consistent with ATTR[DSIZE]
+     *   - SOE: SOFF  not consistent with ATTR[SSIZE]
+     *   - DOE: DOFF  not consistent with ATTR[DSIZE]
+     *   - NCE: NBYTES not a multiple of ATTR[SSIZE]/ATTR[DSIZE], or CITER == 0
+     * The uncorrectable TCD RAM ECC error (UCE) scenario cannot be prevented in
+     * software and needs a functional reset to recover, so it is out of scope here. */
+    if ((int32_t)FSL_FEATURE_EDMA_INSTANCE_HAS_ERRATA_52315n(base) == 1)
+    {
+        uint16_t attr     = EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(base));
+        /* ATTR[SSIZE] is bits [10:8], ATTR[DSIZE] is bits [2:0]; both are the log2
+         * of the transfer size in bytes, so the transfer size is (1 << size). */
+        uint32_t ssize    = 1UL << ((((uint32_t)attr & 0x700UL) >> 8U) & 0x1FUL);
+        uint32_t dsize    = 1UL << (((uint32_t)attr & 0x7UL) & 0x1FUL);
+        /* Alignment mask (size - 1) with an explicit non-zero guard so the
+         * unsigned subtraction can never wrap. */
+        uint32_t ssizeMask = (ssize != 0UL) ? (ssize - 1UL) : 0UL;
+        uint32_t dsizeMask = (dsize != 0UL) ? (dsize - 1UL) : 0UL;
+        uint32_t saddr    = (uint32_t)EDMA_TCD_SADDR(tcd, EDMA_TCD_TYPE(base));
+        uint32_t daddr    = (uint32_t)EDMA_TCD_DADDR(tcd, EDMA_TCD_TYPE(base));
+
+        /* SOFF/DOFF are signed 16-bit offsets; only their low bits matter for the
+         * power-of-two alignment test, so the raw register value can be used. */
+        uint32_t soff     = (uint32_t)(uint16_t)EDMA_TCD_SOFF(tcd, EDMA_TCD_TYPE(base));
+        uint32_t doff     = (uint32_t)(uint16_t)EDMA_TCD_DOFF(tcd, EDMA_TCD_TYPE(base));
+        uint32_t nbytes   = EDMA_TCD_NBYTES(tcd, EDMA_TCD_TYPE(base));
+        uint16_t citerReg = EDMA_TCD_CITER(tcd, EDMA_TCD_TYPE(base));
+        uint16_t citer;
+
+        if ((citerReg & (uint16_t)DMA_CITER_ELINKYES_ELINK_MASK) != 0U)
+        {
+            citer = citerReg & (uint16_t)DMA_CITER_ELINKYES_CITER_MASK;
+        }
+        else
+        {
+            citer = citerReg & (uint16_t)DMA_CITER_ELINKNO_CITER_MASK;
+        }
+
+        /* All sizes are powers of two, so alignment/multiple checks reduce to a mask. */
+        if (((saddr & ssizeMask) != 0UL) ||  /* SAE */
+            ((daddr & dsizeMask) != 0UL) ||  /* DAE */
+            ((soff & ssizeMask) != 0UL) ||   /* SOE */
+            ((doff & dsizeMask) != 0UL) ||   /* DOE */
+            ((nbytes & ssizeMask) != 0UL) || /* NCE */
+            ((nbytes & dsizeMask) != 0UL) || /* NCE */
+            (citer == 0U))                   /* NCE */
+        {
+            assert(false);
+            status = kStatus_InvalidArgument;
+        }
+    }
+#endif
 
     return status;
 }
-#endif
+
 
 /*!
  * brief Push content of TCD structure into hardware TCD register.
@@ -135,6 +192,17 @@ void EDMA_InstallTCD(EDMA_Type *base, uint32_t channel, edma_tcd_t *tcd)
         assert(false);
     }
 #endif
+
+#if defined FSL_FEATURE_EDMA_HAS_ERRATA_52315
+    /* errata 52315 applies to any TCD (not only scatter/gather) on affected instances. */
+    if (errataStatus != kStatus_Success)
+    {
+        assert(false);
+    }
+#endif
+
+    (void)esgStatus;
+    (void)errataStatus;
 
     /* Clear DONE bit first, otherwise ESG cannot be set */
     DMA_CLEAR_DONE_STATUS(base, channel);
@@ -2176,7 +2244,7 @@ status_t EDMA_SubmitTransferTCD(edma_handle_t *handle, edma_tcd_t *tcd)
         /* Chain from previous descriptor unless tcd pool size is 1(this descriptor is its own predecessor). */
         if (currentTcd != previousTcd)
         {
-#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327
+#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327 || defined FSL_FEATURE_EDMA_HAS_ERRATA_52315
             if (EDMA_CheckErrata(handle->base, &handle->tcdPool[previousTcd]) != kStatus_Success)
             {
                 return kStatus_InvalidArgument;
@@ -2333,7 +2401,7 @@ status_t EDMA_SubmitTransfer(edma_handle_t *handle, const edma_transfer_config_t
         /* Chain from previous descriptor unless tcd pool size is 1(this descriptor is its own predecessor). */
         if (currentTcd != previousTcd)
         {
-#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327
+#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327 || defined FSL_FEATURE_EDMA_HAS_ERRATA_52315
             if (EDMA_CheckErrata(handle->base, &handle->tcdPool[previousTcd]) != kStatus_Success)
             {
                 return kStatus_InvalidArgument;
@@ -2454,7 +2522,7 @@ status_t EDMA_SubmitLoopTransfer(edma_handle_t *handle, edma_transfer_config_t *
     {
         transfer[i].linkTCD = &handle->tcdPool[i + 1UL];
         EDMA_ConfigChannelSoftwareTCDExt(handle->base, &(handle->tcdPool[i]), &transfer[i]);
-#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327
+#if defined FSL_FEATURE_EDMA_HAS_ERRATA_51327 || defined FSL_FEATURE_EDMA_HAS_ERRATA_52315
         if (EDMA_CheckErrata(handle->base, &(handle->tcdPool[i])) != kStatus_Success)
         {
             return kStatus_InvalidArgument;
