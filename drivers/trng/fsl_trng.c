@@ -167,7 +167,6 @@
        defined(KW43L43Z92_SERIES) || defined(KW43L43Z93_SERIES) || \
        defined(KW43L43Z96_SERIES) || defined(KW43L43Z97_SERIES) || \
        defined(MCXW70AC_SERIES) || defined(MCXW70AD_SERIES) || \
-       defined(MCXW70AA_SERIES) || \
        defined(MCXC151_SERIES) || \
        defined(MCXC161_SERIES) || defined(MCXC162_SERIES))
 
