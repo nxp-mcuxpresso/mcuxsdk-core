@@ -71,14 +71,19 @@ module SDKGenerator
 
         src_abs = File.expand_path(File.join(sdk_root, source_value)).tr('\\', '/')
         return unless File.file?(src_abs)
-        return unless Utils.path_inside?(src_abs, app_src)
+        # Copy all out-of-tree sources (e.g. board-support files under CUSTOM_BOARD_ROOT),
+        # not just those under APPLICATION_SOURCE_DIR.
+        return if Utils.path_inside?(src_abs, NinjaParser::REPO_ROOT_PATH)
 
+        # Use workspace root (sdk_root's parent) as base so the staged layout mirrors
+        # the original repo structure, e.g. <staging_root>/mcuxsdk-examples-tq/_boards/.../pin_mux.c
+        workspace_root = File.dirname(sdk_root)
         clean_rel = Pathname.new(src_abs)
-                            .relative_path_from(Pathname.new(app_src))
+                            .relative_path_from(Pathname.new(workspace_root))
                             .to_s
                             .tr('\\', '/')
         dest_path = File.join(staging_root, clean_rel)
-
+        FileUtils.mkdir_p(File.dirname(dest_path))
         FileUtils.cp_f(src_abs, dest_path) unless File.exist?(dest_path)
 
         # Preserve every original key (attribute, toolchains, targets, generated, …)
