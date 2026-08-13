@@ -28,8 +28,8 @@ class OutOfTreeNinjaParser < NinjaParser
     end
 
     out_of_tree_source = false
-    if abs_path.include? REPO_ROOT_PATH
-      file_path = abs_path.split(REPO_ROOT_PATH)[-1].sub('/', '')
+    if Utils.path_inside?(abs_path, REPO_ROOT_PATH)
+      file_path = get_relative_path(REPO_ROOT_PATH, abs_path)
     elsif abs_path.include? "#{@name}.dir/"
       # Build artifacts live in <build>/CMakeFiles/<name>.dir/.... Reconstruct
       # the path as APPLICATION_SOURCE_DIR-relative, then express that relative
@@ -223,10 +223,10 @@ class OutOfTreeNinjaParser < NinjaParser
   # the override above can apply our malformed-path recovery before this
   # decision is made.
   def compute_include_entry_path(path)
-    if path.include?(REPO_ROOT_PATH)
+    if Utils.path_inside?(path, REPO_ROOT_PATH)
       return './' if path == REPO_ROOT_PATH
 
-      return path.split(REPO_ROOT_PATH)[-1].sub('/', '')
+      return get_relative_path(REPO_ROOT_PATH, path)
     end
 
     begin

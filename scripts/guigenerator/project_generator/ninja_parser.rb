@@ -307,11 +307,11 @@ class NinjaParser
             include_dir = (quoted || unquoted)
             path = include_dir.tr('\\', '/')
             if path
-              if path.include? REPO_ROOT_PATH
+              if Utils.path_inside?(path, REPO_ROOT_PATH) || path == REPO_ROOT_PATH
                 if path == REPO_ROOT_PATH
                   include_path = './'
                 else
-                  include_path = path.split(REPO_ROOT_PATH)[-1].sub('/', '')
+                  include_path = get_relative_path(REPO_ROOT_PATH, path)
                 end
               else
                 begin
@@ -436,12 +436,12 @@ class NinjaParser
       return unless attribute == 'extra-libraries'
     end
 
-    if file_path.include? REPO_ROOT_PATH
+    if Utils.path_inside?(file_path, REPO_ROOT_PATH)
       # when the file is inside the repo
-      file_path = file_path.split(REPO_ROOT_PATH)[-1].sub('/', '')
+      file_path = get_relative_path(REPO_ROOT_PATH, file_path)
     elsif file_path.include? "#{@name}.dir/"
       file_path = file_path.split("#{@name}.dir/")[1]
-      base_path = ENV['APPLICATION_SOURCE_DIR'].split(REPO_ROOT_PATH)[-1].sub('/', '')
+      base_path = get_relative_path(REPO_ROOT_PATH, ENV['APPLICATION_SOURCE_DIR'])
       file_path = File.join(base_path, file_path)
     elsif Utils.path_inside?(file_path, File.join(@outdir, "../")) && File.dirname(file_path) != @outdir
       # Special handling for ${APPLICATION_BINARY_DIR}/.. paths
@@ -686,7 +686,7 @@ class NinjaParser
         else
           # if the path is for project itself, because all the file is in toolchain folder, and the folder structure is same
           # as repo, we can intercept the rest of REPO_ROOT_PATH from abs_path
-          path = abs_path.tr('\\', '/').split(REPO_ROOT_PATH)[-1]
+          path = get_relative_path(REPO_ROOT_PATH, abs_path.tr('\\', '/'))
         end
       else
         path = relative_path
@@ -1753,8 +1753,8 @@ class NinjaParser
       # translate path in build for standalone project, because it will be copied to build/${toolchain}.
       #. eg, build/pdum_gen.h to $PROJ_DIR$/pdum_gen.h
       return unquoted.gsub(@outdir, get_tool_rootdir(@toolchain))
-    elsif unquoted.include?(File.basename(ENV['SdkRootDirPath']))
-      dest_path = File.join(File.join(@outdir, @toolchain), unquoted.split(/#{File.basename(ENV['SdkRootDirPath'])}[\/\\]/)[-1])
+    elsif Utils.path_inside?(unquoted, ENV['SdkRootDirPath'])
+      dest_path = File.join(File.join(@outdir, @toolchain), get_relative_path(ENV['SdkRootDirPath'], unquoted))
       return File.join(get_tool_rootdir(@toolchain), get_relative_path(File.join(@outdir, @toolchain), dest_path))
     else
       return path
