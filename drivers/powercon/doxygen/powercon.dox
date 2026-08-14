@@ -90,7 +90,7 @@
  * - **SOC Ctrl — Standby Configuration**: Per-mode standby state staging
  *   (POWERCON_SetSocStandbyConfig())
  * - **System Sleep Controller (SSC) Step Mode**: SSC step mode, count, force-standby and
- *   wakeup-suppress masks (POWERCON_SetSysSleepCtrlStepModeMask(), POWERCON_SetForceStandbyMask(),
+ *   wakeup-suppress masks (POWERCON_EnableSysSleepCtrlStepMode(), POWERCON_SetForceStandbyMask(),
  *   POWERCON_SetWakeupStandbyMask())
  * - **Global Control**: XMC standby mask, fast clock-off, observe mux, and debug wakeup source
  *   (POWERCON_SetXmcStandbyMask(), POWERCON_EnableFastClockOff())

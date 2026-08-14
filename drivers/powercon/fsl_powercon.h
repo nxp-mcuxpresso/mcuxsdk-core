@@ -595,7 +595,7 @@ void POWERCON_SetSocStandbyConfig(POWERCON_SOC_CTRL_Type *base,
  * @param sleepCountModeMask  2-bit mask for SSC sleep steps 0–1.
  * @param wakeupCountModeMask 2-bit mask for SSC wakeup steps 0–1.
  */
-static inline void POWERCON_SetSysSleepCtrlStepModeMask(POWERCON_SYS_SLEEP_CTRL_Type *base,
+static inline void POWERCON_EnableSysSleepCtrlStepMode(POWERCON_SYS_SLEEP_CTRL_Type *base,
                                                          uint8_t sleepCountModeMask,
                                                          uint8_t wakeupCountModeMask)
 {
