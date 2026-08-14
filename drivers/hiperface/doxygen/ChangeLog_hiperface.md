@@ -1,4 +1,9 @@
 # HIPERFACE
+## [1.0.2]
+
+- Bug Fixes
+    - Fixed RDB Resource Access Issue
+
 ## [1.0.1]
 
 - Bug Fixes

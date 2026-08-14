@@ -42,6 +42,11 @@ uint8_t DSL_getMaxES(uint32_t syncFreqHz)
 	return maximum > 0xFF ? 0xFF : (maximum & 0xFF);
 }
 
+void DSL_SyncModeDisable(HIPERFACE_Type *base)
+{
+	base->SYNC_CTRL = 0;
+}
+
 int DSL_SyncModeEnable(HIPERFACE_Type *base, uint32_t syncFreqHz, hiperface_config_t *config)
 {
 	uint32_t minimum, maximum;
@@ -56,6 +61,7 @@ int DSL_SyncModeEnable(HIPERFACE_Type *base, uint32_t syncFreqHz, hiperface_conf
 	if (ES > maximum || ES < minimum) {
 		return kStatus_DSL_Invalid_ES;
 	}
+
 	DSL_SetOutputActivate(base, 0x00);
 	DSL_SetProtocolRst(base);
 	DSL_SetMessagesRst(base);
@@ -396,7 +402,7 @@ status_t DSL_RDB_ReadIndirect(HIPERFACE_Type *base, dsl_rdb_node_t *node, void *
 	return kStatus_Success;
 }
 
-/*Write Resource Data from offset 0 and the detLen is not greater than 8*/
+/*Read Resource Data from offset 0 and the detLen maybe is greater than 8*/
 status_t DSL_RDB_ReadIndirectMultiple(HIPERFACE_Type *base, dsl_rdb_node_t *node, void *data, uint32_t datLen)
 {
 	uint16_t errno;
@@ -404,18 +410,16 @@ status_t DSL_RDB_ReadIndirectMultiple(HIPERFACE_Type *base, dsl_rdb_node_t *node
 	datLen = datLen > node->resourceDataLen ? node->resourceDataLen : datLen;
 	int len = datLen > 8 ? 8 : datLen;
 	int offset = 0;
-	while (len) {
+	while (datLen) {
 		if ((status = DSL_RDB_Read(base, node->rid, offset, (uint8_t *)data + offset, len,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
-			if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-				return status;
-			}
-			offset += len;
-			datLen -= len;
-			len = datLen > 8 ? 8 : datLen;
+			return status;
 		}
+
+		offset += len;
+		datLen -= len;
+		len = datLen > 8 ? 8 : datLen;
 	}
 	return kStatus_Success;
-
 }
 
 /*Write Resource Data with specified offset*/
@@ -545,16 +549,13 @@ status_t DSL_RDB_TraverseNodeDefiningValue(HIPERFACE_Type *base, dsl_rdb_node_t 
 	status_t status;
 	dsl_rdb_node_t *newNodes;
 	int i;
-
 	if ((status = DSL_RDB_GetNodeDefiningValue(base, root, rid)) != kStatus_Success) {
 		return status;
 	}
-
 	if (root->dataType == RDB_DATA_TYPE_NODE_INDICATOR) {
 		if ((status = DSL_RDB_GetNodeLinkedNum(base, root)) != kStatus_Success) {
 			return status;
-	}
-
+		}
 		newNodes = malloc(root->childrenNum * sizeof(dsl_rdb_node_t));
 		if (newNodes == NULL) {
 			return kStatus_Fail;
@@ -751,7 +752,7 @@ status_t DSL_RDB_GetTypeNameOfEncoder(HIPERFACE_Type *base, uint8_t *name, uint3
 	status_t status;
 	dsl_rdb_node_t node = {0};
 
-	if ((status = DSL_RDB_GetNodeDefiningValue(base, &node, DSL_RID_TypeOfEncoder)) != kStatus_Success) {
+	if ((status = DSL_RDB_GetNodeDefiningValue(base, &node, DSL_RID_TypeName)) != kStatus_Success) {
 		return status;
 	}
 
@@ -759,9 +760,10 @@ status_t DSL_RDB_GetTypeNameOfEncoder(HIPERFACE_Type *base, uint8_t *name, uint3
 		return kStatus_OutOfRange;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, name, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, name, len)) != kStatus_Success) {
 		return status;
 	}
+
 	name[node.resourceDataLen] = '\0';
 
 	return kStatus_Success;
@@ -780,7 +782,7 @@ status_t DSL_RDB_GetSerialNumber(HIPERFACE_Type *base, uint8_t *serialNumber, ui
 		return kStatus_OutOfRange;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, serialNumber, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, serialNumber, len)) != kStatus_Success) {
 		return status;
 	}
 	serialNumber[node.resourceDataLen] = '\0';
@@ -792,7 +794,7 @@ status_t DSL_RDB_GetBaseiceVersion(HIPERFACE_Type *base, uint8_t *firmware_versi
 {
 	status_t status;
 	dsl_rdb_node_t node = {0};
-	uint8_t buf[20];
+	uint8_t buf[24];
 
 	assert(len0 > 16);
 	assert(len1 > 4);
@@ -801,7 +803,7 @@ status_t DSL_RDB_GetBaseiceVersion(HIPERFACE_Type *base, uint8_t *firmware_versi
 		return status;
 	}
 
-	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, buf, node.resourceDataLen)) != kStatus_Success) {
+	if ((status = DSL_RDB_ReadIndirectMultiple(base, &node, buf, 24)) != kStatus_Success) {
 		return status;
 	}
 
@@ -1099,8 +1101,8 @@ status_t DSL_RDB_GetErrorLog(HIPERFACE_Type *base, uint32_t index, dsl_rdb_error
 	errlog->internalSupplyVoltage = (buf[0] << 8U) | buf[1];
 	errlog->rotationSpeed = (buf[2] << 8U) | buf[3];
 	errlog->reserved = (buf[4] << 8U) | buf[5];
-	errlog->additionalErrorConde = buf[6];
-	errlog->errorConde = buf[7];
+	errlog->additionalErrorCode = buf[6];
+	errlog->errorCode = buf[7];
 
 	return kStatus_Success;
 }
@@ -1286,7 +1288,7 @@ status_t DSL_RDB_SetAccessLevel(HIPERFACE_Type *base, uint8_t accessLevel, uint3
 	buf[6] = (password >> 8) & 0xFF;
 	buf[7] = (password >> 0) & 0xFF;
 
-	if ((status = DSL_RDB_GetNodeDefiningValue(base, &node, DSL_RID_SetPosition)) != kStatus_Success) {
+	if ((status = DSL_RDB_GetNodeDefiningValue(base, &node, DSL_RID_SetAccesslevel)) != kStatus_Success) {
 		return status;
 	}
 
