@@ -1318,6 +1318,23 @@ status_t SWT_BridgeConfigPortDefaultVid(swt_handle_t *handle, netc_hw_port_idx_t
     return kStatus_Success;
 }
 
+status_t SWT_SetPortSTGState(swt_handle_t *handle,
+                             netc_hw_port_idx_t portIdx,
+                             uint8_t stgID,
+                             netc_swt_port_stg_mode_t state)
+{
+    assert(handle != NULL);
+    assert(portIdx < NETC_SOC_SWT_PORT_NUM);
+    assert(stgID < 16U);
+
+    NETC_PORT_Type *base = handle->hw.ports[portIdx].port;
+
+    base->BPSTGSR = (base->BPSTGSR & ~(NETC_PORT_BPSTGSR_STG_STATE0_MASK << (stgID * 2U))) |
+                    (((uint32_t)state & NETC_PORT_BPSTGSR_STG_STATE0_MASK) << (stgID * 2U));
+
+    return kStatus_Success;
+}
+
 status_t SWT_BridgeAddVFTableEntry(swt_handle_t *handle, netc_tb_vf_config_t *config, uint32_t *entryID)
 {
     assert((handle != NULL) && (config != NULL));

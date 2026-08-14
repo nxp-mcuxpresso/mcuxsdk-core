@@ -1297,6 +1297,24 @@ status_t SWT_BridgeConfigPort(swt_handle_t *handle,
 status_t SWT_BridgeConfigPortDefaultVid(swt_handle_t *handle, netc_hw_port_idx_t portIdx, uint16_t vid);
 
 /*!
+ * @brief Set the spanning tree group (STG) state for a specific STG on a switch port
+ *
+ * Updates the STP state for a single STG group on the specified port using a
+ * read-modify-write on the BPSTGSR register. The stgID corresponds to the
+ * Spanning Tree Group Member ID assigned to VLANs in the VLAN filter table.
+ *
+ * @param handle   Switch driver handle
+ * @param portIdx  Port index (must be less than NETC_SOC_SWT_PORT_NUM)
+ * @param stgID    Spanning tree group ID, range 0 ~ 15
+ * @param state    STP state to apply (discard, learn without forward, or forward)
+ * @return kStatus_Success
+ */
+status_t SWT_SetPortSTGState(swt_handle_t *handle,
+                             netc_hw_port_idx_t portIdx,
+                             uint8_t stgID,
+                             netc_swt_port_stg_mode_t state);
+
+/*!
  * @brief Get remaining available entry number (entry size is 24 bytes) of bridge vlan filter table
  * @note This is a Exact Match hash table, and it shares the remaining available entries with Ingress Stream
  *       Identification, Ingress Stream Filter, FDB, L2 IPV4 Multicast Filter table.
