@@ -79,6 +79,7 @@ menu "Middleware"
     osource "middleware/canopennode/Kconfig"
     osource "middleware/mstp-lib/Kconfig"
 	osource "middleware/safety_iec60730b/Kconfig"
+    osource "firmware/edgelock/Kconfig"
 endmenu
 
 # RTOS config
