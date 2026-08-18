@@ -1521,7 +1521,7 @@ void LPUART_TransferCreateHandle(LPUART_Type *base,
     /* Save the handle in global variables to support the double weak mechanism. */
     s_lpuartHandle[instance] = handle;
 
-    s_lpuartIsr[instance] = LPUART_TransferHandleIRQ;
+    s_lpuartIsr[instance] = &LPUART_TransferHandleIRQ;
 
 /* Enable interrupt in NVIC. */
 #if defined(FSL_FEATURE_LPUART_HAS_SEPARATE_RX_TX_IRQ) && FSL_FEATURE_LPUART_HAS_SEPARATE_RX_TX_IRQ
@@ -1564,7 +1564,7 @@ void LPUART_TransferStartRingBuffer(LPUART_Type *base,
     assert(NULL != ringBuffer);
 
     /* Setup the ring buffer address */
-    handle->rxRingBuffer = ringBuffer;
+    handle->ringBuf.rxRingBuffer = ringBuffer;
     if (!handle->is16bitData)
     {
         handle->rxRingBufferSize = ringBufferSize;
@@ -1604,7 +1604,7 @@ void LPUART_TransferStopRingBuffer(LPUART_Type *base, lpuart_handle_t *handle)
         EnableGlobalIRQ(irqMask);
     }
 
-    handle->rxRingBuffer     = NULL;
+    handle->ringBuf.rxRingBuffer = NULL;
     handle->rxRingBufferSize = 0U;
     handle->rxRingBufferHead = 0U;
     handle->rxRingBufferTail = 0U;
@@ -1645,7 +1645,7 @@ status_t LPUART_TransferSendNonBlocking(LPUART_Type *base, lpuart_handle_t *hand
     }
     else
     {
-        handle->txData        = xfer->txData;
+        handle->txBuf.txData  = xfer->txData;
         handle->txDataSize    = xfer->dataSize;
         handle->txDataSizeAll = xfer->dataSize;
         handle->txState       = (uint8_t)kLPUART_TxBusy;
@@ -1799,7 +1799,7 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
         bytesCurrentReceived = 0;
 
         /* If RX ring buffer is used. */
-        if (NULL != handle->rxRingBuffer)
+        if (NULL != handle->ringBuf.rxRingBuffer)
         {
             /* Disable and re-enable the global interrupt to protect the interrupt enable register during
              * read-modify-wrte. */
@@ -1822,12 +1822,12 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
                 {
                     if (!handle->is16bitData)
                     {
-                        xfer->rxData[bytesCurrentReceived] = handle->rxRingBuffer[handle->rxRingBufferTail];
+                        xfer->rxData[bytesCurrentReceived] = handle->ringBuf.rxRingBuffer[handle->rxRingBufferTail];
                     }
                     else
                     {
                         ((uint16_t *)(void *)xfer->rxData)[bytesCurrentReceived] =
-                            ((const uint16_t *)(const void *)handle->rxRingBuffer)[handle->rxRingBufferTail];
+                            ((const uint16_t *)(const void *)handle->ringBuf.rxRingBuffer)[handle->rxRingBufferTail];
                     }
                     bytesCurrentReceived++;
 
@@ -1850,11 +1850,11 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
 
                 if (!handle->is16bitData)
                 {
-                    handle->rxData = &xfer->rxData[bytesCurrentReceived];
+                    handle->rxBuf.rxData = &xfer->rxData[bytesCurrentReceived];
                 }
                 else
                 {
-                    handle->rxData = &xfer->rxData[bytesCurrentReceived * 2U];
+                    handle->rxBuf.rxData = &xfer->rxData[bytesCurrentReceived * 2U];
                 }
                 handle->rxDataSize    = bytesToReceive;
                 handle->rxDataSizeAll = xfer->dataSize;
@@ -1882,11 +1882,11 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
         {
             if (!handle->is16bitData)
             {
-                handle->rxData = &xfer->rxData[bytesCurrentReceived];
+                handle->rxBuf.rxData = &xfer->rxData[bytesCurrentReceived];
             }
             else
             {
-                handle->rxData = &xfer->rxData[bytesCurrentReceived * 2U];
+                handle->rxBuf.rxData = &xfer->rxData[bytesCurrentReceived * 2U];
             }
             handle->rxDataSize    = bytesToReceive;
             handle->rxDataSizeAll = bytesToReceive;
@@ -1925,8 +1925,8 @@ void LPUART_TransferAbortReceive(LPUART_Type *base, lpuart_handle_t *handle)
 {
     assert(NULL != handle);
 
-    /* Only abort the receive to handle->rxData, the RX ring buffer is still working. */
-    if (NULL == handle->rxRingBuffer)
+    /* Only abort the receive to handle->rxBuf.rxData, the RX ring buffer is still working. */
+    if (NULL == handle->ringBuf.rxRingBuffer)
     {
         /* Disable and re-enable the global interrupt to protect the interrupt enable register during read-modify-wrte.
          */
@@ -1986,13 +1986,13 @@ static void LPUART_TransferHandleIDLEReady(LPUART_Type *base, lpuart_handle_t *h
         /* Using non block API to read the data from the registers. */
         if (!handle->is16bitData)
         {
-            LPUART_ReadNonBlocking(base, handle->rxData, tempCount);
-            handle->rxData = &handle->rxData[tempCount];
+            LPUART_ReadNonBlocking(base, handle->rxBuf.rxData, tempCount);
+            handle->rxBuf.rxData = &handle->rxBuf.rxData[tempCount];
         }
         else
         {
-            LPUART_ReadNonBlocking16bit(base, handle->rxData16, tempCount);
-            handle->rxData16 = &handle->rxData16[tempCount];
+            LPUART_ReadNonBlocking16bit(base, handle->rxBuf.rxData16, tempCount);
+            handle->rxBuf.rxData16 = &handle->rxBuf.rxData16[tempCount];
         }
         handle->rxDataSize -= tempCount;
         count -= tempCount;
@@ -2047,7 +2047,7 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
     count = 1;
 #endif
 
-    /* If handle->rxDataSize is not 0, first save data to handle->rxData. */
+    /* If handle->rxDataSize is not 0, first save data to handle->rxBuf.rxData. */
     while ((0U != handle->rxDataSize) && (0U != count))
     {
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
@@ -2059,13 +2059,13 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
         /* Using non block API to read the data from the registers. */
         if (!handle->is16bitData)
         {
-            LPUART_ReadNonBlocking(base, handle->rxData, tempCount);
-            handle->rxData = &handle->rxData[tempCount];
+            LPUART_ReadNonBlocking(base, handle->rxBuf.rxData, tempCount);
+            handle->rxBuf.rxData = &handle->rxBuf.rxData[tempCount];
         }
         else
         {
-            LPUART_ReadNonBlocking16bit(base, handle->rxData16, tempCount);
-            handle->rxData16 = &handle->rxData16[tempCount];
+            LPUART_ReadNonBlocking16bit(base, handle->rxBuf.rxData16, tempCount);
+            handle->rxBuf.rxData16 = &handle->rxBuf.rxData16[tempCount];
         }
         handle->rxDataSize -= tempCount;
         count -= tempCount;
@@ -2083,7 +2083,7 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
     }
 
     /* If use RX ring buffer, receive data to ring buffer. */
-    if (NULL != handle->rxRingBuffer)
+    if (NULL != handle->ringBuf.rxRingBuffer)
     {
         while (0U != count)
         {
@@ -2117,27 +2117,27 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
 #if defined(FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT) && FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT
             if (handle->isSevenDataBits)
             {
-                handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0x7FU);
+                handle->ringBuf.rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0x7FU);
             }
             else
             {
                 if (!handle->is16bitData)
                 {
-                    handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
+                    handle->ringBuf.rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
                 }
                 else
                 {
-                    ((uint16_t *)(void *)handle->rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
+                    ((uint16_t *)(void *)handle->ringBuf.rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
                 }
             }
 #else
             if (!handle->is16bitData)
             {
-                handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
+                handle->ringBuf.rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
             }
             else
             {
-                ((uint16_t *)(void *)handle->rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
+                ((uint16_t *)(void *)handle->ringBuf.rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
             }
 #endif
 
@@ -2176,8 +2176,8 @@ static void LPUART_TransferHandleSendDataEmpty(LPUART_Type *base, lpuart_handle_
 /* Get the bytes that available at this moment. */
 #if defined(FSL_FEATURE_LPUART_HAS_FIFO) && FSL_FEATURE_LPUART_HAS_FIFO
     uint32_t txCount = ((base->WATER & LPUART_WATER_TXCOUNT_MASK) >> LPUART_WATER_TXCOUNT_SHIFT);
-    assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) >= txCount);
-    count = (uint8_t)((FSL_FEATURE_LPUART_FIFO_SIZEn(base) - txCount) & 0xFFU);
+    assert(FSL_FEATURE_LPUART_FIFO_SIZEn(base) >= (int32_t)txCount);
+    count = (uint8_t)(((uint32_t)FSL_FEATURE_LPUART_FIFO_SIZEn(base) - txCount) & 0xFFU);
 #else
     count = 1U;
 #endif
@@ -2193,13 +2193,13 @@ static void LPUART_TransferHandleSendDataEmpty(LPUART_Type *base, lpuart_handle_
         /* Using non block API to write the data to the registers. */
         if (!handle->is16bitData)
         {
-            LPUART_WriteNonBlocking(base, handle->txData, tempCount);
-            handle->txData = &handle->txData[tempCount];
+            LPUART_WriteNonBlocking(base, handle->txBuf.txData, tempCount);
+            handle->txBuf.txData = &handle->txBuf.txData[tempCount];
         }
         else
         {
-            LPUART_WriteNonBlocking16bit(base, handle->txData16, tempCount);
-            handle->txData16 = &handle->txData16[tempCount];
+            LPUART_WriteNonBlocking16bit(base, handle->txBuf.txData16, tempCount);
+            handle->txBuf.txData16 = &handle->txBuf.txData16[tempCount];
         }
         handle->txDataSize -= tempCount;
         count -= tempCount;

@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed self assignment issues.
+  - Fixed MISRA issues.
 
 ## [2.4.0]
 

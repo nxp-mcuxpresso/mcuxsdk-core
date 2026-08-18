@@ -312,14 +312,15 @@ struct _lpuart_handle
     {
         const uint8_t *volatile txData;    /*!< Address of remaining data to send. */
         const uint16_t *volatile txData16; /*!< Address of remaining data to send. */
-    };
+    } txBuf;
     volatile size_t txDataSize;            /*!< Size of the remaining data to send. */
     size_t txDataSizeAll;                  /*!< Size of the data to send out. */
+
     union
     {
         uint8_t *volatile rxData;    /*!< Address of remaining data to receive. */
         uint16_t *volatile rxData16; /*!< Address of remaining data to receive. */
-    };
+    } rxBuf;
     volatile size_t rxDataSize;      /*!< Size of the remaining data to receive. */
     size_t rxDataSizeAll;            /*!< Size of the data to receive. */
 
@@ -327,7 +328,7 @@ struct _lpuart_handle
     {
         uint8_t *rxRingBuffer;           /*!< Start address of the receiver ring buffer. */
         uint16_t *rxRingBuffer16;        /*!< Start address of the receiver ring buffer. */
-    };
+    } ringBuf;
     size_t rxRingBufferSize;             /*!< Size of the ring buffer. */
     volatile uint16_t rxRingBufferHead;  /*!< Index for the driver to store received data into ring buffer. */
     volatile uint16_t rxRingBufferTail;  /*!< Index for the user to get data from the ring buffer. */
@@ -829,13 +830,9 @@ static inline uint8_t LPUART_ReadByte(LPUART_Type *base)
 #if defined(FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT) && FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT
     uint32_t ctrl = base->CTRL;
     uint8_t result;
-    /*
-     * $Branch Coverage Justification$
-     * (ctrl & LPUART_CTRL_M7_MASK) == 0U) false is not covered.
-     * If ctrl & LPUART_CTRL_M7_MASK is 0, it can't be !0 in next judge.
-     */
+
     bool isSevenDataBits = (((ctrl & LPUART_CTRL_M7_MASK) != 0U) ||
-                            (((ctrl & LPUART_CTRL_M7_MASK) == 0U) && ((ctrl & LPUART_CTRL_M_MASK) == 0U) && /* GCOVR_EXCL_BR_LINE */
+                            (((ctrl & LPUART_CTRL_M_MASK) == 0U) &&
                              ((ctrl & LPUART_CTRL_PE_MASK) != 0U)));
 
     if (isSevenDataBits)

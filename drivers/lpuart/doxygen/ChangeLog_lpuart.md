@@ -5,6 +5,7 @@
 - Bug Fixes
   - Fixed inconsistent C union access.
   - Fixed CERT-C issues.
+  - Fixed MISRA issues.
 
 ## [2.11.0]
 
