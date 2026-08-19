@@ -119,8 +119,18 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>JL2CM3</Key>
+          <Name>-U -O78 -S2 -ZTIFSpeedSel5000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO7 -FD20000000 -FC1000 -FN2 -FF0FLASH_128.FLM -FS00 -FL020000 -FP0($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_128.FLM) -FF1FLASH_IFR -FS11002000 -FL16000 -FP1($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_IFR.FLM)</Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
+          <Key>CMSIS_AGDI_V8M</Key>
+          <Name>-X"Any" -UAny -O206 -S9 -C0 -P00000000 -N00("ARM CoreSight SW-DP") -D00(6BA02477) -L00(0) -TO65536 -TC10000000 -TT10000000 -TP20 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO7 -FD20000000 -FC1000 -FN2 -FF0FLASH_128.FLM -FS00 -FL020000 -FP0($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_128.FLM) -FF1FLASH_IFR.FLM -FS11002000 -FL16000 -FP1($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_IFR.FLM)</Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>UL2V8M</Key>
-          <Name>UL2V8M(-S0 -C0 -P0 )  -FN1 -FC1000 -FD20000000 -FF0FLASH_64 -FL010000 -FS00 -FP0($$Device:MCXC353VLF$devices\MCXC353\arm\FLASH_64.FLM)</Name>
+          <Name>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0FLASH_128 -FS00 -FL020000 -FP0($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_128.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
       <Breakpoint/>
@@ -181,9 +191,9 @@
     <ToolsetNumber>0x4</ToolsetNumber>
     <ToolsetName>ARM-ADS</ToolsetName>
     <TargetOption>
-      <CLKADS>48000000</CLKADS>
+      <CLKADS>12000000</CLKADS>
       <OPTTT>
-        <gFlags>0</gFlags>
+        <gFlags>1</gFlags>
         <BeepAtEnd>1</BeepAtEnd>
         <RunSim>0</RunSim>
         <RunTarget>1</RunTarget>
@@ -269,13 +279,23 @@
         <tDlgDll></tDlgDll>
         <tDlgPa></tDlgPa>
         <tIfile></tIfile>
-        <pMon>BIN\CMSIS_AGDI.dll</pMon>
+        <pMon>BIN\CMSIS_AGDI_V8M.DLL</pMon>
       </DebugOpt>
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
-          <Key>UL2CM3</Key>
-          <Name>UL2CM3(-S0 -C0 -P0 -FD1FFFFE00 -FC800 -FN1 -FF0MK_P32_48MHZ_MCXC041 -FS00 -FL08000 -FP0($$Device:MCXC041VFK$devices\MCXC041\arm\MK_P32_48MHZ_MCXC041.FLM))</Name>
+          <Key>JL2CM3</Key>
+          <Name>-U -O78 -S2 -ZTIFSpeedSel5000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO7 -FD20000000 -FC1000 -FN2 -FF0FLASH_128.FLM -FS00 -FL020000 -FP0($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_128.FLM) -FF1FLASH_IFR -FS11002000 -FL16000 -FP1($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_IFR.FLM)</Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
+          <Key>CMSIS_AGDI_V8M</Key>
+          <Name>-X"Any" -UAny -O206 -S9 -C0 -P00000000 -N00("ARM CoreSight SW-DP") -D00(6BA02477) -L00(0) -TO65536 -TC10000000 -TT10000000 -TP20 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO7 -FD20000000 -FC1000 -FN2 -FF0FLASH_128.FLM -FS00 -FL020000 -FP0($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_128.FLM) -FF1FLASH_IFR.FLM -FS11002000 -FL16000 -FP1($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_IFR.FLM)</Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
+          <Key>UL2V8M</Key>
+          <Name>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0FLASH_128 -FS00 -FL020000 -FP0($$Device:MCXC353MLF$devices\MCXC353\arm\FLASH_128.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
       <Breakpoint/>
@@ -321,6 +341,13 @@
       <pszMrulep></pszMrulep>
       <pSingCmdsp></pSingCmdsp>
       <pMultCmdsp></pMultCmdsp>
+      <DebugDescription>
+        <Enable>1</Enable>
+        <EnableFlashSeq>1</EnableFlashSeq>
+        <EnableLog>0</EnableLog>
+        <Protocol>2</Protocol>
+        <DbgClock>5000000</DbgClock>
+      </DebugDescription>
     </TargetOption>
   </Target>
 
