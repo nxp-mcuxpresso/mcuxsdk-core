@@ -189,7 +189,7 @@
             <nBranchProt>0</nBranchProt>
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>1</hadIROM2>
-            <StupSel>0</StupSel>
+            <StupSel>16</StupSel>
             <useUlib>0</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
@@ -285,17 +285,17 @@
                 <Size>0x40000</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x20080000</StartAddress>
                 <Size>0x280000</Size>
               </OCR_RVCT6>
               <OCR_RVCT7>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x30080000</StartAddress>
                 <Size>0x280000</Size>
               </OCR_RVCT7>
               <OCR_RVCT8>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x680000</StartAddress>
                 <Size>0x100000</Size>
               </OCR_RVCT8>
@@ -564,7 +564,7 @@
             <nBranchProt>0</nBranchProt>
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>1</hadIROM2>
-            <StupSel>0</StupSel>
+            <StupSel>16</StupSel>
             <useUlib>0</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
@@ -660,17 +660,17 @@
                 <Size>0x40000</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x20080000</StartAddress>
                 <Size>0x280000</Size>
               </OCR_RVCT6>
               <OCR_RVCT7>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x30080000</StartAddress>
                 <Size>0x280000</Size>
               </OCR_RVCT7>
               <OCR_RVCT8>
-                <Type>1</Type>
+                <Type>0</Type>
                 <StartAddress>0x680000</StartAddress>
                 <Size>0x100000</Size>
               </OCR_RVCT8>
