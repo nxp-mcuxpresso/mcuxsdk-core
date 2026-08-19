@@ -1268,9 +1268,9 @@ RAMFUNC void XSPI_UpdateSFPConfig(XSPI_Type *base,
                 /* Set the most-significant 16 bits of the ending address(64-KB alignment). */
                 *(uint32_t *)fradWord1RegAddr = ptrSfpFradConfig->fradConfig[i].endAddress & 0xFFFF0000UL;
 
+#if (defined(FSL_FEATURE_XSPI_HAS_EENV) && FSL_FEATURE_XSPI_HAS_EENV)
                 for (uint8_t tgId = 0U; tgId < XSPI_TARGET_GROUP_COUNT; tgId++)
                 {
-#if (defined(FSL_FEATURE_XSPI_HAS_EENV) && FSL_FEATURE_XSPI_HAS_EENV)
                     fradWord2RegAddr = XSPI_TG_REG_ADDR_FRAD(base, tgId, i, 2);
                     fradWord3RegAddr = XSPI_TG_REG_ADDR_FRAD(base, tgId, i, 3);
                     XSPI_SetSFPFradEALModeTG(base, (xspi_target_group_t)tgId,
@@ -1290,27 +1290,27 @@ RAMFUNC void XSPI_UpdateSFPConfig(XSPI_Type *base,
                     *(uint32_t *)fradWord3RegAddr =
                         (XSPI_FRAD0_WORD3_VLD(ptrSfpFradConfig->fradConfig[i].tgConfig[tgId].assignIsValid) |
                          XSPI_FRAD0_WORD3_LOCK(ptrSfpFradConfig->fradConfig[i].tgConfig[tgId].descriptorLock));
-#else
-                    fradWord2RegAddr = XSPI_REG_ADDR_FRAD_ADDR(base, i, 2);
-                    fradWord3RegAddr = XSPI_REG_ADDR_FRAD_ADDR(base, i, 3);
-
-                    XSPI_SetSFPFradEALMode(base, ptrSfpFradConfig->fradConfig[i].exclusiveAccessLock, i);
-
-                    if (ptrSfpFradConfig->fradConfig[i].exclusiveAccessLock == kXSPI_ExclusiveAccessLockDisabled)
-                    {
-                        *(uint32_t *)fradWord2RegAddr =
-                            (*(uint32_t *)fradWord3RegAddr &
-                             (~(XSPI_FRAD0_WORD2_MD0ACP_MASK | XSPI_FRAD0_WORD2_MD1ACP_MASK))) |
-                            (XSPI_FRAD0_WORD2_MD0ACP(ptrSfpFradConfig->fradConfig[i].tg0MasterAccess) |
-                             XSPI_FRAD0_WORD2_MD1ACP(ptrSfpFradConfig->fradConfig[i].tg1MasterAccess));
-                    }
-                    *(uint32_t *)fradWord3RegAddr =
-                        ((*(uint32_t *)fradWord3RegAddr) &
-                         (~(XSPI_FRAD0_WORD3_LOCK_MASK | XSPI_FRAD0_WORD3_VLD_MASK))) |
-                        (XSPI_FRAD0_WORD3_VLD(ptrSfpFradConfig->fradConfig[i].assignIsValid) |
-                         XSPI_FRAD0_WORD3_LOCK(ptrSfpFradConfig->fradConfig[i].descriptorLock));
-#endif
                 }
+#else
+                fradWord2RegAddr = XSPI_REG_ADDR_FRAD_ADDR(base, i, 2);
+                fradWord3RegAddr = XSPI_REG_ADDR_FRAD_ADDR(base, i, 3);
+
+                XSPI_SetSFPFradEALMode(base, ptrSfpFradConfig->fradConfig[i].exclusiveAccessLock, i);
+
+                if (ptrSfpFradConfig->fradConfig[i].exclusiveAccessLock == kXSPI_ExclusiveAccessLockDisabled)
+                {
+                    *(uint32_t *)fradWord2RegAddr =
+                        (*(uint32_t *)fradWord3RegAddr &
+                         (~(XSPI_FRAD0_WORD2_MD0ACP_MASK | XSPI_FRAD0_WORD2_MD1ACP_MASK))) |
+                        (XSPI_FRAD0_WORD2_MD0ACP(ptrSfpFradConfig->fradConfig[i].tg0MasterAccess) |
+                         XSPI_FRAD0_WORD2_MD1ACP(ptrSfpFradConfig->fradConfig[i].tg1MasterAccess));
+                }
+                *(uint32_t *)fradWord3RegAddr =
+                    ((*(uint32_t *)fradWord3RegAddr) &
+                     (~(XSPI_FRAD0_WORD3_LOCK_MASK | XSPI_FRAD0_WORD3_VLD_MASK))) |
+                    (XSPI_FRAD0_WORD3_VLD(ptrSfpFradConfig->fradConfig[i].assignIsValid) |
+                     XSPI_FRAD0_WORD3_LOCK(ptrSfpFradConfig->fradConfig[i].descriptorLock));
+#endif
             }
         }
     }
