@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief cache driver version. */
-#define FSL_LLC_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
+#define FSL_LLC_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
 
 /*! @} */
 
@@ -123,7 +123,6 @@ typedef struct _llc_feature_capability
 {
     llc_cache_line_size_t cacheLineSize; /*!< Cache line size capability */
     llc_axi_data_width_t axiDataWidth;   /*!< AXI data width capability */
-    bool freeRun;                        /*!< Free run mode capability */
     uint8_t counterWidth;                /*!< Performance counter width capability */
 } llc_feature_capability_t;
 

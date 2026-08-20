@@ -28,7 +28,7 @@
 - ::LLC_Init applies the configuration, initializes tag/data arrays, and enables cache.
 - ::LLC_GetVersion fills ::llc_version_info_t with {major, minor, patch}.
 - ::LLC_GetCapabilities fills ::llc_feature_capability_t (cacheLineSize, axiDataWidth,
-    freeRun capability, performance counter width).
+    performance counter width).
 
 The ::llc_config_t provides:
 - enableErrorDetection: enable error detection logic.

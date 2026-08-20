@@ -1,5 +1,12 @@
 # Last Level CACHE
 
+## [2.1.1]
+
+- Bug Fixes
+  - Stopped reading CCUPMHI[FREERUN] in LLC_GetCapabilities() and removed the now-meaningless freeRun
+    member of llc_feature_capability_t. The RM 1.13 header update deleted that bitfield, so the
+    capability is no longer defined by the IP register map.
+
 ## [2.1.0]
 
 - New Features

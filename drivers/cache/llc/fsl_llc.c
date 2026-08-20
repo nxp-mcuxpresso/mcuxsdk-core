@@ -343,7 +343,6 @@ void LLC_GetCapabilities(LLC_Type *base, llc_feature_capability_t *feature)
 
     /* Performance Monitor Hardware Information (CCUPMHI) */
     uint32_t pmhi         = base->CCUPMHI;
-    feature->freeRun      = (((pmhi & LLC_CCUPMHI_FREERUN_MASK) >> LLC_CCUPMHI_FREERUN_SHIFT) != 0U);
     feature->counterWidth = (uint8_t)((pmhi & LLC_CCUPMHI_COUNTERWIDTH_MASK) >> LLC_CCUPMHI_COUNTERWIDTH_SHIFT);
 }
 
