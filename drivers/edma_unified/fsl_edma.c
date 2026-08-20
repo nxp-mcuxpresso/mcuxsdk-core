@@ -121,10 +121,11 @@ static inline status_t EDMA_CheckErrata(EDMA_Type *base, edma_tcd_t *tcd)
     if ((int32_t)FSL_FEATURE_EDMA_INSTANCE_HAS_ERRATA_52315n(base) == 1)
     {
         uint16_t attr     = EDMA_TCD_ATTR(tcd, EDMA_TCD_TYPE(base));
-        /* ATTR[SSIZE] is bits [10:8], ATTR[DSIZE] is bits [2:0]; both are the log2
-         * of the transfer size in bytes, so the transfer size is (1 << size). */
-        uint32_t ssize    = 1UL << ((((uint32_t)attr & 0x700UL) >> 8U) & 0x1FUL);
-        uint32_t dsize    = 1UL << (((uint32_t)attr & 0x7UL) & 0x1FUL);
+        /* ATTR[SSIZE]/ATTR[DSIZE] hold the log2 of the transfer size in bytes, so the
+         * transfer size is (1 << size). The fields are 3 bits wide (value range 0..7),
+         * so the resulting shift amount can never reach the width of the operand. */
+        uint32_t ssize    = 1UL << (((uint32_t)attr & DMA_ATTR_SSIZE_MASK) >> DMA_ATTR_SSIZE_SHIFT);
+        uint32_t dsize    = 1UL << (((uint32_t)attr & DMA_ATTR_DSIZE_MASK) >> DMA_ATTR_DSIZE_SHIFT);
         /* Alignment mask (size - 1) with an explicit non-zero guard so the
          * unsigned subtraction can never wrap. */
         uint32_t ssizeMask = (ssize != 0UL) ? (ssize - 1UL) : 0UL;
