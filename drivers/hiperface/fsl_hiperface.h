@@ -15,7 +15,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief HIPERFACE driver version. */
-#define FSL_HIPERFACE_DRIVER_VERSION (MAKE_VERSION(1, 0, 2))
+#define FSL_HIPERFACE_DRIVER_VERSION (MAKE_VERSION(1, 0, 3))
 
 #define POS_READY_MODE_SHOWS_TIME_ALL_TRANSMISSIONS      1
 #define POS_READY_MODE_SHOWS_TIME_SYNC_TRANSMISSIONS     0
@@ -530,7 +530,7 @@ status_t DSL_RDB_GetResolution(HIPERFACE_Type *base, uint32_t *resolution);
 status_t DSL_RDB_GetMeasurementRange(HIPERFACE_Type *base, uint32_t *range);
 status_t DSL_RDB_GetTypeNameOfEncoder(HIPERFACE_Type *base, uint8_t *name, uint32_t len);
 status_t DSL_RDB_GetSerialNumber(HIPERFACE_Type *base, uint8_t *serialNumber, uint32_t len);
-status_t DSL_RDB_GetBaseiceVersion(HIPERFACE_Type *base, uint8_t *firmware_version, uint32_t len0, uint8_t *hardware_version, uint32_t len1);
+status_t DSL_RDB_GetBasicVersion(HIPERFACE_Type *base, uint8_t *firmware_version, uint32_t len0, uint8_t *hardware_version, uint32_t len1);
 status_t DSL_RDB_GetFirmwareDate(HIPERFACE_Type *base, uint8_t *date, uint32_t len);
 status_t DSL_RDB_GetEEPROMSize(HIPERFACE_Type *base, uint16_t *size);
 status_t DSL_RDB_GetSafeChannel2Resolution(HIPERFACE_Type *base, uint32_t *resolution);

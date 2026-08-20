@@ -38,8 +38,9 @@ void DSL_MasterInit(HIPERFACE_Type *base, hiperface_config_t *config)
 
 uint8_t DSL_getMaxES(uint32_t syncFreqHz)
 {
-	uint32_t maximum = (uint32_t) (1000000 / (syncFreqHz * 11.95));
-	return maximum > 0xFF ? 0xFF : (maximum & 0xFF);
+	double tmp = 1000000.0 / ((double)syncFreqHz * 11.95);
+	uint8_t maximum = (tmp >= (double)UINT8_MAX) ? UINT8_MAX : (uint8_t)tmp;
+	return maximum;
 }
 
 void DSL_SyncModeDisable(HIPERFACE_Type *base)
@@ -49,14 +50,13 @@ void DSL_SyncModeDisable(HIPERFACE_Type *base)
 
 int DSL_SyncModeEnable(HIPERFACE_Type *base, uint32_t syncFreqHz, hiperface_config_t *config)
 {
-	uint32_t minimum, maximum;
+	uint8_t minimum, maximum;
 	uint8_t ES = config->es;
 
-	minimum = (uint32_t) (1000000 / (syncFreqHz * 27.0));
-	maximum = (uint32_t) (1000000 / (syncFreqHz * 11.95));
-	if (maximum > 0xFF) {
-		maximum = 0xFF;
-	}
+	double tmp_min = 1000000.0 / ((double)syncFreqHz * 27.0);
+	double tmp_max = 1000000.0 / ((double)syncFreqHz * 11.95);
+	minimum = (tmp_min >= (double)UINT8_MAX) ? UINT8_MAX : (uint8_t)tmp_min;
+	maximum = (tmp_max >= (double)UINT8_MAX) ? UINT8_MAX : (uint8_t)tmp_max;
 
 	if (ES > maximum || ES < minimum) {
 		return kStatus_DSL_Invalid_ES;
@@ -456,10 +456,17 @@ void DSL_GetFastPositionAndSpeed(HIPERFACE_Type *base, uint64_t *position, int32
 	pos0 = *(uint32_t*)(&base->POS_PRIM[0]);
 	pos1 = *(uint32_t*)(&base->POS_PRIM[4]);
 	*position = (((uint64_t)pos0) << 8) + (pos1 >> 24);
-	if (pos1 & 0x800000) {
-		*speed = (int32_t)(pos1 | 0xFF000000);
-	} else {
-			*speed = (int32_t)(pos1 & 0xFFFFFF);
+	/* Sign-extend the 24-bit signed value in pos1[23:0] to int32_t.
+	 * Arithmetic subtraction avoids the uint32_t->int32_t overflow
+	 * flagged when the high bit of uint32_t is set. */
+	uint32_t raw24 = pos1 & 0x00FFFFFFU;
+	if ((raw24 & 0x800000U) != 0U)
+	{
+		*speed = (int32_t)raw24 - (int32_t)0x1000000;
+	}
+	else
+	{
+		*speed = (int32_t)raw24;
 	}
 }
 
@@ -472,16 +479,13 @@ status_t DSL_RDB_WriteIndirectMultiple(HIPERFACE_Type *base, dsl_rdb_node_t *nod
 	int len = datLen > 8 ? 8 : datLen;
 	int offset = 0;
 	while (len) {
-		if ((status = DSL_RDB_Wrire(base, node->rid, offset, (uint8_t *)data + offset, len,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) != kStatus_Success) {
-			if (status == kStatus_DSL_Lmsg_Err_CausedByLmsg) {
-				return status;
-			}
+		if ((status = DSL_RDB_Wrire(base, node->rid, offset, (uint8_t *)data + offset, len,  LMSG_F_INDIRECT | LMSG_F_OFFSET, node->timeOverrun, &errno)) == kStatus_Success) {
 			offset += len;
 			datLen -= len;
 			len = datLen > 8 ? 8 : datLen;
 		}
 	}
-	return kStatus_Success;
+	return status;
 
 }
 
@@ -790,11 +794,11 @@ status_t DSL_RDB_GetSerialNumber(HIPERFACE_Type *base, uint8_t *serialNumber, ui
 	return kStatus_Success;
 }
 
-status_t DSL_RDB_GetBaseiceVersion(HIPERFACE_Type *base, uint8_t *firmware_version, uint32_t len0, uint8_t *hardware_version, uint32_t len1)
+status_t DSL_RDB_GetBasicVersion(HIPERFACE_Type *base, uint8_t *firmware_version, uint32_t len0, uint8_t *hardware_version, uint32_t len1)
 {
 	status_t status;
 	dsl_rdb_node_t node = {0};
-	uint8_t buf[24];
+	uint8_t buf[24] = {0};
 
 	assert(len0 > 16);
 	assert(len1 > 4);
@@ -1550,7 +1554,7 @@ status_t DSL_RDB_GetEncoderIndexIncorporationfunction(HIPERFACE_Type *base, uint
 
 status_t DSL_RDB_SetEncoderIndexIncorporationfunction(HIPERFACE_Type *base, uint8_t isEnabled)
 {
-	uint8_t buf[8];
+	uint8_t buf[8] = {0};
 	status_t status;
 	dsl_rdb_node_t node = {0};
 
@@ -1576,7 +1580,7 @@ status_t DSL_RDB_SetEncoderIndexIncorporationfunction(HIPERFACE_Type *base, uint
 
 status_t DSL_RDB_GetReadCounter(HIPERFACE_Type *base, uint32_t *counter)
 {
-	uint8_t buf[8];
+	uint8_t buf[8] = {0};
 	status_t status;
 	dsl_rdb_node_t node = {0};
 
