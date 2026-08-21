@@ -4,6 +4,7 @@
 
 - Bug Fixes
   - Fixed switch driver to use the BPCAPR NUM_SBP macro spelling.
+  - Fixed some code quality issues.
 
 ## [2.10.7]
 

@@ -2473,11 +2473,11 @@ static inline status_t SWT_ClearPortDiscardReason(swt_handle_t *handle,
 static inline status_t SWT_GetFDBInUseEntriesNumber(swt_handle_t *handle, netc_switch_inuse_fdb_statistic_t *statistic)
 {
     statistic->staticEntries     = (uint16_t)(handle->hw.base->FDBHTOR0 & NETC_SW_FDBHTOR0_STATIC_ENTRIES_MASK);
-    statistic->camEntries        = (uint16_t)(((handle->hw.base->FDBHTOR0 >> NETC_SW_FDBHTOR0_NUM_GENTRIES_SHIFT) &
-                                       NETC_SW_FDBHTOR0_NUM_GENTRIES_MASK) & 0xFFFFU);
+    statistic->camEntries        = (uint16_t)(((handle->hw.base->FDBHTOR0 & NETC_SW_FDBHTOR0_NUM_GENTRIES_MASK) >>
+                                               NETC_SW_FDBHTOR0_NUM_GENTRIES_SHIFT) & 0xFFFFU);
     statistic->dynamicEntries    = (uint16_t)(handle->hw.base->FDBHTOR1 & NETC_SW_FDBHTOR1_DYN_ENTRIES_MASK);
-    statistic->dynamicEntriesHWM = (uint16_t)(((handle->hw.base->FDBHTOR1 >> NETC_SW_FDBHTOR1_HWM_DYN_ENTRIES_SHIFT) &
-                                              NETC_SW_FDBHTOR1_HWM_DYN_ENTRIES_MASK) & 0xFFFFU);
+    statistic->dynamicEntriesHWM = (uint16_t)(((handle->hw.base->FDBHTOR1 & NETC_SW_FDBHTOR1_HWM_DYN_ENTRIES_MASK) >>
+                                               NETC_SW_FDBHTOR1_HWM_DYN_ENTRIES_SHIFT) & 0xFFFFU);
     return kStatus_Success;
 }
 

@@ -489,7 +489,7 @@ status_t EP_Init(ep_handle_t *handle, uint8_t *macAddr, const ep_config_t *confi
     {
         /* Reset VF function */
         handle->hw.func.vf->PCI_CFC_PCIE_DEV_CTL |= ENETC_VF_PCI_TYPE0_PCI_CFC_PCIE_DEV_CTL_INIT_FLR_MASK;
-        while ((handle->hw.func.pf->PCI_CFC_PCIE_DEV_CTL & ENETC_VF_PCI_TYPE0_PCI_CFC_PCIE_DEV_CTL_INIT_FLR_MASK) != 0U)
+        while ((handle->hw.func.vf->PCI_CFC_PCIE_DEV_CTL & ENETC_VF_PCI_TYPE0_PCI_CFC_PCIE_DEV_CTL_INIT_FLR_MASK) != 0U)
         {
         }
         /* Enable master bus and memory access for PCIe and MSI-X */
