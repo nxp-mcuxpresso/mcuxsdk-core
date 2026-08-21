@@ -1,5 +1,24 @@
-# Copyright 2024 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
 rsource "./*/Kconfig"
+
+# Platform-independent DMA selector project segment. Selects the DMA driver
+# implementation that is actually available on the current device:
+#   - driver.dma3         for platforms with DMA3 IP
+#   - driver.edma         for platforms with classic EDMA IP
+#   - driver.edma_unified for platforms with EDMA3/4/5 IP
+# Use this in shared example prj.conf files that must build across platforms
+# with different DMA generations, instead of hard-coding a specific variant.
+#
+# This is defined as a MCUX_PRJSEG_module.* project segment rather than a
+# MCUX_COMPONENT_driver.* component on purpose: a project segment is a logical
+# switch and does not require ecosystem yml (section_info) data, so it does not
+# trigger the "Depended component ... is not loaded" packaging CI check that a
+# real component would.
+config MCUX_PRJSEG_module.driver.edma_selector
+    bool "Platform-independent DMA driver selector"
+    select MCUX_COMPONENT_driver.dma3 if MCUX_HAS_COMPONENT_driver.dma3
+    select MCUX_COMPONENT_driver.edma if MCUX_HAS_COMPONENT_driver.edma
+    select MCUX_COMPONENT_driver.edma_unified if MCUX_HAS_COMPONENT_driver.edma_unified
