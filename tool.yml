@@ -39,9 +39,9 @@ toolchains:
   xcc:
     name: Xtensa C Compiler
     toolchain: xcc
-    version: '2023.11'
+    version: '2026.6'
     compiler: xcc
-    compiler_version: '2023.11'
+    compiler_version: '2026.6'
     vendor: Cadence
     vendor_url: https://www.cadence.com/
     included: always
@@ -50,9 +50,9 @@ toolchains:
   xtensa:
     name: Xtensa Xplorer
     toolchain: xtensa
-    version: '10.1.11'
+    version: '12.0.6'
     compiler: xcc
-    compiler_version: 10.1.11
+    compiler_version: 12.0.6
     vendor: Cadence
     vendor_url: https://www.cadence.com/
     included: always
