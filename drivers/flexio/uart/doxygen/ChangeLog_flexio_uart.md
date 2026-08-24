@@ -7,6 +7,8 @@
   - Fixed CERT INT31-C violations in baud rate timer compare setup and receive data reads.
   - Fixed UNUSED_VALUE violation in baud rate divider calculation.
   - Fixed MISRA issues.
+- Improvements
+  - Improved HIS CCM in FLEXIO_UART_TransferHandleIRQ().
 
 ## [2.6.5]
 
