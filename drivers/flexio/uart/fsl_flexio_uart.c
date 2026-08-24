@@ -593,7 +593,7 @@ status_t FLEXIO_UART_TransferCreateHandle(FLEXIO_UART_Type *base,
 #endif
 
     /* Save the context in global variables to support the double weak mechanism. */
-    return FLEXIO_RegisterHandleIRQ(base, handle, FLEXIO_UART_TransferHandleIRQ);
+    return FLEXIO_RegisterHandleIRQ(base, handle, &FLEXIO_UART_TransferHandleIRQ);
 }
 
 /*!

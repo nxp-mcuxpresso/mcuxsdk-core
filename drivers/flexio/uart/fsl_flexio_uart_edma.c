@@ -179,13 +179,13 @@ status_t FLEXIO_UART_TransferCreateHandleEDMA(FLEXIO_UART_Type *base,
     /* Configure TX. */
     if (txEdmaHandle != NULL)
     {
-        EDMA_SetCallback(handle->txEdmaHandle, FLEXIO_UART_TransferSendEDMACallback, &s_edmaPrivateHandle);
+        EDMA_SetCallback(handle->txEdmaHandle, &FLEXIO_UART_TransferSendEDMACallback, &s_edmaPrivateHandle);
     }
 
     /* Configure RX. */
     if (rxEdmaHandle != NULL)
     {
-        EDMA_SetCallback(handle->rxEdmaHandle, FLEXIO_UART_TransferReceiveEDMACallback, &s_edmaPrivateHandle);
+        EDMA_SetCallback(handle->rxEdmaHandle, &FLEXIO_UART_TransferReceiveEDMACallback, &s_edmaPrivateHandle);
     }
 
     return kStatus_Success;
