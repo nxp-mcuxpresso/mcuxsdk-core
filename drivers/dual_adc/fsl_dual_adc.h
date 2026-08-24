@@ -690,12 +690,65 @@ static inline void DUALADC_Disable(DADC_Type *base)
 static inline void DUALADC_GetConversionResult(DADC_Type *base, uint32_t index, dadc_conversion_result_t *result)
 {
     assert(NULL != result);
-    assert(index >= 1U && index <= DADC_RSLT_COUNT);
+    assert(index >= 1U && index <= DADC_RSLT_RSLT_32B_RSLT_COUNT);
 
     uint32_t raw = base->RSLT[index - 1U];
     result->result32   = raw;
     result->resultLow  = (uint16_t)(raw & 0xFFFFUL);
     result->resultHigh = (uint16_t)((raw >> 16U) & 0xFFFFUL);
+}
+
+/*!
+ * @brief Read the full 32-bit raw conversion result for a command buffer entry.
+ *
+ * Returns RSLT[index-1] as a single uint32_t. This is the most efficient path
+ * when the average-with-timer summed value is required.
+ * Reading the result register automatically clears the corresponding RSLTRDY_STAT bit.
+ *
+ * @param base  DualADC peripheral base address.
+ * @param index Command buffer index, range 1-20.
+ * @return Raw 32-bit RSLT register value.
+ */
+static inline uint32_t DUALADC_GetConversionResult32(DADC_Type *base, uint32_t index)
+{
+    assert(index >= 1U && index <= DADC_RSLT_RSLT_32B_RSLT_COUNT);
+    return base->RSLT[index - 1U];
+}
+
+/*!
+ * @brief Read the low 16-bit conversion result for a command buffer entry.
+ *
+ * Returns RSLT_16B[index-1].RSLT_L directly as a uint16_t, equivalent to
+ * bit[15:0] of the RSLT register.
+ * Reading the result register automatically clears the corresponding
+ * RSLTRDY_STAT bit.
+ *
+ * @param base  DualADC peripheral base address.
+ * @param index Command buffer index, range 1-20.
+ * @return Low 16-bit result (bit[15:0] of RSLT).
+ */
+static inline uint16_t DUALADC_GetConversionResultLow(DADC_Type *base, uint32_t index)
+{
+    assert(index >= 1U && index <= DADC_RSLT_RSLT_16B_RSLT_16B_COUNT);
+    return base->RSLT_16B[index - 1U].RSLT_L;
+}
+
+/*!
+ * @brief Read the high 16-bit conversion result for a command buffer entry.
+ *
+ * Returns RSLT_16B[index-1].RSLT_H directly as a uint16_t, equivalent to
+ * bit[31:16] of the RSLT register.
+ * Reading the result register automatically clears the corresponding
+ * RSLTRDY_STAT bit.
+ *
+ * @param base  DualADC peripheral base address.
+ * @param index Command buffer index, range 1-20.
+ * @return High 16-bit result (bit[31:16] of RSLT).
+ */
+static inline uint16_t DUALADC_GetConversionResultHigh(DADC_Type *base, uint32_t index)
+{
+    assert(index >= 1U && index <= DADC_RSLT_RSLT_16B_RSLT_16B_COUNT);
+    return base->RSLT_16B[index - 1U].RSLT_H;
 }
 
 /*!
