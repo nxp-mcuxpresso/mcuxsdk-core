@@ -75,6 +75,7 @@ static size_t FLEXIO_UART_TransferGetRxRingBufferLength(flexio_uart_handle_t *ha
 
     if (rxRingBufferTail > rxRingBufferHead)
     {
+        assert(rxRingBufferHead <= (SIZE_MAX - handle->rxRingBufferSize));
         size = (size_t)rxRingBufferHead + handle->rxRingBufferSize - (size_t)rxRingBufferTail;
     }
     else
@@ -89,6 +90,7 @@ static bool FLEXIO_UART_TransferIsRxRingBufferFull(flexio_uart_handle_t *handle)
 {
     bool full;
 
+    assert(handle->rxRingBufferSize >= 1U);
     if (FLEXIO_UART_TransferGetRxRingBufferLength(handle) == (handle->rxRingBufferSize - 1U))
     {
         full = true;
@@ -130,8 +132,7 @@ static status_t FLEXIO_UART_CalculateBaudRate(uint32_t baudRate_Bps, uint32_t sr
     for (i=0; i<ARRAY_SIZE(timerSourceDividers); i++)
     {
         assert(baudRate_Bps <= (UINT32_MAX / timerSourceDividers[i]));
-        timerDiv = srcClock_Hz / (baudRate_Bps * timerSourceDividers[i]);
-        timerDiv = timerDiv / 2U - 1U;
+        timerDiv = srcClock_Hz / (baudRate_Bps * timerSourceDividers[i]) / 2U - 1U;
 
         if (timerDiv > 0xFFU)
         {
@@ -269,7 +270,7 @@ status_t FLEXIO_UART_Init(FLEXIO_UART_Type *base, const flexio_uart_config_t *us
     timerConfig.timerStop       = kFLEXIO_TimerStopBitEnableOnTimerDisable;
     timerConfig.timerStart      = kFLEXIO_TimerStartBitEnabled;
 
-    timerCmp = ((uint16_t)userConfig->bitCountPerChar * 2U - 1U) << 8U;
+    timerCmp = (uint16_t)((((uint16_t)userConfig->bitCountPerChar * 2U - 1U) << 8U) & 0xFFFFU);
     timerCmp |= timerDiv;
 
     timerConfig.timerCompare = timerCmp;
@@ -537,7 +538,7 @@ status_t FLEXIO_UART_ReadBlocking(FLEXIO_UART_Type *base, uint8_t *rxData, size_
         }
 #endif
 
-        *rxData++ = (uint8_t)(base->flexioBase->SHIFTBUFBYS[base->shifterIndex[1]]);
+        *rxData++ = (uint8_t)(base->flexioBase->SHIFTBUFBYS[base->shifterIndex[1]] & 0xFFU);
     }
     return kStatus_Success;
 }
@@ -1026,7 +1027,7 @@ void FLEXIO_UART_TransferHandleIRQ(void *uartType, void *uartHandle)
                 /* Read data. */
                 rxRingBufferHead = handle->rxRingBufferHead;
                 handle->rxRingBuffer[rxRingBufferHead] =
-                    (uint8_t)(base->flexioBase->SHIFTBUFBYS[base->shifterIndex[1]]);
+                    (uint8_t)(base->flexioBase->SHIFTBUFBYS[base->shifterIndex[1]] & 0xFFU);
 
                 /* Increase handle->rxRingBufferHead. */
                 if ((uint32_t)handle->rxRingBufferHead + 1U == handle->rxRingBufferSize)
