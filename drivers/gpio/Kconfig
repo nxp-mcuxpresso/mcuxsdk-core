@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -10,3 +10,15 @@ config MCUX_COMPONENT_driver.gpio
     bool "gpio"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.gpio
+
+if MCUX_COMPONENT_driver.gpio
+    config GPIO_PIN_CALLBACK_COUNT
+        int "Number of per-pin interrupt callback entries per GPIO handle"
+        default 4
+        help
+          Number of callback entries in each gpio_handle_t. Each entry binds a
+          pin bitmask to one callback, so this is the number of distinct
+          consumers that can share a single GPIO controller (not the number of
+          pins). Larger values allow more independent consumers on one
+          controller at the cost of a bigger handle.
+endif
