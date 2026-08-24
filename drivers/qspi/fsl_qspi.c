@@ -433,6 +433,11 @@ void QSPI_SoftwareReset(QuadSPI_Type *base)
  */
 uint32_t QSPI_GetRxDataRegisterAddress(QuadSPI_Type *base)
 {
+#if defined(FSL_FEATURE_QSPI_HAS_NO_RXBRD) && (FSL_FEATURE_QSPI_HAS_NO_RXBRD)
+    /* This device has no RXBRD bit in RBCT. Rx data is always read from ARDB. */
+    (void)base;
+    return FSL_FEATURE_QSPI_ARDB_BASE;
+#else
     /* From RDBR */
     if (0U != (base->RBCT & QuadSPI_RBCT_RXBRD_MASK))
     {
@@ -443,6 +448,7 @@ uint32_t QSPI_GetRxDataRegisterAddress(QuadSPI_Type *base)
         /* From ARDB */
         return FSL_FEATURE_QSPI_ARDB_BASE;
     }
+#endif /* FSL_FEATURE_QSPI_HAS_NO_RXBRD */
 }
 
 /*! brief Executes IP commands located in LUT table.
@@ -533,8 +539,17 @@ void QSPI_ClearCache(QuadSPI_Type *base)
  */
 void QSPI_SetReadDataArea(QuadSPI_Type *base, qspi_read_area_t area)
 {
+#if defined(FSL_FEATURE_QSPI_HAS_NO_RXBRD) && (FSL_FEATURE_QSPI_HAS_NO_RXBRD)
+    /* This device has no RXBRD bit in RBCT. Rx data is always read from ARDB, so
+       the readout area is fixed to kQSPI_ReadAHB. Selecting kQSPI_ReadIP is not
+       supported on this device, so trap it here. */
+    assert(area == kQSPI_ReadAHB);
+    (void)base;
+    (void)area;
+#else
     base->RBCT &= ~QuadSPI_RBCT_RXBRD_MASK;
     base->RBCT |= QuadSPI_RBCT_RXBRD(area);
+#endif /* FSL_FEATURE_QSPI_HAS_NO_RXBRD */
 }
 
 /*!
@@ -545,6 +560,11 @@ void QSPI_SetReadDataArea(QuadSPI_Type *base, qspi_read_area_t area)
  */
 uint32_t QSPI_ReadData(QuadSPI_Type *base)
 {
+#if defined(FSL_FEATURE_QSPI_HAS_NO_RXBRD) && (FSL_FEATURE_QSPI_HAS_NO_RXBRD)
+    /* This device has no RXBRD bit in RBCT. Rx data is always read from ARDB. */
+    (void)base;
+    return *((uint32_t *)FSL_FEATURE_QSPI_ARDB_BASE);
+#else
     if (0U != (base->RBCT & QuadSPI_RBCT_RXBRD_MASK))
     {
         return base->RBDR[0];
@@ -554,6 +574,7 @@ uint32_t QSPI_ReadData(QuadSPI_Type *base)
         /* Data from ARDB. */
         return *((uint32_t *)FSL_FEATURE_QSPI_ARDB_BASE);
     }
+#endif /* FSL_FEATURE_QSPI_HAS_NO_RXBRD */
 }
 
 /*!
@@ -616,6 +637,13 @@ void QSPI_ReadBlocking(QuadSPI_Type *base, uint32_t *buffer, size_t size)
         level = MIN(level, (uint32_t)(size / 4U - i));
         assert(level <= (uint32_t)ARRAY_SIZE(base->RBDR));
 
+#if defined(FSL_FEATURE_QSPI_HAS_NO_RXBRD) && (FSL_FEATURE_QSPI_HAS_NO_RXBRD)
+        /* This device has no RXBRD bit in RBCT. Rx data is always read from ARDB. */
+        for (j = 0; j < level; j++)
+        {
+            buffer[i + j] = ((uint32_t *)FSL_FEATURE_QSPI_ARDB_BASE)[j];
+        }
+#else
         /* Data from RBDR */
         if (0U != (base->RBCT & QuadSPI_RBCT_RXBRD_MASK))
         {
@@ -632,6 +660,7 @@ void QSPI_ReadBlocking(QuadSPI_Type *base, uint32_t *buffer, size_t size)
                 buffer[i + j] = ((uint32_t *)FSL_FEATURE_QSPI_ARDB_BASE)[j];
             }
         }
+#endif /* FSL_FEATURE_QSPI_HAS_NO_RXBRD */
         i += level;
 
         /* Clear the Buffer */

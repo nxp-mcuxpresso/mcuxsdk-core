@@ -4,6 +4,9 @@
 
 - Improvements
   - Fixed Coverity MSG issues.
+- Bug Fixes
+  - Handled MCXE327 QSPI without RXBRD bitfield in the RBCT register, so Rx
+    data is read from ARDB.
 
 ## [2.3.3]
 
