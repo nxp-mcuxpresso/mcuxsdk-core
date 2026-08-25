@@ -332,11 +332,11 @@ status_t FLEXIO_SPI_MasterTransferCreateHandleEDMA(FLEXIO_SPI_Type *base,
     /* Install callback for Tx/Rx dma channel. */
     if (handle->txHandle != NULL)
     {
-        EDMA_SetCallback(handle->txHandle, FLEXIO_SPI_TxEDMACallback, &s_edmaPrivateHandle[index]);
+        EDMA_SetCallback(handle->txHandle, &FLEXIO_SPI_TxEDMACallback, &s_edmaPrivateHandle[index]);
     }
     if (handle->rxHandle != NULL)
     {
-        EDMA_SetCallback(handle->rxHandle, FLEXIO_SPI_RxEDMACallback, &s_edmaPrivateHandle[index]);
+        EDMA_SetCallback(handle->rxHandle, &FLEXIO_SPI_RxEDMACallback, &s_edmaPrivateHandle[index]);
     }
 
     return kStatus_Success;

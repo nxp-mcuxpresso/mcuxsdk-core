@@ -1171,7 +1171,7 @@ status_t FLEXIO_SPI_MasterTransferCreateHandle(FLEXIO_SPI_Type *base,
 #endif
 
     /* Save the context in global variables to support the double weak mechanism. */
-    return FLEXIO_RegisterHandleIRQ(base, handle, FLEXIO_SPI_MasterTransferHandleIRQ);
+    return FLEXIO_RegisterHandleIRQ(base, handle, &FLEXIO_SPI_MasterTransferHandleIRQ);
 }
 
 /*!
@@ -1480,7 +1480,7 @@ status_t FLEXIO_SPI_SlaveTransferCreateHandle(FLEXIO_SPI_Type *base,
 #endif
 
     /* Save the context in global variables to support the double weak mechanism. */
-    return FLEXIO_RegisterHandleIRQ(base, handle, FLEXIO_SPI_SlaveTransferHandleIRQ);
+    return FLEXIO_RegisterHandleIRQ(base, handle, &FLEXIO_SPI_SlaveTransferHandleIRQ);
 }
 
 /*!

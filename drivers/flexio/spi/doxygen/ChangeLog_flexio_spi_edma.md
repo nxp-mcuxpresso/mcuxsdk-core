@@ -6,6 +6,7 @@
   - Fixed CERT-C issues.
   - Fixed NO_EFFECT issues.
   - Fixed NULL_FIELD issues.
+  - Fixed MISRA issues.
 
 ## [2.3.0]
 
