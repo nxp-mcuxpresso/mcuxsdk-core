@@ -7,6 +7,8 @@
   - Fixed NO_EFFECT issues.
   - Fixed NULL_FIELD issues.
   - Fixed MISRA issues.
+- Improvements
+  - Extract duplicate code to new functions FLEXIO_SPI_CombineWriteData() and FLEXIO_SPI_SeparateReadData().
 
 ## [2.4.4]
 
