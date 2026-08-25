@@ -1,5 +1,12 @@
 # FLEXIO_SPI
 
+## [2.4.5]
+
+- Bug Fixes
+  - Fixed CERT-C issues.
+  - Fixed NO_EFFECT issues.
+  - Fixed NULL_FIELD issues.
+
 ## [2.4.4]
 
 - Bug Fixes

@@ -228,44 +228,44 @@ static void FLEXIO_SPI_TransferReceiveTransaction(FLEXIO_SPI_Type *base, flexio_
     {
         if (handle->bytePerFrame == 1U)
         {
-            *handle->rxData = (uint8_t)tmpData;
+            *handle->rxData = (uint8_t)(tmpData & 0xFFU);
         }
         else if (handle->bytePerFrame == 2U)
         {
             if (handle->direction == kFLEXIO_SPI_LsbFirst)
             {
-                *handle->rxData = (uint8_t)(tmpData >> 8);
+                *handle->rxData = (uint8_t)((tmpData >> 8U) & 0xFFU);
                 handle->rxData++;
-                *handle->rxData = (uint8_t)tmpData;
+                *handle->rxData = (uint8_t)(tmpData & 0xFFU);
             }
             else
             {
-                *handle->rxData = (uint8_t)tmpData;
+                *handle->rxData = (uint8_t)(tmpData & 0xFFU);
                 handle->rxData++;
-                *handle->rxData = (uint8_t)(tmpData >> 8);
+                *handle->rxData = (uint8_t)((tmpData >> 8U) & 0xFFU);
             }
         }
         else
         {
             if (handle->direction == kFLEXIO_SPI_LsbFirst)
             {
-                *handle->rxData = (uint8_t)(tmpData >> 24U);
+                *handle->rxData = (uint8_t)((tmpData >> 24U) & 0xFFU);
                 handle->rxData++;
-                *handle->rxData = (uint8_t)(tmpData >> 16U);
+                *handle->rxData = (uint8_t)((tmpData >> 16U) & 0xFFU);
                 handle->rxData++;
-                *handle->rxData = (uint8_t)(tmpData >> 8U);
+                *handle->rxData = (uint8_t)((tmpData >> 8U) & 0xFFU);
                 handle->rxData++;
-                *handle->rxData = (uint8_t)tmpData;
+                *handle->rxData = (uint8_t)(tmpData & 0xFFU);
             }
             else
             {
-                *handle->rxData = (uint8_t)tmpData;
+                *handle->rxData = (uint8_t)(tmpData & 0xFFU);
                 handle->rxData++;
-                *handle->rxData = (uint8_t)(tmpData >> 8U);
+                *handle->rxData = (uint8_t)((tmpData >> 8U) & 0xFFU);
                 handle->rxData++;
-                *handle->rxData = (uint8_t)(tmpData >> 16U);
+                *handle->rxData = (uint8_t)((tmpData >> 16U) & 0xFFU);
                 handle->rxData++;
-                *handle->rxData = (uint8_t)(tmpData >> 24U);
+                *handle->rxData = (uint8_t)((tmpData >> 24U) & 0xFFU);
             }
         }
         handle->rxData++;
@@ -414,7 +414,7 @@ void FLEXIO_SPI_MasterInit(FLEXIO_SPI_Type *base, flexio_spi_master_config_t *ma
     timerDiv = timerDiv / 2U - 1U;
     assert(timerDiv <= (uint32_t)UINT8_MAX);
     /* High 8-bits are used to configure shift clock edges(transfer width). */
-    timerCmp = ((uint16_t)masterConfig->dataMode * 2U - 1U) << 8U;
+    timerCmp = (uint16_t)((((uint16_t)masterConfig->dataMode * 2U - 1U) << 8U) & 0xFFFFU);
     timerCmp |= (uint16_t)timerDiv;
 
     timerConfig.timerCompare = timerCmp;
@@ -799,9 +799,9 @@ void FLEXIO_SPI_MasterSetBaudRate(FLEXIO_SPI_Type *base, uint32_t baudRate_Bps, 
     timerDiv = timerDiv / 2U - 1U;
 
     assert(timerDiv <= (uint32_t)UINT8_MAX);
-    timerCmp = (uint16_t)(flexioBase->TIMCMP[base->timerIndex[0]]);
+    timerCmp = (uint16_t)(flexioBase->TIMCMP[base->timerIndex[0]] & 0xFFFFU);
     timerCmp &= 0xFF00U;
-    timerCmp |= (uint16_t)timerDiv;
+    timerCmp |= (uint16_t)(timerDiv & 0xFFU);
 
     flexioBase->TIMCMP[base->timerIndex[0]] = timerCmp;
 }
@@ -897,7 +897,7 @@ status_t FLEXIO_SPI_ReadBlocking(FLEXIO_SPI_Type *base,
             return kStatus_FLEXIO_SPI_Timeout;
         }
 #endif
-        *buffer++ = (uint8_t)FLEXIO_SPI_ReadData(base, direction);
+        *buffer++ = (uint8_t)(FLEXIO_SPI_ReadData(base, direction) & 0xFFU);
     }
 
     return kStatus_Success;
@@ -918,7 +918,7 @@ status_t FLEXIO_SPI_MasterTransferBlocking(FLEXIO_SPI_Type *base, flexio_spi_tra
     flexio_spi_shift_direction_t direction;
     uint8_t bytesPerFrame;
     uint32_t dataMode  = 0;
-    uint16_t timerCmp  = (uint16_t)(base->flexioBase->TIMCMP[base->timerIndex[0]]);
+    uint16_t timerCmp  = (uint16_t)(base->flexioBase->TIMCMP[base->timerIndex[0]] & 0xFFFFU);
     uint32_t tmpData   = FLEXIO_SPI_DUMMYDATA;
     uint8_t dataFormat = FLEXIO_SPI_XFER_DATA_FORMAT(xfer->flags);
 #if SPI_RETRY_TIMES
@@ -1081,44 +1081,44 @@ status_t FLEXIO_SPI_MasterTransferBlocking(FLEXIO_SPI_Type *base, flexio_spi_tra
         {
             if (bytesPerFrame == 1U)
             {
-                *xfer->rxData = (uint8_t)tmpData;
+                *xfer->rxData = (uint8_t)(tmpData & 0xFFU);
             }
             else if (bytesPerFrame == 2U)
             {
                 if (direction == kFLEXIO_SPI_LsbFirst)
                 {
-                    *xfer->rxData = (uint8_t)(tmpData >> 8);
+                    *xfer->rxData = (uint8_t)((tmpData >> 8U) & 0xFFU);
                     xfer->rxData++;
-                    *xfer->rxData = (uint8_t)tmpData;
+                    *xfer->rxData = (uint8_t)(tmpData & 0xFFU);
                 }
                 else
                 {
-                    *xfer->rxData = (uint8_t)tmpData;
+                    *xfer->rxData = (uint8_t)(tmpData & 0xFFU);
                     xfer->rxData++;
-                    *xfer->rxData = (uint8_t)(tmpData >> 8);
+                    *xfer->rxData = (uint8_t)((tmpData >> 8U) & 0xFFU);
                 }
             }
             else
             {
                 if (direction == kFLEXIO_SPI_LsbFirst)
                 {
-                    *xfer->rxData = (uint8_t)(tmpData >> 24U);
+                    *xfer->rxData = (uint8_t)((tmpData >> 24U) & 0xFFU);
                     xfer->rxData++;
-                    *xfer->rxData = (uint8_t)(tmpData >> 16U);
+                    *xfer->rxData = (uint8_t)((tmpData >> 16U) & 0xFFU);
                     xfer->rxData++;
-                    *xfer->rxData = (uint8_t)(tmpData >> 8U);
+                    *xfer->rxData = (uint8_t)((tmpData >> 8U) & 0xFFU);
                     xfer->rxData++;
-                    *xfer->rxData = (uint8_t)tmpData;
+                    *xfer->rxData = (uint8_t)(tmpData & 0xFFU);
                 }
                 else
                 {
-                    *xfer->rxData = (uint8_t)tmpData;
+                    *xfer->rxData = (uint8_t)(tmpData & 0xFFU);
                     xfer->rxData++;
-                    *xfer->rxData = (uint8_t)(tmpData >> 8U);
+                    *xfer->rxData = (uint8_t)((tmpData >> 8U) & 0xFFU);
                     xfer->rxData++;
-                    *xfer->rxData = (uint8_t)(tmpData >> 16U);
+                    *xfer->rxData = (uint8_t)((tmpData >> 16U) & 0xFFU);
                     xfer->rxData++;
-                    *xfer->rxData = (uint8_t)(tmpData >> 24U);
+                    *xfer->rxData = (uint8_t)((tmpData >> 24U) & 0xFFU);
                 }
             }
             xfer->rxData++;
@@ -1195,7 +1195,7 @@ status_t FLEXIO_SPI_MasterTransferNonBlocking(FLEXIO_SPI_Type *base,
     assert(xfer != NULL);
 
     uint32_t dataMode  = 0;
-    uint16_t timerCmp  = (uint16_t)base->flexioBase->TIMCMP[base->timerIndex[0]];
+    uint16_t timerCmp  = (uint16_t)(base->flexioBase->TIMCMP[base->timerIndex[0]] & 0xFFFFU);
     uint32_t tmpData   = FLEXIO_SPI_DUMMYDATA;
     uint8_t dataFormat = FLEXIO_SPI_XFER_DATA_FORMAT(xfer->flags);
 
