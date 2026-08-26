@@ -4059,6 +4059,23 @@ void ENET_QOS_GetStatistics(ENET_QOS_Type *base, enet_qos_transfer_stats_t *stat
     }
 }
 
+/* ERR050707 (MCXE32B): a fatal bus error (FBE) aborts a DMA access that the MAC cannot recover; the
+   only recovery is a software reset (ENET_QOS_Deinit) followed by a full reconfigure. This helper
+   checks the channel's raw DMA_CHX_STAT (not masked by DMA_CHX_INT_EN) so the error is always detected
+   even when the application never enabled the kENET_QOS_DmaBusErr interrupt. When FBE is set it clears
+   the FBE and abnormal interrupt summary (AIS) flags (write-1-to-clear) and reports
+   kENET_QOS_DmaBusErrEvent so the application can perform the software reset and reconfigure. */
+static inline void ENET_QOS_HandleFbeErrata(ENET_QOS_Type *base, enet_qos_handle_t *handle, uint8_t channel)
+{
+    if ((base->DMA_CH[channel].DMA_CHX_STAT & ENET_QOS_DMA_CHX_STAT_FBE_MASK) != 0U)
+    {
+        base->DMA_CH[channel].DMA_CHX_STAT = ENET_QOS_DMA_CHX_STAT_FBE_MASK | ENET_QOS_DMA_CHX_STAT_AIS_MASK;
+        if (handle->callback != NULL)
+        {
+            handle->callback(base, handle, kENET_QOS_DmaBusErrEvent, channel, handle->userData);
+        }
+    }
+}
 
 /*!
  * brief The ENET IRQ handler.
@@ -4090,6 +4107,7 @@ void ENET_QOS_CommonIRQHandler(ENET_QOS_Type *base, enet_qos_handle_t *handle)
             base->DMA_CH[0].DMA_CHX_STAT = ENET_QOS_DMA_CHX_STAT_TI_MASK | ENET_QOS_DMA_CHX_STAT_NIS_MASK;
             ENET_QOS_ReclaimTxDescriptor(base, handle, 0);
         }
+        ENET_QOS_HandleFbeErrata(base, handle, 0);
     }
 #endif /* ENET_QOS_DMA_INTERRUPT_STATUS_DC0IS_MASK */
 
@@ -4113,6 +4131,7 @@ void ENET_QOS_CommonIRQHandler(ENET_QOS_Type *base, enet_qos_handle_t *handle)
             base->DMA_CH[1].DMA_CHX_STAT = ENET_QOS_DMA_CHX_STAT_TI_MASK | ENET_QOS_DMA_CHX_STAT_NIS_MASK;
             ENET_QOS_ReclaimTxDescriptor(base, handle, 1);
         }
+        ENET_QOS_HandleFbeErrata(base, handle, 1);
     }
 #endif /* ENET_QOS_DMA_INTERRUPT_STATUS_DC1IS_MASK */
 
@@ -4136,6 +4155,7 @@ void ENET_QOS_CommonIRQHandler(ENET_QOS_Type *base, enet_qos_handle_t *handle)
             base->DMA_CH[2].DMA_CHX_STAT = ENET_QOS_DMA_CHX_STAT_TI_MASK | ENET_QOS_DMA_CHX_STAT_NIS_MASK;
             ENET_QOS_ReclaimTxDescriptor(base, handle, 2);
         }
+        ENET_QOS_HandleFbeErrata(base, handle, 2);
     }
 #endif /* ENET_QOS_DMA_INTERRUPT_STATUS_DC2IS_MASK */
 
@@ -4159,6 +4179,7 @@ void ENET_QOS_CommonIRQHandler(ENET_QOS_Type *base, enet_qos_handle_t *handle)
             base->DMA_CH[3].DMA_CHX_STAT = ENET_QOS_DMA_CHX_STAT_TI_MASK | ENET_QOS_DMA_CHX_STAT_NIS_MASK;
             ENET_QOS_ReclaimTxDescriptor(base, handle, 3);
         }
+        ENET_QOS_HandleFbeErrata(base, handle, 3);
     }
 #endif /* ENET_QOS_DMA_INTERRUPT_STATUS_DC3IS_MASK */
 

@@ -189,6 +189,8 @@
 #define ENET_QOS_MTL_RXP_INDIRECT_ACC_CONTROL_STATUS_WRRDN_MASK EMAC_MTL_RXP_INDIRECT_ACC_CONTROL_STATUS_WRRDN_MASK
 #define ENET_QOS_DMA_INTERRUPT_STATUS_DC0IS_MASK                EMAC_DMA_INTERRUPT_STATUS_DC0IS_MASK
 #define ENET_QOS_DMA_CHX_STAT_RI_MASK                           EMAC_DMA_CHX_STAT_RI_MASK
+#define ENET_QOS_DMA_CHX_STAT_FBE_MASK                          EMAC_DMA_CHX_STAT_FBE_MASK
+#define ENET_QOS_DMA_CHX_STAT_AIS_MASK                          EMAC_DMA_CHX_STAT_AIS_MASK
 #define ENET_QOS_DMA_CHX_STAT_NIS_MASK                          EMAC_DMA_CHX_STAT_NIS_MASK
 #define ENET_QOS_DMA_CHX_STAT_TI_MASK                           EMAC_DMA_CHX_STAT_TI_MASK
 #define ENET_QOS_DMA_INTERRUPT_STATUS_DC1IS_MASK                EMAC_DMA_INTERRUPT_STATUS_DC1IS_MASK
@@ -536,6 +538,7 @@ typedef enum _enet_qos_event
     kENET_QOS_TxIntEvent,        /*!< Transmit interrupt event. */
     kENET_QOS_WakeUpIntEvent,    /*!< Wake up interrupt event. */
     kENET_QOS_TimeStampIntEvent, /*!< Time stamp interrupt event. */
+    kENET_QOS_DmaBusErrEvent,    /*!< DMA fatal bus error event. Application must perform software reset and full reconfigure. */
 } enet_qos_event_t;
 
 /*! @brief Define the MTL mode for multiple queues/rings. */

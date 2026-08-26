@@ -6,6 +6,7 @@
   - ENET_QOS_Ptp1588PpsSetTrgtTime rejects a PPS target time that is not in the future now (related to MCXE32B errata ERR050595 - GMAC/EMAC incorrect pps output generation on target time error).
   - Applied workaround for errata ERR051222 (GMAC/EMAC: Un-Correctable FSM Timeout Safety Interrupt incorrectly getting generated due to long waiting FSM states): reordered ENET_QOS_StartRxTx to enable the MAC transmitter (MAC_Configuration[TE]) before starting the transmit DMA (DMA_CH0_Tx_Control[ST]), avoiding the incorrect FSM timeout interrupt.
   - Applied workaround for errata ERR050597 (GMAC/EMAC: transmit MAC management counters (MMC) updated incorrectly during frame preemption): ENET_QOS_GetStatistics now reports zero for the affected transmit counters when frame preemption (FPE) is enabled.
+  - Added kENET_QOS_DmaBusErrEvent to report the DMA fatal bus error for application recovery (MCXE32B errata ERR050707).
 
 ## [2.7.7]
 
