@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef LPC_GPIO_H_
-#define LPC_GPIO_H_
+#ifndef FSL_LPC_GPIO_H_
+#define FSL_LPC_GPIO_H_
 
 #include "fsl_common.h"
 

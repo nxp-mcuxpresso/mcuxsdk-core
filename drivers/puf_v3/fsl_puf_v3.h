@@ -6,8 +6,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#ifndef PUF_V3_H_
-#define PUF_V3_H_
+#ifndef FSL_PUF_V3_H_
+#define FSL_PUF_V3_H_
 
 #include <stddef.h>
 #include <stdint.h>
