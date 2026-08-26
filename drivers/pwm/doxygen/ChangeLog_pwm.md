@@ -1,5 +1,13 @@
 # PWM
 
+## [2.10.2]
+
+- Improvements
+  - Added inline API `PWM_SetTriggerStretchPrescaler` to configure MCTRL2[STRETCH_CNT_PRSC] at the module level.
+    Because MCTRL2 is a module-level register shared by all submodules, this API is deliberately kept separate from
+    `PWM_Init` (which is per-submodule) to prevent unintentional overwrites when multiple submodules are initialised.
+    Call it once after all submodules are initialised with `PWM_Init`.
+
 ## [2.10.1]
 
 - Bug Fixes
