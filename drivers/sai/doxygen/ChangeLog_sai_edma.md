@@ -1,5 +1,10 @@
 # SAI_EDMA
 
+## [2.7.5]
+
+- Bug Fixes
+  - Fixed Coverity DEADCODE finding by removing the unreachable offset overflow branch in SAI_TransferSendEDMA and SAI_TransferReceiveEDMA.
+
 ## [2.7.4]
 
 - Bug Fixes

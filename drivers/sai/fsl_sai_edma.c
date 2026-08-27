@@ -433,15 +433,13 @@ status_t SAI_TransferSendEDMA(I2S_Type *base, sai_edma_handle_t *handle, sai_tra
     edma_minor_offset_config_t minorOffset;
     minorOffset.enableSrcMinorOffset = true;
     minorOffset.enableDestMinorOffset = false;
-    /* Multiplication overflow - fallback to safe value */
-    if (srcOffset > (UINT32_MAX / 2U)) 
+    /* Compare in division form so no multiplication is performed before srcOffset is bounded.
+     * This avoids an unsigned wraparound in 2U * srcOffset (CERT INT30-C) while keeping the
+     * single reachable branch (no dead code). In the else branch srcOffset <= (0xFFFFFU + 1U) / 2U,
+     * so 2U * srcOffset can never overflow. */
+    if (srcOffset > ((0xFFFFFU + 1U) / 2U))
     {
-        minorOffset.minorOffset = handle->bytesPerFrame; 
-    }
-    /* Subtraction overflow - fallback to safe value */
-    else if ((2U * srcOffset) > (0xFFFFFU + 1U)) 
-    {
-        minorOffset.minorOffset = handle->bytesPerFrame; 
+        minorOffset.minorOffset = handle->bytesPerFrame;
     }
     else
     {
@@ -588,15 +586,13 @@ status_t SAI_TransferReceiveEDMA(I2S_Type *base, sai_edma_handle_t *handle, sai_
     edma_minor_offset_config_t minorOffset;
     minorOffset.enableSrcMinorOffset = false;
     minorOffset.enableDestMinorOffset = true;
-    /* Multiplication overflow - fallback to safe value */
-    if (destOffset > (UINT32_MAX / 2U)) 
+    /* Compare in division form so no multiplication is performed before destOffset is bounded.
+     * This avoids an unsigned wraparound in 2U * destOffset (CERT INT30-C) while keeping the
+     * single reachable branch (no dead code). In the else branch destOffset <= (0xFFFFFU + 1U) / 2U,
+     * so 2U * destOffset can never overflow. */
+    if (destOffset > ((0xFFFFFU + 1U) / 2U))
     {
-        minorOffset.minorOffset = handle->bytesPerFrame; 
-    }
-    /* Subtraction overflow - fallback to safe value */
-    else if ((2U * destOffset) > (0xFFFFFU + 1U)) 
-    {
-        minorOffset.minorOffset = handle->bytesPerFrame; 
+        minorOffset.minorOffset = handle->bytesPerFrame;
     }
     else
     {

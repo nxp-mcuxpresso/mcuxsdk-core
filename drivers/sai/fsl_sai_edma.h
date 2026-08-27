@@ -23,7 +23,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_SAI_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 7, 4)) /*!< Version 2.7.4 */
+#define FSL_SAI_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 7, 5)) /*!< Version 2.7.5 */
 /*! @} */
 
 /*! @brief the SAI enable position When calling SAI_TransferReceiveEDMA */
