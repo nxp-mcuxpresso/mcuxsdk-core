@@ -757,7 +757,8 @@ void PDM_TransferHandleIRQ(PDM_Type *base, pdm_handle_t *handle)
 
     /* Handle transfer */
     if (((base->STAT & 0xFFU) != 0U) && (handle->channelNums != 0U) &&
-        ((base->CTRL_1 & PDM_CTRL_1_DISEL_MASK) == (0x2UL << PDM_CTRL_1_DISEL_SHIFT)))
+        ((base->CTRL_1 & PDM_CTRL_1_DISEL_MASK) == (0x2UL << PDM_CTRL_1_DISEL_SHIFT)) &&
+        (handle->pdmQueue[handle->queueDriver].data != NULL))
     {
         PDM_ClearStatus(base, 0xFFU);
         /* Judge if the data need to transmit is less than space */
@@ -773,8 +774,11 @@ void PDM_TransferHandleIRQ(PDM_Type *base, pdm_handle_t *handle)
         handle->pdmQueue[handle->queueDriver].data = &(handle->pdmQueue[handle->queueDriver].data[size]);
     }
 
-    /* If finished a block, call the callback function */
-    if (handle->pdmQueue[handle->queueDriver].dataSize == 0U)
+    /* If finished a block, call the callback function.
+     * The data != NULL guard prevents a spurious kStatus_PDM_Idle callback and queueDriver
+     * advance when no transfer is queued, because an empty queue entry has dataSize == 0U too. */
+    if ((handle->pdmQueue[handle->queueDriver].data != NULL) &&
+        (handle->pdmQueue[handle->queueDriver].dataSize == 0U))
     {
         handle->pdmQueue[handle->queueDriver].data = NULL;
         handle->queueDriver                        = (handle->queueDriver + 1U) % PDM_XFER_QUEUE_SIZE;

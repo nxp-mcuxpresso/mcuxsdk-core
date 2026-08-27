@@ -1,5 +1,14 @@
 # PDM
 
+## [2.9.7]
+- Bug Fixes
+  - Fixed Coverity NULL_FIELD defect in PDM_TransferHandleIRQ: added NULL check for
+    pdmQueue[queueDriver].data before using the pointer in PDM_ReadFifo and pointer
+    arithmetic, preventing a potential null pointer dereference when no transfer is queued
+    (CID 53914872).
+  - Added a data != NULL guard to the block-complete check in PDM_TransferHandleIRQ to
+    avoid a spurious kStatus_PDM_Idle callback and queueDriver advance on IRQs that arrive when no transfer is queued (an empty queue entry also has dataSize == 0U).
+
 ## [2.9.6]
 - Improvements
   - Added instance-aware dispatch for PDM EVENT, PDM ERROR, HWVAD EVENT, and HWVAD ERROR IRQ handlers while preserving existing wrapper compatibility.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020,2025 NXP
+ * Copyright 2018-2020,2025-2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -21,7 +21,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_PDM_DRIVER_VERSION (MAKE_VERSION(2, 9, 6)) /*!< Version 2.9.6 */
+#define FSL_PDM_DRIVER_VERSION (MAKE_VERSION(2, 9, 7)) /*!< Version 2.9.7 */
 /*! @} */
 
 /*! @brief PDM XFER QUEUE SIZE */
