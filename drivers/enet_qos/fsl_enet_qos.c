@@ -1371,6 +1371,8 @@ void ENET_QOS_RxBufferFreeAll(ENET_QOS_Type *base, enet_qos_handle_t *handle)
  *
  * note This must be called after all the ENET initilization.
  * And should be called when the ENET receive/transmit is required.
+ * note The MAC transmitter (MAC_Configuration[TE]) is enabled before the transmit DMA
+ * is started as a workaround for errata ERR051222.
  */
 void ENET_QOS_StartRxTx(ENET_QOS_Type *base, uint8_t txRingNum, uint8_t rxRingNum)
 {
@@ -1387,18 +1389,32 @@ void ENET_QOS_StartRxTx(ENET_QOS_Type *base, uint8_t txRingNum, uint8_t rxRingNu
     {
         rxRingNum = ENET_QOS_RING_NUM_MAX;
     }
-    /* Start/Acive the DMA first. */
+    /* Start/Active the RX DMA first. */
     for (index = 0; index < rxRingNum; index++)
     {
         base->DMA_CH[index].DMA_CHX_RX_CTRL |= ENET_QOS_DMA_CHX_RX_CTRL_SR_MASK;
     }
+
+    /*
+     * Errata ERR051222 (GMAC/EMAC: Un-Correctable FSM Timeout Safety Interrupt
+     * incorrectly getting generated due to long waiting FSM states): if the
+     * transmit DMA is started (DMA_CH0_Tx_Control[ST] = 1) while the MAC
+     * transmitter is still disabled (MAC_Configuration[TE] = 0), the transmit
+     * FSM stalls and an FSM timeout interrupt is incorrectly generated.
+     * Workaround: enable the MAC transmitter before starting the transmit DMA.
+     * Enabling the MAC before the DMA is always safe, so this ordering is used
+     * unconditionally. The MAC receiver (RE) is enabled in the same
+     * MAC_CONFIGURATION write to keep a single register access; RE may be set
+     * at any point after the RX DMA has been started and has no timing
+     * dependency on the ERR051222 transmit-side workaround.
+     */
+    base->MAC_CONFIGURATION |= (ENET_QOS_MAC_CONFIGURATION_TE_MASK | ENET_QOS_MAC_CONFIGURATION_RE_MASK);
+
+    /* Start/Active the TX DMA after the MAC transmitter is enabled. */
     for (index = 0; index < txRingNum; index++)
     {
         base->DMA_CH[index].DMA_CHX_TX_CTRL |= ENET_QOS_DMA_CHX_TX_CTRL_ST_MASK;
     }
-
-    /* Enable the RX and TX at same time. */
-    base->MAC_CONFIGURATION |= (ENET_QOS_MAC_CONFIGURATION_TE_MASK | ENET_QOS_MAC_CONFIGURATION_RE_MASK);
 }
 
 /*!

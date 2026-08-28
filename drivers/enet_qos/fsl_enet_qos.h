@@ -1160,6 +1160,8 @@ void ENET_QOS_RxBufferFreeAll(ENET_QOS_Type *base, enet_qos_handle_t *handle);
  *
  * @note This must be called after all the ENET initialization.
  * And should be called when the ENET receive/transmit is required.
+ * @note The MAC transmitter (MAC_Configuration[TE]) is enabled before the transmit DMA
+ *       is started as a workaround for errata ERR051222.
  */
 void ENET_QOS_StartRxTx(ENET_QOS_Type *base, uint8_t txRingNum, uint8_t rxRingNum);
 
