@@ -1254,7 +1254,7 @@
                 </option>
                 <option>
                     <name>NEON</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GFPUCoreSlave2</name>
