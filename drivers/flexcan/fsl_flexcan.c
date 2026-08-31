@@ -620,7 +620,7 @@ status_t FLEXCAN_EnterFreezeMode(CAN_Type *base)
     else
     {
         /* Bus Off state */
-        /* backup MCR and IMASK register. Errata document not descript it, but we need backup for step 8A and 9A. */
+        /* backup MCR and IMASK register. Errata document not describe it, but we need backup for step 8A and 9A. */
         u32TempMCR    = base->MCR;
         u32TempIMASK1 = base->IMASK1;
         u32TempIMASK2 = base->IMASK2;
@@ -647,6 +647,14 @@ status_t FLEXCAN_EnterFreezeMode(CAN_Type *base)
         {
             __NOP();
         }
+
+        /*
+         * Ensure HALT=1 in the saved MCR before restoring it. After the soft reset, the
+         * hardware automatically enters Freeze mode with FRZ=1 HALT=1. The value was saved
+         * at step 2A when HALT was still 0; writing it back would exit Freeze mode and
+         * make Freeze-mode-only register accesses (e.g. RXIMR) trigger a bus fault.
+         */
+        u32TempMCR |= CAN_MCR_HALT_MASK;
 
         /* Step8A: reconfig MCR. */
         base->MCR = u32TempMCR;
@@ -688,7 +696,7 @@ status_t FLEXCAN_EnterFreezeMode(CAN_Type *base)
     /* Step4: check whether the timeout reached. if no skip step5 to step8. */
     if (0U == u32TimeoutCount)
     {
-        /* backup MCR and IMASK register. Errata document not descript it, but we need backup for step 8A and 9A. */
+        /* backup MCR and IMASK register. Errata document not describe it, but we need backup for step 8A and 9A. */
         u32TempMCR    = base->MCR;
         u32TempIMASK1 = base->IMASK1;
 #if defined(CAN_IMASK2_BUF63TO32M_MASK)
