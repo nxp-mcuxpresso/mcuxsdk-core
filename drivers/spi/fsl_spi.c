@@ -88,6 +88,13 @@ static void SPI_ReceiveTransfer(SPI_Type *base, spi_master_handle_t *handle);
  * @param instance SPI instance number.
  */
 static void SPI_CommonIRQHandler(SPI_Type *base, uint32_t instance);
+
+/*!
+ * @brief Flushes any stale data from the SPI receive buffer or FIFO.
+ *
+ * @param base SPI base pointer
+ */
+static void SPI_FlushRxData(SPI_Type *base);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -1297,6 +1304,32 @@ void SPI_SlaveTransferCreateHandle(SPI_Type *base,
     s_spiSlaveIsr = &SPI_SlaveTransferHandleIRQ;
 }
 
+static void SPI_FlushRxData(SPI_Type *base)
+{
+#if defined(FSL_FEATURE_SPI_HAS_FIFO) && FSL_FEATURE_SPI_HAS_FIFO
+    /* If instance has FIFO and FIFO is enabled. */
+    if ((FSL_FEATURE_SPI_FIFO_SIZEn(base) != 0) && ((base->C3 & SPI_C3_FIFOMODE_MASK) != 0U))
+    {
+        while ((SPI_GetStatusFlags(base) & (uint32_t)kSPI_RxFifoEmptyFlag) == 0U)
+        {
+            (void)SPI_ReadData(base);
+        }
+    }
+    else
+    {
+        if ((SPI_GetStatusFlags(base) & (uint32_t)kSPI_RxBufferFullFlag) != 0U)
+        {
+            (void)SPI_ReadData(base);
+        }
+    }
+#else
+    if ((SPI_GetStatusFlags(base) & (uint32_t)kSPI_RxBufferFullFlag) != 0U)
+    {
+        (void)SPI_ReadData(base);
+    }
+#endif /* FSL_FEATURE_SPI_HAS_FIFO */
+}
+
 /*!
  * brief Performs a non-blocking SPI slave interrupt transfer.
  *
@@ -1329,28 +1362,7 @@ status_t SPI_SlaveTransferNonBlocking(SPI_Type *base, spi_slave_handle_t *handle
     }
 
     /* Read out any possible data */
-#if defined(FSL_FEATURE_SPI_HAS_FIFO) && FSL_FEATURE_SPI_HAS_FIFO
-    /* If instance has FIFO and FIFO is enabled. */
-    if ((FSL_FEATURE_SPI_FIFO_SIZEn(base) != 0) && ((base->C3 & SPI_C3_FIFOMODE_MASK) != 0U))
-    {
-        while ((SPI_GetStatusFlags(base) & (uint32_t)kSPI_RxFifoEmptyFlag) == 0U)
-        {
-            (void)SPI_ReadData(base);
-        }
-    }
-    else
-    {
-        if ((SPI_GetStatusFlags(base) & (uint32_t)kSPI_RxBufferFullFlag) != 0U)
-        {
-            (void)SPI_ReadData(base);
-        }
-    }
-#else
-    if ((SPI_GetStatusFlags(base) & (uint32_t)kSPI_RxBufferFullFlag) != 0U)
-    {
-        (void)SPI_ReadData(base);
-    }
-#endif /* FSL_FEATURE_SPI_HAS_FIFO */
+    SPI_FlushRxData(base);
 
     /* Set the handle information */
     handle->txData           = xfer->txData;

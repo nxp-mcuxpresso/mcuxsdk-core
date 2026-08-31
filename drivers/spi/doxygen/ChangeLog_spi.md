@@ -6,6 +6,8 @@
   - Fixed CERT-C issues.
   - Fixed UNUSED_VALUE issues.
   - Fixed MISRA issues.
+- Improvements
+  - Improved HIS CCM in SPI_SlaveTransferNonBlocking().
 
 ## [2.1.5]
 
