@@ -537,6 +537,9 @@ class Build(Forceable):
 
         self.dbg('pristine:', self.auto_pristine, level=Verbosity.DBG_EXTREME)
 
+        boards_mismatched = False
+        devices_mismatched = False
+
         # If the build directory specifies a source app, make sure it's
         # consistent with --source-dir.
         apps_mismatched = (source_abs and cached_abs and
