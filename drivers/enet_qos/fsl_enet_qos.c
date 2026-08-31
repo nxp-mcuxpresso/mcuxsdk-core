@@ -4034,9 +4034,31 @@ void ENET_QOS_GetStatistics(ENET_QOS_Type *base, enet_qos_transfer_stats_t *stat
     statistics->statsRxFifoOverflowErr = base->MAC_RX_FIFO_OVERFLOW_PACKETS;
 
     /* Tx statistics */
-    statistics->statsTxFrameCount      = base->MAC_TX_PACKET_COUNT_GOOD_BAD;
-    statistics->statsTxFifoUnderRunErr = base->MAC_TX_UNDERFLOW_ERROR_PACKETS;
+    /* ERR050597: When frame preemption (FPE) is enabled, a frame can be sent as
+     * several preempted fragments. The hardware updates the transmit MAC
+     * management counters (MMC) per fragment rather than per frame, so the whole
+     * transmit MMC block becomes unreliable while FPE is active (for example the
+     * internal byte accumulators overflow once the fragment bytes exceed the
+     * Jabber limit, which in turn corrupts the derived packet counters). The
+     * erratum workaround is therefore to not use any transmit MMC counter while
+     * FPE is enabled. Report 0 for the transmit counters we expose in that case
+     * so callers do not act on corrupted values; the reads resume normally when
+     * FPE is disabled. Note: 0 is not distinguishable from a genuine idle
+     * reading - see the statsTxFrameCount / statsTxFifoUnderRunErr field notes
+     * in fsl_enet_qos.h.
+     */
+    if ((base->MAC_FPE_CTRL_STS & ENET_QOS_MAC_FPE_CTRL_STS_EFPE_MASK) != 0U)
+    {
+        statistics->statsTxFrameCount      = 0U;
+        statistics->statsTxFifoUnderRunErr = 0U;
+    }
+    else
+    {
+        statistics->statsTxFrameCount      = base->MAC_TX_PACKET_COUNT_GOOD_BAD;
+        statistics->statsTxFifoUnderRunErr = base->MAC_TX_UNDERFLOW_ERROR_PACKETS;
+    }
 }
+
 
 /*!
  * brief The ENET IRQ handler.

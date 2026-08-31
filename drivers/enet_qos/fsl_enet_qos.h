@@ -981,8 +981,12 @@ typedef struct _enet_qos_transfer_stats
     uint32_t statsRxAlignErr;        /*!< Rx frame number with alignment error. */
     uint32_t statsRxLengthErr;       /*!< Rx frame length field doesn't equal to packet size. */
     uint32_t statsRxFifoOverflowErr; /*!< Rx FIFO overflow count. */
-    uint32_t statsTxFrameCount;      /*!< Tx frame number. */
-    uint32_t statsTxFifoUnderRunErr; /*!< Tx FIFO underrun count. */
+    uint32_t statsTxFrameCount;      /*!< Tx frame number. Reported as 0 when frame preemption (EFPE) is
+                                          enabled, because the transmit MMC counters are unreliable under
+                                          frame preemption (ERR050597 workaround). */
+    uint32_t statsTxFifoUnderRunErr; /*!< Tx FIFO underrun count. Reported as 0 when frame preemption (EFPE)
+                                          is enabled, because the transmit MMC counters are unreliable under
+                                          frame preemption (ERR050597 workaround). */
 } enet_qos_transfer_stats_t;
 
 /* Typedef for interrupt handler. */
