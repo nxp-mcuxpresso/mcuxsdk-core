@@ -1,5 +1,11 @@
 # SPI
 
+## [2.1.6]
+
+- Bug Fixes
+  - Fixed CERT-C issues.
+  - Fixed UNUSED_VALUE issues.
+
 ## [2.1.5]
 
 - New Features

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
- * Copyright 2016-2017, 2020 NXP
+ * Copyright 2016-2017, 2020, 2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -162,7 +162,7 @@ void SPI_MasterTransferCreateHandleDMA(SPI_Type *base,
        size. */
     if (FSL_FEATURE_SPI_FIFO_SIZEn(base) != 0)
     {
-        base->C3 &= (uint8_t)(~SPI_C3_FIFOMODE_MASK);
+        base->C3 &= (uint8_t)(~SPI_C3_FIFOMODE_MASK & 0xFFU);
     }
 
 #endif /* FSL_FEATURE_SPI_HAS_FIFO */
