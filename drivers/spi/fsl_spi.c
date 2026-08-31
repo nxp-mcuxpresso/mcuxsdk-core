@@ -1034,7 +1034,7 @@ void SPI_MasterTransferCreateHandle(SPI_Type *base,
     s_spiHandle[instance] = handle;
     handle->callback      = callback;
     handle->userData      = userData;
-    s_spiMasterIsr        = SPI_MasterTransferHandleIRQ;
+    s_spiMasterIsr        = &SPI_MasterTransferHandleIRQ;
     handle->watermark     = SPI_GetWatermark(base);
 
 /* Get the bytes per frame */
@@ -1294,7 +1294,7 @@ void SPI_SlaveTransferCreateHandle(SPI_Type *base,
     /* Slave create handle share same logic with master create handle, the only difference
     is the Isr pointer. */
     SPI_MasterTransferCreateHandle(base, handle, callback, userData);
-    s_spiSlaveIsr = SPI_SlaveTransferHandleIRQ;
+    s_spiSlaveIsr = &SPI_SlaveTransferHandleIRQ;
 }
 
 /*!

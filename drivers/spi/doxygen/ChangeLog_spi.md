@@ -5,6 +5,7 @@
 - Bug Fixes
   - Fixed CERT-C issues.
   - Fixed UNUSED_VALUE issues.
+  - Fixed MISRA issues.
 
 ## [2.1.5]
 

@@ -168,8 +168,8 @@ void SPI_MasterTransferCreateHandleDMA(SPI_Type *base,
 #endif /* FSL_FEATURE_SPI_HAS_FIFO */
 
     /* Install callback for Tx dma channel */
-    DMA_SetCallback(handle->txHandle, SPI_TxDMACallback, &s_dmaPrivateHandle[instance]);
-    DMA_SetCallback(handle->rxHandle, SPI_RxDMACallback, &s_dmaPrivateHandle[instance]);
+    DMA_SetCallback(handle->txHandle, &SPI_TxDMACallback, &s_dmaPrivateHandle[instance]);
+    DMA_SetCallback(handle->rxHandle, &SPI_RxDMACallback, &s_dmaPrivateHandle[instance]);
 }
 
 /*!
