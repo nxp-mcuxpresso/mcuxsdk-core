@@ -1,5 +1,10 @@
 # FLEXCAN
 
+## [2.16.1]
+
+- Bug Fixes
+  - Remove the unnecessary `CAN_IMASK2_BUF63TO32M_MASK` preprocessor guard and the `maxMB > 32` runtime check in ERRATA_9595 `FLEXCAN_EnterFreezeMode()`.
+
 ## [2.16.0]
 
 - Improvements

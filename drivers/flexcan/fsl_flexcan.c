@@ -551,10 +551,7 @@ status_t FLEXCAN_EnterFreezeMode(CAN_Type *base)
     uint32_t u32TimeoutCount = 0U;
     uint32_t u32TempMCR      = 0U;
     uint32_t u32TempIMASK1   = 0U;
-#if defined(CAN_IMASK2_BUF63TO32M_MASK)
-    uint32_t u32TempIMASK2 = 0U;
-    int maxMB = FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base);
-#endif
+    uint32_t u32TempIMASK2   = 0U;
 
     /* Step1: set FRZ enable in MCR. */
     base->MCR |= CAN_MCR_FRZ_MASK;
@@ -593,12 +590,8 @@ status_t FLEXCAN_EnterFreezeMode(CAN_Type *base)
             /* backup MCR and IMASK register. */
             u32TempMCR    = base->MCR;
             u32TempIMASK1 = base->IMASK1;
-#if defined(CAN_IMASK2_BUF63TO32M_MASK)
-            if (maxMB > 32)
-            {
-                u32TempIMASK2 = base->IMASK2;
-            }
-#endif
+            u32TempIMASK2 = base->IMASK2;
+
             /* Set the Soft Reset bit ((SOFTRST) in the MCR.*/
             base->MCR |= CAN_MCR_SOFTRST_MASK;
 
@@ -621,12 +614,7 @@ status_t FLEXCAN_EnterFreezeMode(CAN_Type *base)
 
             /* Reconfig IMASK. */
             base->IMASK1 = u32TempIMASK1;
-#if defined(CAN_IMASK2_BUF63TO32M_MASK)
-            if (maxMB > 32)
-            {
-                base->IMASK2 = u32TempIMASK2;
-            }
-#endif
+            base->IMASK2 = u32TempIMASK2;
         }
     }
     else
@@ -635,12 +623,7 @@ status_t FLEXCAN_EnterFreezeMode(CAN_Type *base)
         /* backup MCR and IMASK register. Errata document not descript it, but we need backup for step 8A and 9A. */
         u32TempMCR    = base->MCR;
         u32TempIMASK1 = base->IMASK1;
-#if defined(CAN_IMASK2_BUF63TO32M_MASK)
-        if (maxMB > 32)
-        {
-            u32TempIMASK2 = base->IMASK2;
-        }
-#endif
+        u32TempIMASK2 = base->IMASK2;
 
         /* Step5A: Set the Soft Reset bit ((SOFTRST) in the MCR.*/
         base->MCR |= CAN_MCR_SOFTRST_MASK;
@@ -670,12 +653,7 @@ status_t FLEXCAN_EnterFreezeMode(CAN_Type *base)
 
         /* Step9A: reconfig IMASK. */
         base->IMASK1 = u32TempIMASK1;
-#if defined(CAN_IMASK2_BUF63TO32M_MASK)
-        if (maxMB > 32)
-        {
-            base->IMASK2 = u32TempIMASK2;
-        }
-#endif
+        base->IMASK2 = u32TempIMASK2;
     }
     return kStatus_Success;
 }
