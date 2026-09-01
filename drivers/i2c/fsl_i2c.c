@@ -149,6 +149,43 @@ static void I2C_TransferCommonIRQHandler(I2C_Type *base, void *handle);
  */
 static status_t I2C_MasterSendSubaddress(I2C_Type *base, i2c_master_transfer_t *xfer);
 
+/*!
+ * @brief Invoke the slave transfer callback if the event is enabled in the event mask.
+ *
+ * Does nothing if the callback pointer is NULL or the event is not enabled.
+ *
+ * @param base I2C peripheral base address.
+ * @param handle Pointer to the slave transfer handle.
+ * @param xfer Pointer to the slave transfer descriptor.
+ */
+static inline void I2C_SlaveInvokeCallback(I2C_Type *base, i2c_slave_handle_t *handle, i2c_slave_transfer_t *xfer);
+
+/*!
+ * @brief Handle an address-match interrupt event.
+ *
+ * Sets the transfer direction, reads the dummy byte for a general-call address,
+ * invokes the slave callback, and returns whether a transmit should follow.
+ *
+ * @param base I2C peripheral base address.
+ * @param handle Pointer to the slave transfer handle.
+ * @param xfer Pointer to the slave transfer descriptor.
+ * @param status Current I2C status flags.
+ * @return true if a slave transmit should be started; false otherwise.
+ */
+static bool I2C_SlaveHandleAddressMatch(I2C_Type *base, i2c_slave_handle_t *handle, i2c_slave_transfer_t *xfer, uint16_t status);
+
+/*!
+ * @brief Handle a NAK received during slave transmit.
+ *
+ * Switches to receive mode, reads the dummy byte to release the bus,
+ * and signals transfer completion via the slave callback.
+ *
+ * @param base I2C peripheral base address.
+ * @param handle Pointer to the slave transfer handle.
+ * @param xfer Pointer to the slave transfer descriptor.
+ */
+static void I2C_SlaveHandleNak(I2C_Type *base, i2c_slave_handle_t *handle, i2c_slave_transfer_t *xfer);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -2225,6 +2262,81 @@ status_t I2C_SlaveTransferGetCount(I2C_Type *base, i2c_slave_handle_t *handle, s
     return kStatus_Success;
 }
 
+static inline void I2C_SlaveInvokeCallback(I2C_Type *base,
+                                           i2c_slave_handle_t *handle,
+                                           i2c_slave_transfer_t *xfer)
+{
+    if ((0U != (handle->eventMask & (uint32_t)xfer->event)) && (handle->callback != NULL))
+    {
+        handle->callback(base, xfer, handle->userData);
+    }
+}
+
+static bool I2C_SlaveHandleAddressMatch(I2C_Type *base,
+                                        i2c_slave_handle_t *handle,
+                                        i2c_slave_transfer_t *xfer,
+                                        uint16_t status)
+{
+    bool doTransmit = false;
+
+    handle->isBusy = true;
+    xfer->event    = kI2C_SlaveAddressMatchEvent;
+
+    /* Slave transmit, master reading from slave. */
+    if (0U != (status & (uint16_t)kI2C_TransferDirectionFlag))
+    {
+        /* Change direction to send data. */
+        base->C1 |= I2C_C1_TX_MASK;
+
+        doTransmit = true;
+    }
+    else
+    {
+        /* Slave receive, master writing to slave. */
+        base->C1 &= (uint8_t)((~(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK)) & 0xFFU);
+
+        /* Read dummy to release the bus and check the address master issued. */
+        if (base->D == 0U)
+        {
+            xfer->event = kI2C_SlaveGenaralcallEvent;
+        }
+    }
+
+    I2C_SlaveInvokeCallback(base, handle, xfer);
+
+    return doTransmit;
+}
+
+static void I2C_SlaveHandleNak(I2C_Type *base,
+                               i2c_slave_handle_t *handle,
+                               i2c_slave_transfer_t *xfer)
+{
+    /* Set receive mode. */
+    base->C1 &= (uint8_t)((~(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK)) & 0xFFU);
+
+    /* Read dummy. */
+    (void)base->D;
+
+    if (handle->transfer.dataSize != 0U)
+    {
+        xfer->event            = kI2C_SlaveCompletionEvent;
+        xfer->completionStatus = kStatus_I2C_Nak;
+        handle->isBusy         = false;
+
+        I2C_SlaveInvokeCallback(base, handle, xfer);
+    }
+    else
+    {
+#ifndef I2C_HAS_STOP_DETECT
+        xfer->event            = kI2C_SlaveCompletionEvent;
+        xfer->completionStatus = kStatus_Success;
+        handle->isBusy         = false;
+
+        I2C_SlaveInvokeCallback(base, handle, xfer);
+#endif /* !FSL_FEATURE_I2C_HAS_START_STOP_DETECT or !FSL_FEATURE_I2C_HAS_STOP_DETECT */
+    }
+}
+
 /*!
  * brief Slave interrupt handler.
  *
@@ -2260,10 +2372,7 @@ void I2C_SlaveTransferHandleIRQ(I2C_Type *base, void *i2cHandle)
             xfer->completionStatus = kStatus_Success;
             handle->isBusy         = false;
 
-            if ((0U != (handle->eventMask & (uint32_t)xfer->event)) && (NULL != handle->callback))
-            {
-                handle->callback(base, xfer, handle->userData);
-            }
+            I2C_SlaveInvokeCallback(base, handle, xfer);
         }
 
         if (0U == (status & (uint16_t)kI2C_AddressMatchFlag))
@@ -2284,10 +2393,7 @@ void I2C_SlaveTransferHandleIRQ(I2C_Type *base, void *i2cHandle)
 
         xfer->event = kI2C_SlaveStartEvent;
 
-        if ((0U != (handle->eventMask & (uint32_t)xfer->event)) && (NULL != handle->callback))
-        {
-            handle->callback(base, xfer, handle->userData);
-        }
+        I2C_SlaveInvokeCallback(base, handle, xfer);
 
         if (0U == (status & (uint16_t)kI2C_AddressMatchFlag))
         {
@@ -2302,67 +2408,12 @@ void I2C_SlaveTransferHandleIRQ(I2C_Type *base, void *i2cHandle)
     /* Check NAK */
     if (0U != (status & (uint16_t)kI2C_ReceiveNakFlag))
     {
-        /* Set receive mode. */
-        base->C1 &= (uint8_t)((~(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK)) & 0xFFU);
-
-        /* Read dummy. */
-        (void)base->D;
-
-        if (handle->transfer.dataSize != 0U)
-        {
-            xfer->event            = kI2C_SlaveCompletionEvent;
-            xfer->completionStatus = kStatus_I2C_Nak;
-            handle->isBusy         = false;
-
-            if ((0U != (handle->eventMask & (uint32_t)xfer->event)) && (NULL != handle->callback))
-            {
-                handle->callback(base, xfer, handle->userData);
-            }
-        }
-        else
-        {
-#ifndef I2C_HAS_STOP_DETECT
-            xfer->event            = kI2C_SlaveCompletionEvent;
-            xfer->completionStatus = kStatus_Success;
-            handle->isBusy         = false;
-
-            if ((0U != (handle->eventMask & (uint32_t)xfer->event)) && (NULL != handle->callback))
-            {
-                handle->callback(base, xfer, handle->userData);
-            }
-#endif /* !FSL_FEATURE_I2C_HAS_START_STOP_DETECT or !FSL_FEATURE_I2C_HAS_STOP_DETECT */
-        }
+        I2C_SlaveHandleNak(base, handle, xfer);
     }
     /* Check address match. */
     else if (0U != (status & (uint16_t)kI2C_AddressMatchFlag))
     {
-        handle->isBusy = true;
-        xfer->event    = kI2C_SlaveAddressMatchEvent;
-
-        /* Slave transmit, master reading from slave. */
-        if (0U != (status & (uint16_t)kI2C_TransferDirectionFlag))
-        {
-            /* Change direction to send data. */
-            base->C1 |= I2C_C1_TX_MASK;
-
-            doTransmit = true;
-        }
-        else
-        {
-            /* Slave receive, master writing to slave. */
-            base->C1 &= (uint8_t)((~(I2C_C1_TX_MASK | I2C_C1_TXAK_MASK)) & 0xFFU);
-
-            /* Read dummy to release the bus and check the address master issued. */
-            if (base->D == 0U)
-            {
-                xfer->event = kI2C_SlaveGenaralcallEvent;
-            }
-        }
-
-        if ((0U != (handle->eventMask & (uint32_t)xfer->event)) && (NULL != handle->callback))
-        {
-            handle->callback(base, xfer, handle->userData);
-        }
+        doTransmit = I2C_SlaveHandleAddressMatch(base, handle, xfer, status);
     }
     /* Check transfer complete flag. */
     else if (0U != (status & (uint16_t)kI2C_TransferCompleteFlag))
@@ -2407,10 +2458,7 @@ void I2C_SlaveTransferHandleIRQ(I2C_Type *base, void *i2cHandle)
                     handle->isBusy         = false;
 
                     /* Proceed receive complete event. */
-                    if (((handle->eventMask & (uint32_t)xfer->event) != 0U) && (handle->callback != NULL))
-                    {
-                        handle->callback(base, xfer, handle->userData);
-                    }
+                    I2C_SlaveInvokeCallback(base, handle, xfer);
 #endif /* !FSL_FEATURE_I2C_HAS_START_STOP_DETECT or !FSL_FEATURE_I2C_HAS_STOP_DETECT */
                 }
             }
@@ -2462,10 +2510,7 @@ void I2C_SlaveTransferHandleIRQ(I2C_Type *base, void *i2cHandle)
             handle->isBusy         = false;
 
             /* Proceed txdone event. */
-            if (((handle->eventMask & (uint32_t)xfer->event) != 0U) && (handle->callback != NULL))
-            {
-                handle->callback(base, xfer, handle->userData);
-            }
+            I2C_SlaveInvokeCallback(base, handle, xfer);
 #endif /* !FSL_FEATURE_I2C_HAS_START_STOP_DETECT or !FSL_FEATURE_I2C_HAS_STOP_DETECT */
         }
     }
