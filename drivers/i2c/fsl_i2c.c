@@ -137,6 +137,18 @@ static status_t I2C_MasterHandleReceiveData(I2C_Type *base, i2c_master_handle_t 
  */
 static void I2C_TransferCommonIRQHandler(I2C_Type *base, void *handle);
 
+/*!
+ * @brief Send subaddress bytes and, for a read transfer, issue a repeated start with the read address.
+ *
+ * @param base I2C peripheral base address.
+ * @param xfer pointer to i2c_master_transfer_t structure which holds the transfer parameters.
+ * @retval kStatus_Success No error found.
+ * @retval kStatus_I2C_ArbitrationLost Transfer error, arbitration lost.
+ * @retval kStatus_I2C_Nak Received NAK error.
+ * @retval kStatus_I2C_Timeout Transfer error, wait signal timeout.
+ */
+static status_t I2C_MasterSendSubaddress(I2C_Type *base, i2c_master_transfer_t *xfer);
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -1281,6 +1293,103 @@ status_t I2C_MasterReadBlocking(I2C_Type *base, uint8_t *rxBuff, size_t rxSize, 
     return result;
 }
 
+static status_t I2C_MasterSendSubaddress(I2C_Type *base, i2c_master_transfer_t *xfer)
+{
+    uint8_t subaddressSize = xfer->subaddressSize;
+    assert(subaddressSize > 0U);
+    status_t result;
+#if I2C_RETRY_TIMES != 0U
+    uint32_t waitTimes;
+#endif
+
+    do
+    {
+        /* Clear interrupt pending flag before writing the next subaddress byte. */
+        base->S = (uint8_t)kI2C_IntPendingFlag;
+
+        subaddressSize--;
+        base->D = (uint8_t)(((xfer->subaddress) >> (8U * subaddressSize)) & 0xFFU);
+
+#if I2C_RETRY_TIMES != 0U
+        waitTimes = I2C_RETRY_TIMES;
+        /* Wait until data transfer complete. */
+        while ((0U == (base->S & (uint8_t)kI2C_IntPendingFlag)) && (0U != waitTimes))
+        {
+            waitTimes--;
+        }
+        if (0U == waitTimes)
+        {
+            return kStatus_I2C_Timeout;
+        }
+#else
+        /* Wait until data transfer complete. */
+        while (0U == (base->S & (uint8_t)kI2C_IntPendingFlag))
+        {
+        }
+#endif
+
+        /* Check if there's transfer error. */
+        result = I2C_CheckAndClearError(base, base->S);
+        if (kStatus_Success != result)
+        {
+            if (result == kStatus_I2C_Nak)
+            {
+                (void)I2C_MasterStop(base);
+            }
+            return result;
+        }
+
+    } while (subaddressSize > 0U);
+
+    /* For read transfers issue a repeated start to switch bus direction. */
+    if (xfer->direction == kI2C_Read)
+    {
+        /* Clear pending flag before repeated start. */
+        base->S = (uint8_t)kI2C_IntPendingFlag;
+
+        /* Send repeated start and slave address. */
+        result = I2C_MasterRepeatedStart(base, xfer->slaveAddress, kI2C_Read);
+
+        /* Return if error. */
+        if (kStatus_Success != result)
+        {
+            return result;
+        }
+
+#if I2C_RETRY_TIMES != 0U
+        waitTimes = I2C_RETRY_TIMES;
+        /* Wait until data transfer complete. */
+        while ((0U == (base->S & (uint8_t)kI2C_IntPendingFlag)) && (0U != waitTimes))
+        {
+            waitTimes--;
+        }
+        if (0U == waitTimes)
+        {
+            return kStatus_I2C_Timeout;
+        }
+#else
+        /* Wait until data transfer complete. */
+        while (0U == (base->S & (uint8_t)kI2C_IntPendingFlag))
+        {
+        }
+#endif
+
+        /* Check if there's transfer error. */
+        result = I2C_CheckAndClearError(base, base->S);
+        if (kStatus_Success != result)
+        {
+            if (result == kStatus_I2C_Nak)
+            {
+                result = kStatus_I2C_Addr_Nak;
+                (void)I2C_MasterStop(base);
+            }
+            return result;
+        }
+    }
+
+    return kStatus_Success;
+}
+
 /*!
  * brief Performs a master polling transfer on the I2C bus.
  *
@@ -1390,96 +1499,15 @@ status_t I2C_MasterTransferBlocking(I2C_Type *base, i2c_master_transfer_t *xfer)
         }
     }
 
-    /* Send subaddress. */
+    /* Send subaddress bytes; for read transfers also issues the repeated start. */
     if (0U != subaddressSize)
     {
-        do
+        result = I2C_MasterSendSubaddress(base, xfer);
+
+        /* Return if error. */
+        if (kStatus_Success != result)
         {
-            /* Clear interrupt pending flag. */
-            base->S = (uint8_t)kI2C_IntPendingFlag;
-
-            subaddressSize--;
-            base->D = (uint8_t)((xfer->subaddress) >> (8U * subaddressSize));
-
-#if I2C_RETRY_TIMES != 0U
-            waitTimes = I2C_RETRY_TIMES;
-            /* Wait until data transfer complete. */
-            while ((0U == (base->S & (uint8_t)kI2C_IntPendingFlag)) && (0U != waitTimes))
-            {
-                waitTimes--;
-            }
-            if (0U == waitTimes)
-            {
-                return kStatus_I2C_Timeout;
-            }
-#else
-            /* Wait until data transfer complete. */
-            while (0U == (base->S & (uint8_t)kI2C_IntPendingFlag))
-            {
-            }
-#endif
-
-            /* Check if there's transfer error. */
-            result = I2C_CheckAndClearError(base, base->S);
-
-            if (0 != result)
-            {
-                if (result == kStatus_I2C_Nak)
-                {
-                    (void)I2C_MasterStop(base);
-                }
-
-                return result;
-            }
-
-        } while (subaddressSize > 0U);
-
-        if (xfer->direction == kI2C_Read)
-        {
-            /* Clear pending flag. */
-            base->S = (uint8_t)kI2C_IntPendingFlag;
-
-            /* Send repeated start and slave address. */
-            result = I2C_MasterRepeatedStart(base, xfer->slaveAddress, kI2C_Read);
-
-            /* Return if error. */
-            if (kStatus_Success != result)
-            {
-                return result;
-            }
-
-#if I2C_RETRY_TIMES != 0U
-            waitTimes = I2C_RETRY_TIMES;
-            /* Wait until data transfer complete. */
-            while ((0U == (base->S & (uint8_t)kI2C_IntPendingFlag)) && (0U != waitTimes))
-            {
-                waitTimes--;
-            }
-            if (0U == waitTimes)
-            {
-                return kStatus_I2C_Timeout;
-            }
-#else
-            /* Wait until data transfer complete. */
-            while (0U == (base->S & (uint8_t)kI2C_IntPendingFlag))
-            {
-            }
-#endif
-
-            /* Check if there's transfer error. */
-            result = I2C_CheckAndClearError(base, base->S);
-
-            if (kStatus_Success != result)
-            {
-                if (result == kStatus_I2C_Nak)
-                {
-                    result = kStatus_I2C_Addr_Nak;
-
-                    (void)I2C_MasterStop(base);
-                }
-
-                return result;
-            }
+            return result;
         }
     }
 
