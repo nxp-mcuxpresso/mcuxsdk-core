@@ -1,5 +1,11 @@
 # I3C
 
+## [2.15.1]
+
+- Improvements
+  - Added reporting of master MERRWARN.URUN (to-bus buffer/FIFO underrun) as
+    kStatus_I3C_UnderrunError on devices that have the field.
+
 ## [2.15.0]
 
 - Improvements

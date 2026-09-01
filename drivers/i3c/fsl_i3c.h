@@ -20,7 +20,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief I3C driver version */
-#define FSL_I3C_DRIVER_VERSION (MAKE_VERSION(2, 15, 0))
+#define FSL_I3C_DRIVER_VERSION (MAKE_VERSION(2, 15, 1))
 /*! @} */
 
 /*!
@@ -66,8 +66,9 @@ enum
         MAKE_STATUS(kStatusGroup_I3C, 12), /*!< The I3C slave count has exceed the definition in I3C_MAX_DEVCNT. */
     kStatus_I3C_IBIWon = MAKE_STATUS(
         kStatusGroup_I3C, 13), /*!< The I3C slave event IBI or MR or HJ won the arbitration on a header address. */
-    kStatus_I3C_OverrunError  = MAKE_STATUS(kStatusGroup_I3C, 14), /*!< Slave internal from-bus buffer/FIFO overrun. */
-    kStatus_I3C_UnderrunError = MAKE_STATUS(kStatusGroup_I3C, 15), /*!< Slave internal to-bus buffer/FIFO underrun */
+    kStatus_I3C_OverrunError = MAKE_STATUS(kStatusGroup_I3C, 14), /*!< Slave internal from-bus buffer/FIFO overrun. */
+    kStatus_I3C_UnderrunError =
+        MAKE_STATUS(kStatusGroup_I3C, 15), /*!< Master/Slave internal to-bus buffer/FIFO underrun */
     kStatus_I3C_UnderrunNak =
         MAKE_STATUS(kStatusGroup_I3C, 16), /*!< Slave internal from-bus buffer/FIFO underrun and NACK error */
     kStatus_I3C_InvalidStart   = MAKE_STATUS(kStatusGroup_I3C, 17), /*!< Slave invalid start flag */
@@ -143,8 +144,11 @@ enum _i3c_master_flags
  */
 enum _i3c_master_error_flags
 {
-    kI3C_MasterErrorNackFlag       = I3C_MERRWARN_NACK_MASK,    /*!< Slave NACKed the last address */
-    kI3C_MasterErrorWriteAbortFlag = I3C_MERRWARN_WRABT_MASK,   /*!< Slave NACKed the write data */
+    kI3C_MasterErrorNackFlag       = I3C_MERRWARN_NACK_MASK,  /*!< Slave NACKed the last address */
+    kI3C_MasterErrorWriteAbortFlag = I3C_MERRWARN_WRABT_MASK, /*!< Slave NACKed the write data */
+#if defined(I3C_MERRWARN_URUN_MASK)
+    kI3C_MasterErrorUnderrunFlag = I3C_MERRWARN_URUN_MASK,    /*!< Master internal to-bus buffer/FIFO underrun */
+#endif
 #if !defined(FSL_FEATURE_I3C_HAS_NO_MERRWARN_TERM) || (!FSL_FEATURE_I3C_HAS_NO_MERRWARN_TERM)
     kI3C_MasterErrorTermFlag = I3C_MERRWARN_TERM_MASK,          /*!< Master terminates slave read */
 #endif
@@ -157,6 +161,9 @@ enum _i3c_master_error_flags
     kI3C_MasterErrorInvalidReqFlag = I3C_MERRWARN_INVREQ_MASK,  /*!< Invalid use of request */
     kI3C_MasterErrorTimeoutFlag    = I3C_MERRWARN_TIMEOUT_MASK, /*!< The module has stalled too long in a frame */
     kI3C_MasterAllErrorFlags       = kI3C_MasterErrorNackFlag | kI3C_MasterErrorWriteAbortFlag |
+#if defined(I3C_MERRWARN_URUN_MASK)
+                               kI3C_MasterErrorUnderrunFlag |
+#endif
 #if !defined(FSL_FEATURE_I3C_HAS_NO_MERRWARN_TERM) || (!FSL_FEATURE_I3C_HAS_NO_MERRWARN_TERM)
                                kI3C_MasterErrorTermFlag |
 #endif
