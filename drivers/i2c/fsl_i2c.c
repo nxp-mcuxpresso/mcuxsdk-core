@@ -1491,7 +1491,7 @@ void I2C_MasterTransferCreateHandle(I2C_Type *base,
     s_i2cHandle[instance] = handle;
 
     /* Save master interrupt handler. */
-    s_i2cMasterIsr = I2C_MasterTransferHandleIRQ;
+    s_i2cMasterIsr = &I2C_MasterTransferHandleIRQ;
 
     /* Enable NVIC interrupt. */
     (void)EnableIRQ(s_i2cIrqs[instance]);
@@ -2022,7 +2022,7 @@ void I2C_SlaveTransferCreateHandle(I2C_Type *base,
     s_i2cHandle[instance] = handle;
 
     /* Save slave interrupt handler. */
-    s_i2cSlaveIsr = I2C_SlaveTransferHandleIRQ;
+    s_i2cSlaveIsr = &I2C_SlaveTransferHandleIRQ;
 
     /* Enable NVIC interrupt. */
     (void)EnableIRQ(s_i2cIrqs[instance]);

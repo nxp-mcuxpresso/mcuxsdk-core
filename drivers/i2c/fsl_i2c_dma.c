@@ -416,7 +416,7 @@ void I2C_MasterTransferCreateHandleDMA(I2C_Type *base,
     s_dmaPrivateHandle[instance].base   = base;
     s_dmaPrivateHandle[instance].handle = handle;
 
-    DMA_SetCallback(dmaHandle, (dma_callback)I2C_MasterTransferCallbackDMA, &s_dmaPrivateHandle[instance]);
+    DMA_SetCallback(dmaHandle, (dma_callback)&I2C_MasterTransferCallbackDMA, &s_dmaPrivateHandle[instance]);
 }
 
 /*!
