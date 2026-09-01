@@ -37,6 +37,9 @@
 #endif
 #endif /* I3C_RETRY_TIMES */
 
+/*! @brief Max read-terminate size supported by MCTRL.RDTERM. */
+#define FSL_I3C_RDTERM_MAX (I3C_MCTRL_RDTERM_MASK >> I3C_MCTRL_RDTERM_SHIFT)
+
 #ifndef I3C_MAX_DEVCNT
 #define I3C_MAX_DEVCNT 10U
 #endif
@@ -275,8 +278,9 @@ typedef enum _i3c_rx_trigger_level
 /*! @brief I3C master read termination operations. */
 typedef enum _i3c_rx_term_ops
 {
-    kI3C_RxTermDisable  = 0U, /*!< Master doesn't terminate read, used for CCC transfer. */
-    kI3C_RxAutoTerm     = 1U, /*!< Master auto terminate read after receiving specified bytes(<=255). */
+    kI3C_RxTermDisable = 0U, /*!< Master doesn't terminate read, used for CCC transfer. */
+    kI3C_RxAutoTerm =
+        1U, /*!< Master auto terminate read after receiving specified bytes(up to MCTRL.RDTERM field width). */
     kI3C_RxTermLastByte = 2U, /*!< Master terminates read at any time after START, no length limitation. */
 } i3c_rx_term_ops_t;
 
@@ -432,10 +436,10 @@ enum _i3c_master_transfer_flags
     kI3C_TransferNoStopFlag        = 0x04U, /*!< Don't send a stop condition. */
     kI3C_TransferWordsFlag         = 0x08U, /*!< Transfer in words, else transfer in bytes. */
     kI3C_TransferDisableRxTermFlag = 0x10U, /*!< Disable Rx termination. Note: It's for I3C CCC transfer. */
-    kI3C_TransferRxAutoTermFlag = 0x20U, /*!< Set Rx auto-termination. Note: It's adaptive based on Rx size(<=255 bytes)
-                                            except in I3C_MasterReceive. */
+    kI3C_TransferRxAutoTermFlag    = 0x20U, /*!< Set Rx auto-termination. Note: It's adaptive based on Rx size(up to
+                                               MCTRL.RDTERM field width) except in I3C_MasterReceive. */
     kI3C_TransferStartWithBroadcastAddr =
-        0x40U,                           /*!< Start transfer with 0x7E, then read/write data with device address. */
+        0x40U,                              /*!< Start transfer with 0x7E, then read/write data with device address. */
 };
 
 /*!
@@ -1248,12 +1252,12 @@ static inline bool I3C_MasterGetBusIdleState(I3C_Type *base)
  * @param address 7-bit slave device address, in bits [6:0].
  * @param dir Master transfer direction, either #kI3C_Read or #kI3C_Write. This parameter is used to set
  *      the R/w bit (bit 0) in the transmitted slave address.
- * @param rxSize Read terminate size for the followed read transfer, limit to 255 bytes.
+ * @param rxSize Read terminate size for the followed read transfer, limit to MCTRL.RDTERM field width.
  * @retval #kStatus_Success START signal and address were successfully enqueued in the transmit FIFO.
  * @retval #kStatus_I3C_Busy Another master is currently utilizing the bus.
  */
 status_t I3C_MasterStartWithRxSize(
-    I3C_Type *base, i3c_bus_type_t type, uint8_t address, i3c_direction_t dir, uint8_t rxSize);
+    I3C_Type *base, i3c_bus_type_t type, uint8_t address, i3c_direction_t dir, uint32_t rxSize);
 
 /*!
  * @ingroup i3c_master_driver
@@ -1293,11 +1297,11 @@ status_t I3C_MasterStart(I3C_Type *base, i3c_bus_type_t type, uint8_t address, i
  * @param address 7-bit slave device address, in bits [6:0].
  * @param dir Master transfer direction, either #kI3C_Read or #kI3C_Write. This parameter is used to set
  *      the R/w bit (bit 0) in the transmitted slave address.
- * @param rxSize Read terminate size for the followed read transfer, limit to 255 bytes.
+ * @param rxSize Read terminate size for the followed read transfer, limit to MCTRL.RDTERM field width.
  * @retval #kStatus_Success Repeated START signal and address were successfully enqueued in the transmit FIFO.
  */
 status_t I3C_MasterRepeatedStartWithRxSize(
-    I3C_Type *base, i3c_bus_type_t type, uint8_t address, i3c_direction_t dir, uint8_t rxSize);
+    I3C_Type *base, i3c_bus_type_t type, uint8_t address, i3c_direction_t dir, uint32_t rxSize);
 
 /*!
  * @ingroup i3c_master_driver

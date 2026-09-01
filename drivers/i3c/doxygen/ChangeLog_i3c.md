@@ -5,6 +5,7 @@
 - Improvements
   - Added reporting of master MERRWARN.URUN (to-bus buffer/FIFO underrun) as
     kStatus_I3C_UnderrunError on devices that have the field.
+  - Updated master receive terminate size to support devices with a wider MCTRL.RDTERM field.
 
 ## [2.15.0]
 
