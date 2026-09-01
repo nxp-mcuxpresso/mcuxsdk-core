@@ -1,5 +1,10 @@
 # ENET_QOS
 
+## [2.7.8]
+
+- Bug Fixes
+  - ENET_QOS_Ptp1588PpsSetTrgtTime rejects a PPS target time that is not in the future now (related to MCXE32B errata ERR050595 - GMAC/EMAC incorrect pps output generation on target time error).
+
 ## [2.7.7]
 
 - Bug Fixes

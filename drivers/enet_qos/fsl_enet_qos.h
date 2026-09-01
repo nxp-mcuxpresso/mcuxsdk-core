@@ -279,7 +279,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief Defines the driver version. */
-#define FSL_ENET_QOS_DRIVER_VERSION (MAKE_VERSION(2, 7, 7))
+#define FSL_ENET_QOS_DRIVER_VERSION (MAKE_VERSION(2, 7, 8))
 /*! @} */
 
 /*! @name Control and status region bit masks of the receive buffer descriptor. */
@@ -2025,6 +2025,14 @@ static inline status_t ENET_Ptp1588PpsControl(ENET_QOS_Type *base,
  * @param instance The ENET QOS PTP PPS instance.
  * @param seconds The target seconds.
  * @param nanoseconds The target nanoseconds.
+ * @retval kStatus_Success  Target time registers programmed successfully.
+ * @retval kStatus_ENET_QOS_TrgtBusy  Target time register busy, previous target not yet consumed.
+ * @retval kStatus_InvalidArgument  On devices affected by errata ERR050595 (MCXE32B), the
+ *         requested target time is not strictly in the future. The caller must read the current
+ *         system time with ENET_QOS_Ptp1588GetTimer, compute a target time in the future and
+ *         retry, otherwise the erratum could produce an incorrect PPS output.
+ * @note   kStatus_InvalidArgument can only be returned on MCXE32B targets (errata ERR050595
+ *         workaround). On all other devices this return code is never produced by this function.
  */
 status_t ENET_QOS_Ptp1588PpsSetTrgtTime(ENET_QOS_Type *base,
                                         enet_qos_ptp_pps_instance_t instance,

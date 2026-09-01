@@ -3498,6 +3498,43 @@ status_t ENET_QOS_Ptp1588PpsSetTrgtTime(ENET_QOS_Type *base,
         return kStatus_ENET_QOS_TrgtBusy;
     }
 
+#if defined(FSL_FEATURE_EMAC_HAS_ERRATA_050595) && (FSL_FEATURE_EMAC_HAS_ERRATA_050595)
+    /*
+     * Errata ERR050595: GMAC/EMAC incorrect pps output generation on target time error.
+     * When the programmed PPS target time is less than the current system time, the pps
+     * output signal is generated incorrectly despite the target being in the past.
+     * Workaround: read the current system time and reject any target time that is not
+     * strictly in the future, so the target time register is never programmed with an
+     * already elapsed time value.
+     *
+     * Note: ERR050595 also lists a second scenario (loss of sub-nanosecond accuracy in
+     * binary rollover mode). That scenario has no code workaround; it is avoided by
+     * configuring the PTP timer for digital rollover (kENET_QOS_DigitalRollover) instead
+     * of binary rollover, which the driver already supports.
+     *
+     * Limitation: this check is best-effort. The system time is sampled here and only
+     * afterwards written to the target time registers. On a preemptive RTOS or on a
+     * multi-core device (for example MCXE32B CM7 core0/core1), an interrupt or context
+     * switch between the sample and the register write may advance the system clock past
+     * the requested target, re-creating the exact errata condition. The erratum itself
+     * requires a future target, so callers should program the target time sufficiently
+     * far ahead (for example at least a few milliseconds) to make this race window
+     * negligible in practice.
+     */
+    {
+        uint64_t currentSecond     = 0U;
+        uint32_t currentNanosecond = 0U;
+
+        ENET_QOS_Ptp1588GetTimer(base, &currentSecond, &currentNanosecond);
+
+        if (((uint64_t)seconds < currentSecond) ||
+            (((uint64_t)seconds == currentSecond) && (nanoseconds <= currentNanosecond)))
+        {
+            return kStatus_InvalidArgument;
+        }
+    }
+#endif
+
     *mac_pps_trgt_ns = ENET_QOS_MAC_PPS0_TARGET_TIME_NANOSECONDS_TTSL0(nanoseconds);
     *mac_pps_trgt_s  = ENET_QOS_MAC_PPS0_TARGET_TIME_SECONDS_TSTRH0(seconds);
 
