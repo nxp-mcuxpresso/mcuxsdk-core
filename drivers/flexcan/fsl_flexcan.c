@@ -399,8 +399,9 @@ static void flexcan_memset(void *s, uint32_t c, size_t n)
 
     m = n / sizeof(*ptr);
 
-    while ((m--) != (size_t)0)
+    while (m != (size_t)0)
     {
+        m--;
         *ptr++ = c;
     }
 }
@@ -5371,11 +5372,14 @@ void FLEXCAN_TransferHandleIRQ(CAN_Type *base, flexcan_handle_t *handle)
             }
 #endif
         }
+#if !(defined(FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) && FSL_FEATURE_FLEXCAN_HAS_NO_SLFWAK_SUPPORT) || \
+    (defined(FSL_FEATURE_FLEXCAN_HAS_PN_MODE) && FSL_FEATURE_FLEXCAN_HAS_PN_MODE)
         else if (0U != (result & FLEXCAN_WAKE_UP_FLAG))
         {
             status = kStatus_FLEXCAN_WakeUp;
             FLEXCAN_ClearStatusFlags(base, FLEXCAN_WAKE_UP_FLAG);
         }
+#endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
         else if (0U != (FLEXCAN_EFIFO_STATUS_UNMASK(result & FLEXCAN_ENHANCED_RX_FIFO_INT_FLAG) & base->ERFIER))
         {

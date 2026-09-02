@@ -219,7 +219,7 @@
 #define FLEXCAN_PN_INT_MASK(x)      (((uint64_t)(((uint64_t)(x)) << 32)) & 0x3000000000000U)
 #define FLEXCAN_PN_INT_UNMASK(x)    (((uint32_t)(((uint64_t)(x)) >> 32)) & 0x00030000U)
 #define FLEXCAN_PN_STATUS_MASK(x)   (((uint64_t)(((uint64_t)(x)) << 16)) & 0x300000000U)
-#define FLEXCAN_PN_STATUS_UNMASK(x) (((uint32_t)(((uint64_t)(x)) >> 16)) & 0x00030000U)
+#define FLEXCAN_PN_STATUS_UNMASK(x) (((uint32_t)((((uint64_t)(x)) >> 16) & 0xFFFFFFFFUL)) & 0x00030000U)
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO) && FSL_FEATURE_FLEXCAN_HAS_ENHANCED_RX_FIFO)
 #define FLEXCAN_EFIFO_INT_MASK(x)      (((uint64_t)(((uint64_t)(x)) << 32)) & 0xF000000000000000U)
@@ -229,7 +229,7 @@
 #endif
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL) && FSL_FEATURE_FLEXCAN_HAS_MEMORY_ERROR_CONTROL)
 #define FLEXCAN_MECR_INT_MASK(x)      (((uint64_t)(((uint64_t)(x)) << 16)) & 0xD00000000U)
-#define FLEXCAN_MECR_INT_UNMASK(x)    (((uint32_t)(((uint64_t)(x)) >> 16)) & 0x000D0000U)
+#define FLEXCAN_MECR_INT_UNMASK(x)    (((uint32_t)((((uint64_t)(x)) >> 16) & 0xFFFFFFFFUL)) & 0x000D0000U)
 #define FLEXCAN_MECR_STATUS_MASK(x)   (((uint64_t)(((uint64_t)(x)) << 34)) & 0x34003400000000U)
 #define FLEXCAN_MECR_STATUS_UNMASK(x) (((uint32_t)(((uint64_t)(x)) >> 34)) & 0x000D000DU)
 #endif
