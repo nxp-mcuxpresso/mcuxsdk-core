@@ -1798,17 +1798,13 @@ static inline uint64_t FLEXCAN_GetHigh64MbStatusFlags(CAN_Type *base, uint64_t m
  */
 static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint64_t mask)
 {
+    base->IFLAG1 = (uint32_t)(mask & 0xFFFFFFFFU);
+#if defined(CAN_IFLAG2_BUF63TO32I_MASK)
     if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 32)
     {
-        base->IFLAG1 = (uint32_t)(mask & 0xFFFFFFFFU);
-#if defined(CAN_IFLAG2_BUF63TO32I_MASK)
         base->IFLAG2 = (uint32_t)(mask >> 32U);
+    }
 #endif
-    }
-    else
-    {
-        base->IFLAG1 = (uint32_t)(mask & 0xFFFFFFFFU);
-    }
 }
 
 #if (defined(FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB) && FSL_FEATURE_FLEXCAN_HAS_MORE_THAN_64_MB)
@@ -1822,17 +1818,13 @@ static inline void FLEXCAN_ClearMbStatusFlags(CAN_Type *base, uint64_t mask)
  */
 static inline void FLEXCAN_ClearHigh64MbStatusFlags(CAN_Type *base, uint64_t mask)
 {
+    base->IFLAG3 = (uint32_t)(mask & 0xFFFFFFFFU);
+#if defined(CAN_IFLAG4_BUF127TO96_MASK)
     if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 96)
     {
-        base->IFLAG3 = (uint32_t)(mask & 0xFFFFFFFFU);
-#if defined(CAN_IFLAG4_BUF127TO96_MASK)
         base->IFLAG4 = (uint32_t)(mask >> 32U);
+    }
 #endif
-    }
-    else
-    {
-        base->IFLAG3 = (uint32_t)(mask & 0xFFFFFFFFU);
-    }
 }
 #endif
 
@@ -2040,17 +2032,13 @@ static inline void FLEXCAN_EnableMbInterrupts(CAN_Type *base, uint64_t mask)
 {
     uint32_t primask = DisableGlobalIRQ();
 
+    base->IMASK1 |= (uint32_t)(mask & 0xFFFFFFFFU);
+#if defined(CAN_IMASK2_BUF63TO32M_MASK)
     if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 32)
     {
-        base->IMASK1 |= (uint32_t)(mask & 0xFFFFFFFFU);
-#if defined(CAN_IMASK2_BUF63TO32M_MASK)
         base->IMASK2 |= (uint32_t)(mask >> 32U);
+    }
 #endif
-    }
-    else
-    {
-        base->IMASK1 |= (uint32_t)(mask & 0xFFFFFFFFU);
-    }
     EnableGlobalIRQ(primask);
 }
 
@@ -2067,17 +2055,13 @@ static inline void FLEXCAN_EnableHigh64MbInterrupts(CAN_Type *base, uint64_t mas
 {
     uint32_t primask = DisableGlobalIRQ();
 
+    base->IMASK3 |= (uint32_t)(mask & 0xFFFFFFFFU);
+#if defined(CAN_IMASK4_BUF127TO96M_MASK)
     if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 96)
     {
-        base->IMASK3 |= (uint32_t)(mask & 0xFFFFFFFFU);
-#if defined(CAN_IMASK4_BUF127TO96M_MASK)
         base->IMASK4 |= (uint32_t)(mask >> 32U);
+    }
 #endif
-    }
-    else
-    {
-        base->IMASK3 |= (uint32_t)(mask & 0xFFFFFFFFU);
-    }
     EnableGlobalIRQ(primask);
 }
 #endif
@@ -2094,17 +2078,13 @@ static inline void FLEXCAN_DisableMbInterrupts(CAN_Type *base, uint64_t mask)
 {
     uint32_t primask = DisableGlobalIRQ();
 
+    base->IMASK1 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
+#if defined(CAN_IMASK2_BUF63TO32M_MASK)
     if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 32)
     {
-        base->IMASK1 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
-#if defined(CAN_IMASK2_BUF63TO32M_MASK)
         base->IMASK2 &= ~((uint32_t)(mask >> 32U));
+    }
 #endif
-    }
-    else
-    {
-        base->IMASK1 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
-    }
     EnableGlobalIRQ(primask);
 }
 
@@ -2121,17 +2101,13 @@ static inline void FLEXCAN_DisableHigh64MbInterrupts(CAN_Type *base, uint64_t ma
 {
     uint32_t primask = DisableGlobalIRQ();
 
+    base->IMASK3 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
+#if defined(CAN_IMASK4_BUF127TO96M_MASK)
     if (FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base) > 96)
     {
-        base->IMASK3 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
-#if defined(CAN_IMASK4_BUF127TO96M_MASK)
         base->IMASK4 &= ~((uint32_t)(mask >> 32U));
+    }
 #endif
-    }
-    else
-    {
-        base->IMASK3 &= ~((uint32_t)(mask & 0xFFFFFFFFU));
-    }
     EnableGlobalIRQ(primask);
 }
 #endif
