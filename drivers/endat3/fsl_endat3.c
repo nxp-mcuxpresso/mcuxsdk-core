@@ -32,7 +32,10 @@
 uint32_t timerstamp = 0;
 __WEAK uint32_t getTimestampMS()
 {
-	return timerstamp++;
+	/* Intentional uint32 wrap-around; checkTimeout handles rollover. */
+	uint32_t ts = timerstamp;
+	timerstamp = ts + 1U;
+	return ts;
 }
 
 static uint32_t addTimeout(uint32_t timeout)
@@ -138,8 +141,9 @@ uint8_t ENDAT3_getRsp(ENDAT3_Type *base, uint8_t bus_addr, endat3_rsp_t *rsp)
 	struct LPF *lpf;
 	int i;
 
-	rsp->hpf.hpf64 = hpf->hpf64;
-	rsp->lph.lph32 = lph->lph32;
+	/* Use struct member access so reads and writes go through the same union member. */
+	rsp->hpf.hpf = hpf->hpf;
+	rsp->lph.lph = lph->lph;
 	rsp->ydim = rsp->lph.lph.nlpf & 0xF;
 	rsp->xdim = (rsp->lph.lph.nlpf >> 4) & 0xF;
 	rsp->zdim = (rsp->lph.lph.status >> 4) & 0x07;
@@ -181,7 +185,6 @@ status_t ENDAT3_FG_Hello(ENDAT3_Type *base)
 
 	return kStatus_Endat3_FG_Hello_Failed;
 }
-
 
 /*FG Request: Echo */
 status_t ENDAT3_FG_Echo(ENDAT3_Type *base, uint16_t arbitrary_data)
@@ -309,11 +312,11 @@ status_t ENDAT3_BG_WaitReqFinished(ENDAT3_Type *base, uint8_t bus_addr, uint8_t 
 	uint32_t timeout = addTimeout(timeout_ms);
 	while (!(base->BG_RSP_1 & ENDAT3_BG_RSP_1_BG_HANDLER_IDLE_MASK)) {
 		if (fg_strobes) {
-			if (op == Point2Point) {
-				ENDAT3_FG_Data(base, ENDAT3_FG_REQ_DATA0, NULL);
-			} else if (op == Peer2Peer) {
-				ENDAT3_FG_Bus_P2P_Data(base, bus_addr, ENDAT3_FG_REQ_DATA0, NULL);
-			}
+		if (op == Point2Point) {
+			(void)ENDAT3_FG_Data(base, ENDAT3_FG_REQ_DATA0, NULL);
+		} else if (op == Peer2Peer) {
+			(void)ENDAT3_FG_Bus_P2P_Data(base, bus_addr, ENDAT3_FG_REQ_DATA0, NULL);
+		}
 		}
 
 		if (base->BG_RSP_1 & ENDAT3_BG_RSP_1_BG_HANDLER_ERROR_MASK) {
@@ -466,7 +469,7 @@ status_t ENDAT3_BG_Protect_OP(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr
 							uint8_t *al_write, uint8_t *al_read, uint8_t fg_strobes, enum op_mode op)
 {
 	struct BGREQ req = {0};
-	uint64_t bg_rsp;
+	uint64_t bg_rsp = 0U;
 	status_t status;
 	req.PROTECT.code = ENDAT3_BG_OPCODE_PROTECT;
 	req.PROTECT.address[0] = (addr >> 16) & 0xFF;
@@ -477,8 +480,13 @@ status_t ENDAT3_BG_Protect_OP(ENDAT3_Type *base, uint8_t bus_addr, uint32_t addr
 
 	status = ENDAT3_BG_Req_Rsp(base, bus_addr, &req, &bg_rsp, fg_strobes, ENDAT3_BG_REQ_TIMEOUT, op);
 
-	*al_write = (bg_rsp >> 8) & 0xFF;
-	*al_read  = bg_rsp & 0xFF;
+	if (status == kStatus_Success) {
+		*al_write = (uint8_t)((bg_rsp >> 8U) & 0xFFU);
+		*al_read  = (uint8_t)(bg_rsp & 0xFFU);
+	} else {
+		*al_write = 0U;
+		*al_read  = 0U;
+	}
 
 	return status;
 }
@@ -558,8 +566,8 @@ status_t ENDAT3_memCacheInit_OP(ENDAT3_Type *base, uint8_t bus_addr, uint32_t me
 void ENDAT3_memCacheSetDirty(endat3_mem_cache_t *cache, int word_index, int isDirty)
 {
 	uint32_t mod_index, mod_bit;
-	mod_index = (word_index / 32U);
-	mod_bit = word_index % 32U;
+	mod_index = ((uint32_t)word_index / 32U);
+	mod_bit = (uint32_t)word_index % 32U;
 	if (isDirty)
 		cache->dirtyWordMap[mod_index] |= (1U << mod_bit);
 	else
@@ -569,8 +577,8 @@ void ENDAT3_memCacheSetDirty(endat3_mem_cache_t *cache, int word_index, int isDi
 int ENDAT3_memCacheDirty(endat3_mem_cache_t *cache, int word_index)
 {
 	uint32_t mod_index, mod_bit;
-	mod_index = (word_index / 32U);
-	mod_bit = word_index % 32U;
+	mod_index = ((uint32_t)word_index / 32U);
+	mod_bit = (uint32_t)word_index % 32U;
 
 	return cache->dirtyWordMap[mod_index] & (1U << mod_bit);
 }
@@ -653,7 +661,7 @@ static uint32_t ENDAT3_memCalcCSReflect(uint32_t data, uint32_t bitnum)
 	uint32_t j = 1;
 	uint32_t data_out = 0;
 
-	for (i = 1U << (bitnum-1U); i > 0; i = i >> 1U) {
+	for (i = (bitnum > 0U) ? (1U << (bitnum - 1U)) : 0U; i > 0U; i = i >> 1U) {
 		if (data & i) {
 			data_out = data_out | j;
 		}
@@ -703,8 +711,8 @@ static uint32_t ENDAT3_memCalcCS(uint16_t *p, const uint16_t len)
 
 status_t ENDAT3_memCacheCheckCS(endat3_mem_cache_t *cache)
 {
-	uint32_t cs_calc= ENDAT3_memCalcCS(&cache->cacheMem[2], cache->memSize - 2U);
-	uint32_t cs_stored = (cache->cacheMem[1] << 16U) | cache->cacheMem[0];
+	uint32_t cs_calc = ENDAT3_memCalcCS(&cache->cacheMem[2], (uint16_t)(cache->memSize - 2U));
+	uint32_t cs_stored = ((uint32_t)cache->cacheMem[1] << 16U) | (uint32_t)cache->cacheMem[0];
 	if (cs_stored != cs_calc) {
 		return kStatus_Endat3_MEM_Cache_Wrong_CS;
 	}
@@ -713,7 +721,7 @@ status_t ENDAT3_memCacheCheckCS(endat3_mem_cache_t *cache)
 
 status_t ENDAT3_memCacheUpdataCS(endat3_mem_cache_t *cache)
 {
-	uint32_t cs_calc= ENDAT3_memCalcCS(&cache->cacheMem[2], cache->memSize - 2U);
+	uint32_t cs_calc = ENDAT3_memCalcCS(&cache->cacheMem[2], (uint16_t)(cache->memSize - 2U));
 
 	cache->cacheMem[0] = cs_calc & 0xFFFF;
 	cache->cacheMem[1] = (cs_calc >> 16U) & 0xFFFF;
@@ -729,12 +737,12 @@ uint16_t  ENDAT3_lpfCacheGetPointer(uint8_t z, endat3_mem_cache_t *lpf_cache)
 
 void ENDAT3_lpfCacheGetXdimYdim(uint8_t z, endat3_mem_cache_t *lpf_cache, uint8_t *xdim, uint8_t *y_dim)
 {
-	uint8_t z_list = z - 1U;
+	uint8_t z_list = (uint8_t)(z - 1U);
 	uint16_t temp;
 	temp = *(lpf_cache->cacheMem + ENDAT3_MEM_LPFSET_LPFLIVE_HEAD_YDIM_1_OFFSET + z_list / 2U);
-	temp = temp >> ((z_list % 2U) * 8);
-	*y_dim = (temp & 0xF) + 1;
-	*xdim = (temp >> 4U) & 0xF;
+	temp = (uint16_t)(temp >> ((z_list % 2U) * 8U));
+	*y_dim = (uint8_t)((temp & 0xFU) + 1U);
+	*xdim  = (uint8_t)((temp >> 4U) & 0xFU);
 }
 
 void ENDAT3_lpfCacheSetPointer(uint8_t z, endat3_mem_cache_t *lpf_cache, uint16_t pointer)
@@ -746,11 +754,11 @@ void ENDAT3_lpfCacheSetPointer(uint8_t z, endat3_mem_cache_t *lpf_cache, uint16_
 void ENDAT3_lpfCacheSetXdimYdim(uint8_t z, endat3_mem_cache_t *lpf_cache, uint8_t xdim, uint8_t y_dim)
 {
 	uint8_t z_list, xy_dim, *addr;
-	z_list = z - 1U;
-	if (y_dim == 0) {
-		xy_dim = (xdim << 4U) | ((y_dim) & 0xF);
+	z_list = (uint8_t)(z - 1U);
+	if (y_dim == 0U) {
+		xy_dim = (uint8_t)((xdim << 4U) | ((uint8_t)(y_dim) & 0xFU));
 	} else {
-		xy_dim = (xdim << 4U) | ((y_dim - 1U) & 0xF);
+		xy_dim = (uint8_t)((xdim << 4U) | (((uint8_t)(y_dim - 1U)) & 0xFU));
 	}
 	addr = (uint8_t *)(lpf_cache->cacheMem + ENDAT3_MEM_LPFSET_LPFLIVE_HEAD_YDIM_1_OFFSET + z_list / 2);
 	ENDAT3_memCacheSetDirty(lpf_cache, ENDAT3_MEM_LPFSET_LPFLIVE_HEAD_YDIM_1_OFFSET  + z_list / 2, 1);
@@ -914,7 +922,7 @@ void ENDAT3_Bus_Init_ForAllParticipants(ENDAT3_Type *base, int nodes_num)
 		}
 
 		for (int i = 0; i < index; i++) {
-			ENDAT3_FG_Bus_P2P_BUSINIT(base, address[i]);
+			(void)ENDAT3_FG_Bus_P2P_BUSINIT(base, address[i]);
 		}
 }
 
