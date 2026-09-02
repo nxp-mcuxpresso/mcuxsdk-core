@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 if(CONFIG_MCUX_COMPONENT_driver.flexcan_edma)
-    mcux_component_version(2.12.1)
+    mcux_component_version(2.12.2)
 
     mcux_add_source(SOURCES fsl_flexcan_edma.h fsl_flexcan_edma.c)
 
