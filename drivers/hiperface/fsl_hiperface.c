@@ -103,7 +103,9 @@ void DSL_EncoderInit(HIPERFACE_Type *base, dsl_encoder_t *enc)
 
 status_t DSL_CheckLinkStatus(HIPERFACE_Type *base, uint32_t timeout_ms)
 {
-	uint32_t target = getTimestampMS() + timeout_ms;
+	uint32_t ts0    = getTimestampMS();
+	/* Avoid uint32_t addition overflow (CERT INT31-C): cap at UINT32_MAX. */
+	uint32_t target = (timeout_ms <= (UINT32_MAX - ts0)) ? (ts0 + timeout_ms) : UINT32_MAX;
 	do {
 		if (DSL_GetQualityMonitoringLink(base)) {
 			return kStatus_Success;
@@ -212,11 +214,15 @@ status_t DSL_RDB_Wrire(HIPERFACE_Type *base, uint16_t addr, uint16_t offset, voi
 	DSL_SetLmsgAddr(base, var, addr);
 	DSL_SetLmsgStart(base);
 
-	endTime = getTimestampMS() + timeout_ms;
+	{
+		uint32_t ts1 = getTimestampMS();
+		/* Avoid uint32_t addition overflow (CERT INT31-C): cap at UINT32_MAX. */
+		endTime = (timeout_ms <= (UINT32_MAX - ts1)) ? (ts1 + timeout_ms) : UINT32_MAX;
+	}
 	while (getTimestampMS() < endTime) {
 		if (DSl_GetEventLongMsgChannelfree(base)) {
 			if (DSL_GetLmsgLastCauseError(base) && errno != NULL) {
-				*errno = (base->PRIM[1] << 8) + base->PRIM[0];
+				*errno = ((uint16_t)base->PRIM[1] << 8U) | (uint16_t)base->PRIM[0];
 				return kStatus_DSL_Lmsg_Err_CausedByLmsg;
 			}
 
@@ -269,12 +275,16 @@ status_t DSL_RDB_Read(HIPERFACE_Type *base, uint16_t addr, uint16_t offset, void
 	DSl_ClrEventLongMsgChannelfree(base);
 	DSL_SetLmsgStart(base);
 
-	endTime = getTimestampMS() + timeout_ms;
+	{
+		uint32_t ts2 = getTimestampMS();
+		/* Avoid uint32_t addition overflow (CERT INT31-C): cap at UINT32_MAX. */
+		endTime = (timeout_ms <= (UINT32_MAX - ts2)) ? (ts2 + timeout_ms) : UINT32_MAX;
+	}
 	while (getTimestampMS() < endTime) {
 		if (DSl_GetEventLongMsgChannelfree(base)) {
 
 	if (DSL_GetLmsgLastCauseError(base) && errno != NULL) {
-		*errno = (base->PRIM[1] << 8) + base->PRIM[0];
+		*errno = ((uint16_t)base->PRIM[1] << 8U) | (uint16_t)base->PRIM[0];
 		return kStatus_DSL_Lmsg_Err_CausedByLmsg;
 	}
 

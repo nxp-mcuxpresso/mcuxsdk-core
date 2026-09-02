@@ -15,7 +15,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief HIPERFACE driver version. */
-#define FSL_HIPERFACE_DRIVER_VERSION (MAKE_VERSION(1, 0, 3))
+#define FSL_HIPERFACE_DRIVER_VERSION (MAKE_VERSION(1, 0, 4))
 
 #define POS_READY_MODE_SHOWS_TIME_ALL_TRANSMISSIONS      1
 #define POS_READY_MODE_SHOWS_TIME_SYNC_TRANSMISSIONS     0
