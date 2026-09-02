@@ -1,5 +1,10 @@
 # BiSS
 
+## [1.0.4]
+
+- Bug Fixes
+  - Optimize BISS_SCDLeftToRight performance.
+
 ## [1.0.3]
 
 - Bug Fixes

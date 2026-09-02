@@ -1341,16 +1341,13 @@ status_t BISS_SLVGetSCD(biss_master_t *master,
 
 uint64_t BISS_SCDLeftToRight(uint64_t SCData)
 {
-    uint64_t SCDdataNew = 0;
-    uint8_t index;
-
-    for (index = 0; index < 64; index++)
-    {
-        SCDdataNew |= (SCData >> index) & 0x01;
-        SCDdataNew = SCDdataNew << 1;
-    }
-
-    return SCDdataNew;
+    SCData = ((SCData & 0x5555555555555555ULL) << 1) | ((SCData >> 1) & 0x5555555555555555ULL);
+    SCData = ((SCData & 0x3333333333333333ULL) << 2) | ((SCData >> 2) & 0x3333333333333333ULL);
+    SCData = ((SCData & 0x0F0F0F0F0F0F0F0FULL) << 4) | ((SCData >> 4) & 0x0F0F0F0F0F0F0F0FULL);
+    SCData = ((SCData & 0x00FF00FF00FF00FFULL) << 8) | ((SCData >> 8) & 0x00FF00FF00FF00FFULL);
+    SCData = ((SCData & 0x0000FFFF0000FFFFULL) << 16) | ((SCData >> 16) & 0x0000FFFF0000FFFFULL);
+    SCData = (SCData << 32) | (SCData >> 32);
+    return SCData;
 }
 
 int BISS_SCDGetnWarning(biss_master_t *master, uint8_t slvID, uint64_t SCData)
