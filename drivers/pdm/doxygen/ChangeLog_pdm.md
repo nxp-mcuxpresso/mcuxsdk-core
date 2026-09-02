@@ -1,5 +1,15 @@
 # PDM
 
+## [2.9.8]
+- Bug Fixes
+  - Fixed Coverity CERT INT30-C unsigned integer wraparound defects in PDM_ReadFifo by
+    guarding both the channel index (startChannel + j) and the buffer-pointer advance
+    against wraparound before each FIFO read (CID 26532168).
+  - Fixed Coverity CERT INT30-C unsigned integer wraparound and CERT INT31-C
+    value-changing conversion defects in PDM_ReadNonBlocking by guarding the channel
+    index and copying the 16-bit sample bit pattern with memcpy to avoid a
+    value-changing unsigned-to-signed conversion (CID 33831988, CID 33831989).
+
 ## [2.9.7]
 - Bug Fixes
   - Fixed Coverity NULL_FIELD defect in PDM_TransferHandleIRQ: added NULL check for
