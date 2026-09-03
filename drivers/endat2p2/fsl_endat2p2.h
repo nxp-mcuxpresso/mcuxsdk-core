@@ -20,7 +20,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_ENDAT2P2_DRIVER_VERSION (MAKE_VERSION(1, 0, 1)) /*!< Version 1.0.1 */
+#define FSL_ENDAT2P2_DRIVER_VERSION (MAKE_VERSION(1, 0, 2))
 /*! @} */
 
 #define SSI_MODE   0x1

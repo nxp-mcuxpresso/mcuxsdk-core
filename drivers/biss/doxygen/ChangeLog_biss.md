@@ -1,5 +1,10 @@
 # BiSS
 
+## [1.0.5]
+
+- Code style
+  - Apply clang-format code style
+  - Remove BISS_SCDLeftToRight function
 ## [1.0.4]
 
 - Bug Fixes

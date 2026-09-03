@@ -1,5 +1,10 @@
 # ENDAT3
 
+## [2.0.4]
+
+- Code style
+  - Apply clang-format code style
+
 ## [2.0.3]
 
 - Bug Fixes

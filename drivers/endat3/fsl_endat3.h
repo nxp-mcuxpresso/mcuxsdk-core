@@ -16,7 +16,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief ENDAT3 driver version. */
-#define FSL_ENDAT3_DRIVER_VERSION (MAKE_VERSION(2, 0, 3))
+#define FSL_ENDAT3_DRIVER_VERSION (MAKE_VERSION(2, 0, 4))
 
 #ifndef BSWAP32
 #define BSWAP32 __REV
