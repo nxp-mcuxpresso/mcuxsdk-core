@@ -965,10 +965,10 @@ void DCIF_FbdSetConfig(DCIF_Type *base, const dcif_fbd_config_t *config);
    config->vfp = 0;
    config->vbp = 0;
    config->polarityFlags = kDCIF_HsyncActiveLow | kDCIF_VsyncActiveLow | kDCIF_DriveDataOnFallingClkEdge;
-   config->format = kDCIF_DpiRGB565;;
-   config->dcif_dpi_display_mode_t = kDCIF_DpiNormal;
+   config->format = kDCIF_DpiRGB565;
+   config->displayMode = kDCIF_DpiNormal;
    config->frameFetch = kDCIF_DpiVfpBegin;
-   config->tcFifoFill = kDCIF_DpiVbpEnd;
+   config->txFifoFill = kDCIF_DpiVfpBegin;
    config->enableBackground = true;
  * @endcode
  *
