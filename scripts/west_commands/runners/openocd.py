@@ -15,7 +15,7 @@ try:
 except ImportError:
     ELFFile = None
 
-from runners.core import ZephyrBinaryRunner
+from runners.core import ZephyrBinaryRunner, RunnerCaps
 
 DEFAULT_OPENOCD_TCL_PORT = 6333
 DEFAULT_OPENOCD_TELNET_PORT = 4444
@@ -82,13 +82,17 @@ class OpenOcdBinaryRunner(ZephyrBinaryRunner):
         self.targets_arg = [] if no_targets else ['-c targets']
         self.serial = ['-c set _ZEPHYR_BOARD_SERIAL ' + serial] if serial else []
         self.use_elf = use_elf
-        self.gdb_init = gdb_init
+        self.gdb_init = gdb_init or []
         self.load_arg = [] if no_load else ['-ex', 'load']
         self.target_handle = target_handle
 
     @classmethod
     def name(cls):
         return 'openocd'
+
+    @classmethod
+    def capabilities(cls):
+        return RunnerCaps(gdb_init=True)
 
     @classmethod
     def do_add_parser(cls, parser):
@@ -132,8 +136,6 @@ class OpenOcdBinaryRunner(ZephyrBinaryRunner):
                             help='openocd telnet port, defaults to 4444')
         parser.add_argument('--gdb-port', default=DEFAULT_OPENOCD_GDB_PORT,
                             help='openocd gdb port, defaults to 3333')
-        parser.add_argument('--gdb-init', action='append',
-                            help='if given, add GDB init commands')
         parser.add_argument('--no-halt', action='store_true',
                             help='if given, no halt issued in gdb server cmd')
         parser.add_argument('--no-init', action='store_true',
@@ -341,10 +343,7 @@ class OpenOcdBinaryRunner(ZephyrBinaryRunner):
                     self.elf_name])
         if command == 'debug':
             gdb_cmd.extend(self.load_arg)
-        if self.gdb_init is not None:
-            for i in self.gdb_init:
-                gdb_cmd.append("-ex")
-                gdb_cmd.append(i)
+        gdb_cmd.extend(self.gdb_ex_args(self.gdb_init))
 
         self.require(gdb_cmd[0])
         self.print_gdbserver_message()

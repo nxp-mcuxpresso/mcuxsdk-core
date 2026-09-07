@@ -49,7 +49,7 @@ class JLinkBinaryRunner(ZephyrBinaryRunner):
                  gdbserver='JLinkGDBServer',
                  gdb_host='',
                  gdb_port=DEFAULT_JLINK_GDB_PORT,
-                 tui=False, tool_opt=[]):
+                 tui=False, tool_opt=[], gdb_init=None):
         super().__init__(cfg)
         self.file = cfg.file
         self.file_type = cfg.file_type
@@ -69,6 +69,7 @@ class JLinkBinaryRunner(ZephyrBinaryRunner):
         self.gdb_host = gdb_host
         self.gdb_port = gdb_port
         self.tui_arg = ['-tui'] if tui else []
+        self.gdb_init = gdb_init or []
         self.loader = loader
 
         self.tool_opt = []
@@ -83,7 +84,7 @@ class JLinkBinaryRunner(ZephyrBinaryRunner):
     def capabilities(cls):
         return RunnerCaps(commands={'flash', 'debug', 'debugserver', 'attach'},
                           dev_id=True, flash_addr=True, erase=True, reset=True,
-                          tool_opt=True, file=True)
+                          tool_opt=True, file=True, gdb_init=True)
 
     @classmethod
     def dev_id_help(cls) -> str:
@@ -142,7 +143,8 @@ class JLinkBinaryRunner(ZephyrBinaryRunner):
                                  loader=args.loader,
                                  gdb_host=args.gdb_host,
                                  gdb_port=args.gdb_port,
-                                 tui=args.tui, tool_opt=args.tool_opt)
+                                 tui=args.tui, tool_opt=args.tool_opt,
+                                 gdb_init=args.gdb_init)
 
     def print_gdbserver_message(self):
         if not self.thread_info_enabled:
@@ -277,6 +279,12 @@ class JLinkBinaryRunner(ZephyrBinaryRunner):
                                '-ex', 'load']
                 if self.reset:
                     client_cmd += ['-ex', 'monitor reset']
+                # Run the user's commands after the last reset, so that nothing
+                # discards their effect, and while the target is still halted.
+                client_cmd += self.gdb_ex_args(self.gdb_init)
+            if command == 'attach':
+                client_cmd += self.gdb_ex_args(self.gdb_init)
+
             if not self.gdb_host:
                 self.require(self.gdbserver)
                 self.print_gdbserver_message()

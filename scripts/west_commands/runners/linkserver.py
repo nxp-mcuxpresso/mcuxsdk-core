@@ -30,7 +30,7 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
                  gdb_port=DEFAULT_LINKSERVER_GDB_PORT,
                  semihost_port=DEFAULT_LINKSERVER_SEMIHOST_PORT,
                  override=[],
-                 tui=False, tool_opt=[]):
+                 tui=False, tool_opt=[], gdb_init=None):
         super().__init__(cfg)
         self.file = cfg.file
         self.file_type = cfg.file_type
@@ -48,6 +48,7 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
         self.gdb_port = gdb_port
         self.semihost_port = semihost_port
         self.tui_arg = ['-tui'] if tui else []
+        self.gdb_init = gdb_init or []
         self.override = override
         self.override_cli = self._build_override_cli()
 
@@ -63,7 +64,7 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
     def capabilities(cls):
         return RunnerCaps(commands={'flash', 'debug', 'debugserver', 'attach'},
                           dev_id=True, flash_addr=True, erase=True,
-                          tool_opt=True, file=True)
+                          tool_opt=True, file=True, gdb_init=True)
 
     @classmethod
     def do_add_parser(cls, parser):
@@ -103,7 +104,8 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
                                  semihost_port=args.semihost_port,
                                  gdb_port=args.gdb_port,
                                  override=args.override,
-                                 tui=args.tui, tool_opt=args.tool_opt)
+                                 tui=args.tui, tool_opt=args.tool_opt,
+                                 gdb_init=args.gdb_init)
 
     @property
     def linkserver_version_str(self):
@@ -150,6 +152,11 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
 
                 if command == 'debug':
                     gdb_cmd += [ '-ex', 'load', '-ex', 'monitor reset']
+
+                # Run the user's commands once the runner's own connect, load
+                # and reset commands are done, while the target is still
+                # halted, so that they take effect before it is resumed.
+                gdb_cmd += self.gdb_ex_args(self.gdb_init)
 
                 if command == 'attach':
                     linkserver_cmd += ['--attach']

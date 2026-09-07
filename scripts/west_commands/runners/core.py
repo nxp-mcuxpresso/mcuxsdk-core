@@ -259,6 +259,10 @@ class RunnerCaps:
       can be given multiple times and is passed on to the underlying tool
       that the runner wraps.
 
+    - gdb_init: whether the runner supports a --gdb-init option, which can be
+      given multiple times and appends commands, in the order given, to the GDB
+      client invocation, after the ones the runner issues itself.
+
     - file: whether the runner supports a --file option, which specifies
       exactly the file that should be used to flash, overriding any default
       discovered in the build directory.
@@ -270,6 +274,7 @@ class RunnerCaps:
     erase: bool = False
     reset: bool = False
     tool_opt: bool = False
+    gdb_init: bool = False
     file: bool = False
 
     def __post_init__(self):
@@ -555,6 +560,14 @@ class ZephyrBinaryRunner(abc.ABC):
                             help=(cls.tool_opt_help() if caps.tool_opt
                                   else argparse.SUPPRESS))
 
+        parser.add_argument('--gdb-init', dest='gdb_init',
+                            default=[], action='append',
+                            metavar='COMMAND',
+                            help=('command to run in the GDB client, after the '
+                                  'ones the runner issues itself; may be given '
+                                  'multiple times, in order'
+                                  if caps.gdb_init else argparse.SUPPRESS))
+
         # Runner-specific options.
         cls.do_add_parser(parser)
 
@@ -582,6 +595,8 @@ class ZephyrBinaryRunner(abc.ABC):
             _missing_cap(cls, '--reset')
         if args.tool_opt and not caps.tool_opt:
             _missing_cap(cls, '--tool-opt')
+        if args.gdb_init and not caps.gdb_init:
+            _missing_cap(cls, '--gdb-init')
         if args.file and not caps.file:
             _missing_cap(cls, '--file')
         if args.file_type and not args.file:
@@ -682,6 +697,13 @@ class ZephyrBinaryRunner(abc.ABC):
                   by this runner. This can be given multiple times;
                   the resulting arguments will be given to the tool
                   in the order they appear on the command line.'''
+
+    @staticmethod
+    def gdb_ex_args(commands: list[str] | None) -> list[str]:
+        '''Turn GDB commands into '-ex', <command> pairs for a GDB argv.
+
+        The commands are passed on verbatim.'''
+        return [arg for command in (commands or []) for arg in ('-ex', command)]
 
     @staticmethod
     def require(program: str, path: Optional[str] = None) -> str:
