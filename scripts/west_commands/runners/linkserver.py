@@ -151,11 +151,12 @@ class LinkServerBinaryRunner(ZephyrBinaryRunner):
                            ['-ex', 'target remote {}:{}'.format(self.gdb_host, self.gdb_port)])
 
                 if command == 'debug':
-                    gdb_cmd += [ '-ex', 'load', '-ex', 'monitor reset']
+                    # If the flash node points to ram, linkserver treats
+                    # the ram as inaccessible and does not flash.
+                    gdb_cmd += ['-ex', 'set mem inaccessible-by-default off']
+                    gdb_cmd += ['-ex', 'monitor reset', '-ex', 'load']
 
-                # Run the user's commands once the runner's own connect, load
-                # and reset commands are done, while the target is still
-                # halted, so that they take effect before it is resumed.
+                # Run the user's commands while the target is still halted.
                 gdb_cmd += self.gdb_ex_args(self.gdb_init)
 
                 if command == 'attach':
