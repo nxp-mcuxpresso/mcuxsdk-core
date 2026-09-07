@@ -54,6 +54,13 @@
 #define ENET_QOS_NTOHL(n) __REV(n)
 
 #define ENET_QOS_DMA_CHX_RX_CTRL_RBSZ
+/*! @brief Busy-loop count that lets a MAC config write settle across clock domains before the
+ * same register is written again (databook requires >= 4 destination-clock cycles, ~1.6 us at
+ * the 2.5 MHz 10 Mbps PHY clock). */
+#ifndef ENET_QOS_SETMII_DELAY
+#define ENET_QOS_SETMII_DELAY (1000UL)
+#endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -1817,6 +1824,8 @@ void ENET_QOS_LeaveMulticastGroup(ENET_QOS_Type *base, uint8_t *address)
  * brief Sets the ENET MII speed and duplex.
  *
  * This API is provided to dynamically change the speed and duplex for MAC.
+ * The databook requires speed/duplex to change only while TX/RX are disabled,
+ * so any enabled TE/RE bits are cleared before the change and restored after.
  *
  * param base  ENET peripheral base address.
  * param speed The speed of the RMII mode.
@@ -1826,18 +1835,44 @@ void ENET_QOS_LeaveMulticastGroup(ENET_QOS_Type *base, uint8_t *address)
  */
 status_t ENET_QOS_SetMII(ENET_QOS_Type *base, enet_qos_mii_speed_t speed, enet_qos_mii_duplex_t duplex)
 {
-    uint32_t reg = base->MAC_CONFIGURATION & ~(ENET_QOS_MAC_CONFIGURATION_DM_MASK | ENET_QOS_MAC_CONFIGURATION_PS_MASK |
-                                               ENET_QOS_MAC_CONFIGURATION_FES_MASK);
     enet_qos_mii_mode_t configured_mode = s_enetStates[ENET_QOS_GetInstance(base)].miiMode;
+    uint32_t reg;
+    uint32_t teRe;
 
     if (!ENET_QOS_IsMIIConfigValid(configured_mode, speed))
     {
         return kStatus_InvalidArgument;
     }
 
-    reg |= ENET_QOS_MAC_CONFIGURATION_DM(duplex) | (uint32_t)speed;
+    reg  = base->MAC_CONFIGURATION;
+    teRe = reg & (ENET_QOS_MAC_CONFIGURATION_TE_MASK | ENET_QOS_MAC_CONFIGURATION_RE_MASK);
 
+    if (teRe != 0U)
+    {
+        /* Speed/duplex may only change while TX/RX are disabled; disable and let it settle. */
+        base->MAC_CONFIGURATION = reg & ~(ENET_QOS_MAC_CONFIGURATION_TE_MASK | ENET_QOS_MAC_CONFIGURATION_RE_MASK);
+
+        for (uint32_t i = 0U; i < ENET_QOS_SETMII_DELAY; i++)
+        {
+            __NOP();
+        }
+    }
+
+    reg &= ~(ENET_QOS_MAC_CONFIGURATION_DM_MASK | ENET_QOS_MAC_CONFIGURATION_PS_MASK |
+             ENET_QOS_MAC_CONFIGURATION_FES_MASK | ENET_QOS_MAC_CONFIGURATION_TE_MASK |
+             ENET_QOS_MAC_CONFIGURATION_RE_MASK);
+    reg |= ENET_QOS_MAC_CONFIGURATION_DM(duplex) | (uint32_t)speed;
     base->MAC_CONFIGURATION = reg;
+
+    if (teRe != 0U)
+    {
+        /* Let the write settle, then restore TX/RX. */
+        for (uint32_t i = 0U; i < ENET_QOS_SETMII_DELAY; i++)
+        {
+            __NOP();
+        }
+        base->MAC_CONFIGURATION = reg | teRe;
+    }
 
     return kStatus_Success;
 }

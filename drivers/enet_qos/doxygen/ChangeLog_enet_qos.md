@@ -1,5 +1,14 @@
 # ENET_QOS
 
+## [2.7.9]
+
+- Bug Fixes
+  - Fixed ENET_QOS_SetMII to reconfigure MAC speed/duplex safely while the
+    transmitter/receiver are enabled, per the Synopsys ENET-QoS databook. It now
+    clears TE/RE, applies the new speed/duplex in a single MAC_CONFIGURATION
+    write, and (only when TE/RE were set) re-enables them after a clock-domain
+    settle delay.
+
 ## [2.7.8]
 
 - Bug Fixes
