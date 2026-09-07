@@ -20,7 +20,7 @@
 /*! @name Driver version */
 /*@{*/
 /*! @brief Defines the driver version. */
-#define FSL_ENET_DRIVER_VERSION (MAKE_VERSION(2, 2, 4))
+#define FSL_ENET_DRIVER_VERSION (MAKE_VERSION(2, 2, 5))
 /*@}*/
 
 /*! @name Control and status region bit masks of the receive buffer descriptor. */
@@ -786,18 +786,50 @@ void ENET_SetISRHandler(ENET_Type *base, enet_isr_t ISRHandler);
 /*!
  * @brief Sets the ENET MII speed and duplex.
  *
- * This API is provided to dynamically change the speed and dulpex for MAC.
+ * This API is provided to dynamically change the speed and duplex for MAC.
+ * The databook requires speed/duplex to change only while TX/RX are disabled,
+ * so any enabled TE/RE bits are cleared before the change and restored after.
  *
  * @param base  ENET peripheral base address.
  * @param speed The speed of the RMII mode.
  * @param duplex The duplex of the RMII mode.
  */
+/*! @brief Busy-loop count that lets a MAC config write settle across clock domains before the
+ * same register is written again (databook requires >= 4 destination-clock cycles, ~1.6 us at
+ * the 2.5 MHz 10 Mbps PHY clock). */
+#ifndef ENET_SETMII_DELAY
+#define ENET_SETMII_DELAY (1000UL)
+#endif
 static inline void ENET_SetMII(ENET_Type *base, enet_mii_speed_t speed, enet_mii_duplex_t duplex)
 {
-    uint32_t reg = base->MAC_CONFIGURATION & ~(ENET_MAC_CONFIGURATION_DM_MASK | ENET_MAC_CONFIGURATION_FES_MASK);
-    reg |= ENET_MAC_CONFIGURATION_DM(duplex) | ENET_MAC_CONFIGURATION_FES(speed);
+    uint32_t reg  = base->MAC_CONFIGURATION;
+    uint32_t teRe = reg & (ENET_MAC_CONFIGURATION_TE_MASK | ENET_MAC_CONFIGURATION_RE_MASK);
 
+    if (teRe != 0U)
+    {
+        /* Speed/duplex may only change while TX/RX are disabled; disable and let it settle. */
+        base->MAC_CONFIGURATION = reg & ~(ENET_MAC_CONFIGURATION_TE_MASK | ENET_MAC_CONFIGURATION_RE_MASK);
+
+        for (uint32_t i = 0U; i < ENET_SETMII_DELAY; i++)
+        {
+            __NOP();
+        }
+    }
+
+    reg &= ~(ENET_MAC_CONFIGURATION_TE_MASK | ENET_MAC_CONFIGURATION_RE_MASK | ENET_MAC_CONFIGURATION_DM_MASK |
+             ENET_MAC_CONFIGURATION_FES_MASK);
+    reg |= ENET_MAC_CONFIGURATION_DM(duplex) | ENET_MAC_CONFIGURATION_FES(speed);
     base->MAC_CONFIGURATION = reg;
+
+    if (teRe != 0U)
+    {
+        /* Let the write settle, then restore TX/RX. */
+        for (uint32_t i = 0U; i < ENET_SETMII_DELAY; i++)
+        {
+            __NOP();
+        }
+        base->MAC_CONFIGURATION = reg | teRe;
+    }
 }
 
 /*!
