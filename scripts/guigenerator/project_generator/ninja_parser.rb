@@ -501,7 +501,8 @@ class NinjaParser
             # Codewarrior IDE will add these flags automatically, not need to add them from CMake setting
             all_flags = result[1].gsub('-bin -gap-fill 0xff -flash-start-x 0x20000', '')
             all_flags = all_flags.gsub('-msgstyle', '').gsub('parseable', '').gsub('-g', '')
-            all_flags = parse_ld_script(all_flags).split(/\s+/)
+            # keep quoted paths whole, the CW install dir contains spaces
+            all_flags = split_respecting_quotes(parse_ld_script(all_flags))
           else
             # Parse tokens: quoted strings ("...") are treated as one token (path may contain spaces)
             raw_tokens = parse_ld_script(result[1]).scan(/"[^"]*"|\S+/)
@@ -638,9 +639,12 @@ class NinjaParser
           end
         elsif @toolchain == 'codewarrior'
           if flag.strip == '-I-'
-            # for codewarrior, "-I -i path" and "-I -ir path" should be seen as a whole
-            result.push "#{flag} #{all_flags[index+1]}  #{all_flags[index+2]} #{all_flags[index+3]}"
-            for i in 1..3
+            # for codewarrior, "-I -i path" and "-I -ir path" should be seen as a whole,
+            # consume extra tokens only while the path quotes are unbalanced
+            last = index + 2
+            last += 1 while all_flags[last] && all_flags[(index + 2)..last].compact.join(' ').count('"').odd?
+            result.push "#{flag} #{all_flags[index+1]}  #{all_flags[(index + 2)..last].compact.join(' ')}"
+            for i in 1..(last - index)
               all_flags[index+i] = nil
             end
           elsif ['-data', '-prog', '-opt'].include? flag.strip
@@ -654,7 +658,8 @@ class NinjaParser
             cfg["lib-search-path"] ||= []
             cfg["lib-search-path"] << {'path' => lib_path} unless cfg["lib-search-path"].any? { |e| e['path'] == lib_path }
           else
-            pattern = /-l\"(\S+)MCU\/(DSP56800x_EABI_Tools\/lib\S+)\"/
+            # the part before MCU/ may contain spaces, so \S+ does not work here
+            pattern = /-l\"([^\"]+)MCU\/(DSP56800x_EABI_Tools\/lib[^\"]+)\"/
             res = flag.strip.match(pattern)
             if res && res[2]
               result.push "-l\\\"${MCUToolsBaseDir}/#{res[2]}\\\""
