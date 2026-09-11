@@ -39,7 +39,7 @@
  ******************************************************************************/
 
 /*! @brief Construct a status code value from a group and code number. */
-#define MAKE_STATUS(group, code) ((((group)*100L) + (code)))
+#define MAKE_STATUS(statusGroup, statusCode) ((((statusGroup)*100L) + (statusCode)))
 
 /*! @brief Construct the version number for drivers.
  *
