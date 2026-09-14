@@ -1112,7 +1112,6 @@ void I3C_MasterSetBaudRate(I3C_Type *base, const i3c_baudrate_hz_t *baudRate_Hz,
     uint32_t i3cODBaudMax_HZ = i3cODBaud_HZ / 10U + i3cODBaud_HZ; /* max is 1.1*i3cODBaud_HZ */
     uint32_t i2cBaud_HZ      = baudRate_Hz->i2cBaud;
     uint32_t i3cPPLow_Ns, i3cOdLow_Ns;
-    uint64_t temp;
     bool isODHigh = (0U != (base->MCONFIG & I3C_MCONFIG_ODHPP_MASK)) ? true : false;
 
     /* Find out the div to generate target freq */
@@ -1160,24 +1159,23 @@ void I3C_MasterSetBaudRate(I3C_Type *base, const i3c_baudrate_hz_t *baudRate_Hz,
     assert(odBaud < FSL_I3C_ODBAUD_DIV_MAX);
     assert(ppBaud < FSL_I3C_PPBAUD_DIV_MAX);
 
-    temp = ((uint64_t)odBaud + 1UL) * (uint64_t)i3cPPLow_Ns;
-    assert(temp <= UINT32_MAX);
-    i3cOdLow_Ns = (uint32_t)temp;
+    /* CodeWarrior for DSC has no uint64_t support: check for overflow via division instead
+     * of widening, per CERT INT30-C compliant solution. */
+    assert((odBaud + 1UL) <= (UINT32_MAX / i3cPPLow_Ns));
+    i3cOdLow_Ns = (odBaud + 1UL) * i3cPPLow_Ns;
 
     /* i2cFreq = odFreq / (I2CBAUD + 1), 0 <= I2CBAUD <= 7 (I2CBAUD need << 1 in register) */
     /* i2cFreq = NSEC_PER_SEC / (I2CBAUD + 1)*i3cOdLow_Ns */
     divEven = (sourceClock_Hz / i2cBaud_HZ) / (2UL * (ppBaud + 1UL) * (odBaud + 1UL));
     divEven = divEven == 0UL ? 1UL : divEven;
 
-    temp = 2UL * (uint64_t)divEven * (uint64_t)i3cOdLow_Ns;
-    assert(temp <= UINT32_MAX);
-    errRate0 = I3C_CalcErrorRatio((uint32_t)(NSEC_PER_SEC / (uint32_t)temp), i2cBaud_HZ);
+    assert(divEven <= (UINT32_MAX / 2UL / i3cOdLow_Ns));
+    errRate0 = I3C_CalcErrorRatio((uint32_t)(NSEC_PER_SEC / (2UL * divEven * i3cOdLow_Ns)), i2cBaud_HZ);
 
     divOdd = ((sourceClock_Hz / i2cBaud_HZ) / ((ppBaud + 1UL) * (odBaud + 1UL) - 1UL)) / 2UL;
     divOdd = divOdd == 0UL ? 1UL : divOdd;
-    temp   = ((2UL * (uint64_t)divOdd + 1UL) * (uint64_t)i3cOdLow_Ns);
-    assert(temp <= UINT32_MAX);
-    errRate1 = I3C_CalcErrorRatio((uint32_t)(NSEC_PER_SEC / (uint32_t)temp), i2cBaud_HZ);
+    assert((2UL * divOdd + 1UL) <= (UINT32_MAX / i3cOdLow_Ns));
+    errRate1 = I3C_CalcErrorRatio((uint32_t)(NSEC_PER_SEC / ((2UL * divOdd + 1UL) * i3cOdLow_Ns)), i2cBaud_HZ);
 
     if (errRate0 < FSL_I3C_ERROR_RATE_MAX || errRate1 < FSL_I3C_ERROR_RATE_MAX)
     {
