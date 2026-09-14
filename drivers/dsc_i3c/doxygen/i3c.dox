@@ -1,0 +1,20 @@
+
+
+/*!
+ * @defgroup i3c I3C: I3C Driver
+ */
+
+/*!
+ * @defgroup i3c_master_driver I3C Master Driver
+ * @ingroup i3c
+ */
+
+/*!
+ * @defgroup i3c_slave_driver I3C Slave Driver
+ * @ingroup i3c
+ */
+
+/*!
+ * @defgroup i3c_common_driver I3C Common Driver
+ * @ingroup i3c
+ */

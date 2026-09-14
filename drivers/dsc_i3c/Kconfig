@@ -1,0 +1,21 @@
+# Copyright 2026 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.dsc_i3c
+    bool
+    default y if MCUX_HW_IP_DriverType_DSC_I3C
+
+config MCUX_COMPONENT_driver.dsc_i3c
+    bool "i3c"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.dsc_i3c
+
+if MCUX_COMPONENT_driver.dsc_i3c
+    config I3C_RETRY_TIMES
+        int "Max loops to wait for I3C operation status complete (0 means wait forever)"
+        default 0
+        help
+            This is the maximum number of loops to wait for I3C operation status complete.
+            If set to 0, it will wait indefinitely.
+endif
