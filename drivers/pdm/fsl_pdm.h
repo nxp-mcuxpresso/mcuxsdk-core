@@ -1217,6 +1217,16 @@ void PDM_TransferAbortReceive(PDM_Type *base, pdm_handle_t *handle);
  * @param handle Pointer to the pdm_handle_t structure.
  */
 void PDM_TransferHandleIRQ(PDM_Type *base, pdm_handle_t *handle);
+void PDM_EventHandleIRQ(uint32_t instance);
+#if !(defined FSL_FEATURE_PDM_HAS_NO_INDEPENDENT_ERROR_IRQ && FSL_FEATURE_PDM_HAS_NO_INDEPENDENT_ERROR_IRQ)
+void PDM_ErrorHandleIRQ(uint32_t instance);
+#endif
+#if !(defined(FSL_FEATURE_PDM_HAS_NO_HWVAD) && FSL_FEATURE_PDM_HAS_NO_HWVAD)
+void PDM_HwvadEventHandleIRQ(uint32_t instance);
+#if !(defined FSL_FEATURE_PDM_HAS_NO_INDEPENDENT_ERROR_IRQ && FSL_FEATURE_PDM_HAS_NO_INDEPENDENT_ERROR_IRQ)
+void PDM_HwvadErrorHandleIRQ(uint32_t instance);
+#endif
+#endif
 
 /*! @} */
 

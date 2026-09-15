@@ -1070,7 +1070,7 @@ void PDM_EnableHwvadInterruptCallback(PDM_Type *base, pdm_hwvad_callback_t vadCa
 
 #endif
 
-static void PDM_EventHandleIRQ(uint32_t instance)
+void PDM_EventHandleIRQ(uint32_t instance)
 {
     assert(instance < ARRAY_SIZE(s_pdmBases));
     assert(s_pdmHandle[instance] != NULL);
@@ -1080,7 +1080,7 @@ static void PDM_EventHandleIRQ(uint32_t instance)
 }
 
 #if !(defined FSL_FEATURE_PDM_HAS_NO_INDEPENDENT_ERROR_IRQ && FSL_FEATURE_PDM_HAS_NO_INDEPENDENT_ERROR_IRQ)
-static void PDM_ErrorHandleIRQ(uint32_t instance)
+void PDM_ErrorHandleIRQ(uint32_t instance)
 {
     assert(instance < ARRAY_SIZE(s_pdmBases));
     assert(s_pdmHandle[instance] != NULL);
@@ -1090,7 +1090,7 @@ static void PDM_ErrorHandleIRQ(uint32_t instance)
 #endif
 
 #if !(defined(FSL_FEATURE_PDM_HAS_NO_HWVAD) && FSL_FEATURE_PDM_HAS_NO_HWVAD)
-static void PDM_HwvadEventHandleIRQ(uint32_t instance)
+void PDM_HwvadEventHandleIRQ(uint32_t instance)
 {
     assert(instance < ARRAY_SIZE(s_pdmBases));
 
@@ -1117,7 +1117,7 @@ static void PDM_HwvadEventHandleIRQ(uint32_t instance)
 }
 
 #if !(defined FSL_FEATURE_PDM_HAS_NO_INDEPENDENT_ERROR_IRQ && FSL_FEATURE_PDM_HAS_NO_INDEPENDENT_ERROR_IRQ)
-static void PDM_HwvadErrorHandleIRQ(uint32_t instance)
+void PDM_HwvadErrorHandleIRQ(uint32_t instance)
 {
     assert(instance < ARRAY_SIZE(s_pdmBases));
 
