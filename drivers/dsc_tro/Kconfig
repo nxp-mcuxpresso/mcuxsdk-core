@@ -1,0 +1,43 @@
+# Copyright 2026 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+config MCUX_HAS_COMPONENT_driver.dsc_tro
+    bool
+    default y if MCUX_HW_IP_DriverType_DSC_TRO
+
+config MCUX_COMPONENT_driver.dsc_tro
+    bool "dsc_tro"
+    select MCUX_COMPONENT_driver.common
+    depends on MCUX_HAS_COMPONENT_driver.dsc_tro
+
+if MCUX_COMPONENT_driver.dsc_tro
+
+    config TRO_CONFIG_VLD_TIMEOUT
+        int "Max loops to wait for TRO configuration valid (0 means wait forever)"
+        default 0
+        help
+          CSR[TRO_CONFIG_VLD] asserts after CSR[TROEN] is set and gates the DLY_CFG
+          and DIV_CFG writes that follow, so the driver waits for it during TRO_Init.
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+    config TRO_DLY_DONE_TIMEOUT
+        int "Max loops to wait for TRO delay line shift transfer complete (0 means wait forever)"
+        default 0
+        help
+          DLY_CFG[TRO_DLY_DONE] reports that the previous delay line shift transfer
+          completed, so the driver waits for it before writing new delay line lengths.
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+    config TRO_DIV_DONE_TIMEOUT
+        int "Max loops to wait for TRO divider shift transfer complete (0 means wait forever)"
+        default 0
+        help
+          DIV_CFG[TRO_DIV_DONE] reports that the previous divider shift transfer
+          completed, so the driver waits for it before writing a new divider value.
+          This parameter defines how many loops to check completion before return timeout.
+          If defined as 0, driver will wait forever until completion.
+
+endif

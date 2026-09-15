@@ -1,0 +1,63 @@
+/*!
+@defgroup dsc_tro TRO: Tracking Ring Oscillator
+@details The MCUXpresso SDK provides a driver for the Tracking Ring Oscillator (TRO).
+
+The TRO's frequency tracks process, voltage, and temperature, so reading it works as an on-die PVT
+sensor. Four delay lines (standard, long, complex gate, RC) can each be lengthened or shortened to
+match the loop to a real critical path rather than to a fixed delay.
+
+# Function groups
+
+## Initialization
+TRO_Init() enables the TRO bus clock (unless driver clock control is disabled), sets CSR[TROEN],
+waits for CSR[TRO_CONFIG_VLD], then writes the delay line and divider registers - writes issued
+before TRO_CONFIG_VLD asserts are discarded by hardware. It fails with kStatus_Fail if CSR[LK] is
+already set. The caller must first select a running reference clock
+(SIM_PERIPH_CLKSEL0[TRO_CLK_SEL]) and, on dual-core devices, set bus ownership
+(kSIM_AIPS_SEL_TRO); this driver never touches those shared SIM registers.
+
+TRO_Deinit() clears CSR[TROEN] and gates the bus clock back off. Hardware resets DLY_CFG and
+DIV_CFG when TROEN clears, so a later TRO_Init() must supply the configuration again, and no TRO
+register - not even the read-only counters - is accessible until then.
+
+## Oscillator configuration
+TRO_SetDelayLineConfig() and TRO_SetClockDivider() each poll a DONE bit before writing, because the
+configuration is shifted into hardware as a transfer and writes issued mid-transfer are discarded.
+
+There is no set-frequency API: the delay-line-to-frequency mapping is unmeasured per part (reset
+state pairs maximum code with a mid-range frequency), so sweep TRO_SetDelayLineConfig() and
+measure with window mode to build one.
+
+TRO_LockRegisters() sets or clears CSR[LK]. While locked, every other write API in this driver is
+silently ineffective and still reports success; check TRO_IsLocked() if that matters.
+
+## Window mode
+Window mode counts tro_clk cycles over a window of reference clock cycles and captures the count
+into CNT_SNAPSHOT, comparing it against WIN_MAX/WIN_MIN. TRO_SetWindowConfig() disables window
+mode before writing the size and thresholds, since hardware only accepts those while disabled;
+arming is always an explicit TRO_EnableWindowMode() call. TRO_SetWindowSize() does the same for
+just the size, without touching CSR[TROEN] or the delay/divider configuration.
+
+Resolution in Hz is 1/window-duration and does not depend on the reference frequency. Maximum
+useful window is bounded by the 22-bit snapshot, roughly 29 ms at 144 MHz. The driver does no
+snapshot-to-Hz conversion; that is snapshot * refClkFreq / windowSize, left to the caller because
+it needs a 64-bit intermediate and this driver cannot validate the reference frequency.
+
+## Interrupts and status
+Window expired, above WIN_MAX, and below WIN_MIN share one interrupt vector and are
+write-1-to-clear, so an ISR must check TRO_GetInterruptStatusFlags() rather than assume a single
+cause. TRO_EnableInterrupts()/TRO_DisableInterrupts() read-modify-write WIN_CFG and are not
+ISR-safe; TRO_GetInterruptStatusFlags()/TRO_ClearInterruptStatusFlags() only touch WIN_ST and are
+ISR-safe. This driver supplies no interrupt handler.
+
+## Phase comparator
+The phase counter accumulates, once per reference clock period, the difference between the
+observed tro_clk count and CSR[REF_CLK_MULT], so a small persistent drift integrates instead of
+averaging out even though every individual window reports it as in tolerance.
+TRO_SetReferenceClockMultiplier() sets the expected ratio; TRO_ClearPhaseCounter() writes a
+self-clearing pulse. TRO_GetPhaseCounter() returns a sign-extended int32_t - do not mask it, that
+would strip the sign.
+
+CSR[REF_CLK_MULT] is 6 bits, so the phase comparator only works when tro_clk/refClk is an integer
+ratio from 0 to 63.
+*/
