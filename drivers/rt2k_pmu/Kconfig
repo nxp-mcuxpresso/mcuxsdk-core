@@ -20,4 +20,15 @@ if MCUX_COMPONENT_driver.rt2k_pmu
         settings of body bias completed.
         If defined as 0, the driver will wait until completion.
 
+    config PMU_DRIVER_UPDATE_TRIM_VALUE
+    bool "Let PMU_ConfigBodyBias write the N-well/P-well trim fields"
+    default n
+    help
+        Parts whose P-Well/N-Well body-bias fuse is not yet trimmed rely on ROM to
+        apply the trim directly to PMU_BODYBIAS_CONFIG_REG; PMU_ConfigBodyBias() must
+        not overwrite it. With this option disabled (default), PMU_ConfigBodyBias()
+        does a read-modify-write that leaves the NWELL_VOL/PWELL_VOL bitfields alone.
+        Enable this only once the fuse is trimmed and a caller-supplied trim value is
+        meant to be written to hardware.
+
 endif
