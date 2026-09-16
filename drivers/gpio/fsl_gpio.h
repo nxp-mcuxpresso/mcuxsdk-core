@@ -147,6 +147,19 @@ extern "C" {
  * @{
  */
 
+/*! @name GPIO instance */
+/*! @{ */
+
+/*!
+ * @brief Gets the GPIO instance according to the GPIO base
+ *
+ * @param base    GPIO peripheral base pointer.
+ * @retval GPIO instance
+ */
+uint32_t GPIO_GetInstance(GPIO_Type *base);
+
+/*! @} */
+
 /*! @name GPIO Configuration */
 /*! @{ */
 
@@ -644,6 +657,19 @@ void GPIO_CheckAttributeBytes(GPIO_Type *base, gpio_checker_attribute_t attribut
  */
 
 #if defined(FSL_FEATURE_SOC_FGPIO_COUNT) && FSL_FEATURE_SOC_FGPIO_COUNT
+
+/*! @name FGPIO instance. */
+/*! @{ */
+
+/*!
+ * @brief Gets the FGPIO instance according to the GPIO base
+ *
+ * @param base    FGPIO peripheral base pointer
+ * @retval FGPIO instance
+ */
+uint32_t FGPIO_GetInstance(FGPIO_Type *base);
+
+/*! @} */
 
 /*! @name FGPIO Configuration */
 /*! @{ */

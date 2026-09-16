@@ -39,14 +39,9 @@
 #if !(defined(FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && \
     defined(FSL_FEATURE_SOC_PORT_COUNT)
 static PORT_Type *const s_portBases[] = PORT_BASE_PTRS;
-static GPIO_Type *const s_gpioBases[] = GPIO_BASE_PTRS;
-#else
-#if defined(GPIO_RESETS_ARRAY) || \
-    !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
-static GPIO_Type *const s_gpioBases[] = GPIO_BASE_PTRS;
-#endif
 #endif
 
+static GPIO_Type *const s_gpioBases[] = GPIO_BASE_PTRS;
 
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && \
     defined(GPIO_CLOCKS_ARRAY)
@@ -75,19 +70,6 @@ static const reset_ip_name_t s_gpioResets[] = GPIO_RESETS_ARRAY;
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-#if !(defined(FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && \
-    defined(FSL_FEATURE_SOC_PORT_COUNT) || defined(GPIO_RESETS_ARRAY) || \
-    (!(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && \
-    defined(GPIO_CLOCKS_ARRAY))
-/*!
- * @brief Gets the GPIO instance according to the GPIO base
- *
- * @param base    GPIO peripheral base pointer(PTA, PTB, PTC, etc.)
- * @retval GPIO instance
- */
-static uint32_t GPIO_GetInstance(GPIO_Type *base);
-#endif
-
 /*!
  * @brief Enable/disable GPIO port clock.
  *
@@ -98,12 +80,7 @@ static void GPIO_PortClockEnable(GPIO_Type *base, bool enable);
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#if !(defined(FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && \
-    defined(FSL_FEATURE_SOC_PORT_COUNT) || defined(GPIO_RESETS_ARRAY) || \
-    (!(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && \
-    defined(GPIO_CLOCKS_ARRAY))
-     
-static uint32_t GPIO_GetInstance(GPIO_Type *base)
+uint32_t GPIO_GetInstance(GPIO_Type *base)
 {
     uint32_t instance;
 
@@ -378,29 +355,16 @@ void GPIO_CheckAttributeBytes(GPIO_Type *base, gpio_checker_attribute_t attribut
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-#if !(defined(FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && \
-    defined(FSL_FEATURE_SOC_PORT_COUNT)
 static FGPIO_Type *const s_fgpioBases[] = FGPIO_BASE_PTRS;
-#endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-#if !(defined(FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && \
-    defined(FSL_FEATURE_SOC_PORT_COUNT)
-/*!
- * @brief Gets the FGPIO instance according to the GPIO base
- *
- * @param base    FGPIO peripheral base pointer(PTA, PTB, PTC, etc.)
- * @retval FGPIO instance
- */
-static uint32_t FGPIO_GetInstance(FGPIO_Type *base);
-#endif
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#if !(defined(FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && FSL_FEATURE_PORT_HAS_NO_INTERRUPT) && \
-    defined(FSL_FEATURE_SOC_PORT_COUNT)
-static uint32_t FGPIO_GetInstance(FGPIO_Type *base)
+uint32_t FGPIO_GetInstance(FGPIO_Type *base)
 {
     uint32_t instance;
 
@@ -417,7 +381,7 @@ static uint32_t FGPIO_GetInstance(FGPIO_Type *base)
 
     return instance;
 }
-#endif
+
 #if defined(FSL_FEATURE_PCC_HAS_FGPIO_CLOCK_GATE_CONTROL) && FSL_FEATURE_PCC_HAS_FGPIO_CLOCK_GATE_CONTROL
 /*!
  * brief Initializes the FGPIO peripheral.
