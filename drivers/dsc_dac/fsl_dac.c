@@ -91,22 +91,42 @@ void DAC_Init(DAC_Type *base, const dac_config_t *psConfig)
 
     u16Tmp = base->CTRL0;
 #if (defined(FSL_FEATURE_DAC_HAS_SYNC_EDGE) && FSL_FEATURE_DAC_HAS_SYNC_EDGE)
-    u16Tmp &= ~(DAC_CTRL0_FORMAT_MASK | DAC_CTRL0_HSLS_MASK | DAC_CTRL0_FILT_EN_MASK | DAC_CTRL0_SYNC_EN_MASK |
-                DAC_CTRL0_SYNCEDGE_MASK | DAC_CTRL0_AUTO_MASK | DAC_CTRL0_DOWN_MASK | DAC_CTRL0_UP_MASK);
+    u16Tmp &= ~(DAC_CTRL0_FORMAT_MASK | DAC_CTRL0_SYNC_EN_MASK | DAC_CTRL0_SYNCEDGE_MASK | DAC_CTRL0_AUTO_MASK |
+                DAC_CTRL0_DOWN_MASK | DAC_CTRL0_UP_MASK);
 #else
-    u16Tmp &= ~(DAC_CTRL0_FORMAT_MASK | DAC_CTRL0_HSLS_MASK | DAC_CTRL0_FILT_EN_MASK | DAC_CTRL0_SYNC_EN_MASK |
-                DAC_CTRL0_AUTO_MASK | DAC_CTRL0_DOWN_MASK | DAC_CTRL0_UP_MASK);
+    u16Tmp &= ~(DAC_CTRL0_FORMAT_MASK | DAC_CTRL0_SYNC_EN_MASK | DAC_CTRL0_AUTO_MASK | DAC_CTRL0_DOWN_MASK |
+                DAC_CTRL0_UP_MASK);
 #endif
+#if !(defined(FSL_FEATURE_DAC_HAS_SPEED_MODE) && (FSL_FEATURE_DAC_HAS_SPEED_MODE == 0U))
+    u16Tmp &= ~DAC_CTRL0_HSLS_MASK;
+    u16Tmp |= DAC_CTRL0_HSLS(psConfig->eSpeedMode);
+#endif
+#if !(defined(FSL_FEATURE_DAC_HAS_GLITCH_FILTER) && (FSL_FEATURE_DAC_HAS_GLITCH_FILTER == 0U))
+    u16Tmp &= ~DAC_CTRL0_FILT_EN_MASK;
+    u16Tmp |= DAC_CTRL0_FILT_EN(psConfig->bEnableGlitchFilter);
+#endif
+    u16Tmp |= DAC_CTRL0_FORMAT(psConfig->eDataFormat);
 #if (defined(FSL_FEATURE_DAC_HAS_SYNC_EDGE) && FSL_FEATURE_DAC_HAS_SYNC_EDGE)
-    u16Tmp |= DAC_CTRL0_FORMAT(psConfig->eDataFormat) | DAC_CTRL0_HSLS(psConfig->eSpeedMode) |
-              DAC_CTRL0_FILT_EN(psConfig->bEnableGlitchFilter) | DAC_CTRL0_SYNCEDGE(psConfig->eSyncInputEdge);
-#else
-    u16Tmp |= DAC_CTRL0_FORMAT(psConfig->eDataFormat) | DAC_CTRL0_HSLS(psConfig->eSpeedMode) |
-              DAC_CTRL0_FILT_EN(psConfig->bEnableGlitchFilter);
+    u16Tmp |= DAC_CTRL0_SYNCEDGE(psConfig->eSyncInputEdge);
 #endif
     base->CTRL0 = u16Tmp;
 
-    base->CTRL1 = DAC_CTRL1_FILT_CNT(psConfig->u8GlitchFilterCount);
+    /* CTRL1[15:14] are reserved and must keep their reset value, so never write the whole word. */
+#if !(defined(FSL_FEATURE_DAC_HAS_GLITCH_FILTER) && (FSL_FEATURE_DAC_HAS_GLITCH_FILTER == 0U))
+    u16Tmp = base->CTRL1;
+    u16Tmp &= ~DAC_CTRL1_FILT_CNT_MASK;
+    u16Tmp |= DAC_CTRL1_FILT_CNT(psConfig->u8GlitchFilterCount);
+    base->CTRL1 = u16Tmp;
+#endif
+#if (defined(FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER) && FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER)
+    u16Tmp = base->CTRL1;
+    u16Tmp &= ~DAC_CTRL1_BUF_EN_MASK;
+    u16Tmp |= DAC_CTRL1_BUF_EN(psConfig->bEnableOutputBuffer);
+    base->CTRL1 = u16Tmp;
+#endif
+#if (defined(FSL_FEATURE_DAC_HAS_HOLD_COUNT) && FSL_FEATURE_DAC_HAS_HOLD_COUNT)
+    base->HOLD = DAC_HOLD_HOLD_COUNT(psConfig->u8HoldCount);
+#endif
 
     if (psConfig->eOperationMode == kDAC_NormalOperationMode)
     {
@@ -226,6 +246,8 @@ void DAC_Deinit(DAC_Type *base)
         psConfig->bEnableAnalogPortion                              = false;
         psConfig->bEnableGlitchFilter                              = true;
         psConfig->u8GlitchFilterCount                              = 29U;
+        psConfig->bEnableOutputBuffer                              = true;
+        psConfig->u8HoldCount                                      = 0U;
     endcode
  *
  * param psConfig The pointer to ref dac_config_t.
@@ -244,10 +266,20 @@ void DAC_GetDefaultConfig(dac_config_t *psConfig)
 #if (defined(FSL_FEATURE_DAC_HAS_SYNC_EDGE) && FSL_FEATURE_DAC_HAS_SYNC_EDGE)
     psConfig->eSyncInputEdge = kDAC_RisingEdge;
 #endif
-    psConfig->eSpeedMode           = kDAC_HighSpeedMode;
+#if !(defined(FSL_FEATURE_DAC_HAS_SPEED_MODE) && (FSL_FEATURE_DAC_HAS_SPEED_MODE == 0U))
+    psConfig->eSpeedMode = kDAC_HighSpeedMode;
+#endif
     psConfig->eDataFormat          = kDAC_DataWordRightJustified;
     psConfig->eSyncSignal          = kDAC_InternalClockSignal;
     psConfig->bEnableAnalogPortion = false;
-    psConfig->bEnableGlitchFilter  = true;
-    psConfig->u8GlitchFilterCount  = 29U;
+#if !(defined(FSL_FEATURE_DAC_HAS_GLITCH_FILTER) && (FSL_FEATURE_DAC_HAS_GLITCH_FILTER == 0U))
+    psConfig->bEnableGlitchFilter = true;
+    psConfig->u8GlitchFilterCount = 29U;
+#endif
+#if (defined(FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER) && FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER)
+    psConfig->bEnableOutputBuffer = true;
+#endif
+#if (defined(FSL_FEATURE_DAC_HAS_HOLD_COUNT) && FSL_FEATURE_DAC_HAS_HOLD_COUNT)
+    psConfig->u8HoldCount = 0U;
+#endif
 }

@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief DAC driver version. */
-#define FSL_DAC_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
+#define FSL_DAC_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
 /*! @} */
 
 /*******************************************************************************
@@ -32,7 +32,20 @@
  * @defgroup dac_driver_log The Driver Change Log
  * @ingroup dac
  * @{
- * The current DAC driver version is 2.0.1.
+ * The current DAC driver version is 2.1.0.
+ *
+ * - 2.1.0
+ *   - Improvements
+ *     - Supported MC56F85xxx.
+ *     - Added FSL_FEATURE_DAC_HAS_GLITCH_FILTER and FSL_FEATURE_DAC_HAS_SPEED_MODE to gate the glitch filter and
+ *       the speed mode selection which are not available on all devices.
+ *     - Added FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER with DAC_EnableOutputBuffer() and the
+ *       dac_config_t::bEnableOutputBuffer configuration member.
+ *     - Added FSL_FEATURE_DAC_HAS_HOLD_COUNT with DAC_SetHoldCount() and the dac_config_t::u8HoldCount
+ *       configuration member.
+ *   - Bug Fixes
+ *     - Fixed the issue that DAC_Init() and DAC_SetGlitchFilterCount() wrote the whole CTRL1 register, which cleared
+ *       the reserved bit field that has to keep its reset value.
  *
  * - 2.0.1
  *   - Improvements
@@ -391,6 +404,7 @@ typedef enum _dac_sync_input_edge
 } dac_sync_input_edge_t;
 #endif
 
+#if !(defined(FSL_FEATURE_DAC_HAS_SPEED_MODE) && (FSL_FEATURE_DAC_HAS_SPEED_MODE == 0U))
 /*!
  * @brief The enumeration of DAC speed mode, including high speed mode and low speed mode.
  */
@@ -400,6 +414,7 @@ typedef enum _dac_speed_mode
                                     but the DAC module uses more power. */
     kDAC_LowSpeedMode = 1U,  /*!< In Low Speed Mode, the DAC module uses less power but takes more time to settle. */
 } dac_speed_mode_t;
+#endif
 
 /*!
  * @brief The enumeration of FIFO watermark level.
@@ -507,15 +522,32 @@ typedef struct _dac_config
     dac_data_format_t eDataFormat;           /*!< The data format of DAC instance. The available selections are
                                                  @ref kDAC_DataWordRightJustified and @ref kDAC_DataWordLeftJustified */
     dac_operation_config_u uOperationConfig; /*!< The configuration of operation mode. */
+#if !(defined(FSL_FEATURE_DAC_HAS_GLITCH_FILTER) && (FSL_FEATURE_DAC_HAS_GLITCH_FILTER == 0U))
     bool bEnableGlitchFilter;                /*!< Enable/Disable glitch suppression filter.
                                                  - \b true Enable glitch filter.
                                                  - \b false Disable glitch filter. */
     uint8_t u8GlitchFilterCount;             /*!< The count(ranges from 0 to 63) represents the number of clock
                                                  cycles for which the DAC output is held unchanged after new data
                                                  is presented to the analog DAC's inputs. */
+#endif
 
+#if !(defined(FSL_FEATURE_DAC_HAS_SPEED_MODE) && (FSL_FEATURE_DAC_HAS_SPEED_MODE == 0U))
     dac_speed_mode_t eSpeedMode; /*!< The speed mode of DAC instance. The available selections are
                                      @ref kDAC_HighSpeedMode and @ref kDAC_LowSpeedMode. */
+#endif
+#if (defined(FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER) && FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER)
+    bool bEnableOutputBuffer;    /*!< Enable/Disable the output buffer.
+                                     - \b true Buffer enabled, the buffered output signal is routed to a pin and the
+                                         unbuffered output signal stays available to on-chip consumers.
+                                     - \b false Buffer disabled, only the unbuffered output signal is available
+                                         inside the chip. */
+#endif
+#if (defined(FSL_FEATURE_DAC_HAS_HOLD_COUNT) && FSL_FEATURE_DAC_HAS_HOLD_COUNT)
+    uint8_t u8HoldCount;         /*!< The number(ranges from 0 to 255) of extra REFRESH pulses for which the
+                                     waveform is kept at the updated MIN/MAX value after an active SYNC_IN edge.
+                                     0 means no blocking. Only takes effect in automatic operation mode with the
+                                     external SYNC_IN signal selected. */
+#endif
     bool bEnableAnalogPortion;   /*!< Power up/down the analog portion.
                                      - \b true Power up the analog portion of the DAC, and the DAC will
                                          output the value currently presented to its inputs.
@@ -568,6 +600,8 @@ void DAC_Deinit(DAC_Type *base);
         psConfig->bEnableAnalogPortion                             = false;
         psConfig->bEnableGlitchFilter                              = true;
         psConfig->u8GlitchFilterCount                              = 29U;
+        psConfig->bEnableOutputBuffer                              = true;
+        psConfig->u8HoldCount                                      = 0U;
     @endcode
  *
  * @param psConfig The pointer to @ref dac_config_t.
@@ -813,6 +847,7 @@ static inline void DAC_SetWatermarkLevel(DAC_Type *base, dac_watermark_level_t e
  * @{
  */
 
+#if !(defined(FSL_FEATURE_DAC_HAS_GLITCH_FILTER) && (FSL_FEATURE_DAC_HAS_GLITCH_FILTER == 0U))
 /*!
  * @brief Enables/Disables Glitch filter.
  *
@@ -843,16 +878,81 @@ static inline void DAC_EnableGlitchFilter(DAC_Type *base, bool bEnable)
  */
 static inline void DAC_SetGlitchFilterCount(DAC_Type *base, uint8_t u8FilterCount)
 {
-    base->CTRL1 = DAC_CTRL1_FILT_CNT(u8FilterCount);
+    uint16_t tmp16;
+
+    /* CTRL1[15:14] are reserved and must keep their reset value, so never write the whole word. */
+    tmp16 = base->CTRL1;
+    tmp16 &= ~DAC_CTRL1_FILT_CNT_MASK;
+    tmp16 |= DAC_CTRL1_FILT_CNT(u8FilterCount);
+
+    base->CTRL1 = tmp16;
+}
+#endif /* FSL_FEATURE_DAC_HAS_GLITCH_FILTER */
+
+/*! @} */
+
+#if (defined(FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER) && FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER)
+/*!
+ * @name Output Buffer Related Interface
+ * @{
+ */
+
+/*!
+ * @brief Enables/Disables the output buffer that routes the DAC output to a pin.
+ *
+ * When the buffer is disabled only the unbuffered output signal is available inside the chip, which is consumed by
+ * other peripherals such as the comparators. The buffer must be enabled to observe the DAC output on a pin.
+ *
+ * @param base DAC peripheral base address.
+ * @param bEnable Enable/Disable the output buffer.
+ *          - \b true Buffer enabled, both the unbuffered and the buffered output signals are available.
+ *          - \b false Buffer disabled, only the unbuffered output signal is available inside the chip.
+ */
+static inline void DAC_EnableOutputBuffer(DAC_Type *base, bool bEnable)
+{
+    uint16_t tmp16;
+
+    /* CTRL1[15:14] are reserved and must keep their reset value, so never write the whole word. */
+    tmp16 = base->CTRL1;
+    tmp16 &= ~DAC_CTRL1_BUF_EN_MASK;
+    tmp16 |= DAC_CTRL1_BUF_EN(bEnable);
+
+    base->CTRL1 = tmp16;
 }
 
 /*! @} */
+#endif /* FSL_FEATURE_DAC_HAS_OUTPUT_BUFFER */
+
+#if (defined(FSL_FEATURE_DAC_HAS_HOLD_COUNT) && FSL_FEATURE_DAC_HAS_HOLD_COUNT)
+/*!
+ * @name Waveform Hold Related Interface
+ * @{
+ */
+
+/*!
+ * @brief Sets the number of extra REFRESH pulses(ranges from 0 to 255) for which the generated waveform is kept at the
+ * updated MIN/MAX value after an active edge of the SYNC_IN signal.
+ *
+ * This only takes effect in automatic operation mode with the external SYNC_IN signal selected, that is when both
+ * CTRL0[AUTO] and CTRL0[SYNC_EN] are set. A count of 0 means no blocking.
+ *
+ * @param base DAC peripheral base address.
+ * @param u8HoldCount The number of extra REFRESH pulses for which the waveform is held.
+ */
+static inline void DAC_SetHoldCount(DAC_Type *base, uint8_t u8HoldCount)
+{
+    base->HOLD = DAC_HOLD_HOLD_COUNT(u8HoldCount);
+}
+
+/*! @} */
+#endif /* FSL_FEATURE_DAC_HAS_HOLD_COUNT */
 
 /*!
  * @name Power And Speed Related Interface
  * @{
  */
 
+#if !(defined(FSL_FEATURE_DAC_HAS_SPEED_MODE) && (FSL_FEATURE_DAC_HAS_SPEED_MODE == 0U))
 /*!
  * @brief Selects speed mode, high speed mode uses more power and low speed mode saves power.
  *
@@ -870,6 +970,7 @@ static inline void DAC_SetSpeedMode(DAC_Type *base, dac_speed_mode_t eSpeedMode)
         base->CTRL0 |= DAC_CTRL0_HSLS_MASK;
     }
 }
+#endif /* FSL_FEATURE_DAC_HAS_SPEED_MODE */
 
 /*!
  * @brief Enables/Disables the operation of the analog portion of the DAC.
