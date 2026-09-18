@@ -24,14 +24,14 @@
  * Prototypes
  ******************************************************************************/
 /*!
- * @brief Calculate the gain conversion result from the gain calibration value.
+ * @brief Calculate the gain calculation result from the gain calibration value.
  *
  * Gain_Adj = 131072 / (131072 - gainCalValue), encoded into the 17-bit GCR register field as Q1.16.
  *
- * @param gainCalValue Signed gain calibration value within [-32768, 32767] read from the GCC register.
+ * @param gainCalValue Raw gain calibration value read from the GCC register.
  * @return Gain adjustment calculation result to be written into the GCR register.
  */
-static uint32_t DUALADC_CalculateGainResult(int16_t gainCalValue);
+static uint32_t DUALADC_CalculateGainResult(uint32_t gainCalValue);
 
 /*******************************************************************************
  * Variables
@@ -376,19 +376,22 @@ void DUALADC_ConfigAverageTimer(DADC_Type *base, const dadc_avgt_config_t *confi
 }
 
 /*!
- * @brief Calculate the gain conversion result from the gain calibration value.
+ * @brief Calculate the gain calculation result from the gain calibration value.
  *
  * Gain_Adj = 131072 / (131072 - gainCalValue), encoded into the 17-bit GCR register field as Q1.16.
  *
- * @param gainCalValue Signed gain calibration value within [-32768, 32767] read from the GCC register.
+ * @param gainCalValue Raw gain calibration value read from the GCC register.
  * @return Gain adjustment calculation result to be written into the GCR register.
  */
-static uint32_t DUALADC_CalculateGainResult(int16_t gainCalValue)
+static uint32_t DUALADC_CalculateGainResult(uint32_t gainCalValue)
 {
     uint32_t gainConvResult;
     int32_t denominator;
+    int32_t signedGainCalValue;
 
-    denominator = 131072 - gainCalValue;
+    /* Sign-extend bit 16 to fill bits [31:17]. */
+    signedGainCalValue = (int32_t)((gainCalValue ^ 0x10000UL) - 0x10000UL);
+    denominator = 131072 - signedGainCalValue;
 
     /*
      * Fixed point formula equivalent to 131072.0 / (131072.0 - gainCalValue).
@@ -413,8 +416,8 @@ static uint32_t DUALADC_CalculateGainResult(int16_t gainCalValue)
  */
 status_t DUALADC_DoCalibration(DADC_Type *base)
 {
-    int16_t GCCa;
-    int16_t GCCb;
+    uint32_t GCCa;
+    uint32_t GCCb;
     uint32_t GCRa;
     uint32_t GCRb;
 #if DUALADC_CALIBRATION_TIMEOUT
@@ -479,9 +482,9 @@ status_t DUALADC_DoCalibration(DADC_Type *base)
 #endif
     }
 
-    /* Read 16-bit signed GAIN_CAL; casting to int16_t performs sign extension. */
-    GCCa = (int16_t)((base->GCC[0] & DADC_GCC_GAIN_CAL_MASK) & 0xFFFF);
-    GCCb = (int16_t)((base->GCC[1] & DADC_GCC_GAIN_CAL_MASK) & 0xFFFF);
+    /* Read raw GAIN_CAL from the GCC register. */
+    GCCa = (base->GCC[0] & DADC_GCC_GAIN_CAL_MASK) >> DADC_GCC_GAIN_CAL_SHIFT;
+    GCCb = (base->GCC[1] & DADC_GCC_GAIN_CAL_MASK) >> DADC_GCC_GAIN_CAL_SHIFT;
 
     GCRa = DUALADC_CalculateGainResult(GCCa);
     GCRb = DUALADC_CalculateGainResult(GCCb);
