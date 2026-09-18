@@ -1,5 +1,11 @@
 # LPADC
 
+## [2.11.1]
+
+- Bug Fixes
+  - Fixed a MISRA C-2012 Rule 10.4 violation in `LPADC_SetConvTriggerConfig`, where the
+    unsigned `triggerId` was compared against the signed `FSL_FEATURE_LPADC_TCTRL_COUNT`.
+
 ## [2.11.0]
 
 - New Features
