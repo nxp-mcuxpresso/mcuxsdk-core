@@ -118,8 +118,10 @@ void DUALADC_GetDefaultConfig(dadc_config_t *config)
     config->enableHardwareTrigger1  = false;
     config->hardwareTrigger1Delay   = 0U;
 
-    /* DE - DMA trigger source */
+    /* DE - DMA enable and trigger source */
+    config->enableDmaA              = false;
     config->dmaSourceA              = kDADC_DmaSrcEndOfScan;
+    config->enableDmaB              = false;
     config->dmaSourceB              = kDADC_DmaSrcEndOfScan;
 }
 
@@ -216,13 +218,13 @@ status_t DUALADC_Init(DADC_Type *base, const dadc_config_t *config)
     reg |= config->enableHardwareTrigger1 ? DADC_TCTRL_HTEN1_MASK : 0U;
     base->TCTRL = reg;
 
-    /*
-     * Configure DMA trigger sources (DE[DMASRCA/B]). DMAENAA/B are not set here;
-     * call DUALADC_EnableDmaA/B at runtime when DMA transfers should begin.
-     */
+    /* Configure DE: DMA enable and trigger source for ADCA and ADCB. */
     reg = base->DE;
-    reg &= MCUX_MASK_INVERT_32(DADC_DE_DMASRCA_MASK | DADC_DE_DMASRCB_MASK);
+    reg &= MCUX_MASK_INVERT_32(DADC_DE_DMAENAA_MASK | DADC_DE_DMASRCA_MASK |
+                               DADC_DE_DMAENAB_MASK | DADC_DE_DMASRCB_MASK);
     reg |= DADC_DE_DMASRCA(config->dmaSourceA) | DADC_DE_DMASRCB(config->dmaSourceB);
+    reg |= config->enableDmaA ? DADC_DE_DMAENAA_MASK : 0U;
+    reg |= config->enableDmaB ? DADC_DE_DMAENAB_MASK : 0U;
     base->DE = reg;
 
     return kStatus_Success;
