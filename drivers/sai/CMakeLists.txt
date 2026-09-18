@@ -12,7 +12,7 @@ if(CONFIG_MCUX_COMPONENT_driver.sai_dma)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.sai_edma)
-    mcux_component_version(2.7.5)
+    mcux_component_version(2.7.6)
 
     mcux_add_source(SOURCES fsl_sai_edma.h fsl_sai_edma.c)
 
