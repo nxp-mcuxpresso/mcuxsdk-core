@@ -14,9 +14,24 @@ config MCUX_COMPONENT_driver.cache_llc
 if MCUX_COMPONENT_driver.cache_llc
 
     config LLC_MAINTENANCE_TIMEOUT
-        int "LLC maintenance operation timeout"
-        default 1000
+        int "LLC maintenance operation timeout, in poll iterations (0 = derive)"
+        default 0
         help
-          Timeout value for LLC maintenance operations.
+          How long a cache maintenance operation may take before the driver
+          stops waiting and reports kStatus_Timeout, counted in poll-loop
+          iterations.
+
+          Leave this at 0 unless you have a reason not to. The driver then
+          derives the budget from the cache geometry, which is what bounds the
+          work an operation has to do, with margin over the measured worst case
+          of every cache entry resident and dirty. Kconfig cannot see the
+          device's way and set counts, so it cannot express that derivation
+          here.
+
+          A non-zero value replaces the derived budget verbatim. Setting it too
+          low makes a maintenance operation that is progressing normally return
+          kStatus_Timeout, so only raise it above the derived value - for
+          instance if the memory behind the cache is slower than the devices
+          this driver was characterized on.
 
 endif
