@@ -24,6 +24,16 @@
 #define FSL_ENET_DRIVER_VERSION (MAKE_VERSION(2, 3, 9))
 /*! @} */
 
+/*! @brief Busy-loop count that lets a MAC config write settle across clock domains before the
+ * same register is written again. Configurable via CONFIG_ENET_SETMII_DELAY. */
+#ifndef ENET_SETMII_DELAY
+#ifdef CONFIG_ENET_SETMII_DELAY
+#define ENET_SETMII_DELAY (uint32_t) CONFIG_ENET_SETMII_DELAY
+#else
+#define ENET_SETMII_DELAY (1000UL)
+#endif
+#endif
+
 /*! @name Control and status region bit masks of the receive buffer descriptor. */
 /*! @{ */
 /*! @brief Defines for read format. */
@@ -710,12 +720,6 @@ void ENET_SetISRHandler(ENET_Type *base, enet_isr_t ISRHandler);
  * @param speed The speed of the RMII mode.
  * @param duplex The duplex of the RMII mode.
  */
-/*! @brief Busy-loop count that lets a MAC config write settle across clock domains before the
- * same register is written again (databook requires >= 4 destination-clock cycles, ~1.6 us at
- * the 2.5 MHz 10 Mbps PHY clock). */
-#ifndef ENET_SETMII_DELAY
-#define ENET_SETMII_DELAY (1000UL)
-#endif
 static inline void ENET_SetMII(ENET_Type *base, enet_mii_speed_t speed, enet_mii_duplex_t duplex)
 {
     uint32_t reg  = base->MAC_CONFIG;

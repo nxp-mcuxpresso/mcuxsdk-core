@@ -10,3 +10,13 @@ config MCUX_COMPONENT_driver.mcx_enet
     bool "mcx_enet"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.mcx_enet
+
+if MCUX_COMPONENT_driver.mcx_enet
+    config ENET_SETMII_DELAY
+        int "NOP loop count to let a MAC config write settle in ENET_SetMII"
+        default 1000
+        help
+            Number of __NOP() iterations ENET_SetMII waits after a MAC_CONFIGURATION
+            write before writing the same register again. Increase it when the CPU clock
+            is much faster than the MAC transmit/receive clock.
+endif

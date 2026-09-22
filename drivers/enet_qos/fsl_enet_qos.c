@@ -55,10 +55,13 @@
 
 #define ENET_QOS_DMA_CHX_RX_CTRL_RBSZ
 /*! @brief Busy-loop count that lets a MAC config write settle across clock domains before the
- * same register is written again (databook requires >= 4 destination-clock cycles, ~1.6 us at
- * the 2.5 MHz 10 Mbps PHY clock). */
+ * same register is written again. Configurable via CONFIG_ENET_QOS_SETMII_DELAY. */
 #ifndef ENET_QOS_SETMII_DELAY
+#ifdef CONFIG_ENET_QOS_SETMII_DELAY
+#define ENET_QOS_SETMII_DELAY (uint32_t) CONFIG_ENET_QOS_SETMII_DELAY
+#else
 #define ENET_QOS_SETMII_DELAY (1000UL)
+#endif
 #endif
 
 /*******************************************************************************
