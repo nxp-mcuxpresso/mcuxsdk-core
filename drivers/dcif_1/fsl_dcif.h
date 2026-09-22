@@ -670,7 +670,7 @@ static inline void DCIF_SetLayerStride(DCIF_Type *base, uint8_t layer, uint32_t 
  *
  * @param base DCIF peripheral base address.
  * @param layer Layer index.
- * @param address The stride in byte.
+ * @param address The layer address.
  */
 static inline void DCIF_SetLayerAddr(DCIF_Type *base, uint8_t layer, uint32_t address)
 {
@@ -687,7 +687,7 @@ static inline void DCIF_SetLayerAddr(DCIF_Type *base, uint8_t layer, uint32_t ad
  *
  * @param base DCIF peripheral base address.
  * @param layer Layer index.
- * @param address The stride in byte.
+ * @param address The UV layer address.
  */
 static inline void DCIF_SetLayerUVAddr(DCIF_Type *base, uint8_t layer, uint32_t address)
 {
