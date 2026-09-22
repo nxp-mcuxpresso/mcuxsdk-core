@@ -1525,6 +1525,7 @@ class Blobs(WestCommand):
                 changed = []
                 added = []
                 removed = []
+                repo_path_fixed = []
                 for sdk_path, src_fpath in init_blobs:
                     # Hash from the staged blob-repo copy if available,
                     # otherwise from the SDK-tree original.
