@@ -62,6 +62,29 @@
 #endif
 
 /*!
+ * @brief NOP loop count used to wait for at least 2 ADC functional clock cycles after
+ *        STAT0[CAL_RDY] is asserted at the end of a calibration step.
+ *
+ * The reference manual requires software to wait 2 ADC clock cycles after polling
+ * STAT0[CAL_RDY] and finding it set before proceeding. This macro controls how many
+ * __NOP() iterations DUALADC_DoCalibration executes to provide a portable hold time
+ * that scales with CPU clock speed.
+ *
+ * The required NOP count scales with the CPU-to-ADC clock frequency ratio:
+ *   min_count = ceil(2 * f_CPU / f_ADC)
+ * The default value of 20 covers ratios up to 10 (e.g., 150 MHz CPU with 16 MHz ADC
+ * clock). Increase this value via Kconfig option CONFIG_DUALADC_CAL_RDY_DELAY when the
+ * CPU clock is much faster than the ADC functional clock (large f_CPU/f_ADC ratio).
+ */
+#ifndef DUALADC_CAL_RDY_DELAY
+#ifdef CONFIG_DUALADC_CAL_RDY_DELAY
+#define DUALADC_CAL_RDY_DELAY (uint32_t)CONFIG_DUALADC_CAL_RDY_DELAY
+#else
+#define DUALADC_CAL_RDY_DELAY (20UL)
+#endif
+#endif
+
+/*!
  * @brief DualADC conversion mode selection.
  *
  * Controls whether ADCA and ADCB share one conversion sequence (cooperation)

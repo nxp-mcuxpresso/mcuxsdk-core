@@ -389,8 +389,8 @@ static uint32_t DUALADC_CalculateGainResult(uint32_t gainCalValue)
     int32_t denominator;
     int32_t signedGainCalValue;
 
-    /* Sign-extend bit 16 to fill bits [31:17]. */
-    signedGainCalValue = (int32_t)((gainCalValue ^ 0x10000UL) - 0x10000UL);
+    /* Sign-extend bit 15 to fill bits [31:16]. */
+    signedGainCalValue = (int32_t)((gainCalValue ^ 0x8000UL) - 0x8000UL);
     denominator = 131072 - signedGainCalValue;
 
     /*
@@ -446,6 +446,12 @@ status_t DUALADC_DoCalibration(DADC_Type *base)
 #endif
     }
 
+    /* Wait 2 ADC clock cycles after STAT0[CAL_RDY] is set. */
+    for (uint32_t i = 0; i < DUALADC_CAL_RDY_DELAY; i++)
+    {
+        __NOP();
+    }
+
     /* Step 2: High-speed calibration - only required when CFG1[HS] is set. */
     if ((base->CFG1 & DADC_CFG1_HS_MASK) != 0U)
     {
@@ -462,6 +468,12 @@ status_t DUALADC_DoCalibration(DADC_Type *base)
             }
 #endif
         }
+    }
+
+    /* Wait 2 ADC clock cycles after STAT0[CAL_RDY] is set. */
+    for (uint32_t i = 0; i < DUALADC_CAL_RDY_DELAY; i++)
+    {
+        __NOP();
     }
 
     /* Step 3: Gain and linearity calibration. */
@@ -505,6 +517,12 @@ status_t DUALADC_DoCalibration(DADC_Type *base)
             return kStatus_Timeout;
         }
 #endif
+    }
+
+    /* Wait 2 ADC clock cycles after STAT0[CAL_RDY] is set. */
+    for (uint32_t i = 0; i < DUALADC_CAL_RDY_DELAY; i++)
+    {
+        __NOP();
     }
 
     /* Restore ADC enable state after calibration routines. */
