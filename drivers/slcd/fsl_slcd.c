@@ -17,6 +17,10 @@
 #define FSL_COMPONENT_ID "platform.drivers.slcd"
 #endif
 
+#if defined(SLCD_RSTS)
+#define SLCD_RESETS_ARRAY SLCD_RSTS
+#endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -37,6 +41,11 @@ static uint32_t SLCD_GetInstance(LCD_Type *base);
 /*! @brief Pointers to slcd clocks for each instance. */
 static const clock_ip_name_t s_slcdClock[FSL_FEATURE_SOC_SLCD_COUNT] = SLCD_CLOCKS;
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+
+#if defined(SLCD_RESETS_ARRAY)
+/*! @brief Pointers to slcd resets for each instance. */
+static const reset_ip_name_t s_slcdResets[] = SLCD_RESETS_ARRAY;
+#endif
 
 /*! @brief Pointers to slcd bases for each instance. */
 static LCD_Type *const s_slcdBases[] = LCD_BASE_PTRS;
@@ -79,7 +88,8 @@ static uint32_t SLCD_GetInstance(LCD_Type *base)
 void SLCD_Init(LCD_Type *base, slcd_config_t *configure)
 {
     assert(configure);
-#if !(defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL)
+#if !(defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL) && \
+    !(defined(FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE) && FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE)
     assert(configure->clkConfig);
 #endif
 
@@ -102,12 +112,26 @@ void SLCD_Init(LCD_Type *base, slcd_config_t *configure)
     CLOCK_EnableClock(s_slcdClock[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
+#if defined(SLCD_RESETS_ARRAY)
+    /* Release SLCD peripheral from reset; some SoCs hold SLCD in reset out of POR, in which case
+     * any register access below terminates with a bus error until this runs. */
+    RESET_ReleasePeripheralReset(s_slcdResets[instance]);
+#endif
+
     /* Configure the duty and set the work for low power wait and stop mode. */
     gcrReg = LCD_GCR_DUTY(configure->dutyCycle) | LCD_GCR_LCDSTP((uint32_t)configure->lowPowerBehavior & 0x1U);
 
     gcrMsk = LCD_GCR_DUTY_MASK | LCD_GCR_LCDSTP_MASK;
 
-#if defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL
+#if defined(FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE) && FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE
+    /* Clock divider. */
+    gcrReg |= LCD_GCR_LCLK(configure->clkPrescaler);
+    /* Analog driver buffer power mode and sample&hold high-performance setting. */
+    gcrReg |= LCD_GCR_BUF_PMODE((uint32_t)configure->bufPowerMode) |
+              LCD_GCR_BUF_SH_HP(configure->bufSampleHoldHighPerf ? 1U : 0U);
+
+    gcrMsk |= LCD_GCR_LCLK_MASK | LCD_GCR_BUF_PMODE_MASK | LCD_GCR_BUF_SH_HP_MASK;
+#elif defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL
     /* Clock divider. */
     gcrReg |= LCD_GCR_LCLK(configure->clkPrescaler);
     /* Sample and hold setting. */
@@ -255,7 +279,11 @@ void SLCD_GetDefaultConfig(slcd_config_t *configure)
     /* SLCD in normal mode. */
     configure->displayMode = kSLCD_NormalMode;
 
-#if defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL
+#if defined(FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE) && FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE
+    /* Buffer power mode default: matches the hardware reset value (normal mode, standard sample&hold period). */
+    configure->bufPowerMode = kSLCD_BufPowerModeNormal;
+    configure->bufSampleHoldHighPerf = false;
+#elif defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL
     configure->voltageTrimVLL1 = kSLCD_VolatgeTrimNo;//TODO
     configure->voltageTrimVLL2 = kSLCD_VolatgeTrimNo;
     configure->lowPowerWaveform = false;

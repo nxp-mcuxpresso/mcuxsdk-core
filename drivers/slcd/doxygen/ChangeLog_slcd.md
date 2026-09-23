@@ -1,5 +1,12 @@
 # SLCD
 
+## [2.2.0]
+
+- New Features
+  - Added slcd_buf_power_mode_t and the FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE gated config fields,
+    updated SLCD_Init and SLCD_GetDefaultConfig to support SoCs whose SLCD IP controls contrast
+    via an analog buffer power mode instead of software voltage trim.
+
 ## [2.1.1]
 
 - Improvements

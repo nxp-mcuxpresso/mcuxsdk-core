@@ -23,7 +23,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief SLCD driver version. */
-#define FSL_SLCD_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
+#define FSL_SLCD_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
 /*! @} */
 
 /*! @brief SLCD clock prescaler to generate frame frequency. */
@@ -39,7 +39,28 @@ typedef enum _slcd_clock_prescaler
     kSLCD_ClkPrescaler07       /*!< Prescaler 7. */
 } slcd_clock_prescaler_t;
 
-#if defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL
+#if defined(FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE) && FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE
+/*! @brief SLCD analog driver buffer power mode. */
+typedef enum _slcd_buf_power_mode
+{
+    kSLCD_BufPowerModeLow    = 0U, /*!< Analog buffer low-power consumption mode. */
+    kSLCD_BufPowerModeNormal = 1U  /*!< Analog buffer normal mode. */
+} slcd_buf_power_mode_t;
+
+/*! @brief SLCD blink rate. */
+typedef enum _slcd_blink_rate
+{
+    kSLCD_BlinkRate00 = 0U, /*!< SLCD blink rate is LCD clock/((2^11)). */
+    kSLCD_BlinkRate01,      /*!< SLCD blink rate is LCD clock/((2^12)). */
+    kSLCD_BlinkRate02,      /*!< SLCD blink rate is LCD clock/((2^13)). */
+    kSLCD_BlinkRate03,      /*!< SLCD blink rate is LCD clock/((2^14)). */
+    kSLCD_BlinkRate04,      /*!< SLCD blink rate is LCD clock/((2^15)). */
+    kSLCD_BlinkRate05,      /*!< SLCD blink rate is LCD clock/((2^16)). */
+    kSLCD_BlinkRate06,      /*!< SLCD blink rate is LCD clock/((2^17)). */
+    kSLCD_BlinkRate07       /*!< SLCD blink rate is LCD clock/((2^18)). */
+} slcd_blink_rate_t;
+
+#elif defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL
 /*! @brief SLCD regulated voltage trim parameter, be used to meet the desired contrast. */
 typedef enum _slcd_regulated_voltage_trim
 {
@@ -313,7 +334,13 @@ typedef struct _slcd_fault_detect_config
 /*! @brief SLCD configuration structure. */
 typedef struct _slcd_config
 {
-#if defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL
+#if defined(FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE) && FSL_FEATURE_SLCD_HAS_BUF_POWER_MODE
+    slcd_buf_power_mode_t bufPowerMode; /*!< Analog driver buffer power mode. */
+    bool bufSampleHoldHighPerf; /*!< Buffer sample&hold high-performance mode. Shortens the sample&hold pulse
+                                   period (~1000us -> ~500us) for better accuracy under high temperature, at the
+                                   cost of higher power consumption. */
+    slcd_clock_prescaler_t clkPrescaler;
+#elif defined(FSL_FEATURE_SLCD_LP_CONTROL) && FSL_FEATURE_SLCD_LP_CONTROL
     bool lowPowerWaveform; /*!< Generate low power waveform. */
     slcd_regulated_voltage_trim_t voltageTrimVLL1; /*!< Voltage trim for VLL1 output level. */
     slcd_regulated_voltage_trim_t voltageTrimVLL2; /*!< Voltage trim for VLL2 output level. */
