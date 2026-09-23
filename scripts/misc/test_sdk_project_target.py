@@ -1,4 +1,4 @@
-# Copyright 2025 NXP
+# Copyright 2025-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -220,6 +220,61 @@ class TestMCUXProjectData:
         
         cmd = project.build_cmd
         assert "--sysbuild" in cmd
+
+    @patch('sdk_project_target.os.path.exists', return_value=True)
+    def test_build_cmd_from_base_dir(self, mock_exists):
+        """Test build command source dir re-expressed relative to a base dir"""
+        project = MCUXProjectData.from_fields(
+            name="test_app",
+            board="frdmk22f",
+            device=None,
+            core_id="",
+            toolchain="armgcc",
+            target="debug",
+            project_file="examples/demo_apps/hello_world",
+            category="demo_apps",
+            use_sysbuild=False
+        )
+
+        # Invoked from the example category dir
+        cmd = project.build_cmd_from(os.path.join(sdk_root_dir, 'examples', 'demo_apps'))
+        assert "west build -p always hello_world --toolchain armgcc" in cmd
+        # Invoked from a sibling category dir, a parent traversal is expected
+        cmd = project.build_cmd_from(os.path.join(sdk_root_dir, 'examples', 'driver_examples'))
+        assert "../demo_apps/hello_world" in cmd
+        # Invoked from the west workspace root
+        cmd = project.build_cmd_from(os.path.dirname(sdk_root_dir))
+        assert f"{os.path.basename(sdk_root_dir)}/examples/demo_apps/hello_world" in cmd
+
+    @patch('sdk_project_target.os.path.exists', return_value=True)
+    def test_build_cmd_without_base_dir_keeps_sdk_root_basis(self, mock_exists):
+        """Test the stored sdk_root_dir basis is untouched when no base dir is given"""
+        project = MCUXProjectData.from_fields(
+            name="test_app",
+            board="frdmk22f",
+            device=None,
+            core_id="",
+            toolchain="armgcc",
+            target="debug",
+            project_file="examples/demo_apps/hello_world",
+            category="demo_apps",
+            use_sysbuild=False
+        )
+
+        assert project.project_file_from() == "examples/demo_apps/hello_world"
+        assert project.build_cmd_from() == project.build_cmd
+        assert "examples/demo_apps/hello_world" in project.as_dict()['build_cmd']
+
+    @patch('sdk_project_target.os.path.exists', return_value=True)
+    def test_project_file_from_absolute_project_file(self, mock_exists):
+        """Test an out of tree project file is relative to the base dir, absolute on failure"""
+        project = MCUXProjectData()
+        project.project_file = os.path.join(os.sep + 'freestanding', 'apps', 'hello_world')
+
+        base_dir = os.path.join(os.sep + 'freestanding', 'apps')
+        assert project.project_file_from(base_dir) == "hello_world"
+        with patch('sdk_project_target.os.path.relpath', side_effect=ValueError):
+            assert project.project_file_from(base_dir) == project.project_file.replace('\\', '/')
 
     def test_board_core_property(self):
         """Test board_core property"""
@@ -635,25 +690,27 @@ class TestMCUXRepoProjects:
     def test_pretty_print_apps(self):
         """Test pretty printing apps"""
         project = Mock()
-        project.build_cmd = "west build -p always examples/demo_apps/hello_world"
-        
+        project.build_cmd_from.return_value = "west build -p always examples/demo_apps/hello_world"
+
         repo_projects = MCUXRepoProjects()
         with patch('sdk_project_target.logger') as mock_logger:
             repo_projects.pretty_print_apps([project])
             mock_logger.info.assert_called_once()
             call_args = mock_logger.info.call_args[0][0]
             assert "west build" in call_args
+        project.build_cmd_from.assert_called_with(None)
 
     def test_silent_print_apps(self, capsys):
         """Test silent printing apps"""
         project = Mock()
-        project.build_cmd = "west build -p always examples/demo_apps/hello_world"
-        
+        project.build_cmd_from.return_value = "west build -p always hello_world"
+
         repo_projects = MCUXRepoProjects()
-        repo_projects.silent_print_apps([project])
-        
+        repo_projects.silent_print_apps([project], base_dir='/tmp/examples/demo_apps')
+
         captured = capsys.readouterr()
-        assert "west build -p always examples/demo_apps/hello_world" in captured.out
+        assert "west build -p always hello_world" in captured.out
+        project.build_cmd_from.assert_called_with('/tmp/examples/demo_apps')
 
 
 class TestIntegration:

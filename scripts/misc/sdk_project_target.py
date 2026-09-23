@@ -1,4 +1,4 @@
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -173,16 +173,36 @@ class MCUXProjectData(object):
         # FIXME not sure the usage of this api
         return f'west build -p always{" --sysbuild" if self.use_sysbuild else ""} {self.project_file} --toolchain {self.toolchain:6} --config {self.target:10} {self.build_cmd_board_device_core:0}'
 
-    @property
-    def build_cmd(self):
+    def project_file_from(self, base_dir=None):
+        '''Express the project source dir relative to base_dir.
+
+        Without base_dir the stored value is returned as is, which keeps the
+        sdk_root_dir basis used by the exported files. With base_dir the source
+        dir is re-expressed relative to it, falling back to the absolute path
+        when no relative form exists, e.g. another Windows drive.
+        '''
+        if not base_dir:
+            return self.project_file
+        abs_path = self.project_file if os.path.isabs(self.project_file) \
+            else os.path.join(sdk_root_dir, self.project_file)
+        try:
+            return os.path.relpath(abs_path, base_dir).replace('\\', '/')
+        except ValueError:
+            return abs_path.replace('\\', '/')
+
+    def build_cmd_from(self, base_dir=None):
         args = ['west', 'build', '-p', 'always']
         # Keep order with original api
         if self.use_sysbuild:
             args.append('--sysbuild')
-        args.extend([self.project_file, '--toolchain', self.toolchain, '--config', self.target, self.build_cmd_board_device_core])
+        args.extend([self.project_file_from(base_dir), '--toolchain', self.toolchain, '--config', self.target, self.build_cmd_board_device_core])
         if self.extra_build_args:
             args.extend(self.extra_build_args)
         return ' '.join(args)
+
+    @property
+    def build_cmd(self):
+        return self.build_cmd_from()
 
     @property
     def board_core(self):
@@ -620,10 +640,10 @@ class MCUXRepoProjects(object):
         else:
             logger.error(f"Invalid export file {export_file}")
 
-    def pretty_print_apps(self, apps):
+    def pretty_print_apps(self, apps, base_dir=None):
         for idx, app in enumerate(apps):
-            logger.info(f"[{idx+1:4}][{app.build_cmd}]")
+            logger.info(f"[{idx+1:4}][{app.build_cmd_from(base_dir)}]")
 
-    def silent_print_apps(self, apps):
+    def silent_print_apps(self, apps, base_dir=None):
         for app in apps:
-            print(app.build_cmd)
+            print(app.build_cmd_from(base_dir))

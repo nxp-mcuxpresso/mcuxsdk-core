@@ -1,4 +1,4 @@
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -21,7 +21,8 @@ LIST_PROJECT_USAGE = '''
 Example:
 Get all examples under current directory:
     west list_project
-Get examples with filters:
+Get examples with filters, -p is relative to the current working directory,
+here the mcuxsdk root:
     west list_project -p examples/driver_examples/lpuart/interrupt -o test.yml
 
 Data Source
@@ -74,7 +75,7 @@ class ListProject(WestCommand):
         )
 
         parser.add_argument('-p', '--app_path',     action="append", type=str, default=[],
-                                                    help= 'Path regex to match examples.yml in its dir or child-dirs. -p pathA -p pathB. Glob pattern match. -p example/driver_examples/** to match all driver_exmaples.  Note in shell, wrap them by ", otherwise it will be parsed shell itself.')
+                                                    help= 'Path regex to match examples.yml in its dir or child-dirs. -p pathA -p pathB. Glob pattern match. -p examples/driver_examples/** to match all driver_exmaples.  An absolute path is used as is, a relative one is resolved against the current working directory.  Note in shell, wrap them by ", otherwise it will be parsed shell itself.')
         parser.add_argument('-b', '--board',        nargs='+', action="extend", type=str, default=[],
                                                     help='boards to build, default to include all boards. -b frdmk22f evkmimxrt1170@cm7')
         parser.add_argument('-d', '--device',       nargs='+', action="extend", type=str, default=[],
@@ -102,7 +103,9 @@ class ListProject(WestCommand):
         output_format = args.list_format or config_get('list_format', 'cmd')
         is_validate_example_yml = args.validate or config_getboolean('validate', False)
         match_cases = []
-        app_paths = args.app_path
+        cwd = os.getcwd()
+        # An absolute -p is used as is, a relative one is anchored at the cwd.
+        app_paths = [path if os.path.isabs(path) else os.path.abspath(path) for path in args.app_path]
         if not app_paths:
             app_paths = sdk_project_target.MCUXRepoProjects.get_default_search_roots(
                 manifest=self.manifest
@@ -129,11 +132,12 @@ class ListProject(WestCommand):
         if args.output_file:
             op.dump_to_file(args.output_file, match_cases)
 
-        # List the output
+        # List the output, with source dirs relative to the cwd so that the
+        # printed commands can be run as is from where list_project was invoked
         if output_format == 'silent_cmd':
-            op.silent_print_apps(match_cases)
+            op.silent_print_apps(match_cases, base_dir=cwd)
         elif output_format == 'cmd':
-            op.pretty_print_apps(match_cases)
+            op.pretty_print_apps(match_cases, base_dir=cwd)
         elif output_format == 'none':
             pass
 
