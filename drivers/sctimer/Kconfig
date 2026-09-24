@@ -10,3 +10,17 @@ config MCUX_COMPONENT_driver.sctimer
     bool "sctimer"
     select MCUX_COMPONENT_driver.common
     depends on MCUX_HAS_COMPONENT_driver.sctimer
+
+if MCUX_COMPONENT_driver.sctimer
+
+    config FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT
+        bool "Start an edge-aligned PWM output at its inactive level"
+        default n
+        help
+          Affects edge-aligned PWM channels set up by SCTIMER_SetupSharedPeriodPwm().
+          By default the first PWM period already carries its pulse. Enable this and
+          the output stays inactive through the first period instead, so the PWM
+          output starts one period late and the pin will not go active before the
+          timer is started. A 0% duty cycle stays inactive either way.
+
+endif

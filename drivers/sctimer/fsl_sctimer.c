@@ -494,14 +494,26 @@ static void SCTIMER_ConfigurePwmChannelOutput(SCT_Type *base,
 
     if ((uint32_t)param->level == (uint32_t)kSCTIMER_HighTrue)
     {
+        /* High true */
         if (mode == kSCTIMER_EdgeAlignedPwm)
         {
-            /* Inactive (low) at start; set at period boundary, clear at pulse. A 0% duty registers no
-             * period-boundary set at all, so the output simply holds the inactive level. */
-            base->OUTPUT &= ~(1UL << output);
+            /* Set at the period boundary, clear at the pulse. A 0% duty registers no period-boundary set,
+             * so nothing but the write below would define this output's level.
+             */
             if (0U != param->dutyCyclePercent)
             {
+#if FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT
+                /* Inactive (low) until the first period boundary. */
+                base->OUTPUT &= ~(1UL << output);
+#else
+                /* The first period carries the pulse(low). */
+                base->OUTPUT |= (1UL << output);
+#endif
                 SCTIMER_SetupOutputSetAction(base, output, periodEvent);
+            }
+            else
+            {
+                base->OUTPUT &= ~(1UL << output);
             }
             SCTIMER_SetupOutputClearAction(base, output, pulseEvent);
         }
@@ -515,14 +527,23 @@ static void SCTIMER_ConfigurePwmChannelOutput(SCT_Type *base,
     }
     else
     {
+        /* Low true */
         if (mode == kSCTIMER_EdgeAlignedPwm)
         {
-            /* Inactive (high) at start; clear at period boundary, set at pulse. A 0% duty registers no
-             * period-boundary clear at all, so the output simply holds the inactive level. */
-            base->OUTPUT |= (1UL << output);
             if (0U != param->dutyCyclePercent)
             {
+#if FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT
+                /* Inactive (high) until the first period boundary. */
+                base->OUTPUT |= (1UL << output);
+#else
+                /* The first period carries the pulse(high). */
+                base->OUTPUT &= ~(1UL << output);
+#endif
                 SCTIMER_SetupOutputClearAction(base, output, periodEvent);
+            }
+            else
+            {
+                base->OUTPUT |= (1UL << output);
             }
             SCTIMER_SetupOutputSetAction(base, output, pulseEvent);
         }

@@ -23,7 +23,23 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_SCTIMER_DRIVER_VERSION (MAKE_VERSION(2, 6, 2)) /*!< Version */
+#define FSL_SCTIMER_DRIVER_VERSION (MAKE_VERSION(2, 7, 0)) /*!< Version */
+/*! @} */
+
+/*!
+ * @name PWM output initial level
+ * @{
+ */
+/*!
+ * @brief Whether an edge-aligned PWM output starts at its inactive level.
+ */
+#ifndef FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT
+#ifdef CONFIG_FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT
+#define FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT CONFIG_FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT
+#else
+#define FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT 0
+#endif
+#endif
 /*! @} */
 
 #ifndef SCT_EV_STATE_STATEMSKn

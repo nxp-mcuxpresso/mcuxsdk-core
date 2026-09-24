@@ -1,6 +1,14 @@
 # SCTIMER
 
 
+## [2.7.0]
+
+- New Features
+  - Added FSL_SCTIMER_PWM_INIT_INACTIVE_OUTPUT, also selectable through Kconfig. The
+    first PWM period of an edge-aligned channel now carries its pulse. Enable this
+    option to keep the output inactive through the first period instead, as earlier
+    versions did. Disabled by default. Affects SCTIMER_SetupSharedPeriodPwm().
+
 ## [2.6.2]
 
 - Bug Fixes
