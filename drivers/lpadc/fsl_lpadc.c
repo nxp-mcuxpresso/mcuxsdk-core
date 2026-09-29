@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2025 NXP
+ * Copyright 2016-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -75,6 +75,19 @@ static uint32_t LPADC_GetGainConvResult(float gainAdjustment);
  * @return Gain conversion result to be written into the GCR register.
  */
 static uint32_t LPADC_CalculateGainResult(int32_t gainCalValue);
+
+#if defined(FSL_FEATURE_LPADC_HAS_CTRL_CALOFSMODE) && FSL_FEATURE_LPADC_HAS_CTRL_CALOFSMODE
+/*!
+ * @brief Extract GCC[GAIN_CAL] as a signed value.
+ *
+ * GCC[GAIN_CAL] is a two's-complement field, so its sign bit is extended into the returned
+ * value. The field width is derived from ADC_GCC_GAIN_CAL_MASK.
+ *
+ * @param gccReg Raw GCC register value.
+ * @return Sign-extended gain calibration value.
+ */
+static int32_t LPADC_GetSignedGainCal(uint32_t gccReg);
+#endif /* FSL_FEATURE_LPADC_HAS_CTRL_CALOFSMODE */
 #endif /* defined(FSL_FEATURE_LPADC_HAS_CTRL_CAL_REQ) && FSL_FEATURE_LPADC_HAS_CTRL_CAL_REQ */
 
 /*******************************************************************************
@@ -902,6 +915,20 @@ void LPADC_PrepareAutoCalibration(ADC_Type *base)
 }
 
 #if defined(FSL_FEATURE_LPADC_HAS_CTRL_CALOFSMODE) && FSL_FEATURE_LPADC_HAS_CTRL_CALOFSMODE
+static int32_t LPADC_GetSignedGainCal(uint32_t gccReg)
+{
+    uint32_t gainCalField = (gccReg & ADC_GCC_GAIN_CAL_MASK) >> ADC_GCC_GAIN_CAL_SHIFT;
+    uint32_t fieldMask    = (uint32_t)ADC_GCC_GAIN_CAL_MASK >> ADC_GCC_GAIN_CAL_SHIFT;
+
+    /* Sign-extend the two's-complement field when its sign bit is set. */
+    if ((gainCalField & ((fieldMask + 1U) >> 1U)) != 0U)
+    {
+        gainCalField |= ~fieldMask;
+    }
+
+    return (int32_t)gainCalField;
+}
+
 /*!
  * brief Finish auto calibration start with LPADC_PrepareAutoCalibration.
  * note This feature is used for LPADC with CTRL[CALOFSMODE].
@@ -938,22 +965,18 @@ status_t LPADC_FinishAutoCalibration(ADC_Type *base)
 #endif
     }
 
-    /* Calculate gain offset. */
-    GCCa = (int32_t)(base->GCC[0] & ADC_GCC_GAIN_CAL_MASK);
-    GCCb = (int32_t)(base->GCC[1] & ADC_GCC_GAIN_CAL_MASK);
-    if (0U != ((base->GCC[0]) & 0x8000U))
-    {
-        GCCa         = GCCa - 0x10000;
-        /* Gain_CalA = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[0])) */
-        base->GCR[0] = LPADC_CalculateGainResult(GCCa); /* write A side GCALR. */
-    }
+    /* Calculate gain offset. GCC[n][GAIN_CAL] is a two's-complement value, so its sign bit
+     * only selects sign extension: the gain correction and the GCR[n][GCALR] update are
+     * required for positive values as well.
+     */
+    GCCa = LPADC_GetSignedGainCal(base->GCC[0]);
+    GCCb = LPADC_GetSignedGainCal(base->GCC[1]);
 
-    if (0U != ((base->GCC[1]) & 0x8000U))
-    {
-        GCCb         = GCCb - 0x10000;
-        /* Gain_CalB = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[1])) */
-        base->GCR[1] = LPADC_CalculateGainResult(GCCb); /* write B side GCALR. */
-    }
+    /* Gain_CalA = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[0])) */
+    base->GCR[0] = LPADC_CalculateGainResult(GCCa); /* write A side GCALR. */
+
+    /* Gain_CalB = (131072.0 / (131072-(ADC_GCC_GAIN_CAL(ADC->GCC[1])) */
+    base->GCR[1] = LPADC_CalculateGainResult(GCCb); /* write B side GCALR. */
 
     /* Indicate the values are valid. */
     base->GCR[0] |= ADC_GCR_RDY_MASK;

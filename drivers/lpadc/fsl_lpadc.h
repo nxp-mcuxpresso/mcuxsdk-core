@@ -23,7 +23,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief LPADC driver version 2.12.0. */
-#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 12, 0))
+#define FSL_LPADC_DRIVER_VERSION (MAKE_VERSION(2, 12, 1))
 /*! @} */
 
 /*! @name Configuration */

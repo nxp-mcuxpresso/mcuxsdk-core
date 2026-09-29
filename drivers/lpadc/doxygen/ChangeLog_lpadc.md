@@ -1,5 +1,16 @@
 # LPADC
 
+## [2.12.1]
+
+- Bug Fixes
+  - Fixed the gain calibration of `LPADC_FinishAutoCalibration()` on SoCs with
+    `CTRL[CALOFSMODE]`, where the `GCC[GAIN_CAL]` sign-bit test gated the gain
+    correction and the `GCR[GCALR]` write instead of only the sign extension. A
+    non-negative `GAIN_CAL` left `GCR[GCALR]` unwritten, so no gain correction was
+    applied. `GAIN_CAL` is a two's-complement value and the correction now applies
+    for both signs. The sign extension is derived from `ADC_GCC_GAIN_CAL_MASK`
+    rather than a hardcoded 16-bit constant.
+
 ## [2.12.0]
 
 - Improvements
