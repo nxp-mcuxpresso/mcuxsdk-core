@@ -65,7 +65,8 @@
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
 /*! @name First extended control region bit masks of the receive buffer descriptor. */
 /*! @{ */
-#define ENET_BUFFDESCRIPTOR_RX_IPV4_MASK             0x0001U /*!< Ipv4 frame mask. */
+#define ENET_BUFFDESCRIPTOR_RX_IPV4_MASK             0x0001U /*!< Same bit as ENET_BUFFDESCRIPTOR_RX_FRAGMENT_MASK. */
+#define ENET_BUFFDESCRIPTOR_RX_FRAGMENT_MASK         0x0001U /*!< IPv4 fragment mask (RxBD[FRAG]). */
 #define ENET_BUFFDESCRIPTOR_RX_IPV6_MASK             0x0002U /*!< Ipv6 frame mask. */
 #define ENET_BUFFDESCRIPTOR_RX_VLAN_MASK             0x0004U /*!< VLAN frame mask. */
 #define ENET_BUFFDESCRIPTOR_RX_PROTOCOLCHECKSUM_MASK 0x0010U /*!< Protocol checksum error mask. */
@@ -79,6 +80,11 @@
 #define ENET_BUFFDESCRIPTOR_RX_COLLISION_MASK 0x0200U /*!< BD collision mask. */
 #define ENET_BUFFDESCRIPTOR_RX_PHYERR_MASK    0x0400U /*!< PHY error mask. */
 #define ENET_BUFFDESCRIPTOR_RX_MACERR_MASK    0x8000U /*!< Mac error mask. */
+/*! @} */
+
+/*! @name Third extended control region bit masks of the receive buffer descriptor. */
+/*! @{ */
+#define ENET_BUFFDESCRIPTOR_RX_BDU_MASK 0x8000U /*!< Last BD update done mask. */
 /*! @} */
 
 /*! @name First extended control region bit masks of the transmit buffer descriptor. */
@@ -737,6 +743,10 @@ typedef struct _enet_rx_frame_attribute_struct
     bool promiscuous;   /*!< This frame is received because of promiscuous mode. */
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
     uint32_t timestamp; /*!< The nanosecond part timestamp of this Rx frame. */
+    uint16_t payloadChecksum; /*!< One's complement sum of the IP payload computed by the MAC; for TCP and UDP
+                                   frames that are not fragments it also includes the pseudo header. */
+    uint16_t ipFlags;         /*!< IP accelerator flags, see ENET_BUFFDESCRIPTOR_RX_*_MASK. */
+    bool bduDone;             /*!< The MAC finished updating the extended fields of the descriptor. */
 #endif
 } enet_rx_frame_attribute_t;
 
