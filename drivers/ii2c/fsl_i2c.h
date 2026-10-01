@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief I2C driver version. */
-#define FSL_I2C_DRIVER_VERSION (MAKE_VERSION(2, 0, 8))
+#define FSL_I2C_DRIVER_VERSION (MAKE_VERSION(2, 0, 9))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
@@ -295,11 +295,11 @@ static inline void I2C_Enable(I2C_Type *base, bool enable)
 {
     if (enable)
     {
-        base->I2CR |= I2C_I2CR_IEN_MASK;
+        base->I2CR |= ((uint16_t)I2C_I2CR_IEN_MASK);
     }
     else
     {
-        base->I2CR &= ~(uint16_t)I2C_I2CR_IEN_MASK;
+        base->I2CR &= (uint16_t)(MCUX_MASK_INVERT_32(I2C_I2CR_IEN_MASK) & 0xFFFFUL);
     }
 }
 
@@ -334,7 +334,7 @@ static inline uint32_t I2C_MasterGetStatusFlags(I2C_Type *base)
  */
 static inline void I2C_MasterClearStatusFlags(I2C_Type *base, uint32_t statusMask)
 {
-    base->I2SR &= (~(uint16_t)statusMask);
+    base->I2SR &= (uint16_t)(MCUX_MASK_INVERT_32(statusMask) & 0xFFFFUL);
 }
 
 /*!

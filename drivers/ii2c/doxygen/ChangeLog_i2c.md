@@ -1,5 +1,12 @@
 # I2C
 
+## [2.0.9]
+- Bug Fixes
+
+  - Fixed MISRA issues.
+  - Fixed CERT-C issues.
+  - HIS CCM reduced - functions: I2C_MasterTransferRunStateMachine; I2C_MasterTransferBlocking; I2C_SlaveTransferHandleIRQ;
+
 ## [2.0.8]
 
 - New Features
