@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief SFA driver version 2.2.0 */
-#define FSL_SFA_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+#define FSL_SFA_DRIVER_VERSION (MAKE_VERSION(2, 3, 0))
 /*! @} */
 
 /*! @name Configuration
@@ -183,6 +183,7 @@ typedef enum _sfa_ref_select
     kSFA_REFSelect0 = 0U,
     kSFA_REFSelect1 = 1U,
     kSFA_REFSelect2 = 2U,
+    kSFA_REFSelect3 = 3U,
 } sfa_ref_select_t;
 
 /*!
@@ -293,7 +294,7 @@ void SFA_Init(SFA_Type *base);
  * @brief Clear counter, disable SFA and gate the SFA clock.
  *
  * @param base SFA peripheral base address.
- * 
+ *
  * @retval kStatus_Success run success.
  * @retval kStatus_Timeout timeout occurs.
  */

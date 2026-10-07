@@ -1,5 +1,10 @@
 # SFA
 
+## [2.3.0]
+
+- New Features
+  - Added `kSFA_REFSelect3` to `sfa_ref_select_t` to support the RFOSC reference-clock selection (REF_CLK_SEL = 3) used by the FRO32K RF_SFC calibration on KW43/MCXW70.
+
 ## [2.2.0]
 
 - Bug Fixes
