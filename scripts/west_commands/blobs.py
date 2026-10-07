@@ -1227,10 +1227,14 @@ class Blobs(WestCommand):
         already use ARE this repo's legitimate blob types, so scanning by
         that set can never mistake a stray non-binary file (Makefile,
         CODEOWNERS, NOTICE, .editorconfig, ... none of which carry a
-        tracked extension) for a blob. Falls back to LIB_EXTS only when
-        there is no existing manifest to learn from (--init bootstrap).
+        tracked extension) for a blob. Falls back to SCAN_BINARY_EXTS (the
+        same build-artifact extension set 'west blobs scan' uses) only when
+        there is no existing manifest to learn from (--init bootstrap) --
+        this must match scan's list, or --init can silently find 0
+        candidates for a repo whose only blobs are an extension missing
+        from a narrower fallback (e.g. a repo whose sole blob is .bin).
         --init-suffix always extends whichever base applies, so a run can
-        intentionally widen scope (e.g. adding .bin to a lib-only repo).
+        intentionally widen scope beyond the default set.
         '''
         exts = set()
         if old_by_path:
@@ -1239,7 +1243,7 @@ class Blobs(WestCommand):
                 for p in old_by_path if Path(p).suffix
             }
         if not exts:
-            exts |= set(LIB_EXTS)
+            exts |= {e.lstrip('.').lower() for e in SCAN_BINARY_EXTS}
         exts |= {s.lstrip('.').lower() for s in getattr(args, 'init_suffix', [])}
         return exts
 
@@ -1479,6 +1483,12 @@ class Blobs(WestCommand):
             # Detect whether this is a bootstrap (--init) run for a project
             # that has no mcux_blobs.yml yet.
             is_init = name in init_project_paths and not manifest_path.exists()
+
+            # repo_path_fixed only has meaning for the existing-manifest path
+            # below (entries whose repo-path needed correcting); a brand-new
+            # --init manifest has no existing entries to fix, so this stays
+            # empty rather than undefined -- referenced unconditionally below.
+            repo_path_fixed = []
 
             if is_init:
                 # ------------------------------------------------------------------
