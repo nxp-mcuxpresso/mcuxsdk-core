@@ -1551,7 +1551,7 @@ void flash_cache_invalidate(void)
 
 FCT_PLACEMENT void flash_cache_invalidate(void)
 {
-    SYSCON->AUTHENTICATE = 0xaaaaaaaa;
+    SYSCON->AUTHENTICATE = 0xaaaaaaaaU;
     __ISB();
     __DSB();
     SYSCON->FMC0_CTRL |= SYSCON_FMC0_CTRL_ECFC_MASK; /* Execute clear cache */
@@ -1567,7 +1567,7 @@ FCT_PLACEMENT void flash_cache_invalidate(void)
 
 FCT_PLACEMENT void flash_cache_disable(void)
 {
-    SYSCON->AUTHENTICATE = 0xaaaaaaaa;
+    SYSCON->AUTHENTICATE = 0xaaaaaaaaU;
     SYSCON->FMC0_CTRL |= (SYSCON_FMC0_CTRL_DFDC_MASK | SYSCON_FMC0_CTRL_DFC_MASK | SYSCON_FMC0_CTRL_DFIC_MASK);
     SYSCON->FMC0_CTRL |= SYSCON_FMC0_CTRL_ECFC_MASK;
     /* Memory barriers for good measure.
@@ -1577,7 +1577,7 @@ FCT_PLACEMENT void flash_cache_disable(void)
 }
 FCT_PLACEMENT void flash_cache_enable(void)
 {
-    SYSCON->AUTHENTICATE = 0xaaaaaaaa;
+    SYSCON->AUTHENTICATE = 0xaaaaaaaaU;
     SYSCON->FMC0_CTRL &= ~(SYSCON_FMC0_CTRL_DFDC_MASK | SYSCON_FMC0_CTRL_DFC_MASK | SYSCON_FMC0_CTRL_DFIC_MASK);
     /* Memory barriers for good measure.
      * All Cache, Branch predictor and TLB maintenance operations before this instruction complete */
@@ -1592,7 +1592,7 @@ FCT_PLACEMENT void flash_cache_enable(void)
 FCT_PLACEMENT void flash_cache_speculation_control(bool isPreProcess, FMU_Type *base)
 {
     (void)base;
-    SYSCON->AUTHENTICATE = 0xaaaaaaaa;
+    SYSCON->AUTHENTICATE = 0xaaaaaaaaU;
 
     if (isPreProcess == false)
     {
