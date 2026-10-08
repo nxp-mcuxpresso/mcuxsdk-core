@@ -26,6 +26,14 @@ endif()
 
 SET(TARGET_TRIPLET "bin")
 
+if(NOT DEFINED TOOLCHAIN_EXT)
+    if(CMAKE_HOST_WIN32)
+        set(TOOLCHAIN_EXT ".exe")
+    else()
+        set(TOOLCHAIN_EXT "")
+    endif()
+endif()
+
 set(AS "as")
 set(CC "gcc")
 set(CXX "g++")
