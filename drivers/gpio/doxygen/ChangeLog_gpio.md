@@ -1,5 +1,11 @@
 # GPIO
 
+## [2.9.1]
+- Bug Fixes
+  - Added the missing dummy read before the write in `GPIO_GpioClearInterruptFlags`, so the
+    write-1-to-clear is not dropped. Without it the interrupt flag stayed set and the handler
+    was entered twice for a single event.
+
 ## [2.9.0]
 - New Features
   - Added handle-based pin-mask interrupt callback support (`GPIO_CreateHandle`,

@@ -310,7 +310,8 @@ void GPIO_PortClearInterruptFlags(GPIO_Type *base, uint32_t mask)
  */
 void GPIO_GpioClearInterruptFlags(GPIO_Type *base, uint32_t mask)
 {
-    /* Perform a dummy read before writing to ensure the write succeeds.*/
+    /* Dummy read required before W1C write on CORE BUS path. */
+    (void)base->ISFR[0];
     base->ISFR[0] &= GPIO_FIT_REG(mask);
 }
 #if (defined(FSL_FEATURE_GPIO_HAS_INTERRUPT_CHANNEL_SELECT) && FSL_FEATURE_GPIO_HAS_INTERRUPT_CHANNEL_SELECT)
@@ -335,6 +336,8 @@ void GPIO_GpioClearInterruptChannelFlags(GPIO_Type *base, uint32_t mask, uint32_
  */
 void GPIO_PinClearInterruptFlag(GPIO_Type *base, uint32_t pin)
 {
+    /* Dummy read required before W1C write on CORE BUS path. */
+    (void)base->ICR[pin];
     base->ICR[pin] |= GPIO_FIT_REG(GPIO_ICR_ISF(1U));
 }
 
