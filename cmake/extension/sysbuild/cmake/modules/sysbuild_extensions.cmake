@@ -1,5 +1,5 @@
 # Copyright (c) 2021-2023 Nordic Semiconductor
-# Copyright 2024-2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -326,6 +326,7 @@ function(ExternalZephyrProject_Add)
     SdkRootDirPath
     CMAKE_BUILD_TYPE
     CMAKE_VERBOSE_MAKEFILE
+    CMAKE_OBJECT_PATH_MAX
     # Forward IDE-generation flags into image CMake runs.
     # These are consumed by MCUXpresso toolchain logic (e.g. auto-enabling
     # MCUX_SKIP_COMPILER_CHECKS for IDE-only generation when the toolchain
