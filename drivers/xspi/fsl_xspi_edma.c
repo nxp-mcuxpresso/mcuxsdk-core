@@ -228,13 +228,9 @@ status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_tra
     else if (xfer->cmdType == kXSPI_Read)
     {
         assert(handle->rxDmaHandle);
-        status = XSPI_StartIpAccess(base, xfer->deviceAddress, xfer->seqIndex, xfer->dataSize, xfer->targetGroup,
-                                    xfer->lockArbitration);
-        if (status != kStatus_Success)
-        {
-            handle->state = kXSPI_Idle;
-            return status;
-        }
+        /* Clear the RX buffer and fully arm the eDMA before issuing the IP read command: on -O0 builds the
+         * cycles between a command-first ordering and the buffer clear are enough for the flash to return
+         * data that gets dropped, permanently stalling the transfer short of the configured watermark. */
         XSPI_ClearRxBuffer(base);
         handle->count = (uint8_t)((base->RBCT) & XSPI_RBCT_WMRK_MASK) + 1U;
 
@@ -269,6 +265,16 @@ status_t XSPI_TransferEDMA(XSPI_Type *base, xspi_edma_handle_t *handle, xspi_tra
 
         /* Enable XSPI RX EDMA. */
         XSPI_EnableRxDMA(base, true);
+
+        status = XSPI_StartIpAccess(base, xfer->deviceAddress, xfer->seqIndex, xfer->dataSize, xfer->targetGroup,
+                                    xfer->lockArbitration);
+        if (status != kStatus_Success)
+        {
+            XSPI_EnableRxDMA(base, false);
+            EDMA_AbortTransfer(handle->rxDmaHandle);
+            handle->state = kXSPI_Idle;
+            return status;
+        }
     }
     else
     {

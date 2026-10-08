@@ -22,8 +22,8 @@
 
 /*! @name Driver version */
 /*@{*/
-/*! @brief XSPI EDMA driver version 2.0.6. */
-#define FSL_XSPI_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 0, 6))
+/*! @brief XSPI EDMA driver version 2.0.5. */
+#define FSL_XSPI_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 0, 5))
 /*@}*/
 
 typedef struct _xspi_edma_handle xspi_edma_handle_t;
