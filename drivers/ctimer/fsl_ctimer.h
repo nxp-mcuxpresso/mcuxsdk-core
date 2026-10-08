@@ -22,7 +22,7 @@
 
 /*! @name Driver version */
 /*! @{ */
-#define FSL_CTIMER_DRIVER_VERSION (MAKE_VERSION(2, 3, 6)) /*!< Version 2.3.6 */
+#define FSL_CTIMER_DRIVER_VERSION (MAKE_VERSION(2, 3, 7)) /*!< Version 2.3.7 */
 /*! @} */
 
 /*! @brief List of Timer capture channels */
@@ -692,6 +692,21 @@ static inline void CTIMER_SetShadowValue(CTIMER_Type *base, ctimer_match_t match
     base->MSR[match] = matchvalue;
 }
 #endif /* FSL_FEATURE_CTIMER_HAS_MSR */
+
+/*! @name IRQ handler */
+/*! @{ */
+
+/*!
+ * @brief Common IRQ handler entry for all CTIMER instances.
+ *
+ * This function dispatches the IRQ to the correct instance handler using
+ * the instance index.
+ *
+ * @param instance CTIMER instance number.
+ */
+void CTIMER_DriverIRQHandler(uint32_t instance);
+
+/*! @} */
 
 #if defined(__cplusplus)
 }

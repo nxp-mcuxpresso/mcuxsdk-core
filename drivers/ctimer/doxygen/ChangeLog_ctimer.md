@@ -1,5 +1,10 @@
 # CTIMER
 
+## [2.3.7]
+
+- New Features
+  - Added common IRQ handler entry CTIMER_DriverIRQHandler.
+
 ## [2.3.6]
 
 - Bug Fixes

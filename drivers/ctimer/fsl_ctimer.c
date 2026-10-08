@@ -27,7 +27,7 @@ static uint32_t CTIMER_GetInstance(CTIMER_Type *base);
 /*!
  * @brief CTIMER generic IRQ handle function.
  *
- * @param index FlexCAN peripheral instance index.
+ * @param index CTIMER peripheral instance index.
  */
 static void CTIMER_GenericIRQHandler(uint32_t index);
 
@@ -621,6 +621,23 @@ static void CTIMER_GenericIRQHandler(uint32_t index)
                 s_ctimerCallback[index][i](int_stat);
             }
         }
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+
+/*!
+ * brief Common IRQ handler entry for all CTIMER instances.
+ *
+ * This function dispatches the IRQ to the correct instance handler using
+ * the instance index.
+ *
+ * param instance CTIMER instance number.
+ */
+void CTIMER_DriverIRQHandler(uint32_t instance)
+{
+    if (instance < ARRAY_SIZE(s_ctimerBases))
+    {
+        CTIMER_GenericIRQHandler(instance);
     }
     SDK_ISR_EXIT_BARRIER;
 }
