@@ -1,5 +1,10 @@
 # Export App
 
+## [26.09.00]
+
+- Bug Fixes
+  - Re-emit the non-MCUX Kconfig symbols the export would otherwise drop.
+
 ## [26.06.00]
 
 - Bug Fixes

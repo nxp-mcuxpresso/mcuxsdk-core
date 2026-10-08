@@ -123,11 +123,24 @@ def main():
 
 
 def dump_extra_info(kconf, output_dir):
+    def selecting_syms(expr):
+        for si in split_expr(expr, OR):
+            if expr_value(si) != 2:
+                continue
+            for term in split_expr(si, AND):
+                if isinstance(term, Symbol):
+                    yield term
+                    break
+
     def y_selecting_sym(sym):
-        if [si for si in split_expr(sym.rev_dep, OR) if expr_value(si) == 2]:
-            return True
-        if [si for si in split_expr(sym.weak_rev_dep, OR) if expr_value(si) == 2]:
-            return True
+        # Only a cross-file selector survives export_app: a selector defined in
+        # the same file is disabled together with this symbol's project segment,
+        # so that edge no longer fires in the exported project.
+        own_files = {node.filename for node in sym.nodes}
+        for expr in (sym.rev_dep, sym.weak_rev_dep):
+            for selector in selecting_syms(expr):
+                if {node.filename for node in selector.nodes} - own_files:
+                    return True
         return False
     force_selected_ps = []
     promptless_syms = []

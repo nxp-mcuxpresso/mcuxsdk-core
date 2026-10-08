@@ -1223,7 +1223,68 @@ class CmakeTraceApp(CmakeApp):
             for k, v in CONFIG_CHOICE_MAP.items():
                 if re.match(k, ps):
                     board_prj_conf.append(f"{v}=y")
+        board_prj_conf.extend(self._restore_non_mcux_conf(build_dir, ps_list))
         return board_prj_conf, force_selected
+
+    def _app_owned_conf_symbols(self):
+        """Symbols assigned by the app's own prj.conf chain, which combine_prj_conf
+        copies into the editable app prj.conf. The board prj.conf must not shadow them.
+        """
+        owned = set()
+        try:
+            app_rel = self.source_dir.relative_to(SDK_ROOT_DIR)
+        except ValueError:
+            return owned
+        example_root_stem = (SDK_ROOT_DIR / app_rel.parts[0]).stem
+        search_dir = self.source_dir
+        while search_dir.stem != example_root_stem:
+            if (app_conf := search_dir / "prj.conf").exists():
+                owned.update(parse_prj_conf(app_conf).keys())
+            search_dir = search_dir.parent
+        return owned
+
+    def _restore_non_mcux_conf(self, build_dir, ps_list):
+        """Re-emit the non-MCUX Kconfig symbols the export would otherwise drop.
+
+        <board>/prj.conf keeps only CONFIG_MCUX_* and disables every exported PRJSEG,
+        so a plain Kconfig symbol set by a board prj.conf or selected by one of those
+        PRJSEGs is lost while the MCUX components it gates stay force selected (e.g.
+        the coredump component without CONFIG_DEBUG_COREDUMP*). .config-trace.json
+        records where each value came from, so only the unrecoverable ones are pinned.
+        """
+        restored = {}
+        trace_file = build_dir / ".config-trace.json"
+        if not trace_file.exists():
+            return []
+        try:
+            trace_data = json.loads(trace_file.read_text(encoding="utf-8"))
+        except Exception as e:
+            logger.warning(f"Cannot parse {trace_file.as_posix()}, error: {e}")
+            return []
+        app_owned = self._app_owned_conf_symbols()
+        disabled_ps = [
+            re.compile(rf"(?<![\w.]){re.escape(ps.removeprefix('CONFIG_'))}(?![\w.])") for ps in ps_list
+        ]
+        for entry in trace_data:
+            if len(entry) != 6:
+                continue
+            name, _visibility, sym_type, value, kind, origin = entry
+            if value is None or name.startswith("CONFIG_MCUX_") or name in app_owned or name in restored:
+                continue
+            # Keep board/device assignments, and values whose selecting PRJSEG is disabled.
+            if kind != "assign" and not (
+                kind in ("select", "imply") and any(p.search(str(origin)) for p in disabled_ps)
+            ):
+                continue
+            if sym_type in ("bool", "tristate"):
+                restored[name] = f"{name}=y" if value == "y" else f"# {name} is not set"
+            elif sym_type == "string":
+                restored[name] = f'{name}="{value}"'
+            else:
+                restored[name] = f"{name}={value}"
+        if restored:
+            logger.info(f"Restore {len(restored)} non-MCUX Kconfig symbol(s) in board prj.conf")
+        return list(restored.values())
 
     def _append_missing_kconfig_cc_defines(self):
         """Read the trace build mcux_config.h and inject non-CONFIG_MCUX_
