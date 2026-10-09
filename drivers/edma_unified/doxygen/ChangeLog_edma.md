@@ -1,5 +1,12 @@
 # EDMA
 
+## [2.10.15]
+
+- Bug Fixes
+  - Fixed channel-link masks for eDMA4/eDMA5 (64-channel): widened BITER/CITER ELINKYES LINKCH
+    from 5 bits (0x3E00U) to 6 bits (0x7E00U) and CSR MAJORLINKCH from 5 bits (0x1F00U) to
+    6 bits (0x3F00U), so channels 32–63 are no longer truncated when linking.
+
 ## [2.10.14]
 
 - Improvements

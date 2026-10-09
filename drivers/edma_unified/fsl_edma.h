@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 NXP
+ * Copyright 2022-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief eDMA driver version */
-#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 14)) /*!< Version 2.10.14. */
+#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 10, 15)) /*!< Version 2.10.15. */
 /*! @} */
 
 /*! @brief eDMA driver name.
