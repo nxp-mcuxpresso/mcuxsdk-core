@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 NXP
+ * Copyright 2022-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -16,8 +16,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*@{*/
-/*! @brief CMC driver version 2.5.0. */
-#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 6, 0))
+/*! @brief CMC driver version 2.7.0. */
+#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
 /* @} */
 
 #if (defined(FSL_FEATURE_MCX_CMC_HAS_BSR_SCR_BIT) && FSL_FEATURE_MCX_CMC_HAS_BSR_SCR_BIT)
@@ -48,8 +48,6 @@ enum _cmc_power_mode_protection
 
 /*!
  * @brief Wake up sources from the previous low power mode entry.
- *
- * @note #kCMC_WakeupFromUsbFs, #kCMC_WakeupFromITRC, #kCMC_WakeupFromCpu1 are not supported in MCXA family.
  */
 enum _cmc_wakeup_sources
 {
@@ -59,9 +57,15 @@ enum _cmc_wakeup_sources
     kCMC_WakeupFromInterrupt    = CMC_CKSTAT_WAKEUP(1U << 2U), /*!< Wakeup source is interrupt. */
     kCMC_WakeupFromDMAWakeup    = CMC_CKSTAT_WAKEUP(1U << 3U), /*!< Wakeup source is DMA Wakeup. */
     kCMC_WakeupFromWUURequest   = CMC_CKSTAT_WAKEUP(1U << 4U), /*!< Wakeup source is WUU request. */
-    kCMC_WakeupFromUsbFs        = CMC_CKSTAT_WAKEUP(1U << 5U), /*!< Wakeup source is USBFS(USB0). */
-    kCMC_WakeupFromITRC         = CMC_CKSTAT_WAKEUP(1U << 6U), /*!< Wakeup source is ITRC. */
-    kCMC_WakeupFromCpu1         = CMC_CKSTAT_WAKEUP(1U << 7U), /*!< Wakeup source is CPU1. */
+#if !(defined(FSL_FEATURE_MCX_CMC_HAS_USBFS_WAKEUP) && (FSL_FEATURE_MCX_CMC_HAS_USBFS_WAKEUP == 0U))
+    kCMC_WakeupFromUsbFs = CMC_CKSTAT_WAKEUP(1U << 5U), /*!< Wakeup source is USBFS(USB0). */
+#endif /* FSL_FEATURE_MCX_CMC_HAS_USBFS_WAKEUP */
+#if !(defined(FSL_FEATURE_MCX_CMC_HAS_ITRC_WAKEUP) && (FSL_FEATURE_MCX_CMC_HAS_ITRC_WAKEUP == 0U))
+    kCMC_WakeupFromITRC = CMC_CKSTAT_WAKEUP(1U << 6U), /*!< Wakeup source is ITRC. */
+#endif /* FSL_FEATURE_MCX_CMC_HAS_ITRC_WAKEUP */
+#if !(defined(FSL_FEATURE_MCX_CMC_HAS_CPU1_WAKEUP) && (FSL_FEATURE_MCX_CMC_HAS_CPU1_WAKEUP == 0U))
+    kCMC_WakeupFromCpu1 = CMC_CKSTAT_WAKEUP(1U << 7U), /*!< Wakeup source is CPU1. */
+#endif /* FSL_FEATURE_MCX_CMC_HAS_CPU1_WAKEUP */
 };
 
 /*!

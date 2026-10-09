@@ -1,5 +1,13 @@
 # MCX_CMC
 
+## [2.7.0]
+
+- New Features
+  - Added feature macros FSL_FEATURE_MCX_CMC_HAS_USBFS_WAKEUP,
+    FSL_FEATURE_MCX_CMC_HAS_ITRC_WAKEUP and
+    FSL_FEATURE_MCX_CMC_HAS_CPU1_WAKEUP to be compatible with platforms
+    where the corresponding CKSTAT[WAKEUP] bits are reserved.
+
 ## [2.6.0]
 
 - New Features
