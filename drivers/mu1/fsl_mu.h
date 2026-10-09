@@ -22,7 +22,7 @@
  * @{
  */
 /*! @brief MU driver version. */
-#define FSL_MU_DRIVER_VERSION (MAKE_VERSION(2, 8, 5))
+#define FSL_MU_DRIVER_VERSION (MAKE_VERSION(2, 8, 6))
 /*! @} */
 
 #define MU_CORE_INTR(intr) ((uint32_t)(intr) << 0U)
@@ -1228,20 +1228,20 @@ static inline void MU_MaskHardwareReset(MU_Type *base, bool mask)
 #if !(defined(FSL_FEATURE_MU_NO_NMI) && (0 != FSL_FEATURE_MU_NO_NMI))
     if (mask)
     {
-        base->CCR0 |= (base->CCR0 & ~(MU_CCR0_HR_MASK | MU_CCR0_NMI_MASK)) | MU_CCR0_HRM_MASK;
+        base->CCR0 = (base->CCR0 & ~(MU_CCR0_HR_MASK | MU_CCR0_NMI_MASK)) | MU_CCR0_HRM_MASK;
     }
     else
     {
-        base->CCR0 |= (base->CCR0 & ~(MU_CCR0_HR_MASK | MU_CCR0_NMI_MASK | MU_CCR0_HRM_MASK));
+        base->CCR0 = (base->CCR0 & ~(MU_CCR0_HR_MASK | MU_CCR0_NMI_MASK | MU_CCR0_HRM_MASK));
     }
 #else
     if (mask)
     {
-        base->CCR0 |= (base->CCR0 & ~(MU_CCR0_HR_MASK)) | MU_CCR0_HRM_MASK;
+        base->CCR0 = (base->CCR0 & ~(MU_CCR0_HR_MASK)) | MU_CCR0_HRM_MASK;
     }
     else
     {
-        base->CCR0 |= (base->CCR0 & ~(MU_CCR0_HR_MASK | MU_CCR0_HRM_MASK));
+        base->CCR0 = (base->CCR0 & ~(MU_CCR0_HR_MASK | MU_CCR0_HRM_MASK));
     }
 #endif
 }

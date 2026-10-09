@@ -1,5 +1,12 @@
 # MU
 
+## [2.8.6]
+
+- Bug Fixes
+  - Fixed MU_MaskHardwareReset() where the read-modify-write used `|=` instead of
+    `=`, so the HR/NMI/HRM bits could never be cleared (unmask was a no-op, and the
+    HR/NMI clearing in the mask branch was dead code).
+
 ## [2.8.5]
 
 - Improvements
