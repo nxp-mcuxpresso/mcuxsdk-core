@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 include_guard(GLOBAL)
-set(ruby_install_link "https://mcuxpresso.nxp.com/mcuxsdk/latest/html/develop/build_system/IDE_Project.html#ruby-environment-setup")
+set(ruby_install_link "https://docs.mcuxpresso.nxp.com/mcuxsdk/latest/develop/build_system/IDE_Project.html#ruby-environment-setup")
 
 if(NOT FOUND_RUBY_EXECUTABLE)
     find_program(RUBY_EXECUTABLE ruby)
