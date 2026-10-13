@@ -1,5 +1,10 @@
 # CADC
 
+## [2.2.1]
+
+- Bug Fixes
+  - Fixed violations of CERT INT30-C and INT31-C rules.
+
 ## [2.2.0]
 
 - New Features

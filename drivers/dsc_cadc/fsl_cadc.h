@@ -1,6 +1,5 @@
 /*
- * Copyright 2020, 2021, 2023 NXP
- * All rights reserved.
+ * Copyright 2020, 2021, 2023, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -23,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief CADC driver version. */
-#define FSL_CADC_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+#define FSL_CADC_DRIVER_VERSION (MAKE_VERSION(2, 2, 1))
 /*! @} */
 
 /*******************************************************************************
@@ -33,8 +32,11 @@
  * @defgroup cadc_driver_log The Driver Change Log
  * @ingroup cadc
  * @{
- * The current CADC driver version is 2.2.0.
+ * The current CADC driver version is 2.2.1.
  *
+ * - 2.2.1
+ *     - Bug Fixes
+ *         - Fixed violations of CERT INT30-C and INT31-C rules.
  * - 2.2.0
  *     - New Features
  *         - Supported platforms which don't have ANA4 expansion MUX.
@@ -2230,26 +2232,26 @@ static inline void CADC_DisableInterrupts(ADC_Type *base, uint32_t u32Mask)
 {
     if ((u32Mask & 0xFFFFUL) != 0UL)
     {
-        base->SCHLTEN &= (uint16_t) ~(u32Mask & 0xFFFFUL);
+        base->SCHLTEN &= MCUX_MASK_INVERT_16(u32Mask & 0xFFFFUL);
     }
 #if ((defined(FSL_FEATURE_CADC_RSLT2_COUNT) && (FSL_FEATURE_CADC_RSLT2_COUNT == 4U)))
     if ((u32Mask & 0xF0000UL) != 0UL)
     {
-        base->SCHLTEN2 &= (uint16_t) ~((u32Mask & 0xF0000UL) >> 16UL);
+        base->SCHLTEN2 &= MCUX_MASK_INVERT_16((u32Mask & 0xF0000UL) >> 16UL);
     }
 #endif /* FSL_FEATURE_CADC_RSLT2_COUNT */
     if ((u32Mask & 0xF000000UL) != 0UL)
     {
-        base->CTRL1 &= (uint16_t) ~((u32Mask & 0xF000000UL) >> 16UL);
+        base->CTRL1 &= MCUX_MASK_INVERT_16((u32Mask & 0xF000000UL) >> 16UL);
     }
     if ((u32Mask & 0xF00000UL) != 0UL)
     {
-        base->CTRL2 &= (uint16_t) ~((u32Mask & 0xF00000UL) >> 12UL);
+        base->CTRL2 &= MCUX_MASK_INVERT_16((u32Mask & 0xF00000UL) >> 12UL);
     }
 #if (defined(FSL_FEATURE_CADC_HAS_EXP_MUX_AUX) && FSL_FEATURE_CADC_HAS_EXP_MUX_AUX)
     if ((u32Mask & 0x30000000UL) != 0UL)
     {
-        base->EXPCFG &= (uint16_t) ~((u32Mask & 0x30000000UL) >> 28UL);
+        base->EXPCFG &= MCUX_MASK_INVERT_16((u32Mask & 0x30000000UL) >> 28UL);
     }
 #endif /* (defined(FSL_FEATURE_CADC_HAS_EXP_MUX_AUX) && FSL_FEATURE_CADC_HAS_EXP_MUX_AUX) */
 }

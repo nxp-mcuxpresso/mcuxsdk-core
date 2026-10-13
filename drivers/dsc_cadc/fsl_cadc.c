@@ -1,6 +1,5 @@
 /*
- * Copyright 2020, 2021, 2023 NXP
- * All rights reserved.
+ * Copyright 2020, 2021, 2023, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -20,17 +19,17 @@
  * Define the MACROs to help calculating the position of register field from sample index.
  */
 /* ADC_ZXCTRL1 & ADC_ZXCTRL2. */
-#define ADC_ZXCTRL_ZCE_MASK(u16SampleIndex) (uint16_t)(3UL << (2U * ((uint16_t)(u16SampleIndex))))
+#define ADC_ZXCTRL_ZCE_MASK(u16SampleIndex) (uint16_t)((3UL << (2U * ((uint16_t)(u16SampleIndex)))) & 0xFFFFUL)
 #define ADC_ZXCTRL_ZCE(u16SampleIndex, u16Value) \
     (uint16_t)(((uint16_t)(u16Value)) << (2U * ((uint16_t)(u16SampleIndex))))
 
 /* ADC_CLIST1 & ADC_CLIST2 & ADC_CLIST3 & ADC_CLIST4 */
-#define ADC_CLIST_SAMPLE_MASK(u16SampleIndex) (uint16_t)(0xFUL << (4U * ((uint16_t)(u16SampleIndex))))
+#define ADC_CLIST_SAMPLE_MASK(u16SampleIndex) (uint16_t)((0xFUL << (4U * ((uint16_t)(u16SampleIndex)))) & 0xFFFFUL)
 #define ADC_CLIST_SAMPLE(u16SampleIndex, u16Value) \
     (uint16_t)(((uint16_t)(u16Value)) << (4U * ((uint16_t)(u16SampleIndex))))
 
 /* ADC_GC1 & ADC_GC2. */
-#define ADC_GC_GAIN_MASK(u16SampleIndex)      (uint16_t)(0x3UL << (2U * ((uint16_t)(u16SampleIndex))))
+#define ADC_GC_GAIN_MASK(u16SampleIndex)      (uint16_t)((0x3UL << (2U * ((uint16_t)(u16SampleIndex)))) & 0xFFFFUL)
 #define ADC_GC_GAIN(u16SampleIndex, u16Value) (uint16_t)(((uint16_t)(u16Value)) << (2U * ((uint16_t)(u16SampleIndex))))
 
 #if (defined(FSL_FEATURE_CADC_RSLT2_COUNT) && (FSL_FEATURE_CADC_RSLT2_COUNT == 4U))
@@ -287,8 +286,12 @@ static uint16_t CADC_CalculateChannelIndexViaChannelMode(cadc_channel_mode_t eCh
     uint16_t u16Index           = 0U;
     uint32_t u32TempChannelMode = (uint32_t)eChannelMode;
 
-    /* Gets the channel's offset */
-    while (0UL == (u32TempChannelMode & 0x07UL))
+    /*
+     * Gets the channel's offset. The loop runs at most 10 times (32-bit value shifted 3 bits each
+     * iteration), so u16Index stays well below its maximum and cannot wrap. The bound guards against
+     * an unexpected input and makes the limit explicit for static analysis (CERT INT30-C).
+     */
+    while ((0UL == (u32TempChannelMode & 0x07UL)) && (u16Index < 30U))
     {
         u16Index += 3U;
         u32TempChannelMode >>= 3U;
@@ -659,7 +662,7 @@ void CADC_SetChannelGain(ADC_Type *base, cadc_channel_number_t eChannelNumber, c
     pGcRegPtr = pGcRegAddrArray[(uint16_t)eChannelNumber / 8U];
     if (pGcRegPtr != NULL)
     {
-        u16Tmp = (*pGcRegPtr) & (uint16_t)(~ADC_GC_GAIN_MASK((uint16_t)eChannelNumber & 7U));
+        u16Tmp = (*pGcRegPtr) & MCUX_MASK_INVERT_16(ADC_GC_GAIN_MASK((uint16_t)eChannelNumber & 7U));
         u16Tmp |= ADC_GC_GAIN((uint16_t)eChannelNumber & 7U, (uint16_t)eChannelGain);
         (*pGcRegPtr) = u16Tmp;
     }
@@ -732,7 +735,7 @@ void CADC_SetSampleSlotZeroCrossingMode(ADC_Type *base,
     pZxctrlRegPtr = pZxctrlRegAddrArray[(uint16_t)eSampleIndex / 8U];
     if (pZxctrlRegPtr != NULL)
     {
-        u16Tmp = (*pZxctrlRegPtr) & (uint16_t)(~ADC_ZXCTRL_ZCE_MASK((uint16_t)eSampleIndex & 7U));
+        u16Tmp = (*pZxctrlRegPtr) & MCUX_MASK_INVERT_16(ADC_ZXCTRL_ZCE_MASK((uint16_t)eSampleIndex & 7U));
         u16Tmp |= ADC_ZXCTRL_ZCE((uint16_t)eSampleIndex & 7U, eZeroCrossingMode);
         (*pZxctrlRegPtr) = u16Tmp;
     }
@@ -773,7 +776,7 @@ void CADC_RouteChannelToSampleSlot(ADC_Type *base,
         {
             if (eChannelNumber <= kCADC_SingleEndANB7_DiffANB6pANB7n)
             {
-                u16Tmp = (*clistRegPtr) & (uint16_t)(~ADC_CLIST_SAMPLE_MASK((uint16_t)eSampleIndex & 3U));
+                u16Tmp = (*clistRegPtr) & MCUX_MASK_INVERT_16(ADC_CLIST_SAMPLE_MASK((uint16_t)eSampleIndex & 3U));
                 u16Tmp |= ADC_CLIST_SAMPLE((uint16_t)eSampleIndex & 3U, eChannelNumber);
                 (*clistRegPtr) = u16Tmp;
             }
