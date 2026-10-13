@@ -717,7 +717,8 @@ _Pragma("diag_suppress=Pm120")
  * Chip level peripheral reset API, for MCUs that implement peripheral reset control external to a peripheral
  */
 #if ((defined(FSL_FEATURE_SOC_SYSCON_COUNT) && (FSL_FEATURE_SOC_SYSCON_COUNT > 0)) || \
-     (defined(FSL_FEATURE_SOC_ASYNC_SYSCON_COUNT) && (FSL_FEATURE_SOC_ASYNC_SYSCON_COUNT > 0)))
+     (defined(FSL_FEATURE_SOC_ASYNC_SYSCON_COUNT) && (FSL_FEATURE_SOC_ASYNC_SYSCON_COUNT > 0)) || \
+     (defined(SOC_HAS_RESET_CONTROL) && (SOC_HAS_RESET_CONTROL == 1)))
 #include "fsl_reset.h"
 #endif
 
