@@ -1,6 +1,5 @@
 /*
- * Copyright 2020 NXP
- * All rights reserved.
+ * Copyright 2020, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -23,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief CMP driver version. */
-#define FSL_CMP_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
+#define FSL_CMP_DRIVER_VERSION (MAKE_VERSION(2, 0, 2))
 /*! @} */
 
 /*******************************************************************************
@@ -33,7 +32,11 @@
  * @defgroup cmp_driver_log The Driver Change Log
  * @ingroup cmp
  * @{
- * The current cmp driver version is 2.0.1.
+ * The current cmp driver version is 2.0.2.
+ *
+ * - 2.0.2
+ *   - Bug Fixes
+ *     - Fixed violations of the CERT INT31-C coding rules.
  *
  * - 2.0.1
  *   - Improvements
@@ -528,7 +531,7 @@ static inline void CMP_Enable(CMP_Type *base, bool bEnable)
     }
     else
     {
-        base->CR1 &= ~(uint16_t)CMP_CR1_EN_MASK;
+        base->CR1 &= MCUX_MASK_INVERT_16(CMP_CR1_EN_MASK);
     }
 }
 
@@ -547,7 +550,7 @@ static inline void CMP_SetInputChannel(CMP_Type *base, cmp_input_mux_t ePlusChan
 {
     uint16_t u16Tmp = base->MUXCR;
 
-    u16Tmp &= ~(uint16_t)((uint16_t)CMP_MUXCR_PSEL_MASK | (uint16_t)CMP_MUXCR_MSEL_MASK);
+    u16Tmp &= MCUX_MASK_INVERT_16((uint16_t)CMP_MUXCR_PSEL_MASK | (uint16_t)CMP_MUXCR_MSEL_MASK);
     u16Tmp |= CMP_MUXCR_PSEL(ePlusChannel) | CMP_MUXCR_MSEL(eMinusChannel);
     base->MUXCR = u16Tmp;
 }
@@ -562,7 +565,7 @@ static inline void CMP_SelectOutputSource(CMP_Type *base, cmp_output_source_t eO
 {
     if (eOutputSource == kCMP_OutputSourceFromFilterCOUT)
     {
-        base->CR1 &= ~(uint16_t)CMP_CR1_COS_MASK;
+        base->CR1 &= MCUX_MASK_INVERT_16(CMP_CR1_COS_MASK);
     }
     else
     {
@@ -586,7 +589,7 @@ static inline void CMP_EnableOuputPin(CMP_Type *base, bool bEnable)
     }
     else
     {
-        base->CR1 &= (uint8_t)(~CMP_CR1_OPE_MASK);
+        base->CR1 &= MCUX_MASK_INVERT_16(CMP_CR1_OPE_MASK);
     }
 }
 
@@ -610,7 +613,7 @@ static inline uint8_t CMP_GetComparatorOutput(CMP_Type *base)
  */
 static inline void CMP_SetHysteresisLevel(CMP_Type *base, cmp_hysteresis_level_t eHysteresisLevel)
 {
-    base->CR0 = ((base->CR0) & (uint8_t)(~CMP_CR0_HYSTCTR_MASK)) | CMP_CR0_HYSTCTR(eHysteresisLevel);
+    MCUX_REG_MODIFY16(base->CR0, CMP_CR0_HYSTCTR_MASK, CMP_CR0_HYSTCTR(eHysteresisLevel));
 }
 
 /*!
@@ -624,7 +627,7 @@ static inline void CMP_SetComparasionSpeedMode(CMP_Type *base, cmp_comparasion_s
 {
     if (eComparatorSpeedMode == kCMP_ComparsionModeLowSpeed)
     {
-        base->CR1 &= (uint8_t)(~CMP_CR1_PMODE_MASK);
+        base->CR1 &= MCUX_MASK_INVERT_16(CMP_CR1_PMODE_MASK);
     }
     else
     {
@@ -648,7 +651,7 @@ static inline void CMP_EnableInvertOutput(CMP_Type *base, bool bEnable)
     }
     else
     {
-        base->CR1 &= (uint8_t)(~CMP_CR1_INV_MASK);
+        base->CR1 &= MCUX_MASK_INVERT_16(CMP_CR1_INV_MASK);
     }
 }
 
@@ -666,7 +669,7 @@ static inline void CMP_EnableWindow(CMP_Type *base, bool bEnable)
     }
     else
     {
-        base->CR1 &= ~CMP_CR1_WE_MASK;
+        base->CR1 &= MCUX_MASK_INVERT_16(CMP_CR1_WE_MASK);
     }
 }
 
@@ -685,7 +688,7 @@ static inline void CMP_SetWindowOutputMode(CMP_Type *base, cmp_window_output_mod
     }
     else
     {
-        base->CR1 &= ~CMP_CR1_COWZ_MASK;
+        base->CR1 &= MCUX_MASK_INVERT_16(CMP_CR1_COWZ_MASK);
     }
 }
 #endif /* FSL_FEATURE_CMP_HAS_COWZ_BIT_FIELD */
@@ -698,7 +701,7 @@ static inline void CMP_SetWindowOutputMode(CMP_Type *base, cmp_window_output_mod
  */
 static inline void CMP_EnableExternalSampleMode(CMP_Type *base, bool bEnable)
 {
-    base->CR1 = (base->CR1 & (uint8_t)(~CMP_CR1_SE_MASK)) | (CMP_CR1_SE(bEnable));
+    MCUX_REG_MODIFY16(base->CR1, CMP_CR1_SE_MASK, CMP_CR1_SE(bEnable));
 }
 
 /*!
@@ -710,7 +713,7 @@ static inline void CMP_EnableExternalSampleMode(CMP_Type *base, bool bEnable)
  */
 static inline void CMP_SetExternalSampleCount(CMP_Type *base, cmp_external_sample_count_t eSampleCount)
 {
-    base->CR0 = (base->CR0 & ((uint8_t)~CMP_CR0_FILTER_CNT_MASK)) | CMP_CR0_FILTER_CNT(eSampleCount);
+    MCUX_REG_MODIFY16(base->CR0, CMP_CR0_FILTER_CNT_MASK, CMP_CR0_FILTER_CNT(eSampleCount));
 }
 
 /*!
@@ -722,7 +725,7 @@ static inline void CMP_SetExternalSampleCount(CMP_Type *base, cmp_external_sampl
  */
 static inline void CMP_SetInternalFilterCount(CMP_Type *base, cmp_filter_count_t eFilterCount)
 {
-    base->CR0 = (base->CR0 & ((uint8_t)~CMP_CR0_FILTER_CNT_MASK)) | CMP_CR0_FILTER_CNT(eFilterCount);
+    MCUX_REG_MODIFY16(base->CR0, CMP_CR0_FILTER_CNT_MASK, CMP_CR0_FILTER_CNT(eFilterCount));
 }
 
 /*!
@@ -772,7 +775,7 @@ static inline void CMP_EnableInternalDAC(CMP_Type *base, bool bEnable)
     }
     else
     {
-        base->MUXCR &= (uint8_t)(~CMP_MUXCR_DACEN_MASK);
+        base->MUXCR &= MCUX_MASK_INVERT_16(CMP_MUXCR_DACEN_MASK);
     }
 #else
     if (bEnable)
@@ -781,7 +784,7 @@ static inline void CMP_EnableInternalDAC(CMP_Type *base, bool bEnable)
     }
     else
     {
-        base->DACCR &= (uint8_t)(~CMP_DACCR_DACEN_MASK);
+        base->DACCR &= MCUX_MASK_INVERT_16(CMP_DACCR_DACEN_MASK);
     }
 #endif
 }
@@ -797,7 +800,7 @@ static inline void CMP_SetDACReferenceVoltageSource(CMP_Type *base, cmp_dac_vref
 #if defined(CMP_MUXCR_VRSEL_MASK)
     if (eDACVrefSource == kCMP_DACVrefSourceVin1)
     {
-        base->MUXCR &= ~CMP_MUXCR_VRSEL_MASK;
+        base->MUXCR &= MCUX_MASK_INVERT_16(CMP_MUXCR_VRSEL_MASK);
     }
     else
     {
@@ -806,7 +809,7 @@ static inline void CMP_SetDACReferenceVoltageSource(CMP_Type *base, cmp_dac_vref
 #else
     if (eDACVrefSource == kCMP_DACVrefSourceVin1)
     {
-        base->DACCR &= ~CMP_DACCR_VRSEL_MASK;
+        base->DACCR &= MCUX_MASK_INVERT_16(CMP_DACCR_VRSEL_MASK);
     }
     else
     {
@@ -831,10 +834,10 @@ static inline void CMP_SetDACReferenceVoltageSource(CMP_Type *base, cmp_dac_vref
 static inline void CMP_EnableInterrupt(CMP_Type *base, cmp_interrupt_request_t eInterruptRequest)
 {
 #if (defined(FSL_FEATURE_CMP_HAS_DMA) && FSL_FEATURE_CMP_HAS_DMA)
-    base->SCR =
-        (base->SCR & (~(CMP_SCR_IER_MASK | CMP_SCR_IEF_MASK | CMP_SCR_DMAEN_MASK))) | (uint16_t)eInterruptRequest;
+    MCUX_REG_MODIFY16(base->SCR, CMP_SCR_IER_MASK | CMP_SCR_IEF_MASK | CMP_SCR_DMAEN_MASK,
+                      (uint16_t)eInterruptRequest);
 #else
-    base->SCR = (base->SCR & (~(CMP_SCR_IER_MASK | CMP_SCR_IEF_MASK))) | (uint16_t)eInterruptRequest;
+    MCUX_REG_MODIFY16(base->SCR, CMP_SCR_IER_MASK | CMP_SCR_IEF_MASK, (uint16_t)eInterruptRequest);
 #endif
 }
 /*! @} */
@@ -864,7 +867,7 @@ static inline cmp_output_flag_t CMP_GetStatusFlags(CMP_Type *base)
  */
 static inline void CMP_ClearStatusFlags(CMP_Type *base, cmp_output_flag_t eOutputFlag)
 {
-    base->SCR = (((base->SCR) & (~(CMP_SCR_CFR_MASK | CMP_SCR_CFF_MASK))) | (uint16_t)eOutputFlag);
+    MCUX_REG_MODIFY16(base->SCR, CMP_SCR_CFR_MASK | CMP_SCR_CFF_MASK, (uint16_t)eOutputFlag);
 }
 
 /*! @} */
@@ -883,7 +886,8 @@ static inline void CMP_ClearStatusFlags(CMP_Type *base, cmp_output_flag_t eOutpu
  */
 static inline void CMP_EnableDMA(CMP_Type *base, cmp_dma_request_t eDMARequestType)
 {
-    base->SCR = (base->SCR & (~(CMP_SCR_IER_MASK | CMP_SCR_IEF_MASK | CMP_SCR_DMAEN_MASK))) | (uint16_t)eDMARequestType;
+    MCUX_REG_MODIFY16(base->SCR, CMP_SCR_IER_MASK | CMP_SCR_IEF_MASK | CMP_SCR_DMAEN_MASK,
+                      (uint16_t)eDMARequestType);
 }
 #endif
 
