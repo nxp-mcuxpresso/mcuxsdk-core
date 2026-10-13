@@ -168,7 +168,9 @@
        defined(KW43L43Z96_SERIES) || defined(KW43L43Z97_SERIES) || \
        defined(MCXW70AC_SERIES) || defined(MCXW70AD_SERIES) || \
        defined(MCXC151_SERIES) || \
-       defined(MCXC161_SERIES) || defined(MCXC162_SERIES))
+       defined(MCXC161_SERIES) || defined(MCXC162_SERIES) || \
+       defined(MCXC163_SERIES) || defined(MCXC164_SERIES) || \
+       defined(MCXC454_SERIES) || defined(MCXC453_SERIES)) 
 
 #ifndef TRNG_ENT_COUNT
 #define TRNG_ENT_COUNT TRNG_ENTA_ENT_COUNT
