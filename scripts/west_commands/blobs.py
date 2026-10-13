@@ -754,6 +754,16 @@ class Blobs(WestCommand):
         # this process only via a temporary environment override; the user's
         # GIT_SSH_COMMAND and ~/.ssh/config are not modified. If ssh is absent
         # or the master fails to start the fetch continues without multiplexing.
+        #
+        # Skipped on Windows: the ssh clients there (Win32-OpenSSH, Git for
+        # Windows) cannot multiplex over a control socket, and forcing
+        # ControlMaster=auto makes every fetch fail with "mux_client_request_
+        # session: read from master failed ... Failed to connect to new
+        # control master".
+        if sys.platform == 'win32':
+            self.dbg('SSH ControlMaster skipped on Windows (unsupported)')
+            yield
+            return
         tmp_dir = None
         prev_git_ssh_cmd = os.environ.get('GIT_SSH_COMMAND')
         try:
