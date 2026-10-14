@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief UART driver version. */
-#define FSL_UART_DRIVER_VERSION (MAKE_VERSION(2, 5, 2))
+#define FSL_UART_DRIVER_VERSION (MAKE_VERSION(2, 5, 3))
 /*! @} */
 
 /*! @brief Retry times for waiting flag. */
@@ -374,7 +374,7 @@ static inline void UART_EnableMatchAddress(UART_Type *base, bool match1, bool ma
     }
     else
     {
-        base->C4 &= ~(uint8_t)UART_C4_MAEN1_MASK;
+        base->C4 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C4_MAEN1_MASK));
     }
     /* Configure match address2 enable bit. */
     if (match2)
@@ -383,7 +383,7 @@ static inline void UART_EnableMatchAddress(UART_Type *base, bool match1, bool ma
     }
     else
     {
-        base->C4 &= ~(uint8_t)UART_C4_MAEN2_MASK;
+        base->C4 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C4_MAEN2_MASK));
     }
 }
 #endif
@@ -405,7 +405,7 @@ static inline void UART_Set9thTransmitBit(UART_Type *base)
  */
 static inline void UART_Clear9thTransmitBit(UART_Type *base)
 {
-    base->C3 &= ~(uint8_t)UART_C3_T8_MASK;
+    base->C3 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C3_T8_MASK));
 }
 
 /*! @} */
@@ -555,11 +555,11 @@ static inline void UART_EnableTxDMA(UART_Type *base, bool enable)
     else
     {
 #if (defined(FSL_FEATURE_UART_IS_SCI) && FSL_FEATURE_UART_IS_SCI)
-        base->C4 &= ~(uint8_t)UART_C4_TDMAS_MASK;
+        base->C4 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C4_TDMAS_MASK));
 #else
-        base->C5 &= ~(uint8_t)UART_C5_TDMAS_MASK;
+        base->C5 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C5_TDMAS_MASK));
 #endif
-        base->C2 &= ~(uint8_t)UART_C2_TIE_MASK;
+        base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C2_TIE_MASK));
     }
 }
 
@@ -585,11 +585,11 @@ static inline void UART_EnableRxDMA(UART_Type *base, bool enable)
     else
     {
 #if (defined(FSL_FEATURE_UART_IS_SCI) && FSL_FEATURE_UART_IS_SCI)
-        base->C4 &= ~(uint8_t)UART_C4_RDMAS_MASK;
+        base->C4 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C4_RDMAS_MASK));
 #else
-        base->C5 &= ~(uint8_t)UART_C5_RDMAS_MASK;
+        base->C5 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C5_RDMAS_MASK));
 #endif
-        base->C2 &= ~(uint8_t)UART_C2_RIE_MASK;
+        base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C2_RIE_MASK));
     }
 }
 
@@ -617,7 +617,7 @@ static inline void UART_EnableTx(UART_Type *base, bool enable)
     }
     else
     {
-        base->C2 &= ~(uint8_t)UART_C2_TE_MASK;
+        base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C2_TE_MASK));
     }
 }
 
@@ -637,7 +637,7 @@ static inline void UART_EnableRx(UART_Type *base, bool enable)
     }
     else
     {
-        base->C2 &= ~(uint8_t)UART_C2_RE_MASK;
+        base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8(UART_C2_RE_MASK));
     }
 }
 
@@ -931,7 +931,7 @@ status_t UART_EnableRxFIFO(UART_Type *base, bool enable);
  */
 static inline void UART_SetRxFifoWatermark(UART_Type *base, uint8_t water)
 {
-    assert((uint8_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= water);
+    assert((FSL_FEATURE_UART_FIFO_SIZEn(base) >= 0) && ((uint32_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= (uint32_t)water));
     base->RWFIFO = water;
 }
 
@@ -943,7 +943,7 @@ static inline void UART_SetRxFifoWatermark(UART_Type *base, uint8_t water)
  */
 static inline void UART_SetTxFifoWatermark(UART_Type *base, uint8_t water)
 {
-    assert((uint8_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= water);
+    assert((FSL_FEATURE_UART_FIFO_SIZEn(base) >= 0) && ((uint32_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= (uint32_t)water));
     base->TWFIFO = water;
 }
 #endif /* FSL_FEATURE_UART_HAS_FIFO */

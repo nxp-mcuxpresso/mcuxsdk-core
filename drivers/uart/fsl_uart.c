@@ -215,8 +215,8 @@ status_t UART_Init(UART_Type *base, const uart_config_t *config, uint32_t srcClo
     assert(config != NULL);
     assert(config->baudRate_Bps != 0U);
 #if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
-    assert((uint8_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= config->txFifoWatermark);
-    assert((uint8_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= config->rxFifoWatermark);
+    assert((FSL_FEATURE_UART_FIFO_SIZEn(base) >= 0) && ((uint32_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= (uint32_t)config->txFifoWatermark));
+    assert((FSL_FEATURE_UART_FIFO_SIZEn(base) >= 0) && ((uint32_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= (uint32_t)config->rxFifoWatermark));
 #endif
 
     uint32_t sbr      = 0U;
@@ -230,27 +230,39 @@ status_t UART_Init(UART_Type *base, const uart_config_t *config, uint32_t srcClo
     {
         sbr = 1U;
     }
+    uint32_t tempBaud = 0U;
 #if defined(FSL_FEATURE_UART_HAS_BAUD_RATE_FINE_ADJUST_SUPPORT) && FSL_FEATURE_UART_HAS_BAUD_RATE_FINE_ADJUST_SUPPORT
     /* Determine if a fractional divider is needed to fine tune closer to the
      * desired baud, each value of brfa is in 1/32 increments,
      * hence the multiply-by-32. */
-    uint32_t tempBaud = 0U;
+    uint64_t clkTemp  = (uint64_t)2U * (uint64_t)srcClock_Hz;
+    uint64_t sbrTemp  = (uint64_t)32U * (uint64_t)sbr;
 
-    uint32_t brfa = (2U * srcClock_Hz / (config->baudRate_Bps)) - 32U * sbr;
+    assert((clkTemp / (uint64_t)config->baudRate_Bps) >= sbrTemp);
+    uint64_t brfaDiff = (clkTemp / (uint64_t)config->baudRate_Bps) - sbrTemp;
+    assert(brfaDiff <= (uint64_t)UINT32_MAX);
+    uint32_t brfa     = (uint32_t)brfaDiff;
 
     /* Calculate the baud rate based on the temporary SBR values and BRFA */
-    tempBaud = srcClock_Hz * 2U / (sbr * 32U + brfa);
+    uint64_t tempBaud64 = clkTemp / (sbrTemp + (uint64_t)brfa);
+    assert(tempBaud64 <= (uint64_t)UINT32_MAX);
+    tempBaud = (uint32_t)tempBaud64;
     baudDiff =
         (tempBaud > config->baudRate_Bps) ? (tempBaud - config->baudRate_Bps) : (config->baudRate_Bps - tempBaud);
 
 #else
     /* Calculate the baud rate based on the temporary SBR values */
-    baudDiff = (srcClock_Hz / (sbr * 16U)) - config->baudRate_Bps;
+    tempBaud = srcClock_Hz / (16U * sbr);
+    uint32_t tempBaudInc = srcClock_Hz / (16U * ((uint32_t)sbr + 1U));
 
+    assert(tempBaud >= config->baudRate_Bps);
+    baudDiff = (tempBaud >= config->baudRate_Bps) ? (tempBaud - config->baudRate_Bps) : (config->baudRate_Bps - tempBaud);
+    assert(config->baudRate_Bps >= tempBaudInc);
+    uint32_t diffInc = (config->baudRate_Bps >= tempBaudInc) ? (config->baudRate_Bps - tempBaudInc) : (tempBaudInc - config->baudRate_Bps);
     /* Select the better value between sbr and (sbr + 1) */
-    if (baudDiff > (config->baudRate_Bps - (srcClock_Hz / (16U * ((uint32_t)sbr + 1U)))))
+    if (baudDiff > diffInc)
     {
-        baudDiff = config->baudRate_Bps - (srcClock_Hz / (16U * ((uint32_t)sbr + 1U)));
+        baudDiff = diffInc;
         sbr++;
     }
 #endif
@@ -269,20 +281,19 @@ status_t UART_Init(UART_Type *base, const uart_config_t *config, uint32_t srcClo
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 
     /* Disable UART TX RX before setting. */
-    base->C2 &= ~((uint8_t)UART_C2_TE_MASK | (uint8_t)UART_C2_RE_MASK);
+    base->C2 &= (uint8_t)( MCUX_MASK_INVERT_8((uint8_t)UART_C2_TE_MASK | (uint8_t)UART_C2_RE_MASK));
 
     /* Write the sbr value to the BDH and BDL registers*/
-    base->BDH = (base->BDH & ~(uint8_t)UART_BDH_SBR_MASK) | (uint8_t)(sbr >> 8);
+    base->BDH &= (uint8_t)((MCUX_MASK_INVERT_8(UART_BDH_SBR_MASK)) | (uint8_t)((sbr >> 8U) & (uint8_t)UART_BDH_SBR_MASK));
     base->BDL = (uint8_t)sbr;
 
 #if defined(FSL_FEATURE_UART_HAS_BAUD_RATE_FINE_ADJUST_SUPPORT) && FSL_FEATURE_UART_HAS_BAUD_RATE_FINE_ADJUST_SUPPORT
     /* Write the brfa value to the register*/
-    base->C4 = (base->C4 & ~(uint8_t)UART_C4_BRFA_MASK) | ((uint8_t)brfa & UART_C4_BRFA_MASK);
+    base->C4 &= (uint8_t)((MCUX_MASK_INVERT_8(UART_C4_BRFA_MASK)) | ((uint8_t)(brfa & (uint8_t)UART_C4_BRFA_MASK) & (uint8_t)UART_C4_BRFA_MASK));
 #endif
 
     /* Set bit count/parity mode/idle type. */
-    temp = base->C1 &
-           ~((uint8_t)UART_C1_PE_MASK | (uint8_t)UART_C1_PT_MASK | (uint8_t)UART_C1_M_MASK | (uint8_t)UART_C1_ILT_MASK);
+    temp = base->C1 & MCUX_MASK_INVERT_8((uint8_t)UART_C1_PE_MASK | (uint8_t)UART_C1_PT_MASK | (uint8_t)UART_C1_M_MASK | (uint8_t)UART_C1_ILT_MASK);
 
     temp |= UART_C1_ILT(config->idleType);
 
@@ -295,7 +306,7 @@ status_t UART_Init(UART_Type *base, const uart_config_t *config, uint32_t srcClo
 
 #if defined(FSL_FEATURE_UART_HAS_STOP_BIT_CONFIG_SUPPORT) && FSL_FEATURE_UART_HAS_STOP_BIT_CONFIG_SUPPORT
     /* Set stop bit per char */
-    base->BDH = (base->BDH & ~(uint8_t)UART_BDH_SBNS_MASK) | (uint8_t)UART_BDH_SBNS((uint8_t)config->stopBitCount);
+    base->BDH &= (uint8_t)((MCUX_MASK_INVERT_8(UART_BDH_SBNS_MASK)) | (uint8_t)UART_BDH_SBNS((uint8_t)config->stopBitCount));
 #endif
 
 #if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
@@ -449,25 +460,38 @@ status_t UART_SetBaudRate(UART_Type *base, uint32_t baudRate_Bps, uint32_t srcCl
     {
         sbr = 1U;
     }
+    uint32_t tempBaud = 0U;
 #if defined(FSL_FEATURE_UART_HAS_BAUD_RATE_FINE_ADJUST_SUPPORT) && FSL_FEATURE_UART_HAS_BAUD_RATE_FINE_ADJUST_SUPPORT
     /* Determine if a fractional divider is needed to fine tune closer to the
      * desired baud, each value of brfa is in 1/32 increments,
      * hence the multiply-by-32. */
-    uint32_t tempBaud = 0U;
 
-    uint32_t brfa = (2U * srcClock_Hz / (baudRate_Bps)) - 32U * sbr;
+    uint64_t clkTemp  = (uint64_t)2U * (uint64_t)srcClock_Hz;
+    uint64_t sbrTemp  = (uint64_t)32U * (uint64_t)sbr;
+
+    assert((clkTemp / (uint64_t)baudRate_Bps) >= sbrTemp);
+    uint64_t brfaDiff = (clkTemp / (uint64_t)baudRate_Bps) - sbrTemp;
+    assert(brfaDiff <= (uint64_t)UINT32_MAX);
+    uint32_t brfa     = (uint32_t)brfaDiff;
 
     /* Calculate the baud rate based on the temporary SBR values and BRFA */
-    tempBaud = (srcClock_Hz * 2U / ((sbr * 32U + brfa)));
+    uint64_t tempBaud64b = clkTemp / (sbrTemp + (uint64_t)brfa);
+    assert(tempBaud64b <= (uint64_t)UINT32_MAX);
+    tempBaud = (uint32_t)tempBaud64b;
     baudDiff = (tempBaud > baudRate_Bps) ? (tempBaud - baudRate_Bps) : (baudRate_Bps - tempBaud);
 #else
     /* Calculate the baud rate based on the temporary SBR values */
-    baudDiff = (srcClock_Hz / (sbr * 16U)) - baudRate_Bps;
+    tempBaud = srcClock_Hz / (16U * sbr);
+    uint32_t tempBaudInc = srcClock_Hz / (16U * ((uint32_t)sbr + 1U));
 
+    assert(tempBaud >= baudRate_Bps);
+    baudDiff = (tempBaud >= baudRate_Bps) ? (tempBaud - baudRate_Bps) : (baudRate_Bps - tempBaud);
+    assert(baudRate_Bps >= tempBaudInc);
+    uint32_t diffInc = (baudRate_Bps >= tempBaudInc) ? (baudRate_Bps - tempBaudInc) : (tempBaudInc - baudRate_Bps);
     /* Select the better value between sbr and (sbr + 1) */
-    if (baudDiff > (baudRate_Bps - (srcClock_Hz / (16U * (sbr + 1U)))))
+    if (baudDiff > diffInc)
     {
-        baudDiff = baudRate_Bps - (srcClock_Hz / (16U * (sbr + 1U)));
+        baudDiff = diffInc;
         sbr++;
     }
 #endif
@@ -480,15 +504,15 @@ status_t UART_SetBaudRate(UART_Type *base, uint32_t baudRate_Bps, uint32_t srcCl
         oldCtrl = base->C2;
 
         /* Disable UART TX RX before setting. */
-        base->C2 &= ~((uint8_t)UART_C2_TE_MASK | (uint8_t)UART_C2_RE_MASK);
+        base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C2_TE_MASK | (uint8_t)UART_C2_RE_MASK));
 
         /* Write the sbr value to the BDH and BDL registers*/
-        base->BDH = (base->BDH & ~(uint8_t)UART_BDH_SBR_MASK) | (uint8_t)(sbr >> 8);
+        base->BDH &= (uint8_t)((MCUX_MASK_INVERT_8(UART_BDH_SBR_MASK)) | (uint8_t)((sbr >> 8U) & (uint8_t)UART_BDH_SBR_MASK));
         base->BDL = (uint8_t)sbr;
 
 #if defined(FSL_FEATURE_UART_HAS_BAUD_RATE_FINE_ADJUST_SUPPORT) && FSL_FEATURE_UART_HAS_BAUD_RATE_FINE_ADJUST_SUPPORT
         /* Write the brfa value to the register*/
-        base->C4 = (base->C4 & ~(uint8_t)UART_C4_BRFA_MASK) | ((uint8_t)brfa & (uint8_t)UART_C4_BRFA_MASK);
+        base->C4 &= (uint8_t)((MCUX_MASK_INVERT_8(UART_C4_BRFA_MASK)) | ((uint8_t)(brfa & (uint8_t)UART_C4_BRFA_MASK) & (uint8_t)UART_C4_BRFA_MASK));
 #endif
         /* Restore C2. */
         base->C2 = oldCtrl;
@@ -519,14 +543,14 @@ void UART_Enable9bitMode(UART_Type *base, bool enable)
     if (enable)
     {
         /* Set UART_C1_M for 9-bit mode, clear UART_C1_PT and UART_C1_PE to disable parity. */
-        temp = base->C1 & ~((uint8_t)UART_C1_PE_MASK | (uint8_t)UART_C1_PT_MASK | (uint8_t)UART_C1_M_MASK);
+        temp = base->C1 & MCUX_MASK_INVERT_8((uint8_t)UART_C1_PE_MASK | (uint8_t)UART_C1_PT_MASK | (uint8_t)UART_C1_M_MASK);
         temp |= (uint8_t)UART_C1_M_MASK;
         base->C1 = temp;
     }
     else
     {
         /* Clear UART_C1_M. */
-        base->C1 &= ~(uint8_t)UART_C1_M_MASK;
+        base->C1 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C1_M_MASK);
     }
 }
 
@@ -569,9 +593,9 @@ void UART_EnableInterrupts(UART_Type *base, uint32_t mask)
 
     /* The interrupt mask is combined by control bits from several register: ((CFIFO<<24) | (C3<<16) | (C2<<8) |(BDH))
      */
-    base->BDH |= (uint8_t)mask;
-    base->C2 |= (uint8_t)(mask >> 8);
-    base->C3 |= (uint8_t)(mask >> 16);
+    base->BDH |= (uint8_t)(mask & 0xFFU);
+    base->C2  |= (uint8_t)((mask >> 8U)  & 0xFFU);
+    base->C3  |= (uint8_t)((mask >> 16U) & 0xFFU);
 
 #if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
     base->CFIFO |= (uint8_t)(mask >> 24);
@@ -597,12 +621,12 @@ void UART_DisableInterrupts(UART_Type *base, uint32_t mask)
 
     /* The interrupt mask is combined by control bits from several register: ((CFIFO<<24) | (C3<<16) | (C2<<8) |(BDH))
      */
-    base->BDH &= ~(uint8_t)mask;
-    base->C2 &= ~(uint8_t)(mask >> 8);
-    base->C3 &= ~(uint8_t)(mask >> 16);
+    base->BDH &= (uint8_t)MCUX_MASK_INVERT_8(mask & 0xFFU);
+    base->C2  &= (uint8_t)MCUX_MASK_INVERT_8((mask >> 8U)  & 0xFFU);
+    base->C3  &= (uint8_t)MCUX_MASK_INVERT_8((mask >> 16U) & 0xFFU);
 
 #if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
-    base->CFIFO &= ~(uint8_t)(mask >> 24);
+    base->CFIFO &= MCUX_MASK_INVERT_8(mask >> 24);
 #endif
 }
 
@@ -699,12 +723,12 @@ status_t UART_ClearStatusFlags(UART_Type *base, uint32_t mask)
     status_t status;
 
 #if defined(FSL_FEATURE_UART_HAS_LIN_BREAK_DETECT) && FSL_FEATURE_UART_HAS_LIN_BREAK_DETECT
-    reg &= ~((uint8_t)UART_S2_RXEDGIF_MASK | (uint8_t)UART_S2_LBKDIF_MASK);
+    reg &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_S2_RXEDGIF_MASK | (uint8_t)UART_S2_LBKDIF_MASK));
 #else
-    reg &= ~(uint8_t)UART_S2_RXEDGIF_MASK;
+    reg &= (uint8_t)MCUX_MASK_INVERT_8(UART_S2_RXEDGIF_MASK);
 #endif
 
-    base->S2 = reg | (uint8_t)(mask >> 8);
+    base->S2 = reg | (uint8_t)((mask >> 8U) & 0xFFU);
 
 #if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
     base->SFIFO = (uint8_t)(mask >> 24);
@@ -758,8 +782,9 @@ status_t UART_WriteBlocking(UART_Type *base, const uint8_t *data, size_t length)
 #if UART_RETRY_TIMES
     uint32_t waitTimes;
 #endif
-    while (0U != length--)
+    while (0U != length)
     {
+        length--;
 #if UART_RETRY_TIMES
         waitTimes = UART_RETRY_TIMES;
         while ((0U == (base->S1 & UART_S1_TDRE_MASK)) && (0U != --waitTimes))
@@ -835,8 +860,9 @@ status_t UART_ReadBlocking(UART_Type *base, uint8_t *data, size_t length)
     uint32_t waitTimes;
 #endif
 
-    while (length-- != 0U)
+    while (0U != length)
     {
+        length--;
 #if UART_RETRY_TIMES
         waitTimes = UART_RETRY_TIMES;
 #endif
@@ -955,7 +981,7 @@ void UART_TransferCreateHandle(UART_Type *base,
     /* Save the handle in global variables to support the double weak mechanism. */
     s_uartHandle[instance] = handle;
 
-    s_uartIsr = UART_TransferHandleIRQ;
+    s_uartIsr = &UART_TransferHandleIRQ;
     /* Enable interrupt in NVIC. */
     (void)EnableIRQ(s_uartIRQ[instance]);
 }
@@ -1018,12 +1044,12 @@ void UART_TransferStopRingBuffer(UART_Type *base, uart_handle_t *handle)
         /* Disable and re-enable the global interrupt to protect the interrupt enable register during read-modify-wrte.
          */
         uint32_t irqMask = DisableGlobalIRQ();
-        base->C2 &= ~(uint8_t)UART_C2_RIE_MASK;
-        base->C3 &= ~((uint8_t)UART_C3_ORIE_MASK | (uint8_t)UART_C3_FEIE_MASK);
+        base->C2 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C2_RIE_MASK);
+        base->C3 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C3_ORIE_MASK | (uint8_t)UART_C3_FEIE_MASK));
         /* Disable parity error interrupt when parity mode is enable*/
         if (((uint8_t)UART_C1_PE_MASK & base->C1) != 0U)
         {
-            base->C3 &= ~(uint8_t)UART_C3_PEIE_MASK;
+            base->C3 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C3_PEIE_MASK);
         }
         EnableGlobalIRQ(irqMask);
     }
@@ -1102,7 +1128,7 @@ void UART_TransferAbortSend(UART_Type *base, uart_handle_t *handle)
 
     /* Disable and re-enable the global interrupt to protect the interrupt enable register during read-modify-wrte. */
     uint32_t irqMask = DisableGlobalIRQ();
-    base->C2 &= ~((uint8_t)UART_C2_TIE_MASK | (uint8_t)UART_C2_TCIE_MASK);
+    base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C2_TIE_MASK | (uint8_t)UART_C2_TCIE_MASK));
     EnableGlobalIRQ(irqMask);
 
     handle->txDataSize = 0;
@@ -1131,6 +1157,8 @@ status_t UART_TransferGetSendCount(UART_Type *base, uart_handle_t *handle, uint3
         return kStatus_NoTransferInProgress;
     }
 #if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
+    assert(handle->txDataSizeAll >= handle->txDataSize);
+    assert((handle->txDataSizeAll - handle->txDataSize) >= base->TCFIFO);
     *count = handle->txDataSizeAll - handle->txDataSize - base->TCFIFO;
 #else
     if ((base->S1 & (uint8_t)kUART_TxDataRegEmptyFlag) != 0U)
@@ -1218,7 +1246,7 @@ status_t UART_TransferReceiveNonBlocking(UART_Type *base,
              * read-modify-wrte. */
             irqMask = DisableGlobalIRQ();
             /* Disable UART RX IRQ, protect ring buffer. */
-            base->C2 &= ~(uint8_t)UART_C2_RIE_MASK;
+            base->C2 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C2_RIE_MASK);
             EnableGlobalIRQ(irqMask);
 
             /* How many bytes in RX ring buffer currently. */
@@ -1328,12 +1356,12 @@ void UART_TransferAbortReceive(UART_Type *base, uart_handle_t *handle)
          */
         uint32_t irqMask = DisableGlobalIRQ();
         /* Disable RX interrupt. */
-        base->C2 &= ~((uint8_t)UART_C2_RIE_MASK | (uint8_t)UART_C2_ILIE_MASK);
-        base->C3 &= ~((uint8_t)UART_C3_ORIE_MASK | (uint8_t)UART_C3_FEIE_MASK);
+        base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C2_RIE_MASK  | (uint8_t)UART_C2_ILIE_MASK));
+        base->C3 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C3_ORIE_MASK | (uint8_t)UART_C3_FEIE_MASK));
         /* Disable parity error interrupt when parity mode is enable*/
         if (((uint8_t)UART_C1_PE_MASK & base->C1) != 0U)
         {
-            base->C3 &= ~(uint8_t)UART_C3_PEIE_MASK;
+            base->C3 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C3_PEIE_MASK);
         }
         EnableGlobalIRQ(irqMask);
     }
@@ -1396,7 +1424,7 @@ status_t UART_EnableTxFIFO(UART_Type *base, bool enable)
     if ((sfifo & UART_SFIFO_TXEMPT_MASK) == UART_SFIFO_TXEMPT_MASK)
     {
         /* Disable UART TX RX before setting */
-        base->C2 &= ~((uint8_t)UART_C2_TE_MASK | (uint8_t)UART_C2_RE_MASK);
+        base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C2_TE_MASK | (uint8_t)UART_C2_RE_MASK));
         /* Flush FIFO */
         base->CFIFO |= (UART_CFIFO_TXFLUSH_MASK | UART_CFIFO_RXFLUSH_MASK);
 
@@ -1406,7 +1434,7 @@ status_t UART_EnableTxFIFO(UART_Type *base, bool enable)
         }
         else
         {
-            base->PFIFO &= ~(uint8_t)UART_PFIFO_TXFE_MASK;
+            base->PFIFO &= (uint8_t)MCUX_MASK_INVERT_8(UART_PFIFO_TXFE_MASK);
         }
 
         /* Flush FIFO */
@@ -1441,7 +1469,7 @@ status_t UART_EnableRxFIFO(UART_Type *base, bool enable)
     if ((sfifo & UART_SFIFO_RXEMPT_MASK) == UART_SFIFO_RXEMPT_MASK)
     {
         /* Disable UART TX RX before setting */
-        base->C2 &= ~((uint8_t)UART_C2_TE_MASK | (uint8_t)UART_C2_RE_MASK);
+        base->C2 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C2_TE_MASK | (uint8_t)UART_C2_RE_MASK));
         /* Flush FIFO */
         base->CFIFO |= (UART_CFIFO_TXFLUSH_MASK | UART_CFIFO_RXFLUSH_MASK);
 
@@ -1451,7 +1479,7 @@ status_t UART_EnableRxFIFO(UART_Type *base, bool enable)
         }
         else
         {
-            base->PFIFO &= ~(uint8_t)UART_PFIFO_RXFE_MASK;
+            base->PFIFO &= (uint8_t)MCUX_MASK_INVERT_8(UART_PFIFO_RXFE_MASK);
         }
         /* Flush FIFO */
         base->CFIFO |= (UART_CFIFO_TXFLUSH_MASK | UART_CFIFO_RXFLUSH_MASK);
@@ -1573,12 +1601,12 @@ void UART_TransferHandleIRQ(UART_Type *base, void *irqHandle)
                  * read-modify-wrte. */
                 irqMask = DisableGlobalIRQ();
                 /* Disable RX interrupt/overrun interrupt/fram error/idle line detected interrupt */
-                base->C2 &= ~(uint8_t)UART_C2_RIE_MASK;
-                base->C3 &= ~((uint8_t)UART_C3_ORIE_MASK | (uint8_t)UART_C3_FEIE_MASK);
+                base->C2 &= (uint8_t) MCUX_MASK_INVERT_8(UART_C2_RIE_MASK);
+                base->C3 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C3_ORIE_MASK | (uint8_t)UART_C3_FEIE_MASK));
                 /* Disable parity error interrupt when parity mode is enabled */
                 if (((uint8_t)UART_C1_PE_MASK & base->C1) != 0U)
                 {
-                    base->C3 &= ~(uint8_t)UART_C3_PEIE_MASK;
+                    base->C3 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C3_PEIE_MASK);
                 }
                 EnableGlobalIRQ(irqMask);
 
@@ -1604,7 +1632,7 @@ void UART_TransferHandleIRQ(UART_Type *base, void *irqHandle)
             /* Disable and re-enable the global interrupt to protect the interrupt enable register during
              * read-modify-wrte. */
             irqMask = DisableGlobalIRQ();
-            base->C2 &= ~(uint8_t)UART_C2_ILIE_MASK;
+            base->C2 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C2_ILIE_MASK);
             EnableGlobalIRQ(irqMask);
         }
         /* If callback is not NULL and rxDataSize is not 0. */
@@ -1700,12 +1728,12 @@ void UART_TransferHandleIRQ(UART_Type *base, void *irqHandle)
              * read-modify-wrte. */
             irqMask = DisableGlobalIRQ();
             /* Disable RX interrupt/overrun interrupt/fram error/idle line detected interrupt */
-            base->C2 &= ~(uint8_t)UART_C2_RIE_MASK;
-            base->C3 &= ~((uint8_t)UART_C3_ORIE_MASK | (uint8_t)UART_C3_FEIE_MASK);
+            base->C2 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C2_RIE_MASK);
+            base->C3 &= (uint8_t)(MCUX_MASK_INVERT_8((uint8_t)UART_C3_ORIE_MASK | (uint8_t)UART_C3_FEIE_MASK));
             /* Disable parity error interrupt when parity mode is enabled */
             if (((uint8_t)UART_C1_PE_MASK & base->C1) != 0U)
             {
-                base->C3 &= ~(uint8_t)UART_C3_PEIE_MASK;
+                base->C3 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C3_PEIE_MASK);
             }
             EnableGlobalIRQ(irqMask);
         }
@@ -1738,7 +1766,8 @@ void UART_TransferHandleIRQ(UART_Type *base, void *irqHandle)
     {
 /* Get the bytes that available at this moment. */
 #if defined(FSL_FEATURE_UART_HAS_FIFO) && FSL_FEATURE_UART_HAS_FIFO
-        count = (uint8_t)FSL_FEATURE_UART_FIFO_SIZEn(base) - base->TCFIFO;
+        assert((uint8_t)FSL_FEATURE_UART_FIFO_SIZEn(base) >= base->TCFIFO);
+		count = (uint8_t)FSL_FEATURE_UART_FIFO_SIZEn(base) - base->TCFIFO;
 #else
         count = 1;
 #endif
@@ -1764,7 +1793,7 @@ void UART_TransferHandleIRQ(UART_Type *base, void *irqHandle)
                  * read-modify-wrte. */
                 irqMask = DisableGlobalIRQ();
                 /* Disable TX register empty interrupt and enable transmission complete interrupt. */
-                base->C2 = (base->C2 & ~(uint8_t)UART_C2_TIE_MASK) | (uint8_t)UART_C2_TCIE_MASK;
+                base->C2 = (uint8_t)((base->C2 & MCUX_MASK_INVERT_8(UART_C2_TIE_MASK)) | (uint8_t)UART_C2_TCIE_MASK);
                 EnableGlobalIRQ(irqMask);
             }
         }
@@ -1780,7 +1809,7 @@ void UART_TransferHandleIRQ(UART_Type *base, void *irqHandle)
          */
         irqMask = DisableGlobalIRQ();
         /* Disable transmission complete interrupt. */
-        base->C2 &= ~(uint8_t)UART_C2_TCIE_MASK;
+        base->C2 &= (uint8_t)MCUX_MASK_INVERT_8(UART_C2_TCIE_MASK);
         EnableGlobalIRQ(irqMask);
 
         /* Trigger callback. */

@@ -21,7 +21,7 @@ if(CONFIG_MCUX_COMPONENT_driver.uart_edma)
 endif()
 
 if(CONFIG_MCUX_COMPONENT_driver.uart)
-    mcux_component_version(2.5.2)
+    mcux_component_version(2.5.3)
 
     mcux_add_source(SOURCES fsl_uart.h fsl_uart.c)
 

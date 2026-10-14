@@ -1,5 +1,11 @@
 # UART
 
+## [2.5.3]
+
+- Bug Fixes
+  - All MSG Issues in NXP Code fixed.
+  - MISRA rules 10.8, 17.12 fixed.
+
 ## [2.5.2]
 
 - New Features
