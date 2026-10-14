@@ -237,6 +237,25 @@ class Blobs(WestCommand):
             (bootstrap + optional --stage copy); see ONBOARD_BLOB_REPO_GUIDE.md
             for the full walkthrough.
 
+            SHARING ONE BLOB REPO ACROSS SEVERAL WEST PROJECTS
+            ---------------------------------------------------
+
+            Per policy, one owner gets one blob repo covering every west
+            project they own (not one blob repo per project). When two or
+            more of those west projects' module roots would otherwise land
+            at the same relative path inside that shared repo (e.g. a
+            'lib/' directory under both project A and project B), give each
+            project's entries their own subdirectory of the shared repo by
+            hand-writing a 'repo-path' with a one-segment prefix, e.g.:
+
+              repo-path: projA/lib/foo.a   # not just lib/foo.a
+
+            'regen' detects and preserves this prefix automatically from a
+            manifest's own existing entries -- no extra flag or schema field
+            is needed, and it will not clobber the prefix back to the flat
+            form, nor mistake another project's entries sharing the same
+            repo for its own.
+
             MIGRATION DASHBOARD
             -------------------
 
@@ -1385,6 +1404,64 @@ class Blobs(WestCommand):
 
         return None
 
+    def _regen_detect_shared_prefix(self, old_entries, manifest_rel):
+        '''Infer a per-manifest repo-path prefix already in use, if any.
+
+        'repo-path' is normally just the sdk_path made relative to the
+        module root (manifest_rel) -- the flat layout. An owner who shares
+        one blob repo across several projects they own (one shared blob
+        repo per owner; see the blob policy doc) may instead place each
+        project's blobs under its own subdirectory of that shared repo,
+        e.g. 'projA/lib/foo.a' instead of 'lib/foo.a', so that a sibling
+        project's 'projB/lib/bar.a' does not collide with it.
+
+        This infers that convention purely from the manifest's own
+        'repo-path' values -- no new schema field or CLI flag is needed.
+        A flat entry (repo-path == its sdk-relative path made module-root-
+        relative) is treated as ambiguous, not contradictory: it is
+        consistent with either convention, so it is ignored rather than
+        voted as evidence for the empty prefix. This matters for a
+        manifest caught mid-migration from the flat layout to a shared
+        prefix, where some entries have already been moved and some have
+        not -- the mix should still resolve to the one real prefix in use,
+        so stragglers get corrected ([rp-fixed]) instead of pulling the
+        whole manifest back to flat.
+        Only trusted when every entry with a NON-flat repo-path agrees on
+        exactly the same prefix, and none has a shape that matches neither
+        convention (e.g. true legacy pre-migration data, where repo-path
+        is still the full sdk-relative path) -- either case falls back to
+        '' (today's flat-only behavior) rather than guessing.
+        '''
+        real_prefixes = set()
+        for entry in old_entries:
+            rp = entry.get('repo-path')
+            sp = entry.get('path')
+            if not rp or not sp:
+                continue
+            if rp == sp:
+                # Pre-migration: repo-path still equals the full sdk-relative
+                # path verbatim. Checked before the flat/prefixed comparison
+                # below because this can otherwise look like a 'prefix' of
+                # manifest_rel itself (e.g. rp 'middleware/projA/lib/foo.a'
+                # legitimately ends with '/lib/foo.a', the same suffix a
+                # real 'projA/lib/foo.a' entry would produce) -- a false
+                # positive this guard exists to prevent.
+                return ''
+            try:
+                flat = Path(sp).relative_to(manifest_rel).as_posix()
+            except ValueError:
+                continue
+            if rp == flat:
+                continue  # flat; ambiguous, not evidence either way
+            elif rp.endswith('/' + flat):
+                real_prefixes.add(rp[: -(len(flat) + 1)])
+            else:
+                return ''  # unrelated shape -- do not guess around it
+
+        if len(real_prefixes) == 1:
+            return real_prefixes.pop()
+        return ''  # no prefix evidence, or more than one differing prefix
+
     def regen(self, args):
         '''Reconcile mcux_blobs.yml manifests against local blob-repo checkouts.
 
@@ -1484,11 +1561,28 @@ class Blobs(WestCommand):
             except ValueError:
                 manifest_rel = Path('.')
 
+            # shared_prefix is a per-manifest directory prefix inside the blob
+            # repo (e.g. 'projA'), detected below from the manifest's
+            # existing entries once they are loaded -- '' here is just the
+            # initial value for a brand-new --init manifest, which has no
+            # prior entries to detect a prefix from and so keeps emitting
+            # the flat form. _to_repo_path reads this variable at call time,
+            # so the detection further down (after old_entries is loaded)
+            # takes effect for every call that follows it. See
+            # _regen_detect_shared_prefix for why this makes a shared blob
+            # repo (one shared repo per owner, several projects) safe: each
+            # project's manifest only ever reads/writes paths under its own
+            # prefix, so regen never clobbers a hand-authored 'projA/lib/...'
+            # layout back to a flat 'lib/...' one, and never mistakes a
+            # sibling project's blobs (e.g. 'projB/lib/...') for its own.
+            shared_prefix = ''
+
             def _to_repo_path(sp):
                 try:
-                    return Path(sp).relative_to(manifest_rel).as_posix()
+                    flat = Path(sp).relative_to(manifest_rel).as_posix()
                 except ValueError:
                     return sp
+                return f'{shared_prefix}/{flat}' if shared_prefix else flat
 
             # Detect whether this is a bootstrap (--init) run for a project
             # that has no mcux_blobs.yml yet.
@@ -1590,6 +1684,16 @@ class Blobs(WestCommand):
                     self.wrn('  No blobs entries; skipping.')
                     continue
 
+                # Detect an existing shared-repo prefix (see
+                # _regen_detect_shared_prefix) BEFORE anything below calls
+                # _to_repo_path, so every repo-path computed for this
+                # manifest -- staging, the reverse blob-repo scan, and new
+                # entries -- lands under the same prefix the manifest
+                # already uses, instead of always assuming the flat layout.
+                shared_prefix = self._regen_detect_shared_prefix(old_entries, manifest_rel)
+                if shared_prefix:
+                    self.inf(f"  repo-prefix: '{shared_prefix}' (detected from existing entries)")
+
                 # Extract shared manifest conventions from the first entry (used
                 # when creating entries for blobs added from the blob repo).
                 template = old_entries[0]
@@ -1650,10 +1754,29 @@ class Blobs(WestCommand):
                 repo_paths = set()
                 if blob_repo_dir is not None:
                     raw_rp = set(self._regen_scan_dir(blob_repo_dir, blob_repo_dir, allowed_exts))
-                    # Normalize to sdk-relative paths (same coordinate system as
-                    # old_by_path keys and sdk_new_paths) so the discard and
-                    # union operations work correctly when manifest_dir != prebuilt_root.
-                    repo_paths = {(manifest_rel / rp).as_posix() for rp in raw_rp}
+                    # Strip shared_prefix before rebasing onto manifest_rel, the
+                    # inverse of _to_repo_path's '{prefix}/{flat}' construction,
+                    # so the result lands in the same sdk-relative coordinate
+                    # system as old_by_path keys and sdk_new_paths (needed for
+                    # the discard/union operations below to work correctly).
+                    #
+                    # In a blob repo shared across several projects (one
+                    # shared repo per owner; see the blob policy doc), a
+                    # sibling's entries sit under a DIFFERENT prefix (e.g. this
+                    # manifest's shared_prefix is 'projA', but the repo also
+                    # holds 'projB/...'). Entries outside this manifest's own
+                    # prefix are not this manifest's blobs, so they are
+                    # skipped here -- without this filter, a path like
+                    # 'projB/lib/foo.a' would be misread as this manifest's
+                    # sdk-relative 'lib/projB/lib/foo.a' and wrongly offered
+                    # up as a new entry to add.
+                    for rp in raw_rp:
+                        if shared_prefix:
+                            prefix_dir = shared_prefix + '/'
+                            if not rp.startswith(prefix_dir):
+                                continue
+                            rp = rp[len(prefix_dir):]
+                        repo_paths.add((manifest_rel / rp).as_posix())
 
                 sdk_new = self._regen_scan_dir(manifest_dir, prebuilt_root, allowed_exts)
                 sdk_new_paths = {p for p in sdk_new if p not in old_by_path}
