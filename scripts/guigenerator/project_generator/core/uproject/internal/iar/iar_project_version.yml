@@ -1,0 +1,304 @@
+# ********************************************************************
+# Copyright 2026 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+# ********************************************************************
+#
+# IAR Embedded Workbench for Arm project-file version fields, per EW release.
+# Measured by saving an empty project with each real install and reading the
+# fields back. A Cortex-M7 and a Cortex-M33 project agree, so one table covers
+# every core.
+#
+# Field notation, translated to xpath by iar_project_version.rb:
+#   fileVersion         -> /project/fileVersion
+#   <S>/archiveVersion  -> ./settings[name="<S>"]/archiveVersion
+#   <S>/data/version    -> ./settings[name="<S>"]/data/version
+#   <S>/option/<O>      -> ./settings[name="<S>"]/data/option[name="<O>"]/version
+#
+# Four fields decide whether IAR opens the project at all. The rest go unchecked
+# on load but are written anyway, to match what the target IAR saves:
+#   .ewp  fileVersion, CUSTOM/archiveVersion, BUILDACTION/archiveVersion
+#   .ewd  fileVersion
+#
+# Opening is not the whole story. What decides the next two failures is the IAR
+# doing the reading, not the shape of the file:
+#   - An option it does not know shifts every option after it, so the entries in
+#     options_added_in have to be removed for older targets.
+#   - A data/version newer than its own makes it drop that settings block, so a
+#     project generated for release V needs IAR V or newer.
+# The reverse costs nothing: options the target added but the template lacks get
+# IAR's defaults.
+#
+# Two blocks changed shape rather than number, and need converting:
+# BUILDACTION archiveVersion 1 (9.10-9.32) holds one command each in <prebuild>
+# and <postbuild>, 2 (9.40 on) a <buildActions> list with a <buildSequence> per
+# entry; CUSTOM archiveVersion 3 carries <hasPrio>, 4 dropped it.
+#
+# Keys are major.minor with the minor in tens, as IAR publishes it: 9.10 through
+# 9.70, then 10.10. A row covers its whole family, so 9.30, 9.30.2, 9.31 and
+# 9.32.1 all resolve to 9.32, and only one row per family is allowed. A one-digit
+# minor names the same family: 10.1 is 10.10, which is how that install spells
+# itself in version_info.json and in the projects it saves. Releases compare
+# numerically, so row order does not matter.
+#
+# .ewt is not covered; the generator never emits one.
+#
+# 10.10 dropped ten .ewd driver blocks (CADI_ID, CMSISDAP_ID, E2_ID, GPLINK_ID,
+# LMIFTDI_ID, NULINK_ID, PEMICRO_ID, THIRDPARTY_ID, TIFET_ID, XDS100_ID) and
+# added CONFIGFILEDEBUG. It opens a project still carrying the dead blocks, so
+# the templates are reused as they are. Debugging a CMSIS-DAP or PEMicro project
+# under 10.10 does not work until IAR ships those drivers again.
+
+versions:
+  "9.10":
+    ewp:
+      # gate fields
+      fileVersion: 3
+      CUSTOM/archiveVersion: 3
+      BUILDACTION/archiveVersion: 1
+      # not validated on load
+      General/data/version: 33
+      General/option/GBECoreSlave: 30
+      General/option/CoreVariant: 30
+      General/option/GFPUCoreSlave2: 30
+      ICCARM/data/version: 37
+      AARM/data/version: 11
+      ILINK/data/version: 25
+      IARCHIVE/data/version: 0
+    ewd:
+      fileVersion: 3
+      C-SPY/data/version: 32
+      IJET_ID/data/version: 9
+      STLINK_ID/data/version: 7
+      STLINK_ID/option/CCSTLinkProbeList: 1
+      XDS100_ID/data/version: 8
+      XDS100_ID/option/CCXds100ResetList: 0
+
+  "9.20":
+    ewp:
+      fileVersion: 3
+      CUSTOM/archiveVersion: 3
+      BUILDACTION/archiveVersion: 1
+      General/data/version: 34
+      General/option/GBECoreSlave: 31
+      General/option/CoreVariant: 31
+      General/option/GFPUCoreSlave2: 31
+      ICCARM/data/version: 37
+      AARM/data/version: 11
+      ILINK/data/version: 26
+      IARCHIVE/data/version: 0
+    ewd:
+      fileVersion: 3
+      C-SPY/data/version: 32
+      IJET_ID/data/version: 9
+      STLINK_ID/data/version: 7
+      STLINK_ID/option/CCSTLinkProbeList: 1
+      XDS100_ID/data/version: 9
+      XDS100_ID/option/CCXds100ResetList: 1
+
+  "9.32":
+    ewp:
+      fileVersion: 3
+      CUSTOM/archiveVersion: 3
+      BUILDACTION/archiveVersion: 1
+      General/data/version: 35
+      General/option/GBECoreSlave: 32
+      General/option/CoreVariant: 32
+      General/option/GFPUCoreSlave2: 32
+      ICCARM/data/version: 37
+      AARM/data/version: 11
+      ILINK/data/version: 27
+      IARCHIVE/data/version: 0
+    ewd:
+      fileVersion: 3
+      C-SPY/data/version: 32
+      IJET_ID/data/version: 9
+      STLINK_ID/data/version: 8
+      STLINK_ID/option/CCSTLinkProbeList: 1
+      XDS100_ID/data/version: 9
+      XDS100_ID/option/CCXds100ResetList: 1
+
+  "9.40":
+    ewp:
+      fileVersion: 4
+      CUSTOM/archiveVersion: 3
+      BUILDACTION/archiveVersion: 2
+      General/data/version: 36
+      General/option/GBECoreSlave: 33
+      General/option/CoreVariant: 33
+      General/option/GFPUCoreSlave2: 33
+      General/option/OG_32_64DeviceCoreSlave: 33
+      ICCARM/data/version: 38
+      AARM/data/version: 12
+      ILINK/data/version: 27
+      IARCHIVE/data/version: 0
+    ewd:
+      fileVersion: 4
+      C-SPY/data/version: 33
+      IJET_ID/data/version: 9
+      STLINK_ID/data/version: 8
+      STLINK_ID/option/CCSTLinkProbeList: 2
+      XDS100_ID/data/version: 9
+      XDS100_ID/option/CCXds100ResetList: 1
+      E2_ID/data/version: 0
+
+  # 9.50 carries exactly the same version fields as 9.40; the only difference
+  # between the two is the GPLINK_ID block 9.50 added to .ewd
+  "9.50":
+    ewp:
+      fileVersion: 4
+      CUSTOM/archiveVersion: 3
+      BUILDACTION/archiveVersion: 2
+      General/data/version: 36
+      General/option/GBECoreSlave: 33
+      General/option/CoreVariant: 33
+      General/option/GFPUCoreSlave2: 33
+      General/option/OG_32_64DeviceCoreSlave: 33
+      ICCARM/data/version: 38
+      AARM/data/version: 12
+      ILINK/data/version: 27
+      IARCHIVE/data/version: 0
+    ewd:
+      fileVersion: 4
+      C-SPY/data/version: 33
+      IJET_ID/data/version: 9
+      STLINK_ID/data/version: 8
+      STLINK_ID/option/CCSTLinkProbeList: 2
+      XDS100_ID/data/version: 9
+      XDS100_ID/option/CCXds100ResetList: 1
+      E2_ID/data/version: 0
+      GPLINK_ID/data/version: 0
+
+  # the templates under templates/iar/ were saved by IAR 9.60.1, so targeting
+  # 9.60 writes back the values already there
+  "9.60":
+    ewp:
+      fileVersion: 4
+      CUSTOM/archiveVersion: 4
+      BUILDACTION/archiveVersion: 2
+      General/data/version: 37
+      General/option/GBECoreSlave: 34
+      General/option/CoreVariant: 34
+      General/option/GFPUCoreSlave2: 34
+      General/option/OG_32_64DeviceCoreSlave: 34
+      ICCARM/data/version: 39
+      AARM/data/version: 12
+      ILINK/data/version: 28
+      IARCHIVE/data/version: 0
+    ewd:
+      fileVersion: 4
+      C-SPY/data/version: 33
+      IJET_ID/data/version: 10
+      STLINK_ID/data/version: 8
+      STLINK_ID/option/CCSTLinkProbeList: 2
+      XDS100_ID/data/version: 9
+      XDS100_ID/option/CCXds100ResetList: 1
+      E2_ID/data/version: 0
+      GPLINK_ID/data/version: 0
+
+  "9.70":
+    ewp:
+      fileVersion: 4
+      CUSTOM/archiveVersion: 4
+      BUILDACTION/archiveVersion: 2
+      General/data/version: 37
+      General/option/GBECoreSlave: 35
+      General/option/CoreVariant: 35
+      General/option/GFPUCoreSlave2: 35
+      General/option/OG_32_64DeviceCoreSlave: 35
+      ICCARM/data/version: 40
+      AARM/data/version: 12
+      ILINK/data/version: 28
+      IARCHIVE/data/version: 1
+    ewd:
+      fileVersion: 4
+      C-SPY/data/version: 34
+      IJET_ID/data/version: 10
+      STLINK_ID/data/version: 8
+      STLINK_ID/option/CCSTLinkProbeList: 2
+      XDS100_ID/data/version: 9
+      XDS100_ID/option/CCXds100ResetList: 1
+      E2_ID/data/version: 1
+      GPLINK_ID/data/version: 0
+
+  # 10.10 matches 9.70 everywhere except fileVersion. The XDS100_ID, E2_ID and
+  # GPLINK_ID entries describe blocks 10.10 no longer has; they are kept so the
+  # dead blocks inherited from the template carry sane numbers.
+  "10.10":
+    ewp:
+      fileVersion: 5
+      CUSTOM/archiveVersion: 4
+      BUILDACTION/archiveVersion: 2
+      General/data/version: 37
+      General/option/GBECoreSlave: 35
+      General/option/CoreVariant: 35
+      General/option/GFPUCoreSlave2: 35
+      General/option/OG_32_64DeviceCoreSlave: 35
+      ICCARM/data/version: 40
+      AARM/data/version: 12
+      ILINK/data/version: 28
+      IARCHIVE/data/version: 1
+    ewd:
+      fileVersion: 5
+      C-SPY/data/version: 34
+      IJET_ID/data/version: 10
+      STLINK_ID/data/version: 8
+      STLINK_ID/option/CCSTLinkProbeList: 2
+      XDS100_ID/data/version: 9
+      XDS100_ID/option/CCXds100ResetList: 1
+      E2_ID/data/version: 1
+      GPLINK_ID/data/version: 0
+
+# Options and settings blocks that first appear in a given version. When
+# targeting anything older, every entry listed under a newer version has to be
+# removed from the generated project, or IAR misreads the options that follow
+# it (see the header).
+#
+# Measured by diffing the option name lists of projects saved by consecutive
+# IAR versions. Every step from 9.10 to 9.70 is purely additive; nothing was
+# ever dropped until 10.10, which is handled separately above.
+options_added_in:
+  "9.20":
+    ewp:
+      General: [BuildFilesPath]
+      ILINK: [IlinkWrapperFileEnable, IlinkWrapperFile]
+    ewd:
+      XDS100_ID: [OCSelectedCoreName]
+  "9.32":
+    ewp:
+      General: [FPU64, PointerAuthentication]
+      ILINK: [IlinkProcessor, IlinkFpuProcessor]
+    ewd:
+      STLINK_ID: [CCSTLinkTargetVccEnable, CCSTLinkTargetVoltage]
+  "9.40":
+    ewp:
+      General: [OG_32_64DeviceCoreSlave]
+      ICCARM: [CCPointerAutentiction, CCBranchTargetIdentification]
+      AARM: [A_32_64Device]
+    ewd:
+      C-SPY: [OCOverrideSlave, OCOverrideSlavePath, C_32_64Device, AuthEnable,
+              AuthSdmSelection, AuthSdmManifest, AuthSdmExplicitLib, AuthEnforce]
+  "9.50": {}
+  "9.60":
+    ewp:
+      General: [GOutputSo]
+      ICCARM: [CCPosRadRwpi, CCPosSharedSlave]
+      ILINK: [IlinkSharedSlave]
+    ewd:
+      IJET_ID: [IjetHWResetTimingOverride]
+  "9.70":
+    ewp:
+      ICCARM: [CCUseIarExtensions, CCUseGnuExtensions]
+      IARCHIVE: [IarchiveExtraOptionsCheck, IarchiveExtraOptions]
+    ewd:
+      C-SPY: [VectorTableOverride, VectorTableExpr]
+      E2_ID: [OCE2DeviceName]
+  "10.10": {}
+
+# Whole <settings> blocks that first appear in a given version, removed the
+# same way when targeting something older.
+settings_added_in:
+  "9.40":
+    ewd: [E2_ID]
+  "9.50":
+    ewd: [GPLINK_ID]
