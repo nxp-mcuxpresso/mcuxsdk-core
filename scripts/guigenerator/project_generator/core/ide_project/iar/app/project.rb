@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -284,20 +284,12 @@ module Iar
           end
         end
       end
-    end
 
-    class IDEProject_9_32_1 < IDEProject
       def set_project_version(target, version)
         @ewp_file.set_project_version(target, version)
         # ewd file is optional
         @ewd_file&.set_project_version(target, version)
       end
-    end
-
-    class IDEProject_9_32_2 < IDEProject_9_32_1
-    end
-
-    class IDEProject_9_40_1 < IDEProject_9_32_2
     end
   end
 end

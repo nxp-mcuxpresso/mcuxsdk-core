@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
 require_relative '../../../internal/_xml_utils'
+require_relative '../iar_project_version'
 require_relative '../../../../../../utils/_assert'
 require 'nokogiri'
 require 'logger'
@@ -22,10 +23,6 @@ module Iar
         def initialize(template, *args, logger: nil, **kwargs)
             @xml    = XmlUtils.load(template)
             @logger = logger ? logger : Logger.new(STDOUT)
-            @version_map = {
-              "/project/fileVersion" => 3,
-              "./settings[name=\"C-SPY\"]/data/version" => 32,
-            }
         end
 
         private
@@ -54,14 +51,17 @@ module Iar
             @operations.clear_unused_targets!()
         end
 
+        # See EwpFile#set_project_version.
         def set_project_version(target, version, *args, **kargs)
-            @version_map.each do |path, value|
-                if path == '/project/fileVersion'
-                    @operations.set_node_value("/project/fileVersion", value)
-                else
-                    @operations.set_state_node(target, path, value, used: true)
-                end
-            end
+            return if version.nil?
+
+            @operations.apply_project_version(
+                target,
+                ProjectVersion.global_xpath,
+                ProjectVersion.fields(version, 'ewd'),
+                ProjectVersion.options_to_remove(version, 'ewd'),
+                ProjectVersion.settings_to_remove(version, 'ewd')
+            )
         end
 
         private
@@ -137,6 +137,32 @@ module Iar
                 state_node = @xml.at_xpath(path)
                 return if state_node.nil?
                 state_node.content = value
+            end
+
+            # See EwpFile's DocumentOperations#apply_project_version. A
+            # generated .ewd keeps every configuration the template carries,
+            # not just the one being built.
+            def apply_project_version(target, global_xpath, fields, options_to_remove, settings_to_remove)
+                # keep the active target marked as used, as the per-target setters do
+                target_node(target)
+                set_node_value(global_xpath, fields[global_xpath])
+
+                @xml.xpath('/project/configuration').each do |node|
+                    fields.each do |path, value|
+                        next if path == global_xpath
+
+                        field_node = node.at_xpath(path)
+                        field_node.content = value.to_s unless field_node.nil?
+                    end
+                    options_to_remove.each do |settings, names|
+                        names.each do |name|
+                            node.at_xpath("./settings[name=\"#{settings}\"]/data/option[name=\"#{name}\"]")&.remove
+                        end
+                    end
+                    settings_to_remove.each do |settings|
+                        node.at_xpath("./settings[name=\"#{settings}\"]")&.remove
+                    end
+                end
             end
 
             # set value to existing "<state>" node by xpath

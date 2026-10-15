@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -30,6 +30,10 @@ module Iar
       end
 
       def save(*args, **kargs)
+        super
+      end
+
+      def set_project_version(*args, **kargs)
         super
       end
 

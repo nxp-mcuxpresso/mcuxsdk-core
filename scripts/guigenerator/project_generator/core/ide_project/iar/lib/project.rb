@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -87,18 +87,10 @@ module Iar
         generated_files = super(@modifier.fullpath(@output_dir), shared_projects_info, using_shared_workspace, shared_workspace)
         generated_files.map { |file| File.join(@output_dir, File.basename(file)) }
       end
-    end
 
-    class IDEProject_9_32_1 < IDEProject
       def set_project_version(target, version)
         @ewp_file.set_project_version(target, version)
       end
-    end
-
-    class IDEProject_9_32_2 < IDEProject_9_32_1
-    end
-
-    class IDEProject_9_40_1 < IDEProject_9_32_2
     end
 
   end

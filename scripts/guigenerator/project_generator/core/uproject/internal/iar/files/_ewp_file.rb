@@ -1,9 +1,10 @@
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
 require_relative '../../../internal/_xml_utils'
+require_relative '../iar_project_version'
 require_relative '../../../../../../utils/_assert'
 require_relative '../../../../../../utils/cmsis'
 # require_relative '../../../../../../pdsc_generator//pdsc_populator/pdsc_utils'
@@ -33,16 +34,6 @@ module Internal
         @components = Set[]
         @pack_info = {}
         @data_err_logger = nil
-        @version_map = {
-          "/project/fileVersion" => 3,
-          "./settings[name=\"General\"]/data/version" => 35,
-          "./settings[name=\"General\"]/data/option[name=\"GBECoreSlave\"]/version" => 32,
-          "./settings[name=\"General\"]/data/option[name=\"CoreVariantVersion\"]/version" => 32,
-          "./settings[name=\"General\"]/data/option[name=\"GFPUCoreSlave2Version\"]/version" => 32,
-          "./settings[name=\"ICCARM\"]/data/version" => 37,
-          "./settings[name=\"AARM\"]/data/version" => 11,
-          "./settings[name=\"BUILDACTION\"]/archiveVersion" => 1,
-        }
       end
 
       # Save file
@@ -514,14 +505,20 @@ module Internal
         end
       end
 
+      # Rewrite the version fields for the target IAR and drop the options it
+      # predates. A nil version emits the template as it is.
       def set_project_version(target, version, *args, **kargs)
-        @version_map.each do |path, value|
-          if path == '/project/fileVersion'
-            @operations.set_node_value("/project/fileVersion", value)
-          else
-            @operations.set_state_node(target, path, value, used: true)
-          end
-        end
+        return if version.nil?
+
+        @operations.apply_project_version(
+          target,
+          ProjectVersion.global_xpath,
+          ProjectVersion.fields(version, 'ewp'),
+          ProjectVersion.options_to_remove(version, 'ewp'),
+          ProjectVersion.settings_to_remove(version, 'ewp'),
+          legacy_build_actions: ProjectVersion.legacy_build_actions?(version),
+          legacy_custom_block: ProjectVersion.legacy_custom_block?(version)
+        )
       end
 
       # make all sub classes private
@@ -759,6 +756,91 @@ module Internal
           state_node = @xml.at_xpath(path)
           return if state_node.nil?
           state_node.content = value
+        end
+
+        # Apply the version fields of a target IAR release.
+        #
+        # The fields describe the file format, not one build configuration, so
+        # they go into every <configuration> the file carries.
+        #
+        # options_to_remove / settings_to_remove name what the target IAR
+        # predates; it reads the option list by position, so anything it does
+        # not know has to go.
+        def apply_project_version(target, global_xpath, fields, options_to_remove, settings_to_remove,
+                                  legacy_build_actions: false, legacy_custom_block: false)
+          # keep the active target marked as used, as the per-target setters do
+          target_node(target, used: true)
+          set_node_value(global_xpath, fields[global_xpath])
+
+          @xml.xpath('/project/configuration').each do |node|
+            fields.each do |path, value|
+              next if path == global_xpath
+
+              field_node = node.at_xpath(path)
+              field_node.content = value.to_s unless field_node.nil?
+            end
+            options_to_remove.each do |settings, names|
+              names.each do |name|
+                node.at_xpath("./settings[name=\"#{settings}\"]/data/option[name=\"#{name}\"]")&.remove
+              end
+            end
+            settings_to_remove.each do |settings|
+              node.at_xpath("./settings[name=\"#{settings}\"]")&.remove
+            end
+            collapse_build_actions(node) if legacy_build_actions
+            align_custom_block(node, legacy_custom_block)
+          end
+        end
+
+        # CUSTOM archiveVersion 3 carries <hasPrio> between <cmdline> and
+        # <buildSequence>; 4 dropped it. The templates are a mix of both, so
+        # add or remove it to match the target.
+        def align_custom_block(config_node, legacy)
+          config_node.xpath('./settings[name="CUSTOM"]/data').each do |data|
+            has_prio = data.at_xpath('./hasPrio')
+            if legacy
+              next unless has_prio.nil?
+
+              node = Nokogiri::XML::Node.new('hasPrio', data.document)
+              node.content = '0'
+              sequence = data.at_xpath('./buildSequence')
+              sequence.nil? ? data << node : sequence.add_previous_sibling(node)
+            else
+              has_prio&.remove
+            end
+          end
+        end
+
+        # Fold a <buildActions> list back into the <prebuild>/<postbuild> pair
+        # that IAR 9.32 and older understand. Renumbering alone leaves the
+        # commands where an older IAR does not look, and it skips them in
+        # silence.
+        #
+        # Several commands chain with ' && ' instead of staying separate
+        # entries, as the ninja parser already does for IAR: separate build
+        # actions have no guaranteed order.
+        def collapse_build_actions(config_node)
+          config_node.xpath('./settings[name="BUILDACTION"]/data').each do |data|
+            actions = data.at_xpath('./buildActions')
+            next if actions.nil?
+
+            actions.xpath('./buildAction').each do |action|
+              cmdline = action.at_xpath('./cmdline')&.content.to_s
+              next if cmdline.strip.empty?
+
+              # the generator emits 'preCompile' and 'postLink'
+              sequence = action.at_xpath('./buildSequence')&.content.to_s.strip.downcase
+              name = sequence.start_with?('pre') ? 'prebuild' : 'postbuild'
+              slot = data.at_xpath("./#{name}")
+              if slot.nil?
+                slot = Nokogiri::XML::Node.new(name, data.document)
+                data << slot
+              end
+              existing = slot.content.to_s.strip
+              slot.content = existing.empty? ? cmdline : "#{existing} && #{cmdline}"
+            end
+            actions.remove
+          end
         end
 
         def set_state_node_nocheck(target, xpath, value, used: nil)

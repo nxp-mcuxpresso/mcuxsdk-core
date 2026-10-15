@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # ********************************************************************
-# Copyright 2022 NXP
+# Copyright 2022, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 # ********************************************************************
@@ -329,22 +329,6 @@ module Iar
             super
           end
         end
-      end
-    end
-
-    class EwpFile_9_32_1 < EwpFile
-      def set_project_version(*args, **kargs)
-        super
-      end
-    end
-
-    class EwpFile_9_32_2 < EwpFile_9_32_1
-    end
-
-    class EwpFile_9_40_1 < EwpFile_9_32_2
-      def initialize(*args, **kwargs)
-        super
-        @version_map.each {|k,v| @version_map[k] = v+1}
       end
     end
   end

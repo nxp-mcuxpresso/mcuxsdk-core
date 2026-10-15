@@ -87,22 +87,10 @@ module App
 
         end
 
-    end
-
-    class EwdFile_9_32_1 < EwdFile
         def set_project_version(*args, **kargs)
             super
         end
-    end
 
-    class EwdFile_9_32_2 < EwdFile_9_32_1
-    end
-
-    class EwdFile_9_40_1 < EwdFile_9_32_2
-        def initialize(*args, **kwargs)
-            super
-            @version_map.each {|k,v| @version_map[k] = v+1}
-        end
     end
 end
 end
