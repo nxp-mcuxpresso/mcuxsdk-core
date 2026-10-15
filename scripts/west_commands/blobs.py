@@ -52,6 +52,7 @@ LIB_EXTS = {'a', 'lib', 'o', 'obj', 'so', 'dll'}
 SCAN_BINARY_EXTS = {
     '.a', '.lib', '.o', '.obj', '.bin', '.so', '.dll',
     '.hex', '.axf', '.elf', '.out', '.srec',
+    '.flm',  # Keil/IAR flash programming algorithm (binary debug-loader image)
 }
 
 # Directories that are build outputs / generated -- skip entirely when scanning.
@@ -2033,7 +2034,10 @@ class Blobs(WestCommand):
         allow_re = re.compile(args.allow_regex) if getattr(args, 'allow_regex', None) else None
 
         # Extension patterns for git pathspecs (e.g. '*.a', '*.bin', ...).
-        _ext_patterns = [f'*{ext}' for ext in SCAN_BINARY_EXTS]
+        # ':(icase)' makes the glob match regardless of case, since git
+        # pathspec globs are case-sensitive by default and some extensions
+        # (e.g. '.FLM') are conventionally uppercase on disk.
+        _ext_patterns = [f':(icase)*{ext}' for ext in SCAN_BINARY_EXTS]
 
         def _git_scan_project(proj_abspath: Path):
             """Return list of committed binary entries, or None on git failure."""
