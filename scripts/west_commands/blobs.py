@@ -1297,26 +1297,66 @@ class Blobs(WestCommand):
         return True
 
     def _regen_scan_dir(self, root, prebuilt_root, allowed_exts):
-        '''Walk root for files whose extension is in allowed_exts.
+        '''Find files under root whose extension is in allowed_exts.
 
         Returns a dict of sdk_path -> absolute Path, skipping anything not
-        under prebuilt_root (so an sdk-relative 'path' can be computed) and
-        skipping '.git' internals entirely.
+        under prebuilt_root (so an sdk-relative 'path' can be computed).
+
+        Prefers 'git ls-files' (same approach as 'west blobs scan'): git
+        reads its packed index directly and returns only committed files,
+        so generated/untracked trees under root -- a build output, a
+        Python venv, vendored packages -- are never considered, with no
+        exclude-dir list to keep in sync. Falls back to an os.walk that
+        prunes SCAN_EXCLUDE_DIR_PARTS/SCAN_EXCLUDE_DIR_PATTERNS when root
+        is not inside a git working tree, or 'git ls-files' fails.
         '''
-        found = {}
-        for fpath in root.rglob('*'):
+        ext_patterns = [f'*.{ext}' for ext in allowed_exts]
+        if not ext_patterns:
+            # No extensions to match; an empty 'git ls-files --' pathspec
+            # would list every tracked file instead of none.
+            return {}
+
+        def _record(fpath):
             if not fpath.is_file():
-                continue
-            if '.git' in fpath.parts:
-                continue
-            ext = fpath.suffix.lstrip('.').lower()
-            if ext not in allowed_exts:
-                continue
+                return
             try:
                 sdk_path = fpath.relative_to(prebuilt_root).as_posix()
             except ValueError:
-                continue
+                return
             found[sdk_path] = fpath
+
+        found = {}
+        try:
+            result = subprocess.run(
+                ['git', 'ls-files', '-z', '--'] + ext_patterns,
+                cwd=str(root),
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            result = None
+
+        if result is not None and result.returncode == 0:
+            for rel_path in result.stdout.split('\0'):
+                if rel_path:
+                    _record((root / rel_path).resolve())
+            return found
+
+        # Fall back: not a git working tree, or git failed for some other
+        # reason -- walk it ourselves, pruning known generated/vendored dirs.
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [
+                d for d in dirnames
+                if d not in SCAN_EXCLUDE_DIR_PARTS
+                and not d.startswith('build')
+                and not any(p.search(d) for p in SCAN_EXCLUDE_DIR_PATTERNS)
+            ]
+            for fn in filenames:
+                ext = os.path.splitext(fn)[1].lstrip('.').lower()
+                if ext not in allowed_exts:
+                    continue
+                _record(Path(dirpath) / fn)
         return found
 
     def _regen_find_blob_repo(self, module_name, manifest_url, explicit_map):
