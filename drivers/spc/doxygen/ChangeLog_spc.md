@@ -1,5 +1,17 @@
 # SPC
 
+## [2.10.1]
+
+- Bug Fixes
+  - Fixed `SPC_SetActiveModeCoreLDORegulatorConfig()` not restoring ACTIVE_CFG[CORELDO_VDD_DS] to
+    normal when switching drive strength from low to normal, leaving the regulator at low drive
+    strength despite returning kStatus_Success. Also now requires the requested voltage to match
+    the pre-low level on this switch, avoiding an unexpected LVD.
+  - Fixed `SPC_SetLowPowerModeCoreLDORegulatorConfig()` missing checks on ACTIVE_CFG[CORELDO_VDD_DS]
+    and ACTIVE_CFG[CORELDO_VDD_LVL] before writing LP_CFG[CORELDO_VDD_LVL], and removed an incorrect
+    low-drive-strength voltage check that could fail on a stale LP_CFG[CORELDO_VDD_LVL] value left
+    over from a prior application (SPC registers survive a software reset).
+
 ## [2.10.0]
 
 - New Features

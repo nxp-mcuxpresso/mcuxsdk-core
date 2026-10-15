@@ -1,5 +1,5 @@
 /*
- * Copyright 2019, 2021-2025 NXP
+ * Copyright 2019, 2021-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -966,6 +966,8 @@ void SPC_SetExternalVoltageDomainsConfig(SPC_Type *base, uint8_t lowPowerIsoMask
  *
  * note If any voltage detect feature is enabled in Active mode, then CORE_LDO's drive strength must not set to low.
  * note Core VDD level for the Core LDO low power regulator can only be changed when CORELDO_VDD_DS is normal
+ * note When switching the drive strength from low to normal, the voltage level must stay the same as it was before
+ * switching to low, otherwise an unexpected LVD can occur while LVDs are enabled.
  *
  * param base SPC peripheral base address.
  * param option Pointer to the spc_active_mode_Core_LDO_option_t structure.
@@ -975,6 +977,8 @@ void SPC_SetExternalVoltageDomainsConfig(SPC_Type *base, uint8_t lowPowerIsoMask
  * retval kStatus_SPC_CORELDOLowDriveStrengthIgnore If any voltage detect enabled, core_ldo's drive strength can not
  * set to low.
  * retval kStatus_SPC_CORELDOVoltageWrong The selected voltage level in active mode is not allowed.
+ * retval kStatus_SPC_CORELDOVoltageSetFail Fail to change Core LDO voltage level when switching drive strength from
+ * low to normal.
  * retval kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_active_mode_core_ldo_option_t *option)
@@ -1026,6 +1030,21 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
         }
 
         base->ACTIVE_CFG &= ~SPC_ACTIVE_CFG_CORELDO_VDD_DS_MASK;
+    }
+    else
+    {
+        /* Switching drive strength from low to normal must keep the voltage level unchanged, otherwise an
+         * unexpected LVD can occur while LVDs are enabled. */
+        if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_CORELDO_VDD_DS_MASK) == 0UL)
+        {
+            preVoltage = SPC_GetActiveModeCoreLDOVDDVoltageLevel(base);
+            if (preVoltage != option->CoreLDOVoltage)
+            {
+                return kStatus_SPC_CORELDOVoltageSetFail;
+            }
+        }
+
+        base->ACTIVE_CFG |= SPC_ACTIVE_CFG_CORELDO_VDD_DS_MASK;
     } /* GCOVR_EXCL_STOP */
 #endif /* FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS */
     base->ACTIVE_CFG = ((base->ACTIVE_CFG & ~SPC_ACTIVE_CFG_CORELDO_VDD_LVL_MASK) |
@@ -1060,7 +1079,8 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
  * level in Active mode must be equal to the voltage level in Low power mode. And the Bandgap
  * must be programmed to select bandgap enabled.
  * Core VDD voltage levels for the Core LDO low power regulator can only be changed when the CORE
- * LDO Drive Strength is set as Normal.
+ * LDO Drive Strength is set as Normal in ACTIVE_CFG. When the Core LDO Drive Strength is set to
+ * Low, the requested voltage level is ignored and LP_CFG[CORELDO_VDD_LVL] keeps its current value.
  *
  * param base SPC peripheral base address.
  * param option Pointer to the spc_lowpower_mode_Core_LDO_option_t structure.
@@ -1069,12 +1089,13 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
  * retval kStatus_SPC_BandgapModeWrong The bandgap mode setting in low powermode is wrong.
  * retval kStatus_SPC_CORELDOVoltageWrong The selected voltage level is wrong.
  * retval kStatus_SPC_CORELDOLowDriveStrengthIgnore Set driver strength to low will be ignored.
- * retval kStatus_SPC_CORELDOVoltageSetFail. Fail to change Core LDO voltage level.
+ * retval kStatus_SPC_CORELDOVoltageSetFail. Fail to change Core LDO voltage level, either because
+ * ACTIVE_CFG[CORELDO_VDD_DS] is not normal, or because the requested voltage level does not match
+ * ACTIVE_CFG[CORELDO_VDD_LVL].
  * retval kStatus_Timeout Timeout occurs while waiting completion.
  */
 status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_lowpower_mode_core_ldo_option_t *option)
 {
-    spc_core_ldo_voltage_level_t preVoltage;
     uint32_t state;
 
 #if SPC_BUSY_TIMEOUT
@@ -1096,6 +1117,20 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_low
 
     if (option->CoreLDODriveStrength == kSPC_CoreLDO_NormalDriveStrength)
     {
+#if defined(FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS) && FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS
+        /* LP_CFG[CORELDO_VDD_LVL] can only be changed when ACTIVE_CFG[CORELDO_VDD_DS] is normal. */
+        if ((base->ACTIVE_CFG & SPC_ACTIVE_CFG_CORELDO_VDD_DS_MASK) == 0UL)
+        {
+            return kStatus_SPC_CORELDOVoltageSetFail;
+        }
+
+        /* When ACTIVE_CFG and LP_CFG both select normal drive strength, their voltage levels must match. */
+        if (SPC_GetActiveModeCoreLDOVDDVoltageLevel(base) != option->CoreLDOVoltage)
+        {
+            return kStatus_SPC_CORELDOVoltageSetFail;
+        }
+#endif /* FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS */
+
         base->LP_CFG |= SPC_LP_CFG_CORELDO_VDD_DS_MASK;
         base->LP_CFG =
             ((base->LP_CFG & (~SPC_LP_CFG_CORELDO_VDD_LVL_MASK)) | SPC_LP_CFG_CORELDO_VDD_LVL(option->CoreLDOVoltage));
@@ -1113,21 +1148,8 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_low
             return kStatus_SPC_CORELDOLowDriveStrengthIgnore; /* GCOVR_EXCL_LINE */
         }
 
-        /*
-         * $Line Coverage Justification$
-         * $ref spc_c_ref_1$.
-         */
-        preVoltage = SPC_GetLowPowerCoreLDOVDDVoltageLevel(base); /* GCOVR_EXCL_LINE */
-        /*
-         * $Branch Coverage Justification$
-         * $ref spc_c_ref_1$.
-         */
-        /* Core LDO voltage level can only be changed when the Core LDO Drive Strength set to Normal */
-        if ((option->CoreLDOVoltage >= kSPC_CoreLDO_MidDriveVoltage) && (preVoltage != option->CoreLDOVoltage)) /* GCOVR_EXCL_START */
-        {
-            return kStatus_SPC_CORELDOVoltageSetFail;
-        } /* GCOVR_EXCL_STOP */
-
+        /* Core LDO voltage level can only be changed when the Core LDO Drive Strength is Normal, so
+         * LP_CFG[CORELDO_VDD_LVL] is intentionally left untouched here. */
         /*
          * $Line Coverage Justification$
          * $ref spc_c_ref_1$.
