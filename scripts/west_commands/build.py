@@ -192,7 +192,7 @@ class Build(Forceable):
                            -DSNIPPET... cmake arguments: the results are
                            undefined''')
         group.add_argument('--toolchain', dest='toolchain', action='store',
-                           default='armgcc', help='Specify toolchain')
+                           default=None, help='Specify toolchain')
         group.add_argument('--toolchain-version', dest='toolchain_version',
                            action='store', default=None,
                            help='''Target IDE version the generated project must
@@ -275,6 +275,14 @@ class Build(Forceable):
                     self.run_cmake = True
         else:
             self.run_cmake = True
+
+        # A build directory remembers its toolchain, so naming only the version
+        # does not have to repeat --toolchain. Resolve it before anything reads
+        # self.args.toolchain.
+        if self.args.toolchain is None:
+            self.args.toolchain = (self._cached_config('CONFIG_TOOLCHAIN')
+                                    or config_get('toolchain', None)
+                                    or 'armgcc')
 
         # Log this west build invocation in the binary directory
         _append_invocation_log(self.build_dir, _get_full_cmdline())
@@ -422,7 +430,9 @@ class Build(Forceable):
     def _cached_config(self, name):
         # Value this build directory was configured with, '' when there is no
         # cache or no such entry.
-        return (self.cmake_cache or {}).get(name) or ''
+        if self.cmake_cache is None:
+            return ''
+        return self.cmake_cache.get(name) or ''
 
     def _get_dir_fmt_context(self):
         # Return a dictionary of build attributes which are used while
@@ -557,6 +567,7 @@ class Build(Forceable):
 
         boards_mismatched = False
         devices_mismatched = False
+        toolchains_mismatched = False
 
         # If the build directory specifies a source app, make sure it's
         # consistent with --source-dir.
@@ -623,7 +634,21 @@ class Build(Forceable):
                 '(Clean the directory, use --pristine, or use --build-dir to '
                 'specify a different one.)')
 
-        if self.auto_pristine and (apps_mismatched or boards_mismatched or devices_mismatched):
+        cached_toolchain = self._cached_config('CONFIG_TOOLCHAIN')
+        if cached_toolchain:
+            # A changed --toolchain needs a clean directory.
+            toolchains_mismatched = (self.args.toolchain and
+                                     self.args.toolchain != cached_toolchain)
+            self.check_force(
+                not toolchains_mismatched or self.auto_pristine,
+                f'Build directory {self.build_dir} is configured for toolchain '
+                f'{cached_toolchain}, but toolchain {self.args.toolchain} was '
+                'specified. Its build artifacts belong to '
+                f'{cached_toolchain}. (Clean the directory, use --pristine, or '
+                'use --build-dir to specify a different one.)')
+
+        if self.auto_pristine and (apps_mismatched or boards_mismatched or devices_mismatched
+                                   or toolchains_mismatched):
             self._run_pristine()
             self.cmake_cache = None
             self.dbg('run_cmake:', True, level=Verbosity.DBG_EXTREME)
