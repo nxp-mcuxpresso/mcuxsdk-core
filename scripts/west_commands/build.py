@@ -193,6 +193,13 @@ class Build(Forceable):
                            undefined''')
         group.add_argument('--toolchain', dest='toolchain', action='store',
                            default='armgcc', help='Specify toolchain')
+        group.add_argument('--toolchain-version', dest='toolchain_version',
+                           action='store', default=None,
+                           help='''Target IDE version the generated project must
+                           open in, e.g. --toolchain-version 9.32. Only the iar
+                           toolchain supports this. Each supported version
+                           covers its whole family, so 9.30, 9.31 and 9.32.1 all
+                           mean 9.32. Omit to leave the templates as they are.''')
         group.add_argument('--compiler', dest='compiler', action='store', help='Specify compiler. Compiler must follow toolchain.')
         group.add_argument('--config', dest='config', action='store',
                            default=None, help='SDK build config type')
@@ -259,6 +266,12 @@ class Build(Forceable):
                 self._update_cache()
                 if (self.args.cmake or self.args.cmake_opts or
                         self.args.cmake_only or self.args.snippets):
+                    self.run_cmake = True
+                # CONFIG_TOOLCHAIN_VERSION is read while cmake configures and
+                # baked into the generator command, so asking for a different
+                # one has to re-configure or the previous version is used again.
+                wanted_version = self.args.toolchain_version or ''
+                if wanted_version != self._cached_config('CONFIG_TOOLCHAIN_VERSION'):
                     self.run_cmake = True
         else:
             self.run_cmake = True
@@ -405,6 +418,11 @@ class Build(Forceable):
     def _update_cache(self):
         with contextlib.suppress(FileNotFoundError):
             self.cmake_cache = CMakeCache.from_build_dir(self.build_dir)
+
+    def _cached_config(self, name):
+        # Value this build directory was configured with, '' when there is no
+        # cache or no such entry.
+        return (self.cmake_cache or {}).get(name) or ''
 
     def _get_dir_fmt_context(self):
         # Return a dictionary of build attributes which are used while
@@ -720,6 +738,13 @@ class Build(Forceable):
                     self.die(f'compiler {self.args.compiler} not supported with toolchain mdk')
 
             extra_args['CONFIG_COMPILER'] = self.args.compiler
+
+        if self.args.toolchain_version and self.args.toolchain != 'iar':
+            self.die(f'--toolchain-version is only supported with toolchain iar, not {self.args.toolchain}')
+        # Always pass it, empty included: a value left out of the cmake command
+        # line keeps whatever the cache already held, so dropping the option
+        # would silently reuse the version of an earlier run.
+        extra_args['CONFIG_TOOLCHAIN_VERSION'] = self.args.toolchain_version or ''
 
         for k,v in extra_args.items():
             cmake_opts.extend([f'-D{k}={v}'])

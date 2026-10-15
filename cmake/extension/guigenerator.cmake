@@ -1,4 +1,4 @@
-# Copyright 2024, 2025 NXP
+# Copyright 2024-2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 include_guard(GLOBAL)
@@ -70,6 +70,9 @@ if(DEFINED SB_CONFIG_secondary_core_id)
 endif()
 if(DEFINED SYSBUILD)
     list(APPEND COMMON_ENV_SETTINGS SYSBUILD=${SYSBUILD})
+endif()
+if(CONFIG_TOOLCHAIN_VERSION)
+    list(APPEND COMMON_ENV_SETTINGS toolchain_version=${CONFIG_TOOLCHAIN_VERSION})
 endif()
 
 if(NOT DEFINED SB_CONF_FILE)

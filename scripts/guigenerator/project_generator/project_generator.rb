@@ -1,4 +1,4 @@
-# Copyright 2024 NXP
+# Copyright 2024, 2026 NXP
 #
 # SPDX-License-Identifier: BSD-3-Clause
 require 'json'
@@ -9,6 +9,7 @@ require_relative './ninja_parser'
 require_relative './out_of_tree_ninja_parser'
 require_relative './out_of_tree_generator'
 require_relative 'core/_fileutils'
+require_relative 'core/uproject/internal/iar/iar_project_version'
 require_relative '../utils/utils'
 require 'rubygems'
 
@@ -23,7 +24,7 @@ CMAKE_LOG_LEVEL_MAP = { 'TRACE' => Logger::DEBUG,
                         'ERROR' => Logger::ERROR }
 RUBY_MINIMUM_REQUIRED = '3.1.2'
 
-def make_up_build_option(project, toolchain, config, outdir)
+def make_up_build_option(project, toolchain, config, outdir, toolchain_version = nil)
   build_option = {}
   build_option[:set_name] = "set.board.#{ENV['board']}"
   build_option[:entry_set] = "set.board.#{ENV['board']}"
@@ -40,6 +41,8 @@ def make_up_build_option(project, toolchain, config, outdir)
   build_option[:projects] = [project]
   build_option[:output_type] = 'project'
   build_option[:sdk_data_version] = 'v3'
+  # IDE version requested on the command line, nil when none was.
+  build_option[:toolchain_version] = toolchain_version
   build_option[:package_data_path] = File.join(ENV["SdkRootDirPath"], PACKAGE_YML_PATH)
   build_option[:generators] = {:project_generate => {}}
   build_option[:set] = {
@@ -70,7 +73,6 @@ def make_up_build_option(project, toolchain, config, outdir)
   #   build_option[:toolchains_version] = {'armgcc' => '12.3.1', 'mdk' => '5.38.1', 'iar' => '9.50.1', 'mcux' => '11.9.0'}
   #   build_option[:manifest_versions] = ['3.14']
   # end
-  build_option[:toolchains_version] = {'armgcc' => '12.3.1', 'mdk' => '5.38.1', 'iar' => '9.50.1', 'mcux' => '11.9.0'}
   build_option[:manifest_versions] = ['3.14']
   build_option
 end
@@ -79,6 +81,7 @@ if $PROGRAM_NAME == __FILE__
   begin
     ninja = nil
     toolchain = nil
+    toolchain_version = nil
     outdir = nil
     project = nil
     config = nil
@@ -94,6 +97,11 @@ if $PROGRAM_NAME == __FILE__
       end
       opts.on('-t', '--toolchain [iar mdk]', String, 'Set toolchain') do |value|
         toolchain = value
+      end
+      opts.on('--toolchain-version [version]', String,
+              'Target IDE version the generated project must open in, e.g. 9.32. ' \
+              'Only IAR is supported. Omit to leave the templates as they are.') do |value|
+        toolchain_version = value
       end
       opts.on('-o', '--output_directory [output dir]', String, 'output dir') do |value|
         outdir = value.tr('\\', '/')
@@ -112,6 +120,25 @@ if $PROGRAM_NAME == __FILE__
         return
     end
 
+    # cmake passes the target version through the environment; the command line
+    # option wins when the script is driven directly. cmake renders an empty
+    # list element as '', so strip those before deciding whether one was given.
+    toolchain_version = ENV['toolchain_version'] if toolchain_version.nil?
+    toolchain_version = toolchain_version.to_s.strip.delete("'\"")
+    toolchain_version = nil if toolchain_version.empty?
+
+    unless toolchain_version.nil?
+        if toolchain != 'iar'
+            puts "--toolchain-version only applies to the iar toolchain, but script get #{toolchain}. Drop the option or switch toolchain."
+            return
+        end
+        unless Internal::Iar::ProjectVersion.supported?(toolchain_version)
+            puts "IAR version '#{toolchain_version}' is not supported. Supported versions: #{Internal::Iar::ProjectVersion.supported.join(', ')}."
+            puts "Each one covers its whole family, so 9.30, 9.31 and 9.32.1 all mean 9.32."
+            return
+        end
+    end
+
     # Give message if the out dir is not in the same disk drive as SDK root path when making GUI project
     if !Utils.same_disk_drive?(ENV['SdkRootDirPath'], outdir) && !ENV['standalone']
         puts "\r\nGUI project use relative path, but the output directory #{outdir} is not in the same disk drive as SDK root path #{ENV['SdkRootDirPath']}, the relative path can not be cauculated, please change the output path to the same disk as the repo."
@@ -128,7 +155,7 @@ if $PROGRAM_NAME == __FILE__
 
     parser_class = OutOfTreeNinjaParser.applicable? ? OutOfTreeNinjaParser : NinjaParser
     build_data = parser_class.new(ninja, project, toolchain, config, outdir, logger).process
-    build_option = make_up_build_option(project, toolchain, config, outdir)
+    build_option = make_up_build_option(project, toolchain, config, outdir, toolchain_version)
 
     if logger.level == Logger::DEBUG
       dump_file = File.join(ENV['build_dir'], 'build_data.yml')

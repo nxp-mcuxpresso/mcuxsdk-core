@@ -239,7 +239,11 @@ module SDKGenerator
         project_info[:replaced_component_config_file] = {}
         project_info[:component_template_file] = {}
         project_info[:sdk_data_version] = @generator_options[:sdk_data_version]
-        project_info[:toolchain_version] = @generator_options[:toolchains_version].dig_with_default(nil, tool_key)
+        # IDE version asked for on the command line, nil when none was. Feeds
+        # instance_with_version, which falls back to the unversioned class when
+        # no class matches, and set_project_version below, which leaves the
+        # templates untouched when it is nil.
+        project_info[:toolchain_version] = @generator_options[:toolchain_version]
         project_info
       end
 
@@ -1168,7 +1172,7 @@ module SDKGenerator
         if @generator_options[:gen_cpp] || (!project_info[:project_language].nil? && project_info[:project_language] != 'c')
           project_instance.set_cpp_compiler(identifier, project_info[:project_language] || 'cpp') if project_instance.methods.include?(:set_cpp_compiler)
         end
-        # Update project file for specific version toolchain
+        # Rewrite the project file version fields for the target IDE version.
         project_instance.set_project_version(identifier, project_info[:toolchain_version]) if project_instance.methods.include?(:set_project_version)
         return unless tool_key == 'iar'
 
