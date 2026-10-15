@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief FlexCAN driver version. */
-#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 2, 0))
+#define FSL_FLEXCAN_DRIVER_VERSION (MAKE_VERSION(2, 2, 1))
 /*! @} */
 
 /*******************************************************************************
@@ -31,7 +31,11 @@
  * @defgroup flexcan_driver_log The Driver Change Log
  * @ingroup flexcan
  * @{
- * The current FLEXCAN driver version is 2.2.0.
+ * The current FLEXCAN driver version is 2.2.1.
+ *
+ * - 2.2.1
+ *   - Bug Fixes
+ *     - Fixed CERT INT30-C, INT31-C, ARR30-C and STR31-C violations.
  *
  * - 2.2.0
  *   - Improvement

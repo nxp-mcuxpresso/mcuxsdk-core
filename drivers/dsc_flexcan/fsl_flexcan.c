@@ -770,7 +770,7 @@ static void FLEXCAN_GetSegments(uint32_t u32IdealSp,
 {
     uint32_t u32Seg1Temp;
 
-    psTimingConfig->u8PhaseSeg2 = (uint8_t)(u32TqNum - (u32TqNum * u32IdealSp) / IDEAL_SP_FACTOR);
+    psTimingConfig->u8PhaseSeg2 = (uint8_t)((u32TqNum - (u32TqNum * u32IdealSp) / IDEAL_SP_FACTOR) & 0xFFU);
 
     if (psTimingConfig->u8PhaseSeg2 < INFO_PROCESS_TIME)
     {
@@ -788,7 +788,7 @@ static void FLEXCAN_GetSegments(uint32_t u32IdealSp,
     if ((u32TqNum - psTimingConfig->u8PhaseSeg2 - 1U) > (MAX_SEG1(bUseCbt) + MAX_PROP(bUseCbt)))
     {
         u32Seg1Temp                 = MAX_SEG1(bUseCbt) + MAX_PROP(bUseCbt);
-        psTimingConfig->u8PhaseSeg2 = (uint8_t)(u32TqNum - 1U - u32Seg1Temp);
+        psTimingConfig->u8PhaseSeg2 = (uint8_t)((u32TqNum - 1U - u32Seg1Temp) & 0xFFU);
     }
     else
     {
@@ -799,7 +799,7 @@ static void FLEXCAN_GetSegments(uint32_t u32IdealSp,
     if (u32Seg1Temp > (psTimingConfig->u8PhaseSeg2 + MAX_PROP(bUseCbt)))
     {
         psTimingConfig->u8PropSeg   = (uint8_t)MAX_PROP(bUseCbt);
-        psTimingConfig->u8PhaseSeg1 = (uint8_t)(u32Seg1Temp - MAX_PROP(bUseCbt));
+        psTimingConfig->u8PhaseSeg1 = (uint8_t)((u32Seg1Temp - MAX_PROP(bUseCbt)) & 0xFFU);
     }
     else
     {
@@ -894,19 +894,19 @@ static void FLEXCAN_FDGetSegments(uint32_t u32FDBaudRateBps,
     /* According to CiA doc 1301 v1.0.0, which specified data phase sample point postion for CAN FD at 80 MHz. */
     if (u32FDBaudRateBps == 1000000U)
     {
-        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)(u32TqNum - (u32TqNum * IDEAL_DATA_SP_1) / IDEAL_SP_FACTOR);
+        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)((u32TqNum - (u32TqNum * IDEAL_DATA_SP_1) / IDEAL_SP_FACTOR) & 0xFFU);
     }
     else if (u32FDBaudRateBps <= 2000000U)
     {
-        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)(u32TqNum - (u32TqNum * IDEAL_DATA_SP_2) / IDEAL_SP_FACTOR);
+        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)((u32TqNum - (u32TqNum * IDEAL_DATA_SP_2) / IDEAL_SP_FACTOR) & 0xFFU);
     }
     else if (u32FDBaudRateBps <= 4000000U)
     {
-        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)(u32TqNum - (u32TqNum * IDEAL_DATA_SP_3) / IDEAL_SP_FACTOR);
+        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)((u32TqNum - (u32TqNum * IDEAL_DATA_SP_3) / IDEAL_SP_FACTOR) & 0xFFU);
     }
     else
     {
-        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)(u32TqNum - (u32TqNum * IDEAL_DATA_SP_4) / IDEAL_SP_FACTOR);
+        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)((u32TqNum - (u32TqNum * IDEAL_DATA_SP_4) / IDEAL_SP_FACTOR) & 0xFFU);
     }
 
     if (psFDTimingConfig->u8PhaseSeg2 < INFO_PROCESS_TIME)
@@ -924,7 +924,7 @@ static void FLEXCAN_FDGetSegments(uint32_t u32FDBaudRateBps,
     /* Modify u8PhaseSeg2 to avoid out of range. */
     if ((u32TqNum - psFDTimingConfig->u8PhaseSeg2 - 1U) > (MAX_FPSEG1 + MAX_FPROPSEG))
     {
-        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)(u32TqNum - 1U - MAX_FPSEG1 - MAX_FPROPSEG);
+        psFDTimingConfig->u8PhaseSeg2 = (uint8_t)((u32TqNum - 1U - MAX_FPSEG1 - MAX_FPROPSEG) & 0xFFU);
         u32Seg1Temp                   = MAX_FPSEG1 + MAX_FPROPSEG;
     }
     else
@@ -1214,7 +1214,7 @@ status_t FLEXCAN_SetBaudRate(CAN_Type *base, uint32_t u32SrcClkHz, uint32_t u32B
         }
         else
         {
-            sTimingConfig.u16PreDivider = (uint16_t)(u32SrcClkHz / u32BaudRateBps / 10U);
+            sTimingConfig.u16PreDivider = (uint16_t)((u32SrcClkHz / u32BaudRateBps / 10U) & 0xFFFFU);
         }
         /* Update classic CAN bit or CAN FD nominal phase timing characteristic. */
         FLEXCAN_SetTimingConfig(base, &sTimingConfig);
@@ -1296,7 +1296,7 @@ status_t FLEXCAN_SetFDBaudRate(CAN_Type *base, uint32_t u32SrcClkHz, uint32_t u3
         }
         else
         {
-            sTimingConfig.u16PreDivider = (uint16_t)(u32SrcClkHz / u32BaudRateBps / 10U);
+            sTimingConfig.u16PreDivider = (uint16_t)((u32SrcClkHz / u32BaudRateBps / 10U) & 0xFFFFU);
         }
         sFDTimingConfig.u8PropSeg    = 0U;
         sFDTimingConfig.u8PhaseSeg1  = 2U;
@@ -1536,7 +1536,12 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *psR
 
     volatile uint32_t *mbAddr;
     uint8_t i, j, k, rffn = 0, numMbOccupy;
-    uint32_t setup_mb = 0;
+#if !defined(NDEBUG)
+    int8_t maxMB = FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base);
+    assert(maxMB != -1);
+    uint8_t setupMbIdx = 0;
+    uint8_t maxMbIdx = (uint8_t)maxMB - 1U;
+#endif
 
     /* Enter Freeze Mode. */
     FLEXCAN_EnterFreezeMode(base);
@@ -1545,11 +1550,14 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *psR
     {
         assert(psRxFifoConfig->u8IdFilterNum <= 128U);
 
-        /* Get the setup_mb value. */
-        setup_mb = (uint8_t)((base->MCR & CAN_MCR_MAXMB_MASK) >> CAN_MCR_MAXMB_SHIFT);
-        setup_mb = (setup_mb < (uint32_t)FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base)) ?
-                       setup_mb :
-                       (uint32_t)FSL_FEATURE_FLEXCAN_HAS_MESSAGE_BUFFER_MAX_NUMBERn(base);
+#if !defined(NDEBUG)
+        /* Ensure Mailboxes occupied by Legacy RX FIFO not exceed maximum Mailboxes value. */
+        assert(psRxFifoConfig->u8IdFilterNum <= (maxMbIdx - 5U) * 4U);
+
+        /* Get number of the last Message Buffer. */
+        setupMbIdx = (uint8_t)((base->MCR & CAN_MCR_MAXMB_MASK) >> CAN_MCR_MAXMB_SHIFT);
+        assert(setupMbIdx >= 7U);
+#endif
 
         /* Determine RFFN value. */
         for (i = 0; i <= 0xFU; i++)
@@ -1557,7 +1565,10 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *psR
             if ((8U * (i + 1U)) >= psRxFifoConfig->u8IdFilterNum)
             {
                 rffn = i;
-                assert(((setup_mb - 8U) - (2U * rffn)) > 0U);
+#if !defined(NDEBUG)
+                /* Ensure Legacy RX FIFO filters programmed through RFFN not exceed SETUP_MB value. */
+                assert((((int)setupMbIdx - 7) - (2 * (int)rffn)) >= 0);
+#endif
 
                 base->CTRL2 = (base->CTRL2 & ~CAN_CTRL2_RFFN_MASK) | CAN_CTRL2_RFFN(rffn);
                 break;
@@ -1566,6 +1577,11 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *psR
 
         /* caculate the Number of Mailboxes occupied by RX Legacy FIFO and the filter. */
         numMbOccupy = 6U + (rffn + 1U) * 2U;
+
+#if !defined(NDEBUG)
+        /* Ensure Mailboxes occupied by Legacy RX FIFO not exceed maximum Mailboxes value. */
+        assert(numMbOccupy <= (maxMbIdx + 1U));
+#endif
 
         /* Copy ID filter table to Message Buffer Region (Fix MISRA_C-2012 Rule 18.1). */
         j = 0U;
@@ -1620,14 +1636,19 @@ void FLEXCAN_SetRxFifoConfig(CAN_Type *base, const flexcan_rx_fifo_config_t *psR
     else
     {
         rffn = (uint8_t)((base->CTRL2 & CAN_CTRL2_RFFN_MASK) >> CAN_CTRL2_RFFN_SHIFT);
+
         /* caculate the Number of Mailboxes occupied by RX Legacy FIFO and the filter. */
         numMbOccupy = 6U + (rffn + 1U) * 2U;
+
+#if !defined(NDEBUG)
+        /* Ensure Mailboxes occupied by Legacy RX FIFO not exceed maximum Mailboxes value. */
+        assert(numMbOccupy <= (maxMbIdx + 1U));
+#endif
 
         /* Disable Rx Message FIFO. */
         base->MCR &= ~CAN_MCR_RFEN_MASK;
 
         /* Clean MB0 ~ MB5 and all MB occupied by ID filters (Fix MISRA_C-2012 Rule 18.1). */
-
         for (i = 0; i < numMbOccupy; i++)
         {
             FLEXCAN_SetRxMbConfig(base, i, NULL, false);
@@ -1716,7 +1737,7 @@ void FLEXCAN_SetFDRxMbConfig(CAN_Type *base,
     mbAddr[offset + 1U] = 0U;
     /* Calculate the DWORD number, dataSize 0/1/2/3 corresponds to 8/16/32/64
        Bytes payload. */
-    payload_dword = (2U << dataSize);
+    payload_dword = (uint8_t)((2UL << dataSize) & 0xFFU);
     for (cnt = 0; cnt < payload_dword; cnt++)
     {
         mbAddr[offset + 2U + cnt] = 0x0;
