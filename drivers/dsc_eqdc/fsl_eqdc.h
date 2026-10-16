@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2022, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief EQDC driver version. */
-#define FSL_EQDC_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+#define FSL_EQDC_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*! @} */
 
 /*******************************************************************************
@@ -32,7 +32,11 @@
  * @defgroup driver_log The Driver Change Log
  * @ingroup eqdc
  * @{
- * The current EQDC driver version is 2.0.0.
+ * The current EQDC driver version is 2.0.1.
+ *
+ * - 2.0.1
+ *   - Improvements
+ *     - Fixed CERT INT31-C violations.
  *
  * - 2.0.0
  *   - Initial version.
@@ -931,7 +935,7 @@ static inline void EQDC_DoSoftwareLoadInitialPositionValue(EQDC_Type *base)
 static inline void EQDC_SetInitialPositionValue(EQDC_Type *base, uint32_t u32PositionInitValue)
 {
     base->UINIT = (uint16_t)(u32PositionInitValue >> 16U);
-    base->LINIT = (uint16_t)(u32PositionInitValue);
+    base->LINIT = (uint16_t)(u32PositionInitValue & 0xFFFFU);
 }
 
 /*!
@@ -945,7 +949,7 @@ static inline void EQDC_SetInitialPositionValue(EQDC_Type *base, uint32_t u32Pos
 static inline void EQDC_SetPositionCounterValue(EQDC_Type *base, uint32_t u32PositionCounterValue)
 {
     base->UPOS = (uint16_t)(u32PositionCounterValue >> 16U);
-    base->LPOS = (uint16_t)(u32PositionCounterValue);
+    base->LPOS = (uint16_t)(u32PositionCounterValue & 0xFFFFU);
 }
 
 /*!
@@ -966,7 +970,7 @@ static inline void EQDC_SetPositionCounterValue(EQDC_Type *base, uint32_t u32Pos
 static inline void EQDC_SetPositionModulusValue(EQDC_Type *base, uint32_t u32PositionModulusValue)
 {
     base->UMOD = (uint16_t)(u32PositionModulusValue >> 16U);
-    base->LMOD = (uint16_t)(u32PositionModulusValue);
+    base->LMOD = (uint16_t)(u32PositionModulusValue & 0xFFFFU);
 }
 
 /*!
@@ -987,7 +991,7 @@ static inline void EQDC_SetPositionModulusValue(EQDC_Type *base, uint32_t u32Pos
 static inline void EQDC_SetPositionCompare0Value(EQDC_Type *base, uint32_t u32PositionComp0Value)
 {
     base->UCOMP0 = (uint16_t)(u32PositionComp0Value >> 16U);
-    base->LCOMP0 = (uint16_t)(u32PositionComp0Value);
+    base->LCOMP0 = (uint16_t)(u32PositionComp0Value & 0xFFFFU);
 }
 
 /*!
@@ -1008,7 +1012,7 @@ static inline void EQDC_SetPositionCompare0Value(EQDC_Type *base, uint32_t u32Po
 static inline void EQDC_SetPositionCompare1Value(EQDC_Type *base, uint32_t u32PositionComp1Value)
 {
     base->UCOMP1 = (uint16_t)(u32PositionComp1Value >> 16U);
-    base->LCOMP1 = (uint16_t)(u32PositionComp1Value);
+    base->LCOMP1 = (uint16_t)(u32PositionComp1Value & 0xFFFFU);
 }
 
 /*!
@@ -1029,7 +1033,7 @@ static inline void EQDC_SetPositionCompare1Value(EQDC_Type *base, uint32_t u32Po
 static inline void EQDC_SetPositionCompare2Value(EQDC_Type *base, uint32_t u32PositionComp2Value)
 {
     base->UCOMP2 = (uint16_t)(u32PositionComp2Value >> 16U);
-    base->LCOMP2 = (uint16_t)(u32PositionComp2Value);
+    base->LCOMP2 = (uint16_t)(u32PositionComp2Value & 0xFFFFU);
 }
 
 /*!
@@ -1050,7 +1054,7 @@ static inline void EQDC_SetPositionCompare2Value(EQDC_Type *base, uint32_t u32Po
 static inline void EQDC_SetPositionCompare3Value(EQDC_Type *base, uint32_t u32PositionComp3Value)
 {
     base->UCOMP3 = (uint16_t)(u32PositionComp3Value >> 16U);
-    base->LCOMP3 = (uint16_t)(u32PositionComp3Value);
+    base->LCOMP3 = (uint16_t)(u32PositionComp3Value & 0xFFFFU);
 }
 
 /*!
