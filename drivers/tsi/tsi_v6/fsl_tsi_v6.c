@@ -11,6 +11,10 @@
 #define FSL_COMPONENT_ID "platform.drivers.tsi_v6"
 #endif
 
+#if defined(TSI_RSTS)
+#define TSI_RESETS_ARRAY TSI_RSTS
+#endif
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -22,6 +26,10 @@
 const clock_ip_name_t s_tsiClock[] = TSI_CLOCKS;
 /* Array of TSI peripheral base address. */
 TSI_Type *const s_tsiBases[] = TSI_BASE_PTRS;
+#if defined(TSI_RESETS_ARRAY)
+/* Array of TSI reset bits. */
+static const reset_ip_name_t s_tsiResets[] = TSI_RESETS_ARRAY;
+#endif
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -71,6 +79,11 @@ void TSI_InitSelfCapMode(TSI_Type *base, const tsi_selfCap_config_t *config)
     /* Enable tsi clock */
     (void)CLOCK_EnableClock(s_tsiClock[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+#if defined(TSI_RESETS_ARRAY)
+    /* Release TSI peripheral from reset; some SoCs hold TSI in reset out of POR, in which case any
+     * register access below terminates with a bus error until this runs. */
+    RESET_ReleasePeripheralReset(s_tsiResets[TSI_GetInstance(base)]);
+#endif
     if ((bool)(base->GENCS & TSI_GENCS_TSIEN_MASK))
     {
         is_module_enabled = true;
@@ -154,6 +167,11 @@ void TSI_InitMutualCapMode(TSI_Type *base, const tsi_mutualCap_config_t *config)
     /* Enable tsi clock */
     (void)CLOCK_EnableClock(s_tsiClock[instance]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
+#if defined(TSI_RESETS_ARRAY)
+    /* Release TSI peripheral from reset; some SoCs hold TSI in reset out of POR, in which case any
+     * register access below terminates with a bus error until this runs. */
+    RESET_ReleasePeripheralReset(s_tsiResets[TSI_GetInstance(base)]);
+#endif
     if ((bool)(base->GENCS & TSI_GENCS_TSIEN_MASK))
     {
         is_module_enabled = true;
