@@ -1303,18 +1303,23 @@ class Blobs(WestCommand):
         Returns a dict of sdk_path -> absolute Path, skipping anything not
         under prebuilt_root (so an sdk-relative 'path' can be computed).
 
-        Prefers 'git ls-files' (same approach as 'west blobs scan'): git
-        reads its packed index directly and returns only committed files,
-        so generated/untracked trees under root -- a build output, a
-        Python venv, vendored packages -- are never considered, with no
-        exclude-dir list to keep in sync. Falls back to an os.walk that
-        prunes SCAN_EXCLUDE_DIR_PARTS/SCAN_EXCLUDE_DIR_PATTERNS when root
-        is not inside a git working tree, or 'git ls-files' fails.
+        Deliberately NOT 'git ls-files' (unlike 'west blobs scan', which
+        wants committed-only because it audits still-uncommitted migration
+        candidates): one caller of this method is regen's "a developer
+        dropped a new binary straight into the SDK tree" detection, and
+        once a project's migrated blob extensions are added to .gitignore,
+        every blob under root -- a genuinely new, not-yet-onboarded one
+        included -- is untracked. Git-tracked-only would make that
+        detection permanently blind post-migration, silently, rather than
+        just scanning an empty/stale set once.
+
+        Walking the filesystem and pruning SCAN_EXCLUDE_DIR_PARTS /
+        SCAN_EXCLUDE_DIR_PATTERNS (the same lists 'west blobs scan' prunes
+        with in its own git-unavailable fallback) is what actually keeps a
+        Python venv, a build output, or vendored packages out -- that part
+        is independent of git tracking either way.
         '''
-        ext_patterns = [f'*.{ext}' for ext in allowed_exts]
-        if not ext_patterns:
-            # No extensions to match; an empty 'git ls-files --' pathspec
-            # would list every tracked file instead of none.
+        if not allowed_exts:
             return {}
 
         def _record(fpath):
@@ -1327,25 +1332,6 @@ class Blobs(WestCommand):
             found[sdk_path] = fpath
 
         found = {}
-        try:
-            result = subprocess.run(
-                ['git', 'ls-files', '-z', '--'] + ext_patterns,
-                cwd=str(root),
-                capture_output=True,
-                text=True,
-                timeout=60,
-            )
-        except (OSError, subprocess.TimeoutExpired):
-            result = None
-
-        if result is not None and result.returncode == 0:
-            for rel_path in result.stdout.split('\0'):
-                if rel_path:
-                    _record((root / rel_path).resolve())
-            return found
-
-        # Fall back: not a git working tree, or git failed for some other
-        # reason -- walk it ourselves, pruning known generated/vendored dirs.
         for dirpath, dirnames, filenames in os.walk(root):
             dirnames[:] = [
                 d for d in dirnames
