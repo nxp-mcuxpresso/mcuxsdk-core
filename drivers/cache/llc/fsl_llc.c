@@ -708,7 +708,21 @@ status_t LLC_CleanInvalidateCacheByRange(uint32_t address, uint32_t sizeByte)
     uint32_t cacheLineNumber = 0U;
     status_t status          = kStatus_Success;
 
-    aliasOffset = MSDK_REG_NONSECURE_ADDR(address) - MSDK_REG_NONSECURE_ADDR(LLC_PHYMEM_BASE(instance, aliasId));
+    /* CERT INT30-C: LLC_FindInstanceAndAlias() only returns this (instance, aliasId)
+       pair when address falls at or above the alias window base, but that invariant
+       is not visible to static analysis across the call boundary. Re-check it here
+       before subtracting so neither subtraction below can wrap. */
+    uint32_t addressNonSecure = MSDK_REG_NONSECURE_ADDR(address);
+    uint32_t aliasWindowBase  = MSDK_REG_NONSECURE_ADDR(LLC_PHYMEM_BASE(instance, aliasId));
+    if (addressNonSecure < aliasWindowBase)
+    {
+        return kStatus_InvalidArgument;
+    }
+    aliasOffset = addressNonSecure - aliasWindowBase;
+    if (aliasOffset >= LLC_PHYMEM_SIZE(instance, aliasId))
+    {
+        return kStatus_InvalidArgument;
+    }
     if (sizeByte > (LLC_PHYMEM_SIZE(instance, aliasId) - aliasOffset))
     {
         return kStatus_InvalidArgument;

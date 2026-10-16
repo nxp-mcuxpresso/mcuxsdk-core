@@ -1,5 +1,15 @@
 # Last Level CACHE
 
+## [2.1.3]
+
+- Bug Fixes
+  - Guarded two unsigned subtractions in LLC_CleanInvalidateCacheByRange() that derive the alias-window
+    offset and the remaining alias-window size. Both relied on an invariant (the request address falls at
+    or above the alias window base) that LLC_FindInstanceAndAlias() establishes internally but does not
+    expose across the call boundary, so static analysis flagged both as a possible unsigned integer
+    wraparound (CERT INT30-C). Each subtraction is now preceded by an explicit check that returns
+    kStatus_InvalidArgument instead of wrapping; behavior for valid inputs is unchanged.
+
 ## [2.1.2]
 
 - Bug Fixes

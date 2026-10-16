@@ -21,7 +21,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief cache driver version. */
-#define FSL_LLC_DRIVER_VERSION (MAKE_VERSION(2, 1, 2))
+#define FSL_LLC_DRIVER_VERSION (MAKE_VERSION(2, 1, 3))
 
 /*! @} */
 
