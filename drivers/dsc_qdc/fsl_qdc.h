@@ -1,6 +1,5 @@
 /*
- * Copyright 2020-2021, 2023 NXP
- * All rights reserved.
+ * Copyright 2020-2021, 2023, 2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -23,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief QDC driver version. */
-#define FSL_QDC_DRIVER_VERSION (MAKE_VERSION(2, 1, 0))
+#define FSL_QDC_DRIVER_VERSION (MAKE_VERSION(2, 1, 1))
 /*! @} */
 
 /*******************************************************************************
@@ -33,7 +32,11 @@
  * @defgroup driver_log The Driver Change Log
  * @ingroup qdc
  * @{
- * The current QDC driver version is 2.1.0.
+ * The current QDC driver version is 2.1.1.
+ *
+ * - 2.1.1
+ *   - Bug Fixes
+ *     - Fixed CERT INT31-C violations.
  *
  * - 2.1.0
  *   - New Features
@@ -808,7 +811,7 @@ static inline void QDC_DoSoftwareLoadInitialPositionValue(QDC_Type *base)
 static inline void QDC_SetInitialPositionValue(QDC_Type *base, uint32_t u32PositionInitValue)
 {
     base->UINIT = (uint16_t)(u32PositionInitValue >> 16U);
-    base->LINIT = (uint16_t)(u32PositionInitValue);
+    base->LINIT = (uint16_t)(u32PositionInitValue & 0xFFFFU);
 }
 
 /*!
@@ -822,7 +825,7 @@ static inline void QDC_SetInitialPositionValue(QDC_Type *base, uint32_t u32Posit
 static inline void QDC_SetPositionCounterValue(QDC_Type *base, uint32_t u32PositionCounterValue)
 {
     base->UPOS = (uint16_t)(u32PositionCounterValue >> 16U);
-    base->LPOS = (uint16_t)(u32PositionCounterValue);
+    base->LPOS = (uint16_t)(u32PositionCounterValue & 0xFFFFU);
 }
 
 /*!
@@ -836,7 +839,7 @@ static inline void QDC_SetPositionCounterValue(QDC_Type *base, uint32_t u32Posit
 static inline void QDC_SetPositionModulusValue(QDC_Type *base, uint32_t u32PositionModulusValue)
 {
     base->UMOD = (uint16_t)(u32PositionModulusValue >> 16U);
-    base->LMOD = (uint16_t)(u32PositionModulusValue);
+    base->LMOD = (uint16_t)(u32PositionModulusValue & 0xFFFFU);
 }
 
 /*!
@@ -850,7 +853,7 @@ static inline void QDC_SetPositionModulusValue(QDC_Type *base, uint32_t u32Posit
 static inline void QDC_SetPositionCompareValue(QDC_Type *base, uint32_t u32PositionCompValue)
 {
     base->UCOMP = (uint16_t)(u32PositionCompValue >> 16U);
-    base->LCOMP = (uint16_t)(u32PositionCompValue);
+    base->LCOMP = (uint16_t)(u32PositionCompValue & 0xFFFFU);
 }
 #if (defined(FSL_FEATURE_QDC_HAS_UCOMP1_REGISTER) && FSL_FEATURE_QDC_HAS_UCOMP1_REGISTER)
 /*!
@@ -864,7 +867,7 @@ static inline void QDC_SetPositionCompareValue(QDC_Type *base, uint32_t u32Posit
 static inline void QDC_SetPositionCompare1Value(QDC_Type *base, uint32_t u32PositionComp1Value)
 {
     base->UCOMP1 = (uint16_t)(u32PositionComp1Value >> 16U);
-    base->LCOMP1 = (uint16_t)(u32PositionComp1Value);
+    base->LCOMP1 = (uint16_t)(u32PositionComp1Value & 0xFFFFU);
 }
 #endif /* FSL_FEATURE_QDC_HAS_UCOMP1_REGISTER */
 /*!
