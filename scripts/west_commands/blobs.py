@@ -416,6 +416,19 @@ class Blobs(WestCommand):
                     Default: prune such entries.''',
         )
         group.add_argument(
+            '--allow-empty',
+            action='store_true',
+            dest='allow_empty',
+            help='''Allow regen to overwrite a manifest that previously had
+                    entries with one that has none. Default: refuse and leave
+                    the existing mcux_blobs.yml untouched, since a manifest
+                    that already had entries going to zero is almost always a
+                    discovery failure (e.g. no blob-repo checkout located, or
+                    an unreachable sdk-tree/--source combination) rather than
+                    every blob genuinely vanishing at once.''',
+        )
+
+        group.add_argument(
             '--dry-run',
             action='store_true',
             help='''Print added / changed / removed entries per manifest without
@@ -1837,8 +1850,30 @@ class Blobs(WestCommand):
 
                     if src_file is None:
                         # Blob not found anywhere.
-                        if args.no_prune:
-                            self.wrn(f'  [missing]   {sdk_path} (kept, --no-prune)')
+                        #
+                        # Guard: never prune on the strength of an SDK-tree walk
+                        # alone when no blob-repo checkout was located. Post
+                        # migration, the blob's extension is normally
+                        # .gitignore'd out of the SDK tree, so "absent from the
+                        # SDK tree" is the *expected* steady state, not evidence
+                        # the blob itself is gone -- the blob repo is the only
+                        # place left that can confirm that.
+                        # In the common case the fetched copy is still
+                        # physically present in the SDK tree (untracked, but
+                        # on disk), so a transient "can't find the blob-repo
+                        # checkout right now" alone does not reach this branch
+                        # at all -- auto/sdk-tree sourcing still finds the
+                        # file. This matters for the rarer case where it is
+                        # ALSO missing from the SDK tree (a fresh checkout
+                        # before 'west blobs fetch' has run, or --source
+                        # blob-repo/sdk-tree narrowing the source): without
+                        # this guard, that combination would silently prune
+                        # every entry and emit an emptied manifest (the empty-
+                        # manifest guard further down is the last backstop for
+                        # that). Treat it like --no-prune and warn.
+                        if args.no_prune or blob_repo_dir is None:
+                            reason = '--no-prune' if args.no_prune else 'no blob-repo checkout found'
+                            self.wrn(f'  [missing]   {sdk_path} (kept, {reason})')
                             new_entries.append(entry)
                         else:
                             removed.append(sdk_path)
@@ -1916,18 +1951,41 @@ class Blobs(WestCommand):
                     added.append(sdk_path)
                     self.inf(f'  [added]     {sdk_path}')
 
-            total_changed += len(changed)
-            total_added += len(added)
-            total_removed += len(removed)
-
-            # Summary line for this manifest.
+            # Summary line for this manifest -- what regen detected,
+            # independent of whether the guard below allows acting on it.
             self.inf(
                 f'  -> {len(new_entries)} entries: '
                 f'{len(changed)} changed, {len(added)} added, {len(removed)} removed'
                 + (' (dry-run, not written)' if args.dry_run else '')
             )
 
-            total_changed += len(repo_path_fixed)
+            # Guard: refuse to overwrite a manifest that previously had
+            # entries with one that would end up empty, unless the user
+            # explicitly opts in with --allow-empty. This is the backstop
+            # for the "every entry resolved to missing" case (e.g. --source
+            # sdk-tree against an already-stripped SDK tree, or a transient
+            # blob-repo discovery failure that the no-prune guard above does
+            # not cover) -- going from N entries to 0 in one run is almost
+            # certainly a discovery failure, not every blob genuinely
+            # vanishing at once, so default to leaving the file untouched
+            # and surfacing the problem instead of silently emptying it.
+            # Checked, and totals left un-incremented, before this manifest's
+            # changed/added/removed count toward the cross-manifest summary:
+            # a refused write changed nothing, so it should not be reported
+            # as though it did.
+            if old_entries and not new_entries and not getattr(args, 'allow_empty', False):
+                self.err(
+                    f'  [{name}] refusing to write an empty manifest '
+                    f'(had {len(old_entries)} entries, would end up with 0). '
+                    f'Leaving {manifest_path} untouched. '
+                    f'Pass --allow-empty to override, or fix blob discovery '
+                    f'(--blob-repo {name}=<dir> / --source).'
+                )
+                continue
+
+            total_changed += len(changed) + len(repo_path_fixed)
+            total_added += len(added)
+            total_removed += len(removed)
 
             if not args.dry_run and (changed or added or removed or repo_path_fixed):
                 manifest_path.write_text(
