@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 #ifndef FSL_DUAL_ADC_H_
 #define FSL_DUAL_ADC_H_
 
@@ -90,84 +91,84 @@
  * Controls whether ADCA and ADCB share one conversion sequence (cooperation)
  * or run independent sequences (independence).
  */
-typedef enum _dadc_conversion_mode
+typedef enum _dualadc_conversion_mode
 {
-    kDADC_CooperationMode  = 0U, /*!< Cooperation mode: ADCA and ADCB share one conversion sequence. */
-    kDADC_IndependenceMode = 1U, /*!< Independence mode: ADCA and ADCB run independent sequences. */
-} dadc_conversion_mode_t;
+    kDUALADC_CooperationMode  = 0U, /*!< Cooperation mode: ADCA and ADCB share one conversion sequence. */
+    kDUALADC_IndependenceMode = 1U, /*!< Independence mode: ADCA and ADCB run independent sequences. */
+} dualadc_conversion_mode_t;
 
 /*!
  * @brief DualADC power configuration.
  *
  * Selects the power and maximum ADCK frequency trade-off.
  */
-typedef enum _dadc_power_config
+typedef enum _dualadc_power_config
 {
-    kDADC_LowPowerConfig  = 0U, /*!< Low power mode: maximum ADCK frequency 24 MHz (default). */
-    kDADC_HighPowerConfig = 1U, /*!< High power mode: maximum ADCK frequency 64 MHz. */
-} dadc_power_config_t;
+    kDUALADC_LowPowerConfig  = 0U, /*!< Low power mode: maximum ADCK frequency 24 MHz (default). */
+    kDUALADC_HighPowerConfig = 1U, /*!< High power mode: maximum ADCK frequency 64 MHz. */
+} dualadc_power_config_t;
 
 /*!
  * @brief DualADC voltage reference source selection.
  */
-typedef enum _dadc_ref_voltage_src
+typedef enum _dualadc_ref_voltage_src
 {
-    kDADC_VrefH0 = 0U, /*!< VREFH0x - default reference. */
-    kDADC_VrefH1 = 1U, /*!< VREFH1x. */
-    kDADC_VrefH2 = 2U, /*!< VREFH2x. */
-} dadc_ref_voltage_src_t;
+    kDUALADC_VrefH0 = 0U, /*!< VREFH0x - default reference. */
+    kDUALADC_VrefH1 = 1U, /*!< VREFH1x. */
+    kDUALADC_VrefH2 = 2U, /*!< VREFH2x. */
+} dualadc_ref_voltage_src_t;
 
 /*!
  * @brief DualADC tune mode selection.
  *
  * @note Consult the device-specific reference manual for the effect of each value.
  */
-typedef enum _dadc_tune_mode
+typedef enum _dualadc_tune_mode
 {
-    kDADC_TuneMode0 = 0U, /*!< Tune mode 0. */
-    kDADC_TuneMode1 = 1U, /*!< Tune mode 1. */
-    kDADC_TuneMode2 = 2U, /*!< Tune mode 2. */
-} dadc_tune_mode_t;
+    kDUALADC_TuneMode0 = 0U, /*!< Tune mode 0. */
+    kDUALADC_TuneMode1 = 1U, /*!< Tune mode 1. */
+    kDUALADC_TuneMode2 = 2U, /*!< Tune mode 2. */
+} dualadc_tune_mode_t;
 
 /*!
  * @brief Number of ADC conversions averaged during calibration routines.
  *
  * Applied to offset calibration (CTRL[CALOFS]), high-speed calibration (CTRL[CALHS]),
  * and gain calibration (CTRL[CAL_REQ]).
- * The recommended minimum is @ref kDADC_CalibrationAverage256.
+ * The recommended minimum is @ref kDUALADC_CalibrationAverage256.
  */
-typedef enum _dadc_calibration_averages
+typedef enum _dualadc_calibration_averages
 {
-    kDADC_CalibrationAverageSingle = 0U,  /*!< Single conversion - no averaging. */
-    kDADC_CalibrationAverage2      = 1U,  /*!< 2 conversions averaged. */
-    kDADC_CalibrationAverage4      = 2U,  /*!< 4 conversions averaged. */
-    kDADC_CalibrationAverage8      = 3U,  /*!< 8 conversions averaged. */
-    kDADC_CalibrationAverage16     = 4U,  /*!< 16 conversions averaged. */
-    kDADC_CalibrationAverage32     = 5U,  /*!< 32 conversions averaged. */
-    kDADC_CalibrationAverage64     = 6U,  /*!< 64 conversions averaged. */
-    kDADC_CalibrationAverage128    = 7U,  /*!< 128 conversions averaged. */
-    kDADC_CalibrationAverage256    = 8U,  /*!< 256 conversions averaged (RM recommended minimum). */
-    kDADC_CalibrationAverage512    = 9U,  /*!< 512 conversions averaged. */
-    kDADC_CalibrationAverage1024   = 10U, /*!< 1024 conversions averaged. */
-} dadc_calibration_averages_t;
+    kDUALADC_CalibrationAverageSingle = 0U,  /*!< Single conversion - no averaging. */
+    kDUALADC_CalibrationAverage2      = 1U,  /*!< 2 conversions averaged. */
+    kDUALADC_CalibrationAverage4      = 2U,  /*!< 4 conversions averaged. */
+    kDUALADC_CalibrationAverage8      = 3U,  /*!< 8 conversions averaged. */
+    kDUALADC_CalibrationAverage16     = 4U,  /*!< 16 conversions averaged. */
+    kDUALADC_CalibrationAverage32     = 5U,  /*!< 32 conversions averaged. */
+    kDUALADC_CalibrationAverage64     = 6U,  /*!< 64 conversions averaged. */
+    kDUALADC_CalibrationAverage128    = 7U,  /*!< 128 conversions averaged. */
+    kDUALADC_CalibrationAverage256    = 8U,  /*!< 256 conversions averaged (RM recommended minimum). */
+    kDUALADC_CalibrationAverage512    = 9U,  /*!< 512 conversions averaged. */
+    kDUALADC_CalibrationAverage1024   = 10U, /*!< 1024 conversions averaged. */
+} dualadc_calibration_averages_t;
 
 /*!
  * @brief DualADC trigger source selection for ADCA (CFG0[TRIGSEL]).
  */
-typedef enum _dadc_trig_sel
+typedef enum _dualadc_trig_sel
 {
-    kDADC_TrigSelTrigger0      = 0U,    /*!< Trigger0 input. */
-    kDADC_TrigSelTriggerSyncIn = 1U,    /*!< Trigger_sync_in input. */
-} dadc_trig_sel_t;
+    kDUALADC_TrigSelTrigger0      = 0U,    /*!< Trigger0 input. */
+    kDUALADC_TrigSelTriggerSyncIn = 1U,    /*!< Trigger_sync_in input. */
+} dualadc_trig_sel_t;
 
 /*!
  * @brief DualADC DMA trigger source selection (DE[DMASRCA/B]).
  */
-typedef enum _dadc_dma_src
+typedef enum _dualadc_dma_src
 {
-    kDADC_DmaSrcEndOfScan   = 0U, /*!< DMA triggered by end-of-scan; cleared by DMA ack. */
-    kDADC_DmaSrcResultReady = 1U, /*!< DMA triggered by result-ready; cleared by reading RSLT. */
-} dadc_dma_src_t;
+    kDUALADC_DmaSrcEndOfScan   = 0U, /*!< DMA triggered by end-of-scan; cleared by DMA ack. */
+    kDUALADC_DmaSrcResultReady = 1U, /*!< DMA triggered by result-ready; cleared by reading RSLT. */
+} dualadc_dma_src_t;
 
 /*!
  * @brief DualADC software trigger selection mask.
@@ -176,64 +177,64 @@ typedef enum _dadc_dma_src
  * In cooperation mode Trigger0 starts both ADCA and ADCB; Trigger1 is unused.
  * In independence mode Trigger0 starts ADCA and Trigger1 starts ADCB.
  */
-typedef enum _dadc_software_trigger
+typedef enum _dualadc_software_trigger
 {
-    kDADC_SoftwareTrigger0 = DADC_SWTRIG_SWT0_MASK, /*!< Software Trigger0: ADCA (ADCA+ADCB in cooperation mode). */
-    kDADC_SoftwareTrigger1 = DADC_SWTRIG_SWT1_MASK, /*!< Software Trigger1: ADCB (independence mode only). */
-} dadc_software_trigger_t;
+    kDUALADC_SoftwareTrigger0 = DUALADC_SWTRIG_SWT0_MASK, /*!< Software Trigger0: ADCA (ADCA+ADCB in cooperation mode). */
+    kDUALADC_SoftwareTrigger1 = DUALADC_SWTRIG_SWT1_MASK, /*!< Software Trigger1: ADCB (independence mode only). */
+} dualadc_software_trigger_t;
 
 /*!
  * @brief DualADC conversion type selection (CMD[CTYPE]).
  */
-typedef enum _dadc_conversion_type
+typedef enum _dualadc_conversion_type
 {
-    kDADC_ConversionSingleEndedA    = 0U, /*!< Single-ended, A-side channel only. */
-    kDADC_ConversionSingleEndedB    = 1U, /*!< Single-ended, B-side channel only. */
-    kDADC_ConversionDifferential    = 2U, /*!< Differential mode (A minus B). */
-    kDADC_ConversionDualSingleEnded = 3U, /*!< Dual single-ended: A and B sides converted independently. */
-} dadc_conversion_type_t;
+    kDUALADC_ConversionSingleEndedA    = 0U, /*!< Single-ended, A-side channel only. */
+    kDUALADC_ConversionSingleEndedB    = 1U, /*!< Single-ended, B-side channel only. */
+    kDUALADC_ConversionDifferential    = 2U, /*!< Differential mode (A minus B). */
+    kDUALADC_ConversionDualSingleEnded = 3U, /*!< Dual single-ended: A and B sides converted independently. */
+} dualadc_conversion_type_t;
 
 /*!
  * @brief DualADC conversion resolution selection (CMD[MODE]).
  */
-typedef enum _dadc_resolution
+typedef enum _dualadc_resolution
 {
-    kDADC_ResolutionStandard = 0U, /*!< Standard: 12-bit single-ended or 13-bit differential. */
-    kDADC_ResolutionHigh     = 1U, /*!< High: 16-bit single-ended or differential. */
-} dadc_resolution_t;
+    kDUALADC_ResolutionStandard = 0U, /*!< Standard: 12-bit single-ended or 13-bit differential. */
+    kDUALADC_ResolutionHigh     = 1U, /*!< High: 16-bit single-ended or differential. */
+} dualadc_resolution_t;
 
 /*!
  * @brief DualADC sample time selection in ADCK cycles (CMD[STS]).
  */
-typedef enum _dadc_sample_time
+typedef enum _dualadc_sample_time
 {
-    kDADC_SampleTime3_5   = 0U, /*!< 3.5 ADCK cycles (minimum sample time). */
-    kDADC_SampleTime5_5   = 1U, /*!< 5.5 ADCK cycles. */
-    kDADC_SampleTime7_5   = 2U, /*!< 7.5 ADCK cycles. */
-    kDADC_SampleTime11_5  = 3U, /*!< 11.5 ADCK cycles. */
-    kDADC_SampleTime19_5  = 4U, /*!< 19.5 ADCK cycles. */
-    kDADC_SampleTime35_5  = 5U, /*!< 35.5 ADCK cycles. */
-    kDADC_SampleTime67_5  = 6U, /*!< 67.5 ADCK cycles. */
-    kDADC_SampleTime131_5 = 7U, /*!< 131.5 ADCK cycles (maximum sample time). */
-} dadc_sample_time_t;
+    kDUALADC_SampleTime3_5   = 0U, /*!< 3.5 ADCK cycles (minimum sample time). */
+    kDUALADC_SampleTime5_5   = 1U, /*!< 5.5 ADCK cycles. */
+    kDUALADC_SampleTime7_5   = 2U, /*!< 7.5 ADCK cycles. */
+    kDUALADC_SampleTime11_5  = 3U, /*!< 11.5 ADCK cycles. */
+    kDUALADC_SampleTime19_5  = 4U, /*!< 19.5 ADCK cycles. */
+    kDUALADC_SampleTime35_5  = 5U, /*!< 35.5 ADCK cycles. */
+    kDUALADC_SampleTime67_5  = 6U, /*!< 67.5 ADCK cycles. */
+    kDUALADC_SampleTime131_5 = 7U, /*!< 131.5 ADCK cycles (maximum sample time). */
+} dualadc_sample_time_t;
 
 /*!
  * @brief DualADC hardware averaging count for conversions (CMD[AVGS]).
  */
-typedef enum _dadc_hardware_averages
+typedef enum _dualadc_hardware_averages
 {
-    kDADC_HardwareAverageSingle = 0U,  /*!< Single conversion, no averaging. */
-    kDADC_HardwareAverage2      = 1U,  /*!< 2 conversions averaged. */
-    kDADC_HardwareAverage4      = 2U,  /*!< 4 conversions averaged. */
-    kDADC_HardwareAverage8      = 3U,  /*!< 8 conversions averaged. */
-    kDADC_HardwareAverage16     = 4U,  /*!< 16 conversions averaged. */
-    kDADC_HardwareAverage32     = 5U,  /*!< 32 conversions averaged. */
-    kDADC_HardwareAverage64     = 6U,  /*!< 64 conversions averaged. */
-    kDADC_HardwareAverage128    = 7U,  /*!< 128 conversions averaged. */
-    kDADC_HardwareAverage256    = 8U,  /*!< 256 conversions averaged. */
-    kDADC_HardwareAverage512    = 9U,  /*!< 512 conversions averaged. */
-    kDADC_HardwareAverage1024   = 10U, /*!< 1024 conversions averaged. */
-} dadc_hardware_averages_t;
+    kDUALADC_HardwareAverageSingle = 0U,  /*!< Single conversion, no averaging. */
+    kDUALADC_HardwareAverage2      = 1U,  /*!< 2 conversions averaged. */
+    kDUALADC_HardwareAverage4      = 2U,  /*!< 4 conversions averaged. */
+    kDUALADC_HardwareAverage8      = 3U,  /*!< 8 conversions averaged. */
+    kDUALADC_HardwareAverage16     = 4U,  /*!< 16 conversions averaged. */
+    kDUALADC_HardwareAverage32     = 5U,  /*!< 32 conversions averaged. */
+    kDUALADC_HardwareAverage64     = 6U,  /*!< 64 conversions averaged. */
+    kDUALADC_HardwareAverage128    = 7U,  /*!< 128 conversions averaged. */
+    kDUALADC_HardwareAverage256    = 8U,  /*!< 256 conversions averaged. */
+    kDUALADC_HardwareAverage512    = 9U,  /*!< 512 conversions averaged. */
+    kDUALADC_HardwareAverage1024   = 10U, /*!< 1024 conversions averaged. */
+} dualadc_hardware_averages_t;
 
 /*!
  * @brief DualADC interrupt source selection mask for the IE register.
@@ -241,28 +242,28 @@ typedef enum _dadc_hardware_averages
  * Values may be OR'd together. ADCB interrupt sources are only generated
  * in independence mode (CFG0[INDEP]=1).
  */
-typedef enum _dadc_interrupt
+typedef enum _dualadc_interrupt
 {
-    kDADC_InterruptEndOfScanA       = DADC_IE_EOSIEA_MASK,         /*!< End of scan sequence for ADCA. */
-    kDADC_InterruptOverlapA         = DADC_IE_OVERLAPIEA_MASK,     /*!< Trigger overlap interrupt for ADCA. */
-    kDADC_InterruptIntervalTimeErrA = DADC_IE_INTVTIMEERRIEA_MASK, /*!< Average-with-timer interval error for ADCA. */
-    kDADC_InterruptEndOfScanB       = DADC_IE_EOSIEB_MASK,         /*!< End of scan sequence for ADCB. */
-    kDADC_InterruptOverlapB         = DADC_IE_OVERLAPIEB_MASK,     /*!< Trigger overlap interrupt for ADCB. */
-    kDADC_InterruptIntervalTimeErrB = DADC_IE_INTVTIMEERRIEB_MASK, /*!< Average-with-timer interval error for ADCB. */
-} dadc_interrupt_t;
+    kDUALADC_InterruptEndOfScanA       = DUALADC_IE_EOSIEA_MASK,         /*!< End of scan sequence for ADCA. */
+    kDUALADC_InterruptOverlapA         = DUALADC_IE_OVERLAPIEA_MASK,     /*!< Trigger overlap interrupt for ADCA. */
+    kDUALADC_InterruptIntervalTimeErrA = DUALADC_IE_INTVTIMEERRIEA_MASK, /*!< Average-with-timer interval error for ADCA. */
+    kDUALADC_InterruptEndOfScanB       = DUALADC_IE_EOSIEB_MASK,         /*!< End of scan sequence for ADCB. */
+    kDUALADC_InterruptOverlapB         = DUALADC_IE_OVERLAPIEB_MASK,     /*!< Trigger overlap interrupt for ADCB. */
+    kDUALADC_InterruptIntervalTimeErrB = DUALADC_IE_INTVTIMEERRIEB_MASK, /*!< Average-with-timer interval error for ADCB. */
+} dualadc_interrupt_t;
 
 /*!
  * @brief DualADC scan sequence completion status flag mask (STAT2[EOSI]).
  *
  * Used with @ref DUALADC_GetScanSequenceStatusFlags and @ref DUALADC_ClearScanSequenceStatusFlags.
- * Values may be OR'd together. kDADC_EndofScanBFlag is only generated in independence mode
+ * Values may be OR'd together. kDUALADC_EndofScanBFlag is only generated in independence mode
  * (CFG0[INDEP]=1).
  */
-typedef enum _dadc_scan_seq_status_flag
+typedef enum _dualadc_scan_seq_status_flag
 {
-    kDADC_EndofScanAFlag = DADC_STAT2_EOSIA_MASK, /*!< ADCA scan sequence complete. */
-    kDADC_EndofScanBFlag = DADC_STAT2_EOSIB_MASK, /*!< ADCB scan sequence complete. */
-} dadc_scan_seq_status_flag_t;
+    kDUALADC_EndofScanAFlag = DUALADC_STAT2_EOSIA_MASK, /*!< ADCA scan sequence complete. */
+    kDUALADC_EndofScanBFlag = DUALADC_STAT2_EOSIB_MASK, /*!< ADCB scan sequence complete. */
+} dualadc_scan_seq_status_flag_t;
 
 /*!
  * @brief DualADC error status flag mask (STAT1).
@@ -271,13 +272,13 @@ typedef enum _dadc_scan_seq_status_flag
  * Values may be OR'd together. ADCB flags are only generated in independence mode
  * (CFG0[INDEP]=1).
  */
-typedef enum _dadc_error_status_flag
+typedef enum _dualadc_error_status_flag
 {
-    kDADC_OverlapAFlag = DADC_STAT1_OVERLAP_FLAGA_MASK, /*!< ADCA Trigger overlap detected. */
-    kDADC_OverlapBFlag = DADC_STAT1_OVERLAP_FLAGB_MASK, /*!< ADCB Trigger overlap detected. */
-    kDADC_IntervalErrAFlag = DADC_STAT1_INTVTIMEERR_FLAGA_MASK, /*!< ADCA Average-with-timer interval too short. */
-    kDADC_IntervalErrBFlag = DADC_STAT1_INTVTIMEERR_FLAGB_MASK, /*!< ADCB Average-with-timer interval too short. */
-} dadc_error_status_flag_t;
+    kDUALADC_OverlapAFlag = DUALADC_STAT1_OVERLAP_FLAGA_MASK, /*!< ADCA Trigger overlap detected. */
+    kDUALADC_OverlapBFlag = DUALADC_STAT1_OVERLAP_FLAGB_MASK, /*!< ADCB Trigger overlap detected. */
+    kDUALADC_IntervalErrAFlag = DUALADC_STAT1_INTVTIMEERR_FLAGA_MASK, /*!< ADCA Average-with-timer interval too short. */
+    kDUALADC_IntervalErrBFlag = DUALADC_STAT1_INTVTIMEERR_FLAGB_MASK, /*!< ADCB Average-with-timer interval too short. */
+} dualadc_error_status_flag_t;
 
 /*!
  * @brief DualADC general read-only status flag mask (STAT0 and STAT2[STARTUPSTS]).
@@ -285,44 +286,44 @@ typedef enum _dadc_error_status_flag
  * Used with @ref DUALADC_GetStatusFlags. All flags are read-only and cannot be
  * cleared by software. Values may be OR'd together to test multiple flags at once.
  */
-typedef enum _dadc_status_flag
+typedef enum _dualadc_status_flag
 {
-    kDADC_AdcActiveAFlag       = DADC_STAT0_ADC_ACTIVEA_MASK, /*!< ADCA is actively converting. */
-    kDADC_AdcActiveBFlag       = DADC_STAT0_ADC_ACTIVEB_MASK, /*!< ADCB is actively converting. */
-    kDADC_CalibrationReadyFlag = DADC_STAT0_CAL_RDY_MASK, /*!< Calibration complete. */
+    kDUALADC_AdcActiveAFlag       = DUALADC_STAT0_ADC_ACTIVEA_MASK, /*!< ADCA is actively converting. */
+    kDUALADC_AdcActiveBFlag       = DUALADC_STAT0_ADC_ACTIVEB_MASK, /*!< ADCB is actively converting. */
+    kDUALADC_CalibrationReadyFlag = DUALADC_STAT0_CAL_RDY_MASK, /*!< Calibration complete. */
 
-    kDADC_StartupDoneAFlag = DADC_STAT2_STARTUPSTSA_MASK, /*!< ADCA analog startup complete. */
-    kDADC_StartupDoneBFlag = DADC_STAT2_STARTUPSTSB_MASK, /*!< ADCB analog startup complete. */
-} dadc_status_flag_t;
+    kDUALADC_StartupDoneAFlag = DUALADC_STAT2_STARTUPSTSA_MASK, /*!< ADCA analog startup complete. */
+    kDUALADC_StartupDoneBFlag = DUALADC_STAT2_STARTUPSTSB_MASK, /*!< ADCB analog startup complete. */
+} dualadc_status_flag_t;
 
 /*!
  * @brief DualADC command buffer bitmask values for RSLTRDY_IE and CMP_IE registers.
  *
  * Values may be OR'd together to address multiple command buffers simultaneously.
  */
-typedef enum _dadc_cmd_mask
+typedef enum _dualadc_cmd_mask
 {
-    kDADC_Cmd1Mask  = (1U << 0U),  /*!< Command buffer 1. */
-    kDADC_Cmd2Mask  = (1U << 1U),  /*!< Command buffer 2. */
-    kDADC_Cmd3Mask  = (1U << 2U),  /*!< Command buffer 3. */
-    kDADC_Cmd4Mask  = (1U << 3U),  /*!< Command buffer 4. */
-    kDADC_Cmd5Mask  = (1U << 4U),  /*!< Command buffer 5. */
-    kDADC_Cmd6Mask  = (1U << 5U),  /*!< Command buffer 6. */
-    kDADC_Cmd7Mask  = (1U << 6U),  /*!< Command buffer 7. */
-    kDADC_Cmd8Mask  = (1U << 7U),  /*!< Command buffer 8. */
-    kDADC_Cmd9Mask  = (1U << 8U),  /*!< Command buffer 9. */
-    kDADC_Cmd10Mask = (1U << 9U),  /*!< Command buffer 10. */
-    kDADC_Cmd11Mask = (1U << 10U), /*!< Command buffer 11. */
-    kDADC_Cmd12Mask = (1U << 11U), /*!< Command buffer 12. */
-    kDADC_Cmd13Mask = (1U << 12U), /*!< Command buffer 13. */
-    kDADC_Cmd14Mask = (1U << 13U), /*!< Command buffer 14. */
-    kDADC_Cmd15Mask = (1U << 14U), /*!< Command buffer 15. */
-    kDADC_Cmd16Mask = (1U << 15U), /*!< Command buffer 16. */
-    kDADC_Cmd17Mask = (1U << 16U), /*!< Command buffer 17. */
-    kDADC_Cmd18Mask = (1U << 17U), /*!< Command buffer 18. */
-    kDADC_Cmd19Mask = (1U << 18U), /*!< Command buffer 19. */
-    kDADC_Cmd20Mask = (1U << 19U), /*!< Command buffer 20. */
-} dadc_cmd_mask_t;
+    kDUALADC_Cmd1Mask  = (1U << 0U),  /*!< Command buffer 1. */
+    kDUALADC_Cmd2Mask  = (1U << 1U),  /*!< Command buffer 2. */
+    kDUALADC_Cmd3Mask  = (1U << 2U),  /*!< Command buffer 3. */
+    kDUALADC_Cmd4Mask  = (1U << 3U),  /*!< Command buffer 4. */
+    kDUALADC_Cmd5Mask  = (1U << 4U),  /*!< Command buffer 5. */
+    kDUALADC_Cmd6Mask  = (1U << 5U),  /*!< Command buffer 6. */
+    kDUALADC_Cmd7Mask  = (1U << 6U),  /*!< Command buffer 7. */
+    kDUALADC_Cmd8Mask  = (1U << 7U),  /*!< Command buffer 8. */
+    kDUALADC_Cmd9Mask  = (1U << 8U),  /*!< Command buffer 9. */
+    kDUALADC_Cmd10Mask = (1U << 9U),  /*!< Command buffer 10. */
+    kDUALADC_Cmd11Mask = (1U << 10U), /*!< Command buffer 11. */
+    kDUALADC_Cmd12Mask = (1U << 11U), /*!< Command buffer 12. */
+    kDUALADC_Cmd13Mask = (1U << 12U), /*!< Command buffer 13. */
+    kDUALADC_Cmd14Mask = (1U << 13U), /*!< Command buffer 14. */
+    kDUALADC_Cmd15Mask = (1U << 14U), /*!< Command buffer 15. */
+    kDUALADC_Cmd16Mask = (1U << 15U), /*!< Command buffer 16. */
+    kDUALADC_Cmd17Mask = (1U << 16U), /*!< Command buffer 17. */
+    kDUALADC_Cmd18Mask = (1U << 17U), /*!< Command buffer 18. */
+    kDUALADC_Cmd19Mask = (1U << 18U), /*!< Command buffer 19. */
+    kDUALADC_Cmd20Mask = (1U << 19U), /*!< Command buffer 20. */
+} dualadc_cmd_mask_t;
 
 /*!
  * @brief DualADC conversion command configuration structure.
@@ -333,12 +334,12 @@ typedef enum _dadc_cmd_mask
  * @note CMD[CDIS] (sequence terminator) is not included here; use the dedicated
  *       @ref DUALADC_SetConvSequenceEndCommand inline function instead.
  */
-typedef struct _dadc_cmd_config
+typedef struct _dualadc_cmd_config
 {
-    dadc_conversion_type_t conversionType;  /*!< Conversion type (A-side/B-side/differential/dual). */
-    dadc_resolution_t resolutionMode;   /*!< Conversion resolution (standard or high). */
-    dadc_sample_time_t sampleTimeMode;  /*!< Input sample time in ADCK cycles. */
-    dadc_hardware_averages_t hardwareAverages; /*!< Number of conversions averaged per result. */
+    dualadc_conversion_type_t conversionType;  /*!< Conversion type (A-side/B-side/differential/dual). */
+    dualadc_resolution_t resolutionMode;   /*!< Conversion resolution (standard or high). */
+    dualadc_sample_time_t sampleTimeMode;  /*!< Input sample time in ADCK cycles. */
+    dualadc_hardware_averages_t hardwareAverages; /*!< Number of conversions averaged per result. */
 
     uint8_t channelNumber;      /*!< A-side input channel select (0-31). */
     bool enableAltBChannel;     /*!< Use altBChannelNumber for B-side instead of channelNumber. */
@@ -349,7 +350,7 @@ typedef struct _dadc_cmd_config
     uint16_t compareValueLow;   /*!< Compare value low (CVL); written to CV[n] when enableCompare is true. */
 
     bool enableWaitTrigger; /*!< Require trigger re-assertion before this command executes. */
-} dadc_cmd_config_t;
+} dualadc_cmd_config_t;
 
 /*!
  * @brief DualADC initialization configuration structure.
@@ -358,31 +359,29 @@ typedef struct _dadc_cmd_config
  * Use @ref DUALADC_GetDefaultConfig to obtain safe reset-state defaults before
  * modifying individual fields.
  *
- * @note CTRL[ADCEN] is always asserted at the end of @ref DUALADC_Init and must
- *       not be set by the caller beforehand.
  * @note Calibration request bits (CTRL[CAL_REQ], CTRL[CALOFS], CTRL[CALHS]) are excluded
  *       from this structure and must be triggered through @ref DUALADC_DoCalibration.
  */
-typedef struct _dadc_config
+typedef struct _dualadc_config
 {
     /* CFG0 - Configuration 0 Register */
-    dadc_conversion_mode_t conversionMode;      /*!< ADCA/ADCB conversion mode (cooperation or independence). */
-    dadc_power_config_t powerConfig;            /*!< Power and maximum ADCK frequency. */
+    dualadc_conversion_mode_t conversionMode;      /*!< ADCA/ADCB conversion mode (cooperation or independence). */
+    dualadc_power_config_t powerConfig;            /*!< Power and maximum ADCK frequency. */
     bool enableAnalogPreEnable;                 /*!< Pre-enable analog circuits for faster conversion startup. */
-    dadc_ref_voltage_src_t refVoltageSource;    /*!< Voltage reference source. */
+    dualadc_ref_voltage_src_t refVoltageSource;    /*!< Voltage reference source. */
     uint8_t powerUpDelayCount;                  /*!< Power-up delay count; must exceed device tADCSTUP. */
-    dadc_trig_sel_t triggerSource;              /*!< Trigger source for ADCA (CFG0[TRIGSEL]). */
+    dualadc_trig_sel_t triggerSource;              /*!< Trigger source for ADCA (CFG0[TRIGSEL]). */
 
     /* CFG1 - Configuration 1 Register */
     bool enableLeftJustify;         /*!< Left-justify the 12-bit result in the result register. */
     bool enableHighSpeedMode;       /*!< Enable high-speed conversion mode. */
     bool enableHighSpeedExtra;      /*!< Add one extra conversion cycle in high-speed mode. */
-    dadc_tune_mode_t tuneMode;      /*!< Tune mode; see device reference manual. */
+    dualadc_tune_mode_t tuneMode;      /*!< Tune mode; see device reference manual. */
 
     /* CTRL - Control Register */
     bool enableDoze;                        /*!< ADC finishes current scan then goes inactive on doze entry. */
     bool enableLongCalSampleTime;           /*!< Use long (67.5 ADCK) sample time during calibration. */
-    dadc_calibration_averages_t calibrationAverages;    /*!< Conversion averages during calibration routines. */
+    dualadc_calibration_averages_t calibrationAverages;    /*!< Conversion averages during calibration routines. */
 
     /* PAUSE - Pause Register */
     bool enableConversionPause;     /*!< Insert a delay between consecutive conversions in a sequence. */
@@ -398,27 +397,27 @@ typedef struct _dadc_config
 
     /* DE - DMA enable and trigger source */
     bool enableDmaA;           /*!< Enable DMA request for ADCA. */
-    dadc_dma_src_t dmaSourceA; /*!< DMA trigger source for ADCA. */
+    dualadc_dma_src_t dmaSourceA; /*!< DMA trigger source for ADCA. */
     bool enableDmaB;           /*!< Enable DMA request for ADCB (independence mode only). */
-    dadc_dma_src_t dmaSourceB; /*!< DMA trigger source for ADCB (independence mode only). */
-} dadc_config_t;
+    dualadc_dma_src_t dmaSourceB; /*!< DMA trigger source for ADCB (independence mode only). */
+} dualadc_config_t;
 
 /*!
  * @brief DualADC average-with-timer interval prescaler (ITCFG[PRESCALERA/B]).
  *
  * Interval = ITCFG[INTERVAL] * ADCK_period * 2^prescaler
  */
-typedef enum _dadc_avgt_prescaler
+typedef enum _dualadc_avgt_prescaler
 {
-    kDADC_AvgtPrescaler1   = 0U, /*!< Prescaled by 1. */
-    kDADC_AvgtPrescaler2   = 1U, /*!< Prescaled by 2. */
-    kDADC_AvgtPrescaler4   = 2U, /*!< Prescaled by 4. */
-    kDADC_AvgtPrescaler8   = 3U, /*!< Prescaled by 8. */
-    kDADC_AvgtPrescaler16  = 4U, /*!< Prescaled by 16. */
-    kDADC_AvgtPrescaler32  = 5U, /*!< Prescaled by 32. */
-    kDADC_AvgtPrescaler64  = 6U, /*!< Prescaled by 64. */
-    kDADC_AvgtPrescaler128 = 7U, /*!< Prescaled by 128. */
-} dadc_avgt_prescaler_t;
+    kDUALADC_AvgtPrescaler1   = 0U, /*!< Prescaled by 1. */
+    kDUALADC_AvgtPrescaler2   = 1U, /*!< Prescaled by 2. */
+    kDUALADC_AvgtPrescaler4   = 2U, /*!< Prescaled by 4. */
+    kDUALADC_AvgtPrescaler8   = 3U, /*!< Prescaled by 8. */
+    kDUALADC_AvgtPrescaler16  = 4U, /*!< Prescaled by 16. */
+    kDUALADC_AvgtPrescaler32  = 5U, /*!< Prescaled by 32. */
+    kDUALADC_AvgtPrescaler64  = 6U, /*!< Prescaled by 64. */
+    kDUALADC_AvgtPrescaler128 = 7U, /*!< Prescaled by 128. */
+} dualadc_avgt_prescaler_t;
 
 /*!
  * @brief DualADC average-with-timer configuration structure.
@@ -433,34 +432,34 @@ typedef enum _dadc_avgt_prescaler
  *
  * Interval formula: Interval = interval * ADCK_period * 2^prescaler
  */
-typedef struct _dadc_avgt_config
+typedef struct _dualadc_avgt_config
 {
     /* ADCA - valid in both cooperation and independence modes */
     bool enableAvgTimerA;       /*!< Enable average-with-timer for ADCA. */
     uint16_t repeatCountA;      /*!< Sequence repeat count for ADCA (1-512); stored as AVGTA_TIMES+1. */
     uint16_t intervalA;         /*!< ADCA timer interval raw count (ITCFG[INTERVALA]). */
-    dadc_avgt_prescaler_t prescalerA;   /*!< ADCA interval timer prescaler. */
+    dualadc_avgt_prescaler_t prescalerA;   /*!< ADCA interval timer prescaler. */
 
     /* ADCB - valid in independence mode only; ignored by hardware in cooperation mode */
     bool enableAvgTimerB;       /*!< Enable average-with-timer for ADCB (independence mode only). */
     uint16_t repeatCountB;      /*!< Sequence repeat count for ADCB (1-512, independence mode only). */
     uint16_t intervalB;         /*!< ADCB timer interval raw count (ITCFG[INTERVALB], independence mode only). */
-    dadc_avgt_prescaler_t prescalerB;   /*!< ADCB interval timer prescaler (independence mode only). */
-} dadc_avgt_config_t;
+    dualadc_avgt_prescaler_t prescalerB;   /*!< ADCB interval timer prescaler (independence mode only). */
+} dualadc_avgt_config_t;
 
 /*!
  * @brief DualADC calibration value structure.
  */
-typedef struct _dadc_calibration_value
+typedef struct _dualadc_calibration_value
 {
     uint16_t offsetTrimA;       /*!< OFSTRIM[OFSTRIMA]: ADCA offset trim (10-bit). */
     uint16_t offsetTrimB;       /*!< OFSTRIM[OFSTRIMB]: ADCB offset trim (10-bit). */
     uint16_t highSpeedTrimA;    /*!< HSTRIM[HSTRIMA]: ADCA high-speed trim (5-bit). */
     uint16_t highSpeedTrimB;    /*!< HSTRIM[HSTRIMB]: ADCB high-speed trim (5-bit). */
-    uint32_t gcalr[DADC_GCR_COUNT];         /*!< GCR[n].GCALR: 17-bit gain calibration result (RDY bit excluded). */
-    uint16_t calGar[DADC_CAL_GAR_COUNT];    /*!< CAL_GAR[0..32]: linearity calibration values for ADCA. */
-    uint16_t calGbr[DADC_CAL_GBR_COUNT];    /*!< CAL_GBR[0..32]: linearity calibration values for ADCB. */
-} dadc_calibration_value_t;
+    uint32_t gcalr[DUALADC_GCR_COUNT];         /*!< GCR[n].GCALR: 17-bit gain calibration result (RDY bit excluded). */
+    uint16_t calGar[DUALADC_CAL_GAR_COUNT];    /*!< CAL_GAR[0..32]: linearity calibration values for ADCA. */
+    uint16_t calGbr[DUALADC_CAL_GBR_COUNT];    /*!< CAL_GBR[0..32]: linearity calibration values for ADCB. */
+} dualadc_calibration_value_t;
 
 /*!
  * @brief DualADC conversion result structure.
@@ -477,13 +476,13 @@ typedef struct _dadc_calibration_value
  *       When average-with-timer is enabled result32 holds the sum of raw register values;
  *       apply the same right-shift before dividing by the repeat count.
  */
-typedef struct _dadc_conversion_result
+typedef struct _dualadc_conversion_result
 {
     uint16_t resultLow;  /*!< bit[15:0]: single-ended or differential result;
                               A-side result in dual single-ended mode. */
     uint16_t resultHigh; /*!< bit[31:16]: B-side result in dual single-ended mode (CTYPE=3). */
     uint32_t result32;   /*!< bit[31:0]: full 32-bit summed result when average-with-timer is enabled. */
-} dadc_conversion_result_t;
+} dualadc_conversion_result_t;
 
 /*******************************************************************************
  * API
@@ -504,10 +503,10 @@ extern "C" {
  * @param base DualADC base address
  * @return Instance number if valid base address is provided, otherwise returns 0xFFFFFFFF
  */
-uint32_t DUALADC_GetInstance(DADC_Type *base);
+uint32_t DUALADC_GetInstance(DUALADC_Type *base);
 
 /*!
- * @brief Populate a @ref dadc_config_t with reset-state defaults.
+ * @brief Populate a @ref dualadc_config_t with reset-state defaults.
  *
  * Defaults applied:
  * - Cooperation mode
@@ -524,7 +523,7 @@ uint32_t DUALADC_GetInstance(DADC_Type *base);
  *
  * @param config Pointer to the configuration structure to populate. Must not be NULL.
  */
-void DUALADC_GetDefaultConfig(dadc_config_t *config);
+void DUALADC_GetDefaultConfig(dualadc_config_t *config);
 
 /*!
  * @brief Initialize the DualADC module.
@@ -537,27 +536,24 @@ void DUALADC_GetDefaultConfig(dadc_config_t *config);
  * 5. Configure CFG1 via read-modify-write.
  * 6. Configure CTRL fields (DOZEN, CST_LONG, CAL_AVGS) via read-modify-write.
  *
- * On return the ADC is enabled and ready for calibration or conversion.
- *
  * @param base   DualADC peripheral base address.
  * @param config Pointer to the initialization configuration. Must not be NULL.
  * @retval kStatus_Success           Initialization succeeded.
  * @retval kStatus_InvalidArgument   @p base is not a valid DualADC peripheral address.
  * @retval kStatus_Timeout           Reset operation times out.
  */
-status_t DUALADC_Init(DADC_Type *base, const dadc_config_t *config);
+status_t DUALADC_Init(DUALADC_Type *base, const dualadc_config_t *config);
 
 /*!
  * @brief Deinitialize the DualADC module.
  *
- * Clears CTRL[ADCEN] to terminate any active conversion, gates the peripheral
- * clock, and asserts the peripheral reset (if supported by the platform).
+ * Gates the peripheral clock, and asserts the peripheral reset (if supported by the platform).
  *
  * @param base DualADC peripheral base address.
  * @retval kStatus_Success           Deinitialization succeeded.
  * @retval kStatus_InvalidArgument   @p base is not a valid DualADC peripheral address.
  */
-status_t DUALADC_DeInit(DADC_Type *base);
+status_t DUALADC_DeInit(DUALADC_Type *base);
 
 /*! @} */
 
@@ -583,10 +579,10 @@ status_t DUALADC_DeInit(DADC_Type *base);
  * @retval kStatus_Timeout  A calibration poll loop exceeded @ref DUALADC_CALIBRATION_TIMEOUT
  *                          iterations (only possible when the timeout is non-zero).
  */
-status_t DUALADC_DoCalibration(DADC_Type *base);
+status_t DUALADC_DoCalibration(DUALADC_Type *base);
 
 /*!
- * @brief Restore calibration registers from a previously saved @ref dadc_calibration_value_t.
+ * @brief Restore calibration registers from a previously saved @ref dualadc_calibration_value_t.
  *
  * Writes OFSTRIM, HSTRIM, CAL_GAR[0..32], CAL_GBR[0..32], GCR[0], and GCR[1] from the
  * supplied structure. GCR[n].RDY is set automatically so the hardware uses the restored values.
@@ -595,7 +591,7 @@ status_t DUALADC_DoCalibration(DADC_Type *base);
  * @param base DualADC peripheral base address.
  * @param ptrCalibrationValue Pointer to the calibration value structure to restore. Must not be NULL.
  */
-void DUALADC_SetCalibrationValue(DADC_Type *base, const dadc_calibration_value_t *ptrCalibrationValue);
+void DUALADC_SetCalibrationValue(DUALADC_Type *base, const dualadc_calibration_value_t *ptrCalibrationValue);
 
 /*! @} */
 
@@ -605,7 +601,7 @@ void DUALADC_SetCalibrationValue(DADC_Type *base, const dadc_calibration_value_t
  */
 
 /*!
- * @brief Populate a @ref dadc_cmd_config_t with reset-state defaults.
+ * @brief Populate a @ref dualadc_cmd_config_t with reset-state defaults.
  *
  * Defaults applied:
  * - Single-ended A-side conversion
@@ -617,7 +613,7 @@ void DUALADC_SetCalibrationValue(DADC_Type *base, const dadc_calibration_value_t
  *
  * @param config Pointer to the command configuration structure. Must not be NULL.
  */
-void DUALADC_GetDefaultConversionCommandConfig(dadc_cmd_config_t *config);
+void DUALADC_GetDefaultConversionCommandConfig(dualadc_cmd_config_t *config);
 
 /*!
  * @brief Configure a DualADC conversion command buffer entry.
@@ -629,7 +625,7 @@ void DUALADC_GetDefaultConversionCommandConfig(dadc_cmd_config_t *config);
  * @param index Command buffer index, range 1-20 (maps to CMD[0]-CMD[19]).
  * @param config Pointer to the command configuration.
  */
-void DUALADC_ConfigConversionCommand(DADC_Type *base, uint32_t index, const dadc_cmd_config_t *config);
+void DUALADC_ConfigConversionCommand(DUALADC_Type *base, uint32_t index, const dualadc_cmd_config_t *config);
 
 /*!
  * @brief Mark a command buffer entry as the conversion sequence terminator.
@@ -641,21 +637,21 @@ void DUALADC_ConfigConversionCommand(DADC_Type *base, uint32_t index, const dadc
  * @param base DualADC peripheral base address.
  * @param index Command buffer index, range 1-20.
  */
-static inline void DUALADC_SetConversionSequenceEndCommand(DADC_Type *base, uint32_t index)
+static inline void DUALADC_SetConversionSequenceEndCommand(DUALADC_Type *base, uint32_t index)
 {
-    assert(index >= 1U && index <= DADC_CMD_COUNT);
-    base->CMD[index - 1U] |= DADC_CMD_CDIS_MASK;
+    assert(index >= 1U && index <= DUALADC_CMD_COUNT);
+    base->CMD[index - 1U] |= DUALADC_CMD_CDIS_MASK;
 }
 
 /*!
- * @brief Populate a @ref dadc_avgt_config_t with reset-state defaults.
+ * @brief Populate a @ref dualadc_avgt_config_t with reset-state defaults.
  *
  * Defaults: average-with-timer disabled for both ADCA and ADCB; repeat count 1;
  * interval 0; prescaler *1.
  *
  * @param config Pointer to the configuration structure to populate. Must not be NULL.
  */
-void DUALADC_GetDefaultAverageTimerConfig(dadc_avgt_config_t *config);
+void DUALADC_GetDefaultAverageTimerConfig(dualadc_avgt_config_t *config);
 
 /*!
  * @brief Configure the average-with-timer feature.
@@ -667,7 +663,7 @@ void DUALADC_GetDefaultAverageTimerConfig(dadc_avgt_config_t *config);
  * @param base   DualADC peripheral base address.
  * @param config Pointer to the average-with-timer configuration. Must not be NULL.
  */
-void DUALADC_ConfigAverageTimer(DADC_Type *base, const dadc_avgt_config_t *config);
+void DUALADC_ConfigAverageTimer(DUALADC_Type *base, const dualadc_avgt_config_t *config);
 
 /*! @} */
 
@@ -683,9 +679,9 @@ void DUALADC_ConfigAverageTimer(DADC_Type *base, const dadc_avgt_config_t *confi
  *
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_Enable(DADC_Type *base)
+static inline void DUALADC_Enable(DUALADC_Type *base)
 {
-    base->CTRL |= DADC_CTRL_ADCEN_MASK;
+    base->CTRL |= DUALADC_CTRL_ADCEN_MASK;
 }
 
 /*!
@@ -696,9 +692,9 @@ static inline void DUALADC_Enable(DADC_Type *base)
  *
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_Disable(DADC_Type *base)
+static inline void DUALADC_Disable(DUALADC_Type *base)
 {
-    base->CTRL &= MCUX_MASK_INVERT_32(DADC_CTRL_ADCEN_MASK);
+    base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_ADCEN_MASK);
 }
 
 /*!
@@ -712,10 +708,10 @@ static inline void DUALADC_Disable(DADC_Type *base)
  * @param index  Command buffer index, range 1-20.
  * @param result Pointer to the result structure to populate. Must not be NULL.
  */
-static inline void DUALADC_GetConversionResult(DADC_Type *base, uint32_t index, dadc_conversion_result_t *result)
+static inline void DUALADC_GetConversionResult(DUALADC_Type *base, uint32_t index, dualadc_conversion_result_t *result)
 {
     assert(NULL != result);
-    assert(index >= 1U && index <= DADC_RSLT_RSLT_32B_RSLT_COUNT);
+    assert(index >= 1U && index <= DUALADC_RSLT_RSLT_32B_RSLT_COUNT);
 
     uint32_t raw = base->RSLT[index - 1U];
     result->result32   = raw;
@@ -734,9 +730,9 @@ static inline void DUALADC_GetConversionResult(DADC_Type *base, uint32_t index, 
  * @param index Command buffer index, range 1-20.
  * @return Raw 32-bit RSLT register value.
  */
-static inline uint32_t DUALADC_GetConversionResult32(DADC_Type *base, uint32_t index)
+static inline uint32_t DUALADC_GetConversionResult32(DUALADC_Type *base, uint32_t index)
 {
-    assert(index >= 1U && index <= DADC_RSLT_RSLT_32B_RSLT_COUNT);
+    assert(index >= 1U && index <= DUALADC_RSLT_RSLT_32B_RSLT_COUNT);
     return base->RSLT[index - 1U];
 }
 
@@ -752,9 +748,9 @@ static inline uint32_t DUALADC_GetConversionResult32(DADC_Type *base, uint32_t i
  * @param index Command buffer index, range 1-20.
  * @return Low 16-bit result (bit[15:0] of RSLT).
  */
-static inline uint16_t DUALADC_GetConversionResultLow(DADC_Type *base, uint32_t index)
+static inline uint16_t DUALADC_GetConversionResultLow(DUALADC_Type *base, uint32_t index)
 {
-    assert(index >= 1U && index <= DADC_RSLT_RSLT_16B_RSLT_16B_COUNT);
+    assert(index >= 1U && index <= DUALADC_RSLT_RSLT_16B_RSLT_16B_COUNT);
     return base->RSLT_16B[index - 1U].RSLT_L;
 }
 
@@ -770,9 +766,9 @@ static inline uint16_t DUALADC_GetConversionResultLow(DADC_Type *base, uint32_t 
  * @param index Command buffer index, range 1-20.
  * @return High 16-bit result (bit[31:16] of RSLT).
  */
-static inline uint16_t DUALADC_GetConversionResultHigh(DADC_Type *base, uint32_t index)
+static inline uint16_t DUALADC_GetConversionResultHigh(DUALADC_Type *base, uint32_t index)
 {
-    assert(index >= 1U && index <= DADC_RSLT_RSLT_16B_RSLT_16B_COUNT);
+    assert(index >= 1U && index <= DUALADC_RSLT_RSLT_16B_RSLT_16B_COUNT);
     return base->RSLT_16B[index - 1U].RSLT_H;
 }
 
@@ -780,9 +776,9 @@ static inline uint16_t DUALADC_GetConversionResultHigh(DADC_Type *base, uint32_t
  * @brief Assert one or both software triggers.
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_software_trigger_t values.
+ * @param mask OR combination of @ref dualadc_software_trigger_t values.
  */
-static inline void DUALADC_SetSoftwareTrigger(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_SetSoftwareTrigger(DUALADC_Type *base, uint32_t mask)
 {
     base->SWTRIG = mask;
 }
@@ -792,18 +788,18 @@ static inline void DUALADC_SetSoftwareTrigger(DADC_Type *base, uint32_t mask)
  *
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_EnableDmaA(DADC_Type *base)
+static inline void DUALADC_EnableDmaA(DUALADC_Type *base)
 {
-    base->DE |= DADC_DE_DMAENAA_MASK;
+    base->DE |= DUALADC_DE_DMAENAA_MASK;
 }
 
 /*!
  * @brief Disable the DMA request for ADCA.
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_DisableDmaA(DADC_Type *base)
+static inline void DUALADC_DisableDmaA(DUALADC_Type *base)
 {
-    base->DE &= MCUX_MASK_INVERT_32(DADC_DE_DMAENAA_MASK);
+    base->DE &= MCUX_MASK_INVERT_32(DUALADC_DE_DMAENAA_MASK);
 }
 
 /*!
@@ -811,18 +807,18 @@ static inline void DUALADC_DisableDmaA(DADC_Type *base)
  *
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_EnableDmaB(DADC_Type *base)
+static inline void DUALADC_EnableDmaB(DUALADC_Type *base)
 {
-    base->DE |= DADC_DE_DMAENAB_MASK;
+    base->DE |= DUALADC_DE_DMAENAB_MASK;
 }
 
 /*!
  * @brief Disable the DMA request for ADCB.
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_DisableDmaB(DADC_Type *base)
+static inline void DUALADC_DisableDmaB(DUALADC_Type *base)
 {
-    base->DE &= MCUX_MASK_INVERT_32(DADC_DE_DMAENAB_MASK);
+    base->DE &= MCUX_MASK_INVERT_32(DUALADC_DE_DMAENAB_MASK);
 }
 
 /*!
@@ -834,9 +830,9 @@ static inline void DUALADC_DisableDmaB(DADC_Type *base)
  *
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_ResetADCA(DADC_Type *base)
+static inline void DUALADC_ResetADCA(DUALADC_Type *base)
 {
-    base->CTRL |= DADC_CTRL_RSTA_MASK;
+    base->CTRL |= DUALADC_CTRL_RSTA_MASK;
 }
 
 /*!
@@ -847,9 +843,9 @@ static inline void DUALADC_ResetADCA(DADC_Type *base)
  *
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_ReleaseResetADCA(DADC_Type *base)
+static inline void DUALADC_ReleaseResetADCA(DUALADC_Type *base)
 {
-    base->CTRL &= MCUX_MASK_INVERT_32(DADC_CTRL_RSTA_MASK);
+    base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_RSTA_MASK);
 }
 
 /*!
@@ -861,9 +857,9 @@ static inline void DUALADC_ReleaseResetADCA(DADC_Type *base)
  *
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_ResetADCB(DADC_Type *base)
+static inline void DUALADC_ResetADCB(DUALADC_Type *base)
 {
-    base->CTRL |= DADC_CTRL_RSTB_MASK;
+    base->CTRL |= DUALADC_CTRL_RSTB_MASK;
 }
 
 /*!
@@ -874,9 +870,9 @@ static inline void DUALADC_ResetADCB(DADC_Type *base)
  *
  * @param base DualADC peripheral base address.
  */
-static inline void DUALADC_ReleaseResetADCB(DADC_Type *base)
+static inline void DUALADC_ReleaseResetADCB(DUALADC_Type *base)
 {
-    base->CTRL &= MCUX_MASK_INVERT_32(DADC_CTRL_RSTB_MASK);
+    base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_RSTB_MASK);
 }
 
 /*! @} */
@@ -890,9 +886,9 @@ static inline void DUALADC_ReleaseResetADCB(DADC_Type *base)
  * @brief Enable DualADC interrupts in the IE register.
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_interrupt_t values.
+ * @param mask OR combination of @ref dualadc_interrupt_t values.
  */
-static inline void DUALADC_EnableInterrupts(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_EnableInterrupts(DUALADC_Type *base, uint32_t mask)
 {
     base->IE |= mask;
 }
@@ -901,9 +897,9 @@ static inline void DUALADC_EnableInterrupts(DADC_Type *base, uint32_t mask)
  * @brief Disable DualADC interrupts in the IE register.
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_interrupt_t values.
+ * @param mask OR combination of @ref dualadc_interrupt_t values.
  */
-static inline void DUALADC_DisableInterrupts(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_DisableInterrupts(DUALADC_Type *base, uint32_t mask)
 {
     base->IE &= MCUX_MASK_INVERT_32(mask);
 }
@@ -912,9 +908,9 @@ static inline void DUALADC_DisableInterrupts(DADC_Type *base, uint32_t mask)
  * @brief Enable result-ready interrupts for one or more command buffers.
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_cmd_mask_t values.
+ * @param mask OR combination of @ref dualadc_cmd_mask_t values.
  */
-static inline void DUALADC_EnableResultReadyInterrupts(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_EnableResultReadyInterrupts(DUALADC_Type *base, uint32_t mask)
 {
     base->RSLTRDY_IE |= mask;
 }
@@ -923,9 +919,9 @@ static inline void DUALADC_EnableResultReadyInterrupts(DADC_Type *base, uint32_t
  * @brief Disable result-ready interrupts for one or more command buffers.
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_cmd_mask_t values.
+ * @param mask OR combination of @ref dualadc_cmd_mask_t values.
  */
-static inline void DUALADC_DisableResultReadyInterrupts(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_DisableResultReadyInterrupts(DUALADC_Type *base, uint32_t mask)
 {
     base->RSLTRDY_IE &= MCUX_MASK_INVERT_32(mask);
 }
@@ -937,9 +933,9 @@ static inline void DUALADC_DisableResultReadyInterrupts(DADC_Type *base, uint32_
  * compare condition (CMD[CMPEN] must also be set for that command buffer).
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_cmd_mask_t values.
+ * @param mask OR combination of @ref dualadc_cmd_mask_t values.
  */
-static inline void DUALADC_EnableCompareInterrupts(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_EnableCompareInterrupts(DUALADC_Type *base, uint32_t mask)
 {
     base->CMP_IE |= mask;
 }
@@ -948,9 +944,9 @@ static inline void DUALADC_EnableCompareInterrupts(DADC_Type *base, uint32_t mas
  * @brief Disable compare interrupts for one or more command buffers.
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_cmd_mask_t values.
+ * @param mask OR combination of @ref dualadc_cmd_mask_t values.
  */
-static inline void DUALADC_DisableCompareInterrupts(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_DisableCompareInterrupts(DUALADC_Type *base, uint32_t mask)
 {
     base->CMP_IE &= MCUX_MASK_INVERT_32(mask);
 }
@@ -959,14 +955,14 @@ static inline void DUALADC_DisableCompareInterrupts(DADC_Type *base, uint32_t ma
  * @brief Get scan sequence completion status flags for ADCA and ADCB (STAT2[EOSI]).
  *
  * Returns the OR-combination of STAT2[EOSIA] and STAT2[EOSIB].
- * Test the return value against @ref kDADC_EndofScanAFlag and @ref kDADC_EndofScanBFlag.
+ * Test the return value against @ref kDUALADC_EndofScanAFlag and @ref kDUALADC_EndofScanBFlag.
  *
  * @param base DualADC peripheral base address.
- * @return OR combination of asserted end-of-scan flag bits from @ref dadc_scan_seq_status_flag_t.
+ * @return OR combination of asserted end-of-scan flag bits from @ref dualadc_scan_seq_status_flag_t.
  */
-static inline uint32_t DUALADC_GetScanSequenceStatusFlags(DADC_Type *base)
+static inline uint32_t DUALADC_GetScanSequenceStatusFlags(DUALADC_Type *base)
 {
-    return base->STAT2 & (DADC_STAT2_EOSIA_MASK | DADC_STAT2_EOSIB_MASK);
+    return base->STAT2 & (DUALADC_STAT2_EOSIA_MASK | DUALADC_STAT2_EOSIB_MASK);
 }
 
 /*!
@@ -976,11 +972,11 @@ static inline uint32_t DUALADC_GetScanSequenceStatusFlags(DADC_Type *base)
  * Bits not present in @p mask are not affected.
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref kDADC_EndofScanAFlag and/or @ref kDADC_EndofScanBFlag.
+ * @param mask OR combination of @ref kDUALADC_EndofScanAFlag and/or @ref kDUALADC_EndofScanBFlag.
  */
-static inline void DUALADC_ClearScanSequenceStatusFlags(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_ClearScanSequenceStatusFlags(DUALADC_Type *base, uint32_t mask)
 {
-    base->STAT2 = mask & (DADC_STAT2_EOSIA_MASK | DADC_STAT2_EOSIB_MASK);
+    base->STAT2 = mask & (DUALADC_STAT2_EOSIA_MASK | DUALADC_STAT2_EOSIB_MASK);
 }
 
 /*!
@@ -990,9 +986,9 @@ static inline void DUALADC_ClearScanSequenceStatusFlags(DADC_Type *base, uint32_
  * Flags clear automatically when the associated RSLT register is read by @ref DUALADC_GetConversionResult.
  *
  * @param base DualADC peripheral base address.
- * @return Bitmask of ready results; use @ref dadc_cmd_mask_t to check individual commands.
+ * @return Bitmask of ready results; use @ref dualadc_cmd_mask_t to check individual commands.
  */
-static inline uint32_t DUALADC_GetResultReadyFlags(DADC_Type *base)
+static inline uint32_t DUALADC_GetResultReadyFlags(DUALADC_Type *base)
 {
     return base->RSLTRDY_STAT;
 }
@@ -1000,9 +996,9 @@ static inline uint32_t DUALADC_GetResultReadyFlags(DADC_Type *base)
 /*!
  * @brief Get the compare status flags for all command buffers.
  * @param base DualADC peripheral base address.
- * @return Bitmask of compare results; use @ref dadc_cmd_mask_t to check individual commands.
+ * @return Bitmask of compare results; use @ref dualadc_cmd_mask_t to check individual commands.
  */
-static inline uint32_t DUALADC_GetCompareStatusFlags(DADC_Type *base)
+static inline uint32_t DUALADC_GetCompareStatusFlags(DUALADC_Type *base)
 {
     return base->CMP_STAT;
 }
@@ -1010,9 +1006,9 @@ static inline uint32_t DUALADC_GetCompareStatusFlags(DADC_Type *base)
 /*!
  * @brief Clear compare status flags for one or more command buffers.
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_cmd_mask_t values to clear.
+ * @param mask OR combination of @ref dualadc_cmd_mask_t values to clear.
  */
-static inline void DUALADC_ClearCompareStatusFlags(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_ClearCompareStatusFlags(DUALADC_Type *base, uint32_t mask)
 {
     base->CMP_STAT = mask;
 }
@@ -1021,16 +1017,16 @@ static inline void DUALADC_ClearCompareStatusFlags(DADC_Type *base, uint32_t mas
  * @brief Get error status flags for ADCA and ADCB (STAT1).
  *
  * Returns the OR-combination of STAT1[INTVTIMEERR_FLAGA/B] and STAT1[OVERLAP_FLAGA/B].
- * Test the return value against @ref kDADC_OverlapAFlag, @ref kDADC_OverlapBFlag,
- * @ref kDADC_IntervalErrAFlag, and @ref kDADC_IntervalErrBFlag.
+ * Test the return value against @ref kDUALADC_OverlapAFlag, @ref kDUALADC_OverlapBFlag,
+ * @ref kDUALADC_IntervalErrAFlag, and @ref kDUALADC_IntervalErrBFlag.
  *
  * @param base DualADC peripheral base address.
- * @return OR combination of asserted error flag bits from @ref dadc_error_status_flag_t.
+ * @return OR combination of asserted error flag bits from @ref dualadc_error_status_flag_t.
  */
-static inline uint32_t DUALADC_GetErrorStatusFlags(DADC_Type *base)
+static inline uint32_t DUALADC_GetErrorStatusFlags(DUALADC_Type *base)
 {
-    return base->STAT1 & (DADC_STAT1_INTVTIMEERR_FLAGA_MASK | DADC_STAT1_OVERLAP_FLAGA_MASK |
-                          DADC_STAT1_INTVTIMEERR_FLAGB_MASK  | DADC_STAT1_OVERLAP_FLAGB_MASK);
+    return base->STAT1 & (DUALADC_STAT1_INTVTIMEERR_FLAGA_MASK | DUALADC_STAT1_OVERLAP_FLAGA_MASK |
+                          DUALADC_STAT1_INTVTIMEERR_FLAGB_MASK  | DUALADC_STAT1_OVERLAP_FLAGB_MASK);
 }
 
 /*!
@@ -1040,12 +1036,12 @@ static inline uint32_t DUALADC_GetErrorStatusFlags(DADC_Type *base)
  * Bits not present in @p mask are not affected.
  *
  * @param base DualADC peripheral base address.
- * @param mask OR combination of @ref dadc_error_status_flag_t values.
+ * @param mask OR combination of @ref dualadc_error_status_flag_t values.
  */
-static inline void DUALADC_ClearErrorStatusFlags(DADC_Type *base, uint32_t mask)
+static inline void DUALADC_ClearErrorStatusFlags(DUALADC_Type *base, uint32_t mask)
 {
-    base->STAT1 = mask & (DADC_STAT1_INTVTIMEERR_FLAGA_MASK | DADC_STAT1_OVERLAP_FLAGA_MASK |
-                          DADC_STAT1_INTVTIMEERR_FLAGB_MASK  | DADC_STAT1_OVERLAP_FLAGB_MASK);
+    base->STAT1 = mask & (DUALADC_STAT1_INTVTIMEERR_FLAGA_MASK | DUALADC_STAT1_OVERLAP_FLAGA_MASK |
+                          DUALADC_STAT1_INTVTIMEERR_FLAGB_MASK  | DUALADC_STAT1_OVERLAP_FLAGB_MASK);
 }
 
 /*!
@@ -1057,20 +1053,20 @@ static inline void DUALADC_ClearErrorStatusFlags(DADC_Type *base, uint32_t mask)
  *   - STAT2[STARTUPSTSA], STAT2[STARTUPSTSB]  - analog startup complete
  *
  * All flags are read-only; none can be cleared by software.
- * Test the return value against @ref kDADC_AdcActiveAFlag, @ref kDADC_AdcActiveBFlag,
- * @ref kDADC_CalibrationReadyFlag, @ref kDADC_StartupDoneAFlag, and @ref kDADC_StartupDoneBFlag.
+ * Test the return value against @ref kDUALADC_AdcActiveAFlag, @ref kDUALADC_AdcActiveBFlag,
+ * @ref kDUALADC_CalibrationReadyFlag, @ref kDUALADC_StartupDoneAFlag, and @ref kDUALADC_StartupDoneBFlag.
  *
  * @param base DualADC peripheral base address.
- * @return OR combination of asserted general status flag bits from @ref dadc_status_flag_t.
+ * @return OR combination of asserted general status flag bits from @ref dualadc_status_flag_t.
  */
-static inline uint32_t DUALADC_GetStatusFlags(DADC_Type *base)
+static inline uint32_t DUALADC_GetStatusFlags(DUALADC_Type *base)
 {
     /* STAT0: ADC_ACTIVEA, ADC_ACTIVEB, and CAL_RDY at natural bit positions. */
-    uint32_t reg = base->STAT0 & (DADC_STAT0_ADC_ACTIVEA_MASK | DADC_STAT0_ADC_ACTIVEB_MASK |
-                                  DADC_STAT0_CAL_RDY_MASK);
+    uint32_t reg = base->STAT0 & (DUALADC_STAT0_ADC_ACTIVEA_MASK | DUALADC_STAT0_ADC_ACTIVEB_MASK |
+                                  DUALADC_STAT0_CAL_RDY_MASK);
 
     /* STAT2: STARTUPSTSA and STARTUPSTSB at natural bit positions. */
-    reg |= base->STAT2 & (DADC_STAT2_STARTUPSTSA_MASK | DADC_STAT2_STARTUPSTSB_MASK);
+    reg |= base->STAT2 & (DUALADC_STAT2_STARTUPSTSA_MASK | DUALADC_STAT2_STARTUPSTSB_MASK);
 
     return reg;
 }
@@ -1080,9 +1076,9 @@ static inline uint32_t DUALADC_GetStatusFlags(DADC_Type *base)
  * @param base DualADC peripheral base address.
  * @return Active command index for ADCA (0~20).
  */
-static inline uint32_t DUALADC_GetActiveCommandA(DADC_Type *base)
+static inline uint32_t DUALADC_GetActiveCommandA(DUALADC_Type *base)
 {
-    return (base->STAT0 & DADC_STAT0_CMDACTA_MASK) >> DADC_STAT0_CMDACTA_SHIFT;
+    return (base->STAT0 & DUALADC_STAT0_CMDACTA_MASK) >> DUALADC_STAT0_CMDACTA_SHIFT;
 }
 
 /*!
@@ -1090,9 +1086,9 @@ static inline uint32_t DUALADC_GetActiveCommandA(DADC_Type *base)
  * @param base DualADC peripheral base address.
  * @return Active command index for ADCB (0~20).
  */
-static inline uint32_t DUALADC_GetActiveCommandB(DADC_Type *base)
+static inline uint32_t DUALADC_GetActiveCommandB(DUALADC_Type *base)
 {
-    return (base->STAT0 & DADC_STAT0_CMDACTB_MASK) >> DADC_STAT0_CMDACTB_SHIFT;
+    return (base->STAT0 & DUALADC_STAT0_CMDACTB_MASK) >> DUALADC_STAT0_CMDACTB_SHIFT;
 }
 
 /*!
@@ -1100,9 +1096,9 @@ static inline uint32_t DUALADC_GetActiveCommandB(DADC_Type *base)
  * @param base DualADC peripheral base address.
  * @return Remaining sequence repeat count for ADCA.
  */
-static inline uint32_t DUALADC_GetAvgTimerStatusA(DADC_Type *base)
+static inline uint32_t DUALADC_GetAvgTimerStatusA(DUALADC_Type *base)
 {
-    return (base->STAT0 & DADC_STAT0_AVGTSTSA_MASK) >> DADC_STAT0_AVGTSTSA_SHIFT;
+    return (base->STAT0 & DUALADC_STAT0_AVGTSTSA_MASK) >> DUALADC_STAT0_AVGTSTSA_SHIFT;
 }
 
 /*!
@@ -1110,53 +1106,53 @@ static inline uint32_t DUALADC_GetAvgTimerStatusA(DADC_Type *base)
  * @param base DualADC peripheral base address.
  * @return Remaining sequence repeat count for ADCB.
  */
-static inline uint32_t DUALADC_GetAvgTimerStatusB(DADC_Type *base)
+static inline uint32_t DUALADC_GetAvgTimerStatusB(DUALADC_Type *base)
 {
-    return (base->STAT0 & DADC_STAT0_AVGTSTSB_MASK) >> DADC_STAT0_AVGTSTSB_SHIFT;
+    return (base->STAT0 & DUALADC_STAT0_AVGTSTSB_MASK) >> DUALADC_STAT0_AVGTSTSB_SHIFT;
 }
 
 /*!
  * @brief Get the command index that was executing when a trigger overlap occurred for ADCA.
- * @note Valid only when @ref kDADC_OverlapAFlag is asserted.
+ * @note Valid only when @ref kDUALADC_OverlapAFlag is asserted.
  * @param base DualADC peripheral base address.
  * @return Command index that was active during the overlap event (1~20).
  */
-static inline uint32_t DUALADC_GetOverlapCommandA(DADC_Type *base)
+static inline uint32_t DUALADC_GetOverlapCommandA(DUALADC_Type *base)
 {
-    return (base->STAT1 & DADC_STAT1_OVERLAP_CMDA_MASK) >> DADC_STAT1_OVERLAP_CMDA_SHIFT;
+    return (base->STAT1 & DUALADC_STAT1_OVERLAP_CMDA_MASK) >> DUALADC_STAT1_OVERLAP_CMDA_SHIFT;
 }
 
 /*!
  * @brief Get the command index that was executing when a trigger overlap occurred for ADCB.
- * @note Valid only when @ref kDADC_OverlapBFlag is asserted.
+ * @note Valid only when @ref kDUALADC_OverlapBFlag is asserted.
  * @param base DualADC peripheral base address.
  * @return Command index that was active during the overlap event (1~20).
  */
-static inline uint32_t DUALADC_GetOverlapCommandB(DADC_Type *base)
+static inline uint32_t DUALADC_GetOverlapCommandB(DUALADC_Type *base)
 {
-    return (base->STAT1 & DADC_STAT1_OVERLAP_CMDB_MASK) >> DADC_STAT1_OVERLAP_CMDB_SHIFT;
+    return (base->STAT1 & DUALADC_STAT1_OVERLAP_CMDB_MASK) >> DUALADC_STAT1_OVERLAP_CMDB_SHIFT;
 }
 
 /*!
  * @brief Get the command index executing when an interval timer error occurred for ADCA.
- * @note Valid only when @ref kDADC_IntervalErrAFlag is asserted.
+ * @note Valid only when @ref kDUALADC_IntervalErrAFlag is asserted.
  * @param base DualADC peripheral base address.
  * @return Command index that was active during the interval error (1~20).
  */
-static inline uint32_t DUALADC_GetIntervalErrCommandA(DADC_Type *base)
+static inline uint32_t DUALADC_GetIntervalErrCommandA(DUALADC_Type *base)
 {
-    return (base->STAT1 & DADC_STAT1_INTVTIMEERR_CMDA_MASK) >> DADC_STAT1_INTVTIMEERR_CMDA_SHIFT;
+    return (base->STAT1 & DUALADC_STAT1_INTVTIMEERR_CMDA_MASK) >> DUALADC_STAT1_INTVTIMEERR_CMDA_SHIFT;
 }
 
 /*!
  * @brief Get the command index executing when an interval timer error occurred for ADCB.
- * @note Valid only when @ref kDADC_IntervalErrBFlag is asserted.
+ * @note Valid only when @ref kDUALADC_IntervalErrBFlag is asserted.
  * @param base DualADC peripheral base address.
  * @return Command index that was active during the interval error (1~20).
  */
-static inline uint32_t DUALADC_GetIntervalErrCommandB(DADC_Type *base)
+static inline uint32_t DUALADC_GetIntervalErrCommandB(DUALADC_Type *base)
 {
-    return (base->STAT1 & DADC_STAT1_INTVTIMEERR_CMDB_MASK) >> DADC_STAT1_INTVTIMEERR_CMDB_SHIFT;
+    return (base->STAT1 & DUALADC_STAT1_INTVTIMEERR_CMDB_MASK) >> DUALADC_STAT1_INTVTIMEERR_CMDB_SHIFT;
 }
 
 /*! @} */
