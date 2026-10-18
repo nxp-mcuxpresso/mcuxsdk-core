@@ -1,5 +1,13 @@
 # LPCMP
 
+## [2.3.3]
+
+- Improvements
+  - Fixed the Coverity CERT INT31-C violation in `LPCMP_Init()`:
+    `FSL_FEATURE_LPCMP_INSTANCE_SUPPORT_CCR0_CMP_STOP_ENn()` yields a negative
+    value for an instance the SoC header does not list, so its result is
+    compared against a signed constant instead of being cast to `uint32_t`.
+
 ## [2.3.2]
 
 - Improvements

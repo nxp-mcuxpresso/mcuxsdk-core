@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
- * Copyright 2016-2019, 2023-2025 NXP
+ * Copyright 2016-2019, 2023-2026 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -119,8 +119,8 @@ void LPCMP_Init(LPCMP_Type *base, const lpcmp_config_t *config)
     /* CCR0 register. */
 #if defined(FSL_FEATURE_LPCMP_INSTANCE_SUPPORT_CCR0_CMP_STOP_ENn)
     /* MISRA C-2012 Rule 14.3 deviation: Platform-specific feature macro may create invariant condition */
-    /* MISRA C-2012 Rule 10.4: Ensure type consistency in comparison */
-    if (1U == (uint32_t)FSL_FEATURE_LPCMP_INSTANCE_SUPPORT_CCR0_CMP_STOP_ENn(base))
+    /* The feature macro expands to a signed value, negative for an instance the SoC header does not list. */
+    if (1 == FSL_FEATURE_LPCMP_INSTANCE_SUPPORT_CCR0_CMP_STOP_ENn(base))
 #endif /* FSL_FEATURE_LPCMP_INSTANCE_SUPPORT_CCR0_CMP_STOP_ENn */
     {
         if (config->enableStopMode)
