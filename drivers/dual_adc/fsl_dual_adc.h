@@ -694,7 +694,7 @@ static inline void DUALADC_Enable(DUALADC_Type *base)
  */
 static inline void DUALADC_Disable(DUALADC_Type *base)
 {
-    base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_ADCEN_MASK);
+    base->CTRL &= ~DUALADC_CTRL_ADCEN_MASK;
 }
 
 /*!
@@ -799,7 +799,7 @@ static inline void DUALADC_EnableDmaA(DUALADC_Type *base)
  */
 static inline void DUALADC_DisableDmaA(DUALADC_Type *base)
 {
-    base->DE &= MCUX_MASK_INVERT_32(DUALADC_DE_DMAENAA_MASK);
+    base->DE &= ~DUALADC_DE_DMAENAA_MASK;
 }
 
 /*!
@@ -818,7 +818,7 @@ static inline void DUALADC_EnableDmaB(DUALADC_Type *base)
  */
 static inline void DUALADC_DisableDmaB(DUALADC_Type *base)
 {
-    base->DE &= MCUX_MASK_INVERT_32(DUALADC_DE_DMAENAB_MASK);
+    base->DE &= ~DUALADC_DE_DMAENAB_MASK;
 }
 
 /*!
@@ -845,7 +845,7 @@ static inline void DUALADC_ResetADCA(DUALADC_Type *base)
  */
 static inline void DUALADC_ReleaseResetADCA(DUALADC_Type *base)
 {
-    base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_RSTA_MASK);
+    base->CTRL &= ~DUALADC_CTRL_RSTA_MASK;
 }
 
 /*!
@@ -872,7 +872,7 @@ static inline void DUALADC_ResetADCB(DUALADC_Type *base)
  */
 static inline void DUALADC_ReleaseResetADCB(DUALADC_Type *base)
 {
-    base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_RSTB_MASK);
+    base->CTRL &= ~DUALADC_CTRL_RSTB_MASK;
 }
 
 /*! @} */
@@ -901,7 +901,7 @@ static inline void DUALADC_EnableInterrupts(DUALADC_Type *base, uint32_t mask)
  */
 static inline void DUALADC_DisableInterrupts(DUALADC_Type *base, uint32_t mask)
 {
-    base->IE &= MCUX_MASK_INVERT_32(mask);
+    base->IE &= ~mask;
 }
 
 /*!
@@ -923,7 +923,7 @@ static inline void DUALADC_EnableResultReadyInterrupts(DUALADC_Type *base, uint3
  */
 static inline void DUALADC_DisableResultReadyInterrupts(DUALADC_Type *base, uint32_t mask)
 {
-    base->RSLTRDY_IE &= MCUX_MASK_INVERT_32(mask);
+    base->RSLTRDY_IE &= ~mask;
 }
 
 /*!
@@ -948,7 +948,7 @@ static inline void DUALADC_EnableCompareInterrupts(DUALADC_Type *base, uint32_t 
  */
 static inline void DUALADC_DisableCompareInterrupts(DUALADC_Type *base, uint32_t mask)
 {
-    base->CMP_IE &= MCUX_MASK_INVERT_32(mask);
+    base->CMP_IE &= ~mask;
 }
 
 /*!

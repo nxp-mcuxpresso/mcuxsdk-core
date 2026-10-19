@@ -163,15 +163,15 @@ status_t DUALADC_Init(DUALADC_Type *base, const dualadc_config_t *config)
         __NOP();
     }
 
-    base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_RSTA_MASK | DUALADC_CTRL_RSTB_MASK);
+    base->CTRL &= ~(DUALADC_CTRL_RSTA_MASK | DUALADC_CTRL_RSTB_MASK);
 
     /* Disable the module before setting configuration. */
-    base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_ADCEN_MASK);
+    base->CTRL &= ~DUALADC_CTRL_ADCEN_MASK;
 
     /* Configure CFG0: conversion mode, power, analog pre-enable, voltage reference, power-up delay, trigger source. */
     reg = base->CFG0;
-    reg &= MCUX_MASK_INVERT_32(DUALADC_CFG0_INDEP_MASK | DUALADC_CFG0_TRIGSEL_MASK | DUALADC_CFG0_PWRSEL_MASK |
-                               DUALADC_CFG0_PWREN_MASK | DUALADC_CFG0_REFSEL_MASK | DUALADC_CFG0_PUDLY_MASK);
+    reg &= ~(DUALADC_CFG0_INDEP_MASK | DUALADC_CFG0_TRIGSEL_MASK | DUALADC_CFG0_PWRSEL_MASK |
+             DUALADC_CFG0_PWREN_MASK | DUALADC_CFG0_REFSEL_MASK | DUALADC_CFG0_PUDLY_MASK);
     reg |= DUALADC_CFG0_INDEP(config->conversionMode) |
            DUALADC_CFG0_PWRSEL(config->powerConfig) |
            DUALADC_CFG0_REFSEL(config->refVoltageSource) |
@@ -182,8 +182,7 @@ status_t DUALADC_Init(DUALADC_Type *base, const dualadc_config_t *config)
 
     /* Configure CFG1: result justification, high-speed mode, extra cycle, tune mode. */
     reg = base->CFG1;
-    reg &= MCUX_MASK_INVERT_32(DUALADC_CFG1_JLEFT_MASK | DUALADC_CFG1_HS_MASK | DUALADC_CFG1_HSEXTRA_MASK |
-                               DUALADC_CFG1_TUNE_MASK);
+    reg &= ~(DUALADC_CFG1_JLEFT_MASK | DUALADC_CFG1_HS_MASK | DUALADC_CFG1_HSEXTRA_MASK | DUALADC_CFG1_TUNE_MASK);
     reg |= DUALADC_CFG1_TUNE(config->tuneMode);
     reg |= config->enableLeftJustify ? DUALADC_CFG1_JLEFT_MASK : 0U;
     reg |= config->enableHighSpeedMode ? DUALADC_CFG1_HS_MASK : 0U;
@@ -195,7 +194,7 @@ status_t DUALADC_Init(DUALADC_Type *base, const dualadc_config_t *config)
      * Calibration request bits (CAL_REQ, CALOFS, CALHS) are left at zero; ADCEN is excluded here.
      */
     reg = base->CTRL;
-    reg &= MCUX_MASK_INVERT_32(DUALADC_CTRL_DOZEN_MASK | DUALADC_CTRL_CST_LONG_MASK | DUALADC_CTRL_CAL_AVGS_MASK);
+    reg &= ~(DUALADC_CTRL_DOZEN_MASK | DUALADC_CTRL_CST_LONG_MASK | DUALADC_CTRL_CAL_AVGS_MASK);
     reg |= DUALADC_CTRL_CAL_AVGS(config->calibrationAverages);
     reg |= config->enableDoze ? DUALADC_CTRL_DOZEN_MASK : 0U;
     reg |= config->enableLongCalSampleTime ? DUALADC_CTRL_CST_LONG_MASK : 0U;
@@ -203,15 +202,15 @@ status_t DUALADC_Init(DUALADC_Type *base, const dualadc_config_t *config)
 
     /* Configure PAUSE before ADCEN is asserted. */
     reg = base->PAUSE;
-    reg &= MCUX_MASK_INVERT_32(DUALADC_PAUSE_PAUSEEN_MASK | DUALADC_PAUSE_PAUSEDLY_MASK);
+    reg &= ~(DUALADC_PAUSE_PAUSEEN_MASK | DUALADC_PAUSE_PAUSEDLY_MASK);
     reg |= config->enableConversionPause ? DUALADC_PAUSE_PAUSEEN_MASK : 0U;
     reg |= DUALADC_PAUSE_PAUSEDLY(config->conversionPauseDelay);
     base->PAUSE = reg;
 
     /* Configure TCTRL: hardware trigger enable and trigger delay for Trigger0 and Trigger1. */
     reg = base->TCTRL;
-    reg &= MCUX_MASK_INVERT_32(DUALADC_TCTRL_HTEN0_MASK | DUALADC_TCTRL_TDLY0_MASK |
-                               DUALADC_TCTRL_HTEN1_MASK | DUALADC_TCTRL_TDLY1_MASK);
+    reg &= ~(DUALADC_TCTRL_HTEN0_MASK | DUALADC_TCTRL_TDLY0_MASK |
+             DUALADC_TCTRL_HTEN1_MASK | DUALADC_TCTRL_TDLY1_MASK);
     reg |= DUALADC_TCTRL_TDLY0(config->hardwareTrigger0Delay) |
            DUALADC_TCTRL_TDLY1(config->hardwareTrigger1Delay);
     reg |= config->enableHardwareTrigger0 ? DUALADC_TCTRL_HTEN0_MASK : 0U;
@@ -220,8 +219,8 @@ status_t DUALADC_Init(DUALADC_Type *base, const dualadc_config_t *config)
 
     /* Configure DE: DMA enable and trigger source for ADCA and ADCB. */
     reg = base->DE;
-    reg &= MCUX_MASK_INVERT_32(DUALADC_DE_DMAENAA_MASK | DUALADC_DE_DMASRCA_MASK |
-                               DUALADC_DE_DMAENAB_MASK | DUALADC_DE_DMASRCB_MASK);
+    reg &= ~(DUALADC_DE_DMAENAA_MASK | DUALADC_DE_DMASRCA_MASK |
+             DUALADC_DE_DMAENAB_MASK | DUALADC_DE_DMASRCB_MASK);
     reg |= DUALADC_DE_DMASRCA(config->dmaSourceA) | DUALADC_DE_DMASRCB(config->dmaSourceB);
     reg |= config->enableDmaA ? DUALADC_DE_DMAENAA_MASK : 0U;
     reg |= config->enableDmaB ? DUALADC_DE_DMAENAB_MASK : 0U;
@@ -299,9 +298,9 @@ void DUALADC_ConfigConversionCommand(DUALADC_Type *base, uint32_t index, const d
 
     /* Configure CMD register via read-modify-write; CDIS is excluded and managed separately. */
     reg = base->CMD[index];
-    reg &= MCUX_MASK_INVERT_32(DUALADC_CMD_CMPEN_MASK | DUALADC_CMD_WAIT_TRIG_MASK | DUALADC_CMD_CTYPE_MASK |
-                               DUALADC_CMD_MODE_MASK | DUALADC_CMD_STS_MASK | DUALADC_CMD_AVGS_MASK |
-                               DUALADC_CMD_ADCH_MASK | DUALADC_CMD_ALTB_ADCH_MASK | DUALADC_CMD_ALTB_EN_MASK);
+    reg &= ~(DUALADC_CMD_CMPEN_MASK | DUALADC_CMD_WAIT_TRIG_MASK | DUALADC_CMD_CTYPE_MASK |
+             DUALADC_CMD_MODE_MASK | DUALADC_CMD_STS_MASK | DUALADC_CMD_AVGS_MASK |
+             DUALADC_CMD_ADCH_MASK | DUALADC_CMD_ALTB_ADCH_MASK | DUALADC_CMD_ALTB_EN_MASK);
     reg |= DUALADC_CMD_CTYPE(config->conversionType) |
            DUALADC_CMD_MODE(config->resolutionMode) |
            DUALADC_CMD_STS(config->sampleTimeMode) |
@@ -356,18 +355,18 @@ void DUALADC_ConfigAverageTimer(DUALADC_Type *base, const dualadc_avgt_config_t 
 
     /* Configure AVGT_CTRL: enable flags and repeat counts for ADCA and ADCB. */
     reg = base->AVGT_CTRL;
-    reg &= MCUX_MASK_INVERT_32(DUALADC_AVGT_CTRL_AVGTA_EN_MASK | DUALADC_AVGT_CTRL_AVGTA_TIMES_MASK |
-                               DUALADC_AVGT_CTRL_AVGTB_EN_MASK | DUALADC_AVGT_CTRL_AVGTB_TIMES_MASK);
-    reg |= DUALADC_AVGT_CTRL_AVGTA_TIMES(config->repeatCountA - 1U) |
-           DUALADC_AVGT_CTRL_AVGTB_TIMES(config->repeatCountB - 1U);
+    reg &= ~(DUALADC_AVGT_CTRL_AVGTA_EN_MASK | DUALADC_AVGT_CTRL_AVGTA_TIMES_MASK |
+             DUALADC_AVGT_CTRL_AVGTB_EN_MASK | DUALADC_AVGT_CTRL_AVGTB_TIMES_MASK);
+    reg |= DUALADC_AVGT_CTRL_AVGTA_TIMES((uint32_t)config->repeatCountA - 1UL) |
+           DUALADC_AVGT_CTRL_AVGTB_TIMES((uint32_t)config->repeatCountB - 1UL);
     reg |= config->enableAvgTimerA ? DUALADC_AVGT_CTRL_AVGTA_EN_MASK : 0U;
     reg |= config->enableAvgTimerB ? DUALADC_AVGT_CTRL_AVGTB_EN_MASK : 0U;
     base->AVGT_CTRL = reg;
 
     /* Configure ITCFG: interval counts and prescalers for ADCA and ADCB. */
     reg = base->ITCFG;
-    reg &= MCUX_MASK_INVERT_32(DUALADC_ITCFG_PRESCALERA_MASK | DUALADC_ITCFG_INTERVALA_MASK |
-                               DUALADC_ITCFG_PRESCALERB_MASK | DUALADC_ITCFG_INTERVALB_MASK);
+    reg &= ~(DUALADC_ITCFG_PRESCALERA_MASK | DUALADC_ITCFG_INTERVALA_MASK |
+             DUALADC_ITCFG_PRESCALERB_MASK | DUALADC_ITCFG_INTERVALB_MASK);
     reg |= DUALADC_ITCFG_PRESCALERA(config->prescalerA) |
            DUALADC_ITCFG_INTERVALA(config->intervalA) |
            DUALADC_ITCFG_PRESCALERB(config->prescalerB) |
@@ -388,9 +387,15 @@ static uint32_t DUALADC_CalculateGainResult(uint32_t gainCalValue)
     uint32_t gainConvResult;
     int32_t denominator;
     int32_t signedGainCalValue;
+    uint32_t unsignedGainCalValue;
 
-    /* Sign-extend bit 15 to fill bits [31:16]. */
-    signedGainCalValue = (int32_t)((gainCalValue ^ 0x8000UL) - 0x8000UL);
+    /*
+     * Sign-extend bit 15 to fill bits [31:16]. Perform the sign-extend arithmetic entirely in
+     * unsigned domain first, store the result in a single unsigned object, then cast that single
+     * object (not a composite expression) to signed.
+     */
+    unsignedGainCalValue = (gainCalValue ^ 0x8000UL) - 0x8000UL;
+    signedGainCalValue   = (int32_t)unsignedGainCalValue;
     denominator = 131072 - signedGainCalValue;
 
     /*
@@ -528,7 +533,7 @@ status_t DUALADC_DoCalibration(DUALADC_Type *base)
     /* Restore ADC enable state after calibration routines. */
     if (!adcEnabled)
     {
-        base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_ADCEN_MASK);
+        base->CTRL &= ~DUALADC_CTRL_ADCEN_MASK;
     }
 
     return kStatus_Success;
@@ -550,7 +555,7 @@ void DUALADC_SetCalibrationValue(DUALADC_Type *base, const dualadc_calibration_v
     /* Disable ADC during calibration register writes to prevent instability. */
     if (adcEnabled)
     {
-        base->CTRL &= MCUX_MASK_INVERT_32(DUALADC_CTRL_ADCEN_MASK);
+        base->CTRL &= ~DUALADC_CTRL_ADCEN_MASK;
     }
 
     /* Restore offset trim values for ADCA and ADCB. */
