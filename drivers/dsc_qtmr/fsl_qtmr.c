@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 NXP
+ * Copyright 2020-2021, 2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -220,7 +220,7 @@ void QTMR_SetupChannleConfig(TMR_Type *base,
     assert(NULL != psConfig);
 
     /* Disable the channel first */
-    QTMR_DisableChannels(base, (uint16_t)(1UL << (uint16_t)eChannelNumber));
+    QTMR_DisableChannels(base, (uint16_t)((1UL << (uint16_t)eChannelNumber) & 0xFFFFU));
 
     /* Setup the qtmr config */
     base->CHANNEL[eChannelNumber].CTRL =

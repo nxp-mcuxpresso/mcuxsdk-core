@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 NXP
+ * Copyright 2020-2021, 2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -22,7 +22,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief QTMR driver version. */
-#define FSL_QTMR_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
+#define FSL_QTMR_DRIVER_VERSION (MAKE_VERSION(2, 0, 2))
 /*! @} */
 
 /*******************************************************************************

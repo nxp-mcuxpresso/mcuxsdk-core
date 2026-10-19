@@ -1,5 +1,10 @@
 # QTMR
 
+## [2.0.2]
+
+- Bug Fixes
+  - Fixed CERT INT31-C violation in QTMR_SetupChannleConfig.
+
 ## [2.0.1]
 
 - Improvements
