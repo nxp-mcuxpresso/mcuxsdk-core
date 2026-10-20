@@ -1707,14 +1707,16 @@ static status_t USDHC_SetScatterGatherAdmaTableConfig(USDHC_Type *base,
 
     while (sgDataList != NULL)
     {
+        const uint32_t *data = (const uint32_t *)USDHC_ADDR_CPU_2_DMA((uintptr_t)(sgDataList->dataAddr));
+
         if (dmaConfig->dmaMode == kUSDHC_DmaModeAdma1)
         {
-            error = USDHC_SetADMA1Descriptor(admaDesBuffer, admaDesLen, sgDataList->dataAddr, sgDataList->dataSize, 0U);
+            error = USDHC_SetADMA1Descriptor(admaDesBuffer, admaDesLen, data, sgDataList->dataSize, 0U);
         }
         /* ADMA2 */
         else
         {
-            error = USDHC_SetADMA2Descriptor(admaDesBuffer, admaDesLen, sgDataList->dataAddr, sgDataList->dataSize, 0U);
+            error = USDHC_SetADMA2Descriptor(admaDesBuffer, admaDesLen, data, sgDataList->dataSize, 0U);
         }
 
         if (error != kStatus_Success)
@@ -1765,7 +1767,7 @@ static status_t USDHC_SetScatterGatherAdmaTableConfig(USDHC_Type *base,
     }
 
     base->DS_ADDR       = 0UL;
-    base->ADMA_SYS_ADDR = (uint32_t)(dmaConfig->admaTable);
+    base->ADMA_SYS_ADDR = USDHC_ADDR_CPU_2_DMA((uintptr_t)(dmaConfig->admaTable));
 
     /* select DMA mode and config the burst length */
     base->PROT_CTRL &= ~(USDHC_PROT_CTRL_DMASEL_MASK);

@@ -1,5 +1,10 @@
 # USDHC
 
+## [2.8.11]
+
+- Bug Fixes
+  - Used DMA view address in USDHC_SetScatterGatherAdmaTableConfig.
+
 ## [2.8.10]
 
 - Bug Fixes
