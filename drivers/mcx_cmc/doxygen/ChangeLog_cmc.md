@@ -1,5 +1,12 @@
 # MCX_CMC
 
+## [2.8.0]
+
+- New Features
+  - Added feature macros FSL_FEATURE_MCX_CMC_HAS_MR_REG and
+    FSL_FEATURE_MCX_CMC_HAS_FM_REG to be compatible with platforms where CMC
+    has no MR and FM registers.
+
 ## [2.7.0]
 
 - New Features

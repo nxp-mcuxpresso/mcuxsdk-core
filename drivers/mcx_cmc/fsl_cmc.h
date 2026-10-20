@@ -16,8 +16,8 @@
  ******************************************************************************/
 /*! @name Driver version */
 /*@{*/
-/*! @brief CMC driver version 2.7.0. */
-#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 7, 0))
+/*! @brief CMC driver version 2.8.0. */
+#define FSL_CMC_DRIVER_VERSION (MAKE_VERSION(2, 8, 0))
 /* @} */
 
 #if (defined(FSL_FEATURE_MCX_CMC_HAS_BSR_SCR_BIT) && FSL_FEATURE_MCX_CMC_HAS_BSR_SCR_BIT)
@@ -680,6 +680,7 @@ static inline void CMC_EnableNonMaskablePinInterrupt(CMC_Type *base, bool enable
  * @{
  */
 
+#if !(defined(FSL_FEATURE_MCX_CMC_HAS_MR_REG) && (FSL_FEATURE_MCX_CMC_HAS_MR_REG == 0U))
 /*!
  * @brief Gets the logic state of the ISPMODE_n pin.
  *
@@ -703,7 +704,9 @@ static inline void CMC_ClearISPMODEPinLogic(CMC_Type *base)
 {
     base->MR[0] = CMC_MR_ISPMODE_n_MASK;
 }
+#endif /* FSL_FEATURE_MCX_CMC_HAS_MR_REG */
 
+#if !(defined(FSL_FEATURE_MCX_CMC_HAS_FM_REG) && (FSL_FEATURE_MCX_CMC_HAS_FM_REG == 0U))
 /*!
  * @brief Set the logic state of the BOOT_CONFIGn pin.
  *
@@ -726,6 +729,7 @@ static inline void CMC_ForceBootConfiguration(CMC_Type *base, bool assert)
         base->FM[0] &= ~CMC_FM_FORCECFG_MASK;
     }
 }
+#endif /* FSL_FEATURE_MCX_CMC_HAS_FM_REG */
 
 /* @} */
 

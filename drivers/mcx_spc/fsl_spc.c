@@ -139,7 +139,9 @@ void SPC_SetSRAMOperateVoltage(SPC_Type *base, const spc_sram_voltage_config_t *
 {
     assert(config != NULL);
 
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_SRAMCTL_VSM) && (FSL_FEATURE_MCX_SPC_HAS_SRAMCTL_VSM == 0U))
     base->SRAMCTL = SPC_SRAMCTL_VSM(config->operateVoltage);
+#endif /* FSL_FEATURE_MCX_SPC_HAS_SRAMCTL_VSM */
 
     if (config->requestVoltageUpdate)
     {
@@ -858,6 +860,7 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
         return kStatus_SPC_CORELDOLowDriveStrengthIgnore;
     }
 
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL) && (FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL == 0U))
     if ((uint8_t)SPC_GetActiveModeCoreLDOVDDVoltageLevel(base) != (uint8_t)(option->CoreLDOVoltage))
     {
 #if defined(FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS) && FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS
@@ -865,6 +868,7 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
 #endif /* FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS */
         (void)SPC_SetActiveModeCoreLDORegulatorVoltageLevel(base, option->CoreLDOVoltage);
     }
+#endif /* FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL */
 
 #if defined(FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS) && FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS
     (void)SPC_SetActiveModeCoreLDORegulatorDriveStrength(base, option->CoreLDODriveStrength);
@@ -873,6 +877,7 @@ status_t SPC_SetActiveModeCoreLDORegulatorConfig(SPC_Type *base, const spc_activ
     return kStatus_Success;
 }
 
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL) && (FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL == 0U))
 /*!
  * brief Set Core LDO VDD Regulator Voltage level in Active mode.
  *
@@ -914,6 +919,7 @@ status_t SPC_SetActiveModeCoreLDORegulatorVoltageLevel(SPC_Type *base, spc_core_
     }
     return kStatus_Success;
 }
+#endif /* FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL */
 
 #if defined(FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS) && FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS
 /*!
@@ -986,6 +992,7 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_low
         return kStatus_SPC_Busy;
     }
 
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL) && (FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL == 0U))
     if (SPC_GetLowPowerCoreLDOVDDVoltageLevel(base) != (option->CoreLDOVoltage))
     {
 #if (defined(FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS) && FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS)
@@ -1013,16 +1020,20 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorConfig(SPC_Type *base, const spc_low
     }
 #endif /* FSL_FEATURE_SPC_HAS_CORELDO_VDD_DS */
     }
+#endif /* FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL */
 
     status = SPC_SetLowPowerModeCoreLDORegulatorDriveStrength(base, option->CoreLDODriveStrength);
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL) && (FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL == 0U))
     if (status == kStatus_Success)
     {
         (void)SPC_SetLowPowerModeCoreLDORegulatorVoltageLevel(base, option->CoreLDOVoltage);
     }
+#endif /* FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL */
 
     return status;
 }
 
+#if !(defined(FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL) && (FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL == 0U))
 /*!
  * brief Set Core LDO VDD Regulator Voltage level in Low power mode.
  *
@@ -1062,6 +1073,7 @@ status_t SPC_SetLowPowerModeCoreLDORegulatorVoltageLevel(SPC_Type *base, spc_cor
 
     return kStatus_Success;
 }
+#endif /* FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL */
 
 /*!
  * brief Set Core LDO VDD Regulator Drive Strength in Low power mode.

@@ -1,5 +1,13 @@
 # MCX_SPC
 
+## [2.14.0]
+
+- New Features
+  - Added feature macros FSL_FEATURE_MCX_SPC_HAS_CORELDO_VDD_LVL and
+    FSL_FEATURE_MCX_SPC_HAS_SRAMCTL_VSM to be compatible with platforms where
+    the ACTIVE_CFG/LP_CFG registers have no CORELDO_VDD_LVL bitfield or the
+    SRAMCTL register has no VSM bitfield.
+
 ## [2.13.0]
 
 - New Features
