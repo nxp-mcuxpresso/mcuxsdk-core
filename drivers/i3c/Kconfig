@@ -16,7 +16,11 @@ config MCUX_HAS_COMPONENT_driver.i3c
 
 config MCUX_HAS_COMPONENT_driver.i3c_msg_dma
     bool
-    default y if MCUX_HAS_COMPONENT_driver.i3c && MCUX_HAS_COMPONENT_driver.edma4
+    default y if MCUX_HAS_COMPONENT_driver.i3c && MCUX_HAS_COMPONENT_driver.edma_unified
+
+config MCUX_HAS_COMPONENT_driver.i3c_msg_port_edma
+    bool
+    default y if MCUX_HAS_COMPONENT_driver.i3c_msg_dma && MCUX_HAS_COMPONENT_driver.edma_unified
 
 config MCUX_COMPONENT_driver.i3c_dma
     bool "i3c_dma"
@@ -38,8 +42,13 @@ config MCUX_COMPONENT_driver.i3c
 config MCUX_COMPONENT_driver.i3c_msg_dma
     bool "i3c_msg_dma"
     select MCUX_COMPONENT_driver.i3c
-    select MCUX_COMPONENT_driver.edma4 if MCUX_HAS_COMPONENT_driver.edma4
+    select MCUX_COMPONENT_driver.i3c_msg_port_edma if MCUX_HAS_COMPONENT_driver.i3c_msg_port_edma
     depends on MCUX_HAS_COMPONENT_driver.i3c_msg_dma
+
+config MCUX_COMPONENT_driver.i3c_msg_port_edma
+    bool "i3c_msg_port_edma"
+    select MCUX_COMPONENT_driver.edma_unified if MCUX_HAS_COMPONENT_driver.edma_unified
+    depends on MCUX_HAS_COMPONENT_driver.i3c_msg_port_edma
 
 if MCUX_COMPONENT_driver.i3c
     config I3C_RETRY_TIMES
