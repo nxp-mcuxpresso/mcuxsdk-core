@@ -51,6 +51,12 @@ enum _ftfx_ram_func_constants
 };
 #endif
 
+#if defined(FSL_FEATURE_TRDC_HAS_FLW) && (FSL_FEATURE_TRDC_HAS_FLW != 0)
+#define FLASH_FLW_BASE      (TRDC->TRDC_FLW_PBASE)
+#define FLASH_FLW_OFFSET    (TRDC->TRDC_FLW_ABASE)
+#define FLASH_FLW_SIZE      ((TRDC->TRDC_FLW_BCNT & TRDC_TRDC_FLW_BCNT_BCNT_MASK) * 0x8000U)
+#endif
+
 /*******************************************************************************
  * Async Mode Includes and Definitions
  ******************************************************************************/
@@ -302,6 +308,17 @@ status_t FLASH_Init(flash_config_t *config)
 #elif (defined(KW43_core0_SERIES) || defined(MCXW70_core0_SERIES))
         config->msf1Config[0].flashDesc.totalSize =
             FLASH_FEATURE_PFLASH0_BLOCK_COUNT * FLASH_FEATURE_PFLASH0_BLOCK_SIZE;
+
+#if defined(FSL_FEATURE_TRDC_HAS_FLW) && (FSL_FEATURE_TRDC_HAS_FLW != 0)
+        /* In case of KW43/MCXMW70 with flash driver configured to use FLW address space
+         * compare the flash size against the FLW register values to confirm the setup is correct.
+         */
+        if (config->msf1Config[0].flashDesc.blockBase == FLASH_FLW_BASE &&
+            config->msf1Config[0].flashDesc.totalSize != FLASH_FLW_SIZE)
+        {
+            status = kStatus_OutOfRange;
+        }
+#endif /* FSL_FEATURE_TRDC_HAS_FLW */
 
 /* Instead of matching a device type default to generic size definition based on block count and size */
 
@@ -1692,6 +1709,10 @@ static status_t pflash_check_param(
     status_t status   = kStatus_FLASH_InvalidArgument;
     FMU_Type *baseTmp = (FMU_Type *)((uint32_t)base & FLASH_ADDR_MASK);
 
+#if defined(FSL_FEATURE_TRDC_HAS_FLW) && (FSL_FEATURE_TRDC_HAS_FLW != 0)
+    uint32_t opAddr = *start;
+#endif
+
     if (lengthInBytes == 0U)
     {
         status = kStatus_FLASH_Success;
@@ -1721,6 +1742,17 @@ static status_t pflash_check_param(
                  (config->msf1Config[0].flashDesc.blockBase + config->msf1Config[0].flashDesc.totalSize)))
             {
                 *start -= config->msf1Config[0].flashDesc.blockBase;
+
+#if defined(FSL_FEATURE_TRDC_HAS_FLW) && (FSL_FEATURE_TRDC_HAS_FLW != 0)
+                if (opAddr >= FLASH_FLW_BASE &&
+                    opAddr <  FLASH_FLW_BASE + config->msf1Config[0].flashDesc.totalSize)
+                {
+                    /* On platforms with FLW the flash array is accessible through a logical window
+                     * that starts at offset defined by TRDC->TRDC_FLW_ABASE. Add that offset
+                     * so that FCCOB-based verify operations receive the correct flash-relative address. */
+                    *start += FLASH_FLW_OFFSET;
+                }
+#endif /* FSL_FEATURE_TRDC_HAS_FLW */
                 status = kStatus_FLASH_Success;
             }
             else

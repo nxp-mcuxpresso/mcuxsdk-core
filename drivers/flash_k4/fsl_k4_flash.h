@@ -24,7 +24,7 @@
  * @{
  */
 /*! @brief Flash driver version for SDK*/
-#define FSL_FLASH_DRIVER_VERSION (MAKE_VERSION(2, 4, 2)) /*!< Version 2.4.2. */
+#define FSL_FLASH_DRIVER_VERSION (MAKE_VERSION(2, 4, 3)) /*!< Version 2.4.3. */
 
 /*! @} */
 
@@ -34,7 +34,7 @@ enum _flash_driver_version_constants
     kFLASH_DriverVersionName   = 'F', /*!< Flash driver version name.*/
     kFLASH_DriverVersionMajor  = 2,   /*!< Major flash driver version.*/
     kFLASH_DriverVersionMinor  = 4,   /*!< Minor flash driver version.*/
-    kFLASH_DriverVersionBugfix = 2    /*!< Bugfix for flash driver version.*/
+    kFLASH_DriverVersionBugfix = 3    /*!< Bugfix for flash driver version.*/
 };
 
 /*!
