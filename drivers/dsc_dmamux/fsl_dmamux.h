@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 NXP
+ * Copyright 2020, 2026 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -28,7 +28,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief DMAMUX driver version. */
-#define FSL_DMAMUX_DRIVER_VERSION (MAKE_VERSION(2, 0, 0))
+#define FSL_DMAMUX_DRIVER_VERSION (MAKE_VERSION(2, 0, 1))
 /*! @} */
 
 /*******************************************************************************
@@ -38,8 +38,10 @@
  * @defgroup dmamux_driver_log The Driver Change Log
  * @ingroup dmamux
  * @{
- *   The current dmamux driver version is 2.0.0.
+ *   The current dmamux driver version is 2.0.1.
  *
+ *   - 2.0.1
+ *     - Fixed violations of the CERT INT31-C coding rules.
  *   - 2.0.0
  *     - Initial version.
  * @}
@@ -166,10 +168,10 @@ static inline void DMAMUX_ConnectChannelToTriggerSource(DMAMUX_Type *base,
                                                         dma_request_source_t eSource)
 {
     /* disable the dmamux channel */
-    base->CHCFG[(uint8_t)eChannel] &= ~(uint8_t)DMAMUX_CHCFG_ENBL_MASK;
-    /* connect dmamux channel to source */
-    base->CHCFG[(uint8_t)eChannel] =
-        (uint8_t)((base->CHCFG[(uint8_t)eChannel] & ~DMAMUX_CHCFG_SOURCE_MASK) | DMAMUX_CHCFG_SOURCE(eSource));
+    MCUX_REG_BIT_CLEAR8(base->CHCFG[(uint8_t)eChannel], DMAMUX_CHCFG_ENBL_MASK);
+    /* connect dmamux channel to source, drop the 0x100 tag of eSource */
+    MCUX_REG_MODIFY8(base->CHCFG[(uint8_t)eChannel], DMAMUX_CHCFG_SOURCE_MASK,
+                     DMAMUX_CHCFG_SOURCE((uint32_t)eSource & DMAMUX_CHCFG_SOURCE_MASK));
     /* enable dmamux channel */
     base->CHCFG[(uint8_t)eChannel] |= DMAMUX_CHCFG_ENBL_MASK;
 }
@@ -184,7 +186,7 @@ static inline void DMAMUX_ConnectChannelToTriggerSource(DMAMUX_Type *base,
  */
 static inline void DMAMUX_DisconnectChannelFromTriggerSource(DMAMUX_Type *base, dmamux_dma_channel_t eChannel)
 {
-    base->CHCFG[(uint8_t)eChannel] &= ~(uint8_t)(DMAMUX_CHCFG_ENBL_MASK | DMAMUX_CHCFG_SOURCE_MASK);
+    MCUX_REG_BIT_CLEAR8(base->CHCFG[(uint8_t)eChannel], DMAMUX_CHCFG_ENBL_MASK | DMAMUX_CHCFG_SOURCE_MASK);
 }
 
 /*! @} */
