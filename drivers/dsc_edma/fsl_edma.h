@@ -23,7 +23,7 @@
 /*! @name Driver version */
 /*! @{ */
 /*! @brief EDMA driver version. */
-#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 0, 4))
+#define FSL_EDMA_DRIVER_VERSION (MAKE_VERSION(2, 0, 5))
 /*! @} */
 
 /*******************************************************************************
@@ -33,7 +33,13 @@
  * @defgroup edma_driver_log The Driver Change Log
  * @ingroup edma
  * @{
- * The current eDMA driver version is 2.0.3.
+ * The current eDMA driver version is 2.0.5.
+ *
+ * - 2.0.5
+ *  - Fixed violations of the CERT INT30-C and INT31-C coding rules.
+ *
+ * - 2.0.4
+ *  - Added common IRQ handler entry EDMA_DriverIRQHandler.
  *
  * - 2.0.3
  *  - Fixed the MISRA-2012 violations.

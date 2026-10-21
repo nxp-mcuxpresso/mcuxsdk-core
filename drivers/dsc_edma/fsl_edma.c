@@ -225,6 +225,7 @@ void EDMA_GetChannelDefaultTransferConfig(edma_channel_transfer_config_t *psTran
     assert(((u32TotalBytes % u32BytesEachRequest) == 0U));
 
     uint32_t u32TransferWidthTmpValue = 0UL;
+    int16_t i16TransferWidth;
     (void)memset(psTransfer, 0, sizeof(edma_channel_transfer_config_t));
 
     psTransfer->u32SrcAddr                      = u32SrcAddr;
@@ -239,19 +240,20 @@ void EDMA_GetChannelDefaultTransferConfig(edma_channel_transfer_config_t *psTran
     psTransfer->eDstAddrModulo = kEDMA_ChannelModuloDisable;
 
     u32TransferWidthTmpValue = 1UL << (uint32_t)eTransferWidth;
+    i16TransferWidth         = (int16_t)(u32TransferWidthTmpValue & 0x7FFFU);
     if (eTransferType == kEDMA_ChannelTransferMemoryToMemory)
     {
-        psTransfer->i16SrcOffsetOfEachTransfer = (int16_t)u32TransferWidthTmpValue;
-        psTransfer->i16DstOffsetOfEachTransfer = (int16_t)u32TransferWidthTmpValue;
+        psTransfer->i16SrcOffsetOfEachTransfer = i16TransferWidth;
+        psTransfer->i16DstOffsetOfEachTransfer = i16TransferWidth;
     }
     else if (eTransferType == kEDMA_ChannelTransferPeripheralToMemory)
     {
         psTransfer->i16SrcOffsetOfEachTransfer = 0;
-        psTransfer->i16DstOffsetOfEachTransfer = (int16_t)u32TransferWidthTmpValue;
+        psTransfer->i16DstOffsetOfEachTransfer = i16TransferWidth;
     }
     else if (eTransferType == kEDMA_ChannelTransferMemoryToPeripheral)
     {
-        psTransfer->i16SrcOffsetOfEachTransfer = (int16_t)u32TransferWidthTmpValue;
+        psTransfer->i16SrcOffsetOfEachTransfer = i16TransferWidth;
         psTransfer->i16DstOffsetOfEachTransfer = 0;
     }
     else
@@ -303,7 +305,7 @@ void EDMA_SetChannelTransferConfig(DMA_Type *base, edma_channel_t eChannel, edma
     /*
        Reset TCD registers to zero.
     */
-    psTcdRegs = (edma_channel_tcd_t *)(uint32_t)&base->TCD[(uint8_t)eChannel];
+    psTcdRegs = (edma_channel_tcd_t *)(void *)&base->TCD[(uint8_t)eChannel];
     EDMA_TcdReset(psTcdRegs);
 
     /* minor loop mapping need to enabled for minor loop offset feature */
@@ -698,16 +700,19 @@ void EDMA_InstallChannelSoftwareTCD(DMA_Type *base, edma_channel_t eChannel, edm
     assert(psTcd != NULL);
     assert(((uint32_t)((uint8_t *)psTcd) & 0x1FU) == 0U);
 
+    /* SLAST and DLAST_SGA are signed in the register map, write them through the unsigned TCD view */
+    edma_channel_tcd_t *psTcdRegs = (edma_channel_tcd_t *)(void *)&base->TCD[(uint8_t)eChannel];
+
     /* Push tcd into hardware TCD register */
     base->TCD[(uint8_t)eChannel].SADDR         = psTcd->u32SADDR;
     base->TCD[(uint8_t)eChannel].SOFF          = psTcd->u16SOFF;
     base->TCD[(uint8_t)eChannel].ATTR          = psTcd->u16ATTR;
     base->TCD[(uint8_t)eChannel].NBYTES_MLNO   = psTcd->u32NBYTES;
-    base->TCD[(uint8_t)eChannel].SLAST         = (int32_t)psTcd->u32SLAST;
+    psTcdRegs->u32SLAST                        = psTcd->u32SLAST;
     base->TCD[(uint8_t)eChannel].DADDR         = psTcd->u32DADDR;
     base->TCD[(uint8_t)eChannel].DOFF          = psTcd->u16DOFF;
     base->TCD[(uint8_t)eChannel].CITER_ELINKNO = psTcd->u16CITER;
-    base->TCD[(uint8_t)eChannel].DLAST_SGA     = (int32_t)psTcd->u32DLAST_SGA;
+    psTcdRegs->u32DLAST_SGA                    = psTcd->u32DLAST_SGA;
     /* Clear DONE bit first, otherwise ESG cannot be set */
     base->TCD[(uint8_t)eChannel].CSR           = 0;
     base->TCD[(uint8_t)eChannel].CSR           = psTcd->u16CSR;
@@ -864,8 +869,10 @@ void EDMA_TransferCreateHandle(DMA_Type *base,
     assert(eChannel < (edma_channel_t)FSL_FEATURE_EDMA_MODULE_CHANNEL);
     assert(psTcdPool != NULL);
     assert(((uint32_t)((uint8_t *)psTcdPool) & 0x1FU) == 0U);
+    assert((u32TcdCount > 0U) && (u32TcdCount <= 0xFFU));
 
     uint32_t u32EdmaInstance;
+    uint32_t u32InstanceOffset;
     uint32_t eChannelIndex;
     edma_channel_tcd_t *psTcdRegs;
 
@@ -877,23 +884,24 @@ void EDMA_TransferCreateHandle(DMA_Type *base,
     psHandle->pfCallback = pfCallback;
     psHandle->pUserData  = pUserData;
     /* Get the DMA instance number */
-    u32EdmaInstance = EDMA_GetInstance(base);
-    eChannelIndex =
-        (EDMA_GetInstanceOffset(u32EdmaInstance) * (uint32_t)FSL_FEATURE_EDMA_MODULE_CHANNEL) + (uint32_t)eChannel;
-    s_EDMAHandle[(uint8_t)eChannelIndex] = psHandle;
+    u32EdmaInstance   = EDMA_GetInstance(base);
+    u32InstanceOffset = EDMA_GetInstanceOffset(u32EdmaInstance);
+    assert(u32InstanceOffset < ARRAY_SIZE(s_edmaBases));
+    eChannelIndex = (u32InstanceOffset * (uint32_t)FSL_FEATURE_EDMA_MODULE_CHANNEL) + (uint32_t)eChannel;
+    s_EDMAHandle[eChannelIndex] = psHandle;
 
     /* Enable interrupt */
     (void)EnableIRQ(s_edmaIRQNumber[u32EdmaInstance][(uint8_t)eChannel]);
 
     /*Reset TCD registers to zero.*/
-    psTcdRegs = (edma_channel_tcd_t *)(uint32_t)&psHandle->psBase->TCD[(uint8_t)eChannel];
+    psTcdRegs = (edma_channel_tcd_t *)(void *)&psHandle->psBase->TCD[(uint8_t)eChannel];
     EDMA_TcdReset(psTcdRegs);
 
     /* Initialize tcd queue attribute. */
     psHandle->u8Header  = 0;
     psHandle->u8Tail    = 0;
     psHandle->u8TcdUsed = 0;
-    psHandle->u8TcdSize = (uint8_t)u32TcdCount;
+    psHandle->u8TcdSize = (uint8_t)(u32TcdCount & 0xFFU);
     psHandle->psTcdPool = psTcdPool;
 }
 
@@ -929,7 +937,7 @@ status_t EDMA_TransferSubmitSingleTransfer(edma_handle_t *psHandle, edma_channel
     assert(psTransfer != NULL);
     assert(psHandle->psTcdPool != NULL);
 
-    edma_channel_tcd_t *tcdRegs = (edma_channel_tcd_t *)(uint32_t)&psHandle->psBase->TCD[(uint8_t)psHandle->eChannel];
+    edma_channel_tcd_t *tcdRegs = (edma_channel_tcd_t *)(void *)&psHandle->psBase->TCD[(uint8_t)psHandle->eChannel];
     uint16_t u16Csr;
     uint8_t u8CurrentTcd;
     uint8_t u8PreviousTcd;
@@ -950,7 +958,7 @@ status_t EDMA_TransferSubmitSingleTransfer(edma_handle_t *psHandle, edma_channel
     u8CurrentTcd = psHandle->u8Tail;
     psHandle->u8TcdUsed++;
     /* Calculate index of next TCD */
-    u8NextTcd = u8CurrentTcd + 1U;
+    u8NextTcd = (uint8_t)((u8CurrentTcd + 1U) & 0xFFU);
     if (u8NextTcd == psHandle->u8TcdSize)
     {
         u8NextTcd = 0;
@@ -1148,7 +1156,7 @@ void EDMA_TransferStart(edma_handle_t *psHandle)
     assert(psHandle != NULL);
     uint32_t u32TmpCSR = 0;
 
-    edma_channel_tcd_t *psTcdRegs = (edma_channel_tcd_t *)(uint32_t)&psHandle->psBase->TCD[(uint8_t)psHandle->eChannel];
+    edma_channel_tcd_t *psTcdRegs = (edma_channel_tcd_t *)(void *)&psHandle->psBase->TCD[(uint8_t)psHandle->eChannel];
 
     /* Check if channel request is actually disable. */
     if ((psHandle->psBase->ERQ & (1UL << ((uint8_t)psHandle->eChannel))) == 0U)
@@ -1245,7 +1253,9 @@ void EDMA_TransferHandleIRQ(edma_handle_t *psHandle)
     /* Check if transfer is already finished. */
     bTransferDone = ((psHandle->psBase->TCD[(uint8_t)psHandle->eChannel].CSR & DMA_CSR_DONE_MASK) != 0U);
 
-    uint32_t u32Sga = (uint32_t)psHandle->psBase->TCD[(uint8_t)psHandle->eChannel].DLAST_SGA;
+    edma_channel_tcd_t *psTcdRegs = (edma_channel_tcd_t *)(void *)&psHandle->psBase->TCD[(uint8_t)psHandle->eChannel];
+    /* DLAST_SGA is signed in the register map, read it through the unsigned TCD view */
+    uint32_t u32Sga = psTcdRegs->u32DLAST_SGA;
     uint32_t u32SgaIndex;
     int32_t i32TcdsDone;
     uint8_t u8NewHeader;
@@ -1258,12 +1268,13 @@ void EDMA_TransferHandleIRQ(edma_handle_t *psHandle)
     if (bTransferDone)
     {
         /* New header shall point to the next TCD to be loaded (current one is already finished) */
-        u8NewHeader = (uint8_t)u32SgaIndex;
+        u8NewHeader = (uint8_t)(u32SgaIndex & 0xFFU);
     }
     else
     {
         /* New header shall point to this descriptor currently loaded (not finished yet) */
-        u8NewHeader = u32SgaIndex != 0U ? (uint8_t)u32SgaIndex - 1U : (uint8_t)psHandle->u8TcdSize - 1U;
+        u8NewHeader =
+            (uint8_t)(((u32SgaIndex != 0U) ? (u32SgaIndex - 1U) : ((uint32_t)psHandle->u8TcdSize - 1U)) & 0xFFU);
     }
     /* Calculate the number of finished TCDs */
     if (u8NewHeader == (uint8_t)psHandle->u8Header)
@@ -1359,7 +1370,9 @@ void DMA3_DriverIRQHandler(void)
 
 void EDMA_DriverIRQHandler(uint32_t instance, uint32_t channel)
 {
-    uint32_t index = EDMA_GetInstanceOffset(instance) * (uint32_t)FSL_FEATURE_EDMA_MODULE_CHANNEL + channel;
+    uint32_t u32InstanceOffset = EDMA_GetInstanceOffset(instance);
+    assert((u32InstanceOffset < ARRAY_SIZE(s_edmaBases)) && (channel < (uint32_t)FSL_FEATURE_EDMA_MODULE_CHANNEL));
+    uint32_t index = (u32InstanceOffset * (uint32_t)FSL_FEATURE_EDMA_MODULE_CHANNEL) + channel;
     if (index < ARRAY_SIZE(s_EDMAHandle))
     {
         EDMA_TransferHandleIRQ(s_EDMAHandle[index]);

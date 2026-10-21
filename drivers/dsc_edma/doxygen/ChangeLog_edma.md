@@ -1,5 +1,11 @@
 # EDMA
 
+## [2.0.5]
+
+- Bug Fixes
+  - Fixed violations of the CERT INT30-C and INT31-C coding rules.
+  - Fixed PW.BAD_CAST pointer conversions through uint32_t.
+
 ## [2.0.4]
 
 - New Features
