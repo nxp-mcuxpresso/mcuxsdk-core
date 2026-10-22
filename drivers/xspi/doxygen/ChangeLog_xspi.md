@@ -1,5 +1,13 @@
 # XSPI
 
+## [2.7.8]
+
+- Bug Fixes
+  - Fixed `XSPI_UpdateDllValue()` DLL bypass mode (`kXSPI_BypassMode`) never writing `DLLCR[FREQEN]`:
+    the field kept its previous (reset default: low frequency) value regardless of
+    `xspi_dll_para_t.bypassModePara.enableHighFreq` or `useRefValue`, which could sample read data
+    outside the delay chain's valid window at SCK frequencies above 133 MHz.
+
 ## [2.7.7]
 
 - Bug Fixes

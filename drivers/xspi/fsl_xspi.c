@@ -760,6 +760,7 @@ RAMFUNC void XSPI_UpdateDllValue(
         /* In case of DLL mode is selected as Bypass mode. */
         uint32_t delayElementCoarseAdjust = 0UL;
         uint32_t delayElementFineAdjust   = 0UL;
+        bool enableHighFreq               = false;
 
         offsetDelayElementCount  = (uint32_t)((ptrDllConfig->useRefValue) ?
                                                   FSL_FEATURE_XSPI_DLL_REF_VALUE_BYPASS_OFFSET_DELAY_ELEMENT_COUNT :
@@ -770,16 +771,25 @@ RAMFUNC void XSPI_UpdateDllValue(
         delayElementFineAdjust   = (uint32_t)((ptrDllConfig->useRefValue) ?
                                                   FSL_FEATURE_XSPI_DLL_REF_VALUE_BYPASS_DELAY_ELEMENT_FINE :
                                                   (ptrDllConfig->dllCustomPara.bypassModePara.delayElementFineValue));
+        /* FREQEN selects the delay chain's operating frequency range (chip RM: low
+         * frequency > 60 MHz to <= 133 MHz, high frequency > 133 MHz); it is not
+         * implied by any other field, so it must be derived the same way as in
+         * auto-update mode below, not left at its previous (possibly reset) value. */
+        enableHighFreq = (ptrDllConfig->useRefValue) ?
+                             ((xspiRootClk >= FSL_FEATURE_XSPI_DLL_REF_VALUE_AUTOUPDATE_FREQ_THRESHOLD) ? true :
+                                                                                                           false) :
+                             ((bool)(ptrDllConfig->dllCustomPara.bypassModePara.enableHighFreq));
 
         base->DLLCR[0] &=
             ~(XSPI_DLLCR_SLAVE_AUTO_UPDT_MASK | XSPI_DLLCR_SLV_DLY_FINE_MASK | XSPI_DLLCR_SLV_DLY_COARSE_MASK |
-              XSPI_DLLCR_SLV_FINE_OFFSET_MASK | XSPI_DLLCR_DLL_CDL8_MASK);
+              XSPI_DLLCR_SLV_FINE_OFFSET_MASK | XSPI_DLLCR_DLL_CDL8_MASK | XSPI_DLLCR_FREQEN_MASK);
         /* Enable subordinate delay chain as bypass mode. */
         base->DLLCR[0] |= XSPI_DLLCR_SLV_EN_MASK | XSPI_DLLCR_SLV_DLL_BYPASS_MASK;
         /* program DLL to desired delay. */
         base->DLLCR[0] |=
             XSPI_DLLCR_SLV_DLY_FINE(delayElementFineAdjust) | XSPI_DLLCR_SLV_DLY_COARSE(delayElementCoarseAdjust) |
-            XSPI_DLLCR_SLV_FINE_OFFSET(offsetDelayElementCount) | XSPI_DLLCR_DLL_CDL8(enableCourseDelayLine8 ? 1U : 0U);
+            XSPI_DLLCR_SLV_FINE_OFFSET(offsetDelayElementCount) | XSPI_DLLCR_DLL_CDL8(enableCourseDelayLine8 ? 1U : 0U) |
+            XSPI_DLLCR_FREQEN(enableHighFreq ? 1U : 0U);
         /* Load above settings into delay chain. */
         base->DLLCR[0] |= XSPI_DLLCR_SLV_UPD_MASK;
 
