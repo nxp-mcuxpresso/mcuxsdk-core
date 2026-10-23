@@ -324,11 +324,7 @@ struct _lpuart_handle
     volatile size_t rxDataSize;      /*!< Size of the remaining data to receive. */
     size_t rxDataSizeAll;            /*!< Size of the data to receive. */
 
-    union
-    {
-        uint8_t *rxRingBuffer;           /*!< Start address of the receiver ring buffer. */
-        uint16_t *rxRingBuffer16;        /*!< Start address of the receiver ring buffer. */
-    } ringBuf;
+    uint8_t *rxRingBuffer;               /*!< Start address of the receiver ring buffer. */
     size_t rxRingBufferSize;             /*!< Size of the ring buffer. */
     volatile uint16_t rxRingBufferHead;  /*!< Index for the driver to store received data into ring buffer. */
     volatile uint16_t rxRingBufferTail;  /*!< Index for the user to get data from the ring buffer. */

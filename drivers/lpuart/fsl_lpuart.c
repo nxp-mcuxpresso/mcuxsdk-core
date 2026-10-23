@@ -1564,7 +1564,7 @@ void LPUART_TransferStartRingBuffer(LPUART_Type *base,
     assert(NULL != ringBuffer);
 
     /* Setup the ring buffer address */
-    handle->ringBuf.rxRingBuffer = ringBuffer;
+    handle->rxRingBuffer = ringBuffer;
     if (!handle->is16bitData)
     {
         handle->rxRingBufferSize = ringBufferSize;
@@ -1604,7 +1604,7 @@ void LPUART_TransferStopRingBuffer(LPUART_Type *base, lpuart_handle_t *handle)
         EnableGlobalIRQ(irqMask);
     }
 
-    handle->ringBuf.rxRingBuffer = NULL;
+    handle->rxRingBuffer = NULL;
     handle->rxRingBufferSize = 0U;
     handle->rxRingBufferHead = 0U;
     handle->rxRingBufferTail = 0U;
@@ -1799,7 +1799,7 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
         bytesCurrentReceived = 0;
 
         /* If RX ring buffer is used. */
-        if (NULL != handle->ringBuf.rxRingBuffer)
+        if (NULL != handle->rxRingBuffer)
         {
             /* Disable and re-enable the global interrupt to protect the interrupt enable register during
              * read-modify-wrte. */
@@ -1822,12 +1822,12 @@ status_t LPUART_TransferReceiveNonBlocking(LPUART_Type *base,
                 {
                     if (!handle->is16bitData)
                     {
-                        xfer->rxData[bytesCurrentReceived] = handle->ringBuf.rxRingBuffer[handle->rxRingBufferTail];
+                        xfer->rxData[bytesCurrentReceived] = handle->rxRingBuffer[handle->rxRingBufferTail];
                     }
                     else
                     {
                         ((uint16_t *)(void *)xfer->rxData)[bytesCurrentReceived] =
-                            ((const uint16_t *)(const void *)handle->ringBuf.rxRingBuffer)[handle->rxRingBufferTail];
+                            ((const uint16_t *)(const void *)handle->rxRingBuffer)[handle->rxRingBufferTail];
                     }
                     bytesCurrentReceived++;
 
@@ -1926,7 +1926,7 @@ void LPUART_TransferAbortReceive(LPUART_Type *base, lpuart_handle_t *handle)
     assert(NULL != handle);
 
     /* Only abort the receive to handle->rxBuf.rxData, the RX ring buffer is still working. */
-    if (NULL == handle->ringBuf.rxRingBuffer)
+    if (NULL == handle->rxRingBuffer)
     {
         /* Disable and re-enable the global interrupt to protect the interrupt enable register during read-modify-wrte.
          */
@@ -2083,7 +2083,7 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
     }
 
     /* If use RX ring buffer, receive data to ring buffer. */
-    if (NULL != handle->ringBuf.rxRingBuffer)
+    if (NULL != handle->rxRingBuffer)
     {
         while (0U != count)
         {
@@ -2117,27 +2117,27 @@ static void LPUART_TransferHandleReceiveDataFull(LPUART_Type *base, lpuart_handl
 #if defined(FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT) && FSL_FEATURE_LPUART_HAS_7BIT_DATA_SUPPORT
             if (handle->isSevenDataBits)
             {
-                handle->ringBuf.rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0x7FU);
+                handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0x7FU);
             }
             else
             {
                 if (!handle->is16bitData)
                 {
-                    handle->ringBuf.rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
+                    handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
                 }
                 else
                 {
-                    ((uint16_t *)(void *)handle->ringBuf.rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
+                    ((uint16_t *)(void *)handle->rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
                 }
             }
 #else
             if (!handle->is16bitData)
             {
-                handle->ringBuf.rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
+                handle->rxRingBuffer[tpmRxRingBufferHead] = (uint8_t)(tpmData & 0xFFU);
             }
             else
             {
-                ((uint16_t *)(void *)handle->ringBuf.rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
+                ((uint16_t *)(void *)handle->rxRingBuffer)[tpmRxRingBufferHead] = (uint16_t)(tpmData & 0x3FFU);
             }
 #endif
 
