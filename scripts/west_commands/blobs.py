@@ -44,6 +44,11 @@ MCUX_BLOBS_MANIFEST = 'mcux_blobs.yml'
 # ext -> blob `type` field (informational, mirrors gen_mcux_blobs.py's split).
 LIB_EXTS = {'a', 'lib', 'o', 'obj', 'so', 'dll'}
 
+# Longest SSH ControlPath that works. A Unix socket path holds at most 107
+# bytes (sun_path is 108 including the NUL), and the ssh master first binds
+# '<ControlPath>.<16 random chars>' before renaming it, which leaves 90.
+SSH_CONTROL_PATH_MAX = 90
+
 # ------------------------------------------------------------------
 # Constants for 'west blobs scan' (mirrors repo_blob_impact.py / binary_inventory.py)
 # ------------------------------------------------------------------
@@ -782,8 +787,12 @@ class Blobs(WestCommand):
         # Per blob: 3 git SSH ops drop from ~3.6s to ~1.6s.
         # 887-blob run: ~50 min -> ~16 min.
         #
-        # The socket lives under <topdir>/.west_blobs_tmp/ so it is on a local
-        # filesystem (SSH control sockets cannot be on NFS). It is scoped to
+        # The socket lives in the system temp directory (normally /tmp, a local
+        # filesystem; SSH control sockets cannot be on NFS), not under topdir:
+        # ssh aborts every connection when the socket path is longer than
+        # SSH_CONTROL_PATH_MAX, which a deep CI workspace such as
+        # /home/jenkins/agent/workspace/<job>/<dir> already exceeds. If even
+        # the temp path is too long, multiplexing is skipped. It is scoped to
         # this process only via a temporary environment override; the user's
         # GIT_SSH_COMMAND and ~/.ssh/config are not modified. If ssh is absent
         # or the master fails to start the fetch continues without multiplexing.
@@ -800,19 +809,22 @@ class Blobs(WestCommand):
         tmp_dir = None
         prev_git_ssh_cmd = os.environ.get('GIT_SSH_COMMAND')
         try:
-            topdir = Path(self.topdir)
-            blob_tmp = topdir / '.west_blobs_tmp'
-            blob_tmp.mkdir(parents=True, exist_ok=True)
-            tmp_dir = Path(tempfile.mkdtemp(prefix='ssh-cm-', dir=str(blob_tmp)))
+            tmp_dir = Path(tempfile.mkdtemp(prefix='west-blobs-ssh-'))
             sock = tmp_dir / 'cm.sock'
 
-            ssh_cmd = (
-                f'ssh -o ControlMaster=auto'
-                f' -o ControlPath={sock}'
-                f' -o ControlPersist=10s'
-            )
-            os.environ['GIT_SSH_COMMAND'] = ssh_cmd
-            self.dbg(f'SSH ControlMaster enabled (socket: {sock})')
+            if len(str(sock)) > SSH_CONTROL_PATH_MAX:
+                self.dbg(f'SSH ControlMaster skipped: socket path {sock} '
+                         f'is longer than {SSH_CONTROL_PATH_MAX} characters')
+                shutil.rmtree(tmp_dir, ignore_errors=True)
+                tmp_dir = None
+            else:
+                ssh_cmd = (
+                    f'ssh -o ControlMaster=auto'
+                    f' -o ControlPath={sock}'
+                    f' -o ControlPersist=10s'
+                )
+                os.environ['GIT_SSH_COMMAND'] = ssh_cmd
+                self.dbg(f'SSH ControlMaster enabled (socket: {sock})')
         except Exception as e:  # noqa: BLE001
             self.dbg(f'SSH ControlMaster setup failed, continuing without: {e}')
         try:
