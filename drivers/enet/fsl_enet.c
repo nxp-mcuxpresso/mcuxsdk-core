@@ -181,7 +181,10 @@ typedef struct _enet_rx_bd_snapshot
     uint16_t control;
     uint32_t buffer;
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
+    uint16_t controlExtend0;
     uint16_t controlExtend1;
+    uint16_t controlExtend2;
+    uint16_t payloadCheckSum;
     uint32_t timestamp;
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
 } enet_rx_bd_snapshot_t;
@@ -197,13 +200,43 @@ static inline void ENET_GetRxBdSnapshot(volatile enet_rx_bd_struct_t *bd, enet_r
         snapshot->length = bd->length;
         snapshot->buffer = bd->buffer;
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
-        snapshot->controlExtend1 = bd->controlExtend1;
-        snapshot->timestamp      = bd->timestamp;
+        /* The extended fields are only valid once the MAC has set BDU: read it first and order the rest after. */
+        snapshot->controlExtend2 = bd->controlExtend2;
+        __DMB();
+        snapshot->controlExtend0  = bd->controlExtend0;
+        snapshot->controlExtend1  = bd->controlExtend1;
+        snapshot->payloadCheckSum = bd->payloadCheckSum;
+        snapshot->timestamp       = bd->timestamp;
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
         __DMB();
         snapshot->control = bd->control;
     } while (snapshot->control != controlFirst);
 }
+
+#ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
+#ifndef ENET_RX_BDU_WAIT_READS
+/*! @brief Maximum extra reads of the last RX BD while E is clear but BDU is not set yet. */
+#define ENET_RX_BDU_WAIT_READS (8U)
+#endif
+
+/*!
+ * @brief Re-reads the last BD of a frame until the MAC has set BDU, a bounded number of times.
+ *
+ * The MAC sets BDU after it updates the extended fields. If the BD were released while BDU is still clear, the late
+ * BDU write would land on the re-armed BD and mark the stale extended fields as valid for the next frame in it. When
+ * the bound is reached the snapshot keeps BDU clear: the frame is reported with bduDone false and the BD is released
+ * all the same, so the case above stays possible only after ENET_RX_BDU_WAIT_READS reads.
+ */
+static inline void ENET_WaitRxBdUpdateDone(volatile enet_rx_bd_struct_t *bd, enet_rx_bd_snapshot_t *snapshot)
+{
+    for (uint32_t reads = 0U;
+         (0U == (snapshot->controlExtend2 & ENET_BUFFDESCRIPTOR_RX_BDU_MASK)) && (reads < ENET_RX_BDU_WAIT_READS);
+         reads++)
+    {
+        ENET_GetRxBdSnapshot(bd, snapshot);
+    }
+}
+#endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
 
 /*!
  * @brief Updates index.
@@ -998,6 +1031,8 @@ static status_t ENET_SetRxBufferDescriptors(ENET_Type *base,
                 {
                     curBuffDescrip->controlExtend1 = 0;
                 }
+                /* Start with BDU clear, see ENET_ReleaseRxBufferDescriptor(). */
+                curBuffDescrip->controlExtend2 = 0U;
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
                 /* Increase the index. */
                 curBuffDescrip++;
@@ -1884,6 +1919,11 @@ static void ENET_ReleaseRxBufferDescriptor(enet_handle_t *handle, uint8_t ringId
     enet_rx_bd_ring_t *rxBdRing                  = &handle->rxBdRing[ringId];
     volatile enet_rx_bd_struct_t *curBuffDescrip = rxBdRing->rxBdBase + rxBdRing->rxGenIdx;
 
+#ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
+    /* The MAC sets BDU after updating the extended fields and never clears it. Clear it before the descriptor
+     * goes back to the MAC, otherwise a stale 1 would hide an update still in progress for the next frame. */
+    curBuffDescrip->controlExtend2 = 0U;
+#endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
     /* Clears status. */
     curBuffDescrip->control &= ENET_BUFFDESCRIPTOR_RX_WRAP_MASK;
     __DMB();
@@ -2405,6 +2445,12 @@ status_t ENET_GetRxFrame(ENET_Type *base, enet_handle_t *handle, enet_rx_frame_s
     do
     {
         ENET_GetRxBdSnapshot(rxBdRing->rxBdBase + rxBdRing->rxGenIdx, &snapshot);
+#ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
+        if (0U != (snapshot.control & ENET_BUFFDESCRIPTOR_RX_LAST_MASK))
+        {
+            ENET_WaitRxBdUpdateDone(rxBdRing->rxBdBase + rxBdRing->rxGenIdx, &snapshot);
+        }
+#endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
         newBuff = (uintptr_t)(uint8_t *)handle->rxBuffAlloc(base, handle->userData, ringId);
         if (newBuff != 0U)
         {
@@ -2442,7 +2488,10 @@ status_t ENET_GetRxFrame(ENET_Type *base, enet_handle_t *handle, enet_rx_frame_s
                     }
                 }
 #ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
-                rxFrame->rxAttribute.timestamp = snapshot.timestamp;
+                rxFrame->rxAttribute.timestamp       = snapshot.timestamp;
+                rxFrame->rxAttribute.payloadChecksum = snapshot.payloadCheckSum;
+                rxFrame->rxAttribute.ipFlags         = snapshot.controlExtend0;
+                rxFrame->rxAttribute.bduDone = (0U != (snapshot.controlExtend2 & ENET_BUFFDESCRIPTOR_RX_BDU_MASK));
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
             }
             else
